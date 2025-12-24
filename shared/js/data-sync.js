@@ -350,8 +350,8 @@ class DataSync {
     const user = this.getCurrentUser();
     if (!user) return false;
     
-    // Admin has all permissions
-    if (user.role === 'admin') return true;
+    // Super Admin, Operations, and Tenant Admin have all permissions within their scope
+    if (user.role === 'super_admin' || user.role === 'operations' || user.role === 'tenant_admin') return true;
     
     // Check specific permissions based on role
     const rolePermissions = {

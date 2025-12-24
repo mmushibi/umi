@@ -5,15 +5,24 @@
 
 class RoleBasedAccess {
   constructor() {
+    // Define role hierarchy levels (higher number = higher privilege)
+    this.roleHierarchy = {
+      'cashier': 1,
+      'pharmacist': 1,
+      'tenant_admin': 2,
+      'operations': 3,
+      'super_admin': 4
+    };
+
     this.roles = {
-      admin: {
-        name: 'Administrator',
+      tenant_admin: {
+        name: 'Tenant Administrator',
         permissions: [
           'view_dashboard', 'manage_users', 'view_reports', 'manage_settings',
           'view_patients', 'manage_patients', 'view_prescriptions', 'manage_prescriptions',
           'view_inventory', 'manage_inventory', 'view_sales', 'manage_sales',
           'view_payments', 'manage_payments', 'process_sales', 'process_payments',
-          'view_analytics', 'export_data', 'import_data', 'system_config'
+          'view_analytics', 'export_data', 'import_data', 'manage_account'
         ],
         pages: ['home.html', 'user-management.html', 'patients.html', 'prescriptions.html',
                 'inventory.html', 'point-of-sale.html', 'sales.html', 'payments.html',
@@ -66,6 +75,32 @@ class RoleBasedAccess {
   hasPermission(userRole, permission) {
     const role = this.roles[userRole];
     return role ? role.permissions.includes(permission) : false;
+  }
+
+  /**
+   * Check role hierarchy - can user manage target role
+   */
+  canManageRole(userRole, targetRole) {
+    const userLevel = this.roleHierarchy[userRole];
+    const targetLevel = this.roleHierarchy[targetRole];
+    
+    if (userLevel === undefined || targetLevel === undefined) {
+      return false;
+    }
+    
+    return userLevel > targetLevel;
+  }
+
+  /**
+   * Get all roles that user can manage
+   */
+  getManageableRoles(userRole) {
+    const userLevel = this.roleHierarchy[userRole];
+    if (userLevel === undefined) return [];
+    
+    return Object.keys(this.roleHierarchy).filter(role => 
+      this.roleHierarchy[role] < userLevel
+    );
   }
 
   /**

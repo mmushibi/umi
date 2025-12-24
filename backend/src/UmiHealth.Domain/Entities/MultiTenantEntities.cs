@@ -1,0 +1,285 @@
+using System;
+using System.Collections.Generic;
+
+namespace UmiHealth.Domain.Entities
+{
+    // Enhanced Branch entity with multi-tenancy support
+    public class Branch : ISoftDeletable
+    {
+        public Guid Id { get; set; }
+        public Guid TenantId { get; set; }
+        public string Name { get; set; } = string.Empty;
+        public string Code { get; set; } = string.Empty;
+        public string? Address { get; set; }
+        public string? Phone { get; set; }
+        public string? Email { get; set; }
+        public string? LicenseNumber { get; set; }
+        public Dictionary<string, object> OperatingHours { get; set; } = new();
+        public Dictionary<string, object> Settings { get; set; } = new();
+        public bool IsMainBranch { get; set; } = false;
+        public bool IsActive { get; set; } = true;
+        public Guid? ParentBranchId { get; set; }
+        public List<Guid> ChildBranchIds { get; set; } = new();
+        public Dictionary<string, object> Location { get; set; } = new();
+        public string? ManagerName { get; set; }
+        public string? ManagerContact { get; set; }
+        public Dictionary<string, object> InventorySettings { get; set; } = new();
+        public Dictionary<string, object> ReportingSettings { get; set; } = new();
+        public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
+        public DateTime UpdatedAt { get; set; } = DateTime.UtcNow;
+        public DateTime? DeletedAt { get; set; }
+
+        // Navigation properties
+        public virtual Tenant Tenant { get; set; } = null!;
+        public virtual Branch? ParentBranch { get; set; }
+        public virtual ICollection<Branch> ChildBranches { get; set; } = new List<Branch>();
+        public virtual ICollection<User> Users { get; set; } = new List<User>();
+    }
+
+    // Inter-branch stock transfer entity
+    public class StockTransfer : ISoftDeletable
+    {
+        public Guid Id { get; set; }
+        public Guid TenantId { get; set; }
+        public string TransferNumber { get; set; } = string.Empty;
+        public Guid SourceBranchId { get; set; }
+        public Guid DestinationBranchId { get; set; }
+        public string Status { get; set; } = "pending"; // pending, approved, in_transit, completed, cancelled
+        public Guid RequestedByUserId { get; set; }
+        public Guid? ApprovedByUserId { get; set; }
+        public DateTime? ApprovedAt { get; set; }
+        public DateTime? CompletedAt { get; set; }
+        public string? Notes { get; set; }
+        public List<StockTransferItem> Items { get; set; } = new();
+        public Dictionary<string, object> Metadata { get; set; } = new();
+        public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
+        public DateTime UpdatedAt { get; set; } = DateTime.UtcNow;
+        public DateTime? DeletedAt { get; set; }
+
+        // Navigation properties
+        public virtual Tenant Tenant { get; set; } = null!;
+        public virtual Branch SourceBranch { get; set; } = null!;
+        public virtual Branch DestinationBranch { get; set; } = null!;
+        public virtual User RequestedByUser { get; set; } = null!;
+        public virtual User? ApprovedByUser { get; set; }
+    }
+
+    // Stock transfer line items
+    public class StockTransferItem : ISoftDeletable
+    {
+        public Guid Id { get; set; }
+        public Guid StockTransferId { get; set; }
+        public Guid ProductId { get; set; }
+        public Guid SourceInventoryId { get; set; }
+        public Guid? DestinationInventoryId { get; set; }
+        public int QuantityRequested { get; set; }
+        public int QuantityApproved { get; set; }
+        public int QuantityTransferred { get; set; } = 0;
+        public string? BatchNumber { get; set; }
+        public DateTime? ExpiryDate { get; set; }
+        public decimal? CostPrice { get; set; }
+        public string? Notes { get; set; }
+        public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
+        public DateTime UpdatedAt { get; set; } = DateTime.UtcNow;
+        public DateTime? DeletedAt { get; set; }
+
+        // Navigation properties
+        public virtual StockTransfer StockTransfer { get; set; } = null!;
+        public virtual Product Product { get; set; } = null!;
+        public virtual Inventory SourceInventory { get; set; } = null!;
+        public virtual Inventory? DestinationInventory { get; set; }
+    }
+
+    // Branch-specific inventory with RLS support
+    public class Inventory : ISoftDeletable
+    {
+        public Guid Id { get; set; }
+        public Guid TenantId { get; set; }
+        public Guid BranchId { get; set; }
+        public Guid ProductId { get; set; }
+        public string? BatchNumber { get; set; }
+        public DateTime? ExpiryDate { get; set; }
+        public int QuantityOnHand { get; set; } = 0;
+        public int QuantityReserved { get; set; } = 0;
+        public int QuantityAvailable { get; set; } = 0; // Computed: QuantityOnHand - QuantityReserved
+        public int ReorderLevel { get; set; } = 0;
+        public int ReorderQuantity { get; set; } = 0;
+        public decimal? CostPrice { get; set; }
+        public decimal? SellingPrice { get; set; }
+        public Guid? SupplierId { get; set; }
+        public string? Location { get; set; }
+        public DateTime? LastCounted { get; set; }
+        public int AdjustmentCount { get; set; } = 0;
+        public decimal? TotalValue { get; set; } // Computed: QuantityOnHand * CostPrice
+        public string Status { get; set; } = "active";
+        public Dictionary<string, object> Metadata { get; set; } = new();
+        public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
+        public DateTime UpdatedAt { get; set; } = DateTime.UtcNow;
+        public DateTime? DeletedAt { get; set; }
+
+        // Navigation properties
+        public virtual Tenant Tenant { get; set; } = null!;
+        public virtual Branch Branch { get; set; } = null!;
+        public virtual Product Product { get; set; } = null!;
+        public virtual ICollection<StockTransferItem> TransferItems { get; set; } = new List<StockTransferItem>();
+    }
+
+    // Enhanced Product entity with multi-tenancy
+    public class Product : ISoftDeletable
+    {
+        public Guid Id { get; set; }
+        public Guid TenantId { get; set; }
+        public string Sku { get; set; } = string.Empty;
+        public string Name { get; set; } = string.Empty;
+        public string? GenericName { get; set; }
+        public string? Category { get; set; }
+        public string? Description { get; set; }
+        public string? Manufacturer { get; set; }
+        public string? Strength { get; set; }
+        public string? Form { get; set; }
+        public bool RequiresPrescription { get; set; } = false;
+        public bool ControlledSubstance { get; set; } = false;
+        public Dictionary<string, object> StorageRequirements { get; set; } = new();
+        public Dictionary<string, object> Pricing { get; set; } = new();
+        public string? Barcode { get; set; }
+        public List<object> Images { get; set; } = new();
+        public List<Guid> BranchIds { get; set; } = new(); // Branches where this product is available
+        public bool IsGlobalProduct { get; set; } = false; // Available in all branches
+        public Dictionary<string, object> RegulatoryInfo { get; set; } = new();
+        public string Status { get; set; } = "active";
+        public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
+        public DateTime UpdatedAt { get; set; } = DateTime.UtcNow;
+        public DateTime? DeletedAt { get; set; }
+
+        // Navigation properties
+        public virtual Tenant Tenant { get; set; } = null!;
+        public virtual ICollection<Inventory> InventoryItems { get; set; } = new List<Inventory>();
+    }
+
+    // Branch-specific user permissions
+    public class BranchPermission : ISoftDeletable
+    {
+        public Guid Id { get; set; }
+        public Guid TenantId { get; set; }
+        public Guid UserId { get; set; }
+        public Guid BranchId { get; set; }
+        public List<string> Permissions { get; set; } = new(); // inventory_read, inventory_write, sales_read, etc.
+        public bool IsManager { get; set; } = false;
+        public bool CanTransferStock { get; set; } = false;
+        public bool CanApproveTransfers { get; set; } = false;
+        public bool CanViewReports { get; set; } = false;
+        public bool CanManageUsers { get; set; } = false;
+        public Dictionary<string, object> Restrictions { get; set; } = new();
+        public DateTime GrantedAt { get; set; } = DateTime.UtcNow;
+        public DateTime? ExpiresAt { get; set; }
+        public DateTime? DeletedAt { get; set; }
+
+        // Navigation properties
+        public virtual Tenant Tenant { get; set; } = null!;
+        public virtual User User { get; set; } = null!;
+        public virtual Branch Branch { get; set; } = null!;
+    }
+
+    // Centralized procurement request
+    public class ProcurementRequest : ISoftDeletable
+    {
+        public Guid Id { get; set; }
+        public Guid TenantId { get; set; }
+        public string RequestNumber { get; set; } = string.Empty;
+        public Guid RequestingBranchId { get; set; }
+        public Guid? ApprovingBranchId { get; set; } // Usually main branch
+        public string Status { get; set; } = "pending"; // pending, approved, ordered, received, cancelled
+        public string Type { get; set; } = "central"; // central, branch
+        public Guid RequestedByUserId { get; set; }
+        public Guid? ApprovedByUserId { get; set; }
+        public DateTime? ApprovedAt { get; set; }
+        public DateTime? ExpectedDeliveryDate { get; set; }
+        public DateTime? ReceivedDate { get; set; }
+        public decimal TotalAmount { get; set; } = 0;
+        public string Currency { get; set; } = "ZMW";
+        public string? SupplierId { get; set; }
+        public string? Notes { get; set; }
+        public List<ProcurementItem> Items { get; set; } = new();
+        public List<ProcurementDistribution> Distributions { get; set; } = new(); // How items are distributed to branches
+        public Dictionary<string, object> Metadata { get; set; } = new();
+        public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
+        public DateTime UpdatedAt { get; set; } = DateTime.UtcNow;
+        public DateTime? DeletedAt { get; set; }
+
+        // Navigation properties
+        public virtual Tenant Tenant { get; set; } = null!;
+        public virtual Branch RequestingBranch { get; set; } = null!;
+        public virtual Branch? ApprovingBranch { get; set; }
+        public virtual User RequestedByUser { get; set; } = null!;
+        public virtual User? ApprovedByUser { get; set; }
+    }
+
+    // Procurement line items
+    public class ProcurementItem : ISoftDeletable
+    {
+        public Guid Id { get; set; }
+        public Guid ProcurementRequestId { get; set; }
+        public Guid ProductId { get; set; }
+        public int QuantityRequested { get; set; }
+        public int QuantityApproved { get; set; }
+        public int QuantityReceived { get; set; } = 0;
+        public decimal UnitPrice { get; set; }
+        public decimal TotalPrice { get; set; }
+        public string? Notes { get; set; }
+        public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
+        public DateTime UpdatedAt { get; set; } = DateTime.UtcNow;
+        public DateTime? DeletedAt { get; set; }
+
+        // Navigation properties
+        public virtual ProcurementRequest ProcurementRequest { get; set; } = null!;
+        public virtual Product Product { get; set; } = null!;
+    }
+
+    // Distribution of procured items to branches
+    public class ProcurementDistribution : ISoftDeletable
+    {
+        public Guid Id { get; set; }
+        public Guid ProcurementRequestId { get; set; }
+        public Guid ProcurementItemId { get; set; }
+        public Guid BranchId { get; set; }
+        public int QuantityAllocated { get; set; }
+        public int QuantityReceived { get; set; } = 0;
+        public string? Notes { get; set; }
+        public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
+        public DateTime UpdatedAt { get; set; } = DateTime.UtcNow;
+        public DateTime? DeletedAt { get; set; }
+
+        // Navigation properties
+        public virtual ProcurementRequest ProcurementRequest { get; set; } = null!;
+        public virtual ProcurementItem ProcurementItem { get; set; } = null!;
+        public virtual Branch Branch { get; set; } = null!;
+    }
+
+    // Branch-level reporting and analytics
+    public class BranchReport : ISoftDeletable
+    {
+        public Guid Id { get; set; }
+        public Guid TenantId { get; set; }
+        public Guid BranchId { get; set; }
+        public string Name { get; set; } = string.Empty;
+        public string Type { get; set; } = string.Empty; // sales, inventory, financial, etc.
+        public string Period { get; set; } = string.Empty; // daily, weekly, monthly, etc.
+        public DateTime StartDate { get; set; }
+        public DateTime EndDate { get; set; }
+        public Dictionary<string, object> Data { get; set; } = new();
+        public Dictionary<string, object> Metrics { get; set; } = new();
+        public string Status { get; set; } = "generating"; // generating, completed, failed
+        public string? GeneratedByUserId { get; set; }
+        public DateTime? GeneratedAt { get; set; }
+        public string? FilePath { get; set; }
+        public string? ErrorMessage { get; set; }
+        public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
+        public DateTime UpdatedAt { get; set; } = DateTime.UtcNow;
+        public DateTime? DeletedAt { get; set; }
+
+        // Navigation properties
+        public virtual Tenant Tenant { get; set; } = null!;
+        public virtual Branch Branch { get; set; } = null!;
+        public virtual User? GeneratedByUser { get; set; }
+    }
+}

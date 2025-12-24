@@ -1,0 +1,18 @@
+{
+  "ConnectionStrings": {
+    "DefaultConnection": "Host=localhost;Database=umihealth_shared;Username=postgres;Password=password;Port=5432",
+    "Redis": "localhost:6379"
+  },
+  "FileStorage": {
+    "BasePath": "./storage",
+    "BaseUrl": "/storage",
+    "MaxFileSizeMB": 10,
+    "AllowedExtensions": [ ".jpg", ".jpeg", ".png", ".gif", ".pdf", ".doc", ".docx", ".txt", ".csv", ".xlsx", ".xls" ]
+  },
+  "CacheSettings": {
+    "DefaultExpiryMinutes": 60,
+    "UserCacheExpiryMinutes": 30,
+    "ProductCacheExpiryMinutes": 120,
+    "InventoryCacheExpiryMinutes": 5
+  }
+}

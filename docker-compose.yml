@@ -1,0 +1,205 @@
+version: '3.8'
+
+services:
+  # Application Services
+  api-gateway:
+    image: umihealth/api-gateway:latest
+    container_name: umihealth-api-gateway
+    ports:
+      - "80:80"
+      - "443:443"
+    depends_on:
+      - umihealth-api
+      - identity-service
+    networks:
+      - umihealth-network
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Production
+      - ApiServices__UmiHealthApi__Url=http://umihealth-api:5000
+      - ApiServices__IdentityService__Url=http://identity-service:5001
+    volumes:
+      - ./certs:/app/certs:ro
+    restart: unless-stopped
+
+  umihealth-api:
+    image: umihealth/api:latest
+    container_name: umihealth-api
+    ports:
+      - "5000:8080"
+    depends_on:
+      - postgres
+      - redis
+      - identity-service
+    networks:
+      - umihealth-network
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Production
+      - ConnectionStrings__DefaultConnection=Host=postgres;Port=5432;Database=UmiHealth;Username=umihealth;Password=${POSTGRES_PASSWORD}
+      - Redis__ConnectionString=redis:6379
+      - IdentityService__Url=http://identity-service:5001
+      - JwtSettings__Secret=${JWT_SECRET}
+      - JwtSettings__Issuer=${JWT_ISSUER}
+      - JwtSettings__Audience=${JWT_AUDIENCE}
+      - Serilog__MinimumLevel=Information
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8080/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+    restart: unless-stopped
+
+  identity-service:
+    image: umihealth/identity:latest
+    container_name: umihealth-identity
+    ports:
+      - "5001:8080"
+    depends_on:
+      - postgres
+      - redis
+    networks:
+      - umihealth-network
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Production
+      - ConnectionStrings__DefaultConnection=Host=postgres;Port=5432;Database=UmiHealthIdentity;Username=umihealth;Password=${POSTGRES_PASSWORD}
+      - Redis__ConnectionString=redis:6379
+      - JwtSettings__Secret=${JWT_SECRET}
+      - JwtSettings__Issuer=${JWT_ISSUER}
+      - JwtSettings__Audience=${JWT_AUDIENCE}
+      - EmailSettings__SmtpServer=${SMTP_SERVER}
+      - EmailSettings__SmtpPort=${SMTP_PORT}
+      - EmailSettings__Username=${SMTP_USERNAME}
+      - EmailSettings__Password=${SMTP_PASSWORD}
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8080/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+    restart: unless-stopped
+
+  # Data Services
+  postgres:
+    image: postgres:15-alpine
+    container_name: umihealth-postgres
+    ports:
+      - "5432:5432"
+    networks:
+      - umihealth-network
+    environment:
+      - POSTGRES_DB=UmiHealth
+      - POSTGRES_USER=umihealth
+      - POSTGRES_PASSWORD=${POSTGRES_PASSWORD}
+      - POSTGRES_MULTIPLE_DATABASES=UmiHealthIdentity
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+      - ./scripts/init-databases.sh:/docker-entrypoint-initdb.d/init-databases.sh:ro
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U umihealth"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    restart: unless-stopped
+
+  redis:
+    image: redis:7-alpine
+    container_name: umihealth-redis
+    ports:
+      - "6379:6379"
+    networks:
+      - umihealth-network
+    command: redis-server --appendonly yes --requirepass ${REDIS_PASSWORD}
+    volumes:
+      - redis_data:/data
+    healthcheck:
+      test: ["CMD", "redis-cli", "--raw", "incr", "ping"]
+      interval: 10s
+      timeout: 3s
+      retries: 5
+    restart: unless-stopped
+
+  # Background Services
+  background-jobs:
+    image: umihealth/jobs:latest
+    container_name: umihealth-jobs
+    depends_on:
+      - postgres
+      - redis
+      - umihealth-api
+    networks:
+      - umihealth-network
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Production
+      - ConnectionStrings__DefaultConnection=Host=postgres;Port=5432;Database=UmiHealth;Username=umihealth;Password=${POSTGRES_PASSWORD}
+      - Redis__ConnectionString=redis:6379,password=${REDIS_PASSWORD}
+      - ApiBaseUrl=http://umihealth-api:5000
+    restart: unless-stopped
+
+  # Monitoring
+  prometheus:
+    image: prom/prometheus:latest
+    container_name: umihealth-prometheus
+    ports:
+      - "9090:9090"
+    networks:
+      - umihealth-network
+    command:
+      - '--config.file=/etc/prometheus/prometheus.yml'
+      - '--storage.tsdb.path=/prometheus'
+      - '--web.console.libraries=/etc/prometheus/console_libraries'
+      - '--web.console.templates=/etc/prometheus/consoles'
+      - '--storage.tsdb.retention.time=200h'
+      - '--web.enable-lifecycle'
+    volumes:
+      - ./monitoring/prometheus.yml:/etc/prometheus/prometheus.yml:ro
+      - prometheus_data:/prometheus
+    restart: unless-stopped
+
+  grafana:
+    image: grafana/grafana:latest
+    container_name: umihealth-grafana
+    ports:
+      - "3000:3000"
+    networks:
+      - umihealth-network
+    environment:
+      - GF_SECURITY_ADMIN_USER=${GRAFANA_USER}
+      - GF_SECURITY_ADMIN_PASSWORD=${GRAFANA_PASSWORD}
+      - GF_USERS_ALLOW_SIGN_UP=false
+    volumes:
+      - grafana_data:/var/lib/grafana
+      - ./monitoring/grafana/provisioning:/etc/grafana/provisioning:ro
+    restart: unless-stopped
+
+  # Reverse Proxy (Optional - for production)
+  nginx:
+    image: nginx:alpine
+    container_name: umihealth-nginx
+    ports:
+      - "80:80"
+      - "443:443"
+    depends_on:
+      - api-gateway
+    networks:
+      - umihealth-network
+    volumes:
+      - ./nginx/nginx.conf:/etc/nginx/nginx.conf:ro
+      - ./nginx/ssl:/etc/nginx/ssl:ro
+    restart: unless-stopped
+    profiles:
+      - production
+
+volumes:
+  postgres_data:
+    driver: local
+  redis_data:
+    driver: local
+  prometheus_data:
+    driver: local
+  grafana_data:
+    driver: local
+
+networks:
+  umihealth-network:
+    driver: bridge
+    ipam:
+      config:
+        - subnet: 172.20.0.0/16

@@ -628,6 +628,59 @@
       font-size: 1.25rem;
     }
 
+    .transaction-id {
+      font-family: monospace;
+      font-size: 0.875rem;
+      color: var(--color-primary);
+      font-weight: 600;
+    }
+
+    .action-button.approve {
+      background: var(--color-success);
+      color: white;
+    }
+
+    .action-button.approve:hover {
+      background: #16a34a;
+    }
+
+    .action-button.reject {
+      background: var(--color-warning);
+      color: white;
+    }
+
+    .action-button.reject:hover {
+      background: #d97706;
+    }
+
+    .amount {
+      font-weight: 600;
+      color: var(--color-primary);
+    }
+
+    .no-data {
+      text-align: center;
+      padding: 3rem;
+      color: var(--color-text-secondary);
+    }
+
+    .no-data .material-symbols-rounded {
+      font-size: 3rem;
+      display: block;
+      margin-bottom: 1rem;
+      opacity: 0.5;
+    }
+
+    .badge {
+      background: var(--color-warning);
+      color: white;
+      border-radius: 12px;
+      padding: 2px 8px;
+      font-size: 0.75rem;
+      font-weight: 600;
+      margin-left: 8px;
+    }
+
     @media (max-width: 768px) {
       .sidebar {
         transform: translateX(-100%);
@@ -773,7 +826,7 @@
           </div>
         </div>
 
-        <div class="table-container">
+        <div class="table-container" x-show="activeTab === 'subscriptions'">
           <table class="table">
             <thead>
               <tr>
@@ -838,6 +891,62 @@
             </div>
           </div>
         </div>
+
+        <!-- Pending Approvals Section -->
+        <div class="table-container" x-show="activeTab === 'approvals'">
+          <table class="table">
+            <thead>
+              <tr>
+                <th>Transaction ID</th>
+                <th>Tenant</th>
+                <th>From Plan</th>
+                <th>To Plan</th>
+                <th>Amount</th>
+                <th>Requested By</th>
+                <th>Date</th>
+                <th>Actions</th>
+              </tr>
+            </thead>
+            <tbody>
+              <template x-for="transaction in pendingTransactions" :key="transaction.id">
+                <tr>
+                  <td>
+                    <span class="transaction-id" x-text="transaction.transactionId"></span>
+                  </td>
+                  <td x-text="transaction.tenantName"></td>
+                  <td>
+                    <span class="plan-badge" x-text="transaction.planFrom"></span>
+                  </td>
+                  <td>
+                    <span class="plan-badge" x-text="transaction.planTo"></span>
+                  </td>
+                  <td>
+                    <span class="amount" x-text="`${transaction.currency} ${transaction.amount}`"></span>
+                  </td>
+                  <td x-text="transaction.requestedBy"></td>
+                  <td x-text="formatDate(transaction.createdAt)"></td>
+                  <td>
+                    <div class="action-buttons">
+                      <button class="action-button approve" @click="approveTransaction(transaction.transactionId)" title="Approve">
+                        <span class="material-symbols-rounded">check_circle</span>
+                        Approve
+                      </button>
+                      <button class="action-button reject" @click="rejectTransaction(transaction.transactionId)" title="Reject">
+                        <span class="material-symbols-rounded">cancel</span>
+                        Reject
+                      </button>
+                    </div>
+                  </td>
+                </tr>
+              </template>
+            </tbody>
+          </table>
+          
+          <div x-show="pendingTransactions.length === 0" class="no-data">
+            <span class="material-symbols-rounded">inbox</span>
+            <p>No pending subscription upgrades to review</p>
+          </div>
+        </div>
       </div>
     </main>
 
@@ -863,9 +972,9 @@
             <div class="form-group">
               <label class="form-label">Subscription Plan</label>
               <select class="form-select" x-model="subscriptionForm.plan" required>
-                <option value="Go">Go</option>
-                <option value="Grow">Grow</option>
-                <option value="Pro">Pro</option>
+                <option value="Care">Care</option>
+                <option value="Care Plus">Care Plus</option>
+                <option value="Care Pro">Care Pro</option>
               </select>
             </div>
             <div class="form-group">
@@ -928,11 +1037,112 @@
           status: ''
         },
         
+        activeTab: 'subscriptions',
+        
         tenants: [],
         subscriptions: [],
+        pendingTransactions: [],
         
         async init() {
           await this.loadData();
+          await this.loadPendingTransactions();
+        },
+        
+        async loadPendingTransactions() {
+          try {
+            const response = await fetch('/api/subscriptionapproval/pending');
+            const result = await response.json();
+            this.pendingTransactions = result.data || [];
+          } catch (error) {
+            console.error('Failed to load pending transactions:', error);
+            // Fallback mock data
+            this.pendingTransactions = [
+              {
+                id: 1,
+                transactionId: 'SUB2024122412345678',
+                tenantName: 'MedCare Pharmacy',
+                planFrom: 'Care',
+                planTo: 'Care Plus',
+                amount: 450,
+                currency: 'ZMW',
+                requestedBy: 'admin@medcare.com',
+                createdAt: '2024-12-24T10:30:00Z',
+                status: 'pending_approval'
+              }
+            ];
+          }
+        },
+        
+        async approveTransaction(transactionId) {
+          try {
+            const response = await fetch(`/api/subscriptionapproval/approve/${transactionId}`, {
+              method: 'POST',
+              headers: {
+                'Content-Type': 'application/json',
+              },
+              body: JSON.stringify({
+                approvedBy: 'operations@umihealth.com'
+              })
+            });
+            
+            const result = await response.json();
+            if (result.success) {
+              this.showSuccess('Transaction approved successfully');
+              await this.loadPendingTransactions();
+            } else {
+              this.showError('Failed to approve transaction');
+            }
+          } catch (error) {
+            console.error('Approval error:', error);
+            this.showError('Failed to approve transaction');
+          }
+        },
+        
+        async rejectTransaction(transactionId) {
+          const reason = prompt('Please provide rejection reason:');
+          if (!reason) return;
+          
+          try {
+            const response = await fetch(`/api/subscriptionapproval/reject/${transactionId}`, {
+              method: 'POST',
+              headers: {
+                'Content-Type': 'application/json',
+              },
+              body: JSON.stringify({
+                approvedBy: 'operations@umihealth.com',
+                rejectionReason: reason
+              })
+            });
+            
+            const result = await response.json();
+            if (result.success) {
+              this.showSuccess('Transaction rejected successfully');
+              await this.loadPendingTransactions();
+            } else {
+              this.showError('Failed to reject transaction');
+            }
+          } catch (error) {
+            console.error('Rejection error:', error);
+            this.showError('Failed to reject transaction');
+          }
+        },
+        
+        formatDate(dateString) {
+          if (!dateString) return '';
+          const date = new Date(dateString);
+          return date.toLocaleDateString('en-US', { 
+            year: 'numeric', 
+            month: 'short', 
+            day: 'numeric' 
+          });
+        },
+        
+        showSuccess(message) {
+          alert(message);
+        },
+        
+        showError(message) {
+          alert(message);
         },
         
         async loadData() {
@@ -963,46 +1173,52 @@
             tenantId: 1,
             tenantName: 'MedCare Pharmacy',
             tenantDomain: 'medcare.umihealth.com',
-            plan: 'Grow',
+            plan: 'Care Plus',
             billingCycle: 'Monthly',
             status: 'Active',
             nextBilling: '2024-02-15',
-            price: 299.00
+            price: 250.00
           },
           {
             id: 2,
             tenantId: 2,
             tenantName: 'HealthPlus Drugs',
             tenantDomain: 'healthplus.umihealth.com',
-            plan: 'Go',
+            plan: 'Care Plus',
             billingCycle: 'Monthly',
             status: 'Trial',
-            nextBilling: '2024-03-20',
-            price: 99.00
+            nextBilling: '2024-01-15',
+            price: 450.00
           },
           {
             id: 3,
             tenantId: 3,
-            tenantName: 'QuickMeds',
-            tenantDomain: 'quickmeds.umihealth.com',
-            plan: 'Pro',
-            billingCycle: 'Annually',
+            tenantName: 'MediCare Pharmacy',
+            plan: 'Care',
             status: 'Active',
-            nextBilling: '2024-12-10',
-            price: 999.00
+            nextBilling: '2024-01-10'
+          },
+          {
+            id: 3,
+            tenantId: 3,
+            tenantName: 'HealthPlus Pharmacy',
+            plan: 'Care Pro',
+            status: 'Active',
+            nextBilling: '2024-01-20',
+            price: 700.00
           },
           {
             id: 4,
             tenantId: 4,
-            tenantName: 'City Pharmacy',
+            tenantName: 'QuickMeds',
             tenantDomain: 'citypharmacy.umihealth.com',
-            plan: 'Grow',
+            plan: 'Care Plus',
             billingCycle: 'Quarterly',
             status: 'Expiring',
             nextBilling: '2024-01-05',
-            price: 299.00
+            price: 450.00
           }
-        ],
+        ];
         
         get filteredSubscriptions() {
           let filtered = this.subscriptions;
@@ -1083,7 +1299,7 @@
         async upgradeSubscription(subscription) {
           try {
             const upgradeData = {
-              targetPlan: subscription.plan === 'Basic' ? 'Professional' : 'Enterprise'
+              targetPlan: subscription.plan === 'Care' ? 'Care Plus' : subscription.plan === 'Care Plus' ? 'Care Pro' : 'Care Pro'
             };
             
             await window.operationsAPI.upgradeSubscription(subscription.id, upgradeData);
@@ -1130,7 +1346,7 @@
         
         upgradeSubscription(subscription) {
           if (confirm(`Upgrade subscription for ${subscription.tenantName}?\n\nThis will change their plan to the next tier.`)) {
-            const plans = ['Go', 'Grow', 'Pro'];
+            const plans = ['Care', 'Care Plus', 'Care Pro'];
             const currentIndex = plans.indexOf(subscription.plan);
             if (currentIndex < plans.length - 1) {
               subscription.plan = plans[currentIndex + 1];

@@ -1,0 +1,277 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Upgrade Subscription | UmiHealth Pharmacy Management</title>
+  <link rel="icon" href="../logo.png" type="image/png">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@100;400;500;600;700&family=Material+Symbols+Rounded:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="../../assets/css/tailwind.output.css">
+  <link rel="stylesheet" href="../css/upgrade.css">
+</head>
+<body x-data="upgradePage()" x-init="init()">
+  <div class="upgrade-container">
+    <a href="account.html" class="back-button">
+      <span class="material-symbols-rounded">arrow_back</span>
+      Back to Account
+    </a>
+
+    <div class="upgrade-header">
+      <h1>Upgrade Your Subscription</h1>
+      <p>Choose the perfect plan for your pharmacy needs</p>
+    </div>
+
+    <div class="plans-grid">
+      <!-- Care Plan -->
+      <div class="plan-card" :class="{ recommended: selectedPlan === 'Care Plus' && currentPlan === 'Care' }">
+        <div class="plan-header">
+          <div class="plan-name">Care</div>
+          <div class="plan-price">250 <span>ZMW/month</span></div>
+          <div class="plan-description">Perfect for small pharmacies</div>
+        </div>
+        
+        <div class="plan-features">
+          <div class="feature-item">
+            <span class="material-symbols-rounded feature-icon">check_circle</span>
+            <span>Inventory Management</span>
+          </div>
+          <div class="feature-item">
+            <span class="material-symbols-rounded feature-icon">check_circle</span>
+            <span>Prescription Management</span>
+          </div>
+          <div class="feature-item">
+            <span class="material-symbols-rounded feature-icon">check_circle</span>
+            <span>POS Functionality</span>
+          </div>
+          <div class="feature-item">
+            <span class="material-symbols-rounded feature-icon">check_circle</span>
+            <span>Basic Reports</span>
+          </div>
+          <div class="feature-item">
+            <span class="material-symbols-rounded feature-icon">check_circle</span>
+            <span>Email Support</span>
+          </div>
+          <div class="feature-item">
+            <span class="material-symbols-rounded feature-icon">check_circle</span>
+            <span>1 Branch, 6 Users, 5GB Storage</span>
+          </div>
+        </div>
+        
+        <div class="plan-action">
+          <div x-show="currentPlan === 'Care'" class="current-plan-indicator">
+            Current Plan
+          </div>
+          <button class="plan-button secondary" 
+                  x-show="currentPlan !== 'Care'"
+                  @click="selectPlan('Care')">
+            Select Care
+          </button>
+        </div>
+      </div>
+
+      <!-- Care Plus Plan -->
+      <div class="plan-card recommended" :class="{ recommended: selectedPlan === 'Care Pro' && currentPlan === 'Care Plus' }">
+        <div x-show="currentPlan !== 'Care Plus'" class="recommended-badge">
+          Most Popular
+        </div>
+        <div class="plan-header">
+          <div class="plan-name">Care Plus</div>
+          <div class="plan-price">450 <span>ZMW/month</span></div>
+          <div class="plan-description">Great for growing pharmacies</div>
+        </div>
+        
+        <div class="plan-features">
+          <div class="feature-item">
+            <span class="material-symbols-rounded feature-icon">check_circle</span>
+            <span>All Care features</span>
+          </div>
+          <div class="feature-item">
+            <span class="material-symbols-rounded feature-icon">check_circle</span>
+            <span>Advanced Reports</span>
+          </div>
+          <div class="feature-item">
+            <span class="material-symbols-rounded feature-icon">check_circle</span>
+            <span>API Access</span>
+          </div>
+          <div class="feature-item">
+            <span class="material-symbols-rounded feature-icon">check_circle</span>
+            <span>Phone Support</span>
+          </div>
+          <div class="feature-item">
+            <span class="material-symbols-rounded feature-icon">check_circle</span>
+            <span>3 Branches, 16 Users, 15GB Storage</span>
+          </div>
+        </div>
+        
+        <div class="plan-action">
+          <div x-show="currentPlan === 'Care Plus'" class="current-plan-indicator">
+            Current Plan
+          </div>
+          <button class="plan-button primary" 
+                  x-show="currentPlan !== 'Care Plus'"
+                  @click="selectPlan('Care Plus')">
+            Upgrade to Care Plus
+          </button>
+        </div>
+      </div>
+
+      <!-- Care Pro Plan -->
+      <div class="plan-card" :class="{ recommended: selectedPlan === 'Care Pro' }">
+        <div class="plan-header">
+          <div class="plan-name">Care Pro</div>
+          <div class="plan-price">700 <span>ZMW/month</span></div>
+          <div class="plan-description">For large pharmacy chains</div>
+        </div>
+        
+        <div class="plan-features">
+          <div class="feature-item">
+            <span class="material-symbols-rounded feature-icon">check_circle</span>
+            <span>All Care Plus features</span>
+          </div>
+          <div class="feature-item">
+            <span class="material-symbols-rounded feature-icon">check_circle</span>
+            <span>Custom Reports</span>
+          </div>
+          <div class="feature-item">
+            <span class="material-symbols-rounded feature-icon">check_circle</span>
+            <span>Webhooks</span>
+          </div>
+          <div class="feature-item">
+            <span class="material-symbols-rounded feature-icon">check_circle</span>
+            <span>Priority Support</span>
+          </div>
+          <div class="feature-item">
+            <span class="material-symbols-rounded feature-icon">check_circle</span>
+            <span>Dedicated Account Manager</span>
+          </div>
+          <div class="feature-item">
+            <span class="material-symbols-rounded feature-icon">check_circle</span>
+            <span>10 Branches, 50+ Users, 30GB Storage</span>
+          </div>
+        </div>
+        
+        <div class="plan-action">
+          <div x-show="currentPlan === 'Care Pro'" class="current-plan-indicator">
+            Current Plan
+          </div>
+          <button class="plan-button primary" 
+                  x-show="currentPlan !== 'Care Pro'"
+                  @click="selectPlan('Care Pro')">
+            Upgrade to Care Pro
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Upgrade Summary -->
+    <div x-show="selectedPlan && selectedPlan !== currentPlan" class="upgrade-summary">
+      <h3 class="summary-title">Upgrade Summary</h3>
+      <div class="summary-item">
+        <span class="summary-label">Current Plan:</span>
+        <span class="summary-value" x-text="currentPlan"></span>
+      </div>
+      <div class="summary-item">
+        <span class="summary-label">New Plan:</span>
+        <span class="summary-value" x-text="selectedPlan"></span>
+      </div>
+      <div class="summary-item">
+        <span class="summary-label">Monthly Cost:</span>
+        <span class="summary-value" x-text="getPlanPrice(selectedPlan) + ' ZMW'"></span>
+      </div>
+      <div class="summary-item">
+        <span class="summary-label">Effective Date:</span>
+        <span class="summary-value" x-text="new Date().toLocaleDateString()"></span>
+      </div>
+      <div class="summary-total">
+        <span>First Month Total:</span>
+        <span x-text="getPlanPrice(selectedPlan) + ' ZMW'"></span>
+      </div>
+      
+      <div style="margin-top: 2rem;">
+        <button class="plan-button primary" style="width: auto; padding: 1rem 2rem;" @click="confirmUpgrade()">
+          <span class="material-symbols-rounded" style="vertical-align: middle; margin-right: 8px;">upgrade</span>
+          Confirm Upgrade
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <script src="../js/auth-api.js"></script>
+  <script>
+    function upgradePage() {
+      return {
+        currentPlan: 'Care',
+        selectedPlan: null,
+        loading: false,
+        
+        init() {
+          // Get current user's subscription
+          const currentUser = JSON.parse(localStorage.getItem('umi_currentUser') || '{}');
+          const subscription = JSON.parse(localStorage.getItem('umi_subscription') || '{}');
+          
+          this.currentPlan = subscription.planType || 'Care';
+          
+          // Get plan from URL parameter
+          const urlParams = new URLSearchParams(window.location.search);
+          const targetPlan = urlParams.get('plan');
+          
+          if (targetPlan) {
+            this.selectedPlan = targetPlan;
+          }
+        },
+        
+        selectPlan(plan) {
+          this.selectedPlan = plan;
+        },
+        
+        getPlanPrice(plan) {
+          const prices = {
+            'Care': 250,
+            'Care Plus': 450,
+            'Care Pro': 700
+          };
+          return prices[plan] || 0;
+        },
+        
+        async confirmUpgrade() {
+          if (!this.selectedPlan || this.selectedPlan === this.currentPlan) {
+            alert('Please select a different plan to upgrade');
+            return;
+          }
+          
+          this.loading = true;
+          
+          try {
+            const response = await window.authAPI.upgradeSubscription({
+              planType: this.selectedPlan,
+              billingCycle: 'monthly',
+              amount: this.getPlanPrice(this.selectedPlan),
+              currency: 'ZMW',
+              autoRenew: true
+            });
+            
+            if (response.success) {
+              // Update local storage
+              const subscription = JSON.parse(localStorage.getItem('umi_subscription') || '{}');
+              subscription.planType = this.selectedPlan;
+              localStorage.setItem('umi_subscription', JSON.stringify(subscription));
+              
+              alert('Successfully upgraded to ' + this.selectedPlan + ' plan!');
+              window.location.href = 'account.html';
+            } else {
+              alert('Upgrade failed: ' + response.message);
+            }
+          } catch (error) {
+            console.error('Upgrade error:', error);
+            alert('Upgrade failed. Please try again.');
+          } finally {
+            this.loading = false;
+          }
+        }
+      };
+    }
+  </script>
+</body>
+</html>

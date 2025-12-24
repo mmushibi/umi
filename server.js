@@ -4,6 +4,7 @@ const path = require('path');
 
 const PORT = 3000;
 const PUBLIC_DIR = path.join(__dirname, 'public');
+const PORTALS_DIR = path.join(__dirname, 'portals');
 
 // MIME types
 const mimeTypes = {
@@ -24,7 +25,14 @@ const getMimeType = (filePath) => {
 };
 
 const server = http.createServer((req, res) => {
-  let filePath = path.join(PUBLIC_DIR, req.url === '/' ? 'index.html' : req.url);
+  let filePath;
+  
+  // Determine which directory to serve from
+  if (req.url.startsWith('/portals/')) {
+    filePath = path.join(PORTALS_DIR, req.url.replace('/portals/', ''));
+  } else {
+    filePath = path.join(PUBLIC_DIR, req.url === '/' ? 'index.html' : req.url);
+  }
   
   // Security: prevent directory traversal
   if (filePath.includes('..')) {

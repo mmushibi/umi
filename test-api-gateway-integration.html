@@ -1,0 +1,247 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>API Gateway Integration Test</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        .test-result { 
+            transition: all 0.3s ease;
+        }
+        .loading { 
+            animation: spin 1s linear infinite;
+        }
+        @keyframes spin { 
+            from { transform: rotate(0deg); } 
+            to { transform: rotate(360deg); } 
+        }
+    </style>
+</head>
+<body class="bg-gray-100 p-8">
+    <div class="max-w-6xl mx-auto">
+        <h1 class="text-3xl font-bold text-gray-800 mb-8">API Gateway Integration Test</h1>
+        
+        <!-- Test Configuration -->
+        <div class="bg-white rounded-lg shadow-md p-6 mb-6">
+            <h2 class="text-xl font-semibold mb-4">Test Configuration</h2>
+            <div class="grid grid-cols-2 gap-4">
+                <div>
+                    <label for="gatewayUrl" class="block text-sm font-medium text-gray-700 mb-2">API Gateway URL</label>
+                    <input type="text" id="gatewayUrl" value="http://localhost:3000/api/v1" 
+                           title="API Gateway base URL for testing"
+                           placeholder="http://localhost:3000/api/v1"
+                           class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500">
+                </div>
+                <div>
+                    <label for="authToken" class="block text-sm font-medium text-gray-700 mb-2">Auth Token (Optional)</label>
+                    <input type="text" id="authToken" placeholder="Bearer token..." 
+                           title="Authorization token for protected endpoints"
+                           class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500">
+                </div>
+            </div>
+        </div>
+
+        <!-- Test Results -->
+        <div class="bg-white rounded-lg shadow-md p-6 mb-6">
+            <h2 class="text-xl font-semibold mb-4">Test Results</h2>
+            <div id="testResults" class="space-y-4">
+                <!-- Test results will be populated here -->
+            </div>
+        </div>
+
+        <!-- Test Controls -->
+        <div class="bg-white rounded-lg shadow-md p-6">
+            <h2 class="text-xl font-semibold mb-4">Test Controls</h2>
+            <div class="flex space-x-4">
+                <button onclick="runAllTests()" 
+                        class="bg-blue-600 text-white px-6 py-2 rounded-md hover:bg-blue-700 transition-colors">
+                    Run All Tests
+                </button>
+                <button onclick="clearResults()" 
+                        class="bg-gray-600 text-white px-6 py-2 rounded-md hover:bg-gray-700 transition-colors">
+                    Clear Results
+                </button>
+                <button onclick="testGatewayHealth()" 
+                        class="bg-green-600 text-white px-6 py-2 rounded-md hover:bg-green-700 transition-colors">
+                    Test Gateway Health
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const gatewayUrl = document.getElementById('gatewayUrl').value;
+        const authToken = document.getElementById('authToken').value;
+
+        async function makeRequest(endpoint, method = 'GET', body = null, headers = {}) {
+            const url = `${gatewayUrl}${endpoint}`;
+            const options = {
+                method,
+                headers: {
+                    'Content-Type': 'application/json',
+                    ...headers
+                }
+            };
+
+            if (authToken) {
+                options.headers['Authorization'] = authToken;
+            }
+
+            if (body) {
+                options.body = JSON.stringify(body);
+            }
+
+            try {
+                const response = await fetch(url, options);
+                const data = await response.json();
+                return {
+                    success: response.ok,
+                    status: response.status,
+                    data,
+                    headers: Object.fromEntries(response.headers.entries())
+                };
+            } catch (error) {
+                return {
+                    success: false,
+                    error: error.message,
+                    status: 0
+                };
+            }
+        }
+
+        function addTestResult(testName, result) {
+            const resultsDiv = document.getElementById('testResults');
+            const testDiv = document.createElement('div');
+            testDiv.className = `test-result p-4 rounded-lg border-l-4 ${
+                result.success ? 'bg-green-50 border-green-500' : 'bg-red-50 border-red-500'
+            }`;
+
+            const statusIcon = result.success ? 
+                '<svg class="w-6 h-6 text-green-600 inline-block mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg>' :
+                '<svg class="w-6 h-6 text-red-600 inline-block mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>';
+
+            testDiv.innerHTML = `
+                <div class="flex items-center justify-between">
+                    <div class="flex items-center">
+                        ${statusIcon}
+                        <h3 class="text-lg font-semibold">${testName}</h3>
+                    </div>
+                    <span class="text-sm font-medium ${result.success ? 'text-green-800' : 'text-red-800'}">
+                        Status: ${result.status || 'ERROR'}
+                    </span>
+                </div>
+                <div class="mt-2 text-sm text-gray-700">
+                    <pre class="bg-gray-100 p-2 rounded overflow-x-auto">${JSON.stringify(result.data || result.error, null, 2)}</pre>
+                </div>
+                ${result.headers ? `
+                    <div class="mt-2 text-xs text-gray-600">
+                        <strong>Response Headers:</strong>
+                        <pre class="bg-gray-50 p-1 rounded overflow-x-auto">${JSON.stringify(result.headers, null, 2)}</pre>
+                    </div>
+                ` : ''}
+            `;
+
+            resultsDiv.appendChild(testDiv);
+        }
+
+        async function testGatewayHealth() {
+            addTestResult('Gateway Health Check', { success: true, data: { message: 'Testing gateway health...' } });
+            
+            const result = await makeRequest('/health');
+            addTestResult('Health Endpoint', result);
+        }
+
+        async function testAuthentication() {
+            // Test login (should be rate limited)
+            const loginResult = await makeRequest('/auth/login', 'POST', {
+                email: 'test@example.com',
+                password: 'testpassword'
+            });
+            addTestResult('Authentication - Login', loginResult);
+
+            // Test protected endpoint without token
+            const protectedResult = await makeRequest('/auth/me');
+            addTestResult('Authentication - Protected (No Token)', protectedResult);
+        }
+
+        async function testRateLimiting() {
+            // Test multiple rapid requests to trigger rate limiting
+            for (let i = 1; i <= 5; i++) {
+                const result = await makeRequest('/auth/login', 'POST', {
+                    email: 'test@example.com',
+                    password: 'testpassword'
+                });
+                addTestResult(`Rate Limiting Test ${i}`, result);
+            }
+        }
+
+        async function testGatewayRouting() {
+            // Test various service endpoints
+            const endpoints = [
+                '/users',
+                '/patients',
+                '/inventory',
+                '/sales',
+                '/payments'
+            ];
+
+            for (const endpoint of endpoints) {
+                const result = await makeRequest(endpoint);
+                addTestResult(`Gateway Routing - ${endpoint}`, result);
+            }
+        }
+
+        async function testGatewayManagement() {
+            // Test gateway service status endpoint
+            const result = await makeRequest('/gateway/services');
+            addTestResult('Gateway Management - Service Status', result);
+        }
+
+        async function testTenantResolution() {
+            // Test with tenant header
+            const result = await makeRequest('/users', 'GET', null, {
+                'X-Tenant-ID': 'tenant-demo-uuid'
+            });
+            addTestResult('Tenant Resolution - With Header', result);
+
+            // Test without tenant header
+            const resultNoTenant = await makeRequest('/users');
+            addTestResult('Tenant Resolution - No Header', resultNoTenant);
+        }
+
+        async function runAllTests() {
+            clearResults();
+            addTestResult('Test Suite Started', { success: true, data: { message: 'Running comprehensive API Gateway tests...' } });
+
+            await testGatewayHealth();
+            await new Promise(resolve => setTimeout(resolve, 500));
+            
+            await testAuthentication();
+            await new Promise(resolve => setTimeout(resolve, 500));
+            
+            await testRateLimiting();
+            await new Promise(resolve => setTimeout(resolve, 1000));
+            
+            await testGatewayRouting();
+            await new Promise(resolve => setTimeout(resolve, 500));
+            
+            await testGatewayManagement();
+            await new Promise(resolve => setTimeout(resolve, 500));
+            
+            await testTenantResolution();
+
+            addTestResult('Test Suite Completed', { success: true, data: { message: 'All tests completed. Review results above.' } });
+        }
+
+        function clearResults() {
+            document.getElementById('testResults').innerHTML = '';
+        }
+
+        // Auto-run tests when page loads
+        document.addEventListener('DOMContentLoaded', function() {
+            console.log('API Gateway Integration Test loaded. Click "Run All Tests" to begin.');
+        });
+    </script>
+</body>
+</html>

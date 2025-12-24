@@ -1,0 +1,232 @@
+# Azure DevOps Pipeline for UmiHealth Multi-Tenant Pharmacy POS System
+
+trigger:
+  branches:
+    include:
+    - main
+    - develop
+    - release/*
+  tags:
+    include:
+    - v*
+
+pr:
+  branches:
+    include:
+    - main
+    - develop
+
+variables:
+  - group: UmiHealth-Variables
+  - name: buildConfiguration
+    value: 'Release'
+  - name: dockerRegistryServiceConnection
+    value: 'UmiHealthContainerRegistry'
+  - name: imageRepository
+    value: 'umihealth/api'
+  - name: containerRegistry
+    value: 'umihealth.azurecr.io'
+  - name: dockerfilePath
+    value: '$(Build.SourcesDirectory)/Dockerfile'
+  - name: tag
+    value: '$(Build.BuildId)'
+
+stages:
+- stage: Build
+  displayName: 'Build and Test Stage'
+  jobs:
+  - job: BuildAPI
+    displayName: 'Build API'
+    pool:
+      vmImage: 'windows-latest'
+    steps:
+    - task: UseDotNet@2
+      displayName: 'Use .NET 8 SDK'
+      inputs:
+        packageType: 'sdk'
+        version: '8.x'
+        installationPath: $(Agent.ToolsDirectory)/dotnet
+
+    - task: DotNetCoreCLI@2
+      displayName: 'Restore NuGet Packages'
+      inputs:
+        command: 'restore'
+        projects: '**/*.csproj'
+        feedsToUse: 'select'
+
+    - task: DotNetCoreCLI@2
+      displayName: 'Build Solution'
+      inputs:
+        command: 'build'
+        projects: '**/*.sln'
+        arguments: '--configuration $(buildConfiguration) --no-restore'
+
+    - task: DotNetCoreCLI@2
+      displayName: 'Run Unit Tests'
+      inputs:
+        command: 'test'
+        projects: '**/*Tests.csproj'
+        arguments: '--configuration $(buildConfiguration) --no-build --collect:"XPlat Code Coverage" --results-directory:$(Agent.TempDirectory)/TestResults'
+
+    - task: PublishCodeCoverageResults@1
+      displayName: 'Publish Code Coverage'
+      inputs:
+        codeCoverageTool: 'Cobertura'
+        summaryFileLocation: '$(Agent.TempDirectory)/TestResults/**/coverage.cobertura.xml'
+
+    - task: DotNetCoreCLI@2
+      displayName: 'Publish API'
+      inputs:
+        command: 'publish'
+        publishWebProjects: false
+        projects: 'src/UmiHealth.API/UmiHealth.API.csproj'
+        arguments: '--configuration $(buildConfiguration) --output $(Build.ArtifactStagingDirectory)/api --no-build'
+        zipAfterPublish: false
+
+    - task: PublishBuildArtifacts@1
+      displayName: 'Publish API Artifacts'
+      inputs:
+        PathtoPublish: '$(Build.ArtifactStagingDirectory)/api'
+        ArtifactName: 'api'
+
+  - job: BuildDocker
+    displayName: 'Build Docker Images'
+    pool:
+      vmImage: 'ubuntu-latest'
+    dependsOn: BuildAPI
+    condition: succeeded()
+    steps:
+    - task: DownloadBuildArtifacts@0
+      displayName: 'Download API Artifacts'
+      inputs:
+        buildType: 'current'
+        downloadType: 'single'
+        artifactName: 'api'
+        downloadPath: '$(System.ArtifactsDirectory)'
+
+    - task: Docker@2
+      displayName: 'Build and Push API Image'
+      inputs:
+        containerRegistry: '$(dockerRegistryServiceConnection)'
+        repository: '$(imageRepository)'
+        command: 'buildAndPush'
+        Dockerfile: '$(dockerfilePath)'
+        buildContext: '$(Build.SourcesDirectory)'
+        tags: |
+          $(tag)
+          latest
+
+    - task: PublishBuildArtifacts@1
+      displayName: 'Publish Docker Manifests'
+      inputs:
+        PathtoPublish: '$(Build.SourcesDirectory)/docker-compose.yml'
+        ArtifactName: 'docker-compose'
+
+- stage: DeployDev
+  displayName: 'Deploy to Development'
+  condition: and(succeeded(), eq(variables['Build.SourceBranch'], 'refs/heads/develop'))
+  dependsOn: Build
+  jobs:
+  - deployment: DeployToDev
+    displayName: 'Deploy to Development Environment'
+    environment: 'Development'
+    strategy:
+      runOnce:
+        deploy:
+          steps:
+          - task: DownloadBuildArtifacts@0
+            displayName: 'Download Docker Compose'
+            inputs:
+              buildType: 'current'
+              downloadType: 'single'
+              artifactName: 'docker-compose'
+              downloadPath: '$(System.ArtifactsDirectory)'
+
+          - task: AzureWebAppContainer@1
+            displayName: 'Deploy to Azure Web App'
+            inputs:
+              azureSubscription: 'UmiHealth-Subscription'
+              appName: 'umihealth-api-dev'
+              containers: '$(containerRegistry)/$(imageRepository):$(tag)'
+              appSettings: |
+                - ASPNETCORE_ENVIRONMENT Development
+                - ConnectionStrings__DefaultConnection $(Dev-ConnectionString)
+                - Redis__ConnectionString $(Dev-RedisConnectionString)
+                - JwtSettings__Secret $(Jwt-Secret)
+                - JwtSettings__Issuer UmiHealth
+                - JwtSettings__Audience UmiHealth.Users
+
+- stage: DeployStaging
+  displayName: 'Deploy to Staging'
+  condition: and(succeeded(), startsWith(variables['Build.SourceBranch'], 'refs/heads/release/'))
+  dependsOn: Build
+  jobs:
+  - deployment: DeployToStaging
+    displayName: 'Deploy to Staging Environment'
+    environment: 'Staging'
+    strategy:
+      runOnce:
+        deploy:
+          steps:
+          - task: DownloadBuildArtifacts@0
+            displayName: 'Download Docker Compose'
+            inputs:
+              buildType: 'current'
+              downloadType: 'single'
+              artifactName: 'docker-compose'
+              downloadPath: '$(System.ArtifactsDirectory)'
+
+          - task: AzureWebAppContainer@1
+            displayName: 'Deploy to Azure Web App'
+            inputs:
+              azureSubscription: 'UmiHealth-Subscription'
+              appName: 'umihealth-api-staging'
+              containers: '$(containerRegistry)/$(imageRepository):$(tag)'
+              appSettings: |
+                - ASPNETCORE_ENVIRONMENT Staging
+                - ConnectionStrings__DefaultConnection $(Staging-ConnectionString)
+                - Redis__ConnectionString $(Staging-RedisConnectionString)
+                - JwtSettings__Secret $(Jwt-Secret)
+                - JwtSettings__Issuer UmiHealth
+                - JwtSettings__Audience UmiHealth.Users
+
+- stage: DeployProduction
+  displayName: 'Deploy to Production'
+  condition: and(succeeded(), startsWith(variables['Build.SourceBranch'], 'refs/tags/v'))
+  dependsOn: Build
+  jobs:
+  - deployment: DeployToProduction
+    displayName: 'Deploy to Production Environment'
+    environment: 'Production'
+    strategy:
+      runOnce:
+        deploy:
+          steps:
+          - task: DownloadBuildArtifacts@0
+            displayName: 'Download Docker Compose'
+            inputs:
+              buildType: 'current'
+              downloadType: 'single'
+              artifactName: 'docker-compose'
+              downloadPath: '$(System.ArtifactsDirectory)'
+
+          - task: AzureWebAppContainer@1
+            displayName: 'Deploy to Azure Web App'
+            inputs:
+              azureSubscription: 'UmiHealth-Subscription'
+              appName: 'umihealth-api'
+              containers: '$(containerRegistry)/$(imageRepository):$(tag)'
+              appSettings: |
+                - ASPNETCORE_ENVIRONMENT Production
+                - ConnectionStrings__DefaultConnection $(Prod-ConnectionString)
+                - Redis__ConnectionString $(Prod-RedisConnectionString)
+                - JwtSettings__Secret $(Jwt-Secret)
+                - JwtSettings__Issuer UmiHealth
+                - JwtSettings__Audience UmiHealth.Users
+
+          - task: AzureAppServiceManage@0
+            displayName: 'Restart Web App'
+            inputs:
+              azureSubscription: 'UmiHealth-Subscription'
+              Action: 'Restart Azure App Service'
+              WebAppName: 'umihealth-api'

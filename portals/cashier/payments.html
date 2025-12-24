@@ -345,6 +345,27 @@
       color: var(--color-warning);
     }
 
+    /* Grid Layout Classes for Modal Forms */
+    .invoice-grid {
+      grid-column: 1 / -1;
+    }
+
+    .invoice-totals-grid {
+      grid-column: 1 / -1;
+    }
+
+    .form-textarea-grid {
+      grid-column: 1 / -1;
+    }
+
+    .quotation-grid {
+      grid-column: 1 / -1;
+    }
+
+    .quotation-totals-grid {
+      grid-column: 1 / -1;
+    }
+
     /* Tabs */
     .tabs-container {
       background: var(--color-background);
@@ -1697,7 +1718,7 @@
             <span>Customer Phone</span>
             <input type="tel" id="customerPhone" placeholder="+260 XXX XXX XXX">
           </label>
-          <label class="form-textarea">
+          <label class="form-textarea form-textarea-grid">
             <span>Customer Address</span>
             <textarea id="customerAddress" rows="2" placeholder="Enter customer address"></textarea>
           </label>
@@ -1707,7 +1728,7 @@
           </label>
           
           <!-- Invoice Items -->
-          <div class="invoice-items-section" style="grid-column: 1 / -1;">
+          <div class="invoice-items-section invoice-grid invoice-items">
             <h3>Invoice Items</h3>
             <div id="invoiceItems">
               <div class="invoice-item">
@@ -1727,7 +1748,7 @@
           </div>
           
           <!-- Totals -->
-          <div class="invoice-totals" style="grid-column: 1 / -1;">
+          <div class="invoice-totals invoice-totals-grid">
             <div class="total-row">
               <span>Subtotal:</span>
               <span id="invoiceSubtotal">ZMW 0.00</span>
@@ -1742,7 +1763,7 @@
             </div>
           </div>
           
-          <label class="form-textarea" style="grid-column: 1 / -1;">
+          <label class="form-textarea form-textarea-grid">
             <span>Notes</span>
             <textarea id="invoiceNotes" rows="3" placeholder="Additional notes or terms"></textarea>
           </label>
@@ -1790,7 +1811,7 @@
           </label>
           
           <!-- Quotation Items -->
-          <div class="quotation-items-section" style="grid-column: 1 / -1;">
+          <div class="quotation-items-section quotation-grid">
             <h3>Quotation Items</h3>
             <div id="quotationItems">
               <div class="quotation-item">
@@ -1810,7 +1831,7 @@
           </div>
           
           <!-- Totals -->
-          <div class="quotation-totals" style="grid-column: 1 / -1;">
+          <div class="quotation-totals quotation-totals-grid">
             <div class="total-row">
               <span>Subtotal:</span>
               <span id="quotationSubtotal">ZMW 0.00</span>
@@ -1825,7 +1846,7 @@
             </div>
           </div>
           
-          <label class="form-textarea" style="grid-column: 1 / -1;">
+          <label class="form-textarea form-textarea-grid">
             <span>Terms & Conditions</span>
             <textarea id="quotationTerms" rows="3" placeholder="Enter terms and conditions"></textarea>
           </label>
@@ -1868,12 +1889,12 @@
             <input type="number" id="creditAmount" placeholder="0.00" step="0.01" min="0" required>
           </label>
           
-          <label class="form-textarea" style="grid-column: 1 / -1;">
+          <label class="form-textarea form-textarea-grid">
             <span>Reason for Credit</span>
             <textarea id="creditReason" rows="3" placeholder="Explain the reason for this credit note" required></textarea>
           </label>
           
-          <label class="form-textarea" style="grid-column: 1 / -1;">
+          <label class="form-textarea form-textarea-grid">
             <span>Notes</span>
             <textarea id="creditNotes" rows="2" placeholder="Additional notes"></textarea>
           </label>
@@ -1924,12 +1945,12 @@
             <input type="date" id="dateOfService" required>
           </label>
           
-          <label class="form-textarea" style="grid-column: 1 / -1;">
+          <label class="form-textarea form-textarea-grid">
             <span>Diagnosis/Service Details</span>
             <textarea id="diagnosisDetails" rows="3" placeholder="Enter diagnosis and service details" required></textarea>
           </label>
           
-          <label class="form-textarea" style="grid-column: 1 / -1;">
+          <label class="form-textarea form-textarea-grid">
             <span>Additional Notes</span>
             <textarea id="claimNotes" rows="2" placeholder="Additional claim information"></textarea>
           </label>

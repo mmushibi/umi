@@ -62,6 +62,25 @@
       scrollbar-color: rgba(255, 255, 255, 0.2) rgba(255, 255, 255, 0.05);
     }
 
+    /* Fallback for browsers that don't support scrollbar styling */
+    *::-webkit-scrollbar {
+      width: 8px;
+    }
+    
+    *::-webkit-scrollbar-track {
+      background: rgba(255, 255, 255, 0.05);
+      border-radius: 4px;
+    }
+    
+    *::-webkit-scrollbar-thumb {
+      background: rgba(255, 255, 255, 0.2);
+      border-radius: 4px;
+    }
+    
+    *::-webkit-scrollbar-thumb:hover {
+      background: rgba(255, 255, 255, 0.3);
+    }
+
     .dashboard-container {
       display: flex;
       min-height: 100vh;
@@ -1179,6 +1198,7 @@
   <!-- Include API and Data Sync Services -->
   <script src="../shared/js/data-sync.js"></script>
   <script src="../shared/js/role-based-access.js"></script>
+  <script src="../shared/js/super-admin-data-sync.js"></script>
   <script src="../admin/js/admin-api.js"></script>
   <script src="js/super-admin-api.js"></script>
 

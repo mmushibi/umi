@@ -14,6 +14,23 @@ namespace UmiHealth.Infrastructure.Data
         public DbSet<Branch> Branches { get; set; }
         public DbSet<User> Users { get; set; }
         public DbSet<Subscription> Subscriptions { get; set; }
+        public DbSet<SubscriptionTransaction> SubscriptionTransactions { get; set; }
+        
+        // Multi-tenancy entities
+        public DbSet<StockTransfer> StockTransfers { get; set; }
+        public DbSet<StockTransferItem> StockTransferItems { get; set; }
+        public DbSet<Inventory> Inventories { get; set; }
+        public DbSet<Product> Products { get; set; }
+        public DbSet<Patient> Patients { get; set; }
+        public DbSet<Prescription> Prescriptions { get; set; }
+        public DbSet<Sale> Sales { get; set; }
+        public DbSet<Payment> Payments { get; set; }
+        public DbSet<AuditLog> AuditLogs { get; set; }
+        public DbSet<BranchPermission> BranchPermissions { get; set; }
+        public DbSet<ProcurementRequest> ProcurementRequests { get; set; }
+        public DbSet<ProcurementItem> ProcurementItems { get; set; }
+        public DbSet<ProcurementDistribution> ProcurementDistributions { get; set; }
+        public DbSet<BranchReport> BranchReports { get; set; }
 
         // Super Admin schema tables
         public DbSet<SuperAdminLog> SuperAdminLogs { get; set; }

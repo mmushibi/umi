@@ -266,9 +266,9 @@ namespace UmiHealth.Api.Controllers
                 {
                     new SubscriptionPlanDto
                     {
-                        Name = "Basic",
+                        Name = "Care",
                         Description = "Perfect for small pharmacies",
-                        Price = 299,
+                        Price = 250,
                         Currency = "ZMW",
                         BillingCycle = "monthly",
                         Features = new Dictionary<string, bool>
@@ -279,21 +279,21 @@ namespace UmiHealth.Api.Controllers
                             { "Basic Reports", true },
                             { "Email Support", true },
                             { "1 Branch", true },
-                            { "5 Users", true }
+                            { "6 Users", true }
                         },
                         Limits = new Dictionary<string, string>
                         {
                             { "Max Branches", "1" },
-                            { "Max Users", "5" },
+                            { "Max Users", "6" },
                             { "Monthly Transactions", "1,000" },
-                            { "Storage", "10 GB" }
+                            { "Storage", "5 GB" }
                         }
                     },
                     new SubscriptionPlanDto
                     {
-                        Name = "Professional",
+                        Name = "Care Plus",
                         Description = "Great for growing pharmacies",
-                        Price = 599,
+                        Price = 450,
                         Currency = "ZMW",
                         BillingCycle = "monthly",
                         Features = new Dictionary<string, bool>
@@ -306,21 +306,21 @@ namespace UmiHealth.Api.Controllers
                             { "Email Support", true },
                             { "Phone Support", true },
                             { "3 Branches", true },
-                            { "15 Users", true }
+                            { "16 Users", true }
                         },
                         Limits = new Dictionary<string, string>
                         {
                             { "Max Branches", "3" },
-                            { "Max Users", "15" },
+                            { "Max Users", "16" },
                             { "Monthly Transactions", "5,000" },
-                            { "Storage", "50 GB" }
+                            { "Storage", "15 GB" }
                         }
                     },
                     new SubscriptionPlanDto
                     {
-                        Name = "Enterprise",
+                        Name = "Care Pro",
                         Description = "For large pharmacy chains",
-                        Price = 1299,
+                        Price = 700,
                         Currency = "ZMW",
                         BillingCycle = "monthly",
                         Features = new Dictionary<string, bool>
@@ -334,15 +334,15 @@ namespace UmiHealth.Api.Controllers
                             { "Webhooks", true },
                             { "Priority Support", true },
                             { "Dedicated Account Manager", true },
-                            { "Unlimited Branches", true },
-                            { "Unlimited Users", true }
+                            { "10 Branches", true },
+                            { "50+ Users", true }
                         },
                         Limits = new Dictionary<string, string>
                         {
-                            { "Max Branches", "Unlimited" },
-                            { "Max Users", "Unlimited" },
+                            { "Max Branches", "10" },
+                            { "Max Users", "50+" },
                             { "Monthly Transactions", "Unlimited" },
-                            { "Storage", "Unlimited" }
+                            { "Storage", "30 GB" }
                         }
                     }
                 };
@@ -451,11 +451,27 @@ namespace UmiHealth.Api.Controllers
     {
         public string Name { get; set; } = string.Empty;
         public string Description { get; set; } = string.Empty;
-        public decimal Price { get; set; }
-        public string Currency { get; set; } = string.Empty;
-        public string BillingCycle { get; set; } = string.Empty;
+        public string Currency { get; set; } = "ZMW";
+        public string BillingCycle { get; set; } = "monthly";
         public Dictionary<string, bool> Features { get; set; } = new();
         public Dictionary<string, string> Limits { get; set; } = new();
+    }
+
+    public class SubscriptionDto
+    {
+        public Guid Id { get; set; }
+        public string PlanType { get; set; } = string.Empty;
+        public string Status { get; set; } = string.Empty;
+        public string BillingCycle { get; set; } = string.Empty;
+        public DateTime StartDate { get; set; }
+        public DateTime EndDate { get; set; }
+        public DateTime? NextBilling { get; set; }
+        public decimal Amount { get; set; }
+        public string Currency { get; set; } = "ZMW";
+        public Dictionary<string, bool> Features { get; set; } = new();
+        public Dictionary<string, string> Limits { get; set; } = new();
+        public bool AutoRenew { get; set; }
+        public bool IsTrial { get; set; }
     }
 
     public class UpgradeSubscriptionRequest

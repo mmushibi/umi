@@ -16,6 +16,9 @@ namespace UmiHealth.Application.Services
         Task<bool> CancelSubscriptionAsync(Guid subscriptionId);
         Task<IEnumerable<Subscription>> GetSubscriptionHistoryAsync(Guid tenantId);
         Task<SubscriptionReminder> GetSubscriptionReminderAsync(Guid tenantId);
+        Task<List<SubscriptionTransaction>> GetPendingTransactionsAsync();
+        Task<bool> ApproveTransactionAsync(string transactionId, string approvedBy);
+        Task<bool> RejectTransactionAsync(string transactionId, string approvedBy, string rejectionReason);
     }
 
     public class SubscriptionService : ISubscriptionService
@@ -81,6 +84,9 @@ namespace UmiHealth.Application.Services
 
         public async Task<Subscription> CreateSubscriptionAsync(Guid tenantId, CreateSubscriptionRequest request)
         {
+            // Generate unique transaction ID for audit trail
+            var transactionId = GenerateTransactionId();
+            
             // Deactivate existing trial subscription if exists
             var existingTrial = await _context.Subscriptions
                 .FirstOrDefaultAsync(s => s.TenantId == tenantId && 
@@ -98,7 +104,7 @@ namespace UmiHealth.Application.Services
                 Id = Guid.NewGuid(),
                 TenantId = tenantId,
                 PlanType = request.PlanType,
-                Status = "active",
+                Status = request.RequiresApproval ? "pending_approval" : "active",
                 BillingCycle = request.BillingCycle,
                 Amount = request.Amount,
                 Currency = request.Currency,
@@ -112,9 +118,86 @@ namespace UmiHealth.Application.Services
             };
 
             _context.Subscriptions.Add(subscription);
+            
+            // Create transaction record for audit trail
+            var transaction = new SubscriptionTransaction
+            {
+                Id = Guid.NewGuid(),
+                TransactionId = transactionId,
+                SubscriptionId = subscription.Id,
+                TenantId = tenantId,
+                Type = "upgrade",
+                Amount = request.Amount,
+                Currency = request.Currency,
+                Status = request.RequiresApproval ? "pending_approval" : "completed",
+                RequestedBy = request.RequestedBy,
+                PlanFrom = request.PlanFrom,
+                PlanTo = request.PlanType,
+                CreatedAt = DateTime.UtcNow
+            };
+            
+            _context.SubscriptionTransactions.Add(transaction);
             await _context.SaveChangesAsync();
 
             return subscription;
+        }
+
+        public async Task<List<SubscriptionTransaction>> GetPendingTransactionsAsync()
+        {
+            return await _context.SubscriptionTransactions
+                .Where(t => t.Status == "pending_approval")
+                .OrderByDescending(t => t.CreatedAt)
+                .ToListAsync();
+        }
+
+        public async Task<bool> ApproveTransactionAsync(string transactionId, string approvedBy)
+        {
+            var transaction = await _context.SubscriptionTransactions
+                .FirstOrDefaultAsync(t => t.TransactionId == transactionId);
+
+            if (transaction == null)
+                return false;
+
+            transaction.Status = "approved";
+            transaction.ApprovedBy = approvedBy;
+            transaction.ApprovedAt = DateTime.UtcNow;
+            transaction.UpdatedAt = DateTime.UtcNow;
+
+            // Activate the subscription
+            var subscription = await _context.Subscriptions.FindAsync(transaction.SubscriptionId);
+            if (subscription != null)
+            {
+                subscription.Status = "active";
+                subscription.UpdatedAt = DateTime.UtcNow;
+            }
+
+            await _context.SaveChangesAsync();
+            return true;
+        }
+
+        public async Task<bool> RejectTransactionAsync(string transactionId, string approvedBy, string rejectionReason)
+        {
+            var transaction = await _context.SubscriptionTransactions
+                .FirstOrDefaultAsync(t => t.TransactionId == transactionId);
+
+            if (transaction == null)
+                return false;
+
+            transaction.Status = "rejected";
+            transaction.ApprovedBy = approvedBy;
+            transaction.RejectionReason = rejectionReason;
+            transaction.UpdatedAt = DateTime.UtcNow;
+
+            // Deactivate the subscription
+            var subscription = await _context.Subscriptions.FindAsync(transaction.SubscriptionId);
+            if (subscription != null)
+            {
+                subscription.Status = "rejected";
+                subscription.UpdatedAt = DateTime.UtcNow;
+            }
+
+            await _context.SaveChangesAsync();
+            return true;
         }
 
         public async Task<Subscription> UpdateSubscriptionAsync(Guid subscriptionId, UpdateSubscriptionRequest request)
@@ -298,6 +381,9 @@ namespace UmiHealth.Application.Services
         public decimal Amount { get; set; }
         public string Currency { get; set; } = "ZMW";
         public bool AutoRenew { get; set; } = true;
+        public bool RequiresApproval { get; set; } = false;
+        public string RequestedBy { get; set; } = string.Empty;
+        public string PlanFrom { get; set; } = string.Empty;
     }
 
     public class UpdateSubscriptionRequest
@@ -318,4 +404,10 @@ namespace UmiHealth.Application.Services
         public string UrgencyLevel { get; set; } = string.Empty;
         public bool RequiresImmediateAction { get; set; }
     }
+
+    private string GenerateTransactionId()
+    {
+        return $"SUB{DateTime.UtcNow:yyyyMMddHHmmss}{new Random().Next(1000, 9999)}";
+    }
+}
 }

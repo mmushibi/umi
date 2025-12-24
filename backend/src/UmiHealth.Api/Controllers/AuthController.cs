@@ -1,5 +1,6 @@
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.RateLimiting;
 using System;
 using System.Threading.Tasks;
 using UmiHealth.Application.Services;
@@ -12,14 +13,20 @@ namespace UmiHealth.Api.Controllers
     {
         private readonly IAuthenticationService _authService;
         private readonly ISubscriptionService _subscriptionService;
+        private readonly IJwtTokenService _jwtTokenService;
 
-        public AuthController(IAuthenticationService authService, ISubscriptionService subscriptionService)
+        public AuthController(
+            IAuthenticationService authService, 
+            ISubscriptionService subscriptionService,
+            IJwtTokenService jwtTokenService)
         {
             _authService = authService;
             _subscriptionService = subscriptionService;
+            _jwtTokenService = jwtTokenService;
         }
 
         [HttpPost("login")]
+        [EnableRateLimiting("Auth")]
         public async Task<ActionResult<AuthResponse>> Login([FromBody] LoginRequest request)
         {
             try
@@ -40,6 +47,7 @@ namespace UmiHealth.Api.Controllers
         }
 
         [HttpPost("register")]
+        [EnableRateLimiting("Auth")]
         public async Task<ActionResult<AuthResponse>> Register([FromBody] RegisterRequest request)
         {
             try
@@ -64,6 +72,13 @@ namespace UmiHealth.Api.Controllers
         {
             try
             {
+                // Validate refresh token first
+                var principal = await _jwtTokenService.ValidateRefreshTokenAsync(request.RefreshToken);
+                if (principal == null)
+                {
+                    return BadRequest(new { success = false, message = "Invalid or expired refresh token" });
+                }
+
                 var result = await _authService.RefreshTokenAsync(request.RefreshToken);
                 
                 if (!result.Success)
@@ -101,6 +116,7 @@ namespace UmiHealth.Api.Controllers
 
         [HttpGet("me")]
         [Authorize]
+        [EnableRateLimiting("Read")]
         public async Task<ActionResult<UserDto>> GetCurrentUser()
         {
             try

@@ -1085,28 +1085,45 @@
               <div class="security-item">
                 <div class="security-info">
                   <div class="security-title">Current Plan</div>
-                  <div class="security-description">Professional Plan - ZMW 450/month</div>
+                  <div class="security-description" x-text="subscription.planType + ' Plan - ZMW ' + getPlanPrice(subscription.planType) + '/month'"></div>
                 </div>
-                <span class="security-status enabled">Active</span>
+                <span class="security-status enabled" x-text="subscription.status"></span>
               </div>
 
               <div class="security-item">
                 <div class="security-info">
                   <div class="security-title">Next Billing Date</div>
-                  <div class="security-description">January 24, 2025</div>
+                  <div class="security-description" x-text="formatDate(subscription.nextBilling)"></div>
                 </div>
                 <button class="btn btn-secondary">View Invoice</button>
               </div>
 
               <div class="security-item">
                 <div class="security-info">
-                  <div class="security-title">Payment Method</div>
-                  <div class="security-description">Visa ending in 4242</div>
+                  <div class="security-title">Available Plans</div>
+                  <div class="plan-options">
+                    <div class="plan-option" :class="{ selected: subscription.planType === 'Care' }" @click="upgradePlan('Care')">
+                      <div class="plan-name">Care</div>
+                      <div class="plan-price">250 ZMW/mo</div>
+                      <div class="plan-features">1 Branch, 6 Users, Basic Features</div>
+                    </div>
+                    <div class="plan-option" :class="{ selected: subscription.planType === 'Care Plus' }" @click="upgradePlan('Care Plus')">
+                      <div class="plan-name">Care Plus</div>
+                      <div class="plan-price">450 ZMW/mo</div>
+                      <div class="plan-features">3 Branches, 16 Users, Advanced Features</div>
+                    </div>
+                    <div class="plan-option" :class="{ selected: subscription.planType === 'Care Pro' }" @click="upgradePlan('Care Pro')">
+                      <div class="plan-name">Care Pro</div>
+                      <div class="plan-price">700 ZMW/mo</div>
+                      <div class="plan-features">10 Branches, 50+ Users, Premium Features</div>
+                    </div>
+                  </div>
                 </div>
-                <button class="btn btn-secondary">Update</button>
+                <button class="btn btn-primary" @click="showUpgradeModal = true" x-show="subscription.planType !== 'Care Pro'">
+                  <span class="material-symbols-rounded">upgrade</span>
+                  Upgrade Plan
+                </button>
               </div>
-
-              <div class="security-item">
                 <div class="security-info">
                   <div class="security-title">Usage Statistics</div>
                   <div class="security-description">45% of monthly quota used</div>
@@ -1122,14 +1139,235 @@
               </div>
             </div>
           </div>
+
+          <!-- Upgrade Modal -->
+          <div class="modal-overlay" :class="{ 'show': showUpgradeModal }" @click="showUpgradeModal = false">
+            <div class="modal" @click.stop>
+              <div class="modal-header">
+                <h3 class="modal-title">Upgrade Subscription</h3>
+                <p class="modal-subtitle">Choose the perfect plan for your pharmacy needs</p>
+              </div>
+              
+              <div class="modal-body">
+                <div class="upgrade-plans">
+                  <div class="plan-card" :class="{ selected: selectedUpgradePlan === 'Care' && subscription.planType !== 'Care' }" @click="selectUpgradePlan('Care')">
+                    <div class="plan-name">Care</div>
+                    <div class="plan-price">250 ZMW/mo</div>
+                    <div class="plan-features">1 Branch, 6 Users, Basic Features</div>
+                  </div>
+                  
+                  <div class="plan-card" :class="{ selected: selectedUpgradePlan === 'Care Plus' && subscription.planType !== 'Care Plus' }" @click="selectUpgradePlan('Care Plus')">
+                    <div class="plan-name">Care Plus</div>
+                    <div class="plan-price">450 ZMW/mo</div>
+                    <div class="plan-features">3 Branches, 16 Users, Advanced Features</div>
+                  </div>
+                  
+                  <div class="plan-card" :class="{ selected: selectedUpgradePlan === 'Care Pro' && subscription.planType !== 'Care Pro' }" @click="selectUpgradePlan('Care Pro')">
+                    <div class="plan-name">Care Pro</div>
+                    <div class="plan-price">700 ZMW/mo</div>
+                    <div class="plan-features">10 Branches, 50+ Users, Premium Features</div>
+                  </div>
+                </div>
+              </div>
+              
+              <div class="modal-footer">
+                <button class="btn btn-secondary" @click="showUpgradeModal = false">Cancel</button>
+                <button class="btn btn-primary" @click="confirmUpgrade()" :disabled="!selectedUpgradePlan || selectedUpgradePlan === subscription.planType">
+                  <span class="material-symbols-rounded">upgrade</span>
+                  Confirm Upgrade to <span x-text="selectedUpgradePlan"></span>
+                </button>
+              </div>
+            </div>
+          </div>
+
+          <!-- Upgrade Modal Styles -->
+          <style>
+            .modal-overlay {
+              position: fixed;
+              top: 0;
+              left: 0;
+              width: 100%;
+              height: 100%;
+              background: rgba(0, 0, 0, 0.5);
+              display: flex;
+              align-items: center;
+              justify-content: center;
+              z-index: 9999;
+            }
+            
+            .modal {
+              background: white;
+              border-radius: 12px;
+              padding: 24px;
+              max-width: 600px;
+              width: 90%;
+              box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1);
+            }
+            
+            .modal-header {
+              text-align: center;
+              margin-bottom: 20px;
+            }
+            
+            .modal-title {
+              margin: 0 0 8px 0;
+              color: #dc2626;
+            }
+            
+            .modal-subtitle {
+              color: #6b7280;
+              margin-bottom: 20px;
+            }
+            
+            .modal-body {
+              margin-bottom: 20px;
+            }
+            
+            .upgrade-plans {
+              display: grid;
+              grid-template-columns: 1fr;
+              gap: 16px;
+              margin-bottom: 20px;
+            }
+            
+            .plan-card {
+              border: 2px solid #e5e7eb;
+              border-radius: 8px;
+              padding: 16px;
+              cursor: pointer;
+              transition: all 0.2s ease;
+            }
+            
+            .plan-card:hover {
+              border-color: #2563eb;
+              transform: translateY(-2px);
+            }
+            
+            .plan-card.selected {
+              border-color: #2563eb;
+              background: #eff6ff;
+            }
+            
+            .plan-name {
+              font-weight: 600;
+              margin-bottom: 4px;
+            }
+            
+            .plan-price {
+              font-size: 1.25rem;
+              font-weight: 700;
+              color: #2563eb;
+              margin-bottom: 4px;
+            }
+            
+            .plan-features {
+              font-size: 0.875rem;
+              color: #6b7280;
+            }
+            
+            .modal-footer {
+              display: flex;
+              gap: 12px;
+              justify-content: flex-end;
+            }
+          </style>
         </div>
       </div>
     </div>
-  </main>
 
-  <!-- Alpine.js Component -->
-  <script>
-    function accountSystem() {
+    <!-- Alpine.js Component -->
+    <script>
+      function accountSystem() {
+        return {
+          sidebarOpen: false,
+          activeSection: 'profile',
+          pharmacyInfo: {
+            name: 'Umi Health',
+            location: 'Lusaka, Zambia'
+          },
+          subscription: {
+            planType: 'Care Plus',
+            status: 'Active',
+            nextBilling: '2025-01-24'
+          },
+          showUpgradeModal: false,
+          selectedUpgradePlan: null,
+          userInfo: {
+            name: 'Umi Health',
+            role: 'Admin',
+            initials: 'UH',
+            email: 'admin@umihealth.com'
+          },
+          profile: {
+            firstName: 'Umi',
+            lastName: 'Health',
+            email: 'admin@umihealth.com',
+            phone: '+260 977 123 456',
+            bio: 'Pharmacy management system administrator'
+          },
+          notifications: {
+            email: true,
+            push: false,
+            sales: true,
+            inventory: true,
+            prescriptions: true
+          },
+          pharmacySettings: {
+            name: 'Umi Health Pharmacy',
+            phone: '+260 977 123 456',
+            email: 'info@umihealth.com',
+            website: 'www.umihealth.com',
+            address: '123 Main Street',
+            city: 'Lusaka',
+            province: 'Lusaka Province',
+            postalCode: '10101',
+            // Receipt settings
+            receiptHeader: 'Umi Health Pharmacy',
+            receiptFooter: 'Thank you for your business!',
+            taxRate: 16,
+            currency: 'ZMW',
+            // Report settings
+            reportLogo: '',
+            reportSignature: 'Pharmacy Manager',
+            // Payment settings
+            paymentTerms: 'Payment due upon receipt',
+            invoicePrefix: 'INV',
+            receiptPrefix: 'RCP'
+          },
+          
+          // Data sync and API integration
+          loading: false,
+          
+          init() {
+            this.loadAccountFromAPI();
+            this.setupEventListeners();
+          },
+          
+          loadAccountFromAPI() {
+            this.loading = true;
+            try {
+              // Load user profile
+              window.adminDataSync.getData('userProfile', {})
+              .then(profile => {
+                this.profile = {
+                  firstName: profile.firstName || '',
+                  lastName: profile.lastName || '',
+                  email: profile.email || '',
+                  phone: profile.phone || '',
+                  bio: profile.bio || ''
+                };
+                
+                this.userInfo = {
+                  name: `${profile.firstName || ''} ${profile.lastName || ''}`,
+                  role: profile.role || 'Admin',
+                  initials: `${profile.firstName?.[0] || 'U'}${profile.lastName?.[0] || 'H'}`,
+                  email: profile.email || ''
+                };
+              })
+              .catch(error => {
+                console.error('Error loading user profile:', error);
+                this.showError('Failed to load user profile. Please try again.');
+              });
       return {
         sidebarOpen: false,
         activeSection: 'profile',
@@ -1429,10 +1667,139 @@
           console.log('Saving pharmacy settings:', this.pharmacySettings);
           alert('Pharmacy settings updated successfully! These settings will now be used across all documents and receipts.');
         },
+        
+        // Upgrade functions
+        getPlanPrice(planType) {
+          const prices = {
+            'Care': 250,
+            'Care Plus': 450,
+            'Care Pro': 700
+          };
+          return prices[planType] || 0;
+        },
+        
+        formatDate(dateString) {
+          if (!dateString) return '';
+          const date = new Date(dateString);
+          return date.toLocaleDateString('en-US', { 
+            year: 'numeric', 
+            month: 'long', 
+            day: 'numeric' 
+          });
+        },
+        
+        upgradePlan(planType) {
+          this.selectedUpgradePlan = planType;
+          this.showUpgradeModal = true;
+        },
+        
+        selectUpgradePlan(planType) {
+          this.selectedUpgradePlan = planType;
+        },
+        
+        async confirmUpgrade() {
+          if (!this.selectedUpgradePlan || this.selectedUpgradePlan === this.subscription.planType) {
+            alert('Please select a different plan to upgrade');
+            return;
+          }
+          
+          try {
+            // Create upgrade request that requires approval
+            const response = await window.adminAPI.upgradeSubscription({
+              planType: this.selectedUpgradePlan,
+              billingCycle: 'monthly',
+              amount: this.getPlanPrice(this.selectedUpgradePlan),
+              currency: 'ZMW',
+              autoRenew: true,
+              requiresApproval: true,
+              requestedBy: this.userInfo.email,
+              planFrom: this.subscription.planType
+            });
+            
+            if (response.success) {
+              this.showSuccess(`Upgrade request submitted! Transaction ID: ${response.transactionId}. Your upgrade is pending approval.`);
+              this.showUpgradeModal = false;
+            } else {
+              this.showError('Upgrade request failed: ' + response.message);
+            }
+          } catch (error) {
+            console.error('Upgrade error:', error);
+            this.showError('Upgrade request failed. Please try again.');
+          }
+        },
+        
+        // Utility methods
+        showSuccess(message) {
+          // Simple success notification
+          const notification = document.createElement('div');
+          notification.className = 'success-notification';
+          notification.textContent = message;
+          notification.style.cssText = `
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            background: #22c55e;
+            color: white;
+            padding: 12px 20px;
+            border-radius: 8px;
+            z-index: 9999;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+          `;
+          document.body.appendChild(notification);
+          
+          setTimeout(() => {
+            notification.remove();
+          }, 3000);
+        },
+        
+        showError(message) {
+          // Simple error notification
+          const notification = document.createElement('div');
+          notification.className = 'error-notification';
+          notification.textContent = message;
+          notification.style.cssText = `
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            background: #ef4444;
+            color: white;
+            padding: 12px 20px;
+            border-radius: 8px;
+            z-index: 9999;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+          `;
+          document.body.appendChild(notification);
+          
+          setTimeout(() => {
+            notification.remove();
+          }, 5000);
+        },
+        
+        showWarning(message) {
+          // Simple warning notification
+          const notification = document.createElement('div');
+          notification.className = 'warning-notification';
+          notification.textContent = message;
+          notification.style.cssText = `
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            background: #f59e0b;
+            color: white;
+            padding: 12px 20px;
+            border-radius: 8px;
+            z-index: 9999;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+          `;
+          document.body.appendChild(notification);
+          
+          setTimeout(() => {
+            notification.remove();
+          }, 4000);
+        }
       }
-    }
-  </script>
+    </script>
 
-  <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
+    <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
 </body>
 </html>

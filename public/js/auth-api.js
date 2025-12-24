@@ -276,9 +276,10 @@ class AuthAPI {
         }
 
         switch (user.role) {
-            case 'admin':
-            case 'super_admin':
+            case 'tenant_admin':
                 return '/portals/admin/home.html';
+            case 'super_admin':
+                return '/portals/super-admin/home.html';
             case 'pharmacist':
                 return '/portals/pharmacist/home.html';
             case 'cashier':

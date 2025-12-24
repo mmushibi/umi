@@ -29,17 +29,20 @@ namespace UmiHealth.Application.Services
         private readonly IConfiguration _configuration;
         private readonly ITenantService _tenantService;
         private readonly ISubscriptionService _subscriptionService;
+        private readonly IJwtTokenService _jwtTokenService;
 
         public AuthenticationService(
             SharedDbContext context,
             IConfiguration configuration,
             ITenantService tenantService,
-            ISubscriptionService subscriptionService)
+            ISubscriptionService subscriptionService,
+            IJwtTokenService jwtTokenService)
         {
             _context = context;
             _configuration = configuration;
             _tenantService = tenantService;
             _subscriptionService = subscriptionService;
+            _jwtTokenService = jwtTokenService;
         }
 
         public async Task<AuthResponse> LoginAsync(LoginRequest request)
@@ -74,9 +77,9 @@ namespace UmiHealth.Application.Services
                 return new AuthResponse { Success = false, Message = "Tenant not found" };
             }
 
-            // Generate tokens
-            var accessToken = GenerateAccessToken(user);
-            var refreshToken = GenerateRefreshToken(user);
+            // Generate tokens using new JWT service
+            var accessToken = await _jwtTokenService.GenerateAccessTokenAsync(user);
+            var refreshToken = await _jwtTokenService.GenerateRefreshTokenAsync(user);
 
             // Get subscription info
             var subscription = await _subscriptionService.GetActiveSubscriptionAsync(user.TenantId);
@@ -89,7 +92,7 @@ namespace UmiHealth.Application.Services
                 User = MapToUserDto(user),
                 Tenant = MapToTenantDto(tenant),
                 Subscription = subscription != null ? MapToSubscriptionDto(subscription) : null,
-                ExpiresIn = 3600,
+                ExpiresIn = 900, // 15 minutes in seconds
                 RequiresSetup = await RequiresTenantSetup(user.TenantId)
             };
         }
@@ -170,9 +173,9 @@ namespace UmiHealth.Application.Services
             // Create 14-day trial subscription
             var trialSubscription = await _subscriptionService.CreateTrialSubscriptionAsync(tenant.Id);
 
-            // Generate tokens
-            var accessToken = GenerateAccessToken(user);
-            var refreshToken = GenerateRefreshToken(user);
+            // Generate tokens using new JWT service
+            var accessToken = await _jwtTokenService.GenerateAccessTokenAsync(user);
+            var refreshToken = await _jwtTokenService.GenerateRefreshTokenAsync(user);
 
             return new AuthResponse
             {
@@ -182,7 +185,7 @@ namespace UmiHealth.Application.Services
                 User = MapToUserDto(user),
                 Tenant = MapToTenantDto(tenant),
                 Subscription = MapToSubscriptionDto(trialSubscription),
-                ExpiresIn = 3600,
+                ExpiresIn = 900, // 15 minutes in seconds
                 RequiresSetup = true // New tenant always requires setup
             };
         }
@@ -191,17 +194,12 @@ namespace UmiHealth.Application.Services
         {
             try
             {
-                var tokenHandler = new JwtSecurityTokenHandler();
-                var key = Encoding.ASCII.GetBytes(_configuration["Jwt:RefreshSecret"]!);
-
-                var principal = tokenHandler.ValidateToken(refreshToken, new TokenValidationParameters
+                // Validate refresh token using JWT service
+                var principal = await _jwtTokenService.ValidateRefreshTokenAsync(refreshToken);
+                if (principal == null)
                 {
-                    ValidateIssuerSigningKey = true,
-                    IssuerSigningKey = new SymmetricSecurityKey(key),
-                    ValidateIssuer = false,
-                    ValidateAudience = false,
-                    ClockSkew = TimeSpan.Zero
-                }, out SecurityToken validatedToken);
+                    return new AuthResponse { Success = false, Message = "Invalid refresh token" };
+                }
 
                 var userId = principal.FindFirst(ClaimTypes.NameIdentifier)?.Value;
                 if (string.IsNullOrEmpty(userId))
@@ -215,15 +213,15 @@ namespace UmiHealth.Application.Services
                     return new AuthResponse { Success = false, Message = "User not found" };
                 }
 
-                var newAccessToken = GenerateAccessToken(user);
-                var newRefreshToken = GenerateRefreshToken(user);
+                var newAccessToken = await _jwtTokenService.GenerateAccessTokenAsync(user);
+                var newRefreshToken = await _jwtTokenService.GenerateRefreshTokenAsync(user);
 
                 return new AuthResponse
                 {
                     Success = true,
                     AccessToken = newAccessToken,
                     RefreshToken = newRefreshToken,
-                    ExpiresIn = 3600
+                    ExpiresIn = 900 // 15 minutes in seconds
                 };
             }
             catch
@@ -258,56 +256,6 @@ namespace UmiHealth.Application.Services
                     u.Username == identifier);
         }
 
-        private string GenerateAccessToken(User user)
-        {
-            var tokenHandler = new JwtSecurityTokenHandler();
-            var key = Encoding.ASCII.GetBytes(_configuration["Jwt:Key"]!);
-
-            var claims = new List<Claim>
-            {
-                new Claim(ClaimTypes.NameIdentifier, user.Id.ToString()),
-                new Claim(ClaimTypes.Email, user.Email),
-                new Claim(ClaimTypes.Name, $"{user.FirstName} {user.LastName}"),
-                new Claim(ClaimTypes.Role, user.Role),
-                new Claim("tenant_id", user.TenantId.ToString()),
-                new Claim("branch_id", user.BranchId?.ToString() ?? ""),
-                new Claim("username", user.Username ?? user.Email)
-            };
-
-            var tokenDescriptor = new SecurityTokenDescriptor
-            {
-                Subject = new ClaimsIdentity(claims),
-                Expires = DateTime.UtcNow.AddHours(1),
-                Issuer = _configuration["Jwt:Issuer"],
-                Audience = _configuration["Jwt:Audience"],
-                SigningCredentials = new SigningCredentials(new SymmetricSecurityKey(key), SecurityAlgorithms.HmacSha256Signature)
-            };
-
-            var token = tokenHandler.CreateToken(tokenDescriptor);
-            return tokenHandler.WriteToken(token);
-        }
-
-        private string GenerateRefreshToken(User user)
-        {
-            var tokenHandler = new JwtSecurityTokenHandler();
-            var key = Encoding.ASCII.GetBytes(_configuration["Jwt:RefreshSecret"]!);
-
-            var claims = new List<Claim>
-            {
-                new Claim(ClaimTypes.NameIdentifier, user.Id.ToString()),
-                new Claim("tenant_id", user.TenantId.ToString())
-            };
-
-            var tokenDescriptor = new SecurityTokenDescriptor
-            {
-                Subject = new ClaimsIdentity(claims),
-                Expires = DateTime.UtcNow.AddDays(7),
-                SigningCredentials = new SigningCredentials(new SymmetricSecurityKey(key), SecurityAlgorithms.HmacSha256Signature)
-            };
-
-            var token = tokenHandler.CreateToken(tokenDescriptor);
-            return tokenHandler.WriteToken(token);
-        }
 
         private async Task<bool> RequiresTenantSetup(Guid tenantId)
         {

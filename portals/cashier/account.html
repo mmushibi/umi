@@ -347,6 +347,10 @@
       grid-column: 1 / -1;
     }
 
+    .profile-icon {
+      font-size: 0.75rem;
+    }
+
     .form-label {
       font-weight: 500;
       color: var(--color-text-primary);
@@ -809,7 +813,7 @@
                 <div class="profile-name" x-text="userInfo.name"></div>
                 <div class="profile-email" x-text="userInfo.email"></div>
                 <span class="profile-role">
-                  <span class="material-symbols-rounded" style="font-size: 0.75rem;">person</span>
+                  <span class="material-symbols-rounded profile-icon">person</span>
                   <span x-text="userInfo.role"></span>
                 </span>
               </div>
