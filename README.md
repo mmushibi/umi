@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 # Umi Health Pharmacy Management System
 
 A comprehensive multi-tenant pharmacy management system with branch support, built with modern web technologies.
@@ -188,3 +189,7 @@ For support and documentation, visit the project repository or contact the devel
 ---
 
 **Built with ❤️ for Zambian pharmacies**
+=======
+# umi
+A comprehensive, web-based Pharmacy Point of Sale (POS) system tailored to Zambian pharmacy standards. Built with role-based dashboards, customizable features, and user-friendly interfaces.
+>>>>>>> 74f338eec15faaa6cdd5bf2563e256ea46f490b7
