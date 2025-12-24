@@ -1,0 +1,297 @@
+<!DOCTYPE html>
+<html lang="en" x-data="contactPage()">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Contact Us - UmiHealthInformationSystems</title>
+  <link rel="icon" href="../logo.png" type="image/png">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@100;400;700&family=Varela+Round&family=Nunito:wght@400;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="../assets/css/tailwind.output.css">
+  <style>
+    :root {
+      --color-primary-blue: #2563EB;
+      --color-accent-teal: #14B8A6;
+      --color-text-white: #FFFFFF;
+      --color-subtle-blue: #EFF6FF;
+      --color-vibrant-red: #F04C4C;
+      --font-primary: 'Inter', sans-serif;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      background: linear-gradient(135deg, var(--color-primary-blue) 0%, var(--color-accent-teal) 100%);
+      color: var(--color-text-white);
+      font-family: 'Nunito', 'Varela Round', sans-serif;
+      line-height: 1.5;
+      min-height: 100vh;
+      position: relative;
+      padding: 2rem 1rem;
+    }
+
+    .contact-container {
+      max-width: 800px;
+      margin: 0 auto;
+    }
+
+    .page-header {
+      text-align: center;
+      margin-bottom: 3rem;
+    }
+
+    .page-title {
+      font-size: 1.8rem;
+      font-weight: 700;
+      font-family: 'Nunito', sans-serif;
+      margin-bottom: 1rem;
+    }
+
+    .page-subtitle {
+      font-size: 0.8rem;
+      opacity: 0.9;
+      font-family: 'Varela Round', sans-serif;
+    }
+
+    .form-container {
+      background: rgba(255, 255, 255, 0.1);
+      -webkit-backdrop-filter: blur(10px);
+      backdrop-filter: blur(10px);
+      border: 1px solid rgba(255, 255, 255, 0.2);
+      border-radius: 15px;
+      padding: 1.5rem;
+      margin-bottom: 2rem;
+    }
+
+    .form-group {
+      margin-bottom: 1rem;
+    }
+
+    .form-label {
+      display: block;
+      font-weight: 600;
+      margin-bottom: 0.5rem;
+      color: var(--color-text-white);
+      font-size: 0.8rem;
+    }
+
+    .form-input,
+    .form-select,
+    .form-textarea {
+      width: 100%;
+      padding: 0.75rem;
+      background: rgba(255, 255, 255, 0.1);
+      border: 1px solid rgba(255, 255, 255, 0.3);
+      border-radius: 8px;
+      color: var(--color-text-white);
+      font-size: 0.85rem;
+      font-family: 'Varela Round', sans-serif;
+      transition: all 0.3s ease;
+    }
+
+    .form-select option {
+      color: var(--color-primary-blue);
+      background: var(--color-text-white);
+    }
+
+    .form-row {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 1rem;
+    }
+
+    .submit-section {
+      text-align: center;
+      margin-top: 2rem;
+    }
+
+    .submit-btn {
+      background: var(--color-text-white);
+      color: var(--color-primary-blue);
+      border: none;
+      padding: 1rem 3rem;
+      border-radius: 12px;
+      font-size: 0.9rem;
+      font-weight: 700;
+      font-family: 'Nunito', sans-serif;
+      cursor: pointer;
+      transition: all 0.3s ease;
+    }
+
+    .submit-btn:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 10px 20px rgba(0, 0, 0, 0.2);
+    }
+
+    .confirmation-message {
+      background: rgba(0, 255, 0, 0.1);
+      border: 1px solid rgba(0, 255, 0, 0.3);
+      border-radius: 10px;
+      padding: 1.5rem;
+      text-align: center;
+      margin-bottom: 2rem;
+      color: var(--color-text-white);
+    }
+
+    .contact-details {
+      background: rgba(255, 255, 255, 0.05);
+      border-radius: 10px;
+      padding: 1.5rem;
+      text-align: center;
+    }
+
+    .contact-details h3 {
+      font-size: 1.1rem;
+      margin-bottom: 1rem;
+    }
+
+    .contact-details p {
+      margin-bottom: 0.5rem;
+      opacity: 0.9;
+      font-size: 0.85rem;
+    }
+
+    @media (max-width: 768px) {
+      .form-row {
+        grid-template-columns: 1fr;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="contact-container">
+    <header class="page-header">
+      <h1 class="page-title">Contact Us</h1>
+      <p class="page-subtitle">Need help or have a question? Fill in the form below and our team will get back to you.</p>
+    </header>
+
+    <div x-show="showConfirmation" class="confirmation-message">
+      <h2>Thank you for contacting us.</h2>
+      <p>We have received your message and will respond as soon as possible.</p>
+    </div>
+
+    <form class="form-container" x-show="!showConfirmation" @submit.prevent="submitForm()">
+      <div class="form-row">
+        <div class="form-group">
+          <label class="form-label" for="your-name">Your Name <span style="color: var(--color-vibrant-red);">*</span></label>
+          <input class="form-input" type="text" id="your-name" x-model="formData.yourName" required>
+        </div>
+        <div class="form-group">
+          <label class="form-label" for="email">Email Address <span style="color: var(--color-vibrant-red);">*</span></label>
+          <input class="form-input" type="email" id="email" x-model="formData.email" required>
+        </div>
+      </div>
+
+      <div class="form-row">
+        <div class="form-group">
+          <label class="form-label" for="phone">Phone Number <span style="color: var(--color-vibrant-red);">*</span></label>
+          <input class="form-input" type="tel" id="phone" x-model="formData.phone" required>
+        </div>
+        <div class="form-group">
+          <label class="form-label" for="branch">Branch / Location</label>
+          <input class="form-input" type="text" id="branch" x-model="formData.branch">
+        </div>
+      </div>
+
+      <div class="form-row">
+        <div class="form-group">
+          <label class="form-label" for="inquiry-type">Inquiry Type</label>
+          <select class="form-select" id="inquiry-type" x-model="formData.inquiryType">
+            <option value="">Select Type</option>
+            <option value="technical-support">Technical Support</option>
+            <option value="sales-pricing">Sales / Pricing</option>
+            <option value="billing">Billing</option>
+            <option value="account-management">Account Management</option>
+            <option value="feature-request">Feature Request</option>
+            <option value="other">Other</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label class="form-label" for="priority">Priority</label>
+          <select class="form-select" id="priority" x-model="formData.priority">
+            <option value="normal">Normal</option>
+            <option value="urgent">Urgent (System issue)</option>
+          </select>
+        </div>
+      </div>
+
+      <div class="form-group">
+        <label class="form-label" for="message">Message / Description <span style="color: var(--color-vibrant-red);">*</span></label>
+        <textarea class="form-textarea" id="message" x-model="formData.message" placeholder="Briefly describe your issue or question." required></textarea>
+      </div>
+
+      <div class="form-group">
+        <label class="form-label" for="attachment">Attachment (Optional)</label>
+        <input class="form-input" type="file" id="attachment" accept=".jpg,.jpeg,.png,.pdf,.doc,.docx,.txt">
+      </div>
+
+      <div class="submit-section">
+        <button type="submit" class="submit-btn">Send Message</button>
+      </div>
+    </form>
+
+    <div class="contact-details">
+      <h3>Contact Details</h3>
+      <p><strong>Support Email:</strong> <a href="mailto:support@umihealth.com" style="color: var(--color-accent-teal);">support@umihealth.com</a></p>
+      <p><strong>Phone:</strong> +260 XXX XXX XXX</p>
+      <p><strong>Business Hours:</strong> Mon-Fri 08:00-19:00, Sat 08:00-13:00, Sun & holidays off.</p>
+      <p><strong>Support Hours:</strong> 24/7</p>
+    </div>
+  </div>
+
+  <!-- Alpine.js Component -->
+  <script>
+    function contactPage() {
+      return {
+        showConfirmation: false,
+        formData: {
+          yourName: '',
+          email: '',
+          phone: '',
+          branch: '',
+          inquiryType: '',
+          priority: 'normal',
+          message: ''
+        },
+
+        submitForm() {
+          // Basic validation - name, email, phone, message are mandatory
+          if (!this.formData.yourName || !this.formData.email || !this.formData.phone || !this.formData.message) {
+            alert('Please fill in all required fields.');
+            return;
+          }
+
+          // Here you would typically send the form data to your backend
+          console.log('Form Data:', this.formData);
+
+          // Show confirmation
+          this.showConfirmation = true;
+
+          // Reset form
+          this.resetForm();
+        },
+
+        resetForm() {
+          this.formData = {
+            yourName: '',
+            email: '',
+            phone: '',
+            branch: '',
+            inquiryType: '',
+            priority: 'normal',
+            message: ''
+          };
+        }
+      }
+    }
+  </script>
+
+  <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
+  </script>
+</body>
+</html>

@@ -1,0 +1,313 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Pharmacy Receipt - Umi Health</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Nunito:wght@400;600;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Rounded:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="../shared/css/shared-styles.css">
+    <style>
+        .receipt-container {
+            max-width: 400px;
+            margin: 0 auto;
+            background: white;
+            padding: 2rem;
+            font-family: 'Courier New', monospace;
+            border: 1px solid #e5e7eb;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+        }
+        
+        .receipt-header {
+            text-align: center;
+            margin-bottom: 2rem;
+            border-bottom: 2px solid #000;
+            padding-bottom: 1rem;
+        }
+        
+        .pharmacy-name {
+            font-size: 1.5rem;
+            font-weight: 700;
+            font-family: 'Inter', sans-serif;
+            margin-bottom: 0.5rem;
+        }
+        
+        .pharmacy-address {
+            font-size: 0.875rem;
+            margin-bottom: 0.25rem;
+        }
+        
+        .pharmacy-contact {
+            font-size: 0.875rem;
+            margin-bottom: 0.25rem;
+        }
+        
+        .license-number {
+            font-size: 0.75rem;
+            color: #6b7280;
+        }
+        
+        .transaction-info {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 1.5rem;
+            font-size: 0.875rem;
+        }
+        
+        .patient-info {
+            margin-bottom: 1.5rem;
+            padding: 1rem;
+            background: #f9fafb;
+            border-radius: 8px;
+        }
+        
+        .patient-name {
+            font-weight: 600;
+            margin-bottom: 0.25rem;
+        }
+        
+        .patient-details {
+            font-size: 0.875rem;
+            color: #6b7280;
+        }
+        
+        .items-section {
+            margin-bottom: 1.5rem;
+        }
+        
+        .receipt-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            margin-bottom: 0.75rem;
+            padding-bottom: 0.75rem;
+            border-bottom: 1px dashed #e5e7eb;
+        }
+        
+        .item-details {
+            flex: 1;
+        }
+        
+        .item-name {
+            font-weight: 600;
+            margin-bottom: 0.25rem;
+        }
+        
+        .item-meta {
+            font-size: 0.75rem;
+            color: #6b7280;
+        }
+        
+        .item-price {
+            text-align: right;
+            font-weight: 600;
+        }
+        
+        .pricing-summary {
+            border-top: 2px solid #000;
+            padding-top: 1rem;
+            margin-bottom: 1.5rem;
+        }
+        
+        .summary-row {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 0.5rem;
+            font-size: 0.875rem;
+        }
+        
+        .summary-row.total {
+            font-weight: 700;
+            font-size: 1.125rem;
+            border-top: 1px solid #e5e7eb;
+            padding-top: 0.5rem;
+            margin-top: 0.5rem;
+        }
+        
+        .payment-info {
+            margin-bottom: 1.5rem;
+            padding: 1rem;
+            background: #f9fafb;
+            border-radius: 8px;
+            font-size: 0.875rem;
+        }
+        
+        .payment-method {
+            font-weight: 600;
+            margin-bottom: 0.25rem;
+        }
+        
+        .legal-notices {
+            font-size: 0.75rem;
+            color: #6b7280;
+            text-align: center;
+            margin-bottom: 1rem;
+            line-height: 1.4;
+        }
+        
+        .receipt-footer {
+            text-align: center;
+            font-size: 0.875rem;
+            border-top: 1px solid #e5e7eb;
+            padding-top: 1rem;
+        }
+        
+        .pharmacist-info {
+            margin-bottom: 0.5rem;
+            font-weight: 600;
+        }
+        
+        .thank-you {
+            font-weight: 600;
+            margin-bottom: 0.5rem;
+        }
+        
+        .hours-info {
+            font-size: 0.75rem;
+            color: #6b7280;
+        }
+        
+        .prescription-item {
+            background: rgba(34, 197, 94, 0.05);
+            border-left: 3px solid #22c55e;
+            padding-left: 0.75rem;
+        }
+        
+        .otc-item {
+            background: rgba(59, 130, 246, 0.05);
+            border-left: 3px solid #3b82f6;
+            padding-left: 0.75rem;
+        }
+        
+        .receipt-actions {
+            display: flex;
+            gap: 1rem;
+            justify-content: center;
+            margin-top: 2rem;
+            padding-top: 1rem;
+            border-top: 1px solid #e5e7eb;
+        }
+        
+        @media print {
+            .receipt-actions {
+                display: none;
+            }
+            
+            .receipt-container {
+                box-shadow: none;
+                border: none;
+                margin: 0;
+                padding: 1rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="receipt-container" id="receiptContainer">
+        <!-- Header Section -->
+        <header class="receipt-header">
+            <div class="pharmacy-name">UMI HEALTH PHARMACY</div>
+            <div class="pharmacy-address">123 Main Street, Lusaka, Zambia</div>
+            <div class="pharmacy-contact">Phone: +260 123 456 789</div>
+            <div class="license-number">License #: PHZ2025/1234</div>
+        </header>
+
+        <!-- Transaction Information -->
+        <div class="transaction-info">
+            <div>
+                <div><strong>Date:</strong> <span id="transactionDate"></span></div>
+                <div><strong>Time:</strong> <span id="transactionTime"></span></div>
+            </div>
+            <div>
+                <div><strong>Receipt #:</strong> <span id="receiptNumber"></span></div>
+            </div>
+        </div>
+
+        <!-- Patient Information -->
+        <section class="patient-info">
+            <div class="patient-name" id="patientName">John Mushibi</div>
+            <div class="patient-details">
+                <div>Patient ID: <span id="patientId">P001234</span></div>
+                <div>Prescription #: <span id="prescriptionNumber">RX123456</span></div>
+                <div>Insurance: <span id="insuranceName">MediCare Zambia</span></div>
+            </div>
+        </section>
+
+        <!-- Items Section -->
+        <section class="items-section">
+            <h3 style="margin-bottom: 1rem; font-size: 1rem;">Purchase Details</h3>
+            <div id="receiptItems">
+                <!-- Items will be dynamically inserted here -->
+            </div>
+        </section>
+
+        <!-- Pricing Summary -->
+        <section class="pricing-summary">
+            <div class="summary-row">
+                <span>Subtotal:</span>
+                <span id="subtotal">K0.00</span>
+            </div>
+            <div class="summary-row">
+                <span>Discount:</span>
+                <span id="discount">-K0.00</span>
+            </div>
+            <div class="summary-row">
+                <span>Insurance Coverage:</span>
+                <span id="insuranceCoverage">-K0.00</span>
+            </div>
+            <div class="summary-row">
+                <span>Tax:</span>
+                <span id="tax">K0.00</span>
+            </div>
+            <div class="summary-row total">
+                <span>Total Amount:</span>
+                <span id="totalAmount">K0.00</span>
+            </div>
+        </section>
+
+        <!-- Payment Information -->
+        <section class="payment-info">
+            <div class="payment-method">Payment Method: <span id="paymentMethod">Debit Card</span></div>
+            <div>Amount Paid: <span id="amountPaid">K0.00</span></div>
+            <div id="changeInfo" style="display: none;">Change: <span id="changeGiven">K0.00</span></div>
+            <div id="cardInfo" style="display: none;">Card: ****<span id="cardLastFour">1234</span></div>
+            <div id="authCode" style="display: none;">Auth: <span id="authorizationCode">ABC123</span></div>
+        </section>
+
+        <!-- Legal Notices -->
+        <section class="legal-notices">
+            <div>No refunds on prescription medications</div>
+            <div>Keep all medications out of reach of children</div>
+            <div>For questions about your prescription, consult your pharmacist</div>
+            <div>Controlled substance regulations apply where indicated</div>
+        </section>
+
+        <!-- Footer -->
+        <footer class="receipt-footer">
+            <div class="pharmacist-info">Pharmacist: <span id="pharmacistName">Dr. Sarah Mwewa</span> (PHZ7890)</div>
+            <div class="thank-you">Thank you for choosing Umi Health Pharmacy!</div>
+            <div class="hours-info">Hours: Mon-Fri 8AM-8PM, Sat 9AM-6PM, Sun 10AM-4PM</div>
+            <div style="margin-top: 0.5rem; font-size: 0.75rem;">www.umihealth.com | App: Umi Health</div>
+        </footer>
+
+        <!-- Action Buttons (Hidden when printing) -->
+        <div class="receipt-actions">
+            <button class="btn btn-primary" onclick="printReceipt()">
+                <span class="material-symbols-rounded">print</span>
+                Print Receipt
+            </button>
+            <button class="btn btn-secondary" onclick="downloadReceipt()">
+                <span class="material-symbols-rounded">download</span>
+                Download PDF
+            </button>
+            <button class="btn btn-secondary" onclick="emailReceipt()">
+                <span class="material-symbols-rounded">email</span>
+                Email Receipt
+            </button>
+        </div>
+    </div>
+
+    <script src="../shared/js/data-sync.js"></script>
+    <script src="receipt-generator.js"></script>
+</body>
+</html>

@@ -1,0 +1,123 @@
+/* tailwindcss-disable */
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+/* tailwindcss-enable */
+
+/* Custom base styles */
+@layer base {
+  html {
+    font-family: 'Inter', 'Nunito', 'Varela Round', sans-serif;
+  }
+  
+  body {
+    /* tailwindcss-disable */
+    @apply bg-gray-50 text-gray-900;
+    /* tailwindcss-enable */
+  }
+}
+
+/* Custom component styles */
+@layer components {
+  .btn-primary {
+    background-color: theme('colors.primary-blue');
+    color: theme('colors.text-white');
+    padding: 1rem 1.5rem;
+    border-radius: 0.5rem;
+    font-weight: 600;
+    transition: all 0.2s ease;
+  }
+  
+  .btn-primary:hover {
+    background-color: theme('colors.blue-700');
+  }
+  
+  .btn-primary:focus {
+    outline: none;
+    box-shadow: 0 0 0 2px theme('colors.primary-blue'), 0 0 0 4px rgba(37, 99, 235, 0.1);
+  }
+  
+  .btn-secondary {
+    background-color: theme('colors.gray-200');
+    color: theme('colors.gray-700');
+    padding: 1rem 1.5rem;
+    border-radius: 0.5rem;
+    font-weight: 600;
+    transition: all 0.2s ease;
+  }
+  
+  .btn-secondary:hover {
+    background-color: theme('colors.gray-300');
+  }
+  
+  .btn-secondary:focus {
+    outline: none;
+    box-shadow: 0 0 0 2px theme('colors.gray-400'), 0 0 0 4px rgba(156, 163, 175, 0.1);
+  }
+  
+  .form-input {
+    width: 100%;
+    padding: 1rem;
+    border: 2px solid theme('colors.gray-300');
+    border-radius: 0.5rem;
+    color: theme('colors.gray-900');
+  }
+  
+  .form-input::placeholder {
+    color: theme('colors.gray-500');
+  }
+  
+  .form-input:focus {
+    border-color: theme('colors.primary-blue');
+    box-shadow: 0 0 0 2px theme('colors.primary-blue'), 0 0 0 4px rgba(37, 99, 235, 0.1);
+    outline: none;
+  }
+  
+  .form-label {
+    display: block;
+    font-size: 0.875rem;
+    font-weight: 500;
+    color: theme('colors.gray-700');
+    margin-bottom: 0.5rem;
+  }
+  
+  .auth-card {
+    background-color: rgba(255, 255, 255, 0.95);
+    -webkit-backdrop-filter: blur(10px);
+    backdrop-filter: blur(10px);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    border-radius: 1rem;
+    padding: 1.5rem;
+    box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
+  }
+  
+  .trial-banner {
+    background: linear-gradient(to right, theme('colors.amber-500'), theme('colors.red-500'));
+    color: white;
+    padding: 1rem;
+    border-radius: 0.75rem;
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+  }
+  
+  .upgrade-section {
+    background-color: theme('colors.amber-50');
+    border: 2px solid theme('colors.amber-500');
+    border-radius: 0.75rem;
+    padding: 1.5rem;
+    margin-top: 2rem;
+  }
+}
+
+/* Custom utility styles */
+@layer utilities {
+  .text-shadow {
+    text-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  }
+  
+  .backdrop-blur-custom {
+    -webkit-backdrop-filter: blur(10px);
+    backdrop-filter: blur(10px);
+  }
+}

@@ -1,0 +1,829 @@
+<!DOCTYPE html>
+<html lang="en" x-data="signin()">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Sign In | Umi Health Information Systems</title>
+  <link rel="icon" href="../logo.png" type="image/png">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@100;400;700&family=Varela+Round&family=Nunito:wght@400;600;700&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Rounded:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="assets/css/tailwind.output.css">
+  <style>
+    :root {
+      --color-primary-blue: #2563EB;
+      --color-accent-teal: #14B8A6;
+      --color-text-white: #FFFFFF;
+      --color-subtle-blue: #EFF6FF;
+      --font-primary: 'Inter', sans-serif;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      background: linear-gradient(135deg, var(--color-primary-blue) 0%, var(--color-accent-teal) 100%);
+      color: var(--color-text-white);
+      font-family: 'Nunito', 'Varela Round', sans-serif;
+      line-height: 1.5;
+      min-height: 100vh;
+      position: relative;
+    }
+
+    .auth-container {
+      display: flex;
+      min-height: 100vh;
+    }
+
+    .auth-left {
+      flex: 1;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 2rem;
+    }
+
+    .auth-right {
+      flex: 1;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 2rem;
+      background: rgba(255, 255, 255, 0.05);
+      -webkit-backdrop-filter: blur(10px);
+      backdrop-filter: blur(10px);
+    }
+
+    .auth-card {
+      width: 100%;
+      max-width: 400px;
+      background: rgba(255, 255, 255, 0.1);
+      -webkit-backdrop-filter: blur(10px);
+      backdrop-filter: blur(10px);
+      border: 1px solid rgba(255, 255, 255, 0.2);
+      border-radius: 20px;
+      padding: 1.75rem;
+      box-shadow: 0 20px 40px rgba(0, 0, 0, 0.2);
+    }
+
+    .auth-header {
+      text-align: center;
+      margin-bottom: 2rem;
+    }
+
+    .logo-container {
+      text-align: center;
+      margin-bottom: 1.5rem;
+    }
+
+    .umi-logo {
+      max-width: 120px;
+      height: auto;
+      border-radius: 8px;
+      box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+      transition: transform 0.3s ease;
+    }
+
+    .umi-logo:hover {
+      transform: scale(1.05);
+    }
+
+    .auth-title {
+      font-size: 1.5rem;
+      font-weight: 700;
+      font-family: 'Nunito', 'Varela Round', sans-serif;
+      margin-bottom: 0.375rem;
+    }
+
+    .auth-subtitle {
+      opacity: 0.8;
+      font-size: 0.8rem;
+      font-family: 'Varela Round', sans-serif;
+    }
+
+    .tabs {
+      display: flex;
+      background: rgba(255, 255, 255, 0.1);
+      border-radius: 12px;
+      padding: 0.25rem;
+      margin-bottom: 2rem;
+    }
+
+    .tab {
+      flex: 1;
+      padding: 0.75rem 1rem;
+      border: none;
+      background: transparent;
+      color: var(--color-text-white);
+      font-size: 0.9rem;
+      font-weight: 500;
+      cursor: pointer;
+      border-radius: 8px;
+      transition: all 0.3s ease;
+      opacity: 0.7;
+    }
+
+    .tab.active {
+      background: rgba(255, 255, 255, 0.2);
+      opacity: 1;
+    }
+
+    .tab:hover {
+      opacity: 1;
+    }
+
+    .form-group {
+      margin-bottom: 1rem;
+    }
+
+    .form-label {
+      display: block;
+      margin-bottom: 0.375rem;
+      font-size: 0.8rem;
+      font-weight: 600;
+      font-family: 'Varela Round', sans-serif;
+      opacity: 0.9;
+    }
+
+    .form-input {
+      width: 100%;
+      padding: 0.75rem;
+      background: rgba(255, 255, 255, 0.1);
+      border: 1px solid rgba(255, 255, 255, 0.3);
+      border-radius: 12px;
+      color: var(--color-text-white);
+      font-size: 0.85rem;
+      font-family: 'Varela Round', sans-serif;
+      transition: all 0.3s ease;
+    }
+
+    .form-input::placeholder {
+      color: rgba(255, 255, 255, 0.5);
+    }
+
+    .form-input:focus {
+      outline: none;
+      background: rgba(255, 255, 255, 0.15);
+      border-color: rgba(255, 255, 255, 0.5);
+    }
+
+    .password-input-wrapper {
+      position: relative;
+    }
+
+    .password-toggle {
+      position: absolute;
+      right: 1rem;
+      top: 50%;
+      transform: translateY(-50%);
+      background: none;
+      border: none;
+      color: rgba(255, 255, 255, 0.7);
+      cursor: pointer;
+      padding: 0.25rem;
+      border-radius: 4px;
+      transition: all 0.3s ease;
+    }
+
+    .password-toggle:hover {
+      color: var(--color-text-white);
+      background: rgba(255, 255, 255, 0.1);
+    }
+
+    .remember-forgot {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 1rem;
+      font-size: 0.9rem;
+    }
+
+    .checkbox-wrapper {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      margin-bottom: 1rem;
+    }
+
+    .checkbox-wrapper input[type="checkbox"] {
+      width: auto;
+      margin: 0;
+    }
+
+    .checkbox-wrapper label {
+      font-size: 0.8rem;
+      line-height: 1.4;
+      opacity: 0.9;
+      font-family: 'Varela Round', sans-serif;
+    }
+
+    .forgot-link {
+      color: var(--color-text-white);
+      text-decoration: none;
+      opacity: 0.8;
+      transition: opacity 0.3s ease;
+      font-size: 0.8rem;
+    }
+
+    .forgot-link:hover {
+      opacity: 1;
+    }
+
+    .submit-button {
+      width: 100%;
+      padding: 0.75rem;
+      background: var(--color-text-white);
+      color: var(--color-primary-blue);
+      border: none;
+      border-radius: 12px;
+      font-size: 0.85rem;
+      font-weight: 700;
+      font-family: 'Nunito', 'Varela Round', sans-serif;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      margin-bottom: 1.25rem;
+    }
+
+    .submit-button:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 10px 20px rgba(0, 0, 0, 0.2);
+    }
+
+    .submit-button:disabled {
+      opacity: 0.6;
+      cursor: not-allowed;
+      transform: none;
+    }
+
+    .divider {
+      text-align: center;
+      margin: 1rem 0;
+      position: relative;
+    }
+
+    .divider::before {
+      content: '';
+      position: absolute;
+      top: 50%;
+      left: 0;
+      right: 0;
+      height: 1px;
+      background: rgba(255, 255, 255, 0.3);
+    }
+
+    .divider span {
+      background: rgba(255, 255, 255, 0.1);
+      padding: 0 0.75rem;
+      position: relative;
+      font-size: 0.8rem;
+      opacity: 0.8;
+    }
+
+    .signup-link {
+      text-align: center;
+      font-size: 0.8rem;
+      opacity: 0.9;
+    }
+
+    .signup-link a {
+      color: var(--color-text-white);
+      text-decoration: none;
+      font-weight: 600;
+      opacity: 1;
+    }
+
+    .demo-credentials {
+      background: rgba(255, 255, 255, 0.05);
+      border: 1px solid rgba(255, 255, 255, 0.2);
+      border-radius: 10px;
+      padding: 1rem;
+      margin-bottom: 1rem;
+    }
+
+    .demo-credentials h4 {
+      font-size: 0.9rem;
+      font-weight: 600;
+      margin-bottom: 0.5rem;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+
+    .demo-credentials p {
+      font-size: 0.85rem;
+      opacity: 0.8;
+      margin: 0.25rem 0;
+    }
+
+    .demo-main-button {
+      margin-bottom: 1rem;
+    }
+
+    .demo-button-icon {
+      vertical-align: middle;
+      margin-right: 0.5rem;
+    }
+
+    .demo-user-selection {
+      text-align: center;
+      margin-bottom: 1rem;
+    }
+
+    .demo-selection-title {
+      opacity: 0.8;
+      font-size: 0.9rem;
+      margin-bottom: 1rem;
+    }
+
+    .demo-buttons-container {
+      display: flex;
+      flex-direction: column;
+      gap: 0.5rem;
+    }
+
+    .demo-role-button {
+      background: rgba(255,255,255,0.2);
+    }
+
+    .back-to-home {
+      position: absolute;
+      top: 2rem;
+      left: 2rem;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      color: var(--color-text-white);
+      text-decoration: none;
+      opacity: 0.8;
+      transition: opacity 0.3s ease;
+      font-size: 0.9rem;
+    }
+
+    .back-to-home:hover {
+      opacity: 1;
+    }
+
+    .trial-content {
+      max-width: 400px;
+      text-align: center;
+    }
+
+    .trial-title {
+      font-size: 2rem;
+      font-weight: 700;
+      font-family: 'Nunito', 'Varela Round', sans-serif;
+      margin-bottom: 0.75rem;
+    }
+
+    .trial-description {
+      opacity: 0.9;
+      font-size: 0.85rem;
+      line-height: 1.5;
+      margin-bottom: 1.5rem;
+      font-family: 'Varela Round', sans-serif;
+    }
+
+    .trial-features {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 1rem;
+      text-align: left;
+    }
+
+    .feature-item {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      font-family: 'Varela Round', sans-serif;
+    }
+
+    .trial-icon {
+      color: var(--color-accent-teal);
+    }
+
+    .modal-title {
+      font-family: 'Nunito', 'Varela Round', sans-serif;
+    }
+
+    .modal-heading {
+      font-family: 'Nunito', 'Varela Round', sans-serif;
+    }
+
+    .modal-text {
+      font-family: 'Varela Round', sans-serif;
+    }
+
+    .modal-button {
+      font-family: 'Nunito', 'Varela Round', sans-serif;
+    }
+
+    .error-message {
+      background: rgba(244, 76, 76, 0.2);
+      border: 1px solid rgba(244, 76, 76, 0.5);
+      color: #FCA5A5;
+      padding: 0.75rem;
+      border-radius: 8px;
+      font-size: 0.9rem;
+      margin-bottom: 1rem;
+      display: none;
+    }
+
+    .error-message.show {
+      display: block;
+    }
+
+    /* Toast Notifications */
+    .toast {
+      position: fixed;
+      top: 20px;
+      right: 20px;
+      min-width: 300px;
+      max-width: 400px;
+      background: white;
+      border-radius: 12px;
+      box-shadow: 0 10px 40px rgba(0, 0, 0, 0.3);
+      transform: translateX(450px);
+      transition: transform 0.3s ease, opacity 0.3s ease;
+      opacity: 0;
+      z-index: 9999;
+      overflow: hidden;
+    }
+
+    .toast.show {
+      transform: translateX(0);
+      opacity: 1;
+    }
+
+    .toast.error-toast {
+      border-left: 4px solid #EF4444;
+    }
+
+    .toast.success-toast {
+      border-left: 4px solid #10B981;
+    }
+
+    .toast-content {
+      display: flex;
+      align-items: flex-start;
+      gap: 12px;
+      padding: 16px;
+      color: #1F2937;
+    }
+
+    .toast-content .material-symbols-rounded {
+      font-size: 24px;
+      flex-shrink: 0;
+    }
+
+    .error-toast .material-symbols-rounded {
+      color: #EF4444;
+    }
+
+    .success-toast .material-symbols-rounded {
+      color: #10B981;
+    }
+
+    .toast-message {
+      flex: 1;
+    }
+
+    .toast-message strong {
+      display: block;
+      font-size: 14px;
+      font-weight: 600;
+      margin-bottom: 4px;
+      color: #111827;
+    }
+
+    .toast-message p {
+      font-size: 13px;
+      color: #6B7280;
+      margin: 0;
+      line-height: 1.4;
+    }
+
+    .toast-close {
+      background: none;
+      border: none;
+      color: #9CA3AF;
+      cursor: pointer;
+      padding: 4px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      border-radius: 4px;
+      transition: all 0.2s;
+      flex-shrink: 0;
+    }
+
+    .toast-close:hover {
+      background: #F3F4F6;
+      color: #4B5563;
+    }
+
+    .toast-close .material-symbols-rounded {
+      font-size: 18px;
+    }
+
+    @media (max-width: 768px) {
+      .auth-container {
+        flex-direction: column;
+      }
+
+      .auth-right {
+        display: none;
+      }
+
+      .auth-card {
+        max-width: 100%;
+        padding: 2rem 1.5rem;
+      }
+
+      .back-to-home {
+        position: static;
+        margin-bottom: 2rem;
+        justify-content: center;
+      }
+    }
+  </style>
+</head>
+<body>
+  <a href="./index.html" class="back-to-home">
+    <span class="material-symbols-rounded">arrow_back</span>
+    Back to Home
+  </a>
+
+  <div class="auth-container">
+    <div class="auth-left">
+      <div class="auth-card">
+        <div class="auth-header">
+         <h1 class="auth-title">Welcome Back</h1>
+          <p class="auth-subtitle">Sign in to your Umi account</p>
+        </div>
+        <!-- Error message removed - using toast instead -->
+
+        <!-- Sign In Form -->
+        <form x-show="activeTab === 'signin'" @submit.prevent="handleSignIn">
+          <div class="form-group">
+            <label class="form-label" for="identifier">Username</label>
+            <input type="text" id="identifier" class="form-input" placeholder="Enter your username, email, or phone number" x-model="signinForm.identifier" required>
+          </div>
+
+          <div class="form-group">
+            <label class="form-label" for="password">Password</label>
+            <div class="password-input-wrapper">
+              <input :type="showPassword ? 'text' : 'password'" id="password" class="form-input" placeholder="Enter your password" x-model="signinForm.password" required>
+              <button type="button" class="password-toggle" @click="showPassword = !showPassword" aria-label="Toggle password visibility">
+                <span class="material-symbols-rounded" x-text="showPassword ? 'visibility_off' : 'visibility'"></span>
+              </button>
+            </div>
+          </div>
+
+          <button type="submit" class="submit-button" :disabled="loading" x-text="loading ? 'Signing in...' : 'Sign In'" title="Sign In"></button>
+        </form>
+
+        <div class="divider">
+          <span>New to Umi?</span>
+        </div>
+
+        <div class="signup-link">
+          Don't have an account? <a href="./signup.html">Sign up</a>
+           </div>
+      </div>
+    </div>
+
+ 
+  </div>
+
+  <!-- Auth API -->
+  <script>
+    // Mock API objects to prevent errors
+    window.authAPI = {
+      login: async (email, password) => {
+        console.log('Mock login:', { email, password });
+        return {
+          success: true,
+          accessToken: 'mock-token',
+          refreshToken: 'mock-refresh',
+          user: { id: 1, name: 'Test User', role: 'admin' },
+          tenant: { id: 1, name: 'Test Pharmacy' },
+          subscription: { plan: 'Go', status: 'Active' }
+        };
+      },
+      forgotPassword: async (email) => {
+        console.log('Mock forgot password:', email);
+        return { success: true, message: 'Password reset email sent' };
+      }
+    };
+  </script>
+  <script>
+    function signin() {
+      return {
+        activeTab: 'signin',
+        email: '',
+        password: '',
+        rememberMe: false,
+        showPassword: false,
+        loading: false,
+        showForgotPassword: false,
+        forgotEmail: '',
+        forgotLoading: false,
+        forgotPasswordSent: false,
+        signinForm: {
+          identifier: '',
+          password: '',
+          remember: false
+        },
+
+        async handleSignIn() {
+          if (!this.signinForm.identifier || !this.signinForm.password) {
+            this.showErrorToast('Validation Error', 'Please enter both identifier and password');
+            return;
+          }
+
+          this.loading = true;
+          this.errorMessage = '';
+
+          try {
+            const result = await window.authAPI.login(
+              this.signinForm.identifier.trim(),
+              this.signinForm.password
+            );
+
+            if (result.success) {
+              this.successMessage = 'Login successful! Redirecting...';
+              
+              // Store auth data
+              localStorage.setItem('umi_access_token', result.accessToken);
+              localStorage.setItem('umi_refresh_token', result.refreshToken);
+              localStorage.setItem('umi_current_user', JSON.stringify(result.user));
+              localStorage.setItem('umi_current_tenant', JSON.stringify(result.tenant));
+              localStorage.setItem('umi_current_subscription', JSON.stringify(result.subscription));
+              localStorage.setItem('umi_tenant_id', result.tenant.id);
+
+              // Setup auto-refresh
+              window.authAPI.setupAutoRefresh();
+
+              // Redirect based on setup status
+              setTimeout(() => {
+                if (result.requiresSetup) {
+                  window.location.href = result.redirectUrl || '/account/setup.html';
+                } else {
+                  const redirectUrl = window.authAPI.getRedirectUrl(result.user);
+                  window.location.href = redirectUrl;
+                }
+              }, 1500);
+            } else {
+              this.showErrorToast('Login Failed', result.message || 'Invalid credentials');
+            }
+          } catch (error) {
+            console.error('Login error:', error);
+            this.showErrorToast('Login Error', 'Failed to connect. Please check your connection and try again.');
+          } finally {
+            this.loading = false;
+          }
+        },
+
+        useDemoAccount(role = 'manager') {
+          this.loading = true;
+          this.errorMessage = '';
+
+          setTimeout(() => {
+            // Set demo credentials based on role
+            const demoCredentials = {
+              admin: {
+                email: 'admin@demo.umi-health-systems.zm',
+                password: 'Demo123!',
+                role: 'admin',
+                redirect: '../demo/admin-demo.html?role=admin'
+              },
+              cashier: {
+                email: 'cashier@demo.umi-health-systems.zm',
+                password: 'Demo123!',
+                role: 'cashier',
+                redirect: '../demo/admin-demo.html?role=cashier'
+              },
+              pharmacist: {
+                email: 'pharmacist@demo.umi-health-systems.zm',
+                password: 'Demo123!',
+                role: 'pharmacist',
+                redirect: '../demo/admin-demo.html?role=pharmacist'
+              },
+              manager: {
+                email: 'manager@demo.umi-health-systems.zm', 
+                password: 'Demo123!',
+                role: 'admin',
+                redirect: '../demo/admin-demo.html?role=admin'
+              }
+            };
+
+            const demo = demoCredentials[role];
+            console.log('Using demo account:', demo);
+
+            // Store session data for demo account
+            sessionStorage.setItem('userRole', demo.role);
+            sessionStorage.setItem('userEmail', demo.email);
+            sessionStorage.setItem('userName', demo.email.split('@')[0]);
+            sessionStorage.setItem('isDemoAccount', 'true');
+
+            // Redirect to demo page with role parameter
+            window.location.href = demo.redirect;
+          }, 1000);
+        },
+
+        async resetPassword() {
+          if (!this.forgotEmail) {
+            this.showErrorToast('Email Required', 'Please enter your email address');
+            return;
+          }
+
+          this.forgotLoading = true;
+
+          try {
+            if (!window.UmiHealthInformationSystemsAuth) {
+              throw new Error('Authentication service not loaded');
+            }
+
+            const result = await window.UmiHealthInformationSystemsAuth.forgotPassword(this.forgotEmail);
+
+            if (result.success) {
+              this.forgotPasswordSent = true;
+              this.showSuccessToast('Reset Email Sent', result.message);
+            } else {
+              this.showErrorToast('Reset Failed', result.message);
+            }
+          } catch (error) {
+            console.error('Forgot password error:', error);
+            this.showErrorToast('Reset Error', 'Failed to send password reset email. Please try again.');
+          } finally {
+            this.forgotLoading = false;
+          }
+        },
+
+        showErrorToast(title, message) {
+          const toast = document.createElement('div');
+          toast.className = 'toast error-toast';
+          toast.innerHTML = `
+            <div class="toast-content">
+              <span class="material-symbols-rounded">error</span>
+              <div class="toast-message">
+                <strong>${title}</strong>
+                <p>${message}</p>
+              </div>
+              <button class="toast-close" onclick="this.parentElement.parentElement.remove()">
+                <span class="material-symbols-rounded">close</span>
+              </button>
+            </div>
+          `;
+
+          document.body.appendChild(toast);
+          setTimeout(() => toast.classList.add('show'), 100);
+          
+          setTimeout(() => {
+            if (toast.parentElement) {
+              toast.classList.remove('show');
+              setTimeout(() => toast.remove(), 300);
+            }
+          }, 5000);
+        },
+
+        showSuccessToast(title, message) {
+          const toast = document.createElement('div');
+          toast.className = 'toast success-toast';
+          toast.innerHTML = `
+            <div class="toast-content">
+              <span class="material-symbols-rounded">check_circle</span>
+              <div class="toast-message">
+                <strong>${title}</strong>
+                <p>${message}</p>
+              </div>
+              <button class="toast-close" onclick="this.parentElement.parentElement.remove()">
+                <span class="material-symbols-rounded">close</span>
+              </button>
+            </div>
+          `;
+
+          document.body.appendChild(toast);
+          setTimeout(() => toast.classList.add('show'), 100);
+          
+          setTimeout(() => {
+            if (toast.parentElement) {
+              toast.classList.remove('show');
+              setTimeout(() => toast.remove(), 300);
+            }
+          }, 3000);
+        }
+      }
+    }
+  </script>
+  <script src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
+</body>
+</html>
+
+
+
+

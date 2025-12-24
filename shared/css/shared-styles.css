@@ -1,0 +1,808 @@
+/**
+ * Shared Styles for Umi Health System
+ * Common styling used across all portals
+ */
+
+:root {
+  --color-primary: #000000;
+  --color-accent: #ffffff;
+  --color-success: #22c55e;
+  --color-warning: #ef4444;
+  --color-error: #dc2626;
+  --color-info: #3b82f6;
+  --color-text-primary: #000000;
+  --color-text-secondary: #6b7280;
+  --color-text-muted: #9ca3af;
+  --color-background: #ffffff;
+  --color-surface: #f9fafb;
+  --color-border: #e5e7eb;
+  --font-primary: 'Inter', sans-serif;
+  --font-secondary: 'Nunito', 'Varela Round', sans-serif;
+  --sidebar-width: 280px;
+  --header-height: 70px;
+}
+
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+body {
+  background: var(--color-background);
+  color: var(--color-text-primary);
+  font-family: var(--font-secondary);
+  line-height: 1.5;
+  overflow-x: hidden;
+}
+
+/* Sidebar Styles */
+.sidebar {
+  position: fixed;
+  left: 0;
+  top: 0;
+  width: var(--sidebar-width);
+  height: 100vh;
+  background: var(--color-text-primary);
+  color: var(--color-accent);
+  z-index: 1000;
+  transition: transform 0.3s ease;
+  display: flex;
+  flex-direction: column;
+  overflow-y: auto;
+  overflow-x: hidden;
+}
+
+.sidebar-header {
+  padding: 1.5rem;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.logo-section {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.logo-icon {
+  width: 40px;
+  height: 40px;
+  background: rgba(255, 255, 255, 0.2);
+  border-radius: 10px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.5rem;
+}
+
+.logo-text {
+  font-size: 1.25rem;
+  font-weight: 700;
+  font-family: var(--font-primary);
+}
+
+.pharmacy-info {
+  padding: 1rem 1.5rem;
+  background: rgba(255, 255, 255, 0.1);
+  margin: 1rem 1.5rem;
+  border-radius: 12px;
+  font-size: 0.85rem;
+}
+
+.pharmacy-name {
+  font-weight: 600;
+  margin-bottom: 0.25rem;
+}
+
+.pharmacy-location {
+  opacity: 0.8;
+  font-size: 0.75rem;
+}
+
+.nav-menu {
+  padding: 1rem 0;
+  flex: 1;
+  overflow-y: auto;
+}
+
+.nav-item {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  padding: 0.875rem 1.5rem;
+  color: rgba(255, 255, 255, 0.8);
+  text-decoration: none;
+  transition: all 0.2s ease;
+  cursor: pointer;
+  font-size: 0.9rem;
+  font-weight: 500;
+}
+
+.nav-item:hover {
+  background: rgba(255, 255, 255, 0.1);
+  color: var(--color-accent);
+}
+
+.nav-item.active {
+  background: rgba(255, 255, 255, 0.15);
+  color: var(--color-accent);
+  border-left: 3px solid var(--color-accent);
+}
+
+.nav-icon {
+  font-size: 1.25rem;
+}
+
+/* Main Content Area */
+.main-content {
+  margin-left: var(--sidebar-width);
+  min-height: 100vh;
+  transition: margin-left 0.3s ease;
+}
+
+/* Header Styles */
+.header {
+  background: white;
+  border-bottom: 1px solid #e2e8f0;
+  padding: 1rem 2rem;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  position: sticky;
+  top: 0;
+  z-index: 100;
+  height: var(--header-height);
+}
+
+.header-left {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+}
+
+.page-title-section {
+  margin-right: 2rem;
+}
+
+.page-title-section .page-title {
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: var(--color-text-primary);
+  margin: 0;
+  font-family: var(--font-primary);
+}
+
+.mobile-menu-toggle {
+  display: none;
+  background: none;
+  border: none;
+  font-size: 1.5rem;
+  color: var(--color-text-secondary);
+  cursor: pointer;
+}
+
+.header-right {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+}
+
+.user-profile {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 0.5rem;
+  border-radius: 16px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.user-profile:hover {
+  background: var(--color-surface);
+}
+
+.user-avatar {
+  width: 36px;
+  height: 36px;
+  background: var(--color-text-primary);
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--color-accent);
+  font-weight: 600;
+  font-size: 0.875rem;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+}
+
+.user-info {
+  display: flex;
+  flex-direction: column;
+}
+
+.user-name {
+  font-size: 0.875rem;
+  font-weight: 600;
+  color: var(--color-text-primary);
+}
+
+.user-role {
+  font-size: 0.75rem;
+  color: var(--color-text-secondary);
+}
+
+/* Form Styles */
+.form-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+  gap: 1.5rem;
+}
+
+.form-group {
+  display: flex;
+  flex-direction: column;
+}
+
+.form-group.full-width {
+  grid-column: 1 / -1;
+}
+
+.form-label {
+  font-weight: 500;
+  color: var(--color-text-primary);
+  margin-bottom: 0.5rem;
+  font-size: 0.875rem;
+}
+
+.form-input {
+  padding: 0.75rem 1rem;
+  border: 1px solid var(--color-border);
+  border-radius: 12px;
+  font-size: 0.875rem;
+  transition: all 0.3s ease;
+  background: var(--color-background);
+}
+
+.form-input:focus {
+  outline: none;
+  border-color: var(--color-primary);
+  box-shadow: 0 0 0 4px rgba(0, 0, 0, 0.1);
+}
+
+.form-textarea {
+  resize: vertical;
+  min-height: 100px;
+}
+
+/* Button Styles */
+.btn {
+  padding: 0.75rem 1.5rem;
+  border-radius: 12px;
+  font-size: 0.875rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  border: none;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  text-decoration: none;
+  justify-content: center;
+}
+
+.btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.btn-primary {
+  background: var(--color-primary);
+  color: var(--color-accent);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+.btn-primary:hover:not(:disabled) {
+  background: var(--color-text-secondary);
+  transform: translateY(-2px);
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.2);
+}
+
+.btn-secondary {
+  background: var(--color-surface);
+  color: var(--color-text-secondary);
+  border: 1px solid var(--color-border);
+}
+
+.btn-secondary:hover:not(:disabled) {
+  background: var(--color-border);
+}
+
+.btn-success {
+  background: var(--color-success);
+  color: white;
+  box-shadow: 0 2px 8px rgba(34, 197, 94, 0.2);
+}
+
+.btn-success:hover:not(:disabled) {
+  background: #16a34a;
+  transform: translateY(-2px);
+  box-shadow: 0 8px 24px rgba(34, 197, 94, 0.3);
+}
+
+.btn-danger {
+  background: var(--color-warning);
+  color: var(--color-accent);
+  box-shadow: 0 2px 8px rgba(239, 68, 68, 0.2);
+}
+
+.btn-danger:hover:not(:disabled) {
+  background: #dc2626;
+  transform: translateY(-2px);
+  box-shadow: 0 8px 24px rgba(239, 68, 68, 0.3);
+}
+
+/* Card Styles */
+.card {
+  background: var(--color-background);
+  border-radius: 20px;
+  border: 1px solid var(--color-border);
+  padding: 2rem;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
+}
+
+.card-header {
+  margin-bottom: 1.5rem;
+}
+
+.card-title {
+  font-size: 1.25rem;
+  font-weight: 600;
+  color: var(--color-text-primary);
+  margin-bottom: 0.5rem;
+  font-family: var(--font-primary);
+}
+
+.card-description {
+  color: var(--color-text-secondary);
+  font-size: 0.875rem;
+}
+
+/* Table Styles */
+.table-container {
+  overflow-x: auto;
+  border-radius: 12px;
+  border: 1px solid var(--color-border);
+}
+
+.table {
+  width: 100%;
+  border-collapse: collapse;
+  background: var(--color-background);
+}
+
+.table th {
+  background: var(--color-surface);
+  padding: 1rem;
+  text-align: left;
+  font-weight: 600;
+  font-size: 0.875rem;
+  color: var(--color-text-primary);
+  border-bottom: 1px solid var(--color-border);
+  position: sticky;
+  top: 0;
+  z-index: 10;
+}
+
+.table td {
+  padding: 1rem;
+  border-bottom: 1px solid var(--color-border);
+  font-size: 0.875rem;
+}
+
+.table tr:hover {
+  background: var(--color-surface);
+}
+
+/* Status Badge Styles */
+.status-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.25rem;
+  padding: 0.25rem 0.75rem;
+  border-radius: 12px;
+  font-size: 0.75rem;
+  font-weight: 600;
+}
+
+.status-badge.active {
+  background: rgba(34, 197, 94, 0.1);
+  color: var(--color-success);
+}
+
+.status-badge.pending {
+  background: rgba(59, 130, 246, 0.1);
+  color: var(--color-info);
+}
+
+.status-badge.inactive {
+  background: rgba(239, 68, 68, 0.1);
+  color: var(--color-warning);
+}
+
+.status-badge.processing {
+  background: rgba(245, 158, 11, 0.1);
+  color: #f59e0b;
+}
+
+/* Modal Styles */
+.modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.5);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+}
+
+.modal {
+  background: var(--color-background);
+  border-radius: 20px;
+  padding: 2rem;
+  max-width: 500px;
+  width: 90%;
+  max-height: 90vh;
+  overflow-y: auto;
+  box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1);
+}
+
+.modal-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 1.5rem;
+}
+
+.modal-title {
+  font-size: 1.25rem;
+  font-weight: 600;
+  color: var(--color-text-primary);
+  font-family: var(--font-primary);
+}
+
+.modal-close {
+  background: none;
+  border: none;
+  font-size: 1.5rem;
+  cursor: pointer;
+  color: var(--color-text-secondary);
+  padding: 0.25rem;
+}
+
+.modal-close:hover {
+  color: var(--color-text-primary);
+}
+
+/* Alert Styles */
+.alert {
+  padding: 1rem;
+  border-radius: 12px;
+  margin-bottom: 1rem;
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.alert-success {
+  background: rgba(34, 197, 94, 0.1);
+  color: var(--color-success);
+  border: 1px solid rgba(34, 197, 94, 0.2);
+}
+
+.alert-warning {
+  background: rgba(239, 68, 68, 0.1);
+  color: var(--color-warning);
+  border: 1px solid rgba(239, 68, 68, 0.2);
+}
+
+.alert-info {
+  background: rgba(59, 130, 246, 0.1);
+  color: var(--color-info);
+  border: 1px solid rgba(59, 130, 246, 0.2);
+}
+
+/* Loading Spinner */
+.spinner {
+  width: 20px;
+  height: 20px;
+  border: 2px solid var(--color-border);
+  border-top: 2px solid var(--color-primary);
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+  .sidebar {
+    transform: translateX(-100%);
+  }
+
+  .sidebar.open {
+    transform: translateX(0);
+  }
+
+  .main-content {
+    margin-left: 0;
+  }
+
+  .mobile-menu-toggle {
+    display: block;
+  }
+
+  .page-title-section {
+    display: none;
+  }
+
+  .form-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .header {
+    padding: 1rem;
+  }
+
+  .card {
+    padding: 1rem;
+  }
+
+  .modal {
+    padding: 1rem;
+  }
+}
+
+/* Utility Classes */
+.text-center { text-align: center; }
+.text-left { text-align: left; }
+.text-right { text-align: right; }
+
+.mt-1 { margin-top: 0.25rem; }
+.mt-2 { margin-top: 0.5rem; }
+.mt-3 { margin-top: 0.75rem; }
+.mt-4 { margin-top: 1rem; }
+.mt-5 { margin-top: 1.25rem; }
+
+.mb-1 { margin-bottom: 0.25rem; }
+.mb-2 { margin-bottom: 0.5rem; }
+.mb-3 { margin-bottom: 0.75rem; }
+.mb-4 { margin-bottom: 1rem; }
+.mb-5 { margin-bottom: 1.25rem; }
+
+.p-1 { padding: 0.25rem; }
+.p-2 { padding: 0.5rem; }
+.p-3 { padding: 0.75rem; }
+.p-4 { padding: 1rem; }
+.p-5 { padding: 1.25rem; }
+
+.hidden { display: none; }
+.block { display: block; }
+.flex { display: flex; }
+.grid { display: grid; }
+
+.w-full { width: 100%; }
+.h-full { height: 100%; }
+
+/* Dashboard specific utilities */
+.dashboard-metrics { margin-bottom: 2rem; }
+.metric-card { font-size: 2rem; font-weight: 700; }
+.metric-subtitle { color: var(--color-text-muted); font-size: 0.875rem; }
+.metric-icon-success { color: var(--color-success); }
+.metric-icon-info { color: var(--color-info); }
+.metric-icon-warning { color: var(--color-warning); }
+.metric-icon-error { color: var(--color-error); }
+.metric-icon-primary { color: var(--color-primary); }
+
+/* Table utilities */
+.table-actions { padding: 0.5rem; }
+.action-button { font-size: 1rem; }
+
+/* Empty state utilities */
+.empty-state { text-align: center; padding: 2rem; }
+.empty-state-text { color: var(--color-text-muted); }
+
+/* Receipt Styles */
+.receipt-container {
+  max-width: 400px;
+  margin: 0 auto;
+  background: var(--color-background);
+  padding: 2rem;
+  font-family: 'Courier New', monospace;
+  border: 1px solid var(--color-border);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+}
+
+.receipt-header {
+  text-align: center;
+  margin-bottom: 2rem;
+  border-bottom: 2px solid var(--color-primary);
+  padding-bottom: 1rem;
+}
+
+.pharmacy-name {
+  font-size: 1.5rem;
+  font-weight: 700;
+  font-family: var(--font-primary);
+  margin-bottom: 0.5rem;
+}
+
+.pharmacy-address,
+.pharmacy-contact {
+  font-size: 0.875rem;
+  margin-bottom: 0.25rem;
+}
+
+.license-number {
+  font-size: 0.75rem;
+  color: var(--color-text-muted);
+}
+
+.transaction-info {
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: 1.5rem;
+  font-size: 0.875rem;
+}
+
+.patient-info {
+  margin-bottom: 1.5rem;
+  padding: 1rem;
+  background: var(--color-surface);
+  border-radius: 8px;
+}
+
+.patient-name {
+  font-weight: 600;
+  margin-bottom: 0.25rem;
+}
+
+.patient-details {
+  font-size: 0.875rem;
+  color: var(--color-text-secondary);
+}
+
+.items-section {
+  margin-bottom: 1.5rem;
+}
+
+.receipt-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: 0.75rem;
+  padding-bottom: 0.75rem;
+  border-bottom: 1px dashed var(--color-border);
+}
+
+.item-details {
+  flex: 1;
+}
+
+.item-name {
+  font-weight: 600;
+  margin-bottom: 0.25rem;
+}
+
+.item-meta {
+  font-size: 0.75rem;
+  color: var(--color-text-secondary);
+}
+
+.item-price {
+  text-align: right;
+  font-weight: 600;
+}
+
+.pricing-summary {
+  border-top: 2px solid var(--color-primary);
+  padding-top: 1rem;
+  margin-bottom: 1.5rem;
+}
+
+.summary-row {
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: 0.5rem;
+  font-size: 0.875rem;
+}
+
+.summary-row.total {
+  font-weight: 700;
+  font-size: 1.125rem;
+  border-top: 1px solid var(--color-border);
+  padding-top: 0.5rem;
+  margin-top: 0.5rem;
+}
+
+.payment-info {
+  margin-bottom: 1.5rem;
+  padding: 1rem;
+  background: var(--color-surface);
+  border-radius: 8px;
+  font-size: 0.875rem;
+}
+
+.payment-method {
+  font-weight: 600;
+  margin-bottom: 0.25rem;
+}
+
+.legal-notices {
+  font-size: 0.75rem;
+  color: var(--color-text-secondary);
+  text-align: center;
+  margin-bottom: 1rem;
+  line-height: 1.4;
+}
+
+.receipt-footer {
+  text-align: center;
+  font-size: 0.875rem;
+  border-top: 1px solid var(--color-border);
+  padding-top: 1rem;
+}
+
+.pharmacist-info {
+  margin-bottom: 0.5rem;
+  font-weight: 600;
+}
+
+.thank-you {
+  font-weight: 600;
+  margin-bottom: 0.5rem;
+}
+
+.hours-info {
+  font-size: 0.75rem;
+  color: var(--color-text-secondary);
+}
+
+.prescription-item {
+  background: rgba(34, 197, 94, 0.05);
+  border-left: 3px solid var(--color-success);
+  padding-left: 0.75rem;
+}
+
+.otc-item {
+  background: rgba(59, 130, 246, 0.05);
+  border-left: 3px solid var(--color-info);
+  padding-left: 0.75rem;
+}
+
+.receipt-actions {
+  display: flex;
+  gap: 1rem;
+  justify-content: center;
+  margin-top: 2rem;
+  padding-top: 1rem;
+  border-top: 1px solid var(--color-border);
+}
+
+@media print {
+  .receipt-actions {
+    display: none;
+  }
+  
+  .receipt-container {
+    box-shadow: none;
+    border: none;
+    margin: 0;
+    padding: 1rem;
+  }
+}

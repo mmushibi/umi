@@ -1,0 +1,1183 @@
+<!DOCTYPE html>
+<html lang="en" x-data="tenantsManagement()" x-init="init()">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Tenant Management - Operations Portal</title>
+  <link rel="icon" href="../../logo.png" type="image/png">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@100;400;500;600;700&family=Varela+Round&family=Nunito:wght@400;600;700&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Rounded:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="../shared/js/data-sync.js"></script>
+  <script src="../shared/js/role-based-access.js"></script>
+  <script src="../admin/js/admin-api.js"></script>
+  <script src="js/operations-api.js"></script>
+  <link rel="stylesheet" href="../../shared/css/cashier-notifications.css">
+  <link rel="stylesheet" href="../../shared/css/shared-styles.css">
+  <style>
+    :root {
+      --color-primary: #000000;
+      --color-accent: #14B8A6;
+      --color-success: #22c55e;
+      --color-warning: #ef4444;
+      --color-info: #3b82f6;
+      --color-text-primary: #000000;
+      --color-text-secondary: #6b7280;
+      --color-text-muted: #9ca3af;
+      --color-background: #ffffff;
+      --color-surface: #f9fafb;
+      --color-border: #e5e7eb;
+      --font-primary: 'Inter', sans-serif;
+      --sidebar-width: 280px;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      background: var(--color-background);
+      color: var(--color-text-primary);
+      font-family: 'Nunito', 'Varela Round', sans-serif;
+      line-height: 1.5;
+      overflow-x: hidden;
+    }
+
+    /* Sidebar Styles */
+    .sidebar {
+      position: fixed;
+      left: 0;
+      top: 0;
+      width: var(--sidebar-width);
+      height: 100vh;
+      background: var(--color-text-primary);
+      color: var(--color-accent);
+      z-index: 1000;
+      transition: transform 0.3s ease;
+      display: flex;
+      flex-direction: column;
+      overflow-y: auto;
+      overflow-x: hidden;
+    }
+
+    .sidebar-header {
+      padding: 1.5rem;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+    }
+
+    .logo-section {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+    }
+
+    .logo-icon {
+      width: 40px;
+      height: 40px;
+      background: rgba(255, 255, 255, 0.2);
+      border-radius: 10px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.5rem;
+    }
+
+    .logo-text {
+      font-size: 1.25rem;
+      font-weight: 700;
+      font-family: 'Inter', sans-serif;
+    }
+
+    .nav-menu {
+      padding: 1rem 0;
+      flex: 1;
+      overflow-y: auto;
+    }
+
+    .nav-item {
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+      padding: 0.875rem 1.5rem;
+      color: rgba(255, 255, 255, 0.8);
+      text-decoration: none;
+      transition: all 0.2s ease;
+      cursor: pointer;
+      font-size: 0.9rem;
+      font-weight: 500;
+    }
+
+    .nav-item:hover {
+      background: rgba(255, 255, 255, 0.1);
+      color: var(--color-accent);
+    }
+
+    .nav-item.active {
+      background: rgba(255, 255, 255, 0.15);
+      color: var(--color-accent);
+      border-left: 3px solid var(--color-accent);
+    }
+
+    .nav-icon {
+      font-size: 1.25rem;
+    }
+
+    /* Main Content Area */
+    .main-content {
+      margin-left: var(--sidebar-width);
+      min-height: 100vh;
+      transition: margin-left 0.3s ease;
+    }
+
+    /* Header Styles */
+    .header {
+      background: white;
+      border-bottom: 1px solid #e2e8f0;
+      padding: 1rem 2rem;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      position: sticky;
+      top: 0;
+      z-index: 100;
+    }
+
+    .header-left {
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+    }
+
+    .page-title-section {
+      margin-right: 2rem;
+    }
+
+    .page-title-section .page-title {
+      font-size: 1.5rem;
+      font-weight: 700;
+      color: var(--color-text-primary);
+      margin: 0;
+      font-family: 'Inter', sans-serif;
+    }
+
+    .mobile-menu-toggle {
+      display: none;
+      background: none;
+      border: none;
+      font-size: 1.5rem;
+      color: var(--color-text-secondary);
+      cursor: pointer;
+    }
+
+    .header-right {
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+    }
+
+    .create-button {
+      background: var(--color-primary);
+      color: var(--color-accent);
+      border: none;
+      padding: 0.625rem 1.25rem;
+      border-radius: 16px;
+      font-size: 0.875rem;
+      font-weight: 600;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      transition: all 0.3s ease;
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+    }
+
+    .create-button:hover {
+      background: var(--color-text-secondary);
+      transform: translateY(-2px);
+      box-shadow: 0 8px 24px rgba(0, 0, 0, 0.2);
+    }
+
+    .user-profile {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+      padding: 0.5rem;
+      border-radius: 16px;
+      cursor: pointer;
+      transition: all 0.3s ease;
+    }
+
+    .user-profile:hover {
+      background: var(--color-surface);
+    }
+
+    .user-avatar {
+      width: 36px;
+      height: 36px;
+      background: var(--color-text-primary);
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: var(--color-accent);
+      font-weight: 600;
+      font-size: 0.875rem;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+    }
+
+    .user-info {
+      display: flex;
+      flex-direction: column;
+    }
+
+    .user-name {
+      font-size: 0.875rem;
+      font-weight: 600;
+      color: var(--color-text-primary);
+    }
+
+    .user-role {
+      font-size: 0.75rem;
+      color: var(--color-text-secondary);
+    }
+
+    /* Content Styles */
+    .content {
+      padding: 2rem;
+    }
+
+    .page-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 2rem;
+    }
+
+    .page-title {
+      font-size: 1.875rem;
+      font-weight: 700;
+      color: var(--color-text-primary);
+      margin: 0;
+      font-family: 'Inter', sans-serif;
+    }
+
+    .page-subtitle {
+      color: var(--color-text-secondary);
+      font-size: 0.875rem;
+      margin-top: 0.25rem;
+    }
+
+    /* Search and Filter */
+    .controls-section {
+      display: flex;
+      gap: 1rem;
+      margin-bottom: 2rem;
+      flex-wrap: wrap;
+    }
+
+    .search-bar {
+      position: relative;
+      flex: 1;
+      min-width: 300px;
+    }
+
+    .search-input {
+      width: 100%;
+      padding: 0.625rem 1rem 0.625rem 2.5rem;
+      border: 1px solid var(--color-border);
+      border-radius: 16px;
+      font-size: 0.875rem;
+      transition: all 0.3s ease;
+    }
+
+    .search-input:focus {
+      outline: none;
+      border-color: var(--color-primary);
+      box-shadow: 0 0 0 4px rgba(0, 0, 0, 0.1);
+    }
+
+    .search-icon {
+      position: absolute;
+      left: 0.75rem;
+      top: 50%;
+      transform: translateY(-50%);
+      color: var(--color-text-muted);
+      font-size: 1.125rem;
+    }
+
+    .filter-dropdown {
+      position: relative;
+    }
+
+    .filter-button {
+      background: white;
+      border: 1px solid var(--color-border);
+      padding: 0.625rem 1.25rem;
+      border-radius: 16px;
+      font-size: 0.875rem;
+      font-weight: 500;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      transition: all 0.3s ease;
+    }
+
+    .filter-button:hover {
+      background: var(--color-surface);
+    }
+
+    /* Table Styles */
+    .table-container {
+      background: white;
+      border-radius: 20px;
+      border: 1px solid var(--color-border);
+      overflow: hidden;
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
+    }
+
+    .table {
+      width: 100%;
+      border-collapse: collapse;
+    }
+
+    .table th {
+      background: var(--color-surface);
+      padding: 1rem;
+      text-align: left;
+      font-weight: 600;
+      color: var(--color-text-primary);
+      font-size: 0.875rem;
+      border-bottom: 1px solid var(--color-border);
+    }
+
+    .table td {
+      padding: 1rem;
+      border-bottom: 1px solid var(--color-border);
+      font-size: 0.875rem;
+    }
+
+    .table tr:hover {
+      background: var(--color-surface);
+    }
+
+    .tenant-name {
+      font-weight: 600;
+      color: var(--color-text-primary);
+    }
+
+    .tenant-email {
+      color: var(--color-text-secondary);
+    }
+
+    .status-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.25rem;
+      padding: 0.25rem 0.75rem;
+      border-radius: 12px;
+      font-size: 0.75rem;
+      font-weight: 600;
+    }
+
+    .status-badge.active {
+      background: rgba(34, 197, 94, 0.1);
+      color: var(--color-success);
+    }
+
+    .status-badge.inactive {
+      background: rgba(239, 68, 68, 0.1);
+      color: var(--color-warning);
+    }
+
+    .status-badge.trial {
+      background: rgba(59, 130, 246, 0.1);
+      color: var(--color-info);
+    }
+
+    .action-buttons {
+      display: flex;
+      gap: 0.5rem;
+    }
+
+    .action-button {
+      background: none;
+      border: none;
+      padding: 0.5rem;
+      border-radius: 8px;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      color: var(--color-text-secondary);
+    }
+
+    .action-button:hover {
+      background: var(--color-surface);
+      color: var(--color-text-primary);
+    }
+
+    /* Modal Styles */
+    .modal-overlay {
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background: rgba(0, 0, 0, 0.5);
+      -webkit-backdrop-filter: blur(4px);
+      backdrop-filter: blur(4px);
+      z-index: 2000;
+      opacity: 0;
+      visibility: hidden;
+      transition: all 0.3s ease;
+    }
+
+    .modal-overlay.show {
+      opacity: 1;
+      visibility: visible;
+    }
+
+    .modal {
+      position: fixed;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%) scale(0.9);
+      background: white;
+      border-radius: 20px;
+      padding: 2rem;
+      max-width: 600px;
+      width: 90%;
+      z-index: 2001;
+      opacity: 0;
+      visibility: hidden;
+      transition: all 0.3s ease;
+      box-shadow: 0 20px 40px rgba(0, 0, 0, 0.2);
+      max-height: 90vh;
+      overflow-y: auto;
+    }
+
+    .modal-overlay.show .modal {
+      opacity: 1;
+      visibility: visible;
+      transform: translate(-50%, -50%) scale(1);
+    }
+
+    .modal-header {
+      margin-bottom: 1.5rem;
+    }
+
+    .modal-title {
+      font-size: 1.5rem;
+      font-weight: 700;
+      color: var(--color-text-primary);
+      margin-bottom: 0.5rem;
+    }
+
+    .modal-subtitle {
+      color: var(--color-text-secondary);
+      font-size: 0.875rem;
+    }
+
+    .form-group {
+      margin-bottom: 1.5rem;
+    }
+
+    .form-label {
+      display: block;
+      margin-bottom: 0.5rem;
+      font-weight: 600;
+      color: var(--color-text-primary);
+      font-size: 0.875rem;
+    }
+
+    .form-input, .form-select, .form-textarea {
+      width: 100%;
+      padding: 0.75rem 1rem;
+      border: 1px solid var(--color-border);
+      border-radius: 12px;
+      font-size: 0.875rem;
+      transition: all 0.3s ease;
+    }
+
+    .form-input:focus, .form-select:focus, .form-textarea:focus {
+      outline: none;
+      border-color: var(--color-primary);
+      box-shadow: 0 0 0 4px rgba(0, 0, 0, 0.1);
+    }
+
+    .form-textarea {
+      resize: vertical;
+      min-height: 100px;
+    }
+
+    .form-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 1rem;
+    }
+
+    .modal-actions {
+      display: flex;
+      gap: 1rem;
+      justify-content: flex-end;
+      margin-top: 2rem;
+    }
+
+    .modal-button {
+      padding: 0.625rem 1.25rem;
+      border-radius: 12px;
+      font-size: 0.875rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      border: none;
+    }
+
+    .modal-button-primary {
+      background: var(--color-primary);
+      color: white;
+    }
+
+    .modal-button-primary:hover {
+      background: var(--color-text-secondary);
+    }
+
+    .modal-button-secondary {
+      background: var(--color-surface);
+      color: var(--color-text-secondary);
+    }
+
+    .modal-button-secondary:hover {
+      background: var(--color-border);
+    }
+
+    /* Pagination */
+    .pagination {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 1rem;
+      border-top: 1px solid var(--color-border);
+    }
+
+    .pagination-info {
+      color: var(--color-text-secondary);
+      font-size: 0.875rem;
+    }
+
+    .pagination-controls {
+      display: flex;
+      gap: 0.5rem;
+    }
+
+    .pagination-button {
+      background: white;
+      border: 1px solid var(--color-border);
+      padding: 0.5rem 0.75rem;
+      border-radius: 8px;
+      font-size: 0.875rem;
+      cursor: pointer;
+      transition: all 0.2s ease;
+    }
+
+    .pagination-button:hover:not(:disabled) {
+      background: var(--color-surface);
+    }
+
+    .pagination-button:disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
+    }
+
+    .pagination-button.active {
+      background: var(--color-primary);
+      color: white;
+      border-color: var(--color-primary);
+    }
+
+    /* Logout Section */
+    .logout-section {
+      padding: 1rem;
+      border-top: 1px solid rgba(255, 255, 255, 0.1);
+      margin-top: auto;
+    }
+
+    .logout-button {
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+      padding: 0.875rem 1.5rem;
+      color: rgba(255, 255, 255, 0.8);
+      text-decoration: none;
+      transition: all 0.2s ease;
+      cursor: pointer;
+      font-size: 0.9rem;
+      font-weight: 500;
+      width: 100%;
+      border: none;
+      background: transparent;
+      text-align: left;
+    }
+
+    .logout-button:hover {
+      background: rgba(239, 68, 68, 0.1);
+      color: var(--color-warning);
+    }
+
+    .logout-icon {
+      font-size: 1.25rem;
+    }
+
+    /* Responsive Design */
+    @media (max-width: 768px) {
+      .sidebar {
+        transform: translateX(-100%);
+      }
+
+      .sidebar.open {
+        transform: translateX(0);
+      }
+
+      .main-content {
+        margin-left: 0;
+      }
+
+      .mobile-menu-toggle {
+        display: block;
+      }
+
+      .page-title-section {
+        display: none;
+      }
+
+      .user-info {
+        display: none;
+      }
+
+      .content {
+        padding: 1rem;
+      }
+
+      .page-header {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 1rem;
+      }
+
+      .controls-section {
+        flex-direction: column;
+      }
+
+      .search-bar {
+        min-width: auto;
+      }
+
+      .form-grid {
+        grid-template-columns: 1fr;
+      }
+
+      .table-container {
+        overflow-x: auto;
+      }
+
+      .table {
+        min-width: 600px;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="dashboard-container">
+    <!-- Sidebar -->
+    <aside class="sidebar" :class="{ 'open': mobileMenuOpen }">
+      <div class="sidebar-header">
+        <div class="logo-section">
+          <div class="logo-icon">
+            <img src="../../logo.png" alt="Umi Health Logo">
+          </div>
+          <div class="logo-text">Operations</div>
+        </div>
+      </div>
+      
+      <nav class="nav-menu">
+        <a href="home.html" class="nav-item" @click.prevent="setActiveMenu('dashboard')">
+          <span class="material-symbols-rounded nav-icon">dashboard</span>
+          Dashboard
+        </a>
+        <a href="#" class="nav-item active" @click.prevent="setActiveMenu('tenants')">
+          <span class="material-symbols-rounded nav-icon">apartment</span>
+          Tenant Management
+        </a>
+        <a href="subscriptions.html" class="nav-item" @click.prevent="setActiveMenu('subscriptions')">
+          <span class="material-symbols-rounded nav-icon">credit_card</span>
+          Subscriptions
+        </a>
+        <a href="users.html" class="nav-item" @click.prevent="setActiveMenu('users')">
+          <span class="material-symbols-rounded nav-icon">people</span>
+          User Management
+        </a>
+        <a href="transactions.html" class="nav-item" @click.prevent="setActiveMenu('transactions')">
+          <span class="material-symbols-rounded nav-icon">receipt_long</span>
+          Transactions
+        </a>
+        <a href="account.html" class="nav-item" @click.prevent="setActiveMenu('account')">
+          <span class="material-symbols-rounded nav-icon">account_circle</span>
+          Account
+        </a>
+      </nav>
+      
+      <div class="logout-section">
+        <a href="../../signin.html" class="logout-button" @click.prevent="handleLogout">
+          <span class="material-symbols-rounded logout-icon">logout</span>
+          Sign Out
+        </a>
+      </div>
+    </aside>
+
+    <!-- Main Content -->
+    <main class="main-content">
+      <!-- Header -->
+      <header class="header">
+        <div class="header-left">
+          <button class="mobile-menu-toggle" @click="mobileMenuOpen = !mobileMenuOpen">
+            <span class="material-symbols-rounded">menu</span>
+          </button>
+          <div class="page-title-section">
+            <h1 class="page-title">Tenant Management</h1>
+          </div>
+        </div>
+      </header>
+
+      <!-- Content -->
+      <div class="content">
+        <div class="page-header">
+          <div>
+            <h2 class="page-title">Tenants</h2>
+            <p class="page-subtitle">Manage all tenant accounts and their information</p>
+          </div>
+        </div>
+
+        <!-- Search and Filters -->
+        <div class="controls-section">
+          <div class="search-bar">
+            <input 
+              type="text" 
+              class="search-input" 
+              placeholder="Search tenants by name, email, or ID..."
+              x-model="searchQuery"
+              @input="filterTenants"
+            >
+            <span class="material-symbols-rounded search-icon">search</span>
+          </div>
+          
+          <div class="filter-dropdown">
+            <button class="filter-button" @click="showFilterDropdown = !showFilterDropdown">
+              <span class="material-symbols-rounded">filter_list</span>
+              Status
+              <span class="material-symbols-rounded">arrow_drop_down</span>
+            </button>
+          </div>
+        </div>
+
+        <!-- Tenants Table -->
+        <div class="table-container">
+          <table class="table">
+            <thead>
+              <tr>
+                <th>Tenant</th>
+                <th>Contact</th>
+                <th>Subscription</th>
+                <th>Status</th>
+                <th>Created</th>
+                <th>Actions</th>
+              </tr>
+            </thead>
+            <tbody>
+              <template x-for="tenant in filteredTenants" :key="tenant.id">
+                <tr>
+                  <td>
+                    <div class="tenant-name" x-text="tenant.name"></div>
+                    <div class="tenant-email" x-text="tenant.domain"></div>
+                  </td>
+                  <td>
+                    <div x-text="tenant.contactName"></div>
+                    <div class="tenant-email" x-text="tenant.contactEmail"></div>
+                  </td>
+                  <td>
+                    <div x-text="tenant.plan"></div>
+                    <div class="tenant-email" x-text="tenant.subscriptionStatus"></div>
+                  </td>
+                  <td>
+                    <span class="status-badge" :class="tenant.status.toLowerCase()" x-text="tenant.status"></span>
+                  </td>
+                  <td x-text="tenant.createdDate"></td>
+                  <td>
+                    <div class="action-buttons">
+                      <button class="action-button" @click="viewTenant(tenant)" title="View">
+                        <span class="material-symbols-rounded">visibility</span>
+                      </button>
+                      <button class="action-button" @click="editTenant(tenant)" title="Edit">
+                        <span class="material-symbols-rounded">edit</span>
+                      </button>
+                      <button class="action-button" @click="manageSubscription(tenant)" title="Manage Subscription">
+                        <span class="material-symbols-rounded">credit_card</span>
+                      </button>
+                    </div>
+                  </td>
+                </tr>
+              </template>
+            </tbody>
+          </table>
+          
+          <!-- Pagination -->
+          <div class="pagination">
+            <div class="pagination-info">
+              Showing <span x-text="paginatedTenants.length"></span> of <span x-text="filteredTenants.length"></span> tenants
+            </div>
+            <div class="pagination-controls">
+              <button class="pagination-button" @click="previousPage" :disabled="currentPage === 1">
+                <span class="material-symbols-rounded">chevron_left</span>
+              </button>
+              <template x-for="page in visiblePages" :key="page">
+                <button class="pagination-button" 
+                        :class="{ active: page === currentPage }"
+                        @click="goToPage(page)"
+                        x-text="page"></button>
+              </template>
+              <button class="pagination-button" @click="nextPage" :disabled="currentPage === totalPages">
+                <span class="material-symbols-rounded">chevron_right</span>
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </main>
+
+    <!-- Create/Edit Tenant Modal -->
+    <div class="modal-overlay" :class="{ 'show': showTenantModal }" @click="closeTenantModal">
+      <div class="modal" @click.stop>
+        <div class="modal-header">
+          <h3 class="modal-title" x-text="editingTenant ? 'Edit Tenant' : 'Create New Tenant'"></h3>
+          <p class="modal-subtitle" x-text="editingTenant ? 'Update tenant information' : 'Fill in the details to create a new tenant account'"></p>
+        </div>
+        
+        <form @submit.prevent="saveTenant">
+          <div class="form-grid">
+            <div class="form-group">
+              <label class="form-label">Tenant Name *</label>
+              <input type="text" class="form-input" x-model="tenantForm.name" required>
+            </div>
+            <div class="form-group">
+              <label class="form-label">Domain *</label>
+              <input type="text" class="form-input" x-model="tenantForm.domain" required placeholder="example.umihealth.com">
+            </div>
+          </div>
+          
+          <div class="form-grid">
+            <div class="form-group">
+              <label class="form-label">Contact Name *</label>
+              <input type="text" class="form-input" x-model="tenantForm.contactName" required>
+            </div>
+            <div class="form-group">
+              <label class="form-label">Contact Email *</label>
+              <input type="email" class="form-input" x-model="tenantForm.contactEmail" required>
+            </div>
+          </div>
+          
+          <div class="form-grid">
+            <div class="form-group">
+              <label class="form-label">Contact Phone</label>
+              <input type="tel" class="form-input" x-model="tenantForm.contactPhone">
+            </div>
+            <div class="form-group">
+              <label class="form-label">Subscription Plan *</label>
+              <select class="form-select" x-model="tenantForm.plan" required>
+                <option value="">Select Plan</option>
+                <option value="Basic">Basic</option>
+                <option value="Professional">Professional</option>
+                <option value="Enterprise">Enterprise</option>
+              </select>
+            </div>
+          </div>
+          
+          <div class="form-group">
+            <label class="form-label">Address</label>
+            <textarea class="form-textarea" x-model="tenantForm.address"></textarea>
+          </div>
+          
+          <div class="form-group">
+            <label class="form-label">Notes</label>
+            <textarea class="form-textarea" x-model="tenantForm.notes"></textarea>
+          </div>
+          
+          <div class="modal-actions">
+            <button type="button" class="modal-button modal-button-secondary" @click="closeTenantModal">
+              Cancel
+            </button>
+            <button type="submit" class="modal-button modal-button-primary">
+              <span x-text="editingTenant ? 'Update Tenant' : 'Create Tenant'"></span>
+            </button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+
+  <script src="../../shared/js/operations-api.js"></script>
+  <script>
+    function tenantsManagement() {
+      return {
+        mobileMenuOpen: false,
+        activeMenu: 'tenants',
+        searchQuery: '',
+        showFilterDropdown: false,
+        showTenantModal: false,
+        editingTenant: null,
+        currentPage: 1,
+        itemsPerPage: 10,
+        loading: false,
+        totalCount: 0,
+        totalPages: 0,
+        
+        tenantForm: {
+          name: '',
+          domain: '',
+          contactName: '',
+          contactEmail: '',
+          contactPhone: '',
+          plan: '',
+          address: '',
+          notes: ''
+        },
+        
+        tenants: [],
+        
+        async init() {
+          await this.loadTenants();
+        },
+        
+        async loadTenants() {
+          try {
+            this.loading = true;
+            const response = await window.operationsAPI.getTenants(
+              this.currentPage,
+              this.itemsPerPage,
+              this.searchQuery
+            );
+            
+            this.tenants = response.data || [];
+            this.totalCount = response.totalCount || 0;
+            this.totalPages = response.totalPages || 0;
+          } catch (error) {
+            console.error('Failed to load tenants:', error);
+            // Fallback to mock data if API fails
+            this.tenants = [
+          {
+            id: 1,
+            name: 'MedCare Pharmacy',
+            domain: 'medcare.umihealth.com',
+            contactName: 'John Smith',
+            contactEmail: 'john.smith@medcare.com',
+            contactPhone: '+1-555-0123',
+            plan: 'Professional',
+            subscriptionStatus: 'Active',
+            status: 'Active',
+            createdDate: '2024-01-15',
+            address: '123 Main St, City, State 12345',
+            notes: 'Long-term client, excellent payment history'
+          },
+          {
+            id: 2,
+            name: 'HealthPlus Drugs',
+            domain: 'healthplus.umihealth.com',
+            contactName: 'Sarah Johnson',
+            contactEmail: 'sarah@healthplus.com',
+            contactPhone: '+1-555-0456',
+            plan: 'Basic',
+            subscriptionStatus: 'Trial',
+            status: 'Trial',
+            createdDate: '2024-02-20',
+            address: '456 Oak Ave, Town, State 67890',
+            notes: 'Trial period, considering upgrade'
+          },
+          {
+            id: 3,
+            name: 'QuickMeds',
+            domain: 'quickmeds.umihealth.com',
+            contactName: 'Mike Wilson',
+            contactEmail: 'mike@quickmeds.com',
+            contactPhone: '+1-555-0789',
+            plan: 'Enterprise',
+            subscriptionStatus: 'Active',
+            status: 'Active',
+            createdDate: '2023-12-10',
+            address: '789 Pine Rd, Village, State 11223',
+            notes: 'Enterprise client with multiple locations'
+          },
+          {
+            id: 4,
+            name: 'City Pharmacy',
+            domain: 'citypharmacy.umihealth.com',
+            contactName: 'Emily Brown',
+            contactEmail: 'admin@citypharmacy.com',
+            contactPhone: '+1-555-0234',
+            plan: 'Professional',
+            subscriptionStatus: 'Expired',
+            status: 'Inactive',
+            createdDate: '2023-11-05',
+            address: '321 Elm St, Metro, State 44556',
+            notes: 'Subscription expired, follow up required'
+          }
+        ];
+        
+        this.totalCount = this.tenants.length;
+        this.totalPages = Math.ceil(this.tenants.length / this.itemsPerPage);
+          } finally {
+            this.loading = false;
+          }
+        },
+        
+        get filteredTenants() {
+          let filtered = this.tenants;
+          
+          if (this.searchQuery) {
+            const query = this.searchQuery.toLowerCase();
+            filtered = filtered.filter(tenant => 
+              tenant.name.toLowerCase().includes(query) ||
+              tenant.domain.toLowerCase().includes(query) ||
+              tenant.contactName.toLowerCase().includes(query) ||
+              tenant.contactEmail.toLowerCase().includes(query)
+            );
+          }
+          
+          return filtered;
+        },
+        
+        get paginatedTenants() {
+          const start = (this.currentPage - 1) * this.itemsPerPage;
+          const end = start + this.itemsPerPage;
+          return this.filteredTenants.slice(start, end);
+        },
+        
+        get totalPages() {
+          return Math.ceil(this.filteredTenants.length / this.itemsPerPage);
+        },
+        
+        get visiblePages() {
+          const pages = [];
+          const maxVisible = 5;
+          let start = Math.max(1, this.currentPage - Math.floor(maxVisible / 2));
+          let end = Math.min(this.totalPages, start + maxVisible - 1);
+          
+          if (end - start < maxVisible - 1) {
+            start = Math.max(1, end - maxVisible + 1);
+          }
+          
+          for (let i = start; i <= end; i++) {
+            pages.push(i);
+          }
+          
+          return pages;
+        },
+        
+        setActiveMenu(menu) {
+          this.activeMenu = menu;
+        },
+        
+        async filterTenants() {
+          this.currentPage = 1;
+          await this.loadTenants();
+        },
+        
+        async saveTenant() {
+          try {
+            if (this.editingTenant) {
+              await window.operationsAPI.updateTenant(this.editingTenant.id, this.tenantForm);
+            } else {
+              await window.operationsAPI.createTenant(this.tenantForm);
+            }
+            
+            this.closeTenantModal();
+            await this.loadTenants();
+          } catch (error) {
+            console.error('Failed to save tenant:', error);
+            alert('Failed to save tenant. Please try again.');
+          }
+        },
+        
+        openCreateModal() {
+          this.editingTenant = null;
+          this.tenantForm = {
+            name: '',
+            domain: '',
+            contactName: '',
+            contactEmail: '',
+            contactPhone: '',
+            plan: '',
+            address: '',
+            notes: ''
+          };
+          this.showTenantModal = true;
+        },
+        
+        editTenant(tenant) {
+          this.editingTenant = tenant;
+          this.tenantForm = {
+            name: tenant.name,
+            domain: tenant.domain,
+            contactName: tenant.contactName,
+            contactEmail: tenant.contactEmail,
+            contactPhone: tenant.contactPhone,
+            plan: tenant.plan,
+            address: tenant.address,
+            notes: tenant.notes
+          };
+          this.showTenantModal = true;
+        },
+        
+        closeTenantModal() {
+          this.showTenantModal = false;
+          this.editingTenant = null;
+        },
+        
+        async goToPage(page) {
+          this.currentPage = page;
+          await this.loadTenants();
+        },
+        
+        async previousPage() {
+          if (this.currentPage > 1) {
+            this.currentPage--;
+            await this.loadTenants();
+          }
+        },
+        
+        async nextPage() {
+          if (this.currentPage < this.totalPages) {
+            this.currentPage++;
+            await this.loadTenants();
+          }
+        },
+        
+        viewTenant(tenant) {
+          alert(`Viewing tenant: ${tenant.name}\n\nThis would open a detailed view page for tenant.`);
+        },
+        
+        manageSubscription(tenant) {
+          alert(`Managing subscription for: ${tenant.name}\n\nThis would navigate to subscription management page.`);
+        },
+        
+        handleLogout() {
+          if (confirm('Are you sure you want to sign out?')) {
+            window.operationsAPI.clearAuthToken();
+            window.location.href = '../../signin.html';
+          }
+        }
+      }
+    }
+  </script>
+</body>
+</html>

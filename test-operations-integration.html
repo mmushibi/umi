@@ -1,0 +1,144 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Operations Integration Test</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-gray-100 p-8">
+    <div class="max-w-4xl mx-auto">
+        <h1 class="text-3xl font-bold mb-8">Operations Portal Integration Test</h1>
+        
+        <div class="bg-white rounded-lg shadow p-6 mb-6">
+            <h2 class="text-xl font-semibold mb-4">API Test Results</h2>
+            <div id="test-results" class="space-y-2">
+                <p class="text-gray-600">Running tests...</p>
+            </div>
+        </div>
+
+        <div class="bg-white rounded-lg shadow p-6">
+            <h2 class="text-xl font-semibold mb-4">Manual Test</h2>
+            <div class="space-y-4">
+                <button onclick="testDashboard()" class="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600">
+                    Test Dashboard API
+                </button>
+                <button onclick="testTenants()" class="bg-green-500 text-white px-4 py-2 rounded hover:bg-green-600">
+                    Test Tenants API
+                </button>
+                <button onclick="testSubscriptions()" class="bg-purple-500 text-white px-4 py-2 rounded hover:bg-purple-600">
+                    Test Subscriptions API
+                </button>
+                <button onclick="testSync()" class="bg-orange-500 text-white px-4 py-2 rounded hover:bg-orange-600">
+                    Test Sync API
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <script src="shared/js/operations-api.js"></script>
+    <script>
+        // Mock auth token for testing
+        window.operationsAPI.setAuthToken('test-token-123');
+
+        async function runTests() {
+            const results = document.getElementById('test-results');
+            results.innerHTML = '';
+
+            const tests = [
+                { name: 'Dashboard Stats', fn: testDashboardAPI },
+                { name: 'Recent Tenants', fn: testRecentTenantsAPI },
+                { name: 'Get Tenants', fn: testTenantsAPI },
+                { name: 'Get Subscriptions', fn: testSubscriptionsAPI },
+                { name: 'Get Users', fn: testUsersAPI },
+                { name: 'Get Transactions', fn: testTransactionsAPI },
+                { name: 'Get Sync Status', fn: testSyncStatusAPI }
+            ];
+
+            for (const test of tests) {
+                try {
+                    await test.fn();
+                    results.innerHTML += `<p class="text-green-600">✅ ${test.name} - Success</p>`;
+                } catch (error) {
+                    results.innerHTML += `<p class="text-red-600">❌ ${test.name} - Failed: ${error.message}</p>`;
+                }
+            }
+        }
+
+        async function testDashboardAPI() {
+            const response = await window.operationsAPI.getDashboardStats();
+            console.log('Dashboard Stats:', response);
+        }
+
+        async function testRecentTenantsAPI() {
+            const response = await window.operationsAPI.getRecentTenants();
+            console.log('Recent Tenants:', response);
+        }
+
+        async function testTenantsAPI() {
+            const response = await window.operationsAPI.getTenants();
+            console.log('Tenants:', response);
+        }
+
+        async function testSubscriptionsAPI() {
+            const response = await window.operationsAPI.getSubscriptions();
+            console.log('Subscriptions:', response);
+        }
+
+        async function testUsersAPI() {
+            const response = await window.operationsAPI.getUsers();
+            console.log('Users:', response);
+        }
+
+        async function testTransactionsAPI() {
+            const response = await window.operationsAPI.getTransactions();
+            console.log('Transactions:', response);
+        }
+
+        async function testSyncStatusAPI() {
+            const response = await window.operationsAPI.getSyncStatus();
+            console.log('Sync Status:', response);
+        }
+
+        // Manual test functions
+        async function testDashboard() {
+            try {
+                const stats = await window.operationsAPI.getDashboardStats();
+                alert(`Dashboard Stats:\nTotal Tenants: ${stats.totalTenants}\nActive Subscriptions: ${stats.activeSubscriptions}\nTotal Users: ${stats.totalUsers}`);
+            } catch (error) {
+                alert(`Error: ${error.message}`);
+            }
+        }
+
+        async function testTenants() {
+            try {
+                const tenants = await window.operationsAPI.getTenants();
+                alert(`Found ${tenants.data?.length || 0} tenants`);
+            } catch (error) {
+                alert(`Error: ${error.message}`);
+            }
+        }
+
+        async function testSubscriptions() {
+            try {
+                const subscriptions = await window.operationsAPI.getSubscriptions();
+                alert(`Found ${subscriptions.data?.length || 0} subscriptions`);
+            } catch (error) {
+                alert(`Error: ${error.message}`);
+            }
+        }
+
+        async function testSync() {
+            try {
+                const status = await window.operationsAPI.getSyncStatus();
+                alert(`Sync Status: ${status.status}\nLast Sync: ${status.lastSyncTime}`);
+            } catch (error) {
+                alert(`Error: ${error.message}`);
+            }
+        }
+
+        // Run tests on page load
+        window.addEventListener('load', runTests);
+    </script>
+</body>
+</html>

@@ -1,0 +1,1438 @@
+<!DOCTYPE html>
+<html lang="en" x-data="accountSystem()">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Account Settings - Umi Health Information Systems</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@100;400;500;600;700&family=Varela+Round&family=Nunito:wght@400;600;700&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Rounded:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="stylesheet" href="../shared/css/shared-styles.css">
+  <script src="../shared/js/data-sync.js"></script>
+  <script src="../shared/js/role-based-access.js"></script>
+  <script src="../admin/js/admin-api.js"></script>
+  <style>
+    :root {
+      --color-primary: #000000;
+      --color-accent: #14B8A6;
+      --color-success: #22c55e;
+      --color-warning: #ef4444;
+      --color-text-primary: #000000;
+      --color-text-secondary: #6b7280;
+      --color-text-muted: #9ca3af;
+      --color-background: #ffffff;
+      --color-surface: #f9fafb;
+      --color-border: #e5e7eb;
+      --font-primary: 'Inter', sans-serif;
+      --sidebar-width: 280px;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      background: var(--color-background);
+      color: var(--color-text-primary);
+      font-family: 'Nunito', 'Varela Round', sans-serif;
+      line-height: 1.5;
+      overflow-x: hidden;
+    }
+
+    /* Sidebar Styles */
+    .sidebar {
+      position: fixed;
+      left: 0;
+      top: 0;
+      width: var(--sidebar-width);
+      height: 100vh;
+      background: var(--color-text-primary);
+      color: var(--color-accent);
+      z-index: 1000;
+      transition: transform 0.3s ease;
+      display: flex;
+      flex-direction: column;
+      overflow-y: auto;
+      overflow-x: hidden;
+    }
+
+    .sidebar-header {
+      padding: 1.5rem;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+    }
+
+    .logo-section {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+    }
+
+    .logo-icon {
+      width: 40px;
+      height: 40px;
+      background: rgba(255, 255, 255, 0.2);
+      border-radius: 10px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.5rem;
+    }
+
+    .logo-text {
+      font-size: 1.25rem;
+      font-weight: 700;
+      font-family: 'Inter', sans-serif;
+    }
+
+    .pharmacy-info {
+      padding: 1rem 1.5rem;
+      background: rgba(255, 255, 255, 0.1);
+      margin: 1rem 1.5rem;
+      border-radius: 12px;
+      font-size: 0.85rem;
+    }
+
+    .pharmacy-name {
+      font-weight: 600;
+      margin-bottom: 0.25rem;
+    }
+
+    .pharmacy-location {
+      opacity: 0.8;
+      font-size: 0.75rem;
+    }
+
+    .nav-menu {
+      padding: 1rem 0;
+      flex: 1;
+      overflow-y: auto;
+    }
+
+    .nav-item {
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+      padding: 0.875rem 1.5rem;
+      color: rgba(255, 255, 255, 0.8);
+      text-decoration: none;
+      transition: all 0.2s ease;
+      cursor: pointer;
+      font-size: 0.9rem;
+      font-weight: 500;
+    }
+
+    .nav-item:hover {
+      background: rgba(255, 255, 255, 0.1);
+      color: var(--color-accent);
+    }
+
+    .nav-item.active {
+      background: rgba(255, 255, 255, 0.15);
+      color: var(--color-accent);
+      border-left: 3px solid var(--color-accent);
+    }
+
+    .nav-icon {
+      font-size: 1.25rem;
+    }
+
+    /* Main Content Area */
+    .main-content {
+      margin-left: var(--sidebar-width);
+      min-height: 100vh;
+      transition: margin-left 0.3s ease;
+    }
+
+    /* Header Styles */
+    .header {
+      background: white;
+      border-bottom: 1px solid #e2e8f0;
+      padding: 1rem 2rem;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      position: sticky;
+      top: 0;
+      z-index: 100;
+    }
+
+    .header-left {
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+    }
+
+    .page-title-section {
+      margin-right: 2rem;
+    }
+
+    .page-title-section .page-title {
+      font-size: 1.5rem;
+      font-weight: 700;
+      color: var(--color-text-primary);
+      margin: 0;
+      font-family: 'Inter', sans-serif;
+    }
+
+    .mobile-menu-toggle {
+      display: none;
+      background: none;
+      border: none;
+      font-size: 1.5rem;
+      color: var(--color-text-secondary);
+      cursor: pointer;
+    }
+
+    .header-right {
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+    }
+
+    .user-profile {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+      padding: 0.5rem;
+      border-radius: 16px;
+      cursor: pointer;
+      transition: all 0.3s ease;
+    }
+
+    .user-profile:hover {
+      background: var(--color-surface);
+    }
+
+    .user-avatar {
+      width: 36px;
+      height: 36px;
+      background: var(--color-text-primary);
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: var(--color-accent);
+      font-weight: 600;
+      font-size: 0.875rem;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+    }
+
+    .user-info {
+      display: flex;
+      flex-direction: column;
+    }
+
+    .user-name {
+      font-size: 0.875rem;
+      font-weight: 600;
+      color: var(--color-text-primary);
+    }
+
+    .user-role {
+      font-size: 0.75rem;
+      color: var(--color-text-secondary);
+    }
+
+    /* Account Content */
+    .account-content {
+      padding: 2rem;
+      max-width: 1200px;
+      margin: 0 auto;
+    }
+
+    /* Settings Grid */
+    .settings-grid {
+      display: grid;
+      grid-template-columns: 300px 1fr;
+      gap: 2rem;
+    }
+
+    /* Settings Navigation */
+    .settings-nav {
+      background: var(--color-background);
+      border-radius: 20px;
+      border: 1px solid var(--color-border);
+      padding: 1.5rem;
+      height: fit-content;
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
+    }
+
+    .settings-nav-title {
+      font-size: 1.125rem;
+      font-weight: 600;
+      color: var(--color-text-primary);
+      margin-bottom: 1.5rem;
+      font-family: 'Inter', sans-serif;
+    }
+
+    .settings-nav-list {
+      list-style: none;
+    }
+
+    .settings-nav-item {
+      margin-bottom: 0.5rem;
+    }
+
+    .settings-nav-link {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+      padding: 0.75rem 1rem;
+      border-radius: 12px;
+      text-decoration: none;
+      color: var(--color-text-secondary);
+      font-size: 0.875rem;
+      font-weight: 500;
+      transition: all 0.2s ease;
+    }
+
+    .settings-nav-link:hover {
+      background: var(--color-surface);
+      color: var(--color-text-primary);
+    }
+
+    .settings-nav-link.active {
+      background: var(--color-primary);
+      color: var(--color-accent);
+    }
+
+    .settings-nav-icon {
+      font-size: 1.125rem;
+    }
+
+    /* Settings Content */
+    .settings-content {
+      background: var(--color-background);
+      border-radius: 20px;
+      border: 1px solid var(--color-border);
+      padding: 2rem;
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
+    }
+
+    .settings-section {
+      margin-bottom: 2rem;
+    }
+
+    .settings-section:last-child {
+      margin-bottom: 0;
+    }
+
+    .section-title {
+      font-size: 1.25rem;
+      font-weight: 600;
+      color: var(--color-text-primary);
+      margin-bottom: 1.5rem;
+      font-family: 'Inter', sans-serif;
+    }
+
+    .section-description {
+      color: var(--color-text-secondary);
+      font-size: 0.875rem;
+      margin-bottom: 1.5rem;
+    }
+
+    /* Form Styles */
+    .form-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+      gap: 1.5rem;
+    }
+
+    .form-group {
+      display: flex;
+      flex-direction: column;
+    }
+
+    .form-group.full-width {
+      grid-column: 1 / -1;
+    }
+
+    .form-label {
+      font-weight: 500;
+      color: var(--color-text-primary);
+      margin-bottom: 0.5rem;
+      font-size: 0.875rem;
+    }
+
+    .form-input {
+      padding: 0.75rem 1rem;
+      border: 1px solid var(--color-border);
+      border-radius: 12px;
+      font-size: 0.875rem;
+      transition: all 0.3s ease;
+      background: var(--color-background);
+    }
+
+    .form-input:focus {
+      outline: none;
+      border-color: var(--color-primary);
+      box-shadow: 0 0 0 4px rgba(0, 0, 0, 0.1);
+    }
+
+    .form-textarea {
+      resize: vertical;
+      min-height: 100px;
+    }
+
+    .section-title-sub {
+      font-size: 1.125rem;
+      font-weight: 600;
+      color: var(--color-text-primary);
+      margin: 2rem 0 1.5rem 0;
+      font-family: 'Inter', sans-serif;
+    }
+
+    /* Profile Section */
+    .profile-section {
+      display: flex;
+      align-items: center;
+      gap: 2rem;
+      padding: 2rem;
+      background: var(--color-surface);
+      border-radius: 16px;
+      margin-bottom: 2rem;
+    }
+
+    .profile-avatar-large {
+      width: 100px;
+      height: 100px;
+      background: var(--color-text-primary);
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: var(--color-accent);
+      font-weight: 600;
+      font-size: 2rem;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+    }
+
+    .profile-info {
+      flex: 1;
+    }
+
+    .profile-name {
+      font-size: 1.5rem;
+      font-weight: 700;
+      color: var(--color-text-primary);
+      margin-bottom: 0.25rem;
+      font-family: 'Inter', sans-serif;
+    }
+
+    .profile-email {
+      color: var(--color-text-secondary);
+      font-size: 0.875rem;
+      margin-bottom: 0.5rem;
+    }
+
+    .profile-role {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.25rem;
+      padding: 0.25rem 0.75rem;
+      border-radius: 12px;
+      font-size: 0.75rem;
+      font-weight: 600;
+      background: rgba(0, 0, 0, 0.1);
+      color: var(--color-text-secondary);
+    }
+
+    /* Button Styles */
+    .button-group {
+      display: flex;
+      gap: 1rem;
+      justify-content: flex-end;
+      margin-top: 2rem;
+    }
+
+    .btn {
+      padding: 0.75rem 1.5rem;
+      border-radius: 12px;
+      font-size: 0.875rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      border: none;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+
+    .btn-primary {
+      background: var(--color-primary);
+      color: var(--color-accent);
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+    }
+
+    .btn-primary:hover {
+      background: var(--color-text-secondary);
+      transform: translateY(-2px);
+      box-shadow: 0 8px 24px rgba(0, 0, 0, 0.2);
+    }
+
+    .btn-secondary {
+      background: var(--color-surface);
+      color: var(--color-text-secondary);
+      border: 1px solid var(--color-border);
+    }
+
+    .btn-secondary:hover {
+      background: var(--color-border);
+    }
+
+    .btn-danger {
+      background: var(--color-warning);
+      color: var(--color-accent);
+      box-shadow: 0 2px 8px rgba(239, 68, 68, 0.2);
+    }
+
+    .btn-danger:hover {
+      background: #dc2626;
+      transform: translateY(-2px);
+      box-shadow: 0 8px 24px rgba(239, 68, 68, 0.3);
+    }
+
+    /* Security Section */
+    .security-item {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 1rem;
+      background: var(--color-surface);
+      border-radius: 12px;
+      margin-bottom: 1rem;
+    }
+
+    .security-info {
+      flex: 1;
+    }
+
+    .security-title {
+      font-weight: 600;
+      color: var(--color-text-primary);
+      margin-bottom: 0.25rem;
+    }
+
+    .security-description {
+      font-size: 0.875rem;
+      color: var(--color-text-secondary);
+    }
+
+    .security-status {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.25rem;
+      padding: 0.25rem 0.75rem;
+      border-radius: 12px;
+      font-size: 0.75rem;
+      font-weight: 600;
+    }
+
+    .security-status.enabled {
+      background: rgba(34, 197, 94, 0.1);
+      color: var(--color-success);
+    }
+
+    .security-status.disabled {
+      background: rgba(239, 68, 68, 0.1);
+      color: var(--color-warning);
+    }
+
+    /* Notification Settings */
+    .notification-item {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 1rem 0;
+      border-bottom: 1px solid var(--color-border);
+    }
+
+    .notification-item:last-child {
+      border-bottom: none;
+    }
+
+    .notification-info {
+      flex: 1;
+    }
+
+    .notification-title {
+      font-weight: 600;
+      color: var(--color-text-primary);
+      margin-bottom: 0.25rem;
+    }
+
+    .notification-description {
+      font-size: 0.875rem;
+      color: var(--color-text-secondary);
+    }
+
+    /* Toggle Switch */
+    .toggle-switch {
+      position: relative;
+      width: 48px;
+      height: 24px;
+      background: var(--color-border);
+      border-radius: 12px;
+      cursor: pointer;
+      transition: background 0.3s ease;
+    }
+
+    .toggle-switch.active {
+      background: var(--color-success);
+    }
+
+    .toggle-slider {
+      position: absolute;
+      top: 2px;
+      left: 2px;
+      width: 20px;
+      height: 20px;
+      background: var(--color-accent);
+      border-radius: 50%;
+      transition: transform 0.3s ease;
+    }
+
+    .toggle-switch.active .toggle-slider {
+      transform: translateX(24px);
+    }
+
+    .logout-section {
+      padding: 1rem;
+      border-top: 1px solid rgba(255, 255, 255, 0.1);
+      margin-top: auto;
+    }
+
+    .logout-button {
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+      padding: 0.875rem 1.5rem;
+      color: rgba(255, 255, 255, 0.8);
+      text-decoration: none;
+      transition: all 0.2s ease;
+      cursor: pointer;
+      font-size: 0.9rem;
+      font-weight: 500;
+      width: 100%;
+      border: none;
+      background: transparent;
+      text-align: left;
+    }
+
+    .logout-button:hover {
+      background: rgba(239, 68, 68, 0.1);
+      color: var(--color-warning);
+    }
+
+    .logout-icon {
+      font-size: 1.25rem;
+    }
+
+    .profile-icon {
+      font-size: 0.75rem;
+    }
+
+    @media (max-width: 768px) {
+      .sidebar {
+        transform: translateX(-100%);
+      }
+
+      .sidebar.open {
+        transform: translateX(0);
+      }
+
+      .main-content {
+        margin-left: 0;
+      }
+
+      .mobile-menu-toggle {
+        display: block;
+      }
+
+      .page-title-section {
+        display: none;
+      }
+
+      .account-content {
+        padding: 1rem;
+      }
+
+      .settings-grid {
+        grid-template-columns: 1fr;
+      }
+
+      .settings-nav {
+        order: 2;
+      }
+
+      .settings-content {
+        order: 1;
+      }
+
+      .profile-section {
+        flex-direction: column;
+        text-align: center;
+      }
+
+      .form-grid {
+        grid-template-columns: 1fr;
+      }
+
+      .button-group {
+        flex-direction: column;
+      }
+    }
+  </style>
+</head>
+<body>
+  <!-- Sidebar -->
+  <aside class="sidebar" :class="sidebarOpen ? 'open' : ''">
+    <div class="sidebar-header">
+      <div class="logo-section">
+        <div class="logo-icon">
+          <span class="material-symbols-rounded">medication</span>
+        </div>
+        <div class="logo-text">Umi Health</div>
+      </div>
+    </div>
+
+    <div class="pharmacy-info">
+      <div class="pharmacy-name" x-text="pharmacyInfo.name"></div>
+      <div class="pharmacy-location" x-text="pharmacyInfo.location"></div>
+    </div>
+
+    <nav class="nav-menu">
+      <a href="home.html" class="nav-item">
+        <span class="material-symbols-rounded nav-icon">home</span>
+        <span>Home</span>
+      </a>
+      <a href="point-of-sale.html" class="nav-item">
+        <span class="material-symbols-rounded nav-icon">point_of_sale</span>
+        <span>Point of Sale</span>
+      </a>
+      <a href="inventory.html" class="nav-item">
+        <span class="material-symbols-rounded nav-icon">inventory_2</span>
+        <span>Inventory</span>
+      </a>
+      <a href="prescriptions.html" class="nav-item">
+        <span class="material-symbols-rounded nav-icon">prescriptions</span>
+        <span>Prescriptions</span>
+      </a>
+      <a href="patients.html" class="nav-item">
+        <span class="material-symbols-rounded nav-icon">people</span>
+        <span>Patients</span>
+      </a>
+      <a href="sales.html" class="nav-item">
+        <span class="material-symbols-rounded nav-icon">receipt_long</span>
+        <span>Sales</span>
+      </a>
+      <a href="payments.html" class="nav-item">
+        <span class="material-symbols-rounded nav-icon">payments</span>
+        <span>Payments</span>
+      </a>
+      <a href="reports.html" class="nav-item">
+        <span class="material-symbols-rounded nav-icon">analytics</span>
+        <span>Reports</span>
+      </a>
+      <a href="user-management.html" class="nav-item">
+        <span class="material-symbols-rounded nav-icon">admin_panel_settings</span>
+        <span>User Management</span>
+      </a>
+      <a href="account.html" class="nav-item active">
+        <span class="material-symbols-rounded nav-icon">settings</span>
+        <span>Account</span>
+      </a>
+    </nav>
+    
+    <div class="logout-section">
+      <button class="logout-button" @click="logout()">
+        <span class="material-symbols-rounded logout-icon">logout</span>
+        <span>Logout</span>
+      </button>
+    </div>
+  </aside>
+
+  <!-- Main Content -->
+  <main class="main-content">
+    <!-- Header -->
+    <header class="header">
+      <div class="header-left">
+        <button class="mobile-menu-toggle" @click="sidebarOpen = !sidebarOpen">
+          <span class="material-symbols-rounded">menu</span>
+        </button>
+        
+        <div class="page-title-section">
+          <h1 class="page-title">Account Settings</h1>
+        </div>
+      </div>
+
+      <div class="header-right">
+        <div class="user-profile">
+          <div class="user-avatar">
+            <span x-text="userInfo.initials"></span>
+          </div>
+          <div class="user-info">
+            <div class="user-name" x-text="userInfo.name"></div>
+            <div class="user-role" x-text="userInfo.role"></div>
+          </div>
+        </div>
+      </div>
+    </header>
+
+    <!-- Account Content -->
+    <div class="account-content">
+      <div class="settings-grid">
+        <!-- Settings Navigation -->
+        <div class="settings-nav">
+          <h3 class="settings-nav-title">Settings</h3>
+          <ul class="settings-nav-list">
+            <li class="settings-nav-item">
+              <a href="#" class="settings-nav-link active" @click="activeSection = 'profile'">
+                <span class="material-symbols-rounded settings-nav-icon">person</span>
+                <span>Profile</span>
+              </a>
+            </li>
+            <li class="settings-nav-item">
+              <a href="#" class="settings-nav-link" @click="activeSection = 'security'">
+                <span class="material-symbols-rounded settings-nav-icon">security</span>
+                <span>Security</span>
+              </a>
+            </li>
+            <li class="settings-nav-item">
+              <a href="#" class="settings-nav-link" @click="activeSection = 'notifications'">
+                <span class="material-symbols-rounded settings-nav-icon">notifications</span>
+                <span>Notifications</span>
+              </a>
+            </li>
+            <li class="settings-nav-item">
+              <a href="#" class="settings-nav-link" @click="activeSection = 'pharmacy'">
+                <span class="material-symbols-rounded settings-nav-icon">business</span>
+                <span>Pharmacy Settings</span>
+              </a>
+            </li>
+            <li class="settings-nav-item">
+              <a href="#" class="settings-nav-link" @click="activeSection = 'billing'">
+                <span class="material-symbols-rounded settings-nav-icon">payments</span>
+                <span>Billing</span>
+              </a>
+            </li>
+          </ul>
+        </div>
+
+        <!-- Settings Content -->
+        <div class="settings-content">
+          <!-- Profile Section -->
+          <div x-show="activeSection === 'profile'">
+            <div class="profile-section">
+              <div class="profile-avatar-large" x-text="userInfo.initials"></div>
+              <div class="profile-info">
+                <div class="profile-name" x-text="userInfo.name"></div>
+                <div class="profile-email" x-text="userInfo.email"></div>
+                <span class="profile-role">
+                  <span class="material-symbols-rounded profile-icon">person</span>
+                  <span x-text="userInfo.role"></span>
+                </span>
+              </div>
+            </div>
+
+            <div class="settings-section">
+              <h2 class="section-title">Personal Information</h2>
+              <p class="section-description">Update your personal information and contact details.</p>
+              
+              <div class="form-grid">
+                <div class="form-group">
+                  <label class="form-label" for="firstName">First Name</label>
+                  <input type="text" id="firstName" class="form-input" x-model="profile.firstName" placeholder="Enter first name">
+                </div>
+                <div class="form-group">
+                  <label class="form-label" for="lastName">Last Name</label>
+                  <input type="text" id="lastName" class="form-input" x-model="profile.lastName" placeholder="Enter last name">
+                </div>
+                <div class="form-group">
+                  <label class="form-label" for="email">Email Address</label>
+                  <input type="email" id="email" class="form-input" x-model="profile.email" placeholder="Enter email address">
+                </div>
+                <div class="form-group">
+                  <label class="form-label" for="phone">Phone Number</label>
+                  <input type="tel" id="phone" class="form-input" x-model="profile.phone" placeholder="Enter phone number">
+                </div>
+                <div class="form-group full-width">
+                  <label class="form-label" for="bio">Bio</label>
+                  <textarea id="bio" class="form-input form-textarea" x-model="profile.bio" placeholder="Enter your bio"></textarea>
+                </div>
+              </div>
+
+              <div class="button-group">
+                <button class="btn btn-secondary">Cancel</button>
+                <button class="btn btn-primary" @click="saveProfile">
+                  <span class="material-symbols-rounded">save</span>
+                  <span>Save Changes</span>
+                </button>
+              </div>
+            </div>
+          </div>
+
+          <!-- Security Section -->
+          <div x-show="activeSection === 'security'">
+            <div class="settings-section">
+              <h2 class="section-title">Security Settings</h2>
+              <p class="section-description">Manage your password and security preferences.</p>
+              
+              <div class="security-item">
+                <div class="security-info">
+                  <div class="security-title">Password</div>
+                  <div class="security-description">Last changed 30 days ago</div>
+                </div>
+                <button class="btn btn-secondary">Change Password</button>
+              </div>
+
+              <div class="security-item">
+                <div class="security-info">
+                  <div class="security-title">Two-Factor Authentication</div>
+                  <div class="security-description">Add an extra layer of security to your account</div>
+                </div>
+                <span class="security-status disabled">Disabled</span>
+              </div>
+
+              <div class="security-item">
+                <div class="security-info">
+                  <div class="security-title">Login Sessions</div>
+                  <div class="security-description">Manage your active login sessions</div>
+                </div>
+                <button class="btn btn-secondary">View Sessions</button>
+              </div>
+
+              <div class="security-item">
+                <div class="security-info">
+                  <div class="security-title">API Keys</div>
+                  <div class="security-description">Manage your API access keys</div>
+                </div>
+                <button class="btn btn-secondary">Manage Keys</button>
+              </div>
+            </div>
+          </div>
+
+          <!-- Notifications Section -->
+          <div x-show="activeSection === 'notifications'">
+            <div class="settings-section">
+              <h2 class="section-title">Notification Preferences</h2>
+              <p class="section-description">Choose how you want to be notified about important updates.</p>
+              
+              <div class="notification-item">
+                <div class="notification-info">
+                  <div class="notification-title">Email Notifications</div>
+                  <div class="notification-description">Receive notifications via email</div>
+                </div>
+                <div class="toggle-switch" :class="notifications.email ? 'active' : ''" @click="notifications.email = !notifications.email">
+                  <div class="toggle-slider"></div>
+                </div>
+              </div>
+
+              <div class="notification-item">
+                <div class="notification-info">
+                  <div class="notification-title">Push Notifications</div>
+                  <div class="notification-description">Receive browser push notifications</div>
+                </div>
+                <div class="toggle-switch" :class="notifications.push ? 'active' : ''" @click="notifications.push = !notifications.push">
+                  <div class="toggle-slider"></div>
+                </div>
+              </div>
+
+              <div class="notification-item">
+                <div class="notification-info">
+                  <div class="notification-title">Sales Alerts</div>
+                  <div class="notification-description">Get notified about new sales transactions</div>
+                </div>
+                <div class="toggle-switch" :class="notifications.sales ? 'active' : ''" @click="notifications.sales = !notifications.sales">
+                  <div class="toggle-slider"></div>
+                </div>
+              </div>
+
+              <div class="notification-item">
+                <div class="notification-info">
+                  <div class="notification-title">Inventory Alerts</div>
+                  <div class="notification-description">Get notified about low stock levels</div>
+                </div>
+                <div class="toggle-switch" :class="notifications.inventory ? 'active' : ''" @click="notifications.inventory = !notifications.inventory">
+                  <div class="toggle-slider"></div>
+                </div>
+              </div>
+
+              <div class="notification-item">
+                <div class="notification-info">
+                  <div class="notification-title">Prescription Alerts</div>
+                  <div class="notification-description">Get notified about new prescriptions</div>
+                </div>
+                <div class="toggle-switch" :class="notifications.prescriptions ? 'active' : ''" @click="notifications.prescriptions = !notifications.prescriptions">
+                  <div class="toggle-slider"></div>
+                </div>
+              </div>
+
+              <div class="button-group">
+                <button class="btn btn-primary" @click="saveNotifications">
+                  <span class="material-symbols-rounded">save</span>
+                  <span>Save Preferences</span>
+                </button>
+              </div>
+            </div>
+          </div>
+
+          <!-- Pharmacy Settings Section -->
+          <div x-show="activeSection === 'pharmacy'">
+            <div class="settings-section">
+              <h2 class="section-title">Pharmacy Settings</h2>
+              <p class="section-description">Configure your pharmacy's business information and preferences. These settings will be used across all documents including receipts, reports, and payments.</p>
+              
+              <div class="form-grid">
+                <div class="form-group">
+                  <label class="form-label" for="pharmacyName">Pharmacy Name</label>
+                  <input type="text" id="pharmacyName" class="form-input" x-model="pharmacySettings.name" placeholder="Enter pharmacy name">
+                </div>
+                <div class="form-group">
+                  <label class="form-label" for="pharmacyPhone">Phone Number</label>
+                  <input type="tel" id="pharmacyPhone" class="form-input" x-model="pharmacySettings.phone" placeholder="Enter phone number">
+                </div>
+                <div class="form-group">
+                  <label class="form-label" for="pharmacyEmail">Email Address</label>
+                  <input type="email" id="pharmacyEmail" class="form-input" x-model="pharmacySettings.email" placeholder="Enter email address">
+                </div>
+                <div class="form-group">
+                  <label class="form-label" for="pharmacyWebsite">Website</label>
+                  <input type="url" id="pharmacyWebsite" class="form-input" x-model="pharmacySettings.website" placeholder="Enter website URL">
+                </div>
+                <div class="form-group full-width">
+                  <label class="form-label" for="pharmacyAddress">Address</label>
+                  <input type="text" id="pharmacyAddress" class="form-input" x-model="pharmacySettings.address" placeholder="Enter street address">
+                </div>
+                <div class="form-group">
+                  <label class="form-label" for="pharmacyCity">City</label>
+                  <input type="text" id="pharmacyCity" class="form-input" x-model="pharmacySettings.city" placeholder="Enter city">
+                </div>
+                <div class="form-group">
+                  <label class="form-label" for="pharmacyProvince">Province</label>
+                  <input type="text" id="pharmacyProvince" class="form-input" x-model="pharmacySettings.province" placeholder="Enter province">
+                </div>
+                <div class="form-group">
+                  <label class="form-label" for="pharmacyPostalCode">Postal Code</label>
+                  <input type="text" id="pharmacyPostalCode" class="form-input" x-model="pharmacySettings.postalCode" placeholder="Enter postal code">
+                </div>
+              </div>
+
+              <h3 class="section-title section-title-sub">Receipt Settings</h3>
+              <p class="section-description">Configure how receipts and invoices appear across the system.</p>
+              
+              <div class="form-grid">
+                <div class="form-group">
+                  <label class="form-label" for="receiptHeader">Receipt Header</label>
+                  <input type="text" id="receiptHeader" class="form-input" x-model="pharmacySettings.receiptHeader" placeholder="Enter receipt header text">
+                </div>
+                <div class="form-group">
+                  <label class="form-label" for="receiptFooter">Receipt Footer</label>
+                  <input type="text" id="receiptFooter" class="form-input" x-model="pharmacySettings.receiptFooter" placeholder="Enter receipt footer text">
+                </div>
+                <div class="form-group">
+                  <label class="form-label" for="taxRate">Tax Rate (%)</label>
+                  <input type="number" id="taxRate" class="form-input" x-model="pharmacySettings.taxRate" min="0" max="100" step="0.1" placeholder="Enter tax rate">
+                </div>
+                <div class="form-group">
+                  <label class="form-label" for="currency">Currency</label>
+                  <input type="text" id="currency" class="form-input" x-model="pharmacySettings.currency" maxlength="3" placeholder="e.g., ZMW">
+                </div>
+              </div>
+
+              <h3 class="section-title section-title-sub">Report Settings</h3>
+              <p class="section-description">Configure report generation settings.</p>
+              
+              <div class="form-grid">
+                <div class="form-group">
+                  <label class="form-label" for="reportSignature">Report Signature</label>
+                  <input type="text" id="reportSignature" class="form-input" x-model="pharmacySettings.reportSignature" placeholder="Enter signature title">
+                </div>
+                <div class="form-group">
+                  <label class="form-label" for="invoicePrefix">Invoice Prefix</label>
+                  <input type="text" id="invoicePrefix" class="form-input" x-model="pharmacySettings.invoicePrefix" maxlength="10" placeholder="e.g., INV">
+                </div>
+                <div class="form-group">
+                  <label class="form-label" for="receiptPrefix">Receipt Prefix</label>
+                  <input type="text" id="receiptPrefix" class="form-input" x-model="pharmacySettings.receiptPrefix" maxlength="10" placeholder="e.g., RCP">
+                </div>
+                <div class="form-group">
+                  <label class="form-label" for="paymentTerms">Payment Terms</label>
+                  <input type="text" id="paymentTerms" class="form-input" x-model="pharmacySettings.paymentTerms" placeholder="Enter payment terms">
+                </div>
+              </div>
+
+              <div class="button-group">
+                <button class="btn btn-secondary">Cancel</button>
+                <button class="btn btn-primary" @click="savePharmacySettings">
+                  <span class="material-symbols-rounded">save</span>
+                  <span>Save Settings</span>
+                </button>
+              </div>
+            </div>
+          </div>
+
+          <!-- Billing Section -->
+          <div x-show="activeSection === 'billing'">
+            <div class="settings-section">
+              <h2 class="section-title">Billing & Subscription</h2>
+              <p class="section-description">Manage your subscription plan and payment methods.</p>
+              
+              <div class="security-item">
+                <div class="security-info">
+                  <div class="security-title">Current Plan</div>
+                  <div class="security-description">Professional Plan - ZMW 450/month</div>
+                </div>
+                <span class="security-status enabled">Active</span>
+              </div>
+
+              <div class="security-item">
+                <div class="security-info">
+                  <div class="security-title">Next Billing Date</div>
+                  <div class="security-description">January 24, 2025</div>
+                </div>
+                <button class="btn btn-secondary">View Invoice</button>
+              </div>
+
+              <div class="security-item">
+                <div class="security-info">
+                  <div class="security-title">Payment Method</div>
+                  <div class="security-description">Visa ending in 4242</div>
+                </div>
+                <button class="btn btn-secondary">Update</button>
+              </div>
+
+              <div class="security-item">
+                <div class="security-info">
+                  <div class="security-title">Usage Statistics</div>
+                  <div class="security-description">45% of monthly quota used</div>
+                </div>
+                <button class="btn btn-secondary">View Details</button>
+              </div>
+
+              <div class="button-group">
+                <button class="btn btn-danger">
+                  <span class="material-symbols-rounded">cancel</span>
+                  <span>Cancel Subscription</span>
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </main>
+
+  <!-- Alpine.js Component -->
+  <script>
+    function accountSystem() {
+      return {
+        sidebarOpen: false,
+        activeSection: 'profile',
+        pharmacyInfo: {
+          name: 'Umi Health',
+          location: 'Lusaka, Zambia'
+        },
+        userInfo: {
+          name: 'Umi Health',
+          role: 'Admin',
+          initials: 'UH',
+          email: 'admin@umihealth.com'
+        },
+        profile: {
+          firstName: 'Umi',
+          lastName: 'Health',
+          email: 'admin@umihealth.com',
+          phone: '+260 977 123 456',
+          bio: 'Pharmacy management system administrator'
+        },
+        notifications: {
+          email: true,
+          push: false,
+          sales: true,
+          inventory: true,
+          prescriptions: true
+        },
+        pharmacySettings: {
+          name: 'Umi Health Pharmacy',
+          phone: '+260 977 123 456',
+          email: 'info@umihealth.com',
+          website: 'www.umihealth.com',
+          address: '123 Main Street',
+          city: 'Lusaka',
+          province: 'Lusaka Province',
+          postalCode: '10101',
+          // Receipt settings
+          receiptHeader: 'Umi Health Pharmacy',
+          receiptFooter: 'Thank you for your business!',
+          taxRate: 16,
+          currency: 'ZMW',
+          // Report settings
+          reportLogo: '',
+          reportSignature: 'Pharmacy Manager',
+          // Payment settings
+          paymentTerms: 'Payment due upon receipt',
+          invoicePrefix: 'INV',
+          receiptPrefix: 'RCP'
+        },
+        
+        // Data sync and API integration
+        loading: false,
+        
+        init() {
+          this.loadAccountFromAPI();
+          this.setupEventListeners();
+        },
+        
+        loadAccountFromAPI() {
+          this.loading = true;
+          try {
+            // Load user profile
+            window.adminDataSync.getData('userProfile', {})
+            .then(profile => {
+              this.profile = {
+                firstName: profile.firstName || '',
+                lastName: profile.lastName || '',
+                email: profile.email || '',
+                phone: profile.phone || '',
+                bio: profile.bio || ''
+              };
+              
+              this.userInfo = {
+                name: `${profile.firstName || ''} ${profile.lastName || ''}`,
+                role: profile.role || 'Admin',
+                initials: `${profile.firstName?.[0] || 'U'}${profile.lastName?.[0] || 'H'}`,
+                email: profile.email || ''
+              };
+            })
+            .catch(error => {
+              console.error('Error loading user profile:', error);
+              this.showError('Failed to load user profile. Please try again.');
+            });
+            
+            // Load pharmacy settings
+            window.adminDataSync.getData('pharmacySettings', {})
+            .then(settings => {
+              this.pharmacySettings = {
+                name: settings.name || 'Umi Health Pharmacy',
+                phone: settings.phone || '',
+                email: settings.email || '',
+                website: settings.website || '',
+                address: settings.address || '',
+                city: settings.city || '',
+                province: settings.province || '',
+                postalCode: settings.postalCode || '',
+                receiptHeader: settings.receiptHeader || 'Umi Health Pharmacy',
+                receiptFooter: settings.receiptFooter || 'Thank you for your business!',
+                taxRate: settings.taxRate || 16,
+                currency: settings.currency || 'ZMW',
+                reportLogo: settings.reportLogo || '',
+                reportSignature: settings.reportSignature || 'Pharmacy Manager',
+                paymentTerms: settings.paymentTerms || 'Payment due upon receipt',
+                invoicePrefix: settings.invoicePrefix || 'INV',
+                receiptPrefix: settings.receiptPrefix || 'RCP'
+              };
+              
+              this.pharmacyInfo = {
+                name: settings.name || 'Umi Health',
+                location: `${settings.city || 'Lusaka'}, ${settings.province || 'Lusaka Province'}`
+              };
+            })
+            .catch(error => {
+              console.error('Error loading pharmacy settings:', error);
+              this.showError('Failed to load pharmacy settings. Please try again.');
+            });
+            
+            // Load notification settings
+            window.adminDataSync.getData('notificationSettings', {})
+            .then(notifications => {
+              this.notifications = {
+                email: notifications.email !== false,
+                push: notifications.push || false,
+                sales: notifications.sales !== false,
+                inventory: notifications.inventory !== false,
+                prescriptions: notifications.prescriptions !== false
+              };
+            })
+            .catch(error => {
+              console.error('Error loading notification settings:', error);
+              this.showError('Failed to load notification settings. Please try again.');
+            });
+            
+            this.loading = false;
+          } catch (error) {
+            console.error('Data sync not available:', error);
+            this.loading = false;
+          }
+        },
+        
+        setupEventListeners() {
+          if (window.adminDataSync) {
+            window.adminDataSync.on('userProfile-updated', (profile) => {
+              this.profile = {
+                firstName: profile.firstName || '',
+                lastName: profile.lastName || '',
+                email: profile.email || '',
+                phone: profile.phone || '',
+                bio: profile.bio || ''
+              };
+              
+              this.userInfo = {
+                name: `${profile.firstName || ''} ${profile.lastName || ''}`,
+                role: profile.role || 'Admin',
+                initials: `${profile.firstName?.[0] || 'U'}${profile.lastName?.[0] || 'H'}`,
+                email: profile.email || ''
+              };
+            });
+
+            window.adminDataSync.on('pharmacySettings-updated', (settings) => {
+              this.pharmacySettings = {
+                name: settings.name || 'Umi Health Pharmacy',
+                phone: settings.phone || '',
+                email: settings.email || '',
+                website: settings.website || '',
+                address: settings.address || '',
+                city: settings.city || '',
+                province: settings.province || '',
+                postalCode: settings.postalCode || '',
+                receiptHeader: settings.receiptHeader || 'Umi Health Pharmacy',
+                receiptFooter: settings.receiptFooter || 'Thank you for your business!',
+                taxRate: settings.taxRate || 16,
+                currency: settings.currency || 'ZMW',
+                reportLogo: settings.reportLogo || '',
+                reportSignature: settings.reportSignature || 'Pharmacy Manager',
+                paymentTerms: settings.paymentTerms || 'Payment due upon receipt',
+                invoicePrefix: settings.invoicePrefix || 'INV',
+                receiptPrefix: settings.receiptPrefix || 'RCP'
+              };
+              
+              this.pharmacyInfo = {
+                name: settings.name || 'Umi Health',
+                location: `${settings.city || 'Lusaka'}, ${settings.province || 'Lusaka Province'}`
+              };
+            });
+
+            window.adminDataSync.on('sync-error', (error) => {
+              console.error('Sync error:', error);
+              this.showWarning('Data synchronization error occurred');
+            });
+          }
+        },
+        
+        // Save methods
+        saveProfile() {
+          try {
+            window.adminAPI.updateUserProfile(this.profile)
+              .then(() => {
+                this.showSuccess('Profile updated successfully');
+              })
+              .catch(error => {
+                console.error('Error updating profile:', error);
+                this.showError('Failed to update profile. Please try again.');
+              });
+          } catch (error) {
+            console.error('API not available:', error);
+            this.showError('Failed to update profile. Please try again.');
+          }
+        },
+        
+        savePharmacySettings() {
+          try {
+            window.adminAPI.updatePharmacySettings(this.pharmacySettings)
+              .then(() => {
+                this.showSuccess('Pharmacy settings updated successfully');
+              })
+              .catch(error => {
+                console.error('Error updating pharmacy settings:', error);
+                this.showError('Failed to update pharmacy settings. Please try again.');
+              });
+          } catch (error) {
+            console.error('API not available:', error);
+            this.showError('Failed to update pharmacy settings. Please try again.');
+          }
+        },
+        
+        saveNotificationSettings() {
+          try {
+            window.adminAPI.updateNotificationSettings(this.notifications)
+              .then(() => {
+                this.showSuccess('Notification settings updated successfully');
+              })
+              .catch(error => {
+                console.error('Error updating notification settings:', error);
+                this.showError('Failed to update notification settings. Please try again.');
+              });
+          } catch (error) {
+            console.error('API not available:', error);
+            this.showError('Failed to update notification settings. Please try again.');
+          }
+        },
+        
+        // Notification methods
+        showSuccess(message) {
+          this.showNotification(message, 'success');
+        },
+
+        showError(message) {
+          this.showNotification(message, 'error');
+        },
+
+        showWarning(message) {
+          this.showNotification(message, 'warning');
+        },
+
+        showNotification(message, type = 'info') {
+          // Create notification element
+          const notification = document.createElement('div');
+          notification.className = `notification notification-${type}`;
+          notification.textContent = message;
+          document.body.appendChild(notification);
+
+          // Animate in
+          setTimeout(() => {
+            notification.classList.add('show');
+          }, 100);
+
+          // Remove after 5 seconds
+          setTimeout(() => {
+            notification.classList.remove('show');
+            setTimeout(() => {
+              if (notification.parentNode) {
+                document.body.removeChild(notification);
+              }
+            }, 300);
+          }, 5000);
+        },
+
+        saveProfile() {
+          console.log('Saving profile:', this.profile);
+          alert('Profile updated successfully!');
+        },
+
+        saveNotifications() {
+          console.log('Saving notifications:', this.notifications);
+          alert('Notification preferences saved!');
+        },
+
+        savePharmacySettings() {
+          // Save to localStorage for global access
+          localStorage.setItem('pharmacySettings', JSON.stringify(this.pharmacySettings));
+          
+          // Update pharmacyInfo display
+          this.pharmacyInfo.name = this.pharmacySettings.name;
+          this.pharmacyInfo.location = `${this.pharmacySettings.city}, ${this.pharmacySettings.province}`;
+          
+          console.log('Saving pharmacy settings:', this.pharmacySettings);
+          alert('Pharmacy settings updated successfully! These settings will now be used across all documents and receipts.');
+        },
+      }
+    }
+  </script>
+
+  <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
+</body>
+</html>

@@ -1,0 +1,81 @@
+/**
+ * Patients Page Specific Styles
+ * Contains styles that were previously inline in the HTML
+ */
+
+/* Loading state styles */
+.loading-state {
+  text-align: center;
+  padding: 40px;
+}
+
+.loading-icon {
+  font-size: 48px;
+  color: var(--gray-400);
+  margin-bottom: 16px;
+  display: block;
+}
+
+.loading-text {
+  color: var(--gray-500);
+  margin: 0;
+}
+
+/* CSV Import Instructions */
+.csv-import-instructions ol {
+  margin-left: 1.5rem;
+  color: #6b7280;
+  font-size: 0.875rem;
+}
+
+.csv-import-instructions .download-template-btn {
+  margin-top: 1rem;
+}
+
+/* CSV Import Area */
+.csv-import-area {
+  margin-top: 1.5rem;
+}
+
+.csv-import-icon {
+  font-size: 48px;
+  color: #9ca3af;
+  margin-bottom: 1rem;
+}
+
+.csv-import-area h4 {
+  margin-bottom: 0.5rem;
+}
+
+.csv-import-area p {
+  color: #6b7280;
+  font-size: 0.875rem;
+}
+
+.csv-import-area input[type="file"] {
+  display: none;
+}
+
+/* CSV Preview */
+.csv-preview {
+  display: none;
+  margin-top: 1.5rem;
+}
+
+.csv-preview h4 {
+  margin-bottom: 0.75rem;
+}
+
+.csv-preview-table {
+  max-height: 300px;
+  overflow: auto;
+  border: 1px solid #e5e7eb;
+  border-radius: 8px;
+  margin-top: 0.75rem;
+}
+
+.csv-preview-stats {
+  margin-top: 0.75rem;
+  color: #6b7280;
+  font-size: 0.875rem;
+}

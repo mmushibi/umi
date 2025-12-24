@@ -1,0 +1,906 @@
+<!DOCTYPE html>
+<html lang="en" x-data="help()">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Help Center | UmiHealthInformationSystems Pharmacy Management</title>
+  <link rel="icon" href="../../logo.png" type="image/png">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Glacial+Indifference:wght@400;500;600;700&family=Material+Symbols+Rounded:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="../../assets/css/tailwind.output.css">
+  <style>
+    :root {
+      --color-primary-blue: #2563EB;
+      --color-accent-teal: #14B8A6;
+      --color-text-white: #FFFFFF;
+      --color-subtle-blue: #EFF6FF;
+      --font-primary: 'Glacial Indifference', sans-serif;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      background: #0a0a0a;
+      color: var(--color-text-white);
+      font-family: 'Glacial Indifference', sans-serif;
+      line-height: 1.5;
+      min-height: 100vh;
+      position: relative;
+      background-image: 
+        linear-gradient(rgba(255, 255, 255, 0.03) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(255, 255, 255, 0.03) 1px, transparent 1px);
+      background-size: 50px 50px;
+    }
+
+    /* Custom scrollbar styles */
+    ::-webkit-scrollbar {
+      width: 8px;
+    }
+
+    ::-webkit-scrollbar-track {
+      background: rgba(255, 255, 255, 0.05);
+      border-radius: 4px;
+    }
+
+    ::-webkit-scrollbar-thumb {
+      background: rgba(255, 255, 255, 0.2);
+      border-radius: 4px;
+    }
+
+    ::-webkit-scrollbar-thumb:hover {
+      background: rgba(255, 255, 255, 0.3);
+    }
+
+    /* Firefox scrollbar */
+    * {
+      scrollbar-width: thin;
+      scrollbar-color: rgba(255, 255, 255, 0.2) rgba(255, 255, 255, 0.05);
+    }
+
+    .dashboard-container {
+      display: flex;
+      min-height: 100vh;
+    }
+
+    /* Sidebar Styles */
+    .sidebar {
+      width: 280px;
+      background: rgba(255, 255, 255, 0.1);
+      -webkit-backdrop-filter: blur(10px);
+      backdrop-filter: blur(10px);
+      border-right: 1px solid rgba(255, 255, 255, 0.2);
+      display: flex;
+      flex-direction: column;
+      position: fixed;
+      height: 100vh;
+      left: 0;
+      top: 0;
+      z-index: 1000;
+    }
+
+    .sidebar-header {
+      padding: 1.5rem;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.2);
+      text-align: center;
+    }
+
+    .sidebar-title {
+      font-size: 1.2rem;
+      font-weight: 700;
+      font-family: 'Glacial Indifference', sans-serif;
+      color: var(--color-accent-teal);
+    }
+
+    .sidebar-menu {
+      flex: 1;
+      padding: 1rem 0;
+      overflow-y: auto;
+    }
+
+    .menu-section {
+      margin-bottom: 2rem;
+    }
+
+    .menu-title {
+      font-size: 0.75rem;
+      font-weight: 600;
+      text-transform: uppercase;
+      opacity: 0.6;
+      padding: 0 1.5rem;
+      margin-bottom: 0.5rem;
+      font-family: 'Glacial Indifference', sans-serif;
+    }
+
+    .menu-item {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+      padding: 0.75rem 1.5rem;
+      color: var(--color-text-white);
+      text-decoration: none;
+      transition: all 0.3s ease;
+      font-family: 'Glacial Indifference', sans-serif;
+      font-size: 0.9rem;
+      opacity: 0.8;
+    }
+
+    .menu-item:hover {
+      background: rgba(255, 255, 255, 0.1);
+      opacity: 1;
+    }
+
+    .menu-item.active {
+      background: rgba(20, 184, 166, 0.2);
+      border-left: 3px solid var(--color-accent-teal);
+      opacity: 1;
+    }
+
+    .menu-icon {
+      font-size: 1.25rem;
+      color: var(--color-accent-teal);
+    }
+
+    .sidebar-footer {
+      padding: 1rem 1.5rem;
+      border-top: 1px solid rgba(255, 255, 255, 0.2);
+    }
+
+    /* Main Content Area */
+    .main-content {
+      flex: 1;
+      margin-left: 280px;
+      display: flex;
+      flex-direction: column;
+    }
+
+    /* Header Styles */
+    .header {
+      height: 70px;
+      background: rgba(10, 10, 10, 0.95);
+      -webkit-backdrop-filter: blur(10px);
+      backdrop-filter: blur(10px);
+      border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0 2rem;
+      position: sticky;
+      top: 0;
+      z-index: 999;
+    }
+
+    .header-left {
+      display: flex;
+      align-items: center;
+      gap: 2rem;
+    }
+
+    .header-logo {
+      display: flex;
+      align-items: center;
+    }
+
+    .header-logo img {
+      width: 100px;
+      height: 100px;
+      object-fit: contain;
+    }
+
+    .page-title {
+      font-size: 1.5rem;
+      font-weight: 700;
+      font-family: 'Glacial Indifference', sans-serif;
+    }
+
+    .header-right {
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+    }
+
+    .user-menu {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+      padding: 0.5rem 1rem;
+      background: rgba(255, 255, 255, 0.1);
+      border: 1px solid rgba(255, 255, 255, 0.2);
+      border-radius: 12px;
+      cursor: pointer;
+      transition: all 0.3s ease;
+    }
+
+    .user-menu:hover {
+      background: rgba(255, 255, 255, 0.15);
+    }
+
+    .user-avatar {
+      width: 35px;
+      height: 35px;
+      background: var(--color-accent-teal);
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1rem;
+    }
+
+    .user-info {
+      display: flex;
+      flex-direction: column;
+    }
+
+    .user-name {
+      font-weight: 600;
+      font-size: 0.9rem;
+      font-family: 'Glacial Indifference', sans-serif;
+    }
+
+    .user-role {
+      font-size: 0.75rem;
+      opacity: 0.8;
+      font-family: 'Glacial Indifference', sans-serif;
+    }
+
+    .search-container {
+      position: relative;
+      width: 350px;
+    }
+
+    .search-input-wrapper {
+      position: relative;
+      display: flex;
+      align-items: center;
+    }
+
+    .search-container .search-input {
+      width: 100%;
+      padding: 0.75rem 1rem 0.75rem 2.5rem;
+      background: rgba(255, 255, 255, 0.1);
+      border: 1px solid rgba(255, 255, 255, 0.3);
+      border-radius: 12px;
+      color: var(--color-text-white);
+      font-size: 0.9rem;
+      font-family: 'Glacial Indifference', sans-serif;
+      transition: all 0.3s ease;
+    }
+
+    .search-container .search-input::placeholder {
+      color: rgba(255, 255, 255, 0.5);
+    }
+
+    .search-container .search-input:focus {
+      outline: none;
+      background: rgba(255, 255, 255, 0.15);
+      border-color: var(--color-accent-teal);
+      box-shadow: 0 0 0 2px rgba(20, 184, 166, 0.2);
+    }
+
+    .search-icon {
+      position: absolute;
+      left: 0.75rem;
+      color: rgba(255, 255, 255, 0.6);
+      font-size: 1.2rem;
+      pointer-events: none;
+    }
+
+    .search-suggestions {
+      position: absolute;
+      top: 100%;
+      left: 0;
+      right: 0;
+      background: rgba(10, 10, 10, 0.95);
+      -webkit-backdrop-filter: blur(10px);
+      backdrop-filter: blur(10px);
+      border: 1px solid rgba(255, 255, 255, 0.2);
+      border-radius: 12px;
+      margin-top: 0.5rem;
+      max-height: 400px;
+      overflow-y: auto;
+      z-index: 1000;
+      box-shadow: 0 10px 25px rgba(0, 0, 0, 0.3);
+    }
+
+    .suggestion-item {
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+      padding: 1rem;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+    }
+
+    .suggestion-item:last-child {
+      border-bottom: none;
+    }
+
+    .suggestion-item:hover {
+      background: rgba(255, 255, 255, 0.1);
+    }
+
+    .suggestion-icon {
+      width: 40px;
+      height: 40px;
+      background: rgba(20, 184, 166, 0.2);
+      border-radius: 10px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.2rem;
+      color: var(--color-accent-teal);
+    }
+
+    .suggestion-content {
+      flex: 1;
+    }
+
+    .suggestion-title {
+      font-weight: 600;
+      font-size: 0.9rem;
+      font-family: 'Glacial Indifference', sans-serif;
+      margin-bottom: 0.25rem;
+    }
+
+    .suggestion-description {
+      font-size: 0.8rem;
+      opacity: 0.7;
+      font-family: 'Glacial Indifference', sans-serif;
+    }
+
+    .suggestion-type {
+      padding: 0.25rem 0.75rem;
+      background: rgba(255, 255, 255, 0.1);
+      border: 1px solid rgba(255, 255, 255, 0.3);
+      border-radius: 20px;
+      font-size: 0.75rem;
+      font-weight: 600;
+      font-family: 'Glacial Indifference', sans-serif;
+      text-transform: uppercase;
+    }
+
+    /* Content Area */
+    .content {
+      flex: 1;
+      padding: 2rem;
+      overflow-y: auto;
+    }
+
+    /* Help Section */
+    .help-container {
+      max-width: 800px;
+      margin: 0 auto;
+    }
+
+    .search-section {
+      background: rgba(255, 255, 255, 0.1);
+      -webkit-backdrop-filter: blur(10px);
+      backdrop-filter: blur(10px);
+      border: 1px solid rgba(255, 255, 255, 0.2);
+      border-radius: 16px;
+      padding: 2rem;
+      margin-bottom: 2rem;
+      text-align: center;
+    }
+
+    .search-title {
+      font-size: 1.5rem;
+      font-weight: 700;
+      font-family: 'Glacial Indifference', sans-serif;
+      margin-bottom: 1rem;
+    }
+
+    .search-input {
+      width: 100%;
+      max-width: 500px;
+      padding: 1rem;
+      background: rgba(255, 255, 255, 0.1);
+      border: 1px solid rgba(255, 255, 255, 0.3);
+      border-radius: 12px;
+      color: var(--color-text-white);
+      font-size: 1rem;
+      font-family: 'Glacial Indifference', sans-serif;
+      margin-bottom: 1rem;
+    }
+
+    .search-input::placeholder {
+      color: rgba(255, 255, 255, 0.5);
+    }
+
+    .search-input:focus {
+      outline: none;
+      background: rgba(255, 255, 255, 0.15);
+      border-color: rgba(255, 255, 255, 0.5);
+    }
+
+    .help-categories {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+      gap: 1.5rem;
+      margin-bottom: 2rem;
+    }
+
+    .category-card {
+      background: rgba(255, 255, 255, 0.1);
+      -webkit-backdrop-filter: blur(10px);
+      backdrop-filter: blur(10px);
+      border: 1px solid rgba(255, 255, 255, 0.2);
+      border-radius: 16px;
+      padding: 1.5rem;
+      transition: all 0.3s ease;
+      cursor: pointer;
+    }
+
+    .category-card:hover {
+      background: rgba(255, 255, 255, 0.15);
+      transform: translateY(-2px);
+    }
+
+    .category-icon {
+      width: 50px;
+      height: 50px;
+      background: rgba(20, 184, 166, 0.2);
+      border-radius: 12px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.5rem;
+      color: var(--color-accent-teal);
+      margin-bottom: 1rem;
+    }
+
+    .category-title {
+      font-size: 1.2rem;
+      font-weight: 700;
+      font-family: 'Glacial Indifference', sans-serif;
+      margin-bottom: 0.5rem;
+    }
+
+    .category-description {
+      opacity: 0.8;
+    }
+
+    .contact-section {
+      background: rgba(255, 255, 255, 0.1);
+      -webkit-backdrop-filter: blur(10px);
+      backdrop-filter: blur(10px);
+      border: 1px solid rgba(255, 255, 255, 0.2);
+      border-radius: 16px;
+      padding: 2rem;
+      text-align: center;
+    }
+
+    .contact-title {
+      font-size: 1.3rem;
+      font-weight: 700;
+      font-family: 'Glacial Indifference', sans-serif;
+      margin-bottom: 1rem;
+    }
+
+    .contact-info {
+      display: flex;
+      justify-content: center;
+      gap: 2rem;
+      flex-wrap: wrap;
+    }
+
+    .contact-item {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+
+    .btn {
+      padding: 0.75rem 1.5rem;
+      border: none;
+      border-radius: 12px;
+      font-size: 0.9rem;
+      font-weight: 600;
+      font-family: 'Glacial Indifference', sans-serif;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      display: inline-flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+
+    .btn-primary {
+      background: var(--color-accent-teal);
+      color: white;
+    }
+
+    .btn-primary:hover {
+      background: #0d9486;
+      transform: translateY(-2px);
+    }
+
+    /* Mobile Responsiveness */
+    .mobile-menu-toggle {
+      display: none;
+      background: none;
+      border: none;
+      color: var(--color-text-white);
+      font-size: 1.5rem;
+      cursor: pointer;
+    }
+
+    @media (max-width: 768px) {
+      .sidebar {
+        transform: translateX(-100%);
+        transition: transform 0.3s ease;
+      }
+
+      .sidebar.open {
+        transform: translateX(0);
+      }
+
+      .main-content {
+        margin-left: 0;
+      }
+
+      .mobile-menu-toggle {
+        display: block;
+      }
+
+      .header {
+        padding: 0 1rem;
+      }
+
+      .content {
+        padding: 1rem;
+      }
+
+      .help-categories {
+        grid-template-columns: 1fr;
+      }
+
+      .contact-info {
+        flex-direction: column;
+        gap: 1rem;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="dashboard-container">
+    <!-- Sidebar -->
+    <aside class="sidebar" :class="{ 'open': mobileMenuOpen }">
+      <div class="sidebar-header">
+        <div class="sidebar-title">Umi Admin</div>
+      </div>
+      
+      <nav class="sidebar-menu">
+        <div class="menu-section">
+          <div class="menu-title">Main</div>
+          <a href="home.html" class="menu-item">
+            <span class="material-symbols-rounded menu-icon">dashboard</span>
+            Home
+          </a>
+          <a href="pharmacies.html" class="menu-item">
+            <span class="material-symbols-rounded menu-icon">store</span>
+            Pharmacies
+          </a>
+          <a href="users.html" class="menu-item">
+            <span class="material-symbols-rounded menu-icon">people</span>
+            Users
+          </a>
+          <a href="transactions.html" class="menu-item">
+            <span class="material-symbols-rounded menu-icon">receipt_long</span>
+            Transactions
+          </a>
+        </div>
+        
+        <div class="menu-section">
+          <div class="menu-title">Management</div>
+          <a href="analytics.html" class="menu-item">
+            <span class="material-symbols-rounded menu-icon">analytics</span>
+            Analytics
+          </a>
+          <a href="reports.html" class="menu-item">
+            <span class="material-symbols-rounded menu-icon">assessment</span>
+            Reports
+          </a>
+          <a href="settings.html" class="menu-item">
+            <span class="material-symbols-rounded menu-icon">account_circle</span>
+            Account
+          </a>
+          <a href="security.html" class="menu-item">
+            <span class="material-symbols-rounded menu-icon">security</span>
+            Security
+          </a>
+        </div>
+        
+        <div class="menu-section">
+          <div class="menu-title">Support</div>
+          <a href="help.html" class="menu-item active">
+            <span class="material-symbols-rounded menu-icon">help_center</span>
+            Help Center
+          </a>
+          <a href="logs.html" class="menu-item">
+            <span class="material-symbols-rounded menu-icon">history</span>
+            System Logs
+          </a>
+        </div>
+      </nav>
+      
+      <div class="sidebar-footer">
+        <a href="../auth/signin.html" class="menu-item" @click.prevent="handleLogout">
+          <span class="material-symbols-rounded menu-icon">logout</span>
+          Sign Out
+        </a>
+      </div>
+    </aside>
+
+    <!-- Main Content -->
+    <main class="main-content">
+      <!-- Header -->
+      <header class="header">
+        <div class="header-left">
+          <button class="mobile-menu-toggle" @click="mobileMenuOpen = !mobileMenuOpen">
+            <span class="material-symbols-rounded">menu</span>
+          </button>
+          <div class="header-logo">
+            <!-- Logo removed per request -->
+          </div>
+          <h1 class="page-title">Help Center</h1>
+        </div>
+        
+        <div class="header-right">
+          <div class="search-container" x-data="searchComponent()">
+            <div class="search-input-wrapper">
+              <input 
+                type="text" 
+                class="search-input" 
+                placeholder="Search pharmacies, users, transactions..."
+                x-model="query"
+                @input="handleSearch"
+                @focus="showSuggestions = true"
+                @blur="hideSuggestions"
+              >
+              <span class="material-symbols-rounded search-icon">search</span>
+            </div>
+            
+            <!-- Search Suggestions Dropdown -->
+            <div 
+              class="search-suggestions" 
+              x-show="showSuggestions && suggestions.length > 0"
+              x-transition
+            >
+              <template x-for="suggestion in suggestions" :key="suggestion.id">
+                <div class="suggestion-item" @click="selectSuggestion(suggestion)">
+                  <div class="suggestion-icon">
+                    <span class="material-symbols-rounded" x-text="suggestion.icon"></span>
+                  </div>
+                  <div class="suggestion-content">
+                    <div class="suggestion-title" x-text="suggestion.title"></div>
+                    <div class="suggestion-description" x-text="suggestion.description"></div>
+                  </div>
+                  <div class="suggestion-type" x-text="suggestion.type"></div>
+                </div>
+              </template>
+            </div>
+          </div>
+        </div>
+      </header>
+
+      <!-- Content Area -->
+      <div class="content">
+        <div class="help-container">
+          <!-- Search Section -->
+          <div class="search-section">
+            <div class="search-title">How can we help you?</div>
+            <input 
+              type="text" 
+              class="search-input" 
+              placeholder="Search for help articles, tutorials, and documentation..."
+              x-model="searchQuery"
+            >
+            <button class="btn btn-primary" @click="searchHelp">
+              <span class="material-symbols-rounded">search</span>
+              Search
+            </button>
+          </div>
+
+          <!-- Help Categories -->
+          <div class="help-categories">
+            <div class="category-card" @click="openCategory('getting-started')">
+              <div class="category-icon">
+                <span class="material-symbols-rounded">rocket_launch</span>
+              </div>
+              <div class="category-title">Getting Started</div>
+              <div class="category-description">
+                Learn the basics of UmiHealthInformationSystems Pharmacy Management System
+              </div>
+            </div>
+
+            <div class="category-card" @click="openCategory('user-guide')">
+              <div class="category-icon">
+                <span class="material-symbols-rounded">menu_book</span>
+              </div>
+              <div class="category-title">User Guide</div>
+              <div class="category-description">
+                Comprehensive guide for all system features and functions
+              </div>
+            </div>
+
+            <div class="category-card" @click="openCategory('troubleshooting')">
+              <div class="category-icon">
+                <span class="material-symbols-rounded">build</span>
+              </div>
+              <div class="category-title">Troubleshooting</div>
+              <div class="category-description">
+                Common issues and their solutions
+              </div>
+            </div>
+
+            <div class="category-card" @click="openCategory('api-docs')">
+              <div class="category-icon">
+                <span class="material-symbols-rounded">code</span>
+              </div>
+              <div class="category-title">API Documentation</div>
+              <div class="category-description">
+                Developer resources and API integration guides
+              </div>
+            </div>
+
+            <div class="category-card" @click="openCategory('tutorials')">
+              <div class="category-icon">
+                <span class="material-symbols-rounded">video_library</span>
+              </div>
+              <div class="category-title">Video Tutorials</div>
+              <div class="category-description">
+                Step-by-step video guides for system features
+              </div>
+            </div>
+
+            <div class="category-card" @click="openCategory('faq')">
+              <div class="category-icon">
+                <span class="material-symbols-rounded">help</span>
+              </div>
+              <div class="category-title">FAQ</div>
+              <div class="category-description">
+                Frequently asked questions and answers
+              </div>
+            </div>
+          </div>
+
+          <!-- Contact Section -->
+          <div class="contact-section">
+            <div class="contact-title">Still need help?</div>
+            <div class="contact-info">
+              <div class="contact-item">
+                <span class="material-symbols-rounded">email</span>
+                <span>support@UmiHealthInformationSystems.zm</span>
+              </div>
+              <div class="contact-item">
+                <span class="material-symbols-rounded">phone</span>
+                <span>+260 977 123 456</span>
+              </div>
+              <div class="contact-item">
+                <span class="material-symbols-rounded">schedule</span>
+                <span>Mon-Fri, 8AM-5PM CAT</span>
+              </div>
+            </div>
+            <button class="btn btn-primary" @click="openSupport" style="margin-top: 1.5rem;">
+              <span class="material-symbols-rounded">support_agent</span>
+              Contact Support
+            </button>
+          </div>
+        </div>
+      </div>
+    </main>
+  </div>
+
+  <script>
+    function searchComponent() {
+      return {
+        query: '',
+        showSuggestions: false,
+        suggestions: [],
+        allSuggestions: [
+          { id: 1, title: 'Pharmacies', description: 'Manage pharmacy tenants', type: 'page', icon: 'store', url: 'pharmacies.html' },
+          { id: 2, title: 'Users', description: 'User management', type: 'page', icon: 'people', url: 'users.html' },
+          { id: 3, title: 'Transactions', description: 'Transaction history', type: 'page', icon: 'receipt_long', url: 'transactions.html' },
+          { id: 4, title: 'Analytics', description: 'System analytics', type: 'page', icon: 'analytics', url: 'analytics.html' },
+          { id: 5, title: 'Reports', description: 'Reports & insights', type: 'page', icon: 'assessment', url: 'reports.html' },
+          { id: 6, title: 'Security', description: 'Security center', type: 'page', icon: 'security', url: 'security.html' },
+          { id: 7, title: 'Settings', description: 'Account & system settings', type: 'page', icon: 'settings', url: 'settings.html' },
+          { id: 8, title: 'Help Center', description: 'Support and documentation', type: 'page', icon: 'help_center', url: 'help.html' },
+          { id: 9, title: 'System Logs', description: 'System activity logs', type: 'page', icon: 'history', url: 'logs.html' }
+        ],
+
+        handleSearch() {
+          const q = (this.query || '').trim().toLowerCase();
+          if (q.length < 2) {
+            this.suggestions = [];
+            return;
+          }
+
+          this.suggestions = this.allSuggestions
+            .filter(s =>
+              (s.title && s.title.toLowerCase().includes(q)) ||
+              (s.description && s.description.toLowerCase().includes(q)) ||
+              (s.type && s.type.toLowerCase().includes(q))
+            )
+            .slice(0, 8);
+        },
+
+        selectSuggestion(suggestion) {
+          this.query = suggestion.title;
+          this.showSuggestions = false;
+          if (suggestion && suggestion.url) {
+            window.location.href = suggestion.url;
+          }
+        },
+
+        hideSuggestions() {
+          setTimeout(() => {
+            this.showSuggestions = false;
+          }, 200);
+        }
+      }
+    }
+
+    function help() {
+      return {
+        userName: '',
+        userEmail: '',
+        mobileMenuOpen: false,
+        showUserMenu: false,
+        searchQuery: '',
+
+        init() {
+          // Get user info from session
+          this.userName = sessionStorage.getItem('userName') || 'Super Admin';
+          this.userEmail = sessionStorage.getItem('userEmail') || 'admin@UmiHealthInformationSystems.zm';
+          
+          // Close mobile menu when clicking outside
+          document.addEventListener('click', (e) => {
+            if (!e.target.closest('.sidebar') && !e.target.closest('.mobile-menu-toggle')) {
+              this.mobileMenuOpen = false;
+            }
+            if (!e.target.closest('.user-menu')) {
+              this.showUserMenu = false;
+            }
+          });
+        },
+
+        searchHelp() {
+          console.log('Searching for:', this.searchQuery);
+          alert(`Search results for "${this.searchQuery}" coming soon!`);
+        },
+
+        openCategory(category) {
+          console.log('Opening category:', category);
+          alert(`${category.replace('-', ' ').charAt(0).toUpperCase() + category.replace('-', ' ').slice(1)} section coming soon!`);
+        },
+
+        openSupport() {
+          console.log('Opening support ticket system...');
+          alert('Support ticket system coming soon!');
+        },
+
+        handleLogout() {
+          if (confirm('Are you sure you want to sign out?')) {
+            // Clear session
+            sessionStorage.clear();
+            
+            // Redirect to signin
+            window.location.href = '../auth/signin.html';
+          }
+        }
+      }
+    }
+  </script>
+  <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
+</body>
+</html>
+
+
+
+

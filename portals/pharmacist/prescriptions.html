@@ -1,0 +1,2051 @@
+<!DOCTYPE html>
+<html lang="en" x-data="prescriptionSystem()">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Prescriptions - Umi Health Information Systems</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@100;400;500;600;700&family=Varela+Round&family=Nunito:wght@400;600;700&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Rounded:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <script src="https://cdn.tailwindcss.com"></script>
+  <style>
+    :root {
+      --color-primary: #000000;
+      --color-accent: #14B8A6;
+      --color-success: #22c55e;
+      --color-warning: #ef4444;
+      --color-text-primary: #000000;
+      --color-text-secondary: #6b7280;
+      --color-text-muted: #9ca3af;
+      --color-background: #ffffff;
+      --color-surface: #f9fafb;
+      --color-border: #e5e7eb;
+      --font-primary: 'Inter', sans-serif;
+      --sidebar-width: 280px;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      background: var(--color-background);
+      color: var(--color-text-primary);
+      font-family: 'Nunito', 'Varela Round', sans-serif;
+      line-height: 1.5;
+      overflow-x: hidden;
+    }
+
+    /* Sidebar Styles */
+    .sidebar {
+      position: fixed;
+      left: 0;
+      top: 0;
+      width: var(--sidebar-width);
+      height: 100vh;
+      background: var(--color-text-primary);
+      color: var(--color-accent);
+      z-index: 1000;
+      transition: transform 0.3s ease;
+      display: flex;
+      flex-direction: column;
+      overflow-y: auto;
+      overflow-x: hidden;
+    }
+
+    .sidebar-header {
+      padding: 1.5rem;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+    }
+
+    .logo-section {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+    }
+
+    .logo-icon {
+      width: 40px;
+      height: 40px;
+      background: rgba(255, 255, 255, 0.2);
+      border-radius: 10px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.5rem;
+    }
+
+    .logo-text {
+      font-size: 1.25rem;
+      font-weight: 700;
+      font-family: 'Inter', sans-serif;
+    }
+
+    .tenant-info {
+      padding: 1rem 1.5rem;
+      background: rgba(255, 255, 255, 0.1);
+      margin: 1rem 1.5rem;
+      border-radius: 12px;
+      font-size: 0.85rem;
+    }
+
+    .tenant-name {
+      font-weight: 600;
+      margin-bottom: 0.25rem;
+    }
+
+    .tenant-location {
+      opacity: 0.8;
+      font-size: 0.75rem;
+    }
+
+    .nav-menu {
+      padding: 1rem 0;
+      flex: 1;
+      overflow-y: auto;
+    }
+
+    .nav-item {
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+      padding: 0.875rem 1.5rem;
+      color: rgba(255, 255, 255, 0.8);
+      text-decoration: none;
+      transition: all 0.2s ease;
+      cursor: pointer;
+      font-size: 0.9rem;
+      font-weight: 500;
+    }
+
+    .nav-item:hover {
+      background: rgba(255, 255, 255, 0.1);
+      color: var(--color-accent);
+    }
+
+    .nav-item.active {
+      background: rgba(255, 255, 255, 0.15);
+      color: var(--color-accent);
+      border-left: 3px solid var(--color-accent);
+    }
+
+    .nav-icon {
+      font-size: 1.25rem;
+    }
+
+    /* Main Content Area */
+    .main-content {
+      margin-left: var(--sidebar-width);
+      min-height: 100vh;
+      transition: margin-left 0.3s ease;
+    }
+
+    /* Header Styles */
+    .header {
+      background: white;
+      border-bottom: 1px solid #e2e8f0;
+      padding: 1rem 2rem;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      position: sticky;
+      top: 0;
+      z-index: 100;
+    }
+
+    .header-left {
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+    }
+
+    .page-title-section {
+      margin-right: 2rem;
+    }
+
+    .page-title-section .page-title {
+      font-size: 1.5rem;
+      font-weight: 700;
+      color: var(--color-text-primary);
+      margin: 0;
+      font-family: 'Inter', sans-serif;
+    }
+
+    .mobile-menu-toggle {
+      display: none;
+      background: none;
+      border: none;
+      font-size: 1.5rem;
+      color: var(--color-text-secondary);
+      cursor: pointer;
+    }
+
+    .header-right {
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+    }
+
+    .create-button {
+      background: var(--color-primary);
+      color: var(--color-accent);
+      border: none;
+      padding: 0.625rem 1.25rem;
+      border-radius: 16px;
+      font-size: 0.875rem;
+      font-weight: 600;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      transition: all 0.3s ease;
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+    }
+
+    .create-button:hover {
+      background: var(--color-text-secondary);
+      transform: translateY(-2px);
+      box-shadow: 0 8px 24px rgba(0, 0, 0, 0.2);
+    }
+
+    .user-profile {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+      padding: 0.5rem;
+      border-radius: 16px;
+      cursor: pointer;
+      transition: all 0.3s ease;
+    }
+
+    .user-profile:hover {
+      background: var(--color-surface);
+    }
+
+    .user-avatar {
+      width: 36px;
+      height: 36px;
+      background: var(--color-text-primary);
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: var(--color-accent);
+      font-weight: 600;
+      font-size: 0.875rem;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+    }
+
+    .user-info {
+      display: flex;
+      flex-direction: column;
+    }
+
+    .user-name {
+      font-size: 0.875rem;
+      font-weight: 600;
+      color: var(--color-text-primary);
+    }
+
+    .user-role {
+      font-size: 0.75rem;
+      color: var(--color-text-secondary);
+    }
+
+    /* Prescriptions Content */
+    .prescriptions-content {
+      padding: 2rem;
+    }
+
+    .stats-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+      gap: 1.5rem;
+      margin-bottom: 2rem;
+    }
+
+    .stat-card {
+      background: var(--color-background);
+      border-radius: 20px;
+      padding: 1.5rem;
+      border: 1px solid var(--color-border);
+      transition: all 0.3s ease;
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
+    }
+
+    .stat-card:hover {
+      transform: translateY(-4px);
+      box-shadow: 0 8px 24px rgba(0, 0, 0, 0.12);
+    }
+
+    .stat-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 1rem;
+    }
+
+    .stat-icon {
+      width: 48px;
+      height: 48px;
+      border-radius: 16px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.5rem;
+    }
+
+    .stat-icon.primary {
+      background: rgba(0, 0, 0, 0.1);
+      color: var(--color-primary);
+    }
+
+    .stat-icon.success {
+      background: rgba(34, 197, 94, 0.1);
+      color: var(--color-success);
+    }
+
+    .stat-icon.warning {
+      background: rgba(239, 68, 68, 0.1);
+      color: var(--color-warning);
+    }
+
+    .stat-value {
+      font-size: 2rem;
+      font-weight: 700;
+      color: var(--color-text-primary);
+      margin-bottom: 0.25rem;
+      font-family: 'Inter', sans-serif;
+    }
+
+    .stat-label {
+      color: var(--color-text-secondary);
+      font-size: 0.875rem;
+      margin-bottom: 0.5rem;
+    }
+
+    .stat-change {
+      font-size: 0.75rem;
+      font-weight: 600;
+      display: flex;
+      align-items: center;
+      gap: 0.25rem;
+    }
+
+    .stat-change.positive {
+      color: var(--color-success);
+    }
+
+    .stat-change.negative {
+      color: var(--color-warning);
+    }
+
+    /* Prescriptions Grid */
+    .prescriptions-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+      gap: 1.5rem;
+    }
+
+    .prescription-card {
+      background: var(--color-background);
+      border-radius: 20px;
+      border: 1px solid var(--color-border);
+      overflow: hidden;
+      transition: all 0.3s ease;
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
+    }
+
+    .prescription-card:hover {
+      transform: translateY(-4px);
+      box-shadow: 0 8px 24px rgba(0, 0, 0, 0.12);
+    }
+
+    .prescription-header {
+      padding: 1.5rem;
+      border-bottom: 1px solid var(--color-border);
+      background: var(--color-surface);
+    }
+
+    .prescription-number {
+      font-size: 1.125rem;
+      font-weight: 700;
+      color: var(--color-text-primary);
+      margin-bottom: 0.25rem;
+    }
+
+    .prescription-date {
+      font-size: 0.875rem;
+      color: var(--color-text-secondary);
+    }
+
+    .prescription-body {
+      padding: 1.5rem;
+    }
+
+    .patient-info {
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+      margin-bottom: 1.5rem;
+    }
+
+    .patient-avatar {
+      width: 48px;
+      height: 48px;
+      background: var(--color-text-primary);
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: var(--color-accent);
+      font-weight: 600;
+      font-size: 1rem;
+    }
+
+    .patient-details {
+      flex: 1;
+    }
+
+    .patient-name {
+      font-weight: 600;
+      color: var(--color-text-primary);
+      margin-bottom: 0.125rem;
+    }
+
+    .patient-id {
+      font-size: 0.75rem;
+      color: var(--color-text-muted);
+    }
+
+    .doctor-info {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      margin-bottom: 1.5rem;
+      font-size: 0.875rem;
+      color: var(--color-text-secondary);
+    }
+
+    .medications-list {
+      margin-bottom: 1.5rem;
+    }
+
+    .medication-item {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 0.75rem;
+      background: var(--color-surface);
+      border-radius: 12px;
+      margin-bottom: 0.5rem;
+    }
+
+    .medication-name {
+      font-weight: 600;
+      font-size: 0.875rem;
+    }
+
+    .medication-dosage {
+      font-size: 0.75rem;
+      color: var(--color-text-muted);
+    }
+
+    .medication-quantity {
+      font-weight: 600;
+      color: var(--color-primary);
+    }
+
+    .prescription-footer {
+      padding: 1rem 1.5rem;
+      background: var(--color-surface);
+      border-top: 1px solid var(--color-border);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .status-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.25rem;
+      padding: 0.25rem 0.75rem;
+      border-radius: 12px;
+      font-size: 0.75rem;
+      font-weight: 600;
+    }
+
+    .status-badge.pending {
+      background: rgba(239, 68, 68, 0.1);
+      color: var(--color-warning);
+    }
+
+    .status-badge.ready {
+      background: rgba(34, 197, 94, 0.1);
+      color: var(--color-success);
+    }
+
+    .status-badge.completed {
+      background: rgba(0, 0, 0, 0.1);
+      color: var(--color-text-secondary);
+    }
+
+    .action-buttons {
+      display: flex;
+      gap: 0.5rem;
+    }
+
+    .action-btn {
+      padding: 0.5rem 1rem;
+      border: 1px solid var(--color-border);
+      background: var(--color-background);
+      border-radius: 8px;
+      cursor: pointer;
+      font-size: 0.75rem;
+      font-weight: 500;
+      transition: all 0.2s ease;
+    }
+
+    .action-btn:hover {
+      background: var(--color-surface);
+    }
+
+    .action-btn.primary {
+      background: var(--color-primary);
+      color: var(--color-accent);
+      border-color: var(--color-primary);
+    }
+
+    .action-btn.primary:hover {
+      background: var(--color-text-secondary);
+    }
+
+    .logout-section {
+      padding: 1rem;
+      border-top: 1px solid rgba(255, 255, 255, 0.1);
+      margin-top: auto;
+    }
+
+    .logout-button {
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+      padding: 0.875rem 1.5rem;
+      color: rgba(255, 255, 255, 0.8);
+      text-decoration: none;
+      transition: all 0.2s ease;
+      cursor: pointer;
+      font-size: 0.9rem;
+      font-weight: 500;
+      width: 100%;
+      border: none;
+      background: transparent;
+      text-align: left;
+    }
+
+    .logout-button:hover {
+      background: rgba(239, 68, 68, 0.1);
+      color: var(--color-warning);
+    }
+
+    .logout-icon {
+      font-size: 1.25rem;
+    }
+
+    /* Prescription Layout Styles */
+    .content-area {
+      padding: 2rem;
+    }
+
+    .content-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      margin-bottom: 2rem;
+      gap: 2rem;
+    }
+
+    .content-header > div:first-child span {
+      color: var(--color-text-secondary);
+      font-size: 1rem;
+    }
+
+    .quick-stats {
+      display: flex;
+      gap: 1rem;
+    }
+
+    .stat-button {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding: 1rem;
+      background: var(--color-background);
+      border: 1px solid var(--color-border);
+      border-radius: 8px;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      min-width: 100px;
+    }
+
+    .stat-button:hover {
+      background: var(--color-surface);
+      transform: translateY(-2px);
+    }
+
+    .stat-button .material-symbols-rounded {
+      font-size: 1.5rem;
+      margin-bottom: 0.5rem;
+      color: var(--color-primary);
+    }
+
+    .stat-button span {
+      font-size: 0.75rem;
+      color: var(--color-text-secondary);
+      margin-bottom: 0.25rem;
+    }
+
+    .stat-button strong {
+      font-size: 1.25rem;
+      font-weight: 700;
+      color: var(--color-text-primary);
+    }
+
+    .add-product-btn {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      padding: 0.75rem 1.5rem;
+      background: var(--color-primary);
+      color: var(--color-accent);
+      border: none;
+      border-radius: 8px;
+      cursor: pointer;
+      font-weight: 500;
+      transition: all 0.2s ease;
+    }
+
+    .add-product-btn:hover {
+      opacity: 0.9;
+      transform: translateY(-1px);
+    }
+
+    .widgets-row {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(400px, 1fr));
+      gap: 1.5rem;
+      margin-bottom: 2rem;
+    }
+
+    .widget {
+      background: var(--color-background);
+      border: 1px solid var(--color-border);
+      border-radius: 12px;
+      overflow: hidden;
+    }
+
+    .widget-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      padding: 1.5rem;
+      border-bottom: 1px solid var(--color-border);
+    }
+
+    .widget-title {
+      font-size: 1.125rem;
+      font-weight: 600;
+      color: var(--color-text-primary);
+      margin: 0 0 0.25rem 0;
+    }
+
+    .widget-subtitle {
+      font-size: 0.875rem;
+      color: var(--color-text-secondary);
+      margin: 0;
+    }
+
+    .icon-button {
+      width: 32px;
+      height: 32px;
+      border: 1px solid var(--color-border);
+      background: var(--color-background);
+      border-radius: 6px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      transition: all 0.2s ease;
+    }
+
+    .icon-button:hover {
+      background: var(--color-surface);
+    }
+
+    .widget-menu {
+      position: absolute;
+      background: var(--color-background);
+      border: 1px solid var(--color-border);
+      border-radius: 8px;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+      z-index: 100;
+      min-width: 150px;
+    }
+
+    .widget-menu button {
+      width: 100%;
+      padding: 0.5rem 1rem;
+      border: none;
+      background: none;
+      text-align: left;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      font-size: 0.875rem;
+    }
+
+    .widget-menu button:hover {
+      background: var(--color-surface);
+    }
+
+    .chart-container {
+      padding: 1.5rem;
+      height: 250px;
+    }
+
+    .recent-prescriptions-body {
+      padding: 1.5rem;
+    }
+
+    .prescription-carousel {
+      margin-bottom: 1.5rem;
+    }
+
+    .prescription-card {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      text-align: center;
+      padding: 2rem;
+      background: var(--color-surface);
+      border: 1px solid var(--color-border);
+      border-radius: 8px;
+    }
+
+    .prescription-icon {
+      font-size: 2rem;
+      color: var(--color-primary);
+      margin-bottom: 1rem;
+    }
+
+    .prescription-card strong {
+      font-size: 1rem;
+      color: var(--color-text-primary);
+      margin-bottom: 0.5rem;
+    }
+
+    .prescription-card span {
+      font-size: 0.875rem;
+      color: var(--color-text-secondary);
+    }
+
+    .urgent-prescriptions {
+      border-top: 1px solid var(--color-border);
+      padding-top: 1rem;
+    }
+
+    .urgent-prescriptions-header {
+      display: grid;
+      grid-template-columns: 1fr 1fr 1fr;
+      gap: 1rem;
+      margin-bottom: 0.5rem;
+      font-size: 0.75rem;
+      font-weight: 600;
+      color: var(--color-text-secondary);
+    }
+
+    .urgent-prescriptions-list {
+      max-height: 150px;
+      overflow-y: auto;
+    }
+
+    .dropdown-empty {
+      text-align: center;
+      padding: 1rem;
+      color: var(--color-text-secondary);
+      font-size: 0.875rem;
+    }
+
+    .prescription-list-container {
+      background: var(--color-background);
+      border: 1px solid var(--color-border);
+      border-radius: 12px;
+      overflow: hidden;
+    }
+
+    .prescription-list-header {
+      padding: 1.5rem;
+      border-bottom: 1px solid var(--color-border);
+    }
+
+    .prescription-list-header h2 {
+      font-size: 1.25rem;
+      font-weight: 600;
+      color: var(--color-text-primary);
+      margin: 0 0 0.25rem 0;
+    }
+
+    .prescription-list-header span {
+      font-size: 0.875rem;
+      color: var(--color-text-secondary);
+    }
+
+    .table-controls {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 1rem 1.5rem;
+      border-bottom: 1px solid var(--color-border);
+      gap: 1rem;
+    }
+
+    .control-group {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+
+    .table-search {
+      position: relative;
+      display: flex;
+      align-items: center;
+    }
+
+    .table-search .material-symbols-rounded {
+      position: absolute;
+      left: 0.75rem;
+      font-size: 1.25rem;
+      color: var(--color-text-secondary);
+    }
+
+    .table-search input {
+      padding: 0.5rem 0.75rem 0.5rem 2.5rem;
+      border: 1px solid var(--color-border);
+      border-radius: 6px;
+      font-size: 0.875rem;
+      min-width: 250px;
+    }
+
+    .table-search input:focus {
+      outline: none;
+      border-color: var(--color-primary);
+    }
+
+    .search-autocomplete {
+      position: absolute;
+      top: 100%;
+      left: 0;
+      right: 0;
+      background: var(--color-background);
+      border: 1px solid var(--color-border);
+      border-radius: 6px;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+      z-index: 100;
+    }
+
+    .control-button {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      padding: 0.5rem 1rem;
+      border: 1px solid var(--color-border);
+      background: var(--color-background);
+      border-radius: 6px;
+      cursor: pointer;
+      font-size: 0.875rem;
+      transition: all 0.2s ease;
+    }
+
+    .control-button:hover {
+      background: var(--color-surface);
+    }
+
+    .control-button.secondary {
+      border-color: var(--color-primary);
+      color: var(--color-primary);
+    }
+
+    .table-scroll {
+      overflow-x: auto;
+    }
+
+    .prescription-table {
+      width: 100%;
+      border-collapse: collapse;
+    }
+
+    .prescription-table th {
+      background: var(--color-surface);
+      padding: 1rem;
+      text-align: left;
+      font-weight: 600;
+      color: var(--color-text-primary);
+      border-bottom: 1px solid var(--color-border);
+      font-size: 0.875rem;
+    }
+
+    .prescription-table td {
+      padding: 1rem;
+      border-bottom: 1px solid var(--color-border);
+      font-size: 0.875rem;
+    }
+
+    .prescription-table tbody tr:hover {
+      background: var(--color-surface);
+    }
+
+    .table-empty {
+      text-align: center;
+      padding: 4rem 2rem;
+      color: var(--color-text-secondary);
+    }
+
+    .table-empty .material-symbols-rounded {
+      font-size: 3rem;
+      margin-bottom: 1rem;
+      display: block;
+      opacity: 0.3;
+    }
+
+    .pagination {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 1rem 1.5rem;
+      border-top: 1px solid var(--color-border);
+      flex-wrap: wrap;
+      gap: 1rem;
+    }
+
+    .pagination-info {
+      font-size: 0.875rem;
+      color: var(--color-text-secondary);
+    }
+
+    .pagination-controls {
+      display: flex;
+      gap: 0.5rem;
+    }
+
+    .pagination-show label {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      font-size: 0.875rem;
+      color: var(--color-text-secondary);
+    }
+
+    .pagination-show select {
+      padding: 0.25rem;
+      border: 1px solid var(--color-border);
+      border-radius: 4px;
+      font-size: 0.875rem;
+    }
+
+    /* Modal Styles */
+    .overlay {
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background: rgba(0, 0, 0, 0.5);
+      z-index: 1000;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .modal {
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background: rgba(0, 0, 0, 0.5);
+      z-index: 1000;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .modal-content {
+      background: var(--color-background);
+      border-radius: 12px;
+      box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1);
+      max-width: 500px;
+      width: 90%;
+      max-height: 90vh;
+      overflow-y: auto;
+    }
+
+    .modal-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 1.5rem;
+      border-bottom: 1px solid var(--color-border);
+    }
+
+    .modal-header h2 {
+      font-size: 1.25rem;
+      font-weight: 600;
+      color: var(--color-text-primary);
+      margin: 0;
+    }
+
+    .modal-close {
+      width: 32px;
+      height: 32px;
+      border: 1px solid var(--color-border);
+      background: var(--color-background);
+      border-radius: 6px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      transition: all 0.2s ease;
+    }
+
+    .modal-close:hover {
+      background: var(--color-surface);
+    }
+
+    .modal-body {
+      padding: 1.5rem;
+    }
+
+    .form-section-title {
+      font-size: 1rem;
+      font-weight: 600;
+      color: var(--color-text-primary);
+      margin: 1.5rem 0 1rem 0;
+      padding-bottom: 0.5rem;
+      border-bottom: 1px solid var(--color-border);
+    }
+
+    .form-section-title:first-child {
+      margin-top: 0;
+    }
+
+    .form-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+      gap: 1rem;
+      margin-bottom: 1.5rem;
+    }
+
+    .form-grid label {
+      display: flex;
+      flex-direction: column;
+      gap: 0.5rem;
+    }
+
+    .form-grid label span {
+      font-size: 0.875rem;
+      font-weight: 500;
+      color: var(--color-text-primary);
+    }
+
+    .form-grid input,
+    .form-grid select {
+      padding: 0.75rem;
+      border: 1px solid var(--color-border);
+      border-radius: 6px;
+      font-size: 0.875rem;
+    }
+
+    .form-grid input:focus,
+    .form-grid select:focus {
+      outline: none;
+      border-color: var(--color-primary);
+    }
+
+    .form-textarea {
+      display: flex;
+      flex-direction: column;
+      gap: 0.5rem;
+    }
+
+    .form-textarea span {
+      font-size: 0.875rem;
+      font-weight: 500;
+      color: var(--color-text-primary);
+    }
+
+    .form-textarea textarea {
+      padding: 0.75rem;
+      border: 1px solid var(--color-border);
+      border-radius: 6px;
+      font-size: 0.875rem;
+      resize: vertical;
+    }
+
+    .form-textarea textarea:focus {
+      outline: none;
+      border-color: var(--color-primary);
+    }
+
+    .modal-footer {
+      display: flex;
+      justify-content: flex-end;
+      gap: 0.75rem;
+      padding: 1.5rem;
+      border-top: 1px solid var(--color-border);
+    }
+
+    .modal-footer button {
+      padding: 0.75rem 1.5rem;
+      border-radius: 6px;
+      font-size: 0.875rem;
+      font-weight: 500;
+      cursor: pointer;
+      transition: all 0.3s ease;
+    }
+
+    .modal-footer button.secondary {
+      background: var(--color-background);
+      border: 1px solid var(--color-border);
+      color: var(--color-text-primary);
+    }
+
+    .modal-footer button.secondary:hover {
+      background: var(--color-surface);
+    }
+
+    .modal-footer button.primary {
+      background: var(--color-primary);
+      color: var(--color-accent);
+      border: none;
+    }
+
+    .modal-footer button.primary:hover {
+      opacity: 0.9;
+    }
+
+    /* Additional utility classes */
+    .modal-content-large {
+      max-width: 800px;
+    }
+
+    .required-field {
+      color: #ef4444;
+    }
+
+    .table-empty-state {
+      text-align: center;
+      padding: 2rem;
+    }
+
+    .table-empty-state .material-symbols-rounded {
+      font-size: 2rem;
+      opacity: 0.3;
+    }
+
+    .table-empty-state p {
+      color: var(--color-text-secondary);
+      margin-top: 1rem;
+    }
+
+    .prescription-details-grid {
+      display: grid;
+      gap: 1rem;
+    }
+
+    @media (max-width: 768px) {
+      .sidebar {
+        transform: translateX(-100%);
+      }
+
+      .sidebar.open {
+        transform: translateX(0);
+      }
+
+      .main-content {
+        margin-left: 0;
+      }
+
+      .mobile-menu-toggle {
+        display: block;
+      }
+
+      .page-title-section {
+        display: none;
+      }
+
+      .prescriptions-content {
+        padding: 1rem;
+      }
+
+      .stats-grid {
+        grid-template-columns: 1fr;
+      }
+
+      .prescriptions-grid {
+        grid-template-columns: 1fr;
+      }
+    }
+  </style>
+</head>
+<body>
+  <!-- Sidebar -->
+  <aside class="sidebar" :class="sidebarOpen ? 'open' : ''">
+    <div class="sidebar-header">
+      <div class="logo-section">
+        <div class="logo-icon">
+          <span class="material-symbols-rounded">medication</span>
+        </div>
+        <div class="logo-text">Umi Health</div>
+      </div>
+    </div>
+
+    <div class="tenant-info">
+      <div class="tenant-name" x-text="tenantInfo.name"></div>
+      <div class="tenant-location" x-text="tenantInfo.location"></div>
+    </div>
+
+    <nav class="nav-menu">
+      <a href="home.html" class="nav-item">
+        <span class="material-symbols-rounded nav-icon">home</span>
+        <span>Home</span>
+      </a>
+      <a href="prescriptions.html" class="nav-item active">
+        <span class="material-symbols-rounded nav-icon">prescriptions</span>
+        <span>Prescriptions</span>
+      </a>
+      <a href="patients.html" class="nav-item">
+        <span class="material-symbols-rounded nav-icon">people</span>
+        <span>Patients</span>
+      </a>
+      <a href="inventory.html" class="nav-item">
+        <span class="material-symbols-rounded nav-icon">inventory_2</span>
+        <span>Inventory</span>
+      </a>
+      <a href="payments.html" class="nav-item">
+        <span class="material-symbols-rounded nav-icon">payments</span>
+        <span>Payments</span>
+      </a>
+      <a href="account.html" class="nav-item">
+        <span class="material-symbols-rounded nav-icon">settings</span>
+        <span>Account</span>
+      </a>
+    </nav>
+    
+    <div class="logout-section">
+      <button class="logout-button" @click="logout()">
+        <span class="material-symbols-rounded logout-icon">logout</span>
+        <span>Logout</span>
+      </button>
+    </div>
+  </aside>
+
+  <!-- Main Content -->
+  <main class="main-content">
+    <!-- Header -->
+    <header class="header">
+      <div class="header-left">
+        <button class="mobile-menu-toggle" @click="sidebarOpen = !sidebarOpen">
+          <span class="material-symbols-rounded">menu</span>
+        </button>
+        
+        <div class="page-title-section">
+          <h1 class="page-title">Prescriptions</h1>
+        </div>
+      </div>
+
+      <div class="header-right">
+        <button class="create-button" @click="showNewModal = true">
+          <span class="material-symbols-rounded">add</span>
+          <span>New Prescription</span>
+        </button>
+
+        <div class="user-profile">
+          <div class="user-avatar">
+            <span x-text="userInfo.initials"></span>
+          </div>
+          <div class="user-info">
+            <div class="user-name" x-text="userInfo.name"></div>
+            <div class="user-role" x-text="userInfo.role"></div>
+          </div>
+        </div>
+      </div>
+    </header>
+
+    <section class="content-area">
+        <div class="content-header">
+          <div>
+            <span>Ensure safe and accurate prescription management</span>
+          </div>
+          <div class="quick-stats">
+            <button class="stat-button" data-stat="pending-prescriptions">
+              <span class="material-symbols-rounded">pending</span>
+              <span>Pending</span>
+              <strong id="pendingPrescriptionsCount">0</strong>
+            </button>
+            <button class="stat-button" data-stat="processing-prescriptions">
+              <span class="material-symbols-rounded">hourglass_top</span>
+              <span>Processing</span>
+              <strong id="processingPrescriptionsCount">0</strong>
+            </button>
+            <button class="stat-button" data-stat="completed-prescriptions">
+              <span class="material-symbols-rounded">check_circle</span>
+              <span>Completed</span>
+              <strong id="completedPrescriptionsCount">0</strong>
+            </button>
+            <button class="stat-button" data-stat="urgent-prescriptions">
+              <span class="material-symbols-rounded">priority_high</span>
+              <span>Urgent</span>
+              <strong id="urgentPrescriptionsCount">0</strong>
+            </button>
+          </div>
+          <button class="add-product-btn" id="addPrescriptionButton" type="button">
+            <span class="material-symbols-rounded">add</span>
+            New Prescription
+          </button>
+        </div>
+
+        <div class="widgets-row">
+          <article class="widget">
+            <header class="widget-header">
+              <div>
+                <h3 class="widget-title">Prescription Status</h3>
+                <p class="widget-subtitle">Current prescription distribution</p>
+              </div>
+              <button class="icon-button" type="button" data-menu="prescription-status" aria-haspopup="true"
+                aria-expanded="false" aria-controls="prescriptionStatusMenu" aria-label="Prescription status menu">
+                <span class="material-symbols-rounded" aria-hidden="true">more_horiz</span>
+              </button>
+              <div class="widget-menu" id="prescriptionStatusMenu" hidden>
+                <button type="button" data-action="refresh-prescription-status"><span class="material-symbols-rounded"
+                    aria-hidden="true">refresh</span>Refresh data</button>
+                <button type="button" data-action="download-prescription-status"><span class="material-symbols-rounded"
+                    aria-hidden="true">download</span>Download report</button>
+              </div>
+            </header>
+            <div class="chart-container">
+              <canvas id="prescriptionStatusChart" aria-label="Prescription status distribution"></canvas>
+            </div>
+          </article>
+
+          <article class="widget">
+            <header class="widget-header">
+              <div>
+                <h3 class="widget-title">Recent Prescriptions</h3>
+                <p class="widget-subtitle">Latest prescription requests</p>
+              </div>
+              <button class="icon-button" type="button" data-menu="recent-prescriptions" aria-haspopup="true"
+                aria-expanded="false" aria-controls="recentPrescriptionsMenu" aria-label="Recent prescriptions menu">
+                <span class="material-symbols-rounded" aria-hidden="true">more_horiz</span>
+              </button>
+              <div class="widget-menu" id="recentPrescriptionsMenu" hidden>
+                <button type="button" data-action="refresh-recent-prescriptions"><span class="material-symbols-rounded"
+                    aria-hidden="true">refresh</span>Refresh list</button>
+                <button type="button" data-action="view-all-prescriptions"><span class="material-symbols-rounded"
+                    aria-hidden="true">list</span>View all prescriptions</button>
+              </div>
+            </header>
+            <div class="recent-prescriptions-body">
+              <div class="prescription-carousel" id="recentPrescriptionsList">
+                <article class="prescription-card">
+                  <span class="prescription-icon material-symbols-rounded" aria-hidden="true">medical_services</span>
+                  <strong>No data yet</strong>
+                  <span>Add prescriptions to see insights</span>
+                </article>
+              </div>
+
+              <div class="urgent-prescriptions">
+                <div class="urgent-prescriptions-header">
+                  <span>Prescription ID</span>
+                  <span>Patient</span>
+                  <span>Priority</span>
+                </div>
+                <div class="urgent-prescriptions-list" id="urgentPrescriptionsList">
+                  <div class="dropdown-empty">No urgent prescriptions.</div>
+                </div>
+              </div>
+            </div>
+          </article>
+
+          <article class="widget">
+            <header class="widget-header">
+              <div>
+                <h3 class="widget-title">Daily Prescriptions</h3>
+                <p class="widget-subtitle">Prescription trend for the past week</p>
+              </div>
+              <button class="icon-button" type="button" data-menu="prescription-trend" aria-haspopup="true"
+                aria-expanded="false" aria-controls="prescriptionTrendMenu" aria-label="Prescription trend menu">
+                <span class="material-symbols-rounded" aria-hidden="true">more_horiz</span>
+              </button>
+              <div class="widget-menu" id="prescriptionTrendMenu" hidden>
+                <button type="button" data-action="refresh-prescription-trend"><span class="material-symbols-rounded"
+                    aria-hidden="true">refresh</span>Refresh graph</button>
+                <button type="button" data-action="export-prescription-trend"><span class="material-symbols-rounded"
+                    aria-hidden="true">download</span>Export summary</button>
+              </div>
+            </header>
+            <div class="chart-container">
+              <canvas id="prescriptionTrendChart" aria-label="Weekly prescription trend"></canvas>
+            </div>
+          </article>
+        </div>
+
+        <article class="prescription-list-container">
+          <header class="prescription-list-header">
+            <div>
+              <h2>Prescription List</h2>
+              <span>Manage patient prescriptions and medication orders</span>
+            </div>
+          </header>
+
+          <div class="table-controls">
+            <div class="control-group">
+              <label class="table-search">
+                <span class="material-symbols-rounded" aria-hidden="true">search</span>
+                <input id="prescriptionSearchInput" type="search" placeholder="Search prescriptions by patient, doctor or medication"
+                  autocomplete="off">
+                <div class="search-autocomplete" id="prescriptionSearchAutocomplete" role="listbox" hidden></div>
+              </label>
+              <button class="icon-button" id="prescriptionFilterToggle" type="button" aria-haspopup="true" aria-expanded="false"
+                aria-controls="prescriptionFilterPanel" title="Filters">
+                <span class="material-symbols-rounded" aria-hidden="true">filter_list</span>
+              </button>
+              <button class="icon-button" id="prescriptionSortToggle" type="button" aria-haspopup="true" aria-expanded="false"
+                aria-controls="prescriptionSortPanel" title="Sort">
+                <span class="material-symbols-rounded" aria-hidden="true">sort</span>
+              </button>
+              <button class="icon-button" id="prescriptionColumnsToggle" type="button" aria-haspopup="true" aria-expanded="false"
+                aria-controls="prescriptionColumnsPanel" title="Manage columns">
+                <span class="material-symbols-rounded" aria-hidden="true">view_column</span>
+              </button>
+            </div>
+            <div class="nav-actions">
+              <button class="control-button secondary" id="exportPrescriptions">
+                <span class="material-symbols-rounded" aria-hidden="true">download</span>
+                Export
+              </button>
+            </div>
+          </div>
+
+
+          <div class="table-scroll">
+            <table class="prescription-table" id="prescriptionTable" aria-live="polite">
+              <thead>
+                <tr>
+                  <th scope="col" data-column="prescriptionId">Prescription ID</th>
+                  <th scope="col" data-column="patientName">Patient Name</th>
+                  <th scope="col" data-column="doctorName">Doctor</th>
+                  <th scope="col" data-column="medication">Medication</th>
+                  <th scope="col" data-column="dosage">Dosage</th>
+                  <th scope="col" data-column="quantity">Quantity</th>
+                  <th scope="col" data-column="date">Date</th>
+                  <th scope="col" data-column="priority">Priority</th>
+                  <th scope="col" data-column="status">Status</th>
+                  <th scope="col" data-column="actions">Actions</th>
+                </tr>
+              </thead>
+              <tbody id="prescriptionTableBody"></tbody>
+            </table>
+          </div>
+
+          <div class="table-empty" id="prescriptionEmptyState" hidden>
+            <span class="material-symbols-rounded" aria-hidden="true">medical_services</span>
+            <p>No prescriptions match your filters. Adjust search or filters to view results.</p>
+          </div>
+
+          <footer class="pagination" id="prescriptionPagination" hidden>
+            <div class="pagination-info" id="prescriptionPaginationInfo"></div>
+            <div class="pagination-controls" id="prescriptionPaginationControls"></div>
+            <div class="pagination-show">
+              <label>
+                Show
+                <select id="prescriptionPageSizeSelect" aria-label="Select page size">
+                  <option value="10">10</option>
+                  <option value="20">20</option>
+                  <option value="50">50</option>
+                </select>
+                entries
+              </label>
+            </div>
+          </footer>
+        </article>
+      </section>
+    </div>
+  </div>
+
+  <div class="overlay" id="modalOverlay" hidden></div>
+
+  <section class="modal" id="prescriptionModal" role="dialog" aria-modal="true" aria-labelledby="prescriptionModalTitle"
+    hidden>
+    <div class="modal-content modal-content-large">
+      <header class="modal-header">
+        <h2 id="prescriptionModalTitle">New Prescription</h2>
+        <button type="button" class="modal-close" data-close="prescriptionModal" aria-label="Close prescription form">
+          <span class="material-symbols-rounded" aria-hidden="true">close</span>
+        </button>
+      </header>
+      <form id="prescriptionForm" class="modal-body">
+        <h4 class="form-section-title">Patient Information</h4>
+        <div class="form-grid">
+          <label>
+            <span>Patient Name <span class="required-field">*</span></span>
+            <input type="text" id="formPatientName" name="patientName" required>
+          </label>
+          <label>
+            <span>Contact Number</span>
+            <input type="tel" id="formPatientContact" name="patientContact" placeholder="+260...">
+          </label>
+        </div>
+
+        <h4 class="form-section-title">Prescriber Information</h4>
+        <div class="form-grid">
+          <label>
+            <span>Prescriber Name <span class="required-field">*</span></span>
+            <input type="text" id="formDoctorName" name="doctorName" required>
+          </label>
+          <label>
+            <span>Prescriber License</span>
+            <input type="text" id="formDoctorLicense" name="doctorLicense" placeholder="License number">
+          </label>
+        </div>
+
+        <h4 class="form-section-title">Medication Details</h4>
+        <div class="form-grid">
+          <label>
+            <span>Medication <span class="required-field">*</span></span>
+            <select id="formMedication" name="medication" required>
+              <option value="">Select medication from inventory</option>
+            </select>
+          </label>
+          <label>
+            <span>Strength & Formulation <span class="required-field">*</span></span>
+            <input type="text" id="formDosage" name="dosage" placeholder="e.g., 500mg tablet" required>
+          </label>
+          <label>
+            <span>Quantity <span class="required-field">*</span></span>
+            <input type="number" id="formQuantity" name="quantity" min="1" value="1" required>
+          </label>
+          <label>
+            <span>SIG (Directions) <span class="required-field">*</span></span>
+            <input type="text" id="formSig" name="sig" list="sigSuggestions" placeholder="Start typing..." required autocomplete="off">
+            <datalist id="sigSuggestions">
+              <option value="Take 1 tablet once daily">
+              <option value="Take 1 tablet twice daily">
+              <option value="Take 1 tablet three times daily">
+              <option value="Take 2 tablets twice daily">
+              <option value="Take 1 tablet every 4-6 hours as needed">
+              <option value="Take 1 tablet every 8 hours">
+              <option value="Take 1 tablet at bedtime">
+              <option value="Take 1 tablet in the morning">
+              <option value="Apply to affected area twice daily">
+              <option value="Take 1 teaspoon three times daily">
+              <option value="Take 1 capsule with food twice daily">
+              <option value="Dissolve 1 tablet in water and drink">
+              <option value="Inhale 2 puffs twice daily">
+              <option value="Apply thin layer to affected area">
+              <option value="Take as directed by physician">
+            </datalist>
+          </label>
+        </div>
+
+        <h4 class="form-section-title">Additional Details</h4>
+        <div class="form-grid">
+          <label>
+            <span>Priority <span class="required-field">*</span></span>
+            <select id="formPriority" name="priority" required>
+              <option value="normal">Normal</option>
+              <option value="high">High</option>
+              <option value="urgent">Urgent</option>
+            </select>
+          </label>
+          <label>
+            <span>Status</span>
+            <select id="formStatus" name="status">
+              <option value="pending">Pending</option>
+              <option value="processing">Processing</option>
+              <option value="ready">Ready to Pick Up</option>
+              <option value="dispensed">Dispensed</option>
+              <option value="collected">Collected</option>
+            </select>
+          </label>
+        </div>
+
+        <label class="form-textarea">
+          <span>Special Instructions</span>
+          <textarea id="formInstructions" name="instructions" rows="2"
+            placeholder="Add any special instructions or warnings"></textarea>
+        </label>
+      </form>
+      <footer class="modal-footer">
+        <button type="button" class="secondary" data-close="prescriptionModal">Cancel</button>
+        <button type="submit" form="prescriptionForm" class="primary" id="submitPrescription">Create Prescription</button>
+      </footer>
+    </div>
+  </section>
+
+  <section class="modal" id="prescriptionActionModal" role="dialog" aria-modal="true" aria-labelledby="prescriptionActionModalTitle"
+    hidden>
+    <div class="modal-content">
+      <header class="modal-header">
+        <h2 id="prescriptionActionModalTitle">Prescription Details</h2>
+        <button type="button" class="modal-close" data-close="prescriptionActionModal" aria-label="Close dialog">
+          <span class="material-symbols-rounded" aria-hidden="true">close</span>
+        </button>
+      </header>
+      <div class="modal-body" id="prescriptionActionModalBody"></div>
+      <footer class="modal-footer" id="prescriptionActionModalFooter"></footer>
+    </div>
+  </section>
+  </main>
+
+  <script>
+    // Prescription Management JavaScript
+    document.addEventListener('DOMContentLoaded', function() {
+      // Modal elements
+      const prescriptionModal = document.getElementById('prescriptionModal');
+      const prescriptionActionModal = document.getElementById('prescriptionActionModal');
+      const modalOverlay = document.getElementById('modalOverlay');
+      const addPrescriptionButton = document.getElementById('addPrescriptionButton');
+      const prescriptionForm = document.getElementById('prescriptionForm');
+      
+      // Table elements
+      const prescriptionTableBody = document.getElementById('prescriptionTableBody');
+      const prescriptionSearchInput = document.getElementById('prescriptionSearchInput');
+      const prescriptionSearchAutocomplete = document.getElementById('prescriptionSearchAutocomplete');
+      const exportPrescriptions = document.getElementById('exportPrescriptions');
+      
+      // Stat buttons
+      const statButtons = document.querySelectorAll('.stat-button');
+      
+      // Widget menus
+      const widgetMenus = document.querySelectorAll('[data-menu]');
+      
+      // Prescription data
+      let prescriptions = [];
+      let filteredPrescriptions = [];
+      let currentPage = 1;
+      const pageSize = 10;
+      
+      // Sample medications for dropdown
+      const medications = [
+        'Paracetamol 500mg',
+        'Amoxicillin 250mg',
+        'Ibuprofen 400mg',
+        'Vitamin C 1000mg',
+        'Cough Syrup',
+        'Aspirin 75mg',
+        'Azithromycin 250mg',
+        'Multivitamin',
+        'Antacid Tablets',
+        'Ciprofloxacin 500mg'
+      ];
+      
+      // Initialize
+      function init() {
+        loadSampleData();
+        populateMedicationDropdown();
+        updateStatCounts();
+        renderPrescriptionTable();
+        setupEventListeners();
+      }
+      
+      // Load prescription data - real data will be loaded from API
+      function loadSampleData() {
+        // Initialize empty prescriptions array - real data will be loaded from API
+        prescriptions = [];
+        filteredPrescriptions = [];
+      }
+      
+      // Populate medication dropdown
+      function populateMedicationDropdown() {
+        const medicationSelect = document.getElementById('formMedication');
+        medications.forEach(med => {
+          const option = document.createElement('option');
+          option.value = med;
+          option.textContent = med;
+          medicationSelect.appendChild(option);
+        });
+      }
+      
+      // Update stat counts
+      function updateStatCounts() {
+        const pending = prescriptions.filter(p => p.status === 'pending').length;
+        const processing = prescriptions.filter(p => p.status === 'processing').length;
+        const completed = prescriptions.filter(p => p.status === 'ready').length;
+        const urgent = prescriptions.filter(p => p.priority === 'urgent').length;
+        
+        document.getElementById('pendingPrescriptionsCount').textContent = pending;
+        document.getElementById('processingPrescriptionsCount').textContent = processing;
+        document.getElementById('completedPrescriptionsCount').textContent = completed;
+        document.getElementById('urgentPrescriptionsCount').textContent = urgent;
+      }
+      
+      // Render prescription table
+      function renderPrescriptionTable() {
+        if (filteredPrescriptions.length === 0) {
+          prescriptionTableBody.innerHTML = `
+            <tr>
+              <td colspan="10" class="table-empty-state">
+                <span class="material-symbols-rounded">medical_services</span>
+                <p>No prescriptions found</p>
+              </td>
+            </tr>
+          `;
+          return;
+        }
+        
+        const start = (currentPage - 1) * pageSize;
+        const end = start + pageSize;
+        const pageData = filteredPrescriptions.slice(start, end);
+        
+        prescriptionTableBody.innerHTML = pageData.map(prescription => `
+          <tr>
+            <td>${prescription.id}</td>
+            <td>${prescription.patientName}</td>
+            <td>${prescription.doctorName}</td>
+            <td>${prescription.medication}</td>
+            <td>${prescription.dosage}</td>
+            <td>${prescription.quantity}</td>
+            <td>${prescription.date}</td>
+            <td><span class="priority-badge ${prescription.priority}">${prescription.priority}</span></td>
+            <td><span class="status-badge ${prescription.status}">${prescription.status}</span></td>
+            <td>
+              <button class="action-btn" onclick="viewPrescription('${prescription.id}')">View</button>
+              <button class="action-btn primary" onclick="editPrescription('${prescription.id}')">Edit</button>
+            </td>
+          </tr>
+        `).join('');
+      }
+      
+      // Setup event listeners
+      function setupEventListeners() {
+        // Add prescription button
+        addPrescriptionButton.addEventListener('click', () => {
+          prescriptionModal.hidden = false;
+          modalOverlay.hidden = false;
+        });
+        
+        // Modal close buttons
+        document.querySelectorAll('[data-close]').forEach(button => {
+          button.addEventListener('click', (e) => {
+            const modalId = e.target.closest('[data-close]').getAttribute('data-close');
+            document.getElementById(modalId).hidden = true;
+            modalOverlay.hidden = true;
+          });
+        });
+        
+        // Overlay click to close modals
+        modalOverlay.addEventListener('click', () => {
+          prescriptionModal.hidden = true;
+          prescriptionActionModal.hidden = true;
+          modalOverlay.hidden = true;
+        });
+        
+        // Prescription form submission
+        prescriptionForm.addEventListener('submit', (e) => {
+          e.preventDefault();
+          const formData = new FormData(prescriptionForm);
+          
+          const newPrescription = {
+            id: 'RX' + String(prescriptions.length + 1).padStart(3, '0'),
+            patientName: formData.get('patientName'),
+            doctorName: formData.get('doctorName'),
+            medication: formData.get('medication'),
+            dosage: formData.get('dosage'),
+            quantity: parseInt(formData.get('quantity')),
+            date: new Date().toISOString().split('T')[0],
+            priority: formData.get('priority'),
+            status: formData.get('status')
+          };
+          
+          prescriptions.push(newPrescription);
+          filteredPrescriptions = [...prescriptions];
+          
+          updateStatCounts();
+          renderPrescriptionTable();
+          
+          prescriptionModal.hidden = true;
+          modalOverlay.hidden = true;
+          prescriptionForm.reset();
+          
+          alert('Prescription created successfully!');
+        });
+        
+        // Search functionality
+        prescriptionSearchInput.addEventListener('input', (e) => {
+          const searchTerm = e.target.value.toLowerCase();
+          if (searchTerm === '') {
+            filteredPrescriptions = [...prescriptions];
+          } else {
+            filteredPrescriptions = prescriptions.filter(p => 
+              p.patientName.toLowerCase().includes(searchTerm) ||
+              p.doctorName.toLowerCase().includes(searchTerm) ||
+              p.medication.toLowerCase().includes(searchTerm) ||
+              p.id.toLowerCase().includes(searchTerm)
+            );
+          }
+          currentPage = 1;
+          renderPrescriptionTable();
+        });
+        
+        // Export functionality
+        exportPrescriptions.addEventListener('click', () => {
+          const csvContent = [
+            ['Prescription ID', 'Patient Name', 'Doctor', 'Medication', 'Dosage', 'Quantity', 'Date', 'Priority', 'Status'],
+            ...filteredPrescriptions.map(p => [
+              p.id, p.patientName, p.doctorName, p.medication, p.dosage, 
+              p.quantity, p.date, p.priority, p.status
+            ])
+          ].map(row => row.join(',')).join('\n');
+          
+          const blob = new Blob([csvContent], { type: 'text/csv' });
+          const url = window.URL.createObjectURL(blob);
+          const a = document.createElement('a');
+          a.href = url;
+          a.download = 'prescriptions.csv';
+          a.click();
+          window.URL.revokeObjectURL(url);
+        });
+        
+        // Widget menus
+        widgetMenus.forEach(button => {
+          button.addEventListener('click', (e) => {
+            e.stopPropagation();
+            const menuId = e.target.closest('[data-menu]').getAttribute('data-menu');
+            const menu = document.getElementById(menuId + 'Menu');
+            
+            // Close all other menus
+            document.querySelectorAll('.widget-menu').forEach(m => {
+              if (m !== menu) m.hidden = true;
+            });
+            
+            menu.hidden = !menu.hidden;
+          });
+        });
+        
+        // Close menus when clicking outside
+        document.addEventListener('click', () => {
+          document.querySelectorAll('.widget-menu').forEach(menu => {
+            menu.hidden = true;
+          });
+        });
+        
+        // Stat button clicks
+        statButtons.forEach(button => {
+          button.addEventListener('click', () => {
+            const stat = button.dataset.stat;
+            // Filter by stat type
+            if (stat === 'pending-prescriptions') {
+              filteredPrescriptions = prescriptions.filter(p => p.status === 'pending');
+            } else if (stat === 'processing-prescriptions') {
+              filteredPrescriptions = prescriptions.filter(p => p.status === 'processing');
+            } else if (stat === 'completed-prescriptions') {
+              filteredPrescriptions = prescriptions.filter(p => p.status === 'ready');
+            } else if (stat === 'urgent-prescriptions') {
+              filteredPrescriptions = prescriptions.filter(p => p.priority === 'urgent');
+            }
+            currentPage = 1;
+            renderPrescriptionTable();
+          });
+        });
+      }
+      
+      // Global functions for table actions
+      window.viewPrescription = function(id) {
+        const prescription = prescriptions.find(p => p.id === id);
+        if (prescription) {
+          const modalBody = document.getElementById('prescriptionActionModalBody');
+          modalBody.innerHTML = `
+            <div class="prescription-details-grid">
+              <div><strong>Prescription ID:</strong> ${prescription.id}</div>
+              <div><strong>Patient:</strong> ${prescription.patientName}</div>
+              <div><strong>Doctor:</strong> ${prescription.doctorName}</div>
+              <div><strong>Medication:</strong> ${prescription.medication}</div>
+              <div><strong>Dosage:</strong> ${prescription.dosage}</div>
+              <div><strong>Quantity:</strong> ${prescription.quantity}</div>
+              <div><strong>Date:</strong> ${prescription.date}</div>
+              <div><strong>Priority:</strong> ${prescription.priority}</div>
+              <div><strong>Status:</strong> ${prescription.status}</div>
+            </div>
+          `;
+          prescriptionActionModal.hidden = false;
+          modalOverlay.hidden = false;
+        }
+      };
+      
+      window.editPrescription = function(id) {
+        const prescription = prescriptions.find(p => p.id === id);
+        if (prescription) {
+          // Populate form with prescription data
+          document.getElementById('formPatientName').value = prescription.patientName;
+          document.getElementById('formDoctorName').value = prescription.doctorName;
+          document.getElementById('formMedication').value = prescription.medication;
+          document.getElementById('formDosage').value = prescription.dosage;
+          document.getElementById('formQuantity').value = prescription.quantity;
+          document.getElementById('formPriority').value = prescription.priority;
+          document.getElementById('formStatus').value = prescription.status;
+          
+          prescriptionModal.hidden = false;
+          modalOverlay.hidden = false;
+        }
+      };
+      
+      // Add CSS for badges
+      const style = document.createElement('style');
+      style.textContent = `
+        .priority-badge {
+          padding: 0.25rem 0.5rem;
+          border-radius: 4px;
+          font-size: 0.75rem;
+          font-weight: 500;
+        }
+        .priority-badge.normal {
+          background: #e5e7eb;
+          color: #374151;
+        }
+        .priority-badge.high {
+          background: #fef3c7;
+          color: #d97706;
+        }
+        .priority-badge.urgent {
+          background: #fee2e2;
+          color: #dc2626;
+        }
+        .status-badge {
+          padding: 0.25rem 0.5rem;
+          border-radius: 4px;
+          font-size: 0.75rem;
+          font-weight: 500;
+        }
+        .status-badge.pending {
+          background: #fef3c7;
+          color: #d97706;
+        }
+        .status-badge.processing {
+          background: #dbeafe;
+          color: #2563eb;
+        }
+        .status-badge.ready {
+          background: #d1fae5;
+          color: #059669;
+        }
+        .action-btn {
+          padding: 0.25rem 0.5rem;
+          border: 1px solid var(--color-border);
+          background: var(--color-background);
+          border-radius: 4px;
+          cursor: pointer;
+          font-size: 0.75rem;
+          margin-right: 0.25rem;
+        }
+        .action-btn:hover {
+          background: var(--color-surface);
+        }
+        .action-btn.primary {
+          background: var(--color-primary);
+          color: var(--color-accent);
+          border-color: var(--color-primary);
+        }
+        .action-btn.primary:hover {
+          opacity: 0.9;
+        }
+      `;
+      document.head.appendChild(style);
+      
+      // Initialize the system
+      init();
+    });
+
+  <!-- Alpine.js Component -->
+  <script>
+    function prescriptionSystem() {
+      return {
+        sidebarOpen: false,
+        showNewModal: false,
+        tenantInfo: {
+          name: 'Umi Health',
+          location: 'Lusaka, Zambia'
+        },
+        userInfo: {
+          name: 'Umi Health',
+          role: 'Admin',
+          initials: 'UH'
+        },
+        formatCurrency(amount) {
+          return new Intl.NumberFormat('en-ZM', {
+            style: 'currency',
+            currency: 'ZMW'
+          }).format(amount);
+        },
+
+        logout() {
+          if (confirm('Are you sure you want to logout?')) {
+            window.location.href = 'index.html';
+          }
+        },
+        prescriptions: [],
+
+        get totalPrescriptions() {
+          return this.prescriptions.length;
+        },
+
+        get pendingCount() {
+          return this.prescriptions.filter(p => p.status === 'pending').length;
+        },
+
+        get readyCount() {
+          return this.prescriptions.filter(p => p.status === 'ready').length;
+        },
+
+        get todayCount() {
+          const today = new Date().toISOString().split('T')[0];
+          return this.prescriptions.filter(p => p.date === today).length;
+        },
+
+        processPrescription(prescriptionId) {
+          const prescription = this.prescriptions.find(p => p.id === prescriptionId);
+          if (prescription) {
+            prescription.status = 'ready';
+            console.log('Prescription processed:', prescriptionId);
+          }
+        },
+
+        completePrescription(prescriptionId) {
+          const prescription = this.prescriptions.find(p => p.id === prescriptionId);
+          if (prescription) {
+            prescription.status = 'completed';
+            console.log('Prescription completed:', prescriptionId);
+          }
+        },
+
+        viewPrescription(prescriptionId) {
+          const prescription = this.prescriptions.find(p => p.id === prescriptionId);
+          console.log('View prescription:', prescription);
+          // Implement detailed view functionality
+        }
+      }
+    }
+  </script>
+
+  <!-- Include API and Data Sync Services -->
+  <script src="../shared/js/data-sync.js"></script>
+  <script src="../shared/js/role-based-access.js"></script>
+  <script src="../admin/js/admin-api.js"></script>
+  <script src="js/pharmacist-api.js"></script>
+
+  <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
+</body>
+</html>

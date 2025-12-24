@@ -1,0 +1,415 @@
+<!DOCTYPE html>
+<html lang="en" x-data="learnMore()">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Learn More - UmiHealthInformationSystems</title>
+  <link rel="icon" href="../logo.png" type="image/png">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@100;400;700&family=Varela+Round&family=Nunito:wght@400;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
+  <link rel="stylesheet" href="../assets/css/tailwind.output.css">
+  <style>
+    :root {
+      --color-primary-blue: #2563EB;
+      --color-accent-teal: #14B8A6;
+      --color-text-white: #FFFFFF;
+      --color-subtle-blue: #EFF6FF;
+      --color-vibrant-red: #F04C4C;
+      --font-primary: 'Inter', sans-serif;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      background: linear-gradient(135deg, var(--color-primary-blue) 0%, var(--color-accent-teal) 100%);
+      color: var(--color-text-white);
+      font-family: 'Nunito', 'Varela Round', sans-serif;
+      line-height: 1.5;
+      min-height: 100vh;
+      position: relative;
+      padding: 2rem 1rem;
+    }
+
+    .learn-more-container {
+      max-width: 1200px;
+      margin: 0 auto;
+    }
+
+    .page-header {
+      text-align: center;
+      margin-bottom: 3rem;
+    }
+
+    .page-title {
+      font-size: 1.5rem;
+      font-weight: 700;
+      font-family: 'Nunito', sans-serif;
+      margin-bottom: 1rem;
+    }
+
+    .page-subtitle {
+      font-size: 0.8rem;
+      opacity: 0.9;
+      font-family: 'Varela Round', sans-serif;
+    }
+
+    .overview-section {
+      background: rgba(255, 255, 255, 0.1);
+      -webkit-backdrop-filter: blur(10px);
+      backdrop-filter: blur(10px);
+      border: 1px solid rgba(255, 255, 255, 0.2);
+      border-radius: 15px;
+      padding: 2rem;
+      margin-bottom: 2rem;
+    }
+
+    .section-title {
+      font-size: 1.8rem;
+      font-weight: 600;
+      font-family: 'Nunito', sans-serif;
+      text-align: center;
+      margin-bottom: 3rem;
+      color: var(--color-text-white);
+    }
+
+    .overview-content {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+      gap: 2rem;
+      margin-bottom: 2rem;
+    }
+
+    .overview-item {
+      background: rgba(255, 255, 255, 0.05);
+      border-radius: 10px;
+      padding: 1.5rem;
+    }
+
+    .overview-item h3 {
+      font-size: 1.2rem;
+      font-weight: 600;
+      margin-bottom: 1rem;
+      color: var(--color-accent-teal);
+    }
+
+    .overview-item p {
+      opacity: 0.9;
+      line-height: 1.6;
+    }
+
+    .features-section {
+      margin-bottom: 2rem;
+    }
+
+    .features-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+      gap: 2rem;
+    }
+
+    .feature-card {
+      background: rgba(255, 255, 255, 0.1);
+      -webkit-backdrop-filter: blur(10px);
+      backdrop-filter: blur(10px);
+      border: 1px solid rgba(255, 255, 255, 0.2);
+      border-radius: 15px;
+      padding: 1.5rem;
+      text-align: center;
+      transition: transform 0.3s ease, box-shadow 0.3s ease;
+    }
+
+    .feature-card:hover {
+      transform: translateY(-5px);
+      box-shadow: 0 20px 40px rgba(0, 0, 0, 0.2);
+    }
+
+    .feature-icon {
+      font-size: 3rem;
+      margin-bottom: 1rem;
+      color: var(--color-accent-teal);
+    }
+
+    .feature-card h3 {
+      font-size: 1.25rem;
+      font-weight: 600;
+      font-family: 'Nunito', sans-serif;
+      margin-bottom: 1rem;
+      color: var(--color-text-white);
+    }
+
+    .feature-card p {
+      opacity: 0.9;
+      line-height: 1.6;
+      font-family: 'Varela Round', sans-serif;
+      font-size: 0.85rem;
+    }
+
+    .pricing-section {
+      margin-bottom: 2rem;
+    }
+
+    .pricing-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+      gap: 2rem;
+      max-width: 1000px;
+      margin: 0 auto;
+    }
+
+    .pricing-card {
+      background: rgba(255, 255, 255, 0.1);
+      -webkit-backdrop-filter: blur(10px);
+      backdrop-filter: blur(10px);
+      border: 1px solid rgba(255, 255, 255, 0.2);
+      border-radius: 15px;
+      padding: 2rem;
+      text-align: center;
+      position: relative;
+      transition: transform 0.3s ease, box-shadow 0.3s ease;
+    }
+
+    .pricing-card:hover {
+      transform: translateY(-5px);
+      box-shadow: 0 20px 40px rgba(0, 0, 0, 0.2);
+    }
+
+    .pricing-card.featured {
+      border-color: var(--color-accent-teal);
+      transform: scale(1.05);
+    }
+
+    .badge {
+      position: absolute;
+      top: -10px;
+      right: 20px;
+      background: var(--color-accent-teal);
+      color: white;
+      padding: 0.25rem 1rem;
+      border-radius: 20px;
+      font-size: 0.8rem;
+      font-weight: 600;
+    }
+
+    .pricing-card h3 {
+      font-size: 1.5rem;
+      font-weight: 600;
+      font-family: 'Nunito', sans-serif;
+      margin-bottom: 1rem;
+      color: var(--color-text-white);
+    }
+
+    .price {
+      font-size: 3rem;
+      font-weight: 700;
+      color: var(--color-text-white);
+      margin-bottom: 2rem;
+    }
+
+    .price span {
+      font-size: 1rem;
+      opacity: 0.7;
+    }
+
+    .features-list {
+      list-style: none;
+      padding: 0;
+      margin-bottom: 2rem;
+      text-align: left;
+    }
+
+    .features-list li {
+      padding: 0.5rem 0;
+      opacity: 0.9;
+      color: var(--color-text-white);
+    }
+
+    .pricing-button {
+      background: var(--color-text-white);
+      color: var(--color-primary-blue);
+      border: none;
+      padding: 1rem 2rem;
+      border-radius: 12px;
+      font-size: 1rem;
+      font-weight: 700;
+      font-family: 'Nunito', sans-serif;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      width: 100%;
+    }
+
+    .pricing-button:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 10px 20px rgba(0, 0, 0, 0.2);
+    }
+
+    .cta-section {
+      text-align: center;
+      margin-top: 3rem;
+    }
+
+    .cta-buttons {
+      display: flex;
+      gap: 1rem;
+      justify-content: center;
+      flex-wrap: wrap;
+      margin-bottom: 2rem;
+    }
+
+    .cta-button {
+      padding: 0.75rem 1.5rem;
+      border-radius: 12px;
+      text-decoration: none;
+      font-weight: 700;
+      font-size: 0.9rem;
+      font-family: 'Nunito', sans-serif;
+      transition: all 0.3s ease;
+      display: inline-block;
+    }
+
+    .cta-button.primary {
+      background: var(--color-text-white);
+      color: var(--color-primary-blue);
+    }
+
+    .cta-button.primary:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 10px 20px rgba(0, 0, 0, 0.2);
+    }
+
+    .cta-button.secondary {
+      background: rgba(255, 255, 255, 0.1);
+      color: var(--color-text-white);
+      border: 2px solid rgba(255, 255, 255, 0.3);
+    }
+
+    .cta-button.secondary:hover {
+      background: rgba(255, 255, 255, 0.2);
+      border-color: rgba(255, 255, 255, 0.5);
+    }
+
+    @media (max-width: 768px) {
+      .features-grid {
+        grid-template-columns: 1fr;
+      }
+      .pricing-grid {
+        grid-template-columns: 1fr;
+      }
+      .overview-content {
+        grid-template-columns: 1fr;
+      }
+      .cta-buttons {
+        flex-direction: column;
+        align-items: center;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="learn-more-container">
+    <header class="page-header">
+      <h1 class="page-title">Discover Umi Health Information Systems</h1>
+      <p class="page-subtitle">Complete pharmacy management designed for Zambia. Focus on patients, not paperwork.</p>
+    </header>
+
+    <section class="overview-section">
+      <h2 class="section-title">Why Choose Umi Health?</h2>
+      <div class="overview-content">
+        <div class="overview-item">
+          <h3>ZAMRA Compliant</h3>
+          <p>Built specifically for Zambian pharmacy regulations with automated compliance reporting and ZRA tax integration.</p>
+        </div>
+        <div class="overview-item">
+          <h3>Multi-Platform Support</h3>
+          <p>Works seamlessly across web browsers, desktop, tablets, and mobile devices for pharmacy staff on the go.</p>
+        </div>
+        <div class="overview-item">
+          <h3>Mobile Money Integration</h3>
+          <p>Accept payments via Airtel Money and MTN Mobile Money with instant transaction confirmation.</p>
+        </div>
+        <div class="overview-item">
+          <h3>Real-Time Inventory</h3>
+          <p>Track stock levels, expiry dates, and receive automated reorder alerts to prevent stockouts.</p>
+        </div>
+        <div class="overview-item">
+          <h3>Patient Safety First</h3>
+          <p>Digital prescriptions with patient history tracking and allergy warnings to ensure safe dispensing.</p>
+        </div>
+        <div class="overview-item">
+          <h3>Business Intelligence</h3>
+          <p>Get insights into sales trends, profitability, and customer behavior with comprehensive reporting tools.</p>
+        </div>
+      </div>
+    </section>
+
+    <section class="features-section">
+      <h2 class="section-title">Key Features</h2>
+      <div class="features-grid">
+        <div class="feature-card">
+          <h3>Prescription Management</h3>
+          <p>Digital prescriptions. Track patient history and manage repeat prescriptions easily.</p>
+        </div>
+
+        <div class="feature-card">
+          <h3>Smart Inventory</h3>
+          <p>Track stock in real-time, monitor expiry dates, and get alerts when medicines need reordering.</p>
+        </div>
+
+        <div class="feature-card">
+          <h3>Payment Processing</h3>
+          <p>Accept mobile money, card payments, and generate receipts automatically. Support for Airtel Money and MTN.</p>
+        </div>
+
+        <div class="feature-card">
+          <h3>Business Analytics</h3>
+          <p>View sales reports and track performance. Generate ZRA-compliant tax reports automatically.</p>
+        </div>
+
+        <div class="feature-card">
+          <h3>Data Security</h3>
+          <p>Bank-level encryption with secure access controls. Your data is protected and backed up regularly.</p>
+        </div>
+
+        <div class="feature-card">
+          <h3>Multi-Device Support</h3>
+          <p>Works on desktop, tablet, and mobile. Access your pharmacy data anywhere, even offline.</p>
+        </div>
+
+        <div class="feature-card">
+          <h3>ZAMRA Compliance</h3>
+          <p>Built-in tools to help you follow Zambian pharmacy regulations. Generate required reports easily.</p>
+        </div>
+
+        <div class="feature-card">
+          <h3>24/7 Support</h3>
+          <p>Get help anytime via phone, email, or chat. Our team is always ready to assist you.</p>
+        </div>
+      </div>
+    </section>
+
+    <section class="cta-section">
+      <h2 class="section-title">Ready to Transform Your Pharmacy?</h2>
+      <div class="cta-buttons">
+        <a href="./signup.html" class="cta-button primary">Start Trial</a>
+        <a href="./contact.html" class="cta-button secondary">Contact Us</a>
+      </div>
+    </section>
+  </div>
+
+  <!-- Alpine.js Component -->
+  <script>
+    function learnMore() {
+      return {
+        // Component data and methods can be added here if needed
+      }
+    }
+  </script>
+
+  <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
+</body>
+</html>

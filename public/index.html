@@ -1,0 +1,874 @@
+<!DOCTYPE html>
+<html lang="en" x-data="landing()">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Umi Health Information Systems</title>
+  <link rel="icon" href="../logo.png" type="image/png">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@100;400;700&family=Varela+Round&family=Nunito:wght@400;600;700&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Rounded:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="../assets/css/tailwind.output.css">
+  <style>
+    :root {
+      --color-primary-blue: #2563EB;
+      --color-accent-teal: #14B8A6;
+      --color-text-white: #FFFFFF;
+      --color-subtle-blue: #EFF6FF;
+      --font-primary: 'Inter', sans-serif;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      background: linear-gradient(135deg, var(--color-primary-blue) 0%, var(--color-accent-teal) 100%);
+      color: var(--color-text-white);
+      font-family: 'Nunito', 'Varela Round', sans-serif;
+      line-height: 1.5;
+      overflow: auto;
+      position: relative;
+    }
+
+    .main-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 1.5rem 2.5rem;
+      font-size: 0.8rem;
+      font-weight: 600;
+      font-family: 'Varela Round', sans-serif;
+      position: relative;
+    }
+
+    .nav-left {
+      display: flex;
+      align-items: center;
+      gap: 1.5rem;
+    }
+
+    .logo {
+      position: absolute;
+      right: 2.5rem;
+    }
+
+    .logo-container {
+      text-align: center;
+      margin-bottom: 2rem;
+    }
+
+    .umi-logo {
+      max-width: 200px;
+      height: auto;
+      border-radius: 12px;
+      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+      transition: transform 0.3s ease;
+    }
+
+    .umi-logo:hover {
+      transform: scale(1.05);
+    }
+
+    .menu-icon, .grid-icon, .bottom-right-btn {
+      background: rgba(255, 255, 255, 0.1);
+      border: 1px solid rgba(255, 255, 255, 0.2);
+      color: var(--color-text-white);
+      font-size: 1.25rem;
+      cursor: pointer;
+      padding: 0.5rem;
+      line-height: 1;
+      border-radius: 8px;
+      transition: all 0.3s ease;
+    }
+
+    .menu-icon:hover, .grid-icon:hover, .bottom-right-btn:hover {
+      background: rgba(255, 255, 255, 0.2);
+      border-color: rgba(255, 255, 255, 0.4);
+    }
+
+    .primary-nav a {
+      color: var(--color-text-white);
+      text-decoration: none;
+      margin-right: 1.5rem;
+      opacity: 0.8;
+      transition: opacity 0.2s;
+    }
+
+    .primary-nav a:hover {
+      opacity: 1;
+    }
+
+    .logo {
+      position: absolute;
+      right: 2.5rem;
+    }
+
+    .logo-link {
+      display: block;
+      transition: transform 0.2s ease;
+    }
+
+    .logo-link:hover {
+      transform: scale(1.05);
+    }
+
+    .logo-link img {
+      cursor: pointer;
+    }
+
+    .language-select a {
+      color: var(--color-text-white);
+      text-decoration: none;
+      margin-left: 0.5rem;
+      opacity: 0.6;
+    }
+
+    .language-select a.active {
+      opacity: 1;
+      font-weight: 700;
+    }
+
+    .content-area {
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      text-align: center;
+      gap: 2rem;
+      padding-bottom: 5rem;
+    }
+
+    .year-display {
+      font-size: 15vw;
+      font-weight: 100;
+      font-family: 'Inter', sans-serif;
+      line-height: 1;
+      letter-spacing: -0.02em;
+    }
+
+    .info-section {
+      max-width: 800px;
+      padding: 0 2rem;
+    }
+
+    .info-title {
+      font-size: 1.8rem;
+      font-weight: 700;
+      font-family: 'Nunito', 'Varela Round', sans-serif;
+      margin-bottom: 1rem;
+      line-height: 1.2;
+    }
+
+    .info-description {
+      font-size: 0.9rem;
+      opacity: 0.9;
+      max-width: 600px;
+      margin: 0 auto 2rem;
+      line-height: 1.5;
+      font-family: 'Varela Round', sans-serif;
+    }
+
+    .action-buttons {
+      display: flex;
+      gap: 1rem;
+      justify-content: center;
+      flex-wrap: wrap;
+    }
+
+    .action-button {
+      padding: 0.625rem 1.25rem;
+      border-radius: 12px;
+      text-decoration: none;
+      font-weight: 700;
+      font-size: 0.8rem;
+      font-family: 'Nunito', 'Varela Round', sans-serif;
+      transition: all 0.3s ease;
+      display: inline-block;
+    }
+
+    .action-button.primary {
+      background: var(--color-text-white);
+      color: var(--color-primary-blue);
+    }
+
+    .action-button.primary:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 10px 20px rgba(0, 0, 0, 0.2);
+    }
+
+    .action-button.secondary {
+      background: rgba(255, 255, 255, 0.1);
+      color: var(--color-text-white);
+      border: 2px solid rgba(255, 255, 255, 0.3);
+    }
+
+    .action-button.secondary:hover {
+      background: rgba(255, 255, 255, 0.2);
+      border-color: rgba(255, 255, 255, 0.5);
+    }
+
+    .timeline-indicator {
+      position: absolute;
+      top: 50%;
+      right: 1rem;
+      transform: translateY(-50%);
+      width: 2px;
+      height: 80%;
+      background-color: rgba(255, 255, 255, 0.4);
+    }
+
+    .timeline-indicator::before,
+    .timeline-indicator {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 4px;
+      background: rgba(255, 255, 255, 0.1);
+      z-index: 100;
+    }
+
+    .scroll-progress {
+      position: fixed;
+      top: 0;
+      right: 0;
+      width: 4px;
+      height: 100vh;
+      background: rgba(255, 255, 255, 0.1);
+      z-index: 100;
+    }
+
+    .scroll-progress-bar {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      background: var(--color-accent-teal);
+      transition: height 0.3s ease;
+    }
+
+    .timeline-indicator::before {
+      top: 20%;
+    }
+
+    .timeline-indicator::after {
+      top: 40%;
+    }
+
+    .scroll-prompt {
+      position: absolute;
+      bottom: 2rem;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 30px;
+      height: 50px;
+      border: 2px solid var(--color-text-white);
+      border-radius: 15px;
+      opacity: 0.6;
+      animation: bounce 2s infinite;
+    }
+
+    .mouse-scroll-icon {
+      position: absolute;
+      top: 10px;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 4px;
+      height: 8px;
+      background-color: var(--color-text-white);
+      border-radius: 2px;
+      animation: scroll 2s infinite;
+    }
+
+    .bottom-right-btn {
+      position: absolute;
+      bottom: 2rem;
+      right: 2rem;
+      font-size: 1.25rem;
+      background-color: var(--color-text-white);
+      color: var(--color-primary-blue);
+      width: 40px;
+      height: 40px;
+      border-radius: 5px;
+      line-height: 0;
+      padding: 0;
+      border: none;
+    }
+
+    @keyframes bounce {
+      0%, 20%, 50%, 80%, 100% {
+        transform: translateX(-50%) translateY(0);
+      }
+      40% {
+        transform: translateX(-50%) translateY(-10px);
+      }
+      60% {
+        transform: translateX(-50%) translateY(-5px);
+      }
+    }
+
+    @keyframes scroll {
+      0% {
+        opacity: 1;
+        top: 10px;
+      }
+      100% {
+        opacity: 0;
+        top: 25px;
+      }
+    }
+
+    /* Features Section */
+    .features-section {
+      padding: 5rem 2rem;
+      background: rgba(255, 255, 255, 0.05);
+    }
+
+    .container {
+      max-width: 1200px;
+      margin: 0 auto;
+    }
+
+    .section-title {
+      font-size: 1.8rem;
+      font-weight: 700;
+      font-family: 'Nunito', 'Varela Round', sans-serif;
+      text-align: center;
+      margin-bottom: 3rem;
+      color: var(--color-text-white);
+    }
+
+    .features-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+      gap: 1.5rem;
+    }
+
+    .feature-card {
+      background: rgba(255, 255, 255, 0.1);
+      -webkit-backdrop-filter: blur(10px);
+      backdrop-filter: blur(10px);
+      border: 1px solid rgba(255, 255, 255, 0.2);
+      border-radius: 15px;
+      padding: 1.5rem;
+      text-align: center;
+      transition: transform 0.3s ease, box-shadow 0.3s ease;
+    }
+
+    .feature-card:hover {
+      transform: translateY(-5px);
+      box-shadow: 0 20px 40px rgba(0, 0, 0, 0.2);
+    }
+
+    .feature-icon {
+      font-size: 2.5rem;
+      margin-bottom: 1rem;
+    }
+
+    .feature-card h3 {
+      font-size: 1.1rem;
+      font-weight: 600;
+      font-family: 'Nunito', 'Varela Round', sans-serif;
+      margin-bottom: 1rem;
+      color: var(--color-text-white);
+    }
+
+    .feature-card p {
+      opacity: 0.9;
+      line-height: 1.6;
+      font-family: 'Varela Round', sans-serif;
+      font-size: 0.85rem;
+    }
+
+    /* Pricing Section */
+    .pricing-section {
+      padding: 5rem 2rem;
+      background: rgba(255, 255, 255, 0.02);
+    }
+
+    .pricing-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+      gap: 1.5rem;
+      max-width: 900px;
+      margin: 0 auto;
+    }
+
+    .pricing-card {
+      background: rgba(255, 255, 255, 0.1);
+      -webkit-backdrop-filter: blur(10px);
+      backdrop-filter: blur(10px);
+      border: 1px solid rgba(255, 255, 255, 0.2);
+      border-radius: 15px;
+      padding: 1.5rem;
+      text-align: center;
+      position: relative;
+      transition: transform 0.3s ease, box-shadow 0.3s ease;
+    }
+
+    .pricing-card:hover {
+      transform: translateY(-5px);
+      box-shadow: 0 20px 40px rgba(0, 0, 0, 0.2);
+    }
+
+    .pricing-card.featured {
+      border-color: var(--color-accent-teal);
+      transform: scale(1.05);
+    }
+
+    .badge {
+      position: absolute;
+      top: -10px;
+      right: 20px;
+      background: var(--color-accent-teal);
+      color: white;
+      padding: 0.25rem 1rem;
+      border-radius: 20px;
+      font-size: 0.75rem;
+      font-weight: 600;
+    }
+
+    .pricing-card h3 {
+      font-size: 1.1rem;
+      font-weight: 600;
+      font-family: 'Nunito', 'Varela Round', sans-serif;
+      margin-bottom: 1rem;
+      color: var(--color-text-white);
+    }
+
+    .price {
+      font-size: 2.5rem;
+      font-weight: 700;
+      color: var(--color-text-white);
+      margin-bottom: 2rem;
+    }
+
+    .price span {
+      font-size: 0.9rem;
+      opacity: 0.7;
+    }
+
+    .features-list {
+      list-style: none;
+      padding: 0;
+      margin-bottom: 2rem;
+      text-align: left;
+    }
+
+    .features-list li {
+      padding: 0.5rem 0;
+      opacity: 0.9;
+      color: var(--color-text-white);
+      font-size: 0.85rem;
+    }
+
+    .pricing-button {
+      background: var(--color-text-white);
+      color: var(--color-primary-blue);
+      border: none;
+      padding: 0.75rem 1.5rem;
+      border-radius: 12px;
+      font-size: 0.85rem;
+      font-weight: 700;
+      font-family: 'Nunito', 'Varela Round', sans-serif;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      width: 100%;
+    }
+
+    .pricing-button:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 10px 20px rgba(0, 0, 0, 0.2);
+    }
+
+    /* Contact Section */
+    .contact-section {
+      padding: 5rem 2rem;
+      background: rgba(255, 255, 255, 0.05);
+    }
+
+    .contact-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 3rem;
+      max-width: 800px;
+      margin: 0 auto;
+    }
+
+    .contact-info {
+      display: flex;
+      flex-direction: column;
+      gap: 1.5rem;
+    }
+
+    .contact-item {
+      display: flex;
+      align-items: flex-start;
+      gap: 1rem;
+    }
+
+    .contact-icon {
+      font-size: 1.75rem;
+      min-width: 3rem;
+    }
+
+    .contact-item h3 {
+      font-size: 1.1rem;
+      font-weight: 600;
+      font-family: 'Nunito', 'Varela Round', sans-serif;
+      margin-bottom: 0.5rem;
+      color: var(--color-text-white);
+    }
+
+    .contact-item p {
+      opacity: 0.9;
+      line-height: 1.6;
+      color: var(--color-text-white);
+      font-family: 'Varela Round', sans-serif;
+      font-size: 0.85rem;
+    }
+
+    .contact-form {
+      background: rgba(255, 255, 255, 0.1);
+      -webkit-backdrop-filter: blur(10px);
+      backdrop-filter: blur(10px);
+      border: 1px solid rgba(255, 255, 255, 0.2);
+      border-radius: 15px;
+      padding: 1.5rem;
+    }
+
+    .contact-form h3 {
+      font-size: 1.2rem;
+      font-weight: 600;
+      font-family: 'Nunito', 'Varela Round', sans-serif;
+      margin-bottom: 2rem;
+      color: var(--color-text-white);
+    }
+
+    .contact-form input,
+    .contact-form textarea {
+      width: 100%;
+      padding: 0.75rem;
+      background: rgba(255, 255, 255, 0.1);
+      border: 1px solid rgba(255, 255, 255, 0.3);
+      border-radius: 8px;
+      color: var(--color-text-white);
+      font-size: 0.85rem;
+      font-family: 'Varela Round', sans-serif;
+      margin-bottom: 1rem;
+      transition: all 0.3s ease;
+    }
+
+    .contact-form input::placeholder,
+    .contact-form textarea::placeholder {
+      color: rgba(255, 255, 255, 0.5);
+    }
+
+    .contact-form input:focus,
+    .contact-form textarea:focus {
+      outline: none;
+      background: rgba(255, 255, 255, 0.15);
+      border-color: rgba(255, 255, 255, 0.5);
+    }
+
+    .submit-button {
+      background: var(--color-text-white);
+      color: var(--color-primary-blue);
+      border: none;
+      padding: 0.75rem 1.5rem;
+      border-radius: 10px;
+      font-size: 0.85rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      width: 100%;
+    }
+
+    .submit-button:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 10px 20px rgba(0, 0, 0, 0.2);
+    }
+
+    /* Highlights Section */
+    .highlights-section {
+      padding: 5rem 2rem;
+      background: rgba(255, 255, 255, 0.02);
+    }
+
+    .highlights-container {
+      max-width: 800px;
+      margin: 0 auto;
+    }
+
+    .highlights-title {
+      font-size: 1.8rem;
+      font-weight: 700;
+      font-family: 'Nunito', sans-serif;
+      text-align: center;
+      margin-bottom: 3rem;
+      color: var(--color-text-white);
+    }
+
+    .highlights-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+      gap: 2rem;
+    }
+
+    .highlight-card {
+      background: rgba(255, 255, 255, 0.1);
+      -webkit-backdrop-filter: blur(10px);
+      backdrop-filter: blur(10px);
+      border: 1px solid rgba(255, 255, 255, 0.2);
+      border-radius: 15px;
+      padding: 1.5rem;
+      text-align: center;
+      transition: transform 0.3s ease, box-shadow 0.3s ease;
+    }
+
+    .highlight-card:hover {
+      transform: translateY(-5px);
+      box-shadow: 0 20px 40px rgba(0, 0, 0, 0.2);
+    }
+
+    .highlight-icon {
+      font-size: 3rem;
+      margin-bottom: 1rem;
+      color: var(--color-accent-teal);
+    }
+
+    .highlight-card h3 {
+      font-size: 1.1rem;
+      font-weight: 600;
+      font-family: 'Nunito', sans-serif;
+      margin-bottom: 1rem;
+      color: var(--color-text-white);
+    }
+
+    .highlight-card p {
+      opacity: 0.9;
+      line-height: 1.6;
+      font-family: 'Varela Round', sans-serif;
+      font-size: 0.85rem;
+    }
+
+    .main-footer {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 2rem 2.5rem;
+      font-size: 0.8rem;
+      font-weight: 600;
+      font-family: 'Varela Round', sans-serif;
+      position: relative;
+      background: rgba(255, 255, 255, 0.05);
+      border-top: 1px solid rgba(255, 255, 255, 0.1);
+    }
+
+    .footer-nav {
+      display: flex;
+      align-items: center;
+      gap: 1.5rem;
+    }
+
+    .footer-links {
+      display: flex;
+      align-items: center;
+      gap: 1.5rem;
+    }
+
+    .footer-links a {
+      color: var(--color-text-white);
+      text-decoration: none;
+      margin-right: 1.5rem;
+      opacity: 0.8;
+      transition: opacity 0.2s;
+    }
+
+    .footer-links a:hover {
+      opacity: 1;
+    }
+
+    .footer-links a:last-child {
+      margin-right: 0;
+    }
+
+    .footer-copyright {
+      opacity: 0.7;
+      font-size: 0.75rem;
+    }
+
+    .footer-copyright p {
+      margin: 0;
+    }
+
+    @media (max-width: 768px) {
+      .main-footer {
+        flex-direction: column;
+        gap: 1rem;
+        padding: 1.5rem 1rem;
+        text-align: center;
+      }
+
+      .footer-links {
+        flex-wrap: wrap;
+        justify-content: center;
+      }
+    }
+  </style>
+</head>
+<body x-data="landing()">
+  <div class="scroll-progress">
+    <div class="scroll-progress-bar" x-ref="scrollBar"></div>
+  </div>
+  
+ 
+
+  <main class="content-area">
+    <div class="year-display" x-text="currentYear"></div>
+    <div class="info-section">
+      <h2 class="info-title">Umi Health Information Systems: Pharmacy POS. Simple. Safe. Successful.</h2>
+      <p class="info-description">
+        Complete pharmacy management designed for Zambia. Focus on patients, not paperwork.
+      </p>
+      <div class="action-buttons">
+        <a href="./signup.html" class="action-button secondary">Sign Up</a>
+        <a href="./signin.html" class="action-button secondary">Sign In</a>
+      </div>
+    </div>
+  </main>
+
+  <section class="highlights-section">
+    <div class="highlights-container">
+      <h2 class="highlights-title">Why Choose Umi Health?</h2>
+      <div class="highlights-grid">
+        <div class="highlight-card">
+          <span class="material-symbols-rounded highlight-icon">verified</span>
+          <h3>ZAMRA Compliant</h3>
+          <p>Built specifically for Zambian pharmacy regulations with automated compliance reporting and ZRA tax integration.</p>
+        </div>
+
+        <div class="highlight-card">
+          <span class="material-symbols-rounded highlight-icon">devices</span>
+          <h3>Multi-Platform Support</h3>
+          <p>Works seamlessly across web browsers, desktop, tablets, and mobile devices for pharmacy staff on the go.</p>
+        </div>
+
+        <div class="highlight-card">
+          <span class="material-symbols-rounded highlight-icon">payments</span>
+          <h3>Mobile Money Integration</h3>
+          <p>Accept payments via Airtel Money and MTN Mobile Money with instant transaction confirmation.</p>
+        </div>
+
+        <div class="highlight-card">
+          <span class="material-symbols-rounded highlight-icon">inventory_2</span>
+          <h3>Real-Time Inventory</h3>
+          <p>Track stock levels, expiry dates, and receive automated reorder alerts to prevent stockouts.</p>
+        </div>
+
+        <div class="highlight-card">
+          <span class="material-symbols-rounded highlight-icon">medication</span>
+          <h3>Patient Safety First</h3>
+          <p>Digital prescriptions with patient history tracking and allergy warnings to ensure safe dispensing.</p>
+        </div>
+
+        <div class="highlight-card">
+          <span class="material-symbols-rounded highlight-icon">analytics</span>
+          <h3>Business Intelligence</h3>
+          <p>Get insights into sales trends, profitability, and customer behavior with comprehensive reporting tools.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+    
+  <div class="timeline-indicator"></div>
+
+  <div class="scroll-prompt">
+    <div class="mouse-scroll-icon"></div>
+  </div>
+  
+  
+  <!-- Mobile Menu -->
+  <div x-show="mobileMenuOpen" 
+       x-transition:enter="transition ease-out duration-300"
+       x-transition:enter-start="opacity-0 transform -translate-x-full"
+       x-transition:enter-end="opacity-100 transform translate-x-0"
+       x-transition:leave="transition ease-in duration-200"
+       x-transition:leave-start="opacity-100 transform translate-x-0"
+       x-transition:leave-end="opacity-0 transform -translate-x-full"
+       class="fixed inset-0 z-50 bg-black/50 lg:hidden">
+    <div class="fixed left-0 top-0 h-full w-64 bg-white shadow-xl">
+      <div class="p-4">
+        <div class="flex items-center justify-between mb-8">
+          <h2 class="text-xl font-bold text-gray-900">Menu</h2>
+          <button @click="mobileMenuOpen = false" class="text-gray-500">
+            <span class="material-symbols-rounded">close</span>
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <footer class="main-footer">
+    <div class="footer-nav">
+      <nav class="footer-links">
+        <a href="./learn-more.html">Learn More</a>
+        <a href="./contact.html">Contact</a>
+      </nav>
+    </div>
+    <div class="footer-copyright">
+      <p>&copy; <span x-text="currentYear"></span> Umi Health Information Systems. All rights reserved.</p>
+    </div>
+  </footer>
+
+  <!-- Alpine.js Component -->
+  <script>
+    function landing() {
+      return {
+        mobileMenuOpen: false,
+        currentYear: new Date().getFullYear(),
+        yearsInOperation: new Date().getFullYear() - 2024,
+        showAdminMenu: false,
+        showFeatures: false,
+        showPricing: false,
+        showContact: false,
+        annualBilling: false,
+        
+        init() {
+          // Auto-advance years for timeline effect
+          setInterval(() => {
+            const years = [2024, new Date().getFullYear()];
+            const currentIndex = years.indexOf(this.currentYear);
+            const nextIndex = (currentIndex + 1) % years.length;
+            this.currentYear = years[nextIndex];
+          }, 3000);
+
+          // Update scroll progress
+          window.addEventListener('scroll', () => {
+            const scrollHeight = document.documentElement.scrollHeight - window.innerHeight;
+            const scrollPosition = window.scrollY;
+            const scrollPercentage = (scrollPosition / scrollHeight) * 100;
+            if (this.$refs.scrollBar) {
+              this.$refs.scrollBar.style.height = scrollPercentage + '%';
+            }
+          });
+        }
+      }
+    }
+  </script>
+  
+  <!-- API Services -->
+  <script src="../assets/js/api-config.js"></script>
+  <script src="../assets/js/auth-service.js"></script>
+  <script src="../assets/js/product-service.js"></script>
+  <script src="../assets/js/customer-service.js"></script>
+  <script src="../assets/js/dashboard-service.js"></script>
+  
+  <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
+</body>
+</html>

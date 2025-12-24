@@ -1,0 +1,61 @@
+/* Cashier Portal Notification Styles */
+.notification {
+    position: fixed;
+    top: 20px;
+    right: 20px;
+    padding: 1rem 1.5rem;
+    border-radius: 8px;
+    color: white;
+    font-weight: 500;
+    z-index: 9999;
+    transform: translateX(100%);
+    transition: transform 0.3s ease;
+    max-width: 400px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+}
+
+.notification.show {
+    transform: translateX(0);
+}
+
+.notification-success {
+    background-color: #22c55e;
+}
+
+.notification-error {
+    background-color: #ef4444;
+}
+
+.notification-warning {
+    background-color: #f59e0b;
+}
+
+.notification-info {
+    background-color: #3b82f6;
+}
+
+/* Chart container responsive fixes */
+.chart-container {
+    position: relative;
+    height: 300px;
+    width: 100%;
+}
+
+/* Icon size utilities */
+.icon-sm {
+    font-size: 1rem;
+}
+
+@media (max-width: 768px) {
+    .notification {
+        top: 10px;
+        right: 10px;
+        left: 10px;
+        max-width: none;
+        transform: translateY(-100%);
+    }
+    
+    .notification.show {
+        transform: translateY(0);
+    }
+}

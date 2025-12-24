@@ -1,0 +1,1272 @@
+<!DOCTYPE html>
+<html lang="en" x-data="superAdmin()">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Super Admin Dashboard | UmiHealthInformationSystems Pharmacy Management</title>
+  <link rel="icon" href="../../logo.png" type="image/png">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Glacial+Indifference:wght@400;500;600;700&family=Material+Symbols+Rounded:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="../../assets/css/tailwind.output.css">
+  <!-- Include API and Data Sync Services -->
+  <script src="../shared/js/data-sync.js"></script>
+  <script src="../shared/js/role-based-access.js"></script>
+  <script src="../admin/js/admin-api.js"></script>
+  <script src="js/super-admin-api.js"></script>
+  <style>
+    :root {
+      --color-primary-blue: #2563EB;
+      --color-accent-teal: #14B8A6;
+      --color-text-white: #FFFFFF;
+      --color-subtle-blue: #EFF6FF;
+      --font-primary: 'Inter', sans-serif;
+    }
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+    body {
+      background: #0a0a0a;
+      color: var(--color-text-white);
+      font-family: 'Glacial Indifference', sans-serif;
+      line-height: 1.5;
+      min-height: 100vh;
+      position: relative;
+      background-image: 
+        linear-gradient(rgba(255, 255, 255, 0.03) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(255, 255, 255, 0.03) 1px, transparent 1px);
+      background-size: 50px 50px;
+    }
+    /* Custom scrollbar styles */
+    ::-webkit-scrollbar {
+      width: 8px;
+    }
+    ::-webkit-scrollbar-track {
+      background: rgba(255, 255, 255, 0.05);
+      border-radius: 4px;
+    }
+    ::-webkit-scrollbar-thumb {
+      background: rgba(255, 255, 255, 0.2);
+      border-radius: 4px;
+    }
+    ::-webkit-scrollbar-thumb:hover {
+      background: rgba(255, 255, 255, 0.3);
+    }
+    /* Firefox scrollbar */
+    * {
+      scrollbar-width: thin;
+      scrollbar-color: rgba(255, 255, 255, 0.2) rgba(255, 255, 255, 0.05);
+    }
+    .dashboard-container {
+      display: flex;
+      min-height: 100vh;
+    }
+    /* Sidebar Styles */
+    .sidebar {
+      width: 280px;
+      background: rgba(255, 255, 255, 0.1);
+      -webkit-backdrop-filter: blur(10px);
+      backdrop-filter: blur(10px);
+      border-right: 1px solid rgba(255, 255, 255, 0.2);
+      display: flex;
+      flex-direction: column;
+      position: fixed;
+      height: 100vh;
+      left: 0;
+      top: 0;
+      z-index: 1000;
+    }
+    .sidebar-header {
+      padding: 1.5rem;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.2);
+      text-align: center;
+    }
+    .sidebar-title {
+      font-size: 1.2rem;
+      font-weight: 700;
+      font-family: 'Glacial Indifference', sans-serif;
+      color: var(--color-accent-teal);
+    }
+    .sidebar-search {
+      display: none;
+      padding: 1rem;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.2);
+    }
+    .sidebar-search .search-container {
+      width: 100%;
+    }
+    .sidebar-menu {
+      flex: 1;
+      padding: 1rem 0;
+      overflow-y: auto;
+    }
+    .menu-section {
+      margin-bottom: 2rem;
+    }
+    .menu-title {
+      font-size: 0.75rem;
+      font-weight: 600;
+      text-transform: uppercase;
+      opacity: 0.6;
+      padding: 0 1.5rem;
+      margin-bottom: 0.5rem;
+      font-family: 'Glacial Indifference', sans-serif;
+    }
+    .menu-item {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+      padding: 0.75rem 1.5rem;
+      color: var(--color-text-white);
+      text-decoration: none;
+      transition: all 0.3s ease;
+      font-family: 'Glacial Indifference', sans-serif;
+      font-size: 0.9rem;
+      opacity: 0.8;
+    }
+    .menu-item:hover {
+      background: rgba(255, 255, 255, 0.1);
+      opacity: 1;
+    }
+    .menu-item.active {
+      background: rgba(20, 184, 166, 0.2);
+      border-left: 3px solid var(--color-accent-teal);
+      opacity: 1;
+    }
+    .menu-icon {
+      font-size: 1.25rem;
+      color: var(--color-accent-teal);
+    }
+    .sidebar-footer {
+      padding: 1rem 1.5rem;
+      border-top: 1px solid rgba(255, 255, 255, 0.2);
+    }
+    /* Main Content Area */
+    .main-content {
+      flex: 1;
+      margin-left: 280px;
+      display: flex;
+      flex-direction: column;
+    }
+    /* Header Styles */
+    .header {
+      height: 70px;
+      background: rgba(10, 10, 10, 0.95);
+      -webkit-backdrop-filter: blur(10px);
+      backdrop-filter: blur(10px);
+      border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0 2rem;
+      position: sticky;
+      top: 0;
+      z-index: 999;
+    }
+    .header-left {
+      display: flex;
+      align-items: center;
+      gap: 2rem;
+    }
+    .header-logo {
+      display: flex;
+      align-items: center;
+    }
+    .header-logo img {
+      width: 100px;
+      height: 100px;
+      object-fit: contain;
+    }
+    .header-brand {
+      font-size: 1.25rem;
+      font-weight: 700;
+      font-family: 'Glacial Indifference', sans-serif;
+      color: var(--color-accent-teal);
+    }
+    .page-title {
+      font-size: 1.5rem;
+      font-weight: 700;
+      font-family: 'Glacial Indifference', sans-serif;
+    }
+    .header-right {
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+    }
+    .user-menu {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+      padding: 0.5rem 1rem;
+      background: rgba(255, 255, 255, 0.1);
+      border: 1px solid rgba(255, 255, 255, 0.2);
+      border-radius: 12px;
+      cursor: pointer;
+      transition: all 0.3s ease;
+    }
+    .user-menu:hover {
+      background: rgba(255, 255, 255, 0.15);
+    }
+    .user-avatar {
+      width: 35px;
+      height: 35px;
+      background: var(--color-accent-teal);
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1rem;
+    }
+    .user-info {
+      display: flex;
+      flex-direction: column;
+    }
+    .user-name {
+      font-weight: 600;
+      font-size: 0.9rem;
+      font-family: 'Glacial Indifference', sans-serif;
+    }
+    .user-role {
+      font-size: 0.75rem;
+      opacity: 0.8;
+      font-family: 'Glacial Indifference', sans-serif;
+    }
+    /* Search Container Styles */
+    .search-container {
+      position: relative;
+      width: 400px;
+    }
+    .search-input-wrapper {
+      position: relative;
+      display: flex;
+      align-items: center;
+    }
+    .search-input {
+      width: 100%;
+      padding: 0.75rem 1rem 0.75rem 2.5rem;
+      background: rgba(255, 255, 255, 0.1);
+      border: 1px solid rgba(255, 255, 255, 0.3);
+      border-radius: 12px;
+      color: var(--color-text-white);
+      font-size: 0.9rem;
+      font-family: 'Glacial Indifference', sans-serif;
+      transition: all 0.3s ease;
+    }
+    .search-input::placeholder {
+      color: rgba(255, 255, 255, 0.5);
+    }
+    .search-input:focus {
+      outline: none;
+      background: rgba(255, 255, 255, 0.15);
+      border-color: var(--color-accent-teal);
+      box-shadow: 0 0 0 2px rgba(20, 184, 166, 0.2);
+    }
+    .search-icon {
+      position: absolute;
+      left: 0.75rem;
+      color: rgba(255, 255, 255, 0.6);
+      font-size: 1.2rem;
+      pointer-events: none;
+    }
+    .search-suggestions {
+      position: absolute;
+      top: 100%;
+      left: 0;
+      right: 0;
+      background: rgba(10, 10, 10, 0.95);
+      -webkit-backdrop-filter: blur(10px);
+      backdrop-filter: blur(10px);
+      border: 1px solid rgba(255, 255, 255, 0.2);
+      border-radius: 12px;
+      margin-top: 0.5rem;
+      max-height: 400px;
+      overflow-y: auto;
+      z-index: 1000;
+      box-shadow: 0 10px 25px rgba(0, 0, 0, 0.3);
+    }
+    .suggestion-item {
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+      padding: 1rem;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+    }
+    .suggestion-item:last-child {
+      border-bottom: none;
+    }
+    .suggestion-item:hover {
+      background: rgba(255, 255, 255, 0.1);
+    }
+    .suggestion-icon {
+      width: 40px;
+      height: 40px;
+      background: rgba(20, 184, 166, 0.2);
+      border-radius: 10px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.2rem;
+      color: var(--color-accent-teal);
+    }
+    .suggestion-content {
+      flex: 1;
+    }
+    .suggestion-title {
+      font-weight: 600;
+      font-size: 0.9rem;
+      font-family: 'Glacial Indifference', sans-serif;
+      margin-bottom: 0.25rem;
+    }
+    .suggestion-description {
+      font-size: 0.8rem;
+      opacity: 0.7;
+      font-family: 'Glacial Indifference', sans-serif;
+    }
+    .suggestion-type {
+      padding: 0.25rem 0.75rem;
+      background: rgba(255, 255, 255, 0.1);
+      border: 1px solid rgba(255, 255, 255, 0.3);
+      border-radius: 20px;
+      font-size: 0.75rem;
+      font-weight: 600;
+      font-family: 'Glacial Indifference', sans-serif;
+      text-transform: uppercase;
+    }
+    /* Content Area */
+    .content {
+      flex: 1;
+      padding: 2rem;
+      overflow-y: auto;
+    }
+    /* Dashboard Grid */
+    .dashboard-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+      gap: 1.5rem;
+      margin-bottom: 2rem;
+    }
+    .stat-card {
+      background: rgba(255, 255, 255, 0.1);
+      -webkit-backdrop-filter: blur(10px);
+      backdrop-filter: blur(10px);
+      border: 1px solid rgba(255, 255, 255, 0.2);
+      border-radius: 16px;
+      padding: 1.5rem;
+      transition: all 0.3s ease;
+    }
+    .stat-card:hover {
+      transform: translateY(-2px);
+      background: rgba(255, 255, 255, 0.15);
+    }
+    .stat-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 1rem;
+    }
+    .stat-icon {
+      width: 45px;
+      height: 45px;
+      background: rgba(20, 184, 166, 0.2);
+      border-radius: 12px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.5rem;
+      color: var(--color-accent-teal);
+    }
+    .stat-trend {
+      font-size: 0.8rem;
+      font-weight: 600;
+      padding: 0.25rem 0.5rem;
+      border-radius: 6px;
+      font-family: 'Glacial Indifference', sans-serif;
+    }
+    .trend-up {
+      background: rgba(16, 185, 129, 0.2);
+      color: #10B981;
+    }
+    .trend-down {
+      background: rgba(244, 76, 76, 0.2);
+      color: #FCA5A5;
+    }
+    .stat-number {
+      font-size: 2rem;
+      font-weight: 700;
+      font-family: 'Glacial Indifference', sans-serif;
+      margin-bottom: 0.5rem;
+    }
+    .stat-label {
+      font-size: 0.9rem;
+      opacity: 0.8;
+      font-family: 'Glacial Indifference', sans-serif;
+    }
+    /* Quick Actions */
+    .quick-actions {
+      background: rgba(255, 255, 255, 0.1);
+      -webkit-backdrop-filter: blur(10px);
+      backdrop-filter: blur(10px);
+      border: 1px solid rgba(255, 255, 255, 0.2);
+      border-radius: 16px;
+      padding: 1.5rem;
+      margin-bottom: 2rem;
+    }
+    .section-title {
+      font-size: 1.25rem;
+      font-weight: 700;
+      font-family: 'Glacial Indifference', sans-serif;
+      margin-bottom: 1rem;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+    .actions-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: 1rem;
+    }
+    .action-button {
+      background: rgba(255, 255, 255, 0.1);
+      border: 1px solid rgba(255, 255, 255, 0.3);
+      border-radius: 12px;
+      padding: 1rem;
+      color: var(--color-text-white);
+      text-decoration: none;
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+      transition: all 0.3s ease;
+      font-family: 'Glacial Indifference', sans-serif;
+      font-size: 0.9rem;
+    }
+    .action-button:hover {
+      background: rgba(255, 255, 255, 0.2);
+      transform: translateY(-2px);
+    }
+    .action-icon {
+      font-size: 1.25rem;
+      color: var(--color-accent-teal);
+    }
+    /* Recent Activity */
+    .activity-feed {
+      background: rgba(255, 255, 255, 0.1);
+      -webkit-backdrop-filter: blur(10px);
+      backdrop-filter: blur(10px);
+      border: 1px solid rgba(255, 255, 255, 0.2);
+      border-radius: 16px;
+      padding: 1.5rem;
+    }
+    .activity-item {
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+      padding: 1rem 0;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+    }
+    .activity-item:last-child {
+      border-bottom: none;
+    }
+    .activity-icon {
+      width: 35px;
+      height: 35px;
+      background: rgba(255, 255, 255, 0.1);
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1rem;
+      color: var(--color-accent-teal);
+    }
+    .activity-content {
+      flex: 1;
+    }
+    .activity-title {
+      font-weight: 600;
+      font-size: 0.9rem;
+      font-family: 'Glacial Indifference', sans-serif;
+      margin-bottom: 0.25rem;
+    }
+    .activity-description {
+      font-size: 0.8rem;
+      opacity: 0.8;
+      font-family: 'Glacial Indifference', sans-serif;
+    }
+    .activity-time {
+      font-size: 0.8rem;
+      opacity: 0.6;
+      font-family: 'Glacial Indifference', sans-serif;
+    }
+    /* Trial Status Styles */
+    .trial-status-section {
+      margin-bottom: 2rem;
+    }
+    .trial-status-card {
+      background: linear-gradient(135deg, rgba(20, 184, 166, 0.1), rgba(37, 99, 235, 0.1));
+      border: 1px solid rgba(20, 184, 166, 0.3);
+      border-radius: 16px;
+      padding: 1.5rem;
+      transition: all 0.3s ease;
+    }
+    .trial-status-card.trial-expiring-soon {
+      background: linear-gradient(135deg, rgba(251, 146, 60, 0.1), rgba(239, 68, 68, 0.1));
+      border-color: rgba(251, 146, 60, 0.5);
+    }
+    .trial-status-card.trial-expired {
+      background: linear-gradient(135deg, rgba(239, 68, 68, 0.1), rgba(127, 29, 29, 0.1));
+      border-color: rgba(239, 68, 68, 0.5);
+    }
+    .trial-status-header {
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+      margin-bottom: 1rem;
+    }
+    .trial-status-icon {
+      width: 48px;
+      height: 48px;
+      background: rgba(20, 184, 166, 0.2);
+      border-radius: 12px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: var(--color-accent-teal);
+    }
+    .trial-status-card.trial-expiring-soon .trial-status-icon {
+      background: rgba(251, 146, 60, 0.2);
+      color: #fb923c;
+    }
+    .trial-status-card.trial-expired .trial-status-icon {
+      background: rgba(239, 68, 68, 0.2);
+      color: #ef4444;
+    }
+    .trial-status-text {
+      flex: 1;
+    }
+    .trial-status-title {
+      font-size: 1.1rem;
+      font-weight: 600;
+      margin-bottom: 0.25rem;
+      color: var(--color-text-white);
+    }
+    .trial-status-subtitle {
+      font-size: 0.9rem;
+      opacity: 0.8;
+      color: var(--color-text-white);
+    }
+    .upgrade-button {
+      background: var(--color-accent-teal);
+      color: white;
+      border: none;
+      padding: 0.5rem 1rem;
+      border-radius: 8px;
+      font-size: 0.85rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.3s ease;
+    }
+    .upgrade-button:hover {
+      background: #0d9488;
+      transform: translateY(-1px);
+    }
+    .trial-progress-bar {
+      width: 100%;
+      height: 8px;
+      background: rgba(255, 255, 255, 0.2);
+      border-radius: 4px;
+      overflow: hidden;
+      margin-bottom: 1rem;
+    }
+    .trial-progress-fill {
+      height: 100%;
+      background: linear-gradient(90deg, var(--color-accent-teal), #10b981);
+      border-radius: 4px;
+      transition: width 0.3s ease;
+    }
+    .trial-status-card.trial-expiring-soon .trial-progress-fill {
+      background: linear-gradient(90deg, #fb923c, #f97316);
+    }
+    .trial-status-card.trial-expired .trial-progress-fill {
+      background: linear-gradient(90deg, #ef4444, #dc2626);
+    }
+    .trial-features {
+      display: flex;
+      gap: 0.5rem;
+      flex-wrap: wrap;
+    }
+    .trial-feature-badge {
+      background: rgba(255, 255, 255, 0.1);
+      color: var(--color-text-white);
+      padding: 0.25rem 0.75rem;
+      border-radius: 12px;
+      font-size: 0.75rem;
+      font-weight: 500;
+      border: 1px solid rgba(255, 255, 255, 0.2);
+    }
+    /* Mobile Responsiveness */
+    .mobile-menu-toggle {
+      display: none;
+      background: none;
+      border: none;
+      color: var(--color-text-white);
+      font-size: 1.5rem;
+      cursor: pointer;
+    }
+    @media (max-width: 768px) {
+      .sidebar {
+        transform: translateX(-100%);
+        transition: transform 0.3s ease;
+        width: 280px;
+      }
+      .sidebar.open {
+        transform: translateX(0);
+      }
+      .main-content {
+        margin-left: 0;
+      }
+      .mobile-menu-toggle {
+        display: block;
+      }
+      .header {
+        padding: 0 1rem;
+        justify-content: center;
+        position: relative;
+      }
+      .header-left {
+        gap: 1rem;
+        position: absolute;
+        left: 1rem;
+        top: 50%;
+        transform: translateY(-50%);
+      }
+      .header-logo {
+        position: absolute;
+        left: 50%;
+        transform: translateX(-50%);
+      }
+      .header-logo img {
+        width: 80px;
+        height: 80px;
+      }
+      .page-title {
+        display: none;
+      }
+      .header-right {
+        display: none;
+      }
+      .sidebar-search {
+        display: block;
+        padding: 1rem;
+        border-bottom: 1px solid rgba(255, 255, 255, 0.2);
+      }
+      .content {
+        padding: 1rem;
+      }
+      .dashboard-grid {
+        grid-template-columns: 1fr;
+      }
+      .actions-grid {
+        grid-template-columns: 1fr;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="dashboard-container">
+    <!-- Sidebar -->
+    <aside class="sidebar" :class="{ 'open': mobileMenuOpen }">
+      <div class="sidebar-header">
+        <div class="sidebar-title">Umi Admin</div>
+      </div>
+      <!-- Mobile Search Bar -->
+      <div class="sidebar-search">
+        <div class="search-container" x-data="searchComponent()">
+          <div class="search-input-wrapper">
+            <input 
+              type="text" 
+              class="search-input" 
+              placeholder="Search pharmacies, users, transactions..."
+              x-model="query"
+              @input="handleSearch"
+              @focus="showSuggestions = true"
+              @blur="hideSuggestions"
+            >
+            <span class="material-symbols-rounded search-icon">search</span>
+          </div>
+          <!-- Search Suggestions Dropdown -->
+          <div 
+            class="search-suggestions" 
+            x-show="showSuggestions && suggestions.length > 0"
+            x-transition
+          >
+            <template x-for="suggestion in suggestions" :key="suggestion.id">
+              <div class="suggestion-item" @click="selectSuggestion(suggestion)">
+                <div class="suggestion-icon">
+                  <span class="material-symbols-rounded" x-text="suggestion.icon"></span>
+                </div>
+                <div class="suggestion-content">
+                  <div class="suggestion-title" x-text="suggestion.title"></div>
+                  <div class="suggestion-description" x-text="suggestion.description"></div>
+                </div>
+                <div class="suggestion-type" x-text="suggestion.type"></div>
+              </div>
+            </template>
+          </div>
+        </div>
+      </div> 
+      <nav class="sidebar-menu">
+        <div class="menu-section">
+          <div class="menu-title">Main</div>
+          <a href="#" class="menu-item active" @click.prevent="setActiveMenu('dashboard')">
+            <span class="material-symbols-rounded menu-icon">dashboard</span>
+            Home
+          </a>
+          <a href="#" class="menu-item" @click.prevent="setActiveMenu('pharmacies')">
+            <span class="material-symbols-rounded menu-icon">store</span>
+            Pharmacies
+          </a>
+          <a href="#" class="menu-item" @click.prevent="setActiveMenu('users')">
+            <span class="material-symbols-rounded menu-icon">people</span>
+            Users
+          </a>
+          <a href="#" class="menu-item" @click.prevent="setActiveMenu('transactions')">
+            <span class="material-symbols-rounded menu-icon">receipt_long</span>
+            Transactions
+          </a>
+        </div>
+        <div class="menu-section">
+          <div class="menu-title">Management</div>
+          <a href="#" class="menu-item" @click.prevent="setActiveMenu('analytics')">
+            <span class="material-symbols-rounded menu-icon">analytics</span>
+            Analytics
+          </a>
+          <a href="#" class="menu-item" @click.prevent="setActiveMenu('reports')">
+            <span class="material-symbols-rounded menu-icon">assessment</span>
+            Reports
+          </a>
+          <a href="#" class="menu-item" @click.prevent="setActiveMenu('settings')">
+            <span class="material-symbols-rounded menu-icon">account_circle</span>
+            Account
+          </a>
+          <a href="#" class="menu-item" @click.prevent="setActiveMenu('security')">
+            <span class="material-symbols-rounded menu-icon">security</span>
+            Security
+          </a>
+        </div>
+        <div class="menu-section">
+          <div class="menu-title">Support</div>
+          <a href="#" class="menu-item" @click.prevent="setActiveMenu('help')">
+            <span class="material-symbols-rounded menu-icon">help_center</span>
+            Help Center
+          </a>
+          <a href="#" class="menu-item" @click.prevent="setActiveMenu('logs')">
+            <span class="material-symbols-rounded menu-icon">history</span>
+            System Logs
+          </a>
+        </div>
+      </nav>
+      <div class="sidebar-footer">
+        <a href="../auth/signin.html" class="menu-item" @click.prevent="handleLogout">
+          <span class="material-symbols-rounded menu-icon">logout</span>
+          Sign Out
+        </a>
+      </div>
+    </aside>
+    <!-- Main Content -->
+    <main class="main-content">
+      <!-- Header -->
+      <header class="header">
+        <div class="header-left">
+          <button class="mobile-menu-toggle" @click="mobileMenuOpen = !mobileMenuOpen">
+            <span class="material-symbols-rounded">menu</span>
+          </button>
+          <div class="header-logo">
+            <!-- Logo removed per request -->
+          </div>
+          <h1 class="page-title">Dashboard Overview</h1>
+        </div>
+        <div class="header-right">
+          <div class="search-container" x-data="searchComponent()">
+            <div class="search-input-wrapper">
+              <input 
+                type="text" 
+                class="search-input" 
+                placeholder="Search pharmacies, users, transactions..."
+                x-model="query"
+                @input="handleSearch"
+                @focus="showSuggestions = true"
+                @blur="hideSuggestions"
+              >
+              <span class="material-symbols-rounded search-icon">search</span>
+            </div>
+            <!-- Search Suggestions Dropdown -->
+            <div 
+              class="search-suggestions" 
+              x-show="showSuggestions && suggestions.length > 0"
+              x-transition
+            >
+              <template x-for="suggestion in suggestions" :key="suggestion.id">
+                <div class="suggestion-item" @click="selectSuggestion(suggestion)">
+                  <div class="suggestion-icon">
+                    <span class="material-symbols-rounded" x-text="suggestion.icon"></span>
+                  </div>
+                  <div class="suggestion-content">
+                    <div class="suggestion-title" x-text="suggestion.title"></div>
+                    <div class="suggestion-description" x-text="suggestion.description"></div>
+                  </div>
+                  <div class="suggestion-type" x-text="suggestion.type"></div>
+                </div>
+              </template>
+            </div>
+          </div>
+        </div>
+      </header>
+      <!-- Content Area -->
+      <div class="content">
+        <!-- Dashboard Stats Grid -->
+        <div class="dashboard-grid">
+          <div class="stat-card">
+            <div class="stat-header">
+              <div class="stat-icon">
+                <span class="material-symbols-rounded">store</span>
+              </div>
+              <div class="stat-trend trend-up"></div>
+            </div>
+            <div class="stat-number" x-text="stats.pharmacies"></div>
+            <div class="stat-label">Active Pharmacies</div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-header">
+              <div class="stat-icon">
+                <span class="material-symbols-rounded">people</span>
+              </div>
+              <div class="stat-trend trend-up"></div>
+            </div>
+            <div class="stat-number" x-text="stats.users"></div>
+            <div class="stat-label">Total Users</div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-header">
+              <div class="stat-icon">
+                <span class="material-symbols-rounded">receipt_long</span>
+              </div>
+              <div class="stat-trend trend-down"></div>
+            </div>
+            <div class="stat-number" x-text="stats.transactions"></div>
+            <div class="stat-label">Transactions Today</div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-header">
+              <div class="stat-icon">
+                <span class="material-symbols-rounded">trending_up</span>
+              </div>
+              <div class="stat-trend trend-up"></div>
+            </div>
+            <div class="stat-number">K<span x-text="stats.revenue"></div>
+            <div class="stat-label">Revenue Today</div>
+          </div>
+        </div>
+        <!-- Trial Status -->
+        <div class="trial-status-section" x-show="trialInfo && trialInfo.isTrialAccount">
+          <h2 class="section-title">
+            <span class="material-symbols-rounded">timer</span>
+            Trial Status
+          </h2>
+          <div class="trial-status-card" :class="{ 'trial-expiring-soon': trialInfo.daysRemaining <= 3, 'trial-expired': trialInfo.daysRemaining <= 0 }">
+            <div class="trial-status-header">
+              <div class="trial-status-icon">
+                <span class="material-symbols-rounded" x-text="trialInfo.daysRemaining > 0 ? 'hourglass_top' : 'hourglass_empty'"></span>
+              </div>
+              <div class="trial-status-text">
+                <div class="trial-status-title" x-text="trialInfo.daysRemaining > 0 ? 'Free Trial Active' : 'Trial Expired'"></div>
+                <div class="trial-status-subtitle" x-text="trialInfo.daysRemaining > 0 ? `${trialInfo.daysRemaining} days remaining` : 'Upgrade to continue using UmiHealthInformationSystems'"></div>
+              </div>
+              <div class="trial-status-action">
+                <button class="upgrade-button" @click="showUpgradeModal = true" x-show="trialInfo.daysRemaining <= 3">
+                  Upgrade Now
+                </button>
+              </div>
+            </div>
+            <div class="trial-progress-bar">
+              <div class="trial-progress-fill" :style="{ width: `${Math.max(0, (trialInfo.daysRemaining / 14) * 100)}%` }"></div>
+            </div>
+            <div class="trial-features">
+              <span class="trial-feature-badge">Full Features</span>
+              <span class="trial-feature-badge">No Credit Card</span>
+              <span class="trial-feature-badge">Cancel Anytime</span>
+            </div>
+          </div>
+        </div>
+        <!-- Quick Actions -->
+        <div class="quick-actions">
+          <h2 class="section-title">
+            <span class="material-symbols-rounded">bolt</span>
+            Quick Actions
+          </h2>
+          <div class="actions-grid">
+            <a href="#" class="action-button" @click.prevent="navigateTo('add-pharmacy')">
+              <span class="material-symbols-rounded action-icon">add_business</span>
+              <span>Add New Pharmacy</span>
+            </a>
+            <a href="#" class="action-button" @click.prevent="navigateTo('user-management')">
+              <span class="material-symbols-rounded action-icon">person_add</span>
+              <span>Create User Account</span>
+            </a>
+            <a href="#" class="action-button" @click.prevent="navigateTo('system-backup')">
+              <span class="material-symbols-rounded action-icon">backup</span>
+              <span>System Backup</span>
+            </a>
+            <a href="#" class="action-button" @click.prevent="navigateTo('generate-report')">
+              <span class="material-symbols-rounded action-icon">summarize</span>
+              <span>Generate Report</span>
+            </a>
+          </div>
+        </div>
+        <!-- Recent Activity -->
+        <div class="activity-feed">
+          <h2 class="section-title">
+            <span class="material-symbols-rounded">activity</span>
+            Recent Activity
+          </h2>
+          <div id="activity-container">
+            <!-- Activity items will be loaded dynamically -->
+            <div class="activity-item">
+              <div class="activity-icon">
+                <span class="material-symbols-rounded">info</span>
+              </div>
+              <div class="activity-content">
+                <div class="activity-title">Loading recent activity...</div>
+                <div class="activity-description">Please wait while we fetch the latest system activity</div>
+              </div>
+              <div class="activity-time">Just now</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </main>
+  </div>
+  <script>
+    function searchComponent() {
+      return {
+        query: '',
+        showSuggestions: false,
+        suggestions: [],
+        init() {
+          // Initialize with some sample suggestions
+          this.suggestions = [
+            {
+              id: 1,
+              title: 'MediCare Pharmacy',
+              description: 'Lusaka, Zambia',
+              type: 'pharmacy',
+              icon: 'store'
+            },
+            {
+              id: 2,
+              title: 'John Smith',
+              description: 'Pharmacist at HealthPlus',
+              type: 'user',
+              icon: 'person'
+            },
+            {
+              id: 3,
+              title: 'Transaction #12345',
+              description: 'KMW 2,500 - Completed',
+              type: 'transaction',
+              icon: 'receipt_long'
+            },
+            {
+              id: 4,
+              title: 'System Analytics',
+              description: 'View system performance metrics',
+              type: 'page',
+              icon: 'analytics'
+            }
+          ];
+        },
+        handleSearch() {
+          if (this.query.length < 2) {
+            this.suggestions = [];
+            return;
+          }
+          // Simulate API call for search suggestions
+          console.log('Searching for:', this.query);
+          // Filter existing suggestions based on query
+          this.suggestions = this.suggestions.filter(s => 
+            s.title.toLowerCase().includes(this.query.toLowerCase()) ||
+            s.description.toLowerCase().includes(this.query.toLowerCase())
+          );
+        },
+        selectSuggestion(suggestion) {
+          console.log('Selected suggestion:', suggestion);
+          this.query = suggestion.title;
+          this.showSuggestions = false;
+          // Navigate based on suggestion type
+          switch(suggestion.type) {
+            case 'pharmacy':
+              window.location.href = 'pharmacies.html';
+              break;
+            case 'user':
+              window.location.href = 'users.html';
+              break;
+            case 'transaction':
+              window.location.href = 'transactions.html';
+              break;
+            case 'page':
+              window.location.href = suggestion.title.toLowerCase().replace(' ', '-') + '.html';
+              break;
+          }
+        },
+        hideSuggestions() {
+          setTimeout(() => {
+            this.showSuggestions = false;
+          }, 200);
+        }
+      }
+    }
+    function superAdmin() {
+      return {
+        userName: '',
+        userEmail: '',
+        mobileMenuOpen: false,
+        activeMenuItem: 'dashboard',
+        showUpgradeModal: false,
+        trialInfo: null,
+        loading: false,
+        dashboardData: null,
+        recentActivity: [],
+        systemWarnings: [],
+        stats: {
+          totalTenants: 0,
+          activeTenants: 0,
+          totalUsers: 0,
+          activeUsers: 0,
+          totalTransactions: 0,
+          totalRevenue: 0,
+          criticalSecurityEvents: 0,
+          pendingReports: 0,
+          failedBackups: 0
+        },
+        init() {
+          // Get user info from session
+          this.userName = sessionStorage.getItem('userName') || 'Super Admin';
+          this.userEmail = sessionStorage.getItem('userEmail') || 'admin@UmiHealthInformationSystems.zm';
+          // Check authentication
+          if (!window.superAdminDataSync.isAuthenticated()) {
+            this.redirectToLogin();
+            return;
+          }
+          // Load dashboard data
+          this.loadDashboardData();
+          this.loadSystemWarnings();
+          // Set up auto-refresh
+          window.superAdminDataSync.startAutoRefresh('/dashboard', (data) => {
+            this.dashboardData = data;
+            this.updateStats(data);
+            this.updateRecentActivity(data);
+          });
+          // Set up event listeners
+          window.superAdminDataSync.addEventListener('error', (message) => {
+            this.showError(message);
+          });
+          window.superAdminDataSync.addEventListener('success', (message) => {
+            this.showSuccess(message);
+          });
+          // Close mobile menu when clicking outside
+          document.addEventListener('click', (e) => {
+            if (!e.target.closest('.sidebar') && !e.target.closest('.mobile-menu-toggle')) {
+              this.mobileMenuOpen = false;
+            }
+          });
+        },
+        async loadDashboardData() {
+          try {
+            this.loading = true;
+            const data = await window.superAdminDataSync.getDashboardSummary();
+            this.dashboardData = data;
+            this.updateStats(data);
+            this.updateRecentActivity(data);
+          } catch (error) {
+            this.showError('Failed to load dashboard data');
+            console.error('Dashboard load error:', error);
+          } finally {
+            this.loading = false;
+          }
+        },
+        updateStats(data) {
+          this.stats = {
+            totalTenants: data.totalTenants || 0,
+            activeTenants: data.activeTenants || 0,
+            totalUsers: data.totalUsers || 0,
+            activeUsers: data.activeUsers || 0,
+            totalTransactions: data.totalTransactions || 0,
+            totalRevenue: data.totalRevenue || 0,
+            criticalSecurityEvents: data.criticalSecurityEvents || 0,
+            pendingReports: data.pendingReports || 0,
+            failedBackups: data.failedBackups || 0
+          };
+        },
+        updateRecentActivity(data) {
+          this.recentActivity = [
+            ...data.recentLogs?.map(log => ({
+              type: 'log',
+              message: log.message,
+              timestamp: log.createdAt,
+              severity: log.logLevel
+            })) || [],
+            ...data.recentSecurityEvents?.map(event => ({
+              type: 'security',
+              message: `${event.eventType}: ${event.action || 'Unknown action'}`,
+              timestamp: event.createdAt,
+              severity: event.severity
+            })) || []
+          ].sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp))
+           .slice(0, 10);
+        },
+        async loadSystemWarnings() {
+          try {
+            const warnings = await window.superAdminDataSync.getSystemWarnings();
+            this.systemWarnings = warnings;
+          } catch (error) {
+            console.error('Failed to load system warnings:', error);
+          }
+        },
+        async loadTrialInfo() {
+          try {
+            // Get trial info from localStorage (set during signup)
+            const storedTrialInfo = localStorage.getItem('trialInfo');
+            if (storedTrialInfo) {
+              this.trialInfo = JSON.parse(storedTrialInfo);
+            }
+          } catch (error) {
+            console.error('Failed to load trial info:', error);
+          }
+        },
+        async loadStats() {
+          // This is now handled by loadDashboardData()
+          await this.loadDashboardData();
+        },
+        async loadRecentActivity() {
+          // This is now handled by loadDashboardData()
+          await this.loadDashboardData();
+        },
+        formatNumber(num) {
+          if (num >= 1000000) {
+            return (num / 1000000).toFixed(1) + 'M';
+          } else if (num >= 1000) {
+            return (num / 1000).toFixed(1) + 'K';
+          }
+          return num.toString();
+        },
+        formatCurrency(amount) {
+          return new Intl.NumberFormat('en-ZM', {
+            style: 'currency',
+            currency: 'ZMW'
+          }).format(amount);
+        },
+        formatDateTime(dateString) {
+          return window.superAdminDataSync.formatDateTime(dateString);
+        },
+        getSeverityIcon(severity) {
+          const icons = {
+            low: 'info',
+            medium: 'warning',
+            high: 'priority_high',
+            critical: 'dangerous'
+          };
+          return icons[severity] || 'info';
+        },
+        getSeverityClass(severity) {
+          const classes = {
+            low: 'text-blue-400',
+            medium: 'text-yellow-400',
+            high: 'text-orange-400',
+            critical: 'text-red-400'
+          };
+          return classes[severity] || 'text-gray-400';
+        },
+        showError(message) {
+          // Show error toast or notification
+          if (window.showToast) {
+            window.showToast(message, 'error');
+          } else {
+            alert(message);
+          }
+        },
+        showSuccess(message) {
+          // Show success toast or notification
+          if (window.showToast) {
+            window.showToast(message, 'success');
+          }
+        },
+        redirectToLogin() {
+          window.location.href = '/public/admin-signin.html';
+        },
+        logout() {
+          window.superAdminDataSync.clearToken();
+          sessionStorage.clear();
+          this.redirectToLogin();
+        },
+        setActiveMenuItem(item) {
+          this.activeMenuItem = item;
+        },
+        // Navigation methods
+        navigateTo(page) {
+          window.location.href = `${page}.html`;
+        },
+        // Dashboard actions
+        async refreshDashboard() {
+          await this.loadDashboardData();
+          await this.loadSystemWarnings();
+        },
+        async generateReport() {
+          try {
+            const reportData = {
+              name: `Dashboard Report ${new Date().toISOString().split('T')[0]}`,
+              type: 'dashboard',
+              description: 'Automated dashboard report with system metrics and statistics'
+            };
+            await window.superAdminDataSync.createReport(reportData);
+            this.showSuccess('Report generation started');
+          } catch (error) {
+            this.showError('Failed to generate report');
+          }
+        },
+        async exportData() {
+          try {
+            await window.superAdminDataSync.exportSystemData('dashboard', {
+              includeStats: true,
+              includeAnalytics: true,
+              dateRange: 'last30days'
+            });
+            this.showSuccess('Data export completed');
+          } catch (error) {
+            this.showError('Failed to export data');
+          }
+        },
+        // System health actions
+        async checkSystemHealth() {
+          try {
+            const health = await window.superAdminDataSync.getSystemHealth();
+            console.log('System Health:', health);
+            if (health.status === 'healthy') {
+              this.showSuccess('System is healthy');
+            } else {
+              this.showError('System health issues detected');
+            }
+          } catch (error) {
+            this.showError('Failed to check system health');
+          }
+        },
+        // Cleanup
+        destroy() {
+          window.superAdminDataSync.stopAllAutoRefresh();
+        }
+      }
+    }
+  </script>
+</body>
+</html>
