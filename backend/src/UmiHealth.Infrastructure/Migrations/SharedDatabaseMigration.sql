@@ -303,7 +303,7 @@ INSERT INTO superadmin.system_settings (key, value, category, description, is_pu
 ('system_version', '1.0.0', 'general', 'Current system version', true),
 ('max_file_size_mb', '10', 'storage', 'Maximum file upload size in MB', false),
 ('allowed_file_extensions', '["jpg","jpeg","png","gif","pdf","doc","docx","txt","csv","xlsx","xls"]', 'storage', 'Allowed file extensions for uploads', false),
-('default_subscription_plan', 'basic', 'subscriptions', 'Default subscription plan for new tenants', false),
+('default_subscription_plan', 'Care', 'subscriptions', 'Default subscription plan for new tenants', false),
 ('trial_period_days', '14', 'subscriptions', 'Number of days for trial period', false),
 ('password_min_length', '8', 'security', 'Minimum password length', false),
 ('session_timeout_minutes', '30', 'security', 'Session timeout in minutes', false),

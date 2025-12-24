@@ -1,0 +1,125 @@
+name: CI/CD
+
+on:
+  push:
+    branches: [ main, develop ]
+  pull_request:
+    branches: [ main, develop ]
+
+jobs:
+  build-test:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v3
+        with:
+          dotnet-version: '8.0.x'
+
+      - name: Restore
+        run: dotnet restore backend/UmiHealth.sln
+
+      - name: Build
+        run: dotnet build backend/UmiHealth.sln --configuration Release --no-restore
+
+      - name: Test
+        run: dotnet test backend/tests/ --no-build --verbosity normal
+
+  build-and-push:
+    needs: build-test
+    runs-on: ubuntu-latest
+    if: github.ref == 'refs/heads/main' || github.ref == 'refs/heads/develop'
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+      - name: Set registry variables
+        run: |
+          echo "REGISTRY=${{ env.REGISTRY || 'ghcr.io' }}" >> $GITHUB_ENV
+
+      - name: Log in to registry (GHCR or ACR)
+        if: ${{ secrets.ACR_LOGIN_SERVER != '' }}
+        uses: docker/login-action@v2
+        with:
+          registry: ${{ secrets.ACR_LOGIN_SERVER }}
+          username: ${{ secrets.ACR_USERNAME }}
+          password: ${{ secrets.ACR_PASSWORD }}
+
+      - name: Log in to GHCR (fallback)
+        if: ${{ secrets.ACR_LOGIN_SERVER == '' }}
+        uses: docker/login-action@v2
+        with:
+          registry: ${{ env.REGISTRY }}
+          username: ${{ github.actor }}
+          password: ${{ secrets.CR_PAT }}
+
+      - name: Build and push API image
+        uses: docker/build-push-action@v4
+        with:
+          context: backend/
+          file: backend/Dockerfile
+          push: true
+          tags: |
+            ${{ env.REGISTRY }}/${{ github.repository }}/umihealth-api:latest
+            ${{ env.REGISTRY }}/${{ github.repository }}/umihealth-api:${{ github.sha }}
+
+      - name: Build and push Identity image
+        uses: docker/build-push-action@v4
+        with:
+          context: backend/UmiHealth.Identity/
+          file: backend/UmiHealth.Identity/Dockerfile
+          push: true
+          tags: |
+            ${{ env.REGISTRY }}/${{ github.repository }}/umihealth-identity:latest
+            ${{ env.REGISTRY }}/${{ github.repository }}/umihealth-identity:${{ github.sha }}
+
+      - name: Build and push Background Jobs image
+        uses: docker/build-push-action@v4
+        with:
+          context: backend/UmiHealth.Jobs/
+          file: backend/UmiHealth.Jobs/Dockerfile
+          push: true
+          tags: |
+            ${{ env.REGISTRY }}/${{ github.repository }}/umihealth-jobs:latest
+            ${{ env.REGISTRY }}/${{ github.repository }}/umihealth-jobs:${{ github.sha }}
+
+  deploy-azure:
+    needs: build-and-push
+    runs-on: ubuntu-latest
+    if: github.ref == 'refs/heads/main'
+    steps:
+      - name: Deploy to Azure Web App (Container)
+        uses: azure/webapps-deploy@v2
+        with:
+          app-name: ${{ secrets.AZURE_WEBAPP_NAME }}
+          slot-name: production
+          publish-profile: ${{ secrets.AZURE_PUBLISH_PROFILE }}
+          images: ${{ env.REGISTRY }}/${{ github.repository }}/umihealth-api:${{ github.sha }}
+
+      - name: Wait for app to become available
+        run: |
+          for i in {1..12}; do
+            if curl -fsS https://${{ secrets.AZURE_WEBAPP_DEFAULT_HOSTNAME }}/health; then
+              echo "app is healthy"; break
+            fi
+            echo "waiting for app... ($i)"; sleep 5
+          done
+
+      - name: Run EF Core migrations against target DB
+        env:
+          DOTNET_NOLOGO: true
+          DB_CONN: ${{ secrets.DATABASE_CONNECTION }}
+        run: |
+          echo "Running EF Core migrations using connection from secret DATABASE_CONNECTION"
+          git clone --depth 1 https://github.com/${{ github.repository }} .
+          cd backend
+          dotnet tool restore
+          dotnet restore
+          dotnet build --configuration Release
+          # Run migrations for the UmiHealth project
+          dotnet ef database update --project src/UmiHealth.Infrastructure --startup-project src/UmiHealth.Api --connection "$DB_CONN"
+
+      - name: Smoke test
+        run: |
+          curl -f https://${{ secrets.AZURE_WEBAPP_DEFAULT_HOSTNAME }}/health || (echo "Health check failed" && exit 1)

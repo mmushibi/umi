@@ -15,6 +15,12 @@ namespace UmiHealth.Infrastructure.Data
         public DbSet<User> Users { get; set; }
         public DbSet<Subscription> Subscriptions { get; set; }
         public DbSet<SubscriptionTransaction> SubscriptionTransactions { get; set; }
+        public DbSet<SubscriptionPlan> SubscriptionPlans { get; set; }
+        public DbSet<AdditionalUserRequest> AdditionalUserRequests { get; set; }
+        public DbSet<AdditionalUserCharge> AdditionalUserCharges { get; set; }
+        public DbSet<Notification> Notifications { get; set; }
+        public DbSet<NotificationSettings> NotificationSettings { get; set; }
+        public DbSet<PaymentTransaction> PaymentTransactions { get; set; }
         
         // Multi-tenancy entities
         public DbSet<StockTransfer> StockTransfers { get; set; }
@@ -240,6 +246,368 @@ namespace UmiHealth.Infrastructure.Data
                     .HasDefaultValueSql("CURRENT_TIMESTAMP");
 
                 entity.Property(e => e.UpdatedAt)
+                    .HasDefaultValueSql("CURRENT_TIMESTAMP");
+            });
+
+            // Configure SubscriptionTransaction entity
+            modelBuilder.Entity<SubscriptionTransaction>(entity =>
+            {
+                entity.ToTable("subscription_transactions", "shared");
+                entity.HasKey(e => e.Id);
+
+                entity.Property(e => e.TransactionId)
+                    .IsRequired()
+                    .HasMaxLength(50);
+
+                entity.Property(e => e.Type)
+                    .IsRequired()
+                    .HasMaxLength(50);
+
+                entity.Property(e => e.Currency)
+                    .HasMaxLength(3)
+                    .HasDefaultValue("ZMW");
+
+                entity.Property(e => e.Status)
+                    .HasMaxLength(50)
+                    .HasDefaultValue("pending_approval");
+
+                entity.Property(e => e.PlanFrom)
+                    .HasMaxLength(50);
+
+                entity.Property(e => e.PlanTo)
+                    .HasMaxLength(50);
+
+                entity.Property(e => e.RejectionReason)
+                    .HasMaxLength(1000);
+
+                entity.HasOne(e => e.Tenant)
+                    .WithMany()
+                    .HasForeignKey(e => e.TenantId)
+                    .OnDelete(DeleteBehavior.Cascade);
+
+                entity.HasOne(e => e.Subscription)
+                    .WithMany()
+                    .HasForeignKey(e => e.SubscriptionId)
+                    .OnDelete(DeleteBehavior.SetNull);
+
+                entity.HasOne(e => e.RequestedByUser)
+                    .WithMany()
+                    .HasForeignKey(e => e.RequestedBy)
+                    .OnDelete(DeleteBehavior.Restrict);
+
+                entity.HasOne(e => e.ApprovedByUser)
+                    .WithMany()
+                    .HasForeignKey(e => e.ApprovedBy)
+                    .OnDelete(DeleteBehavior.SetNull);
+
+                entity.HasIndex(e => e.TransactionId)
+                    .IsUnique();
+                entity.HasIndex(e => e.TenantId);
+                entity.HasIndex(e => e.Status);
+                entity.HasIndex(e => e.CreatedAt);
+
+                entity.Property(e => e.CreatedAt)
+                    .HasDefaultValueSql("CURRENT_TIMESTAMP");
+
+                entity.Property(e => e.UpdatedAt)
+                    .HasDefaultValueSql("CURRENT_TIMESTAMP");
+            });
+
+            // Configure SubscriptionPlan entity
+            modelBuilder.Entity<SubscriptionPlan>(entity =>
+            {
+                entity.ToTable("subscription_plans", "shared");
+                entity.HasKey(e => e.Id);
+
+                entity.Property(e => e.Name)
+                    .IsRequired()
+                    .HasMaxLength(50);
+
+                entity.Property(e => e.DisplayName)
+                    .IsRequired()
+                    .HasMaxLength(100);
+
+                entity.Property(e => e.Description)
+                    .HasColumnType("text");
+
+                entity.Property(e => e.Features)
+                    .HasColumnType("jsonb");
+
+                entity.HasIndex(e => e.Name)
+                    .IsUnique();
+                entity.HasIndex(e => e.IsActive);
+
+                entity.Property(e => e.CreatedAt)
+                    .HasDefaultValueSql("CURRENT_TIMESTAMP");
+
+                entity.Property(e => e.UpdatedAt)
+                    .HasDefaultValueSql("CURRENT_TIMESTAMP");
+            });
+
+            // Configure AdditionalUserRequest entity
+            modelBuilder.Entity<AdditionalUserRequest>(entity =>
+            {
+                entity.ToTable("additional_user_requests", "shared");
+                entity.HasKey(e => e.Id);
+
+                entity.Property(e => e.RequestId)
+                    .IsRequired()
+                    .HasMaxLength(50);
+
+                entity.Property(e => e.UserEmail)
+                    .IsRequired()
+                    .HasMaxLength(255);
+
+                entity.Property(e => e.UserFirstName)
+                    .IsRequired()
+                    .HasMaxLength(100);
+
+                entity.Property(e => e.UserLastName)
+                    .IsRequired()
+                    .HasMaxLength(100);
+
+                entity.Property(e => e.UserRole)
+                    .IsRequired()
+                    .HasMaxLength(50);
+
+                entity.Property(e => e.SubscriptionPlanAtRequest)
+                    .IsRequired()
+                    .HasMaxLength(50);
+
+                entity.Property(e => e.Status)
+                    .HasMaxLength(50)
+                    .HasDefaultValue("pending_approval");
+
+                entity.Property(e => e.RejectionReason)
+                    .HasMaxLength(1000);
+
+                entity.HasOne(e => e.Tenant)
+                    .WithMany()
+                    .HasForeignKey(e => e.TenantId)
+                    .OnDelete(DeleteBehavior.Cascade);
+
+                entity.HasOne(e => e.Branch)
+                    .WithMany()
+                    .HasForeignKey(e => e.BranchId)
+                    .OnDelete(DeleteBehavior.SetNull);
+
+                entity.HasOne(e => e.RequestedByUser)
+                    .WithMany()
+                    .HasForeignKey(e => e.RequestedBy)
+                    .OnDelete(DeleteBehavior.Restrict);
+
+                entity.HasOne(e => e.ApprovedByUser)
+                    .WithMany()
+                    .HasForeignKey(e => e.ApprovedBy)
+                    .OnDelete(DeleteBehavior.SetNull);
+
+                entity.HasOne(e => e.UserCreated)
+                    .WithMany()
+                    .HasForeignKey(e => e.UserCreatedId)
+                    .OnDelete(DeleteBehavior.SetNull);
+
+                entity.HasIndex(e => e.RequestId)
+                    .IsUnique();
+                entity.HasIndex(e => e.TenantId);
+                entity.HasIndex(e => e.RequestedBy);
+                entity.HasIndex(e => e.Status);
+                entity.HasIndex(e => e.CreatedAt);
+
+                entity.Property(e => e.CreatedAt)
+                    .HasDefaultValueSql("CURRENT_TIMESTAMP");
+
+                entity.Property(e => e.UpdatedAt)
+                    .HasDefaultValueSql("CURRENT_TIMESTAMP");
+            });
+
+            // Configure AdditionalUserCharge entity
+            modelBuilder.Entity<AdditionalUserCharge>(entity =>
+            {
+                entity.ToTable("additional_user_charges", "shared");
+                entity.HasKey(e => e.Id);
+
+                entity.Property(e => e.Currency)
+                    .HasMaxLength(3)
+                    .HasDefaultValue("ZMW");
+
+                entity.Property(e => e.Status)
+                    .HasMaxLength(50)
+                    .HasDefaultValue("pending_payment");
+
+                entity.Property(e => e.PaymentReference)
+                    .HasMaxLength(100);
+
+                entity.Property(e => e.PaymentMethod)
+                    .HasMaxLength(50);
+
+                entity.Property(e => e.RejectionReason)
+                    .HasMaxLength(1000);
+
+                entity.HasOne(e => e.Tenant)
+                    .WithMany()
+                    .HasForeignKey(e => e.TenantId)
+                    .OnDelete(DeleteBehavior.Cascade);
+
+                entity.HasOne(e => e.User)
+                    .WithMany()
+                    .HasForeignKey(e => e.UserId)
+                    .OnDelete(DeleteBehavior.Cascade);
+
+                entity.HasOne(e => e.ApprovedByUser)
+                    .WithMany()
+                    .HasForeignKey(e => e.ApprovedBy)
+                    .OnDelete(DeleteBehavior.SetNull);
+
+                entity.HasIndex(e => e.TenantId);
+                entity.HasIndex(e => e.UserId);
+                entity.HasIndex(e => e.BillingMonth);
+                entity.HasIndex(e => e.Status);
+
+                entity.Property(e => e.CreatedAt)
+                    .HasDefaultValueSql("CURRENT_TIMESTAMP");
+
+                entity.Property(e => e.UpdatedAt)
+                    .HasDefaultValueSql("CURRENT_TIMESTAMP");
+
+                // Unique constraint on tenant_id + user_id + billing_month
+                entity.HasIndex(e => new { e.TenantId, e.UserId, e.BillingMonth })
+                    .IsUnique();
+            });
+
+            // Configure Notification entity
+            modelBuilder.Entity<Notification>(entity =>
+            {
+                entity.ToTable("notifications", "shared");
+                entity.HasKey(e => e.Id);
+
+                entity.Property(e => e.Type)
+                    .IsRequired()
+                    .HasMaxLength(50);
+
+                entity.Property(e => e.Title)
+                    .IsRequired()
+                    .HasMaxLength(255);
+
+                entity.Property(e => e.Message)
+                    .IsRequired();
+
+                entity.Property(e => e.Data)
+                    .HasColumnType("jsonb");
+
+                entity.Property(e => e.ActionUrl)
+                    .HasMaxLength(500);
+
+                entity.HasOne(e => e.Tenant)
+                    .WithMany()
+                    .HasForeignKey(e => e.TenantId)
+                    .OnDelete(DeleteBehavior.Cascade);
+
+                entity.HasOne(e => e.User)
+                    .WithMany()
+                    .HasForeignKey(e => e.UserId)
+                    .OnDelete(DeleteBehavior.Cascade);
+
+                entity.HasOne(e => e.Sender)
+                    .WithMany()
+                    .HasForeignKey(e => e.SenderId)
+                    .OnDelete(DeleteBehavior.SetNull);
+
+                entity.HasIndex(e => e.TenantId);
+                entity.HasIndex(e => e.UserId);
+                entity.HasIndex(e => e.Type);
+                entity.HasIndex(e => e.IsRead);
+                entity.HasIndex(e => e.CreatedAt);
+
+                entity.Property(e => e.CreatedAt)
+                    .HasDefaultValueSql("CURRENT_TIMESTAMP");
+
+                entity.Property(e => e.UpdatedAt)
+                    .HasDefaultValueSql("CURRENT_TIMESTAMP");
+            });
+
+            // Configure NotificationSettings entity
+            modelBuilder.Entity<NotificationSettings>(entity =>
+            {
+                entity.ToTable("notification_settings", "shared");
+                entity.HasKey(e => e.Id);
+
+                entity.Property(e => e.CustomAlerts)
+                    .HasColumnType("jsonb");
+
+                entity.HasOne(e => e.Tenant)
+                    .WithMany()
+                    .HasForeignKey(e => e.TenantId)
+                    .OnDelete(DeleteBehavior.Cascade);
+
+                entity.HasOne(e => e.User)
+                    .WithMany()
+                    .HasForeignKey(e => e.UserId)
+                    .OnDelete(DeleteBehavior.Cascade);
+
+                entity.HasIndex(e => e.TenantId);
+                entity.HasIndex(e => e.UserId);
+
+                // Unique constraint on tenant_id + user_id
+                entity.HasIndex(e => new { e.TenantId, e.UserId })
+                    .IsUnique();
+
+                entity.Property(e => e.CreatedAt)
+                    .HasDefaultValueSql("CURRENT_TIMESTAMP");
+
+                entity.Property(e => e.UpdatedAt)
+                    .HasDefaultValueSql("CURRENT_TIMESTAMP");
+            });
+
+            // Configure PaymentTransaction entity
+            modelBuilder.Entity<PaymentTransaction>(entity =>
+            {
+                entity.ToTable("payment_transactions", "shared");
+                entity.HasKey(e => e.Id);
+
+                entity.Property(e => e.TransactionReference)
+                    .IsRequired()
+                    .HasMaxLength(100);
+
+                entity.Property(e => e.Currency)
+                    .HasMaxLength(3)
+                    .HasDefaultValue("ZMW");
+
+                entity.Property(e => e.PaymentMethod)
+                    .IsRequired()
+                    .HasMaxLength(50);
+
+                entity.Property(e => e.Status)
+                    .IsRequired()
+                    .HasMaxLength(50)
+                    .HasDefaultValue("pending");
+
+                entity.Property(e => e.RefundReason)
+                    .HasMaxLength(1000);
+
+                entity.HasOne(e => e.Tenant)
+                    .WithMany()
+                    .HasForeignKey(e => e.TenantId)
+                    .OnDelete(DeleteBehavior.Cascade);
+
+                entity.HasOne(e => e.User)
+                    .WithMany()
+                    .HasForeignKey(e => e.UserId)
+                    .OnDelete(DeleteBehavior.Cascade);
+
+                entity.HasOne(e => e.Charge)
+                    .WithMany()
+                    .HasForeignKey(e => e.ChargeId)
+                    .OnDelete(DeleteBehavior.Cascade);
+
+                entity.HasIndex(e => e.TransactionReference)
+                    .IsUnique();
+                entity.HasIndex(e => e.TenantId);
+                entity.HasIndex(e => e.UserId);
+                entity.HasIndex(e => e.ChargeId);
+                entity.HasIndex(e => e.Status);
+                entity.HasIndex(e => e.TransactionDate);
+
+                entity.Property(e => e.CreatedAt)
                     .HasDefaultValueSql("CURRENT_TIMESTAMP");
             });
 

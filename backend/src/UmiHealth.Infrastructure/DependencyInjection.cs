@@ -3,6 +3,7 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using StackExchange.Redis;
+using UmiHealth.Application.Services;
 using UmiHealth.Core.Interfaces;
 using UmiHealth.Infrastructure.Cache;
 using UmiHealth.Infrastructure.Data;
@@ -30,7 +31,7 @@ public static class DependencyInjection
             options.Configuration = redisConnectionString;
             options.InstanceName = "UmiHealth";
         });
-        services.AddScoped<ICacheService, RedisCacheService>();
+        services.AddScoped<ICacheService, RedisCacheServiceAdapter>();
 
         // Repositories
         services.AddScoped(typeof(IRepository<>), typeof(Repository<>));
@@ -48,6 +49,12 @@ public static class DependencyInjection
 
         // File Storage
         services.AddScoped<IFileStorageService, LocalFileStorageService>();
+
+        // Application Services
+        services.AddScoped<ISubscriptionService, SubscriptionService>();
+        services.AddScoped<INotificationService, NotificationService>();
+        services.AddScoped<IAdditionalUserService, AdditionalUserService>();
+        services.AddScoped<IPaymentVerificationService, PaymentVerificationService>();
 
         // Logging
         services.AddLogging(builder =>

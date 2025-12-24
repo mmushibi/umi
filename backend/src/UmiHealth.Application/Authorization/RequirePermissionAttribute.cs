@@ -3,6 +3,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Filters;
 using System;
 using System.Threading.Tasks;
+using UmiHealth.Application.Services;
 
 namespace UmiHealth.Application.Authorization
 {

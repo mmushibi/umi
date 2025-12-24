@@ -1,3 +1,5 @@
+using UmiHealth.Core.Entities;
+
 namespace UmiHealth.Core.Interfaces;
 
 public interface IRepository<T> where T : BaseEntity

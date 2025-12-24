@@ -1,0 +1,456 @@
+{
+	"info": {
+		"_postman_id": "umi-health-api-collection",
+		"name": "Umi Health API Collection",
+		"description": "Complete API collection for Umi Health system",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+	},
+	"item": [
+		{
+			"name": "Authentication",
+			"item": [
+				{
+					"name": "Login",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							},
+							{
+								"key": "X-Tenant-Code",
+								"value": "{{tenant_code}}"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"email\": \"{{user_email}}\",\n  \"password\": \"{{user_password}}\",\n  \"tenantSubdomain\": \"{{tenant_code}}\"\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/api/v1/auth/login",
+							"host": ["{{base_url}}"],
+							"path": ["api", "v1", "auth", "login"]
+						}
+					}
+				},
+				{
+					"name": "Register",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							},
+							{
+								"key": "X-Tenant-Code",
+								"value": "{{tenant_code}}"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"email\": \"{{new_user_email}}\",\n  \"password\": \"{{new_user_password}}\",\n  \"firstName\": \"{{new_user_firstName}}\",\n  \"lastName\": \"{{new_user_lastName}}\",\n  \"phoneNumber\": \"{{new_user_phoneNumber}}\"\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/api/v1/auth/register",
+							"host": ["{{base_url}}"],
+							"path": ["api", "v1", "auth", "register"]
+						}
+					}
+				}
+			]
+		},
+		{
+			"name": "Tenants",
+			"item": [
+				{
+					"name": "Get Tenants",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{access_token}}"
+							}
+						],
+						"url": {
+							"raw": "{{base_url}}/api/v1/tenants",
+							"host": ["{{base_url}}"],
+							"path": ["api", "v1", "tenants"]
+						}
+					}
+				},
+				{
+					"name": "Create Tenant",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{access_token}}"
+							},
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"name\": \"{{tenant_name}}\",\n  \"subdomain\": \"{{tenant_subdomain}}\",\n  \"subscriptionPlan\": \"{{subscription_plan}}\",\n  \"contactEmail\": \"{{tenant_contact_email}}\",\n  \"phoneNumber\": \"{{tenant_phone}}\"\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/api/v1/tenants",
+							"host": ["{{base_url}}"],
+							"path": ["api", "v1", "tenants"]
+						}
+					}
+				}
+			]
+		},
+		{
+			"name": "Users",
+			"item": [
+				{
+					"name": "Get Users",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{access_token}}"
+							}
+						],
+						"url": {
+							"raw": "{{base_url}}/api/v1/users",
+							"host": ["{{base_url}}"],
+							"path": ["api", "v1", "users"]
+						}
+					}
+				},
+				{
+					"name": "Create User",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{access_token}}"
+							},
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"email\": \"{{new_user_email}}\",\n  \"firstName\": \"{{new_user_firstName}}\",\n  \"lastName\": \"{{new_user_lastName}}\",\n  \"phoneNumber\": \"{{new_user_phoneNumber}}\",\n  \"roleId\": \"{{role_id}}\",\n  \"branchId\": \"{{branch_id}}\"\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/api/v1/users",
+							"host": ["{{base_url}}"],
+							"path": ["api", "v1", "users"]
+						}
+					}
+				}
+			]
+		},
+		{
+			"name": "Patients",
+			"item": [
+				{
+					"name": "Get Patients",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{access_token}}"
+							}
+						],
+						"url": {
+							"raw": "{{base_url}}/api/v1/patients",
+							"host": ["{{base_url}}"],
+							"path": ["api", "v1", "patients"]
+						}
+					}
+				},
+				{
+					"name": "Create Patient",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{access_token}}"
+							},
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"firstName\": \"{{patient_firstName}}\",\n  \"lastName\": \"{{patient_lastName}}\",\n  \"dateOfBirth\": \"{{patient_dob}}\",\n  \"gender\": \"{{patient_gender}}\",\n  \"phoneNumber\": \"{{patient_phone}}\",\n  \"email\": \"{{patient_email}}\",\n  \"address\": \"{{patient_address}}\"\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/api/v1/patients",
+							"host": ["{{base_url}}"],
+							"path": ["api", "v1", "patients"]
+						}
+					}
+				}
+			]
+		},
+		{
+			"name": "Products",
+			"item": [
+				{
+					"name": "Get Products",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{access_token}}"
+							}
+						],
+						"url": {
+							"raw": "{{base_url}}/api/v1/products",
+							"host": ["{{base_url}}"],
+							"path": ["api", "v1", "products"]
+						}
+					}
+				},
+				{
+					"name": "Create Product",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{access_token}}"
+							},
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"name\": \"{{product_name}}\",\n  \"genericName\": \"{{product_generic_name}}\",\n  \"category\": \"{{product_category}}\",\n  \"strength\": \"{{product_strength}}\",\n  \"form\": \"{{product_form}}\",\n  \"price\": {{product_price}}\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/api/v1/products",
+							"host": ["{{base_url}}"],
+							"path": ["api", "v1", "products"]
+						}
+					}
+				}
+			]
+		},
+		{
+			"name": "Inventory",
+			"item": [
+				{
+					"name": "Get Inventory",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{access_token}}"
+							}
+						],
+						"url": {
+							"raw": "{{base_url}}/api/v1/inventory",
+							"host": ["{{base_url}}"],
+							"path": ["api", "v1", "inventory"]
+						}
+					}
+				},
+				{
+					"name": "Create Inventory Item",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{access_token}}"
+							},
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"name\": \"{{product_name}}\",\n  \"description\": \"{{product_description}}\",\n  \"category\": \"{{product_category}}\",\n  \"price\": {{product_price}},\n  \"quantity\": {{product_quantity}},\n  \"sku\": \"{{product_sku}}\"\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/api/v1/inventory",
+							"host": ["{{base_url}}"],
+							"path": ["api", "v1", "inventory"]
+						}
+					}
+				}
+			]
+		},
+		{
+			"name": "Prescriptions",
+			"item": [
+				{
+					"name": "Get Prescriptions",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{access_token}}"
+							}
+						],
+						"url": {
+							"raw": "{{base_url}}/api/v1/prescriptions",
+							"host": ["{{base_url}}"],
+							"path": ["api", "v1", "prescriptions"]
+						}
+					}
+				},
+				{
+					"name": "Create Prescription",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{access_token}}"
+							},
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"patientId\": \"{{patient_id}}\",\n  \"doctorId\": \"{{doctor_id}}\",\n  \"medications\": [\n    {\n      \"productId\": \"{{product_id}}\",\n      \"dosage\": \"{{dosage}}\",\n      \"frequency\": \"{{frequency}}\",\n      \"duration\": \"{{duration}}\",\n      \"quantity\": {{quantity}}\n    }\n  ],\n  \"notes\": \"{{prescription_notes}}\"\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/api/v1/prescriptions",
+							"host": ["{{base_url}}"],
+							"path": ["api", "v1", "prescriptions"]
+						}
+					}
+				}
+			]
+		},
+		{
+			"name": "Point of Sale",
+			"item": [
+				{
+					"name": "Create Sale",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{access_token}}"
+							},
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"patientId\": \"{{patient_id}}\",\n  \"items\": [\n    {\n      \"productId\": \"{{product_id}}\",\n      \"quantity\": {{quantity}},\n      \"unitPrice\": {{unit_price}}\n    }\n  ],\n  \"paymentMethod\": \"{{payment_method}}\",\n  \"cashierId\": \"{{cashier_id}}\"\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/api/v1/pointofsale",
+							"host": ["{{base_url}}"],
+							"path": ["api", "v1", "pointofsale"]
+						}
+					}
+				}
+			]
+		},
+		{
+			"name": "Payments",
+			"item": [
+				{
+					"name": "Create Payment",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{access_token}}"
+							},
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"saleId\": \"{{sale_id}}\",\n  \"amount\": {{payment_amount}},\n  \"paymentMethod\": \"{{payment_method}}\",\n  \"reference\": \"{{payment_reference}}\"\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/api/v1/payments",
+							"host": ["{{base_url}}"],
+							"path": ["api", "v1", "payments"]
+						}
+					}
+				}
+			]
+		},
+		{
+			"name": "Reports",
+			"item": [
+				{
+					"name": "Sales Report",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{access_token}}"
+							}
+						],
+						"url": {
+							"raw": "{{base_url}}/api/v1/reports/sales",
+							"host": ["{{base_url}}"],
+							"path": ["api", "v1", "reports", "sales"]
+						}
+					}
+				},
+				{
+					"name": "Inventory Report",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{access_token}}"
+							}
+						],
+						"url": {
+							"raw": "{{base_url}}/api/v1/reports/inventory",
+							"host": ["{{base_url}}"],
+							"path": ["api", "v1", "reports", "inventory"]
+						}
+					}
+				}
+			]
+		}
+	],
+	"variable": [
+		{
+			"key": "base_url",
+			"value": "https://localhost:7123"
+		},
+		{
+			"key": "tenant_code",
+			"value": "DEV001"
+		}
+	]
+}

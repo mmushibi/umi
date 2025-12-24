@@ -1,0 +1,9 @@
+C:\Users\sepio\Desktop\Umi_Health\obj\Debug\net8.0\StandaloneAuthApi.csproj.AssemblyReference.cache
+C:\Users\sepio\Desktop\Umi_Health\obj\Debug\net8.0\rpswa.dswa.cache.json
+C:\Users\sepio\Desktop\Umi_Health\obj\Debug\net8.0\StandaloneAuthApi.GeneratedMSBuildEditorConfig.editorconfig
+C:\Users\sepio\Desktop\Umi_Health\obj\Debug\net8.0\StandaloneAuthApi.AssemblyInfoInputs.cache
+C:\Users\sepio\Desktop\Umi_Health\obj\Debug\net8.0\StandaloneAuthApi.AssemblyInfo.cs
+C:\Users\sepio\Desktop\Umi_Health\obj\Debug\net8.0\StandaloneAuthApi.csproj.CoreCompileInputs.cache
+C:\Users\sepio\Desktop\Umi_Health\obj\Debug\net8.0\StandaloneAuthApi.MvcApplicationPartsAssemblyInfo.cs
+C:\Users\sepio\Desktop\Umi_Health\obj\Debug\net8.0\StandaloneAuthApi.MvcApplicationPartsAssemblyInfo.cache
+C:\Users\sepio\Desktop\Umi_Health\obj\Debug\net8.0\StandaloneAuthApi.sourcelink.json

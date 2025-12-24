@@ -1,6 +1,6 @@
 {
   "ConnectionStrings": {
-    "DefaultConnection": "Host=localhost;Database=umihealth_shared;Username=postgres;Password=password;Port=5432",
+    "DefaultConnection": "Host=localhost;Database=Umi_db;Username=postgres;Password=root;Port=5432",
     "Redis": "localhost:6379"
   },
   "FileStorage": {

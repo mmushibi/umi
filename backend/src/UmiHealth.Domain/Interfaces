@@ -1,0 +1,105 @@
+using UmiHealth.Domain.Entities;
+
+namespace UmiHealth.Core.Interfaces;
+
+public interface IPosService
+{
+    // Sales Management
+    Task<Sale> CreateSaleAsync(Guid tenantId, CreateSaleRequest request, CancellationToken cancellationToken = default);
+    Task<IReadOnlyList<Sale>> GetSalesAsync(Guid tenantId, Guid branchId, SaleFilter? filter = null, CancellationToken cancellationToken = default);
+    Task<Sale?> GetSaleAsync(Guid saleId, Guid tenantId, CancellationToken cancellationToken = default);
+    Task<bool> CancelSaleAsync(Guid saleId, Guid tenantId, CancellationToken cancellationToken = default);
+
+    // Payment Processing
+    Task<Payment> ProcessPaymentAsync(Guid saleId, ProcessPaymentRequest request, CancellationToken cancellationToken = default);
+    Task<ReceiptDto> GenerateReceiptAsync(Guid saleId, Guid tenantId, CancellationToken cancellationToken = default);
+
+    // Returns Management
+    Task<SaleReturn> ProcessReturnAsync(Guid tenantId, ProcessReturnRequest request, CancellationToken cancellationToken = default);
+    Task<IReadOnlyList<SaleReturn>> GetReturnsAsync(Guid tenantId, Guid branchId, CancellationToken cancellationToken = default);
+}
+
+public record CreateSaleRequest(
+    Guid BranchId,
+    Guid PatientId,
+    List<CreateSaleItemRequest> Items,
+    string PaymentMethod,
+    decimal? DiscountAmount,
+    string? Notes,
+    string? PrescriptionNumber
+);
+
+public record CreateSaleItemRequest(
+    Guid ProductId,
+    int Quantity,
+    decimal? DiscountPercentage
+);
+
+public record SaleFilter(
+    DateTime? StartDate,
+    DateTime? EndDate,
+    string? Status,
+    string? PaymentStatus,
+    string? PatientName,
+    string? SaleNumber
+);
+
+public record ProcessPaymentRequest(
+    decimal Amount,
+    string PaymentMethod,
+    string? TransactionReference,
+    string? CardLastFour,
+    string? MobileNumber
+);
+
+public record ProcessReturnRequest(
+    Guid SaleId,
+    List<ReturnItemRequest> Items,
+    string Reason,
+    string? Notes
+);
+
+public record ReturnItemRequest(
+    Guid ProductId,
+    int Quantity
+);
+
+public record ReceiptDto(
+    Guid SaleId,
+    string SaleNumber,
+    DateTime SaleDate,
+    ReceiptPatientInfo Patient,
+    BranchInfo Branch,
+    List<ReceiptItemDto> Items,
+    decimal Subtotal,
+    decimal TaxAmount,
+    decimal DiscountAmount,
+    decimal TotalAmount,
+    decimal AmountPaid,
+    decimal ChangeAmount,
+    string PaymentMethod,
+    CashierInfo Cashier
+);
+
+public record ReceiptItemDto(
+    string ProductName,
+    int Quantity,
+    decimal UnitPrice,
+    decimal DiscountAmount,
+    decimal Total
+);
+
+public record ReceiptPatientInfo(
+    string Name,
+    string? PhoneNumber
+);
+
+public record BranchInfo(
+    string Name,
+    string Address,
+    string Phone
+);
+
+public record CashierInfo(
+    string Name
+);

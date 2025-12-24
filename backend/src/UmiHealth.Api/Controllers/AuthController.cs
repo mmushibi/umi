@@ -3,226 +3,312 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.RateLimiting;
 using System;
 using System.Threading.Tasks;
-using UmiHealth.Application.Services;
+using UmiHealth.Core.Interfaces;
+using UmiHealth.Shared.DTOs;
 
-namespace UmiHealth.Api.Controllers
+namespace UmiHealth.API.Controllers
 {
     [ApiController]
     [Route("api/v1/[controller]")]
     public class AuthController : ControllerBase
     {
-        private readonly IAuthenticationService _authService;
-        private readonly ISubscriptionService _subscriptionService;
-        private readonly IJwtTokenService _jwtTokenService;
+        private readonly IAuthService _authService;
 
-        public AuthController(
-            IAuthenticationService authService, 
-            ISubscriptionService subscriptionService,
-            IJwtTokenService jwtTokenService)
+        public AuthController(IAuthService authService)
         {
             _authService = authService;
-            _subscriptionService = subscriptionService;
-            _jwtTokenService = jwtTokenService;
         }
 
         [HttpPost("login")]
         [EnableRateLimiting("Auth")]
-        public async Task<ActionResult<AuthResponse>> Login([FromBody] LoginRequest request)
+        public async Task<ActionResult<ApiResponse<LoginResponse>>> Login([FromBody] LoginRequest request)
         {
             try
             {
-                var result = await _authService.LoginAsync(request);
-                
+                var result = await _authService.LoginAsync(new(
+                    request.Email,
+                    request.Password,
+                    request.TenantSubdomain
+                ));
+
                 if (!result.Success)
                 {
-                    return BadRequest(new { success = false, message = result.Message });
+                    return BadRequest(ApiResponse<LoginResponse>.ErrorResult(result.Message));
                 }
 
-                return Ok(result);
+                var response = new LoginResponse
+                {
+                    Success = result.Success,
+                    Message = result.Message,
+                    User = result.User,
+                    Token = result.Token,
+                    RefreshToken = result.RefreshToken,
+                    ExpiresAt = result.ExpiresAt
+                };
+
+                return Ok(ApiResponse<LoginResponse>.SuccessResult(response));
             }
             catch (Exception ex)
             {
-                return StatusCode(500, new { success = false, message = "Login failed. Please try again." });
+                return BadRequest(ApiResponse<LoginResponse>.ErrorResult("Login failed. Please try again."));
             }
         }
 
         [HttpPost("register")]
         [EnableRateLimiting("Auth")]
-        public async Task<ActionResult<AuthResponse>> Register([FromBody] RegisterRequest request)
+        public async Task<ActionResult<ApiResponse<LoginResponse>>> Register([FromBody] RegisterRequest request)
         {
             try
             {
-                var result = await _authService.RegisterAsync(request);
-                
+                var result = await _authService.RegisterAsync(new(
+                    request.Email,
+                    request.Password,
+                    request.FirstName,
+                    request.LastName,
+                    request.PhoneNumber,
+                    request.TenantId,
+                    request.BranchId
+                ));
+
                 if (!result.Success)
                 {
-                    return BadRequest(new { success = false, message = result.Message });
+                    return BadRequest(ApiResponse<LoginResponse>.ErrorResult(result.Message));
                 }
 
-                return Created("", result);
+                var response = new LoginResponse
+                {
+                    Success = result.Success,
+                    Message = result.Message,
+                    User = result.User,
+                    Token = result.Token,
+                    RefreshToken = result.RefreshToken,
+                    ExpiresAt = result.ExpiresAt
+                };
+
+                return Created("", ApiResponse<LoginResponse>.SuccessResult(response, "Registration successful"));
             }
             catch (Exception ex)
             {
-                return StatusCode(500, new { success = false, message = "Registration failed. Please try again." });
+                return BadRequest(ApiResponse<LoginResponse>.ErrorResult("Registration failed. Please try again."));
             }
         }
 
         [HttpPost("refresh")]
-        public async Task<ActionResult<AuthResponse>> RefreshToken([FromBody] RefreshTokenRequest request)
+        public async Task<ActionResult<ApiResponse<LoginResponse>>> RefreshToken([FromBody] RefreshTokenRequest request)
         {
             try
             {
-                // Validate refresh token first
-                var principal = await _jwtTokenService.ValidateRefreshTokenAsync(request.RefreshToken);
-                if (principal == null)
-                {
-                    return BadRequest(new { success = false, message = "Invalid or expired refresh token" });
-                }
+                var result = await _authService.RefreshTokenAsync(new(
+                    request.Token,
+                    request.RefreshToken
+                ));
 
-                var result = await _authService.RefreshTokenAsync(request.RefreshToken);
-                
                 if (!result.Success)
                 {
-                    return BadRequest(new { success = false, message = result.Message });
+                    return BadRequest(ApiResponse<LoginResponse>.ErrorResult(result.Message));
                 }
 
-                return Ok(result);
+                var response = new LoginResponse
+                {
+                    Success = result.Success,
+                    Message = result.Message,
+                    User = result.User,
+                    Token = result.Token,
+                    RefreshToken = result.RefreshToken,
+                    ExpiresAt = result.ExpiresAt
+                };
+
+                return Ok(ApiResponse<LoginResponse>.SuccessResult(response));
             }
             catch (Exception ex)
             {
-                return StatusCode(500, new { success = false, message = "Token refresh failed." });
+                return BadRequest(ApiResponse<LoginResponse>.ErrorResult("Token refresh failed."));
             }
         }
 
         [HttpPost("logout")]
         [Authorize]
-        public async Task<ActionResult> Logout()
+        public async Task<ActionResult<ApiResponse<bool>>> Logout()
         {
             try
             {
-                var userId = User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value;
-                if (!string.IsNullOrEmpty(userId))
+                var userIdClaim = User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value;
+                if (!string.IsNullOrEmpty(userIdClaim))
                 {
-                    await _authService.LogoutAsync(userId);
+                    var result = await _authService.LogoutAsync(userIdClaim);
+                    return Ok(ApiResponse<bool>.SuccessResult(result, "Logged out successfully"));
                 }
 
-                return Ok(new { success = true, message = "Logged out successfully" });
+                return BadRequest(ApiResponse<bool>.ErrorResult("User not found"));
             }
             catch (Exception ex)
             {
-                return StatusCode(500, new { success = false, message = "Logout failed." });
+                return BadRequest(ApiResponse<bool>.ErrorResult("Logout failed."));
             }
         }
 
         [HttpGet("me")]
         [Authorize]
         [EnableRateLimiting("Read")]
-        public async Task<ActionResult<UserDto>> GetCurrentUser()
+        public async Task<ActionResult<ApiResponse<UserProfileDto>>> GetCurrentUser()
         {
             try
             {
-                var userId = User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value;
-                if (string.IsNullOrEmpty(userId))
+                var userIdClaim = User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value;
+                if (string.IsNullOrEmpty(userIdClaim) || !Guid.TryParse(userIdClaim, out var userId))
                 {
                     return Unauthorized();
                 }
 
-                var user = await _authService.GetUserByIdAsync(userId);
-                if (user == null)
+                var userProfile = await _authService.GetProfileAsync(userId);
+                if (userProfile == null)
                 {
-                    return NotFound();
+                    return NotFound(ApiResponse<UserProfileDto>.ErrorResult("User not found"));
                 }
 
-                return Ok(new UserDto
+                var profileDto = new UserProfileDto
                 {
-                    Id = user.Id,
-                    Email = user.Email,
-                    PhoneNumber = user.PhoneNumber,
-                    Username = user.Username ?? user.Email,
-                    FirstName = user.FirstName,
-                    LastName = user.LastName,
-                    Role = user.Role,
-                    TenantId = user.TenantId,
-                    BranchId = user.BranchId,
-                    BranchAccess = user.BranchAccess,
-                    Permissions = user.Permissions,
-                    IsActive = user.IsActive,
-                    EmailVerified = user.EmailVerified,
-                    PhoneVerified = user.PhoneVerified,
-                    TwoFactorEnabled = user.TwoFactorEnabled,
-                    LastLogin = user.LastLogin
-                });
-            }
-            catch (Exception ex)
-            {
-                return StatusCode(500, new { success = false, message = "Failed to get user information." });
-            }
-        }
-
-        [HttpGet("subscription-status")]
-        [Authorize]
-        public async Task<ActionResult<SubscriptionReminder>> GetSubscriptionStatus()
-        {
-            try
-            {
-                var tenantIdClaim = User.FindFirst("tenant_id")?.Value;
-                if (string.IsNullOrEmpty(tenantIdClaim))
-                {
-                    return BadRequest("Tenant information not found");
-                }
-
-                var tenantId = Guid.Parse(tenantIdClaim);
-                var reminder = await _subscriptionService.GetSubscriptionReminderAsync(tenantId);
-
-                if (reminder == null)
-                {
-                    return Ok(new { 
-                        showUpgradeBanner = false, 
-                        message = "No active subscription found" 
-                    });
-                }
-
-                return Ok(reminder);
-            }
-            catch (Exception ex)
-            {
-                return StatusCode(500, new { success = false, message = "Failed to get subscription status." });
-            }
-        }
-
-        [HttpGet("check-setup")]
-        [Authorize]
-        public async Task<ActionResult> CheckTenantSetup()
-        {
-            try
-            {
-                var tenantIdClaim = User.FindFirst("tenant_id")?.Value;
-                if (string.IsNullOrEmpty(tenantIdClaim))
-                {
-                    return BadRequest("Tenant information not found");
-                }
-
-                var tenantId = Guid.Parse(tenantIdClaim);
-                var subscription = await _subscriptionService.GetActiveSubscriptionAsync(tenantId);
-
-                var response = new
-                {
-                    requiresSetup = subscription?.PlanType == "trial",
-                    setupCompleted = false, // This would be checked from tenant settings
-                    redirectUrl = subscription?.PlanType == "trial" ? "/account/setup" : "/home"
+                    Id = userProfile.Id,
+                    Email = userProfile.Email,
+                    FirstName = userProfile.FirstName,
+                    LastName = userProfile.LastName,
+                    PhoneNumber = userProfile.PhoneNumber,
+                    TenantId = userProfile.TenantId,
+                    TenantName = userProfile.TenantName,
+                    BranchId = userProfile.BranchId,
+                    BranchName = userProfile.BranchName,
+                    CreatedAt = userProfile.CreatedAt,
+                    LastLoginAt = userProfile.LastLoginAt,
+                    IsActive = userProfile.IsActive
                 };
 
-                return Ok(response);
+                return Ok(ApiResponse<UserProfileDto>.SuccessResult(profileDto));
             }
             catch (Exception ex)
             {
-                return StatusCode(500, new { success = false, message = "Failed to check setup status." });
+                return BadRequest(ApiResponse<UserProfileDto>.ErrorResult("Failed to get user information."));
             }
         }
-    }
 
-    public class RefreshTokenRequest
-    {
-        public string RefreshToken { get; set; } = string.Empty;
+        [HttpPut("me")]
+        [Authorize]
+        [EnableRateLimiting("Write")]
+        public async Task<ActionResult<ApiResponse<UserProfileDto>>> UpdateProfile([FromBody] UpdateProfileRequest request)
+        {
+            try
+            {
+                var userIdClaim = User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value;
+                if (string.IsNullOrEmpty(userIdClaim) || !Guid.TryParse(userIdClaim, out var userId))
+                {
+                    return Unauthorized();
+                }
+
+                var userProfile = await _authService.UpdateProfileAsync(userId, new(
+                    request.FirstName,
+                    request.LastName,
+                    request.PhoneNumber,
+                    request.Email
+                ));
+
+                var profileDto = new UserProfileDto
+                {
+                    Id = userProfile.Id,
+                    Email = userProfile.Email,
+                    FirstName = userProfile.FirstName,
+                    LastName = userProfile.LastName,
+                    PhoneNumber = userProfile.PhoneNumber,
+                    TenantId = userProfile.TenantId,
+                    TenantName = userProfile.TenantName,
+                    BranchId = userProfile.BranchId,
+                    BranchName = userProfile.BranchName,
+                    CreatedAt = userProfile.CreatedAt,
+                    LastLoginAt = userProfile.LastLoginAt,
+                    IsActive = userProfile.IsActive
+                };
+
+                return Ok(ApiResponse<UserProfileDto>.SuccessResult(profileDto, "Profile updated successfully"));
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(ApiResponse<UserProfileDto>.ErrorResult("Failed to update profile."));
+            }
+        }
+
+        [HttpPost("change-password")]
+        [Authorize]
+        [EnableRateLimiting("Write")]
+        public async Task<ActionResult<ApiResponse<bool>>> ChangePassword([FromBody] ChangePasswordRequest request)
+        {
+            try
+            {
+                var userIdClaim = User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value;
+                if (string.IsNullOrEmpty(userIdClaim) || !Guid.TryParse(userIdClaim, out var userId))
+                {
+                    return Unauthorized();
+                }
+
+                var result = await _authService.ChangePasswordAsync(userId, new(
+                    request.CurrentPassword,
+                    request.NewPassword,
+                    request.ConfirmPassword
+                ));
+
+                if (!result)
+                {
+                    return BadRequest(ApiResponse<bool>.ErrorResult("Current password is incorrect"));
+                }
+
+                return Ok(ApiResponse<bool>.SuccessResult(true, "Password changed successfully"));
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(ApiResponse<bool>.ErrorResult("Failed to change password."));
+            }
+        }
+
+        [HttpPost("forgot-password")]
+        [EnableRateLimiting("Auth")]
+        public async Task<ActionResult<ApiResponse<bool>>> ForgotPassword([FromBody] ForgotPasswordRequest request)
+        {
+            try
+            {
+                var result = await _authService.ForgotPasswordAsync(new(
+                    request.Email,
+                    request.TenantSubdomain
+                ));
+
+                return Ok(ApiResponse<bool>.SuccessResult(true, "Password reset email sent"));
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(ApiResponse<bool>.ErrorResult("Failed to send password reset email."));
+            }
+        }
+
+        [HttpPost("reset-password")]
+        [EnableRateLimiting("Auth")]
+        public async Task<ActionResult<ApiResponse<bool>>> ResetPassword([FromBody] ResetPasswordRequest request)
+        {
+            try
+            {
+                var result = await _authService.ResetPasswordAsync(new(
+                    request.Email,
+                    request.Token,
+                    request.NewPassword,
+                    request.ConfirmPassword
+                ));
+
+                if (!result)
+                {
+                    return BadRequest(ApiResponse<bool>.ErrorResult("Invalid or expired reset token"));
+                }
+
+                return Ok(ApiResponse<bool>.SuccessResult(true, "Password reset successfully"));
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(ApiResponse<bool>.ErrorResult("Failed to reset password."));
+            }
+        }
     }
 }

@@ -1,12 +1,15 @@
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.AspNetCore.RateLimiting;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using UmiHealth.Domain.Entities;
 using UmiHealth.Infrastructure.Data;
+using UmiHealth.Application.Services;
+using UmiHealth.Shared.DTOs;
 
 namespace UmiHealth.Api.Controllers
 {
@@ -17,11 +20,16 @@ namespace UmiHealth.Api.Controllers
     {
         private readonly SharedDbContext _context;
         private readonly ILogger<PaymentsController> _logger;
+        private readonly IPaymentProcessingService _paymentProcessingService;
 
-        public PaymentsController(SharedDbContext context, ILogger<PaymentsController> logger)
+        public PaymentsController(
+            SharedDbContext context, 
+            ILogger<PaymentsController> logger,
+            IPaymentProcessingService paymentProcessingService)
         {
             _context = context;
             _logger = logger;
+            _paymentProcessingService = paymentProcessingService;
         }
 
         [HttpGet]
@@ -256,11 +264,12 @@ namespace UmiHealth.Api.Controllers
         }
 
         [HttpPost("{id}/process")]
+        [EnableRateLimiting("Write")]
         public async Task<IActionResult> ProcessPayment(Guid id)
         {
             try
             {
-                var tenantId = User.FindFirst("TenantId")?.Value;
+                var tenantId = GetTenantId();
                 if (string.IsNullOrEmpty(tenantId))
                 {
                     return Unauthorized("Tenant not found");
@@ -279,11 +288,23 @@ namespace UmiHealth.Api.Controllers
                     return BadRequest("Payment can only be processed if status is pending");
                 }
 
-                // Simulate payment processing based on payment method
-                var processingResult = await ProcessPaymentMethodAsync(payment);
+                // Create payment request for processing service
+                var paymentRequest = new PaymentRequest
+                {
+                    TenantId = Guid.Parse(tenantId),
+                    BranchId = payment.BranchId,
+                    SaleId = payment.SaleId,
+                    Amount = payment.Amount,
+                    PaymentMethod = payment.PaymentMethod,
+                    Reference = payment.ReferenceNumber,
+                    Description = payment.Notes
+                };
+
+                var processingResult = await _paymentProcessingService.ProcessPaymentAsync(paymentRequest);
 
                 payment.Status = processingResult.Success ? "completed" : "failed";
                 payment.Notes = processingResult.Message;
+                payment.ReferenceNumber = processingResult.TransactionId ?? payment.ReferenceNumber;
                 payment.UpdatedAt = DateTime.UtcNow;
 
                 await _context.SaveChangesAsync();
@@ -291,33 +312,244 @@ namespace UmiHealth.Api.Controllers
                 // Update sale payment status
                 if (payment.SaleId.HasValue)
                 {
-                    var sale = await _context.Sales.FindAsync(payment.SaleId);
-                    if (sale != null)
-                    {
-                        var totalPaid = await _context.Payments
-                            .Where(p => p.SaleId == sale.Id && p.Status == "completed" && p.DeletedAt == null)
-                            .SumAsync(p => p.Amount);
-
-                        if (totalPaid >= sale.TotalAmount)
-                        {
-                            sale.PaymentStatus = "paid";
-                            sale.Status = "completed";
-                        }
-                        else if (totalPaid > 0)
-                        {
-                            sale.PaymentStatus = "partial";
-                        }
-                        
-                        sale.UpdatedAt = DateTime.UtcNow;
-                        await _context.SaveChangesAsync();
-                    }
+                    await UpdateSalePaymentStatusAsync(payment.SaleId.Value);
                 }
 
-                return Ok(new { status = payment.Status, message = processingResult.Message });
+                return Ok(new { status = payment.Status, message = processingResult.Message, transactionId = processingResult.TransactionId });
             }
             catch (Exception ex)
             {
                 _logger.LogError(ex, "Error processing payment {PaymentId}", id);
+                return StatusCode(500, "Internal server error");
+            }
+        }
+
+        [HttpPost("mobile-money")]
+        [EnableRateLimiting("Write")]
+        public async Task<ActionResult<MobileMoneyResponse>> InitiateMobileMoneyPayment([FromBody] MobileMoneyRequest request)
+        {
+            try
+            {
+                var tenantId = GetTenantId();
+                var branchId = GetBranchId();
+                
+                if (string.IsNullOrEmpty(tenantId) || string.IsNullOrEmpty(branchId))
+                {
+                    return Unauthorized("Tenant or branch not found");
+                }
+
+                request.TenantId = Guid.Parse(tenantId);
+
+                var result = await _paymentProcessingService.InitiateMobileMoneyPaymentAsync(request);
+
+                // Create payment record
+                if (result.Success)
+                {
+                    var payment = new Payment
+                    {
+                        Id = Guid.NewGuid(),
+                        BranchId = Guid.Parse(branchId),
+                        PaymentNumber = await GeneratePaymentNumberAsync(),
+                        Amount = request.Amount,
+                        PaymentMethod = "mobile_money",
+                        PaymentDate = DateTime.UtcNow,
+                        Status = "pending",
+                        ReferenceNumber = result.TransactionId,
+                        Notes = $"Mobile money payment via {request.Provider}",
+                        CreatedAt = DateTime.UtcNow,
+                        UpdatedAt = DateTime.UtcNow
+                    };
+
+                    _context.Payments.Add(payment);
+                    await _context.SaveChangesAsync();
+                }
+
+                return CreatedAtAction(nameof(CheckPaymentStatus), new { transactionId = result.TransactionId }, result);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error initiating mobile money payment");
+                return StatusCode(500, "Internal server error");
+            }
+        }
+
+        [HttpGet("status/{transactionId}")]
+        [EnableRateLimiting("Read")]
+        public async Task<ActionResult<PaymentStatusResponse>> CheckPaymentStatus(string transactionId)
+        {
+            try
+            {
+                var tenantId = GetTenantId();
+                if (string.IsNullOrEmpty(tenantId))
+                {
+                    return Unauthorized("Tenant not found");
+                }
+
+                var status = await _paymentProcessingService.CheckPaymentStatusAsync(transactionId);
+
+                // Update payment status in database if changed
+                var payment = await _context.Payments
+                    .FirstOrDefaultAsync(p => p.ReferenceNumber == transactionId && p.DeletedAt == null);
+
+                if (payment != null && payment.Status != status.Status)
+                {
+                    payment.Status = status.Status;
+                    payment.UpdatedAt = DateTime.UtcNow;
+                    await _context.SaveChangesAsync();
+
+                    // Update sale payment status if payment is completed
+                    if (status.Status == "completed" && payment.SaleId.HasValue)
+                    {
+                        await UpdateSalePaymentStatusAsync(payment.SaleId.Value);
+                    }
+                }
+
+                return Ok(status);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error checking payment status for transaction {TransactionId}", transactionId);
+                return StatusCode(500, "Internal server error");
+            }
+        }
+
+        [HttpPost("refund")]
+        [EnableRateLimiting("Write")]
+        public async Task<ActionResult<RefundResponse>> ProcessRefund([FromBody] RefundRequest request)
+        {
+            try
+            {
+                var tenantId = GetTenantId();
+                var userId = GetUserId();
+                
+                if (string.IsNullOrEmpty(tenantId) || string.IsNullOrEmpty(userId))
+                {
+                    return Unauthorized("Tenant or user not found");
+                }
+
+                request.RequestedBy = Guid.Parse(userId);
+
+                var result = await _paymentProcessingService.ProcessRefundAsync(request);
+
+                if (result.Success)
+                {
+                    // Create refund record
+                    var refund = new Payment
+                    {
+                        Id = Guid.NewGuid(),
+                        BranchId = GetBranchId() != null ? Guid.Parse(GetBranchId()) : null,
+                        PaymentNumber = await GeneratePaymentNumberAsync(),
+                        Amount = -request.Amount, // Negative amount for refund
+                        PaymentMethod = "refund",
+                        PaymentDate = DateTime.UtcNow,
+                        Status = "completed",
+                        ReferenceNumber = result.RefundId,
+                        Notes = $"Refund for transaction {request.TransactionId}: {request.Reason}",
+                        CreatedAt = DateTime.UtcNow,
+                        UpdatedAt = DateTime.UtcNow
+                    };
+
+                    _context.Payments.Add(refund);
+                    await _context.SaveChangesAsync();
+                }
+
+                return Ok(result);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error processing refund for transaction {TransactionId}", request.TransactionId);
+                return StatusCode(500, "Internal server error");
+            }
+        }
+
+        [HttpGet("methods")]
+        [EnableRateLimiting("Read")]
+        public async Task<ActionResult<IEnumerable<PaymentMethodDto>>> GetAvailablePaymentMethods()
+        {
+            try
+            {
+                var tenantId = GetTenantId();
+                if (string.IsNullOrEmpty(tenantId))
+                {
+                    return Unauthorized("Tenant not found");
+                }
+
+                var methods = await _paymentProcessingService.GetAvailablePaymentMethodsAsync(Guid.Parse(tenantId));
+                return Ok(methods);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error retrieving available payment methods");
+                return StatusCode(500, "Internal server error");
+            }
+        }
+
+        [HttpGet("analytics")]
+        [EnableRateLimiting("Read")]
+        public async Task<ActionResult<PaymentAnalyticsDto>> GetPaymentAnalytics(
+            [FromQuery] DateTime startDate,
+            [FromQuery] DateTime endDate)
+        {
+            try
+            {
+                var tenantId = GetTenantId();
+                if (string.IsNullOrEmpty(tenantId))
+                {
+                    return Unauthorized("Tenant not found");
+                }
+
+                var query = _context.Payments
+                    .Where(p => p.PaymentDate >= startDate && p.PaymentDate <= endDate && p.DeletedAt == null);
+
+                var payments = await query.ToListAsync();
+
+                var analytics = new PaymentAnalyticsDto
+                {
+                    StartDate = startDate,
+                    EndDate = endDate,
+                    TotalRevenue = payments.Where(p => p.Status == "completed").Sum(p => p.Amount),
+                    TotalTransactions = payments.Count,
+                    AverageTransactionValue = payments.Any() ? payments.Average(p => p.Amount) : 0,
+                    PaymentMethods = payments
+                        .GroupBy(p => p.PaymentMethod)
+                        .Select(g => new PaymentMethodAnalytics
+                        {
+                            PaymentMethod = g.Key,
+                            TransactionCount = g.Count(),
+                            TotalAmount = g.Sum(p => p.Amount),
+                            Percentage = payments.Any() ? (g.Sum(p => p.Amount) / payments.Sum(p => p.Amount)) * 100 : 0,
+                            AverageAmount = g.Average(p => p.Amount),
+                            SuccessfulTransactions = g.Count(p => p.Status == "completed"),
+                            FailedTransactions = g.Count(p => p.Status == "failed"),
+                            SuccessRate = g.Any() ? ((double)g.Count(p => p.Status == "completed") / g.Count()) * 100 : 0
+                        }).ToList(),
+                    DailyRevenue = payments
+                        .Where(p => p.Status == "completed")
+                        .GroupBy(p => p.PaymentDate.Date)
+                        .Select(g => new DailyRevenueDto
+                        {
+                            Date = g.Key,
+                            Revenue = g.Sum(p => p.Amount),
+                            TransactionCount = g.Count(),
+                            AverageTransactionValue = g.Average(p => p.Amount)
+                        }).OrderBy(d => d.Date).ToList(),
+                    FailedPayments = payments
+                        .Where(p => p.Status == "failed")
+                        .Select(p => new FailedPaymentDto
+                        {
+                            TransactionId = p.ReferenceNumber,
+                            FailedAt = p.PaymentDate,
+                            Amount = p.Amount,
+                            PaymentMethod = p.PaymentMethod,
+                            FailureReason = p.Notes
+                        }).ToList()
+                };
+
+                return Ok(analytics);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error retrieving payment analytics");
                 return StatusCode(500, "Internal server error");
             }
         }
@@ -398,6 +630,52 @@ namespace UmiHealth.Api.Controllers
             }
 
             throw new Exception("Unable to generate unique payment number");
+        }
+
+        private async Task UpdateSalePaymentStatusAsync(Guid saleId)
+        {
+            var sale = await _context.Sales.FindAsync(saleId);
+            if (sale != null)
+            {
+                var totalPaid = await _context.Payments
+                    .Where(p => p.SaleId == sale.Id && p.Status == "completed" && p.DeletedAt == null)
+                    .SumAsync(p => p.Amount);
+
+                if (totalPaid >= sale.TotalAmount)
+                {
+                    sale.PaymentStatus = "paid";
+                    sale.Status = "completed";
+                }
+                else if (totalPaid > 0)
+                {
+                    sale.PaymentStatus = "partial";
+                }
+                else
+                {
+                    sale.PaymentStatus = "pending";
+                }
+                
+                sale.UpdatedAt = DateTime.UtcNow;
+                await _context.SaveChangesAsync();
+            }
+        }
+
+        private string GetTenantId()
+        {
+            var tenantIdClaim = User.FindFirst("tenant_id");
+            return tenantIdClaim?.Value ?? string.Empty;
+        }
+
+        private string GetBranchId()
+        {
+            var branchIdClaim = User.FindFirst("branch_id");
+            return branchIdClaim?.Value ?? string.Empty;
+        }
+
+        private string GetUserId()
+        {
+            var userIdClaim = User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier);
+            return userIdClaim?.Value ?? string.Empty;
         }
 
         private async Task<PaymentProcessingResult> ProcessPaymentMethodAsync(Payment payment)
