@@ -11,6 +11,7 @@ using UmiHealth.Infrastructure;
 using UmiHealth.Application;
 using UmiHealth.Api.Services;
 using UmiHealth.Api.Configuration;
+using UmiHealth.Application.Configuration;
 using Microsoft.AspNetCore.Mvc.ApiExplorer;
 using Microsoft.AspNetCore.Mvc;
 using Swashbuckle.AspNetCore.SwaggerGen;
@@ -99,6 +100,9 @@ builder.Services.AddSwaggerGen(options =>
 builder.Services.AddInfrastructure(builder.Configuration);
 builder.Services.AddApplication();
 
+// Add Hangfire services
+builder.Services.AddHangfireServices(builder.Configuration);
+
 // API Gateway Service
 builder.Services.AddSingleton<IApiGatewayService, ApiGatewayService>();
 
@@ -120,31 +124,12 @@ builder.Services.AddCors(options =>
     });
 });
 
-// JWT Authentication
-var jwtSettings = builder.Configuration.GetSection("Jwt");
-var key = Encoding.ASCII.GetBytes(jwtSettings["Key"]);
+// RSA Key Service for JWT
+builder.Services.AddSingleton<IRsaKeyService, RsaKeyService>();
+builder.Services.AddScoped<ITokenBlacklistService, TokenBlacklistService>();
 
-builder.Services.AddAuthentication(options =>
-{
-    options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
-    options.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
-})
-.AddJwtBearer(options =>
-{
-    options.RequireHttpsMetadata = false;
-    options.SaveToken = true;
-    options.TokenValidationParameters = new TokenValidationParameters
-    {
-        ValidateIssuerSigningKey = true,
-        IssuerSigningKey = new SymmetricSecurityKey(key),
-        ValidateIssuer = true,
-        ValidIssuer = jwtSettings["Issuer"],
-        ValidateAudience = true,
-        ValidAudience = jwtSettings["Audience"],
-        ValidateLifetime = true,
-        ClockSkew = TimeSpan.Zero
-    };
-});
+// JWT Authentication with RSA
+builder.Services.AddUmiAuthentication(builder.Configuration);
 
 // Enhanced Rate limiting with multiple policies
 builder.Services.AddRateLimiter(options =>
@@ -228,6 +213,9 @@ if (app.Environment.IsDevelopment())
 app.UseHttpsRedirection();
 app.UseCors("AllowAll");
 
+// Configure Hangfire dashboard
+app.UseHangfireDashboard(builder.Configuration);
+
 // Custom middleware pipeline
 app.UseMiddleware<ApiGatewayMiddleware>();
 app.UseMiddleware<TenantContextMiddleware>();
@@ -245,5 +233,12 @@ app.MapControllers();
 
 // Health checks
 app.MapHealthChecks("/health");
+
+// Initialize background jobs
+using (var scope = app.Services.CreateScope())
+{
+    var backgroundJobService = scope.ServiceProvider.GetRequiredService<IBackgroundJobService>();
+    backgroundJobService.ScheduleRecurringJobs();
+}
 
 app.Run();

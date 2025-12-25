@@ -768,18 +768,38 @@
         <div class="page-title-section">
           <h1 class="page-title">Account Settings</h1>
         </div>
+        
+        <div class="search-bar" x-data="{ searchOpen: false, query: '' }">
+          <span class="material-symbols-rounded search-icon">search</span>
+          <input 
+            type="text" 
+            class="search-input" 
+            placeholder="Search settings by name or category..."
+            x-model="query"
+            @focus="searchOpen = true"
+            @input="searchOpen = true"
+            @blur="setTimeout(() => searchOpen = false, 200)"
+          >
+          
+          <div class="search-suggestions" :class="searchOpen && query.length > 0 ? 'show' : ''">
+            <template x-for="suggestion in filteredSuggestions" :key="suggestion.id">
+              <div class="suggestion-item" @click="selectSuggestion(suggestion)">
+                <div class="suggestion-icon">
+                  <span class="material-symbols-rounded" x-text="suggestion.icon"></span>
+                </div>
+                <div class="suggestion-content">
+                  <div class="suggestion-title" x-text="suggestion.title"></div>
+                  <div class="suggestion-description" x-text="suggestion.description"></div>
+                </div>
+                <div class="suggestion-type" x-text="suggestion.type"></div>
+              </div>
+            </template>
+          </div>
+        </div>
       </div>
 
       <div class="header-right">
-        <div class="user-profile">
-          <div class="user-avatar">
-            <span x-text="userInfo.initials"></span>
-          </div>
-          <div class="user-info">
-            <div class="user-name" x-text="userInfo.name"></div>
-            <div class="user-role" x-text="userInfo.role"></div>
-          </div>
-        </div>
+        <!-- Header elements removed per request -->
       </div>
     </header>
 
@@ -1618,11 +1638,11 @@
         showError(message) {
           this.showNotification(message, 'error');
         },
-
+        
         showWarning(message) {
           this.showNotification(message, 'warning');
         },
-
+        
         showNotification(message, type = 'info') {
           // Create notification element
           const notification = document.createElement('div');
@@ -1646,28 +1666,6 @@
           }, 5000);
         },
 
-        saveProfile() {
-          console.log('Saving profile:', this.profile);
-          alert('Profile updated successfully!');
-        },
-
-        saveNotifications() {
-          console.log('Saving notifications:', this.notifications);
-          alert('Notification preferences saved!');
-        },
-
-        savePharmacySettings() {
-          // Save to localStorage for global access
-          localStorage.setItem('pharmacySettings', JSON.stringify(this.pharmacySettings));
-          
-          // Update pharmacyInfo display
-          this.pharmacyInfo.name = this.pharmacySettings.name;
-          this.pharmacyInfo.location = `${this.pharmacySettings.city}, ${this.pharmacySettings.province}`;
-          
-          console.log('Saving pharmacy settings:', this.pharmacySettings);
-          alert('Pharmacy settings updated successfully! These settings will now be used across all documents and receipts.');
-        },
-        
         // Upgrade functions
         getPlanPrice(planType) {
           const prices = {
@@ -1727,78 +1725,12 @@
             this.showError('Upgrade request failed. Please try again.');
           }
         },
-        
+
         // Utility methods
-        showSuccess(message) {
-          // Simple success notification
-          const notification = document.createElement('div');
-          notification.className = 'success-notification';
-          notification.textContent = message;
-          notification.style.cssText = `
-            position: fixed;
-            top: 20px;
-            right: 20px;
-            background: #22c55e;
-            color: white;
-            padding: 12px 20px;
-            border-radius: 8px;
-            z-index: 9999;
-            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
-          `;
-          document.body.appendChild(notification);
-          
-          setTimeout(() => {
-            notification.remove();
-          }, 3000);
-        },
-        
-        showError(message) {
-          // Simple error notification
-          const notification = document.createElement('div');
-          notification.className = 'error-notification';
-          notification.textContent = message;
-          notification.style.cssText = `
-            position: fixed;
-            top: 20px;
-            right: 20px;
-            background: #ef4444;
-            color: white;
-            padding: 12px 20px;
-            border-radius: 8px;
-            z-index: 9999;
-            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
-          `;
-          document.body.appendChild(notification);
-          
-          setTimeout(() => {
-            notification.remove();
-          }, 5000);
-        },
-        
-        showWarning(message) {
-          // Simple warning notification
-          const notification = document.createElement('div');
-          notification.className = 'warning-notification';
-          notification.textContent = message;
-          notification.style.cssText = `
-            position: fixed;
-            top: 20px;
-            right: 20px;
-            background: #f59e0b;
-            color: white;
-            padding: 12px 20px;
-            border-radius: 8px;
-            z-index: 9999;
-            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
-          `;
-          document.body.appendChild(notification);
-          
-          setTimeout(() => {
-            notification.remove();
-          }, 4000);
-        }
       }
-    </script>
+      }
+    }
+  </script>
 
     <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
 </body>

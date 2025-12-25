@@ -73,3 +73,11 @@ public class RefreshToken : TenantEntity
 
     public virtual User User { get; set; } = null!;
 }
+
+public class BlacklistedToken
+{
+    public Guid Id { get; set; }
+    public string TokenId { get; set; } = string.Empty;
+    public DateTime BlacklistedAt { get; set; }
+    public DateTime ExpiresAt { get; set; }
+}

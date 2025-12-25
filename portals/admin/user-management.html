@@ -1410,23 +1410,38 @@
         <div class="page-title-section">
           <h1 class="page-title">User Management</h1>
         </div>
+        
+        <div class="search-bar" x-data="{ searchOpen: false, query: '' }">
+          <span class="material-symbols-rounded search-icon">search</span>
+          <input 
+            type="text" 
+            class="search-input" 
+            placeholder="Search users by name, email, or role..."
+            x-model="query"
+            @focus="searchOpen = true"
+            @input="searchOpen = true"
+            @blur="setTimeout(() => searchOpen = false, 200)"
+          >
+          
+          <div class="search-suggestions" :class="searchOpen && query.length > 0 ? 'show' : ''">
+            <template x-for="suggestion in filteredSuggestions" :key="suggestion.id">
+              <div class="suggestion-item" @click="selectSuggestion(suggestion)">
+                <div class="suggestion-icon">
+                  <span class="material-symbols-rounded" x-text="suggestion.icon"></span>
+                </div>
+                <div class="suggestion-content">
+                  <div class="suggestion-title" x-text="suggestion.title"></div>
+                  <div class="suggestion-description" x-text="suggestion.description"></div>
+                </div>
+                <div class="suggestion-type" x-text="suggestion.type"></div>
+              </div>
+            </template>
+          </div>
+        </div>
       </div>
 
       <div class="header-right">
-        <button class="create-button" @click="showAddModal = true">
-          <span class="material-symbols-rounded">add</span>
-          <span>Add User</span>
-        </button>
-
-        <div class="user-profile">
-          <div class="user-avatar">
-            <span x-text="userInfo.initials"></span>
-          </div>
-          <div class="user-info">
-            <div class="user-name" x-text="userInfo.name"></div>
-            <div class="user-role" x-text="userInfo.role"></div>
-          </div>
-        </div>
+        <!-- Header elements removed per request -->
       </div>
     </header>
 

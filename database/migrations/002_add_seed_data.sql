@@ -3,7 +3,7 @@
 
 -- Insert sample tenant
 INSERT INTO tenants (name, slug, domain, subscription_plan, status, settings) VALUES
-('Umi Pharmacy - Main Branch', 'umi-pharmacy', 'umi-pharmacy.umihealth.com', 'professional', 'active', '{
+('Umi Pharmacy - Main Branch', 'umi-pharmacy', 'umi-pharmacy.umihealth.com', 'Care Plus', 'active', '{
     "business_hours": {"monday": "08:00-18:00", "tuesday": "08:00-18:00", "wednesday": "08:00-18:00", "thursday": "08:00-18:00", "friday": "08:00-18:00", "saturday": "09:00-14:00", "sunday": "closed"},
     "currency": "KES",
     "tax_rate": 16.0,

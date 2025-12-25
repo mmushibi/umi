@@ -5,8 +5,8 @@ using Microsoft.IdentityModel.Tokens;
 using System;
 using System.IdentityModel.Tokens.Jwt;
 using System.Linq;
-using System.Text;
 using System.Threading.Tasks;
+using UmiHealth.Api.Services;
 
 namespace UmiHealth.Api.Middleware
 {
@@ -14,22 +14,24 @@ namespace UmiHealth.Api.Middleware
     {
         private readonly RequestDelegate _next;
         private readonly ILogger<AuthenticationMiddleware> _logger;
-        private readonly IConfiguration _configuration;
-        private readonly string _jwtKey;
+        private readonly IRsaKeyService _rsaKeyService;
+        private readonly ITokenBlacklistService _tokenBlacklistService;
         private readonly string _jwtIssuer;
         private readonly string _jwtAudience;
 
         public AuthenticationMiddleware(
             RequestDelegate next,
             ILogger<AuthenticationMiddleware> logger,
+            IRsaKeyService rsaKeyService,
+            ITokenBlacklistService tokenBlacklistService,
             IConfiguration configuration)
         {
             _next = next;
             _logger = logger;
-            _configuration = configuration;
-            _jwtKey = _configuration["Jwt:Key"] ?? throw new InvalidOperationException("JWT Key not configured");
-            _jwtIssuer = _configuration["Jwt:Issuer"] ?? throw new InvalidOperationException("JWT Issuer not configured");
-            _jwtAudience = _configuration["Jwt:Audience"] ?? throw new InvalidOperationException("JWT Audience not configured");
+            _rsaKeyService = rsaKeyService;
+            _tokenBlacklistService = tokenBlacklistService;
+            _jwtIssuer = configuration["Jwt:Issuer"] ?? throw new InvalidOperationException("JWT Issuer not configured");
+            _jwtAudience = configuration["Jwt:Audience"] ?? throw new InvalidOperationException("JWT Audience not configured");
         }
 
         public async Task InvokeAsync(HttpContext context)
@@ -54,12 +56,26 @@ namespace UmiHealth.Api.Middleware
             try
             {
                 var tokenHandler = new JwtSecurityTokenHandler();
-                var key = Encoding.ASCII.GetBytes(_jwtKey);
+                
+                // First, decode the token to get the JWT ID for blacklist checking
+                var jsonToken = tokenHandler.ReadJwtToken(token);
+                var tokenId = jsonToken.Id;
+                
+                // Check if token is blacklisted
+                if (!string.IsNullOrEmpty(tokenId) && await _tokenBlacklistService.IsTokenBlacklistedAsync(tokenId))
+                {
+                    _logger.LogWarning("Blacklisted token used for request: {RequestPath}", context.Request.Path);
+                    context.Response.StatusCode = 401;
+                    await context.Response.WriteAsync("Token has been revoked");
+                    return;
+                }
+
+                var key = new RsaSecurityKey(_rsaKeyService.GetPublicKey());
 
                 var validationParameters = new TokenValidationParameters
                 {
                     ValidateIssuerSigningKey = true,
-                    IssuerSigningKey = new SymmetricSecurityKey(key),
+                    IssuerSigningKey = key,
                     ValidateIssuer = true,
                     ValidIssuer = _jwtIssuer,
                     ValidateAudience = true,

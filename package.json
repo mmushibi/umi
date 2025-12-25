@@ -4,20 +4,10 @@
   "description": "Umi Health Pharmacy Management System",
   "main": "index.js",
   "scripts": {
-    "build-css": "tailwindcss -i ./src/input.css -o ./assets/css/tailwind.output.css --watch",
-    "build-css-prod": "tailwindcss -i ./src/input.css -o ./assets/css/tailwind.output.css --minify",
-    "dev": "concurrently \"npm run build-css\" \"node server.js\"",
     "install-deps": "npm install",
     "start": "node server.js"
   },
-  "devDependencies": {
-    "@tailwindcss/forms": "^0.5.7",
-    "autoprefixer": "^10.4.16",
-    "concurrently": "^8.2.2",
-    "live-server": "^1.2.2",
-    "postcss": "^8.4.32",
-    "tailwindcss": "^3.3.6"
-  },
+  "devDependencies": {},
   "keywords": [
     "pharmacy",
     "healthcare",

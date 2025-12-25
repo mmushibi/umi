@@ -37,4 +37,4 @@ INSERT INTO users (
 
 -- Create default subscription plans reference data
 -- This can be moved to a separate subscription management table later
-COMMENT ON COLUMN tenants.subscription_plan IS 'Available plans: basic, professional, enterprise';
+COMMENT ON COLUMN tenants.subscription_plan IS 'Available plans: Care, Care Plus, Care Pro';

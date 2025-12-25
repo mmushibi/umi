@@ -339,8 +339,8 @@ CREATE TABLE shared.users (
 
 -- Sample tenant data
 INSERT INTO shared.tenants (name, subdomain, database_name, subscription_plan, max_branches, max_users) VALUES
-('Demo Pharmacy', 'demo', 'umi_demo', 'premium', 5, 50),
-('Test Pharmacy', 'test', 'umi_test', 'basic', 1, 10);
+('Demo Pharmacy', 'demo', 'umi_demo', 'Care Plus', 5, 50),
+('Test Pharmacy', 'test', 'umi_test', 'Care', 1, 10);
 
 -- Sample branch data
 INSERT INTO shared.branches (tenant_id, name, code, address, phone, email) VALUES

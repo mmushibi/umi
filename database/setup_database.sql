@@ -4,8 +4,8 @@
 -- Create database if it doesn't exist
 DO $$ 
 BEGIN
-    IF NOT EXISTS (SELECT FROM pg_database WHERE datname = 'umi_health') THEN
-        CREATE DATABASE umi_health
+    IF NOT EXISTS (SELECT FROM pg_database WHERE datname = 'Umi_db') THEN
+        CREATE DATABASE Umi_db
             WITH 
             OWNER = postgres
             ENCODING = 'UTF8'
@@ -18,7 +18,7 @@ END
 $$;
 
 -- Connect to the database
-\c umi_health;
+\c Umi_db;
 
 -- Create extensions
 CREATE EXTENSION IF NOT EXISTS "uuid-ossp";
@@ -34,7 +34,7 @@ END
 $$;
 
 -- Grant basic permissions
-GRANT CONNECT ON DATABASE umi_health TO umi_health_app;
+GRANT CONNECT ON DATABASE Umi_db TO umi_health_app;
 GRANT USAGE ON SCHEMA public TO umi_health_app;
 GRANT CREATE ON SCHEMA public TO umi_health_app;
 

@@ -1897,85 +1897,7 @@
       </div>
 
       <div class="header-right">
-        <button class="create-button" @click="showCreateModal = true">
-          <span class="material-symbols-rounded">add</span>
-          <span>Create</span>
-        </button>
-
-        <div class="dropdown" x-data="{ notificationOpen: false }">
-          <button class="notification-button" @click="notificationOpen = !notificationOpen">
-            <span class="material-symbols-rounded">notifications</span>
-            <span class="notification-badge"></span>
-          </button>
-          
-          <div class="dropdown-menu" :class="notificationOpen ? 'show' : ''" @click.away="notificationOpen = false">
-            <div class="dropdown-header">Notifications</div>
-            <a href="#" class="dropdown-item">
-              <span class="material-symbols-rounded dropdown-item-icon">medication</span>
-              <div>
-                <div>New prescription received</div>
-                <div class="notification-time">2 minutes ago</div>
-              </div>
-            </a>
-            <a href="#" class="dropdown-item">
-              <span class="material-symbols-rounded dropdown-item-icon">inventory_2</span>
-              <div>
-                <div>Low stock alert: Paracetamol</div>
-                <div class="notification-time">15 minutes ago</div>
-              </div>
-            </a>
-            <a href="#" class="dropdown-item">
-              <span class="material-symbols-rounded dropdown-item-icon">payments</span>
-              <div>
-                <div>Payment received: ZMW 450</div>
-                <div class="notification-time">1 hour ago</div>
-              </div>
-            </a>
-            <div class="dropdown-divider"></div>
-            <a href="#" class="dropdown-item">
-              <span class="material-symbols-rounded dropdown-item-icon">settings</span>
-              <div>View all notifications</div>
-            </a>
-          </div>
-        </div>
-
-        <div class="dropdown" x-data="{ profileOpen: false }">
-          <div class="user-profile" @click="profileOpen = !profileOpen">
-            <div class="user-avatar">
-              <span x-text="userInfo.initials"></span>
-            </div>
-            <div class="user-info">
-              <div class="user-name" x-text="userInfo.name"></div>
-              <div class="user-role" x-text="userInfo.role"></div>
-            </div>
-            <span class="material-symbols-rounded dropdown-toggle-icon">expand_more</span>
-          </div>
-          
-          <div class="dropdown-menu" :class="profileOpen ? 'show' : ''" @click.away="profileOpen = false">
-            <div class="dropdown-header">Account</div>
-            <a href="#" class="dropdown-item">
-              <span class="material-symbols-rounded dropdown-item-icon">person</span>
-              <div>Profile Settings</div>
-            </a>
-            <a href="#" class="dropdown-item">
-              <span class="material-symbols-rounded dropdown-item-icon">admin_panel_settings</span>
-              <div>Tenant Settings</div>
-            </a>
-            <a href="#" class="dropdown-item">
-              <span class="material-symbols-rounded dropdown-item-icon">security</span>
-              <div>Security</div>
-            </a>
-            <div class="dropdown-divider"></div>
-            <a href="#" class="dropdown-item">
-              <span class="material-symbols-rounded dropdown-item-icon">help</span>
-              <div>Help & Support</div>
-            </a>
-            <a href="#" class="dropdown-item">
-              <span class="material-symbols-rounded dropdown-item-icon">logout</span>
-              <div>Sign Out</div>
-            </a>
-          </div>
-        </div>
+        <!-- Header elements removed per request -->
       </div>
     </header>
 
@@ -2807,7 +2729,10 @@
           });
         },
         
-        function adminDashboard() {
+      }
+    }
+
+    function adminDashboard() {
       return {
         // Data state
         dashboardStats: {
