@@ -2158,27 +2158,8 @@
         },
 
         loadDocuments(type) {
-          // Switch based on document type and load data
-          switch(type) {
-            case 'invoices':
-              this.renderPaymentsTable(this.invoices);
-              break;
-            case 'quotations':
-              this.renderPaymentsTable(this.quotations);
-              break;
-            case 'credit-notes':
-              this.renderPaymentsTable(this.creditNotes);
-              break;
-            case 'insurance-claims':
-              this.renderPaymentsTable(this.claims);
-              break;
-            case 'receipts':
-              this.renderPaymentsTable(this.receipts || []);
-              break;
-            case 'reports':
-              this.loadReports();
-              break;
-          }
+          // Load documents from API instead of local data
+          this.loadDocumentsFromAPI(type);
         },
 
         // Table Rendering
@@ -2587,18 +2568,204 @@
 
         // Initialize
         init() {
-          this.loadSampleData();
+          this.loadPaymentsData();
           this.setupEventListeners();
           this.loadDocuments('invoices');
-          this.updatePaymentStats();
+          
+          // Set up periodic updates
+          setInterval(() => {
+            this.loadPaymentsData();
+          }, 30000); // Update every 30 seconds
         },
 
-        loadSampleData() {
-          // Initialize empty data arrays - real data will be loaded from API
-          this.invoices = [];
-          this.quotations = [];
-          this.creditNotes = [];
-          this.claims = [];
+        async loadPaymentsData() {
+          try {
+            // Load payment stats
+            const stats = await window.cashierAPI.getPaymentStats();
+            this.updatePaymentStats(stats);
+            
+            // Load payments based on current document type
+            await this.loadDocumentsFromAPI(this.currentDocumentType);
+            
+            // Load recent payments
+            const recentPayments = await window.cashierAPI.getPayments({ pageSize: 10 });
+            this.updateRecentPayments(recentPayments.payments || []);
+            
+          } catch (error) {
+            console.error('Error loading payments data:', error);
+            window.cashierAPI.handleError(error, 'loadPaymentsData');
+          }
+        },
+        
+        async loadDocumentsFromAPI(type) {
+          try {
+            let documents = [];
+            
+            switch(type) {
+              case 'invoices':
+                const invoices = await window.cashierAPI.getPayments({ type: 'invoice' });
+                documents = invoices.payments || [];
+                break;
+              case 'quotations':
+                const quotations = await window.cashierAPI.getPayments({ type: 'quotation' });
+                documents = quotations.payments || [];
+                break;
+              case 'credit-notes':
+                const creditNotes = await window.cashierAPI.getPayments({ type: 'credit-note' });
+                documents = creditNotes.payments || [];
+                break;
+              case 'insurance-claims':
+                const claims = await window.cashierAPI.getPayments({ type: 'insurance-claim' });
+                documents = claims.payments || [];
+                break;
+              case 'receipts':
+                const receipts = await window.cashierAPI.getPayments({ type: 'receipt' });
+                documents = receipts.payments || [];
+                break;
+              default:
+                documents = [];
+            }
+            
+            // Update the appropriate data array
+            switch(type) {
+              case 'invoices':
+                this.invoices = documents;
+                break;
+              case 'quotations':
+                this.quotations = documents;
+                break;
+              case 'credit-notes':
+                this.creditNotes = documents;
+                break;
+              case 'insurance-claims':
+                this.claims = documents;
+                break;
+              case 'receipts':
+                this.receipts = documents;
+                break;
+            }
+            
+            this.renderPaymentsTable(documents);
+          } catch (error) {
+            console.error(`Error loading ${type}:`, error);
+            window.cashierAPI.handleError(error, `loadDocumentsFromAPI-${type}`);
+          }
+        },
+        
+        updatePaymentStats(stats) {
+          // Update stat buttons with real data
+          document.querySelector('[data-stat="total-revenue"] strong').textContent = this.formatCurrency(stats.totalRevenue || 0);
+          document.querySelector('[data-stat="pending-payments"] strong').textContent = stats.pendingPayments || 0;
+          document.querySelector('[data-stat="overdue"] strong').textContent = stats.overduePayments || 0;
+          document.querySelector('[data-stat="this-month"] strong').textContent = this.formatCurrency(stats.thisMonthRevenue || 0);
+        },
+        
+        updateRecentPayments(payments) {
+          const recentPaymentsList = document.getElementById('recentPaymentsList');
+          if (recentPaymentsList) {
+            recentPaymentsList.innerHTML = payments.map(payment => `
+              <div class="payment-item">
+                <div class="payment-info">
+                  <div class="payment-title">${payment.number || payment.id}</div>
+                  <div class="payment-meta">
+                    ${payment.customer || payment.patient || 'Unknown'} • 
+                    ${window.cashierAPI.formatDate(payment.date)}
+                  </div>
+                </div>
+                <div class="payment-amount">${this.formatCurrency(payment.amount || 0)}</div>
+                <div class="payment-status">
+                  <span class="status-badge ${payment.status}">${payment.status}</span>
+                </div>
+              </div>
+            `).join('');
+          }
+        },
+        
+        async submitInvoiceForm(event) {
+          event.preventDefault();
+          try {
+            const formData = new FormData(event.target);
+            const invoiceData = Object.fromEntries(formData.entries());
+            
+            // Get items from form
+            const items = this.getInvoiceItems();
+            const subtotal = items.reduce((sum, item) => sum + (item.quantity * item.price), 0);
+            const tax = subtotal * 0.16;
+            const total = subtotal + tax;
+            
+            const newInvoice = {
+              ...invoiceData,
+              items,
+              subtotal,
+              tax,
+              total,
+              type: 'invoice'
+            };
+            
+            // Create invoice via API
+            const createdInvoice = await window.cashierAPI.createInvoice(newInvoice);
+            
+            this.invoices.push(createdInvoice);
+            this.closeModal('invoiceModal');
+            event.target.reset();
+            this.updatePaymentStats();
+            this.renderPaymentsTable(this.invoices);
+            
+            alert('Invoice created successfully!');
+          } catch (error) {
+            console.error('Error creating invoice:', error);
+            window.cashierAPI.handleError(error, 'submitInvoiceForm');
+            alert('Failed to create invoice. Please try again.');
+          }
+        },
+        
+        async submitQuotationForm(event) {
+          event.preventDefault();
+          try {
+            const formData = new FormData(event.target);
+            const quotationData = Object.fromEntries(formData.entries());
+            
+            const items = this.getQuotationItems();
+            const subtotal = items.reduce((sum, item) => sum + (item.quantity * item.price), 0);
+            const tax = subtotal * 0.16;
+            const total = subtotal + tax;
+            
+            const newQuotation = {
+              ...quotationData,
+              items,
+              subtotal,
+              tax,
+              total,
+              type: 'quotation'
+            };
+            
+            // Create quotation via API
+            const createdQuotation = await window.cashierAPI.createQuotation(newQuotation);
+            
+            this.quotations.push(createdQuotation);
+            this.closeModal('quotationModal');
+            event.target.reset();
+            this.renderPaymentsTable(this.quotations);
+            
+            alert('Quotation created successfully!');
+          } catch (error) {
+            console.error('Error creating quotation:', error);
+            window.cashierAPI.handleError(error, 'submitQuotationForm');
+            alert('Failed to create quotation. Please try again.');
+          }
+        },
+        
+        async viewDocumentDetails(documentId) {
+          try {
+            const documentDetails = await window.cashierAPI.getPaymentDetails(documentId);
+            console.log('Document details:', documentDetails);
+            
+            // Show details in modal or navigate to detail page
+            alert(`Document Details:\nNumber: ${documentDetails.number}\nAmount: ${this.formatCurrency(documentDetails.amount)}\nStatus: ${documentDetails.status}\nCustomer: ${documentDetails.customer || documentDetails.patient}`);
+          } catch (error) {
+            console.error('Error viewing document:', error);
+            window.cashierAPI.handleError(error, 'viewDocumentDetails');
+          }
         },
 
         setupEventListeners() {

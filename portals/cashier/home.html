@@ -2202,6 +2202,8 @@
         prescriptionsFilled: 0,
         averageWaitTime: 0,
         transactionCount: 0,
+        customersServed: 0,
+        avgTransaction: 0,
         
         // Data arrays
         searchSuggestions: [
@@ -2429,25 +2431,108 @@
           }).format(amount);
         },
         
-        loadSampleData() {
-          // Initialize empty data arrays - real data will be loaded from API
-          this.todaySales = 0;
-          this.salesTrend = '+0%';
-          this.prescriptionsFilled = 0;
-          this.averageWaitTime = 0;
-          this.transactionCount = 0;
+        async loadDashboardData() {
+          try {
+            // Load dashboard stats
+            const stats = await window.cashierAPI.getDashboardStats();
+            this.updateDashboardStats(stats);
+            
+            // Load recent sales
+            const recentSales = await window.cashierAPI.getRecentSales(10);
+            this.updateRecentSales(recentSales.sales || []);
+            
+            // Load low stock alerts
+            const lowStock = await window.cashierAPI.getLowStockItems();
+            this.updateLowStockAlerts(lowStock || []);
+            
+            // Load popular products
+            const popularProducts = await window.cashierAPI.getPopularProducts(5);
+            this.updatePopularProducts(popularProducts || []);
+            
+            // Load recent patients
+            const recentPatients = await window.cashierAPI.getRecentPatients(5);
+            this.updateRecentPatients(recentPatients.patients || []);
+            
+          } catch (error) {
+            console.error('Error loading dashboard data:', error);
+            window.cashierAPI.handleError(error, 'loadDashboardData');
+          }
+        },
+        
+        updateDashboardStats(stats) {
+          this.todaySales = stats.todayRevenue || 0;
+          this.transactionCount = stats.todaySales || 0;
+          this.customersServed = stats.todaySales || 0;
+          this.avgTransaction = this.transactionCount > 0 ? this.todaySales / this.transactionCount : 0;
+          this.prescriptionsFilled = stats.prescriptionsFilled || 0;
+          this.averageWaitTime = stats.averageWaitTime || 0;
           
-          // Initialize empty transactions array
-          this.transactions = [];
-          
-          // Initialize empty recent sales array
-          this.recentSales = [];
-          
-          // Initialize empty prescription queue array
-          this.prescriptionQueue = [];
-          
-          // Initialize empty sales performance array
-          this.salesPerformance = [];
+          // Calculate trend
+          const yesterdayRevenue = stats.yesterdayRevenue || 0;
+          if (yesterdayRevenue > 0) {
+            const trend = ((this.todaySales - yesterdayRevenue) / yesterdayRevenue) * 100;
+            this.salesTrend = trend >= 0 ? `+${trend.toFixed(1)}%` : `${trend.toFixed(1)}%`;
+          } else {
+            this.salesTrend = '+0%';
+          }
+        },
+        
+        updateRecentSales(sales) {
+          this.recentSales = sales.map(sale => ({
+            id: sale.id,
+            time: window.cashierAPI.formatDateTime(sale.saleDate),
+            item: sale.patientId ? `Patient Sale #${sale.saleNumber}` : `OTC Sale #${sale.saleNumber}`,
+            amount: sale.totalAmount,
+            status: sale.status
+          }));
+        },
+        
+        updateLowStockAlerts(alerts) {
+          // Update low stock alerts in the UI
+          const alertsContainer = document.getElementById('lowStockAlerts');
+          if (alertsContainer) {
+            alertsContainer.innerHTML = alerts.map(alert => `
+              <div class="alert-item">
+                <span class="material-symbols-rounded" style="color: var(--color-warning);">warning</span>
+                <div>
+                  <div style="font-weight: 600;">${alert.productName}</div>
+                  <div style="color: var(--color-text-secondary); font-size: 0.875rem;">
+                    Only ${alert.currentStock} units remaining
+                  </div>
+                </div>
+              </div>
+            `).join('');
+          }
+        },
+        
+        updatePopularProducts(products) {
+          // Update popular products in the UI
+          const productsContainer = document.getElementById('popularProducts');
+          if (productsContainer) {
+            productsContainer.innerHTML = products.map(product => `
+              <div class="product-item">
+                <div style="font-weight: 600;">${product.name}</div>
+                <div style="color: var(--color-text-secondary); font-size: 0.875rem;">
+                  ${product.salesCount} sold today
+                </div>
+              </div>
+            `).join('');
+          }
+        },
+        
+        updateRecentPatients(patients) {
+          // Update recent patients in the UI
+          const patientsContainer = document.getElementById('recentPatients');
+          if (patientsContainer) {
+            patientsContainer.innerHTML = patients.map(patient => `
+              <div class="patient-item">
+                <div style="font-weight: 600;">${patient.name}</div>
+                <div style="color: var(--color-text-secondary); font-size: 0.875rem;">
+                  ID: ${patient.patientId}
+                </div>
+              </div>
+            `).join('');
+          }
         },
         
         renderDashboardContent() {
@@ -2584,13 +2669,13 @@
         },
         
         init() {
-          this.loadSampleData();
+          this.loadDashboardData();
           this.renderDashboardContent();
           this.setupEventListeners();
           
           // Set up periodic updates
           setInterval(() => {
-            this.loadSampleData();
+            this.loadDashboardData();
             this.renderDashboardContent();
           }, 30000); // Update every 30 seconds
           

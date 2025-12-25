@@ -1999,6 +1999,10 @@
           role: 'Admin',
           initials: 'UH'
         },
+        prescriptions: [],
+        loading: false,
+        error: null,
+
         formatCurrency(amount) {
           return new Intl.NumberFormat('en-ZM', {
             style: 'currency',
@@ -2011,7 +2015,68 @@
             window.location.href = 'index.html';
           }
         },
-        prescriptions: [],
+
+        async loadPrescriptions() {
+          this.loading = true;
+          this.error = null;
+          try {
+            const response = await window.pharmacistApi.prescriptions.getPrescriptions();
+            this.prescriptions = response.data || [];
+          } catch (error) {
+            console.error('Failed to load prescriptions:', error);
+            this.error = 'Failed to load prescriptions';
+          } finally {
+            this.loading = false;
+          }
+        },
+
+        async processPrescription(prescriptionId) {
+          try {
+            await window.pharmacistApi.prescriptions.dispensePrescription(prescriptionId, {
+              dispensedBy: this.userInfo.name,
+              dispensedAt: new Date().toISOString()
+            });
+            const prescription = this.prescriptions.find(p => p.id === prescriptionId);
+            if (prescription) {
+              prescription.status = 'ready';
+            }
+          } catch (error) {
+            console.error('Failed to process prescription:', error);
+            alert('Failed to process prescription');
+          }
+        },
+
+        async completePrescription(prescriptionId) {
+          try {
+            await window.pharmacistApi.prescriptions.updatePrescription(prescriptionId, {
+              status: 'completed',
+              completedAt: new Date().toISOString()
+            });
+            const prescription = this.prescriptions.find(p => p.id === prescriptionId);
+            if (prescription) {
+              prescription.status = 'completed';
+            }
+          } catch (error) {
+            console.error('Failed to complete prescription:', error);
+            alert('Failed to complete prescription');
+          }
+        },
+
+        async verifyPrescription(prescriptionId) {
+          try {
+            await window.pharmacistApi.prescriptions.verifyPrescription(prescriptionId, {
+              verifiedBy: this.userInfo.name,
+              verifiedAt: new Date().toISOString()
+            });
+            const prescription = this.prescriptions.find(p => p.id === prescriptionId);
+            if (prescription) {
+              prescription.verified = true;
+            }
+          } catch (error) {
+            console.error('Failed to verify prescription:', error);
+            alert('Failed to verify prescription');
+          }
+        },
 
         get totalPrescriptions() {
           return this.prescriptions.length;
@@ -2030,26 +2095,14 @@
           return this.prescriptions.filter(p => p.date === today).length;
         },
 
-        processPrescription(prescriptionId) {
-          const prescription = this.prescriptions.find(p => p.id === prescriptionId);
-          if (prescription) {
-            prescription.status = 'ready';
-            console.log('Prescription processed:', prescriptionId);
-          }
-        },
-
-        completePrescription(prescriptionId) {
-          const prescription = this.prescriptions.find(p => p.id === prescriptionId);
-          if (prescription) {
-            prescription.status = 'completed';
-            console.log('Prescription completed:', prescriptionId);
-          }
-        },
-
         viewPrescription(prescriptionId) {
           const prescription = this.prescriptions.find(p => p.id === prescriptionId);
           console.log('View prescription:', prescription);
           // Implement detailed view functionality
+        },
+
+        init() {
+          this.loadPrescriptions();
         }
       }
     }

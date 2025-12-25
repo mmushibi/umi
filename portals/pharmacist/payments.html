@@ -2020,6 +2020,146 @@
         quotations: [],
         creditNotes: [],
         claims: [],
+        receipts: [],
+        loading: false,
+        error: null,
+
+        async loadPayments() {
+          this.loading = true;
+          this.error = null;
+          try {
+            const response = await window.pharmacistApi.payments.getPayments();
+            const payments = response.data || [];
+            this.invoices = payments.filter(p => p.type === 'invoice') || [];
+            this.quotations = payments.filter(p => p.type === 'quotation') || [];
+            this.creditNotes = payments.filter(p => p.type === 'credit-note') || [];
+            this.claims = payments.filter(p => p.type === 'insurance-claim') || [];
+            this.receipts = payments.filter(p => p.type === 'receipt') || [];
+          } catch (error) {
+            console.error('Failed to load payments:', error);
+            this.error = 'Failed to load payments';
+          } finally {
+            this.loading = false;
+          }
+        },
+
+        async createPayment(paymentData) {
+          try {
+            const response = await window.pharmacistApi.payments.createPayment(paymentData);
+            const newPayment = response.data;
+            
+            // Add to appropriate array based on type
+            switch(newPayment.type) {
+              case 'invoice':
+                this.invoices.push(newPayment);
+                break;
+              case 'quotation':
+                this.quotations.push(newPayment);
+                break;
+              case 'credit-note':
+                this.creditNotes.push(newPayment);
+                break;
+              case 'insurance-claim':
+                this.claims.push(newPayment);
+                break;
+              case 'receipt':
+                this.receipts.push(newPayment);
+                break;
+            }
+            
+            return newPayment;
+          } catch (error) {
+            console.error('Failed to create payment:', error);
+            throw error;
+          }
+        },
+
+        async updatePayment(id, paymentData) {
+          try {
+            const response = await window.pharmacistApi.payments.updatePayment(id, paymentData);
+            const updatedPayment = response.data;
+            
+            // Update in appropriate array
+            this.updatePaymentInArrays(updatedPayment);
+            
+            return updatedPayment;
+          } catch (error) {
+            console.error('Failed to update payment:', error);
+            throw error;
+          }
+        },
+
+        async deletePayment(id) {
+          try {
+            await window.pharmacistApi.payments.deletePayment(id);
+            
+            // Remove from all arrays
+            this.invoices = this.invoices.filter(p => p.id !== id);
+            this.quotations = this.quotations.filter(p => p.id !== id);
+            this.creditNotes = this.creditNotes.filter(p => p.id !== id);
+            this.claims = this.claims.filter(p => p.id !== id);
+            this.receipts = this.receipts.filter(p => p.id !== id);
+          } catch (error) {
+            console.error('Failed to delete payment:', error);
+            throw error;
+          }
+        },
+
+        async processRefund(id, refundData) {
+          try {
+            const response = await window.pharmacistApi.payments.processRefund(id, refundData);
+            const refund = response.data;
+            
+            // Update payment status
+            this.updatePaymentStatus(id, 'refunded');
+            
+            return refund;
+          } catch (error) {
+            console.error('Failed to process refund:', error);
+            throw error;
+          }
+        },
+
+        updatePaymentInArrays(updatedPayment) {
+          const arrays = [this.invoices, this.quotations, this.creditNotes, this.claims, this.receipts];
+          
+          arrays.forEach(array => {
+            const index = array.findIndex(p => p.id === updatedPayment.id);
+            if (index !== -1) {
+              array[index] = updatedPayment;
+            }
+          });
+        },
+
+        updatePaymentStatus(id, status) {
+          const arrays = [this.invoices, this.quotations, this.creditNotes, this.claims, this.receipts];
+          
+          arrays.forEach(array => {
+            const payment = array.find(p => p.id === id);
+            if (payment) {
+              payment.status = status;
+            }
+          });
+        },
+
+        async getPaymentSummary(startDate, endDate) {
+          try {
+            const response = await window.pharmacistApi.payments.getSummary(startDate, endDate);
+            return response.data;
+          } catch (error) {
+            console.error('Failed to get payment summary:', error);
+            throw error;
+          }
+        },
+
+        viewDocumentDetails(documentId) {
+          console.log('View document details:', documentId);
+          // Implement detailed view functionality
+        },
+
+        init() {
+          this.loadPayments();
+        },
 
         get totalInvoices() {
           return this.invoices.length;

@@ -1180,26 +1180,153 @@
           receiptPrefix: 'RCP'
         },
 
-        saveProfile() {
-          console.log('Saving profile:', this.profile);
-          alert('Profile updated successfully!');
+        async loadAccountData() {
+          try {
+            // Load user profile
+            const profile = await window.cashierAPI.getUserProfile();
+            this.updateProfile(profile);
+            
+            // Load notification settings
+            const notificationSettings = await window.cashierAPI.getNotificationSettings();
+            this.updateNotifications(notificationSettings);
+            
+            // Load pharmacy settings
+            const pharmacySettings = await window.cashierAPI.getPharmacySettings();
+            this.updatePharmacySettings(pharmacySettings);
+            
+          } catch (error) {
+            console.error('Error loading account data:', error);
+            window.cashierAPI.handleError(error, 'loadAccountData');
+          }
         },
-
-        saveNotifications() {
-          console.log('Saving notifications:', this.notifications);
-          alert('Notification preferences saved!');
+        
+        updateProfile(profile) {
+          this.profile = {
+            firstName: profile.firstName || this.profile.firstName,
+            lastName: profile.lastName || this.profile.lastName,
+            email: profile.email || this.profile.email,
+            phone: profile.phone || this.profile.phone,
+            bio: profile.bio || this.profile.bio
+          };
+          
+          this.userInfo = {
+            ...this.userInfo,
+            name: `${this.profile.firstName} ${this.profile.lastName}`,
+            email: this.profile.email,
+            initials: `${this.profile.firstName.charAt(0)}${this.profile.lastName.charAt(0)}`
+          };
         },
-
-        savePharmacySettings() {
-          // Save to localStorage for global access
-          localStorage.setItem('pharmacySettings', JSON.stringify(this.pharmacySettings));
+        
+        updateNotifications(settings) {
+          this.notifications = {
+            email: settings.email !== undefined ? settings.email : this.notifications.email,
+            push: settings.push !== undefined ? settings.push : this.notifications.push,
+            sales: settings.sales !== undefined ? settings.sales : this.notifications.sales,
+            inventory: settings.inventory !== undefined ? settings.inventory : this.notifications.inventory,
+            prescriptions: settings.prescriptions !== undefined ? settings.prescriptions : this.notifications.prescriptions
+          };
+        },
+        
+        updatePharmacySettings(settings) {
+          this.pharmacySettings = {
+            ...this.pharmacySettings,
+            name: settings.name || this.pharmacySettings.name,
+            phone: settings.phone || this.pharmacySettings.phone,
+            email: settings.email || this.pharmacySettings.email,
+            website: settings.website || this.pharmacySettings.website,
+            address: settings.address || this.pharmacySettings.address,
+            city: settings.city || this.pharmacySettings.city,
+            province: settings.province || this.pharmacySettings.province,
+            postalCode: settings.postalCode || this.pharmacySettings.postalCode,
+            receiptHeader: settings.receiptHeader || this.pharmacySettings.receiptHeader,
+            receiptFooter: settings.receiptFooter || this.pharmacySettings.receiptFooter,
+            taxRate: settings.taxRate || this.pharmacySettings.taxRate,
+            currency: settings.currency || this.pharmacySettings.currency,
+            reportSignature: settings.reportSignature || this.pharmacySettings.reportSignature,
+            paymentTerms: settings.paymentTerms || this.pharmacySettings.paymentTerms,
+            invoicePrefix: settings.invoicePrefix || this.pharmacySettings.invoicePrefix,
+            receiptPrefix: settings.receiptPrefix || this.pharmacySettings.receiptPrefix
+          };
           
           // Update pharmacyInfo display
           this.pharmacyInfo.name = this.pharmacySettings.name;
           this.pharmacyInfo.location = `${this.pharmacySettings.city}, ${this.pharmacySettings.province}`;
-          
-          console.log('Saving pharmacy settings:', this.pharmacySettings);
-          alert('Pharmacy settings updated successfully! These settings will now be used across all documents and receipts.');
+        },
+        
+        async saveProfile() {
+          try {
+            await window.cashierAPI.updateProfile(this.profile);
+            alert('Profile updated successfully!');
+          } catch (error) {
+            console.error('Error saving profile:', error);
+            window.cashierAPI.handleError(error, 'saveProfile');
+            alert('Failed to update profile. Please try again.');
+          }
+        },
+        
+        async saveNotifications() {
+          try {
+            await window.cashierAPI.updateNotificationSettings(this.notifications);
+            alert('Notification preferences saved successfully!');
+          } catch (error) {
+            console.error('Error saving notifications:', error);
+            window.cashierAPI.handleError(error, 'saveNotifications');
+            alert('Failed to save notification preferences. Please try again.');
+          }
+        },
+        
+        async savePharmacySettings() {
+          try {
+            await window.cashierAPI.updatePharmacySettings(this.pharmacySettings);
+            
+            // Save to localStorage for global access
+            localStorage.setItem('pharmacySettings', JSON.stringify(this.pharmacySettings));
+            
+            // Update pharmacyInfo display
+            this.pharmacyInfo.name = this.pharmacySettings.name;
+            this.pharmacyInfo.location = `${this.pharmacySettings.city}, ${this.pharmacySettings.province}`;
+            
+            alert('Pharmacy settings updated successfully! These settings will now be used across all documents and receipts.');
+          } catch (error) {
+            console.error('Error saving pharmacy settings:', error);
+            window.cashierAPI.handleError(error, 'savePharmacySettings');
+            alert('Failed to update pharmacy settings. Please try again.');
+          }
+        },
+        
+        async changePassword() {
+          try {
+            const currentPassword = document.getElementById('currentPassword').value;
+            const newPassword = document.getElementById('newPassword').value;
+            const confirmPassword = document.getElementById('confirmPassword').value;
+            
+            if (newPassword !== confirmPassword) {
+              alert('New passwords do not match!');
+              return;
+            }
+            
+            if (newPassword.length < 8) {
+              alert('Password must be at least 8 characters long!');
+              return;
+            }
+            
+            await window.cashierAPI.changePassword({
+              currentPassword,
+              newPassword,
+              confirmPassword
+            });
+            
+            // Clear form
+            document.getElementById('currentPassword').value = '';
+            document.getElementById('newPassword').value = '';
+            document.getElementById('confirmPassword').value = '';
+            
+            alert('Password changed successfully!');
+          } catch (error) {
+            console.error('Error changing password:', error);
+            window.cashierAPI.handleError(error, 'changePassword');
+            alert('Failed to change password. Please check your current password and try again.');
+          }
         },
       }
     }
@@ -1210,6 +1337,14 @@
   <script src="../shared/js/role-based-access.js"></script>
   <script src="../admin/js/admin-api.js"></script>
   <script src="js/cashier-api.js"></script>
+
+  <script>
+  // Initialize account system when DOM is ready
+  document.addEventListener('DOMContentLoaded', () => {
+    const accountApp = Alpine.data('accountSystem', accountSystem);
+    accountApp.loadAccountData();
+  });
+</script>
 
   <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
 </body>

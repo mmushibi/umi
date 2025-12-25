@@ -2102,10 +2102,98 @@
           window.print();
         },
 
-        logout() {
-          if (confirm('Are you sure you want to logout?')) {
-            window.location.href = 'index.html';
+        init() {
+          this.loadPaymentsFromAPI();
+          this.setupEventListeners();
+          this.updatePaymentStats();
+        },
+
+        loadPaymentsFromAPI() {
+          this.loading = true;
+          
+          // Use adminAPI for backend integration
+          if (window.adminAPI) {
+            // Load invoices
+            window.adminAPI.getSales({ type: 'invoices' })
+              .then(invoices => {
+                this.invoices = invoices.map(inv => ({
+                  id: inv.id,
+                  number: inv.invoiceNumber || inv.number,
+                  customer: inv.customer || inv.patientName,
+                  amount: inv.total || inv.amount,
+                  date: inv.date || inv.createdAt,
+                  status: inv.status || 'pending',
+                  type: 'invoices'
+                }));
+                
+                // Load quotations
+                return window.adminAPI.getSales({ type: 'quotations' });
+              })
+              .then(quotations => {
+                this.quotations = quotations.map(q => ({
+                  id: q.id,
+                  number: q.quotationNumber || q.number,
+                  customer: q.customer || q.patientName,
+                  amount: q.total || q.amount,
+                  date: q.date || q.createdAt,
+                  status: q.status || 'draft',
+                  type: 'quotations'
+                }));
+                
+                // Load credit notes
+                return window.adminAPI.getSales({ type: 'credit-notes' });
+              })
+              .then(creditNotes => {
+                this.creditNotes = creditNotes.map(cn => ({
+                  id: cn.id,
+                  number: cn.creditNoteNumber || cn.number,
+                  customer: cn.customer || cn.patientName,
+                  amount: cn.amount,
+                  date: cn.date || cn.createdAt,
+                  status: cn.status || 'pending',
+                  type: 'credit-notes'
+                }));
+                
+                // Load insurance claims
+                return window.adminAPI.getSales({ type: 'insurance-claims' });
+              })
+              .then(claims => {
+                this.claims = claims.map(cl => ({
+                  id: cl.id,
+                  number: cl.claimNumber || cl.number,
+                  patient: cl.patient || cl.patientName,
+                  insurance: cl.insuranceProvider || cl.insurance,
+                  amount: cl.amount,
+                  date: cl.date || cl.createdAt,
+                  status: cl.status || 'pending',
+                  type: 'insurance-claims'
+                }));
+                
+                this.updatePaymentStats();
+                this.loadDocuments(this.currentDocumentType);
+                this.loading = false;
+              })
+              .catch(error => {
+                console.error('Error loading payments:', error);
+                this.showError('Failed to load payments. Please try again.');
+                this.loading = false;
+                // Fallback to mock data
+                this.loadSampleData();
+              });
+          } else {
+            // Fallback to mock data
+            this.loadSampleData();
+            this.loading = false;
           }
+        },
+
+        loadSampleData() {
+          // Initialize empty arrays - real data will be loaded from API
+          this.invoices = [];
+          this.quotations = [];
+          this.creditNotes = [];
+          this.claims = [];
+          this.updatePaymentStats();
         },
 
         convertToInvoice(quotation) {
@@ -2265,23 +2353,68 @@
           const tax = subtotal * 0.16;
           const total = subtotal + tax;
           
-          const newInvoice = {
-            id: Date.now().toString(),
-            ...invoiceData,
-            items,
-            subtotal,
-            tax,
-            total,
-            date: new Date().toISOString().split('T')[0],
-            status: 'pending',
-            type: 'invoices'
-          };
-          
-          this.invoices.push(newInvoice);
-          this.closeModal('invoiceModal');
-          event.target.reset();
-          this.updatePaymentStats();
-          this.renderPaymentsTable(this.invoices);
+          // Use adminAPI for backend integration
+          if (window.adminAPI) {
+            const invoicePayload = {
+              invoiceNumber: invoiceData.invoiceNumber,
+              customerName: invoiceData.customerName,
+              customerEmail: invoiceData.customerEmail,
+              customerPhone: invoiceData.customerPhone,
+              customerAddress: invoiceData.customerAddress,
+              dueDate: invoiceData.dueDate,
+              items: items,
+              subtotal: subtotal,
+              tax: tax,
+              total: total,
+              notes: document.getElementById('invoiceNotes')?.value || ''
+            };
+
+            window.adminAPI.generateSalesReport('invoice', invoicePayload)
+              .then(response => {
+                const newInvoice = {
+                  id: response.id || Date.now().toString(),
+                  ...invoiceData,
+                  items,
+                  subtotal,
+                  tax,
+                  total,
+                  date: new Date().toISOString().split('T')[0],
+                  status: response.status || 'pending',
+                  type: 'invoices'
+                };
+                
+                this.invoices.push(newInvoice);
+                this.closeModal('invoiceModal');
+                event.target.reset();
+                this.updatePaymentStats();
+                this.renderPaymentsTable(this.invoices);
+                this.showSuccess('Invoice created successfully!');
+              })
+              .catch(error => {
+                console.error('Error creating invoice:', error);
+                this.showError('Failed to create invoice. Please try again.');
+              });
+          } else {
+            // Fallback to local storage
+            const newInvoice = {
+              id: Date.now().toString(),
+              ...invoiceData,
+              items,
+              subtotal,
+              tax,
+              total,
+              date: new Date().toISOString().split('T')[0],
+              status: 'pending',
+              type: 'invoices'
+            };
+            
+            this.invoices.push(newInvoice);
+            this.closeModal('invoiceModal');
+            event.target.reset();
+            this.updatePaymentStats();
+            this.renderPaymentsTable(this.invoices);
+            this.showSuccess('Invoice created successfully!');
+          }
         },
 
         getInvoiceItems() {
@@ -2362,22 +2495,65 @@
           const tax = subtotal * 0.16;
           const total = subtotal + tax;
           
-          const newQuotation = {
-            id: Date.now().toString(),
-            ...quotationData,
-            items,
-            subtotal,
-            tax,
-            total,
-            date: new Date().toISOString().split('T')[0],
-            status: 'draft',
-            type: 'quotations'
-          };
-          
-          this.quotations.push(newQuotation);
-          this.closeModal('quotationModal');
-          event.target.reset();
-          this.renderPaymentsTable(this.quotations);
+          // Use adminAPI for backend integration
+          if (window.adminAPI) {
+            const quotationPayload = {
+              quotationNumber: quotationData.quotationNumber,
+              customerName: quotationData.quoteCustomerName,
+              customerEmail: quotationData.quoteCustomerEmail,
+              customerPhone: quotationData.quoteCustomerPhone,
+              validUntil: quotationData.validUntil,
+              items: items,
+              subtotal: subtotal,
+              tax: tax,
+              total: total,
+              terms: document.getElementById('quotationTerms')?.value || ''
+            };
+
+            window.adminAPI.generateSalesReport('quotation', quotationPayload)
+              .then(response => {
+                const newQuotation = {
+                  id: response.id || Date.now().toString(),
+                  ...quotationData,
+                  items,
+                  subtotal,
+                  tax,
+                  total,
+                  date: new Date().toISOString().split('T')[0],
+                  status: response.status || 'draft',
+                  type: 'quotations'
+                };
+                
+                this.quotations.push(newQuotation);
+                this.closeModal('quotationModal');
+                event.target.reset();
+                this.renderPaymentsTable(this.quotations);
+                this.showSuccess('Quotation created successfully!');
+              })
+              .catch(error => {
+                console.error('Error creating quotation:', error);
+                this.showError('Failed to create quotation. Please try again.');
+              });
+          } else {
+            // Fallback to local storage
+            const newQuotation = {
+              id: Date.now().toString(),
+              ...quotationData,
+              items,
+              subtotal,
+              tax,
+              total,
+              date: new Date().toISOString().split('T')[0],
+              status: 'draft',
+              type: 'quotations'
+            };
+            
+            this.quotations.push(newQuotation);
+            this.closeModal('quotationModal');
+            event.target.reset();
+            this.renderPaymentsTable(this.quotations);
+            this.showSuccess('Quotation created successfully!');
+          }
         },
 
         getQuotationItems() {
@@ -2453,18 +2629,53 @@
           const formData = new FormData(event.target);
           const creditNoteData = Object.fromEntries(formData.entries());
           
-          const newCreditNote = {
-            id: Date.now().toString(),
-            ...creditNoteData,
-            date: new Date().toISOString().split('T')[0],
-            status: 'pending',
-            type: 'credit-notes'
-          };
-          
-          this.creditNotes.push(newCreditNote);
-          this.closeModal('creditNoteModal');
-          event.target.reset();
-          this.renderPaymentsTable(this.creditNotes);
+          // Use adminAPI for backend integration
+          if (window.adminAPI) {
+            const creditNotePayload = {
+              creditNoteNumber: creditNoteData.creditNoteNumber,
+              originalInvoice: creditNoteData.originalInvoice,
+              customerName: creditNoteData.creditCustomerName,
+              creditAmount: creditNoteData.creditAmount,
+              reason: creditNoteData.creditReason,
+              notes: creditNoteData.creditNotes
+            };
+
+            window.adminAPI.generateSalesReport('credit-note', creditNotePayload)
+              .then(response => {
+                const newCreditNote = {
+                  id: response.id || Date.now().toString(),
+                  ...creditNoteData,
+                  date: new Date().toISOString().split('T')[0],
+                  status: response.status || 'pending',
+                  type: 'credit-notes'
+                };
+                
+                this.creditNotes.push(newCreditNote);
+                this.closeModal('creditNoteModal');
+                event.target.reset();
+                this.renderPaymentsTable(this.creditNotes);
+                this.showSuccess('Credit note created successfully!');
+              })
+              .catch(error => {
+                console.error('Error creating credit note:', error);
+                this.showError('Failed to create credit note. Please try again.');
+              });
+          } else {
+            // Fallback to local storage
+            const newCreditNote = {
+              id: Date.now().toString(),
+              ...creditNoteData,
+              date: new Date().toISOString().split('T')[0],
+              status: 'pending',
+              type: 'credit-notes'
+            };
+            
+            this.creditNotes.push(newCreditNote);
+            this.closeModal('creditNoteModal');
+            event.target.reset();
+            this.renderPaymentsTable(this.creditNotes);
+            this.showSuccess('Credit note created successfully!');
+          }
         },
 
         // Insurance Claim Management
@@ -2473,18 +2684,55 @@
           const formData = new FormData(event.target);
           const claimData = Object.fromEntries(formData.entries());
           
-          const newClaim = {
-            id: Date.now().toString(),
-            ...claimData,
-            date: new Date().toISOString().split('T')[0],
-            status: 'pending',
-            type: 'insurance-claims'
-          };
-          
-          this.claims.push(newClaim);
-          this.closeModal('insuranceClaimModal');
-          event.target.reset();
-          this.renderPaymentsTable(this.claims);
+          // Use adminAPI for backend integration
+          if (window.adminAPI) {
+            const claimPayload = {
+              claimNumber: claimData.claimNumber,
+              patientName: claimData.patientName,
+              insuranceProvider: claimData.insuranceProvider,
+              policyNumber: claimData.policyNumber,
+              claimAmount: claimData.claimAmount,
+              dateOfService: claimData.dateOfService,
+              diagnosisDetails: claimData.diagnosisDetails,
+              claimNotes: claimData.claimNotes
+            };
+
+            window.adminAPI.generateSalesReport('insurance-claim', claimPayload)
+              .then(response => {
+                const newClaim = {
+                  id: response.id || Date.now().toString(),
+                  ...claimData,
+                  date: new Date().toISOString().split('T')[0],
+                  status: response.status || 'pending',
+                  type: 'insurance-claims'
+                };
+                
+                this.claims.push(newClaim);
+                this.closeModal('insuranceClaimModal');
+                event.target.reset();
+                this.renderPaymentsTable(this.claims);
+                this.showSuccess('Insurance claim created successfully!');
+              })
+              .catch(error => {
+                console.error('Error creating insurance claim:', error);
+                this.showError('Failed to create insurance claim. Please try again.');
+              });
+          } else {
+            // Fallback to local storage
+            const newClaim = {
+              id: Date.now().toString(),
+              ...claimData,
+              date: new Date().toISOString().split('T')[0],
+              status: 'pending',
+              type: 'insurance-claims'
+            };
+            
+            this.claims.push(newClaim);
+            this.closeModal('insuranceClaimModal');
+            event.target.reset();
+            this.renderPaymentsTable(this.claims);
+            this.showSuccess('Insurance claim created successfully!');
+          }
         },
 
         // Search and Filter
@@ -2580,12 +2828,46 @@
           window.URL.revokeObjectURL(url);
         },
 
-        // Initialize
-        init() {
-          this.loadSampleData();
-          this.setupEventListeners();
-          this.loadDocuments('invoices');
-          this.updatePaymentStats();
+        // Notification methods
+        showSuccess(message) {
+          this.showNotification(message, 'success');
+        },
+
+        showError(message) {
+          this.showNotification(message, 'error');
+        },
+
+        showWarning(message) {
+          this.showNotification(message, 'warning');
+        },
+
+        showNotification(message, type = 'info') {
+          // Create notification element
+          const notification = document.createElement('div');
+          notification.className = `notification notification-${type}`;
+          notification.textContent = message;
+          document.body.appendChild(notification);
+
+          // Animate in
+          setTimeout(() => {
+            notification.classList.add('show');
+          }, 100);
+
+          // Remove after 5 seconds
+          setTimeout(() => {
+            notification.classList.remove('show');
+            setTimeout(() => {
+              if (notification.parentNode) {
+                document.body.removeChild(notification);
+              }
+            }, 300);
+          }, 5000);
+        },
+
+        logout() {
+          if (confirm('Are you sure you want to logout?')) {
+            window.location.href = 'index.html';
+          }
         },
 
         loadSampleData() {

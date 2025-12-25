@@ -1964,28 +1964,102 @@
           const formData = new FormData(event.target);
           const employeeData = Object.fromEntries(formData.entries());
           
-          const newEmployee = {
-            id: employeeData.employeeId || this.generateEmployeeId(),
-            ...employeeData,
-            status: 'active',
-            createdAt: new Date().toISOString()
-          };
-          
-          if (employeeData.employeeId) {
-            // Update existing employee
-            const index = this.employees.findIndex(emp => emp.id === employeeData.employeeId);
-            if (index !== -1) {
-              this.employees[index] = { ...this.employees[index], ...newEmployee };
+          // Use adminAPI for backend integration
+          if (window.adminAPI) {
+            const userPayload = {
+              firstName: employeeData.firstName,
+              lastName: employeeData.lastName,
+              email: employeeData.email,
+              phone: employeeData.phone,
+              role: employeeData.role,
+              department: employeeData.department,
+              status: employeeData.status || 'active',
+              hireDate: employeeData.hireDate,
+              salary: parseFloat(employeeData.salary) || 0,
+              employmentType: employeeData.employmentType,
+              defaultShift: employeeData.defaultShift,
+              workDays: employeeData.workDays,
+              nrc: employeeData.nrc,
+              licenseNumber: employeeData.licenseNumber,
+              licenseExpiry: employeeData.licenseExpiry,
+              qualifications: employeeData.qualifications,
+              experience: parseInt(employeeData.experience) || 0,
+              password: employeeData.password || 'defaultPassword123' // Should be generated securely
+            };
+
+            if (employeeData.employeeId) {
+              // Update existing user
+              window.adminAPI.updateUser(employeeData.employeeId, userPayload)
+                .then(response => {
+                  const updatedEmployee = {
+                    id: employeeData.employeeId,
+                    ...userPayload,
+                    updatedAt: new Date().toISOString()
+                  };
+                  
+                  const index = this.employees.findIndex(emp => emp.id === employeeData.employeeId);
+                  if (index !== -1) {
+                    this.employees[index] = { ...this.employees[index], ...updatedEmployee };
+                  }
+                  
+                  this.closeModal('employeeModal');
+                  event.target.reset();
+                  this.renderEmployeesTable();
+                  this.updateEmployeeStats();
+                  this.showSuccess('Employee updated successfully!');
+                })
+                .catch(error => {
+                  console.error('Error updating employee:', error);
+                  this.showError('Failed to update employee. Please try again.');
+                });
+            } else {
+              // Create new user
+              window.adminAPI.createUser(userPayload)
+                .then(response => {
+                  const newEmployee = {
+                    id: response.id || this.generateEmployeeId(),
+                    ...userPayload,
+                    createdAt: new Date().toISOString()
+                  };
+                  
+                  this.employees.push(newEmployee);
+                  this.closeModal('employeeModal');
+                  event.target.reset();
+                  this.renderEmployeesTable();
+                  this.updateEmployeeStats();
+                  this.showSuccess('Employee created successfully!');
+                })
+                .catch(error => {
+                  console.error('Error creating employee:', error);
+                  this.showError('Failed to create employee. Please try again.');
+                });
             }
           } else {
-            // Add new employee
-            this.employees.push(newEmployee);
+            // Fallback to local storage
+            const newEmployee = {
+              id: employeeData.employeeId || this.generateEmployeeId(),
+              ...employeeData,
+              status: 'active',
+              createdAt: new Date().toISOString()
+            };
+            
+            if (employeeData.employeeId) {
+              // Update existing employee
+              const index = this.employees.findIndex(emp => emp.id === employeeData.employeeId);
+              if (index !== -1) {
+                this.employees[index] = { ...this.employees[index], ...newEmployee };
+              }
+            } else {
+              // Add new employee
+              this.employees.push(newEmployee);
+            }
+            
+            this.closeModal('employeeModal');
+            event.target.reset();
+            this.renderEmployeesTable();
+            this.updateEmployeeStats();
+            this.showSuccess(employeeData.employeeId ? 'Employee updated successfully!' : 'Employee created successfully!');
           }
-          
-          this.closeModal('employeeModal');
-          event.target.reset();
-          this.renderEmployeesTable();
-          this.updateEmployeeStats();
         },
 
         renderEmployeesTable() {
@@ -2190,9 +2264,26 @@
 
         deleteEmployee(employeeId) {
           if (confirm('Are you sure you want to delete this employee? This action cannot be undone.')) {
-            this.employees = this.employees.filter(emp => emp.id !== employeeId);
-            this.renderEmployeesTable();
-            this.updateEmployeeStats();
+            // Use adminAPI for backend integration
+            if (window.adminAPI) {
+              window.adminAPI.deleteUser(employeeId)
+                .then(response => {
+                  this.employees = this.employees.filter(emp => emp.id !== employeeId);
+                  this.renderEmployeesTable();
+                  this.updateEmployeeStats();
+                  this.showSuccess('Employee deleted successfully!');
+                })
+                .catch(error => {
+                  console.error('Error deleting employee:', error);
+                  this.showError('Failed to delete employee. Please try again.');
+                });
+            } else {
+              // Fallback to local storage
+              this.employees = this.employees.filter(emp => emp.id !== employeeId);
+              this.renderEmployeesTable();
+              this.updateEmployeeStats();
+              this.showSuccess('Employee deleted successfully!');
+            }
           }
         },
 
@@ -2384,13 +2475,58 @@
           window.URL.revokeObjectURL(url);
         },
 
-        // Initialize
         init() {
-          this.loadSampleData();
+          this.loadUsersFromAPI();
           this.setupEventListeners();
           this.renderEmployeesTable();
           this.updateEmployeeStats();
           this.switchTab('schedule');
+        },
+
+        loadUsersFromAPI() {
+          this.loading = true;
+          
+          // Use adminAPI for backend integration
+          if (window.adminAPI) {
+            window.adminAPI.getUsers(1, 100, {})
+              .then(users => {
+                this.employees = users.map(user => ({
+                  id: user.id,
+                  firstName: user.firstName || user.name?.split(' ')[0] || '',
+                  lastName: user.lastName || user.name?.split(' ')[1] || '',
+                  email: user.email,
+                  phone: user.phone || user.phoneNumber || '',
+                  role: user.role || 'staff',
+                  department: user.department || 'pharmacy',
+                  status: user.status || 'active',
+                  hireDate: user.hireDate || user.createdAt?.split('T')[0] || '',
+                  salary: user.salary || 0,
+                  employmentType: user.employmentType || 'full-time',
+                  defaultShift: user.defaultShift || 'morning',
+                  workDays: user.workDays || 'monday-friday',
+                  nrc: user.nrc || user.nationalId || '',
+                  licenseNumber: user.licenseNumber || '',
+                  licenseExpiry: user.licenseExpiry || '',
+                  qualifications: user.qualifications || '',
+                  experience: user.experience || 0
+                }));
+                
+                this.updateEmployeeStats();
+                this.renderEmployeesTable();
+                this.loading = false;
+              })
+              .catch(error => {
+                console.error('Error loading users:', error);
+                this.showError('Failed to load users. Please try again.');
+                this.loading = false;
+                // Fallback to mock data
+                this.loadSampleData();
+              });
+          } else {
+            // Fallback to mock data
+            this.loadSampleData();
+            this.loading = false;
+          }
         },
 
         loadSampleData() {
@@ -2448,6 +2584,42 @@
           document.getElementById('formEmployeeId').value = '';
           document.getElementById('employeeModalTitle').textContent = 'Add Employee';
           this.openModal('employeeModal');
+        },
+
+        // Notification methods
+        showSuccess(message) {
+          this.showNotification(message, 'success');
+        },
+
+        showError(message) {
+          this.showNotification(message, 'error');
+        },
+
+        showWarning(message) {
+          this.showNotification(message, 'warning');
+        },
+
+        showNotification(message, type = 'info') {
+          // Create notification element
+          const notification = document.createElement('div');
+          notification.className = `notification notification-${type}`;
+          notification.textContent = message;
+          document.body.appendChild(notification);
+
+          // Animate in
+          setTimeout(() => {
+            notification.classList.add('show');
+          }, 100);
+
+          // Remove after 5 seconds
+          setTimeout(() => {
+            notification.classList.remove('show');
+            setTimeout(() => {
+              if (notification.parentNode) {
+                document.body.removeChild(notification);
+              }
+            }, 300);
+          }, 5000);
         },
 
         resetFilters() {

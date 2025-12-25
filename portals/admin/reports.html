@@ -1792,36 +1792,68 @@
         
         loadReportsFromAPI() {
           this.loading = true;
-          try {
-            window.adminDataSync.getData('reports', {
-              page: 1,
-              pageSize: 50,
-              search: this.searchQuery,
-              period: this.reportPeriod,
-              type: this.reportType
-            })
-            .then(reports => {
-              this.reports = reports.map(r => ({
-                id: r.id,
-                name: r.name,
-                type: r.type,
-                date: r.generatedDate ? new Date(r.generatedDate).toLocaleDateString() : '',
-                status: r.status,
-                size: r.size || '0 KB'
-              }));
-              
-              // Update dashboard metrics
-              this.updateReportMetrics();
+          
+          // Use adminAPI for backend integration
+          if (window.adminAPI) {
+            window.adminAPI.getReports()
+              .then(reports => {
+                this.reports = reports.map(r => ({
+                  id: r.id,
+                  name: r.name,
+                  type: r.type,
+                  date: r.generatedDate ? new Date(r.generatedDate).toLocaleDateString() : '',
+                  status: r.status,
+                  size: r.size || '0 KB',
+                  amount: r.amount || 0,
+                  period: r.period || this.formatPeriod(r.startDate, r.endDate)
+                }));
+                
+                // Update dashboard metrics
+                this.updateReportMetrics();
+                this.loading = false;
+              })
+              .catch(error => {
+                console.error('Error loading reports:', error);
+                this.showError('Failed to load reports. Please try again.');
+                this.loading = false;
+                // Fallback to mock data
+                this.loadSampleReports();
+              });
+          } else {
+            // Fallback to data sync or mock data
+            try {
+              window.adminDataSync.getData('reports', {
+                page: 1,
+                pageSize: 50,
+                search: this.searchQuery,
+                period: this.reportPeriod,
+                type: this.reportType
+              })
+              .then(reports => {
+                this.reports = reports.map(r => ({
+                  id: r.id,
+                  name: r.name,
+                  type: r.type,
+                  date: r.generatedDate ? new Date(r.generatedDate).toLocaleDateString() : '',
+                  status: r.status,
+                  size: r.size || '0 KB',
+                  amount: r.amount || 0,
+                  period: r.period || this.formatPeriod(r.startDate, r.endDate)
+                }));
+                
+                this.updateReportMetrics();
+                this.loading = false;
+              })
+              .catch(error => {
+                console.error('Data sync error:', error);
+                this.loadSampleReports();
+                this.loading = false;
+              });
+            } catch (error) {
+              console.error('Data sync not available:', error);
+              this.loadSampleReports();
               this.loading = false;
-            })
-            .catch(error => {
-              console.error('Error loading reports:', error);
-              this.showError('Failed to load reports. Please try again.');
-              this.loading = false;
-            });
-          } catch (error) {
-            console.error('Data sync not available:', error);
-            this.loading = false;
+            }
           }
         },
         
@@ -1946,24 +1978,70 @@
 
         submitGenerateReport() {
           if (!this.newReport.name || !this.newReport.type || !this.newReport.startDate || !this.newReport.endDate) {
-            alert('Please fill in all required fields');
+            this.showError('Please fill in all required fields');
             return;
           }
 
-          const report = {
-            id: Date.now(),
-            name: this.newReport.name,
-            type: this.newReport.type,
-            period: `${this.formatDate(this.newReport.startDate)} - ${this.formatDate(this.newReport.endDate)}`,
-            status: 'Completed',
-            date: this.formatDate(new Date())
-          };
+          // Use adminAPI for backend integration
+          if (window.adminAPI) {
+            const reportData = {
+              name: this.newReport.name,
+              type: this.newReport.type,
+              startDate: this.newReport.startDate,
+              endDate: this.newReport.endDate,
+              format: this.newReport.format,
+              email: this.newReport.email === 'yes',
+              description: this.newReport.description
+            };
 
-          this.reports.unshift(report);
-          this.showGenerateReportModal = false;
-          this.resetNewReport();
-          
-          alert('Report generated successfully!');
+            window.adminAPI.generateReport(this.newReport.type, {
+              name: this.newReport.name,
+              startDate: this.newReport.startDate,
+              endDate: this.newReport.endDate,
+              format: this.newReport.format,
+              email: this.newReport.email === 'yes',
+              description: this.newReport.description
+            })
+            .then(response => {
+              const report = {
+                id: response.id || Date.now(),
+                name: this.newReport.name,
+                type: this.newReport.type,
+                period: `${this.formatDate(this.newReport.startDate)} - ${this.formatDate(this.newReport.endDate)}`,
+                status: response.status || 'Processing',
+                date: this.formatDate(new Date()),
+                amount: response.amount || 0
+              };
+
+              this.reports.unshift(report);
+              this.showGenerateReportModal = false;
+              this.resetNewReport();
+              this.showSuccess('Report generated successfully!');
+              
+              // Refresh reports list
+              this.loadReportsFromAPI();
+            })
+            .catch(error => {
+              console.error('Error generating report:', error);
+              this.showError('Failed to generate report. Please try again.');
+            });
+          } else {
+            // Fallback to local mock data
+            const report = {
+              id: Date.now(),
+              name: this.newReport.name,
+              type: this.newReport.type,
+              period: `${this.formatDate(this.newReport.startDate)} - ${this.formatDate(this.newReport.endDate)}`,
+              status: 'Completed',
+              date: this.formatDate(new Date()),
+              amount: Math.floor(Math.random() * 10000) + 1000
+            };
+
+            this.reports.unshift(report);
+            this.showGenerateReportModal = false;
+            this.resetNewReport();
+            this.showSuccess('Report generated successfully!');
+          }
         },
 
         exportReport() {
@@ -2094,8 +2172,24 @@
         },
 
         refreshRevenueChart() {
-          console.log('Refreshing revenue chart...');
-          // Implement refresh logic
+          // Use adminAPI to get fresh sales data
+          if (window.adminAPI) {
+            window.adminAPI.getSales({ 
+              period: this.reportPeriod,
+              type: 'revenue' 
+            })
+            .then(salesData => {
+              this.updateRevenueChart(salesData);
+              this.showSuccess('Revenue chart refreshed successfully!');
+            })
+            .catch(error => {
+              console.error('Error refreshing revenue chart:', error);
+              this.showError('Failed to refresh revenue chart.');
+            });
+          } else {
+            console.log('Refreshing revenue chart...');
+            this.showWarning('Admin API not available - using mock data');
+          }
         },
 
         refreshCategoryChart() {
@@ -2104,7 +2198,28 @@
         },
 
         refreshTopProducts() {
-          this.loadSampleTopProducts();
+          // Use adminAPI to get fresh product data
+          if (window.adminAPI) {
+            window.adminAPI.getInventory({ 
+              sortBy: 'sales',
+              limit: 10 
+            })
+            .then(products => {
+              this.topProducts = products.map(p => ({
+                name: p.name,
+                sales: p.sales || 0,
+                revenue: p.revenue || 0
+              }));
+              this.showSuccess('Top products refreshed successfully!');
+            })
+            .catch(error => {
+              console.error('Error refreshing top products:', error);
+              this.showError('Failed to refresh top products.');
+              this.loadSampleTopProducts();
+            });
+          } else {
+            this.loadSampleTopProducts();
+          }
         },
 
         viewAllProducts() {
@@ -2113,8 +2228,22 @@
         },
 
         refreshInventoryMetrics() {
-          console.log('Refreshing inventory metrics...');
-          // Implement refresh logic
+          // Use adminAPI to get fresh inventory data
+          if (window.adminAPI) {
+            window.adminAPI.getInventory()
+              .then(inventory => {
+                // Update inventory metrics
+                this.updateInventoryMetrics(inventory);
+                this.showSuccess('Inventory metrics refreshed successfully!');
+              })
+              .catch(error => {
+                console.error('Error refreshing inventory metrics:', error);
+                this.showError('Failed to refresh inventory metrics.');
+              });
+          } else {
+            console.log('Refreshing inventory metrics...');
+            this.showWarning('Admin API not available - using mock data');
+          }
         },
 
         exportInventoryReport() {
@@ -2123,8 +2252,23 @@
         },
 
         refreshCustomerInsights() {
-          console.log('Refreshing customer insights...');
-          // Implement refresh logic
+          // Use adminAPI to get fresh patient data
+          if (window.adminAPI) {
+            window.adminAPI.getPatients({ 
+              period: this.reportPeriod 
+            })
+            .then(patients => {
+              this.updateCustomerMetrics(patients);
+              this.showSuccess('Customer insights refreshed successfully!');
+            })
+            .catch(error => {
+              console.error('Error refreshing customer insights:', error);
+              this.showError('Failed to refresh customer insights.');
+            });
+          } else {
+            console.log('Refreshing customer insights...');
+            this.showWarning('Admin API not available - using mock data');
+          }
         },
 
         exportCustomerInsights() {
@@ -2144,7 +2288,30 @@
 
         downloadReport(reportId) {
           console.log('Downloading report:', reportId);
-          alert('Report downloaded successfully!');
+          
+          // Use adminAPI for backend integration
+          if (window.adminAPI) {
+            window.adminAPI.downloadReport(reportId)
+              .then(blob => {
+                // Create download link
+                const url = window.URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                a.href = url;
+                a.download = `report-${reportId}.pdf`;
+                document.body.appendChild(a);
+                a.click();
+                window.URL.revokeObjectURL(url);
+                document.body.removeChild(a);
+                this.showSuccess('Report downloaded successfully!');
+              })
+              .catch(error => {
+                console.error('Error downloading report:', error);
+                this.showError('Failed to download report. Please try again.');
+              });
+          } else {
+            // Fallback to mock download
+            this.showSuccess('Report downloaded successfully!');
+          }
         },
 
         shareReport(reportId) {
@@ -2162,11 +2329,67 @@
           this.reports = [];
         },
 
+        formatPeriod(startDate, endDate) {
+          if (!startDate || !endDate) return '';
+          return `${this.formatDate(startDate)} - ${this.formatDate(endDate)}`;
+        },
+
+        updateRevenueChart(salesData) {
+          // Update the revenue chart with new data
+          const chart = Chart.getChart('revenueChart');
+          if (chart && salesData) {
+            chart.data.labels = salesData.labels || ['Week 1', 'Week 2', 'Week 3', 'Week 4'];
+            chart.data.datasets[0].data = salesData.data || [12000, 15000, 13500, 18000];
+            chart.update();
+          }
+        },
+
+        updateInventoryMetrics(inventory) {
+          // Update inventory metrics cards
+          if (inventory) {
+            const totalStockValue = inventory.reduce((sum, item) => sum + (item.value || 0), 0);
+            const lowStockItems = inventory.filter(item => item.stockLevel < item.minStock).length;
+            const expiringItems = inventory.filter(item => item.daysToExpiry < 30).length;
+            
+            // Update DOM elements if they exist
+            const elements = {
+              totalStock: document.querySelector('.metric-value'),
+              lowStock: document.querySelectorAll('.metric-value')[1],
+              expiring: document.querySelectorAll('.metric-value')[2]
+            };
+            
+            if (elements.totalStock) elements.totalStock.textContent = this.formatCurrency(totalStockValue);
+            if (elements.lowStock) elements.lowStock.textContent = lowStockItems;
+            if (elements.expiring) elements.expiring.textContent = expiringItems;
+          }
+        },
+
+        updateCustomerMetrics(patients) {
+          // Update customer insights
+          if (patients) {
+            const totalPatients = patients.length;
+            const newPatients = patients.filter(p => p.isNew).length;
+            const repeatPatients = patients.filter(p => p.isRepeat).length;
+            
+            // Update DOM elements if they exist
+            const elements = {
+              total: document.querySelector('.insight-value'),
+              new: document.querySelectorAll('.insight-value')[1],
+              repeat: document.querySelectorAll('.insight-value')[2]
+            };
+            
+            if (elements.total) elements.total.textContent = totalPatients.toLocaleString();
+            if (elements.new) elements.new.textContent = `+${newPatients}`;
+            if (elements.repeat) elements.repeat.textContent = `${Math.round((repeatPatients / totalPatients) * 100)}%`;
+          }
+        },
+
         init() {
           this.loadSampleTopProducts();
           this.loadSampleReports();
           this.initCharts();
           this.setupEventListeners();
+          this.loadReportsFromAPI();
         },
 
         initCharts() {
