@@ -1,0 +1,5 @@
+C:\Users\sepio\Desktop\Umi_Health\backend\src\UmiHealth.Core\obj\Debug\net8.0\UmiHealth.Core.GeneratedMSBuildEditorConfig.editorconfig
+C:\Users\sepio\Desktop\Umi_Health\backend\src\UmiHealth.Core\obj\Debug\net8.0\UmiHealth.Core.AssemblyInfoInputs.cache
+C:\Users\sepio\Desktop\Umi_Health\backend\src\UmiHealth.Core\obj\Debug\net8.0\UmiHealth.Core.AssemblyInfo.cs
+C:\Users\sepio\Desktop\Umi_Health\backend\src\UmiHealth.Core\obj\Debug\net8.0\UmiHealth.Core.csproj.CoreCompileInputs.cache
+C:\Users\sepio\Desktop\Umi_Health\backend\src\UmiHealth.Core\obj\Debug\net8.0\UmiHealth.Core.sourcelink.json

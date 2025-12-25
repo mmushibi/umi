@@ -1,3 +1,6 @@
+using UmiHealth.Core.Entities;
+using UmiHealth.Domain.Entities;
+
 namespace UmiHealth.Core.Interfaces;
 
 public interface IPharmacyService

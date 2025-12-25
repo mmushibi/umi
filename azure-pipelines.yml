@@ -1,0 +1,128 @@
+trigger:
+  - main
+  - develop
+
+pool:
+  vmImage: 'ubuntu-latest'
+
+variables:
+  buildConfiguration: 'Release'
+  imageNameApi: 'umihealth/api'
+  imageNameIdentity: 'umihealth/identity'
+  imageNameJobs: 'umihealth/jobs'
+  registry: '$(registry)' # set in pipeline variables or variable group
+
+stages:
+  - stage: Build
+    displayName: Build and Test
+    jobs:
+      - job: BuildAndTest
+        steps:
+          - task: UseDotNet@2
+            inputs:
+              version: '8.0.x'
+
+          - script: dotnet restore backend/UmiHealth.sln
+            displayName: Restore
+
+          - script: dotnet build backend/UmiHealth.sln --configuration $(buildConfiguration) --no-restore
+            displayName: Build
+
+          - script: dotnet test backend/tests/ --no-build --verbosity normal
+            displayName: Test
+
+          - task: Docker@2
+            displayName: Build API Image
+            inputs:
+              command: build
+              Dockerfile: backend/Dockerfile
+              tags: |
+                $(registry)/$(imageNameApi):$(Build.BuildId)
+                $(registry)/$(imageNameApi):latest
+
+          - task: Docker@2
+            displayName: Build Identity Image
+            inputs:
+              command: build
+              Dockerfile: backend/UmiHealth.Identity/Dockerfile
+              tags: |
+                $(registry)/$(imageNameIdentity):$(Build.BuildId)
+                $(registry)/$(imageNameIdentity):latest
+
+          - task: Docker@2
+            displayName: Build Jobs Image
+            inputs:
+              command: build
+              Dockerfile: backend/UmiHealth.Jobs/Dockerfile
+              tags: |
+                $(registry)/$(imageNameJobs):$(Build.BuildId)
+                $(registry)/$(imageNameJobs):latest
+
+  - stage: Push
+    displayName: Push Images
+    dependsOn: Build
+    condition: succeeded()
+    jobs:
+      - job: PushToRegistry
+        steps:
+          - task: Docker@2
+            displayName: Login to ACR
+            inputs:
+              command: login
+              containerRegistry: '$(dockerRegistryServiceConnection)'
+
+          - task: Docker@2
+            displayName: Push API Image
+            inputs:
+              command: push
+              tags: |
+                $(registry)/$(imageNameApi):$(Build.BuildId)
+                $(registry)/$(imageNameApi):latest
+
+          - task: Docker@2
+            displayName: Push Identity Image
+            inputs:
+              command: push
+              tags: |
+                $(registry)/$(imageNameIdentity):$(Build.BuildId)
+                $(registry)/$(imageNameIdentity):latest
+
+          - task: Docker@2
+            displayName: Push Jobs Image
+            inputs:
+              command: push
+              tags: |
+                $(registry)/$(imageNameJobs):$(Build.BuildId)
+                $(registry)/$(imageNameJobs):latest
+
+  - stage: Deploy
+    displayName: Deploy to Staging
+    dependsOn: Push
+    condition: succeeded()
+    jobs:
+      - deployment: DeployStaging
+        environment: 'staging'
+        strategy:
+          runOnce:
+            deploy:
+              steps:
+                - task: AzureCLI@2
+                  inputs:
+                    azureSubscription: '$(azureSubscription)'
+                    scriptType: bash
+                    scriptLocation: inlineScript
+                    inlineScript: |
+                      echo "Deploying to Azure App Service using container images"
+                      az webapp create --resource-group $(resourceGroup) --plan $(appServicePlan) --name $(webAppName) --deployment-container-image-name $(registry)/$(imageNameApi):latest || true
+                      az webapp config container set --name $(webAppName) --resource-group $(resourceGroup) --docker-custom-image-name $(registry)/$(imageNameApi):latest
+                      # Run EF Core migrations using a temporary container in ACR
+                      echo "Running EF Core migrations via ACR task/container"
+                      ACR_NAME=$(registry)
+                      IMAGE="$ACR_NAME/$(imageNameApi):latest"
+                      # Create a container instance that runs migrations then exits
+                      az container create --resource-group $(resourceGroup) --name umihealth-migrate --image $IMAGE --command-line "/bin/sh -c 'dotnet ef database update --project src/UmiHealth.Infrastructure --startup-project src/UmiHealth.Api --connection \"$(dbConnection)\"'" --restart-policy Never || true
+                      # Wait for container to finish
+                      sleep 10
+                      az container show --resource-group $(resourceGroup) --name umihealth-migrate --query instanceView.exitCode -o tsv || true
+                      # Optionally delete container
+                      az container delete --resource-group $(resourceGroup) --name umihealth-migrate --yes || true

@@ -145,6 +145,7 @@ namespace UmiHealth.Domain.Entities
         public string? SessionId { get; set; }
         public DateTime Timestamp { get; set; } = DateTime.UtcNow;
         public Dictionary<string, object> Metadata { get; set; } = new();
+        public DateTime? DeletedAt { get; set; }
     }
 
     public interface ISoftDeletable

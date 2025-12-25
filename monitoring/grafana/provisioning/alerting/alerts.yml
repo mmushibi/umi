@@ -1,0 +1,29 @@
+apiVersion: 1
+groups:
+  - name: UmiHealth Alerts
+    interval: 1m
+    rules:
+      - uid: umi_high_api_error_rate
+        title: UmiHealth High API Error Rate
+        condition: "A > 5"
+        data:
+          - refId: A
+            relativeTimeRange:
+              from: 600000
+              to: 0
+            datasourceUid: Prometheus
+            model:
+              expr: sum(rate(http_requests_total{job=\"umihealth-api\",status=~\"5..\"}[5m])) by (instance)
+              format: time_series
+              interval: ""
+              legendFormat: "{{instance}}"
+      - uid: umi_high_api_latency
+        title: UmiHealth High API Latency
+        condition: "A > 0.8"
+        data:
+          - refId: A
+            datasourceUid: Prometheus
+            model:
+              expr: avg(rate(http_request_duration_seconds_sum{job=\"umihealth-api\"}[5m])) by (instance)
+              format: time_series
+              legendFormat: "{{instance}}"

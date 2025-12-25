@@ -1,0 +1,36 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ include "umihealth.fullname" . }}
+  labels:
+    app: {{ include "umihealth.name" . }}
+spec:
+  replicas: {{ .Values.replicaCount }}
+  selector:
+    matchLabels:
+      app: {{ include "umihealth.name" . }}
+  template:
+    metadata:
+      labels:
+        app: {{ include "umihealth.name" . }}
+    spec:
+      containers:
+        - name: api
+          image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
+          ports:
+            - containerPort: 80
+          env:
+            - name: ASPNETCORE_ENVIRONMENT
+              value: "Production"
+            - name: ConnectionStrings__DefaultConnection
+              valueFrom:
+                secretKeyRef:
+                  name: umihealth-secrets
+                  key: DefaultConnection
+        - name: identity
+          image: "{{ .Values.identityImage.repository }}:{{ .Values.identityImage.tag }}"
+          ports:
+            - containerPort: 80
+        - name: jobs
+          image: "{{ .Values.jobsImage.repository }}:{{ .Values.jobsImage.tag }}"
+          ports: []

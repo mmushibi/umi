@@ -1,3 +1,5 @@
+using UmiHealth.Domain.Entities;
+
 namespace UmiHealth.Core.Interfaces;
 
 public interface IPrescriptionService

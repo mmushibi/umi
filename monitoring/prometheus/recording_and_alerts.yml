@@ -1,0 +1,62 @@
+groups:
+  - name: umihealth-recording-rules
+    interval: 30s
+    rules:
+      # Recording rules: precompute common aggregates
+      - record: job:api_request_duration_seconds:mean
+        expr: avg(rate(http_request_duration_seconds_sum{job="umihealth-api"}[5m])) by (instance)
+
+      - record: job:api_request_errors:rate
+        expr: sum(rate(http_requests_total{job="umihealth-api",status=~"5.."}[5m])) by (instance)
+
+  - name: umihealth-alerting-rules
+    rules:
+      # High error rate alert
+      - alert: HighApiErrorRate
+        expr: job:api_request_errors:rate > 0.05
+        for: 2m
+        labels:
+          severity: critical
+        annotations:
+          summary: "High API 5xx error rate on {{ $labels.instance }}"
+          description: "API 5xx error rate is >5% for more than 2 minutes. Investigate logs and recent deployments."
+
+      # High latency alert
+      - alert: HighApiLatency
+        expr: job:api_request_duration_seconds:mean > 0.8
+        for: 3m
+        labels:
+          severity: warning
+        annotations:
+          summary: "High API latency on {{ $labels.instance }}"
+          description: "Average request duration > 800ms for more than 3 minutes. Check database and external dependencies."
+
+      # Instance down
+      - alert: ApiInstanceDown
+        expr: up{job="umihealth-api"} == 0
+        for: 1m
+        labels:
+          severity: critical
+        annotations:
+          summary: "UmiHealth API instance {{ $labels.instance }} down"
+          description: "Prometheus reports the API instance is down. Verify container & pod status."
+
+      # Postgres unhealthy
+      - alert: PostgresDown
+        expr: up{job="postgres"} == 0
+        for: 1m
+        labels:
+          severity: critical
+        annotations:
+          summary: "Postgres is down"
+          description: "Database instance is not responding. Check Postgres container / server."
+
+      # Redis memory high
+      - alert: RedisHighMemory
+        expr: redis_memory_used_bytes{job="redis"} / redis_memory_max_bytes{job="redis"} > 0.85
+        for: 5m
+        labels:
+          severity: warning
+        annotations:
+          summary: "Redis memory usage high"
+          description: "Redis memory usage >85% for 5 minutes. Consider scaling or eviction tuning."
