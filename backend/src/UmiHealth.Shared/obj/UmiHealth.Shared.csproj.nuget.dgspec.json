@@ -1,17 +1,17 @@
 {
   "format": 1,
   "restore": {
-    "C:\\Users\\sepio\\Desktop\\Umi_Health\\backend\\src\\UmiHealth.Shared\\UmiHealth.Shared.csproj": {}
+    "C:\\Users\\sepio\\Desktop\\Umi_Health\\Umi_Health\\backend\\src\\UmiHealth.Shared\\UmiHealth.Shared.csproj": {}
   },
   "projects": {
-    "C:\\Users\\sepio\\Desktop\\Umi_Health\\backend\\src\\UmiHealth.Shared\\UmiHealth.Shared.csproj": {
+    "C:\\Users\\sepio\\Desktop\\Umi_Health\\Umi_Health\\backend\\src\\UmiHealth.Shared\\UmiHealth.Shared.csproj": {
       "version": "1.0.0",
       "restore": {
-        "projectUniqueName": "C:\\Users\\sepio\\Desktop\\Umi_Health\\backend\\src\\UmiHealth.Shared\\UmiHealth.Shared.csproj",
+        "projectUniqueName": "C:\\Users\\sepio\\Desktop\\Umi_Health\\Umi_Health\\backend\\src\\UmiHealth.Shared\\UmiHealth.Shared.csproj",
         "projectName": "UmiHealth.Shared",
-        "projectPath": "C:\\Users\\sepio\\Desktop\\Umi_Health\\backend\\src\\UmiHealth.Shared\\UmiHealth.Shared.csproj",
+        "projectPath": "C:\\Users\\sepio\\Desktop\\Umi_Health\\Umi_Health\\backend\\src\\UmiHealth.Shared\\UmiHealth.Shared.csproj",
         "packagesPath": "C:\\Users\\sepio\\.nuget\\packages\\",
-        "outputPath": "C:\\Users\\sepio\\Desktop\\Umi_Health\\backend\\src\\UmiHealth.Shared\\obj\\",
+        "outputPath": "C:\\Users\\sepio\\Desktop\\Umi_Health\\Umi_Health\\backend\\src\\UmiHealth.Shared\\obj\\",
         "projectStyle": "PackageReference",
         "configFilePaths": [
           "C:\\Users\\sepio\\AppData\\Roaming\\NuGet\\NuGet.Config"

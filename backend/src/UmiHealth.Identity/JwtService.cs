@@ -6,6 +6,7 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using UmiHealth.Core.Entities;
 using UmiHealth.Infrastructure;
+using UmiHealth.Core.Interfaces;
 
 namespace UmiHealth.Identity
 {

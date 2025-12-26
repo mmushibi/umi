@@ -13,7 +13,7 @@ namespace UmiHealth.Api.Controllers
     public class BranchController : ControllerBase
     {
         private readonly IBranchInventoryService _inventoryService;
-        private readonly IStockTransferService _transferService;
+        // private readonly IStockTransferService _transferService; // Temporarily commented
         private readonly IProcurementService _procurementService;
         private readonly IBranchPermissionService _permissionService;
         private readonly IBranchReportingService _reportingService;
@@ -21,14 +21,14 @@ namespace UmiHealth.Api.Controllers
 
         public BranchController(
             IBranchInventoryService inventoryService,
-            IStockTransferService transferService,
+            // IStockTransferService transferService, // Temporarily commented
             IProcurementService procurementService,
             IBranchPermissionService permissionService,
             IBranchReportingService reportingService,
             ITenantService tenantService)
         {
             _inventoryService = inventoryService;
-            _transferService = transferService;
+            // _transferService = transferService; // Temporarily commented
             _procurementService = procurementService;
             _permissionService = permissionService;
             _reportingService = reportingService;

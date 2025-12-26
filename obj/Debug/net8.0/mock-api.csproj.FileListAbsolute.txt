@@ -1,0 +1,7 @@
+C:\Users\sepio\Desktop\Umi_Health\Umi_Health\obj\Debug\net8.0\rpswa.dswa.cache.json
+C:\Users\sepio\Desktop\Umi_Health\Umi_Health\obj\Debug\net8.0\mock-api.GeneratedMSBuildEditorConfig.editorconfig
+C:\Users\sepio\Desktop\Umi_Health\Umi_Health\obj\Debug\net8.0\mock-api.AssemblyInfoInputs.cache
+C:\Users\sepio\Desktop\Umi_Health\Umi_Health\obj\Debug\net8.0\mock-api.AssemblyInfo.cs
+C:\Users\sepio\Desktop\Umi_Health\Umi_Health\obj\Debug\net8.0\mock-api.csproj.CoreCompileInputs.cache
+C:\Users\sepio\Desktop\Umi_Health\Umi_Health\obj\Debug\net8.0\mock-api.MvcApplicationPartsAssemblyInfo.cache
+C:\Users\sepio\Desktop\Umi_Health\Umi_Health\obj\Debug\net8.0\mock-api.sourcelink.json

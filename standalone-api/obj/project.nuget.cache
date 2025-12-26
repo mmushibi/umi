@@ -1,8 +1,8 @@
 {
   "version": 2,
-  "dgSpecHash": "DM+3EQhUyt0=",
+  "dgSpecHash": "MDP4JeOBXNY=",
   "success": true,
-  "projectFilePath": "C:\\Users\\sepio\\Desktop\\Umi_Health\\standalone-api\\StandaloneAuthApi.csproj",
+  "projectFilePath": "C:\\Users\\sepio\\Desktop\\Umi_Health\\Umi_Health\\standalone-api\\StandaloneAuthApi.csproj",
   "expectedPackageFiles": [
     "C:\\Users\\sepio\\.nuget\\packages\\bcrypt.net-next\\4.0.3\\bcrypt.net-next.4.0.3.nupkg.sha512",
     "C:\\Users\\sepio\\.nuget\\packages\\microsoft.aspnetcore.authentication.jwtbearer\\8.0.0\\microsoft.aspnetcore.authentication.jwtbearer.8.0.0.nupkg.sha512",
@@ -38,9 +38,9 @@
       "code": "NU1902",
       "level": "Warning",
       "message": "Package 'System.IdentityModel.Tokens.Jwt' 7.0.3 has a known moderate severity vulnerability, https://github.com/advisories/GHSA-59j7-ghrg-fj52",
-      "projectPath": "C:\\Users\\sepio\\Desktop\\Umi_Health\\standalone-api\\StandaloneAuthApi.csproj",
+      "projectPath": "C:\\Users\\sepio\\Desktop\\Umi_Health\\Umi_Health\\standalone-api\\StandaloneAuthApi.csproj",
       "warningLevel": 1,
-      "filePath": "C:\\Users\\sepio\\Desktop\\Umi_Health\\standalone-api\\StandaloneAuthApi.csproj",
+      "filePath": "C:\\Users\\sepio\\Desktop\\Umi_Health\\Umi_Health\\standalone-api\\StandaloneAuthApi.csproj",
       "libraryId": "System.IdentityModel.Tokens.Jwt",
       "targetGraphs": [
         "net8.0"

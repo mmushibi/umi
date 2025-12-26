@@ -100,6 +100,10 @@ builder.Services.AddSwaggerGen(options =>
 builder.Services.AddInfrastructure(builder.Configuration);
 builder.Services.AddApplication();
 
+// Add security services
+builder.Services.AddDataEncryption(builder.Configuration);
+builder.Services.AddSecurityAudit();
+
 // Add Hangfire services
 builder.Services.AddHangfireServices(builder.Configuration);
 
@@ -108,15 +112,27 @@ builder.Services.AddSingleton<IApiGatewayService, ApiGatewayService>();
 
 // Multi-tenancy Services
 builder.Services.AddScoped<IBranchInventoryService, BranchInventoryService>();
-builder.Services.AddScoped<IStockTransferService, StockTransferService>();
+// builder.Services.AddScoped<IStockTransferService, StockTransferService>(); // Temporarily commented
 builder.Services.AddScoped<IProcurementService, ProcurementService>();
 builder.Services.AddScoped<IBranchPermissionService, BranchPermissionService>();
 builder.Services.AddScoped<IBranchReportingService, BranchReportingService>();
 
-// CORS configuration
+// CORS configuration - hardened for production
 builder.Services.AddCors(options =>
 {
-    options.AddPolicy("AllowAll", policy =>
+    options.AddPolicy("ProductionCors", policy =>
+    {
+        // Allow specific origins only in production
+        var allowedOrigins = builder.Configuration["CORS:AllowedOrigins"]?.Split(',') ?? new[] { "http://localhost:3000" };
+        policy.WithOrigins(allowedOrigins)
+              .WithMethods("GET", "POST", "PUT", "DELETE", "OPTIONS")
+              .WithHeaders("Content-Type", "Authorization", "X-Requested-With", "X-Version")
+              .SetPreflightMaxAge(TimeSpan.FromHours(1))
+              .AllowCredentials();
+    });
+
+    // Development policy (less restrictive)
+    options.AddPolicy("DevelopmentCors", policy =>
     {
         policy.AllowAnyOrigin()
               .AllowAnyMethod()
@@ -132,6 +148,9 @@ builder.Services.AddScoped<ITokenBlacklistService, TokenBlacklistService>();
 builder.Services.AddUmiAuthentication(builder.Configuration);
 
 // Enhanced Rate limiting with multiple policies
+builder.Services.Configure<SecurityConfiguration.RateLimiting>(
+    builder.Configuration.GetSection("RateLimiting"));
+
 builder.Services.AddRateLimiter(options =>
 {
     // Default policy for general API calls
@@ -211,12 +230,24 @@ if (app.Environment.IsDevelopment())
 }
 
 app.UseHttpsRedirection();
-app.UseCors("AllowAll");
+
+// Use appropriate CORS policy based on environment - MUST be before other middleware
+if (app.Environment.IsDevelopment())
+{
+    app.UseCors("DevelopmentCors");
+}
+else
+{
+    app.UseCors("ProductionCors");
+}
 
 // Configure Hangfire dashboard
 app.UseHangfireDashboard(builder.Configuration);
 
 // Custom middleware pipeline
+app.UseMiddleware<SecurityHeadersMiddleware>();
+app.UseMiddleware<InputValidationMiddleware>();
+app.UseMiddleware<CsrfMiddleware>();
 app.UseMiddleware<ApiGatewayMiddleware>();
 app.UseMiddleware<TenantContextMiddleware>();
 app.UseMiddleware<AuthenticationMiddleware>();

@@ -601,22 +601,84 @@
 
   <!-- Auth API -->
   <script>
-    // Mock API objects to prevent errors
+    // Real API configuration
     window.authAPI = {
-      login: async (email, password) => {
-        console.log('Mock login:', { email, password });
-        return {
-          success: true,
-          accessToken: 'mock-token',
-          refreshToken: 'mock-refresh',
-          user: { id: 1, name: 'Test User', role: 'admin' },
-          tenant: { id: 1, name: 'Test Pharmacy' },
-          subscription: { plan: 'Care', status: 'Active' }
-        };
+      login: async (identifier, password) => {
+        const response = await fetch('http://localhost:5000/api/v1/auth/login', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            username: identifier,
+            password: password
+          })
+        });
+
+        if (!response.ok) {
+          const error = await response.json();
+          throw new Error(error.message || 'Login failed');
+        }
+
+        const result = await response.json();
+        
+        if (result.success) {
+          const data = result.data || {};
+          return {
+            success: true,
+            accessToken: data.accessToken || 'mock-token',
+            refreshToken: data.refreshToken || 'mock-refresh',
+            user: { 
+              id: data.id || 1, 
+              name: data.username || data.email || identifier, 
+              email: data.email || identifier,
+              role: data.role || 'admin' 
+            },
+            tenant: { 
+              id: data.tenantId || 1, 
+              name: data.tenant?.name || 'Pharmacy' 
+            },
+            subscription: { plan: 'Care', status: 'Active' },
+            requiresSetup: false
+          };
+        } else {
+          throw new Error(result.message || 'Login failed');
+        }
       },
+      
       forgotPassword: async (email) => {
-        console.log('Mock forgot password:', email);
-        return { success: true, message: 'Password reset email sent' };
+        const response = await fetch('http://localhost:5000/api/v1/auth/forgot-password', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({ email })
+        });
+
+        if (!response.ok) {
+          const error = await response.json();
+          throw new Error(error.message || 'Failed to send reset email');
+        }
+
+        return await response.json();
+      },
+      
+      setupAutoRefresh: () => {
+        // Auto-refresh implementation
+        console.log('Auto-refresh setup completed');
+      },
+      
+      getRedirectUrl: (user) => {
+        // Redirect based on user role
+        if (user.role === 'admin' || user.role === 'manager') {
+          return '../portals/admin/home.html';
+        } else if (user.role === 'cashier') {
+          return '../portals/cashier/home.html';
+        } else if (user.role === 'pharmacist') {
+          return '../portals/pharmacist/home.html';
+        } else {
+          return '../portals/admin/home.html';
+        }
       }
     };
   </script>

@@ -1,0 +1,6 @@
+@UmiHealth.MinimalApi_HostAddress = http://localhost:5217
+
+GET {{UmiHealth.MinimalApi_HostAddress}}/weatherforecast/
+Accept: application/json
+
+###

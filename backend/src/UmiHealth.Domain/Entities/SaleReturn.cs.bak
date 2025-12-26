@@ -1,0 +1,21 @@
+using System;
+using UmiHealth.Core.Entities;
+using UmiHealth.Infrastructure.Data;
+
+namespace UmiHealth.Domain.Entities;
+
+public class SaleReturn : TenantEntity
+{
+    public new Guid Id { get; set; }
+    public new Guid BranchId { get; set; }
+    public Guid SaleId { get; set; }
+    public Guid CashierId { get; set; }
+    public string ReturnNumber { get; set; } = string.Empty;
+    public decimal TotalAmount { get; set; }
+    public string Reason { get; set; } = string.Empty;
+    public string? Notes { get; set; }
+    public string Status { get; set; } = "pending";
+    public new DateTime CreatedAt { get; set; } = DateTime.UtcNow;
+    public new DateTime UpdatedAt { get; set; } = DateTime.UtcNow;
+    public new DateTime? DeletedAt { get; set; }
+}

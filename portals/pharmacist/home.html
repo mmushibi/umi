@@ -2233,8 +2233,8 @@
         loadPharmacistDataFromAPI() {
           this.loading = true;
           try {
-            // Load dashboard metrics
-            window.adminDataSync.getData('pharmacistDashboard', {})
+            // Load dashboard stats from API
+            window.pharmacistDataSync.getData('pharmacistDashboard', {})
             .then(data => {
               this.pendingPrescriptions = data.pendingPrescriptions || 0;
               this.prescriptionsFilled = data.prescriptionsFilled || 0;
@@ -2251,7 +2251,7 @@
             });
             
             // Load recent transactions
-            window.adminDataSync.getData('transactions', {
+            window.pharmacistDataSync.getData('transactions', {
               page: 1,
               pageSize: 10
             })
@@ -2276,8 +2276,8 @@
         },
         
         setupEventListeners() {
-          if (window.adminDataSync) {
-            window.adminDataSync.on('pharmacistDashboard-updated', (data) => {
+          if (window.pharmacistDataSync) {
+            window.pharmacistDataSync.on('pharmacistDashboard-updated', (data) => {
               this.pendingPrescriptions = data.pendingPrescriptions || 0;
               this.prescriptionsFilled = data.prescriptionsFilled || 0;
               this.drugInteractions = data.drugInteractions || 0;
@@ -2286,7 +2286,7 @@
               this.averageWaitTime = data.averageWaitTime || 0;
             });
 
-            window.adminDataSync.on('transactions-updated', (transactions) => {
+            window.pharmacistDataSync.on('transactions-updated', (transactions) => {
               this.transactions = transactions.map(t => ({
                 id: t.id,
                 patientName: t.patientName,
@@ -2297,7 +2297,7 @@
               }));
             });
 
-            window.adminDataSync.on('sync-error', (error) => {
+            window.pharmacistDataSync.on('sync-error', (error) => {
               console.error('Sync error:', error);
               this.showWarning('Data synchronization error occurred');
             });
@@ -2611,6 +2611,40 @@
               break;
             default:
               console.log('Unknown widget action:', action);
+          }
+        },
+        
+        async loadDashboardData() {
+          try {
+            // Load dashboard stats from API
+            const statsResponse = await window.pharmacistApi.dashboard.getStats();
+            const stats = statsResponse.data || {};
+            
+            // Update dashboard metrics
+            this.pendingPrescriptions = stats.pendingPrescriptions || 0;
+            this.prescriptionsFilled = stats.prescriptionsFilled || 0;
+            this.drugInteractions = stats.drugInteractions || 0;
+            this.patientConsultations = stats.patientConsultations || 0;
+            this.clinicalReviews = stats.clinicalReviews || 0;
+            this.averageWaitTime = stats.averageWaitTime || 0;
+            
+            // Load recent prescriptions
+            const prescriptionsResponse = await window.pharmacistApi.prescriptions.getPrescriptions({ limit: 10 });
+            this.recentPrescriptions = prescriptionsResponse.data || [];
+            
+            // Load inventory alerts
+            const lowStockResponse = await window.pharmacistApi.inventory.getLowStock();
+            this.inventoryAlerts = lowStockResponse.data || [];
+            
+            // Update UI
+            this.renderDashboardContent();
+            
+            console.log('Pharmacist dashboard data loaded successfully');
+          } catch (error) {
+            console.error('Error loading pharmacist dashboard:', error);
+            // Fallback to sample data on error
+            this.loadSampleData();
+            this.renderDashboardContent();
           }
         },
         

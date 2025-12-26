@@ -10864,11 +10864,11 @@
   "project": {
     "version": "1.0.0",
     "restore": {
-      "projectUniqueName": "C:\\Users\\sepio\\Desktop\\Umi_Health\\backend\\tests\\UmiHealth.Tests\\UmiHealth.Tests.csproj",
+      "projectUniqueName": "C:\\Users\\sepio\\Desktop\\Umi_Health\\Umi_Health\\backend\\tests\\UmiHealth.Tests\\UmiHealth.Tests.csproj",
       "projectName": "UmiHealth.Tests",
-      "projectPath": "C:\\Users\\sepio\\Desktop\\Umi_Health\\backend\\tests\\UmiHealth.Tests\\UmiHealth.Tests.csproj",
+      "projectPath": "C:\\Users\\sepio\\Desktop\\Umi_Health\\Umi_Health\\backend\\tests\\UmiHealth.Tests\\UmiHealth.Tests.csproj",
       "packagesPath": "C:\\Users\\sepio\\.nuget\\packages\\",
-      "outputPath": "C:\\Users\\sepio\\Desktop\\Umi_Health\\backend\\tests\\UmiHealth.Tests\\obj\\",
+      "outputPath": "C:\\Users\\sepio\\Desktop\\Umi_Health\\Umi_Health\\backend\\tests\\UmiHealth.Tests\\obj\\",
       "projectStyle": "PackageReference",
       "configFilePaths": [
         "C:\\Users\\sepio\\AppData\\Roaming\\NuGet\\NuGet.Config"
@@ -10883,23 +10883,23 @@
         "net8.0": {
           "targetAlias": "net8.0",
           "projectReferences": {
-            "C:\\Users\\sepio\\Desktop\\Umi_Health\\backend\\src\\UmiHealth.API\\UmiHealth.API.csproj": {
-              "projectPath": "C:\\Users\\sepio\\Desktop\\Umi_Health\\backend\\src\\UmiHealth.API\\UmiHealth.API.csproj"
+            "C:\\Users\\sepio\\Desktop\\Umi_Health\\Umi_Health\\backend\\src\\UmiHealth.API\\UmiHealth.API.csproj": {
+              "projectPath": "C:\\Users\\sepio\\Desktop\\Umi_Health\\Umi_Health\\backend\\src\\UmiHealth.API\\UmiHealth.API.csproj"
             },
-            "C:\\Users\\sepio\\Desktop\\Umi_Health\\backend\\src\\UmiHealth.Application\\UmiHealth.Application.csproj": {
-              "projectPath": "C:\\Users\\sepio\\Desktop\\Umi_Health\\backend\\src\\UmiHealth.Application\\UmiHealth.Application.csproj"
+            "C:\\Users\\sepio\\Desktop\\Umi_Health\\Umi_Health\\backend\\src\\UmiHealth.Application\\UmiHealth.Application.csproj": {
+              "projectPath": "C:\\Users\\sepio\\Desktop\\Umi_Health\\Umi_Health\\backend\\src\\UmiHealth.Application\\UmiHealth.Application.csproj"
             },
-            "C:\\Users\\sepio\\Desktop\\Umi_Health\\backend\\src\\UmiHealth.Core\\UmiHealth.Core.csproj": {
-              "projectPath": "C:\\Users\\sepio\\Desktop\\Umi_Health\\backend\\src\\UmiHealth.Core\\UmiHealth.Core.csproj"
+            "C:\\Users\\sepio\\Desktop\\Umi_Health\\Umi_Health\\backend\\src\\UmiHealth.Core\\UmiHealth.Core.csproj": {
+              "projectPath": "C:\\Users\\sepio\\Desktop\\Umi_Health\\Umi_Health\\backend\\src\\UmiHealth.Core\\UmiHealth.Core.csproj"
             },
-            "C:\\Users\\sepio\\Desktop\\Umi_Health\\backend\\src\\UmiHealth.Identity\\UmiHealth.Identity.csproj": {
-              "projectPath": "C:\\Users\\sepio\\Desktop\\Umi_Health\\backend\\src\\UmiHealth.Identity\\UmiHealth.Identity.csproj"
+            "C:\\Users\\sepio\\Desktop\\Umi_Health\\Umi_Health\\backend\\src\\UmiHealth.Identity\\UmiHealth.Identity.csproj": {
+              "projectPath": "C:\\Users\\sepio\\Desktop\\Umi_Health\\Umi_Health\\backend\\src\\UmiHealth.Identity\\UmiHealth.Identity.csproj"
             },
-            "C:\\Users\\sepio\\Desktop\\Umi_Health\\backend\\src\\UmiHealth.Infrastructure\\UmiHealth.Infrastructure.csproj": {
-              "projectPath": "C:\\Users\\sepio\\Desktop\\Umi_Health\\backend\\src\\UmiHealth.Infrastructure\\UmiHealth.Infrastructure.csproj"
+            "C:\\Users\\sepio\\Desktop\\Umi_Health\\Umi_Health\\backend\\src\\UmiHealth.Infrastructure\\UmiHealth.Infrastructure.csproj": {
+              "projectPath": "C:\\Users\\sepio\\Desktop\\Umi_Health\\Umi_Health\\backend\\src\\UmiHealth.Infrastructure\\UmiHealth.Infrastructure.csproj"
             },
-            "C:\\Users\\sepio\\Desktop\\Umi_Health\\backend\\src\\UmiHealth.Shared\\UmiHealth.Shared.csproj": {
-              "projectPath": "C:\\Users\\sepio\\Desktop\\Umi_Health\\backend\\src\\UmiHealth.Shared\\UmiHealth.Shared.csproj"
+            "C:\\Users\\sepio\\Desktop\\Umi_Health\\Umi_Health\\backend\\src\\UmiHealth.Shared\\UmiHealth.Shared.csproj": {
+              "projectPath": "C:\\Users\\sepio\\Desktop\\Umi_Health\\Umi_Health\\backend\\src\\UmiHealth.Shared\\UmiHealth.Shared.csproj"
             }
           }
         }

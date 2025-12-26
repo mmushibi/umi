@@ -9,4 +9,8 @@ public class Supplier : TenantEntity
     public string? Address { get; set; }
     public string? LicenseNumber { get; set; }
     public bool IsActive { get; set; } = true;
+    
+    // Navigation properties
+    public virtual Tenant Tenant { get; set; } = null!;
+    public virtual ICollection<PurchaseOrder> PurchaseOrders { get; set; } = new List<PurchaseOrder>();
 }

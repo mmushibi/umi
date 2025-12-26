@@ -1,3 +1,5 @@
+using UmiHealth.Core.Entities;
+
 namespace UmiHealth.Domain.Entities;
 
 public class Patient : TenantEntity

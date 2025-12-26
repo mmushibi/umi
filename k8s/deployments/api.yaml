@@ -1,0 +1,90 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: umihealth-api
+  namespace: umihealth
+  labels:
+    app: umihealth-api
+    tier: backend
+spec:
+  replicas: 3
+  selector:
+    matchLabels:
+      app: umihealth-api
+  template:
+    metadata:
+      labels:
+        app: umihealth-api
+        tier: backend
+    spec:
+      containers:
+      - name: umihealth-api
+        image: umihealth/api:latest
+        ports:
+        - containerPort: 8080
+        env:
+        - name: ASPNETCORE_ENVIRONMENT
+          valueFrom:
+            configMapKeyRef:
+              name: umihealth-config
+              key: aspnetcore-environment
+        - name: ConnectionStrings__DefaultConnection
+          valueFrom:
+            secretKeyRef:
+              name: azure-secrets
+              key: postgres-connection
+        - name: Redis__ConnectionString
+          valueFrom:
+            secretKeyRef:
+              name: azure-secrets
+              key: redis-connection
+        - name: JwtSettings__Issuer
+          valueFrom:
+            configMapKeyRef:
+              name: umihealth-config
+              key: jwt-issuer
+        - name: JwtSettings__Audience
+          valueFrom:
+            configMapKeyRef:
+              name: umihealth-config
+              key: jwt-audience
+        - name: ApplicationInsights__InstrumentationKey
+          valueFrom:
+            secretKeyRef:
+              name: azure-secrets
+              key: app-insights-key
+        resources:
+          requests:
+            memory: "256Mi"
+            cpu: "250m"
+          limits:
+            memory: "512Mi"
+            cpu: "500m"
+        livenessProbe:
+          httpGet:
+            path: /health
+            port: 8080
+          initialDelaySeconds: 30
+          periodSeconds: 10
+        readinessProbe:
+          httpGet:
+            path: /health/ready
+            port: 8080
+          initialDelaySeconds: 5
+          periodSeconds: 5
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: umihealth-api
+  namespace: umihealth
+  labels:
+    app: umihealth-api
+spec:
+  type: LoadBalancer
+  ports:
+  - port: 80
+    targetPort: 8080
+    protocol: TCP
+  selector:
+    app: umihealth-api

@@ -17,6 +17,7 @@
 
   <ItemGroup>
     <ProjectReference Include="..\UmiHealth.Core\UmiHealth.Core.csproj" />
+    <ProjectReference Include="..\UmiHealth.Domain\UmiHealth.Domain.csproj" />
     <ProjectReference Include="..\UmiHealth.Shared\UmiHealth.Shared.csproj" />
   </ItemGroup>
 

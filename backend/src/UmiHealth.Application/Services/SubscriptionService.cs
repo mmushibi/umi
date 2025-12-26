@@ -371,6 +371,11 @@ namespace UmiHealth.Application.Services
                 _ => "low"
             };
         }
+
+        private string GenerateTransactionId()
+        {
+            return $"SUB{DateTime.UtcNow:yyyyMMddHHmmss}{new Random().Next(1000, 9999)}";
+        }
     }
 
     // DTOs
@@ -404,10 +409,4 @@ namespace UmiHealth.Application.Services
         public string UrgencyLevel { get; set; } = string.Empty;
         public bool RequiresImmediateAction { get; set; }
     }
-
-    private string GenerateTransactionId()
-    {
-        return $"SUB{DateTime.UtcNow:yyyyMMddHHmmss}{new Random().Next(1000, 9999)}";
-    }
-}
 }

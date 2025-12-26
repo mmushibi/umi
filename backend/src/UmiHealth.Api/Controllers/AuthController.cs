@@ -67,7 +67,12 @@ namespace UmiHealth.API.Controllers
                     request.LastName,
                     request.PhoneNumber,
                     request.TenantId,
-                    request.BranchId
+                    request.BranchId,
+                    request.PharmacyName,
+                    request.PharmacyLicenseNumber,
+                    request.Address,
+                    request.Province,
+                    request.Username
                 ));
 
                 if (!result.Success)

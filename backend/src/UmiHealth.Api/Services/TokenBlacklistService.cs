@@ -1,17 +1,10 @@
 using Microsoft.EntityFrameworkCore;
 using UmiHealth.Core.Entities;
 using UmiHealth.Infrastructure;
+using UmiHealth.Core.Interfaces;
 
 namespace UmiHealth.Api.Services
 {
-    public interface ITokenBlacklistService
-    {
-        Task<bool> IsTokenBlacklistedAsync(string tokenId);
-        Task BlacklistTokenAsync(string tokenId, DateTime expiresAt);
-        Task BlacklistUserTokensAsync(Guid userId);
-        Task CleanExpiredTokensAsync();
-    }
-
     public class TokenBlacklistService : ITokenBlacklistService
     {
         private readonly UmiHealthDbContext _context;

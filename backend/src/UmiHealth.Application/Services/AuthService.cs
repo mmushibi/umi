@@ -34,15 +34,59 @@ public class AuthService : IAuthService
 
     public async Task<AuthResponse> RegisterAsync(RegisterRequest request, CancellationToken cancellationToken = default)
     {
-        // Check if tenant exists and is active
-        if (!await _tenantService.IsSubscriptionActiveAsync(request.TenantId, cancellationToken))
+        // For pharmacy registration, create tenant if it doesn't exist
+        Guid tenantId = request.TenantId;
+        Guid? branchId = request.BranchId;
+        
+        if (request.TenantId == Guid.Empty)
         {
-            return new AuthResponse(false, "Tenant subscription is not active", null, null, null, null);
+            // Create new tenant for pharmacy registration
+            var tenantRequest = new CreateTenantRequest(
+                request.PharmacyName,
+                $"{request.PharmacyName} - Pharmacy Management System",
+                request.PharmacyName.ToLower().Replace(" ", "-"),
+                request.Email,
+                request.PhoneNumber,
+                request.Address,
+                "", // City will be extracted from address
+                "Zambia", // Default country
+                "", // Postal code
+                "Trial" // Default subscription plan
+            );
+            
+            var newTenant = await _tenantService.CreateTenantAsync(tenantRequest, cancellationToken);
+            tenantId = newTenant.Id;
+            
+            // Create main branch for the tenant
+            var branchRequest = new CreateBranchRequest(
+                $"{request.PharmacyName} - Main Branch",
+                "MAIN",
+                request.Address,
+                request.Province,
+                "Zambia",
+                "",
+                request.PhoneNumber,
+                request.Email,
+                true, // Is main branch
+                $"{request.FirstName} {request.LastName}",
+                request.PhoneNumber
+            );
+            
+            var newBranch = await _tenantService.CreateBranchAsync(tenantId, branchRequest, cancellationToken);
+            branchId = newBranch.Id;
+        }
+        else
+        {
+            // Check if tenant exists and is active
+            if (!await _tenantService.IsSubscriptionActiveAsync(tenantId, cancellationToken))
+            {
+                return new AuthResponse(false, "Tenant subscription is not active", null, null, null, null);
+            }
         }
 
         // Check if user already exists
         var existingUser = (await _userRepository.FindAsync(
-            u => u.TenantId == request.TenantId && u.Email == request.Email, 
+            u => u.TenantId == tenantId && u.Email == request.Email, 
             cancellationToken)).FirstOrDefault();
 
         if (existingUser != null)
@@ -54,13 +98,13 @@ public class AuthService : IAuthService
         var user = new User
         {
             Id = Guid.NewGuid(),
-            TenantId = request.TenantId,
-            BranchId = request.BranchId,
+            TenantId = tenantId,
+            BranchId = branchId,
             FirstName = request.FirstName,
             LastName = request.LastName,
             Email = request.Email,
             PhoneNumber = request.PhoneNumber,
-            UserName = request.Email,
+            UserName = request.Username,
             PasswordHash = HashPassword(request.Password),
             IsActive = true,
             EmailConfirmed = false,
@@ -73,25 +117,38 @@ public class AuthService : IAuthService
 
         await _userRepository.AddAsync(user, cancellationToken);
 
-        // Assign default role
+        // Assign default role (Admin for new pharmacy registrations)
         var defaultRole = (await _roleRepository.FindAsync(
-            r => r.TenantId == request.TenantId && r.Name == "User", 
+            r => r.TenantId == tenantId && r.Name == "Administrator", 
             cancellationToken)).FirstOrDefault();
 
-        if (defaultRole != null)
+        if (defaultRole == null)
         {
-            var userRole = new UserRole
+            // Create Administrator role if it doesn't exist
+            defaultRole = new Role
             {
                 Id = Guid.NewGuid(),
-                TenantId = request.TenantId,
-                UserId = user.Id,
-                RoleId = defaultRole.Id,
+                TenantId = tenantId,
+                Name = "Administrator",
+                Description = "Pharmacy Administrator",
+                IsActive = true,
                 CreatedAt = DateTime.UtcNow,
                 UpdatedAt = DateTime.UtcNow
             };
-
-            await _userRoleRepository.AddAsync(userRole, cancellationToken);
+            await _roleRepository.AddAsync(defaultRole, cancellationToken);
         }
+
+        var userRole = new UserRole
+        {
+            Id = Guid.NewGuid(),
+            TenantId = tenantId,
+            UserId = user.Id,
+            RoleId = defaultRole.Id,
+            CreatedAt = DateTime.UtcNow,
+            UpdatedAt = DateTime.UtcNow
+        };
+
+        await _userRoleRepository.AddAsync(userRole, cancellationToken);
 
         var userDto = await CreateUserDtoAsync(user, cancellationToken);
         return new AuthResponse(true, "Registration successful", userDto, null, null, null);

@@ -3,3 +3,15 @@ C:\Users\sepio\Desktop\Umi_Health\backend\src\UmiHealth.Core\obj\Debug\net8.0\Um
 C:\Users\sepio\Desktop\Umi_Health\backend\src\UmiHealth.Core\obj\Debug\net8.0\UmiHealth.Core.AssemblyInfo.cs
 C:\Users\sepio\Desktop\Umi_Health\backend\src\UmiHealth.Core\obj\Debug\net8.0\UmiHealth.Core.csproj.CoreCompileInputs.cache
 C:\Users\sepio\Desktop\Umi_Health\backend\src\UmiHealth.Core\obj\Debug\net8.0\UmiHealth.Core.sourcelink.json
+C:\Users\sepio\Desktop\Umi_Health\Umi_Health\backend\src\UmiHealth.Core\obj\Debug\net8.0\UmiHealth.Core.GeneratedMSBuildEditorConfig.editorconfig
+C:\Users\sepio\Desktop\Umi_Health\Umi_Health\backend\src\UmiHealth.Core\obj\Debug\net8.0\UmiHealth.Core.AssemblyInfoInputs.cache
+C:\Users\sepio\Desktop\Umi_Health\Umi_Health\backend\src\UmiHealth.Core\obj\Debug\net8.0\UmiHealth.Core.AssemblyInfo.cs
+C:\Users\sepio\Desktop\Umi_Health\Umi_Health\backend\src\UmiHealth.Core\obj\Debug\net8.0\UmiHealth.Core.csproj.CoreCompileInputs.cache
+C:\Users\sepio\Desktop\Umi_Health\Umi_Health\backend\src\UmiHealth.Core\obj\Debug\net8.0\UmiHealth.Core.sourcelink.json
+C:\Users\sepio\Desktop\Umi_Health\Umi_Health\backend\src\UmiHealth.Core\bin\Debug\net8.0\UmiHealth.Core.deps.json
+C:\Users\sepio\Desktop\Umi_Health\Umi_Health\backend\src\UmiHealth.Core\bin\Debug\net8.0\UmiHealth.Core.dll
+C:\Users\sepio\Desktop\Umi_Health\Umi_Health\backend\src\UmiHealth.Core\bin\Debug\net8.0\UmiHealth.Core.pdb
+C:\Users\sepio\Desktop\Umi_Health\Umi_Health\backend\src\UmiHealth.Core\obj\Debug\net8.0\UmiHealth.Core.dll
+C:\Users\sepio\Desktop\Umi_Health\Umi_Health\backend\src\UmiHealth.Core\obj\Debug\net8.0\refint\UmiHealth.Core.dll
+C:\Users\sepio\Desktop\Umi_Health\Umi_Health\backend\src\UmiHealth.Core\obj\Debug\net8.0\UmiHealth.Core.pdb
+C:\Users\sepio\Desktop\Umi_Health\Umi_Health\backend\src\UmiHealth.Core\obj\Debug\net8.0\ref\UmiHealth.Core.dll

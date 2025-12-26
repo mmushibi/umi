@@ -1,8 +1,8 @@
 {
   "version": 2,
-  "dgSpecHash": "kl5Zktv7A1M=",
+  "dgSpecHash": "KwQuddwrBe0=",
   "success": true,
-  "projectFilePath": "C:\\Users\\sepio\\Desktop\\Umi_Health\\backend\\tests\\UmiHealth.Tests\\UmiHealth.Tests.csproj",
+  "projectFilePath": "C:\\Users\\sepio\\Desktop\\Umi_Health\\Umi_Health\\backend\\tests\\UmiHealth.Tests\\UmiHealth.Tests.csproj",
   "expectedPackageFiles": [
     "C:\\Users\\sepio\\.nuget\\packages\\aspnetcore.healthchecks.npgsql\\8.0.0\\aspnetcore.healthchecks.npgsql.8.0.0.nupkg.sha512",
     "C:\\Users\\sepio\\.nuget\\packages\\aspnetcore.healthchecks.redis\\8.0.0\\aspnetcore.healthchecks.redis.8.0.0.nupkg.sha512",

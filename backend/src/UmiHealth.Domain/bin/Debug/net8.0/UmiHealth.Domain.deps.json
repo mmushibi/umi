@@ -1,0 +1,39 @@
+{
+  "runtimeTarget": {
+    "name": ".NETCoreApp,Version=v8.0",
+    "signature": ""
+  },
+  "compilationOptions": {},
+  "targets": {
+    ".NETCoreApp,Version=v8.0": {
+      "UmiHealth.Domain/1.0.0": {
+        "dependencies": {
+          "UmiHealth.Core": "1.0.0"
+        },
+        "runtime": {
+          "UmiHealth.Domain.dll": {}
+        }
+      },
+      "UmiHealth.Core/1.0.0": {
+        "runtime": {
+          "UmiHealth.Core.dll": {
+            "assemblyVersion": "1.0.0.0",
+            "fileVersion": "1.0.0.0"
+          }
+        }
+      }
+    }
+  },
+  "libraries": {
+    "UmiHealth.Domain/1.0.0": {
+      "type": "project",
+      "serviceable": false,
+      "sha512": ""
+    },
+    "UmiHealth.Core/1.0.0": {
+      "type": "project",
+      "serviceable": false,
+      "sha512": ""
+    }
+  }
+}

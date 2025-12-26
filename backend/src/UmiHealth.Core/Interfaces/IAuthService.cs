@@ -20,7 +20,12 @@ public record RegisterRequest(
     string LastName,
     string PhoneNumber,
     Guid TenantId,
-    Guid? BranchId
+    Guid? BranchId,
+    string PharmacyName,
+    string PharmacyLicenseNumber,
+    string Address,
+    string Province,
+    string Username
 );
 
 public record LoginRequest(

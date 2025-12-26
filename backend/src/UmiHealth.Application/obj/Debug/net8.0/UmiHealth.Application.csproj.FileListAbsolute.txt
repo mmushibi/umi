@@ -1,0 +1,6 @@
+C:\Users\sepio\Desktop\Umi_Health\Umi_Health\backend\src\UmiHealth.Application\obj\Debug\net8.0\UmiHealth.Application.csproj.AssemblyReference.cache
+C:\Users\sepio\Desktop\Umi_Health\Umi_Health\backend\src\UmiHealth.Application\obj\Debug\net8.0\UmiHealth.Application.GeneratedMSBuildEditorConfig.editorconfig
+C:\Users\sepio\Desktop\Umi_Health\Umi_Health\backend\src\UmiHealth.Application\obj\Debug\net8.0\UmiHealth.Application.AssemblyInfoInputs.cache
+C:\Users\sepio\Desktop\Umi_Health\Umi_Health\backend\src\UmiHealth.Application\obj\Debug\net8.0\UmiHealth.Application.AssemblyInfo.cs
+C:\Users\sepio\Desktop\Umi_Health\Umi_Health\backend\src\UmiHealth.Application\obj\Debug\net8.0\UmiHealth.Application.csproj.CoreCompileInputs.cache
+C:\Users\sepio\Desktop\Umi_Health\Umi_Health\backend\src\UmiHealth.Application\obj\Debug\net8.0\UmiHealth.Application.sourcelink.json

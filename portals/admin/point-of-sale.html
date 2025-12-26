@@ -956,6 +956,11 @@
       font-size: 1.25rem;
     }
 
+    .real-time-indicator i {
+      font-size: 16px;
+      color: var(--success-color, #10b981);
+    }
+
     /* POS Layout Styles */
     .content-area {
       padding: 2rem;
@@ -2050,7 +2055,7 @@
               <h3 class="widget-title">
                 Recent Transactions
                 <span class="real-time-indicator" title="Real-time updates enabled">
-                  <i class="fi fi-rr-refresh" aria-hidden="true" style="font-size: 16px; color: var(--success-color, #10b981);"></i>
+                  <i class="fi fi-rr-refresh" aria-hidden="true"></i>
                 </span>
               </h3>
               <p class="widget-subtitle">Today's sales activity</p>
@@ -2520,20 +2525,11 @@
           location: 'Lusaka, Zambia'
         },
         userInfo: {
-          name: 'Umi Health',
-          role: 'Admin',
-          initials: 'UH'
+          name: localStorage.getItem('umi_user_name') || 'Admin User',
+          role: localStorage.getItem('umi_user_role') || 'Admin',
+          initials: (localStorage.getItem('umi_user_name') || 'Admin User').split(' ').map(n => n[0]).join('').toUpperCase()
         },
-        products: [
-          { id: 1, name: 'Paracetamol 500mg', price: 25.50, stock: 150, category: 'medication' },
-          { id: 2, name: 'Amoxicillin 250mg', price: 85.00, stock: 80, category: 'medication' },
-          { id: 3, name: 'Vitamin C 1000mg', price: 45.75, stock: 200, category: 'supplements' },
-          { id: 4, name: 'Face Masks', price: 15.00, stock: 500, category: 'medical' },
-          { id: 5, name: 'Ibuprofen 400mg', price: 35.00, stock: 120, category: 'medication' },
-          { id: 6, name: 'Hand Sanitizer', price: 20.00, stock: 300, category: 'medical' },
-          { id: 7, name: 'Vitamin D3', price: 55.00, stock: 100, category: 'supplements' },
-          { id: 8, name: 'Blood Pressure Monitor', price: 450.00, stock: 25, category: 'medical' }
-        ],
+        products: [],
 
         get filteredProducts() {
           let filtered = this.products;
@@ -2820,15 +2816,19 @@
 
         logout() {
           if (confirm('Are you sure you want to logout?')) {
-            window.location.href = 'index.html';
+            // Clear user session data
+            localStorage.removeItem('umi_access_token');
+            localStorage.removeItem('umi_refresh_token');
+            localStorage.removeItem('umi_user_name');
+            localStorage.removeItem('umi_user_role');
+            localStorage.removeItem('umi_tenant_id');
+            
+            // Redirect to login page
+            window.location.href = '../index.html';
           }
-        },
-
-        init() {
-          this.loadTransactions();
         }
-      }
     }
+  }
   </script>
 
   <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>

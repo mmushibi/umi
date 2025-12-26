@@ -9,10 +9,11 @@
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@100;400;500;600;700&family=Varela+Round&family=Nunito:wght@400;600;700&display=swap" rel="stylesheet">
   <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Rounded:wght@300;400;500;600;700&display=swap" rel="stylesheet">
   <script src="https://cdn.tailwindcss.com"></script>
-  <link rel="stylesheet" href="../shared/css/shared-styles.css">
-  <script src="../shared/js/data-sync.js"></script>
-  <script src="../shared/js/role-based-access.js"></script>
-  <script src="../admin/js/admin-api.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+  <link rel="stylesheet" href="../../shared/css/shared-styles.css">
+  <script src="../../shared/js/data-sync.js"></script>
+  <script src="../../shared/js/role-based-access.js"></script>
+  <script src="js/admin-api.js"></script>
   <style>
     :root {
       --color-primary: #000000;
@@ -769,19 +770,19 @@
           <h1 class="page-title">Account Settings</h1>
         </div>
         
-        <div class="search-bar" x-data="{ searchOpen: false, query: '' }">
+        <div class="search-bar" x-data="{ searchOpenLocal: false }">
           <span class="material-symbols-rounded search-icon">search</span>
           <input 
             type="text" 
             class="search-input" 
             placeholder="Search settings by name or category..."
-            x-model="query"
-            @focus="searchOpen = true"
-            @input="searchOpen = true"
-            @blur="setTimeout(() => searchOpen = false, 200)"
+            x-model="searchQuery"
+            @focus="searchOpenLocal = true; searchOpen = true"
+            @input="searchOpenLocal = true; searchOpen = true"
+            @blur="setTimeout(() => { searchOpenLocal = false; searchOpen = false; }, 200)"
           >
           
-          <div class="search-suggestions" :class="searchOpen && query.length > 0 ? 'show' : ''">
+          <div class="search-suggestions" :class="searchOpenLocal && searchQuery.length > 0 ? 'show' : ''">
             <template x-for="suggestion in filteredSuggestions" :key="suggestion.id">
               <div class="suggestion-item" @click="selectSuggestion(suggestion)">
                 <div class="suggestion-icon">
@@ -809,33 +810,33 @@
         <!-- Settings Navigation -->
         <div class="settings-nav">
           <h3 class="settings-nav-title">Settings</h3>
-          <ul class="settings-nav-list">
+          <ul class="settings-nav">
             <li class="settings-nav-item">
-              <a href="#" class="settings-nav-link active" @click="activeSection = 'profile'">
+              <a href="#" class="settings-nav-link" :class="{ 'active': activeSection === 'profile' }" @click="activeSection = 'profile'">
                 <span class="material-symbols-rounded settings-nav-icon">person</span>
                 <span>Profile</span>
               </a>
             </li>
             <li class="settings-nav-item">
-              <a href="#" class="settings-nav-link" @click="activeSection = 'security'">
+              <a href="#" class="settings-nav-link" :class="{ 'active': activeSection === 'security' }" @click="activeSection = 'security'">
                 <span class="material-symbols-rounded settings-nav-icon">security</span>
                 <span>Security</span>
               </a>
             </li>
             <li class="settings-nav-item">
-              <a href="#" class="settings-nav-link" @click="activeSection = 'notifications'">
+              <a href="#" class="settings-nav-link" :class="{ 'active': activeSection === 'notifications' }" @click="activeSection = 'notifications'">
                 <span class="material-symbols-rounded settings-nav-icon">notifications</span>
                 <span>Notifications</span>
               </a>
             </li>
             <li class="settings-nav-item">
-              <a href="#" class="settings-nav-link" @click="activeSection = 'pharmacy'">
+              <a href="#" class="settings-nav-link" :class="{ 'active': activeSection === 'pharmacy' }" @click="activeSection = 'pharmacy'">
                 <span class="material-symbols-rounded settings-nav-icon">business</span>
                 <span>Pharmacy Settings</span>
               </a>
             </li>
             <li class="settings-nav-item">
-              <a href="#" class="settings-nav-link" @click="activeSection = 'billing'">
+              <a href="#" class="settings-nav-link" :class="{ 'active': activeSection === 'billing' }" @click="activeSection = 'billing'">
                 <span class="material-symbols-rounded settings-nav-icon">payments</span>
                 <span>Billing</span>
               </a>
@@ -905,9 +906,9 @@
               <div class="security-item">
                 <div class="security-info">
                   <div class="security-title">Password</div>
-                  <div class="security-description">Last changed 30 days ago</div>
+                  <div class="security-description" x-text="'Last changed ' + (passwordInfo.lastChanged || 'Never')"></div>
                 </div>
-                <button class="btn btn-secondary">Change Password</button>
+                <button class="btn btn-secondary" @click="showPasswordModal = true">Change Password</button>
               </div>
 
               <div class="security-item">
@@ -921,9 +922,9 @@
               <div class="security-item">
                 <div class="security-info">
                   <div class="security-title">Login Sessions</div>
-                  <div class="security-description">Manage your active login sessions</div>
+                  <div class="security-description" x-text="activeSessions.length + ' active session(s)'"></div>
                 </div>
-                <button class="btn btn-secondary">View Sessions</button>
+                <button class="btn btn-secondary" @click="showSessionsModal = true">View Sessions</button>
               </div>
 
               <div class="security-item">
@@ -1105,9 +1106,21 @@
               <div class="security-item">
                 <div class="security-info">
                   <div class="security-title">Current Plan</div>
-                  <div class="security-description" x-text="subscription.planType + ' Plan - ZMW ' + getPlanPrice(subscription.planType) + '/month'"></div>
+                  <div class="security-description" x-text="subscription.planType + ' Plan' + (subscription.isTrial ? ' - Trial' : '')"></div>
+                  <div class="security-description" x-show="subscription.isTrial && subscription.trialDaysRemaining > 0" x-text="subscription.trialDaysRemaining + ' days remaining in trial'"></div>
                 </div>
-                <span class="security-status enabled" x-text="subscription.status"></span>
+                <span class="security-status" :class="subscription.status.toLowerCase()" x-text="subscription.status"></span>
+              </div>
+
+              <div class="security-item" x-show="subscription.isTrial">
+                <div class="security-info">
+                  <div class="security-title">Trial Period</div>
+                  <div class="security-description" x-text="'Started: ' + formatDate(subscription.trialStart) + ' | Ends: ' + formatDate(subscription.trialEnd)"></div>
+                </div>
+                <button class="btn btn-primary" @click="showUpgradeModal = true" x-show="subscription.isTrial">
+                  <span class="material-symbols-rounded">upgrade</span>
+                  Upgrade Now
+                </button>
               </div>
 
               <div class="security-item">
@@ -1115,7 +1128,23 @@
                   <div class="security-title">Next Billing Date</div>
                   <div class="security-description" x-text="formatDate(subscription.nextBilling)"></div>
                 </div>
-                <button class="btn btn-secondary">View Invoice</button>
+                <button class="btn btn-secondary" @click="showInvoicesModal = true">View Invoices</button>
+              </div>
+
+              <div class="security-item">
+                <div class="security-info">
+                  <div class="security-title">Usage Statistics</div>
+                  <div class="security-description" x-text="'Current month: ' + usageStats.currentMonthUsage + ' transactions'"></div>
+                </div>
+                <button class="btn btn-secondary" @click="showUsageModal = true">View Details</button>
+              </div>
+
+              <div class="security-item">
+                <div class="security-info">
+                  <div class="security-title">Subscription Management</div>
+                  <div class="security-description">Cancel your subscription and account access</div>
+                </div>
+                <button class="btn btn-danger" @click="showCancelConfirmModal = true">Cancel Subscription</button>
               </div>
 
               <div class="security-item">
@@ -1124,17 +1153,14 @@
                   <div class="plan-options">
                     <div class="plan-option" :class="{ selected: subscription.planType === 'Care' }" @click="upgradePlan('Care')">
                       <div class="plan-name">Care</div>
-                      <div class="plan-price">250 ZMW/mo</div>
                       <div class="plan-features">1 Branch, 6 Users, Basic Features</div>
                     </div>
                     <div class="plan-option" :class="{ selected: subscription.planType === 'Care Plus' }" @click="upgradePlan('Care Plus')">
                       <div class="plan-name">Care Plus</div>
-                      <div class="plan-price">450 ZMW/mo</div>
                       <div class="plan-features">3 Branches, 16 Users, Advanced Features</div>
                     </div>
                     <div class="plan-option" :class="{ selected: subscription.planType === 'Care Pro' }" @click="upgradePlan('Care Pro')">
                       <div class="plan-name">Care Pro</div>
-                      <div class="plan-price">700 ZMW/mo</div>
                       <div class="plan-features">10 Branches, 50+ Users, Premium Features</div>
                     </div>
                   </div>
@@ -1143,20 +1169,6 @@
                   <span class="material-symbols-rounded">upgrade</span>
                   Upgrade Plan
                 </button>
-              </div>
-                <div class="security-info">
-                  <div class="security-title">Usage Statistics</div>
-                  <div class="security-description">45% of monthly quota used</div>
-                </div>
-                <button class="btn btn-secondary">View Details</button>
-              </div>
-
-              <div class="button-group">
-                <button class="btn btn-danger">
-                  <span class="material-symbols-rounded">cancel</span>
-                  <span>Cancel Subscription</span>
-                </button>
-              </div>
             </div>
           </div>
 
@@ -1172,29 +1184,269 @@
                 <div class="upgrade-plans">
                   <div class="plan-card" :class="{ selected: selectedUpgradePlan === 'Care' && subscription.planType !== 'Care' }" @click="selectUpgradePlan('Care')">
                     <div class="plan-name">Care</div>
-                    <div class="plan-price">250 ZMW/mo</div>
                     <div class="plan-features">1 Branch, 6 Users, Basic Features</div>
                   </div>
                   
                   <div class="plan-card" :class="{ selected: selectedUpgradePlan === 'Care Plus' && subscription.planType !== 'Care Plus' }" @click="selectUpgradePlan('Care Plus')">
                     <div class="plan-name">Care Plus</div>
-                    <div class="plan-price">450 ZMW/mo</div>
                     <div class="plan-features">3 Branches, 16 Users, Advanced Features</div>
                   </div>
                   
                   <div class="plan-card" :class="{ selected: selectedUpgradePlan === 'Care Pro' && subscription.planType !== 'Care Pro' }" @click="selectUpgradePlan('Care Pro')">
                     <div class="plan-name">Care Pro</div>
-                    <div class="plan-price">700 ZMW/mo</div>
                     <div class="plan-features">10 Branches, 50+ Users, Premium Features</div>
                   </div>
                 </div>
               </div>
               
               <div class="modal-footer">
-                <button class="btn btn-secondary" @click="showUpgradeModal = false">Cancel</button>
-                <button class="btn btn-primary" @click="confirmUpgrade()" :disabled="!selectedUpgradePlan || selectedUpgradePlan === subscription.planType">
-                  <span class="material-symbols-rounded">upgrade</span>
-                  Confirm Upgrade to <span x-text="selectedUpgradePlan"></span>
+                <button class="btn btn-secondary" @click="cancelUpgrade()">Cancel</button>
+                <button class="btn btn-primary" @click="confirmUpgrade()" :disabled="!selectedUpgradePlan || selectedUpgradePlan === subscription.planType || upgradeRequestPending">
+                  <span class="material-symbols-rounded" x-show="!upgradeRequestPending">upgrade</span>
+                  <span class="material-symbols-rounded" x-show="upgradeRequestPending" style="animation: spin 1s linear infinite;">refresh</span>
+                  <span x-show="!upgradeRequestPending">Confirm Upgrade to <span x-text="selectedUpgradePlan"></span></span>
+                  <span x-show="upgradeRequestPending">Processing...</span>
+                </button>
+              </div>
+            </div>
+          </div>
+
+          <!-- Change Password Modal -->
+          <div class="modal-overlay" :class="{ 'show': showPasswordModal }" @click="showPasswordModal = false">
+            <div class="modal" @click.stop>
+              <div class="modal-header">
+                <h3 class="modal-title">Change Password</h3>
+                <p class="modal-subtitle">Update your account password for security</p>
+              </div>
+              
+              <div class="modal-body">
+                <div class="form-group">
+                  <label class="form-label" for="currentPassword">Current Password</label>
+                  <input type="password" id="currentPassword" class="form-input" x-model="passwordForm.currentPassword" placeholder="Enter current password">
+                </div>
+                
+                <div class="form-group">
+                  <label class="form-label" for="newPassword">New Password</label>
+                  <input type="password" id="newPassword" class="form-input" x-model="passwordForm.newPassword" placeholder="Enter new password">
+                  <div class="password-requirements">
+                    <small x-show="passwordForm.newPassword">
+                      Password must contain:
+                      <div :class="passwordRequirements.hasMinLength ? 'text-success' : 'text-muted'">• At least 8 characters</div>
+                      <div :class="passwordRequirements.hasLetter ? 'text-success' : 'text-muted'">• At least one letter</div>
+                      <div :class="passwordRequirements.hasNumber ? 'text-success' : 'text-muted'">• At least one number</div>
+                    </small>
+                  </div>
+                </div>
+                
+                <div class="form-group">
+                  <label class="form-label" for="confirmPassword">Confirm New Password</label>
+                  <input type="password" id="confirmPassword" class="form-input" x-model="passwordForm.confirmPassword" placeholder="Confirm new password">
+                  <div class="field-error" x-show="passwordForm.confirmPassword && passwordForm.newPassword !== passwordForm.confirmPassword">
+                    Passwords do not match
+                  </div>
+                </div>
+              </div>
+              
+              <div class="modal-footer">
+                <button class="btn btn-secondary" @click="cancelPasswordChange()">Cancel</button>
+                <button class="btn btn-primary" @click="changePassword()" :disabled="!isPasswordFormValid()">
+                  <span class="material-symbols-rounded">lock</span>
+                  Change Password
+                </button>
+              </div>
+            </div>
+          </div>
+
+          <!-- Sessions Modal -->
+          <div class="modal-overlay" :class="{ 'show': showSessionsModal }" @click="showSessionsModal = false">
+            <div class="modal" @click.stop>
+              <div class="modal-header">
+                <h3 class="modal-title">Active Login Sessions</h3>
+                <p class="modal-subtitle">Manage your active login sessions across devices</p>
+              </div>
+              
+              <div class="modal-body">
+                <div class="sessions-list">
+                  <template x-for="session in activeSessions" :key="session.id">
+                    <div class="session-item">
+                      <div class="session-info">
+                        <div class="session-device" x-text="session.device"></div>
+                        <div class="session-details">
+                          <span x-text="session.location"></span> • 
+                          <span x-text="session.lastActive"></span>
+                        </div>
+                      </div>
+                      <div class="session-actions">
+                        <span class="session-status" :class="session.current ? 'current' : ''" x-text="session.current ? 'Current' : ''"></span>
+                        <button class="btn btn-danger btn-sm" x-show="!session.current" @click="revokeSession(session.id)">
+                          Revoke
+                        </button>
+                      </div>
+                    </div>
+                  </template>
+                </div>
+                
+                <div class="sessions-footer">
+                  <button class="btn btn-danger" @click="revokeAllSessions()" x-show="activeSessions.length > 1">
+                    Revoke All Other Sessions
+                  </button>
+                </div>
+              </div>
+              
+              <div class="modal-footer">
+                <button class="btn btn-secondary" @click="showSessionsModal = false">Close</button>
+              </div>
+            </div>
+          </div>
+
+          <!-- Invoices Modal -->
+          <div class="modal-overlay" :class="{ 'show': showInvoicesModal }" @click="showInvoicesModal = false">
+            <div class="modal" @click.stop>
+              <div class="modal-header">
+                <h3 class="modal-title">Billing Invoices</h3>
+                <p class="modal-subtitle">View and download your billing history</p>
+              </div>
+              
+              <div class="modal-body">
+                <div class="invoices-list">
+                  <template x-for="invoice in invoices" :key="invoice.id">
+                    <div class="invoice-item">
+                      <div class="invoice-info">
+                        <div>
+                          <div class="invoice-number" x-text="'Invoice #' + invoice.number"></div>
+                          <div class="invoice-description" x-text="invoice.description || 'Monthly subscription fee'"></div>
+                        </div>
+                        <div class="invoice-details">
+                          <div class="invoice-date" x-text="formatDate(invoice.date)"></div>
+                          <div class="invoice-amount" x-text="'ZMW ' + invoice.amount"></div>
+                        </div>
+                      </div>
+                      <div class="invoice-status" :class="invoice.status.toLowerCase()" x-text="invoice.status"></div>
+                      <div class="invoice-actions">
+                        <button class="btn btn-secondary btn-sm" @click="downloadInvoice(invoice.id)">
+                          <span class="material-symbols-rounded">download</span>
+                          Download
+                        </button>
+                      </div>
+                    </div>
+                  </template>
+                </div>
+              </div>
+              
+              <div class="modal-footer">
+                <button class="btn btn-secondary" @click="showInvoicesModal = false">Close</button>
+              </div>
+            </div>
+          </div>
+
+          <!-- Usage Statistics Modal -->
+          <div class="modal-overlay" :class="{ 'show': showUsageModal }" @click="showUsageModal = false">
+            <div class="modal" @click.stop>
+              <div class="modal-header">
+                <h3 class="modal-title">Usage Statistics</h3>
+                <p class="modal-subtitle">Your account usage and activity metrics</p>
+              </div>
+              
+              <div class="modal-body">
+                <div class="usage-stats-grid">
+                  <div class="stat-card">
+                    <div class="stat-icon">
+                      <span class="material-symbols-rounded">shopping_cart</span>
+                    </div>
+                    <div class="stat-info">
+                      <div class="stat-value" x-text="usageStats.currentMonthUsage"></div>
+                      <div class="stat-label">Current Month Transactions</div>
+                    </div>
+                  </div>
+                  
+                  <div class="stat-card">
+                    <div class="stat-icon">
+                      <span class="material-symbols-rounded">medication</span>
+                    </div>
+                    <div class="stat-info">
+                      <div class="stat-value" x-text="usageStats.totalPrescriptions"></div>
+                      <div class="stat-label">Total Prescriptions</div>
+                    </div>
+                  </div>
+                  
+                  <div class="stat-card">
+                    <div class="stat-icon">
+                      <span class="material-symbols-rounded">inventory</span>
+                    </div>
+                    <div class="stat-info">
+                      <div class="stat-value" x-text="usageStats.inventoryItems"></div>
+                      <div class="stat-label">Inventory Items</div>
+                    </div>
+                  </div>
+                  
+                  <div class="stat-card">
+                    <div class="stat-icon">
+                      <span class="material-symbols-rounded">people</span>
+                    </div>
+                    <div class="stat-info">
+                      <div class="stat-value" x-text="usageStats.activeUsers"></div>
+                      <div class="stat-label">Active Users</div>
+                    </div>
+                  </div>
+                </div>
+                
+                <div class="usage-chart">
+                  <h4>Monthly Activity</h4>
+                  <div class="chart-placeholder">
+                    <p>Chart showing monthly transaction trends</p>
+                  </div>
+                </div>
+              </div>
+              
+              <div class="modal-footer">
+                <button class="btn btn-secondary" @click="showUsageModal = false">Close</button>
+              </div>
+            </div>
+          </div>
+
+          <!-- Cancel Subscription Confirmation Modal -->
+          <div class="modal-overlay" :class="{ 'show': showCancelConfirmModal }" @click="showCancelConfirmModal = false">
+            <div class="modal" @click.stop>
+              <div class="modal-header">
+                <h3 class="modal-title">Cancel Subscription</h3>
+                <p class="modal-subtitle">This action will permanently cancel your subscription</p>
+              </div>
+              
+              <div class="modal-body">
+                <div class="warning-box">
+                  <div class="warning-icon">
+                    <span class="material-symbols-rounded">warning</span>
+                  </div>
+                  <div class="warning-content">
+                    <h4>Important Notice</h4>
+                    <ul>
+                      <li>Your account will become read-only immediately</li>
+                      <li>You will be automatically logged out in 5 minutes</li>
+                      <li>Data access will be limited to viewing only</li>
+                      <li>Account reactivation requires admin approval</li>
+                    </ul>
+                  </div>
+                </div>
+                
+                <div class="form-group">
+                  <label class="form-label" for="cancelReason">Reason for cancellation</label>
+                  <textarea id="cancelReason" class="form-input" x-model="cancelForm.reason" placeholder="Please tell us why you're cancelling..."></textarea>
+                </div>
+                
+                <div class="form-group">
+                  <label class="checkbox-label">
+                    <input type="checkbox" x-model="cancelForm.confirmTerms">
+                    <span class="checkmark"></span>
+                    I understand that this action cannot be undone and my account will become read-only
+                  </label>
+                </div>
+              </div>
+              
+              <div class="modal-footer">
+                <button class="btn btn-secondary" @click="showCancelConfirmModal = false">Keep Subscription</button>
+                <button class="btn btn-danger" @click="confirmCancelSubscription()" :disabled="!cancelForm.confirmTerms">
+                  <span class="material-symbols-rounded">cancel</span>
+                  Cancel Subscription
                 </button>
               </div>
             </div>
@@ -1209,10 +1461,17 @@
               width: 100%;
               height: 100%;
               background: rgba(0, 0, 0, 0.5);
-              display: flex;
+              display: none;
               align-items: center;
               justify-content: center;
               z-index: 9999;
+              opacity: 0;
+              transition: opacity 0.3s ease;
+            }
+            
+            .modal-overlay.show {
+              display: flex;
+              opacity: 1;
             }
             
             .modal {
@@ -1290,6 +1549,259 @@
               gap: 12px;
               justify-content: flex-end;
             }
+            
+            @keyframes spin {
+              from { transform: rotate(0deg); }
+              to { transform: rotate(360deg); }
+            }
+            
+            /* Password Modal Styles */
+            .password-requirements {
+              margin-top: 0.5rem;
+            }
+            
+            .text-success {
+              color: #22c55e;
+            }
+            
+            .text-muted {
+              color: #6b7280;
+            }
+            
+            .field-error {
+              color: #ef4444;
+              font-size: 0.75rem;
+              margin-top: 0.25rem;
+            }
+            
+            /* Sessions Modal Styles */
+            .sessions-list {
+              max-height: 300px;
+              overflow-y: auto;
+              margin-bottom: 1rem;
+            }
+            
+            .session-item {
+              display: flex;
+              justify-content: space-between;
+              align-items: center;
+              padding: 1rem;
+              border: 1px solid #e5e7eb;
+              border-radius: 8px;
+              margin-bottom: 0.5rem;
+            }
+            
+            .session-info {
+              flex: 1;
+            }
+            
+            .session-device {
+              font-weight: 600;
+              margin-bottom: 0.25rem;
+            }
+            
+            .session-details {
+              font-size: 0.875rem;
+              color: #6b7280;
+            }
+            
+            .session-actions {
+              display: flex;
+              align-items: center;
+              gap: 0.5rem;
+            }
+            
+            .session-status {
+              padding: 0.25rem 0.5rem;
+              border-radius: 4px;
+              font-size: 0.75rem;
+              font-weight: 600;
+            }
+            
+            .session-status.current {
+              background: #dcfce7;
+              color: #166534;
+            }
+            
+            .btn-sm {
+              padding: 0.5rem 0.75rem;
+              font-size: 0.75rem;
+            }
+            
+            .sessions-footer {
+              padding-top: 1rem;
+              border-top: 1px solid #e5e7eb;
+            }
+            
+            /* Invoices Modal Styles */
+            .invoices-list {
+              max-height: 400px;
+              overflow-y: auto;
+            }
+            
+            .invoice-item {
+              display: flex;
+              justify-content: space-between;
+              align-items: center;
+              padding: 1rem;
+              border: 1px solid #e5e7eb;
+              border-radius: 8px;
+              margin-bottom: 0.5rem;
+            }
+            
+            .invoice-info {
+              display: flex;
+              justify-content: space-between;
+              align-items: flex-start;
+              flex: 1;
+            }
+            
+            .invoice-number {
+              font-weight: 600;
+              font-size: 0.95rem;
+            }
+            
+            .invoice-description {
+              font-size: 0.8rem;
+              color: #6b7280;
+              margin-top: 0.25rem;
+            }
+            
+            .invoice-details {
+              text-align: right;
+            }
+            
+            .invoice-date {
+              color: #6b7280;
+              font-size: 0.875rem;
+            }
+            
+            .invoice-amount {
+              font-weight: 600;
+              color: #059669;
+              font-size: 0.95rem;
+            }
+            
+            .invoice-status {
+              padding: 0.25rem 0.5rem;
+              border-radius: 4px;
+              font-size: 0.75rem;
+              font-weight: 600;
+            }
+            
+            .invoice-status.paid {
+              background: #dcfce7;
+              color: #166534;
+            }
+            
+            .invoice-status.pending {
+              background: #fef3c7;
+              color: #92400e;
+            }
+            
+            /* Usage Statistics Modal Styles */
+            .usage-stats-grid {
+              display: grid;
+              grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+              gap: 1rem;
+              margin-bottom: 2rem;
+            }
+            
+            .stat-card {
+              display: flex;
+              align-items: center;
+              gap: 1rem;
+              padding: 1rem;
+              border: 1px solid #e5e7eb;
+              border-radius: 8px;
+            }
+            
+            .stat-icon {
+              width: 48px;
+              height: 48px;
+              display: flex;
+              align-items: center;
+              justify-content: center;
+              background: #f3f4f6;
+              border-radius: 8px;
+            }
+            
+            .stat-icon .material-symbols-rounded {
+              font-size: 24px;
+              color: #6b7280;
+            }
+            
+            .stat-value {
+              font-size: 1.5rem;
+              font-weight: 700;
+              color: #111827;
+            }
+            
+            .stat-label {
+              font-size: 0.875rem;
+              color: #6b7280;
+            }
+            
+            .usage-chart {
+              padding: 1rem;
+              border: 1px solid #e5e7eb;
+              border-radius: 8px;
+            }
+            
+            .chart-placeholder {
+              height: 200px;
+              display: flex;
+              align-items: center;
+              justify-content: center;
+              background: #f9fafb;
+              border-radius: 4px;
+              color: #6b7280;
+            }
+            
+            /* Cancellation Modal Styles */
+            .warning-box {
+              display: flex;
+              gap: 1rem;
+              padding: 1rem;
+              background: #fef2f2;
+              border: 1px solid #fecaca;
+              border-radius: 8px;
+              margin-bottom: 1.5rem;
+            }
+            
+            .warning-icon {
+              color: #dc2626;
+            }
+            
+            .warning-icon .material-symbols-rounded {
+              font-size: 24px;
+            }
+            
+            .warning-content h4 {
+              color: #dc2626;
+              margin-bottom: 0.5rem;
+            }
+            
+            .warning-content ul {
+              margin: 0;
+              padding-left: 1.5rem;
+            }
+            
+            .warning-content li {
+              margin-bottom: 0.25rem;
+              color: #7f1d1d;
+            }
+            
+            .checkbox-label {
+              display: flex;
+              align-items: center;
+              gap: 0.5rem;
+              cursor: pointer;
+            }
+            
+            .checkbox-label input[type="checkbox"] {
+              width: auto;
+            }
           </style>
         </div>
       </div>
@@ -1302,28 +1814,80 @@
           sidebarOpen: false,
           activeSection: 'profile',
           pharmacyInfo: {
-            name: 'Umi Health',
-            location: 'Lusaka, Zambia'
+            name: '',
+            location: ''
           },
           subscription: {
-            planType: 'Care Plus',
-            status: 'Active',
-            nextBilling: '2025-01-24'
+            planType: '',
+            status: '',
+            nextBilling: null,
+            trialStart: null,
+            trialEnd: null,
+            isTrial: false,
+            trialDaysRemaining: 0,
+            accountCreated: null,
+            lastBillingDate: null
           },
           showUpgradeModal: false,
           selectedUpgradePlan: null,
+          upgradeRequestPending: false,
+          searchQuery: '',
+          searchOpen: false,
+          // Password modal data
+          showPasswordModal: false,
+          passwordForm: {
+            currentPassword: '',
+            newPassword: '',
+            confirmPassword: ''
+          },
+          passwordRequirements: {
+            hasMinLength: false,
+            hasLetter: false,
+            hasNumber: false
+          },
+          passwordInfo: {
+            lastChanged: null
+          },
+          // Sessions modal data
+          showSessionsModal: false,
+          activeSessions: [],
+          // Invoices modal data
+          showInvoicesModal: false,
+          invoices: [],
+          // Usage statistics modal data
+          showUsageModal: false,
+          usageStats: {
+            currentMonthUsage: 0,
+            totalPrescriptions: 0,
+            inventoryItems: 0,
+            activeUsers: 0
+          },
+          // Cancellation modal data
+          showCancelConfirmModal: false,
+          cancelForm: {
+            reason: '',
+            confirmTerms: false
+          },
+          readOnlyMode: false,
+          suggestions: [
+            { id: 'profile', title: 'Profile Settings', description: 'Update your personal information', icon: 'person', type: 'settings' },
+            { id: 'security', title: 'Security Settings', description: 'Manage password and security', icon: 'security', type: 'settings' },
+            { id: 'notifications', title: 'Notifications', description: 'Configure notification preferences', icon: 'notifications', type: 'settings' },
+            { id: 'pharmacy', title: 'Pharmacy Settings', description: 'Update pharmacy information', icon: 'business', type: 'settings' },
+            { id: 'billing', title: 'Billing & Subscription', description: 'Manage subscription and payments', icon: 'payments', type: 'settings' }
+          ],
           userInfo: {
-            name: 'Umi Health',
-            role: 'Admin',
-            initials: 'UH',
-            email: 'admin@umihealth.com'
+            name: '',
+            role: '',
+            initials: '',
+            email: ''
           },
           profile: {
-            firstName: 'Umi',
-            lastName: 'Health',
-            email: 'admin@umihealth.com',
-            phone: '+260 977 123 456',
-            bio: 'Pharmacy management system administrator'
+            firstName: '',
+            lastName: '',
+            email: '',
+            phone: '',
+            bio: ''
           },
           notifications: {
             email: true,
@@ -1333,179 +1897,111 @@
             prescriptions: true
           },
           pharmacySettings: {
-            name: 'Umi Health Pharmacy',
-            phone: '+260 977 123 456',
-            email: 'info@umihealth.com',
-            website: 'www.umihealth.com',
-            address: '123 Main Street',
-            city: 'Lusaka',
-            province: 'Lusaka Province',
-            postalCode: '10101',
+            name: '',
+            phone: '',
+            email: '',
+            website: '',
+            address: '',
+            city: '',
+            province: '',
+            postalCode: '',
             // Receipt settings
-            receiptHeader: 'Umi Health Pharmacy',
-            receiptFooter: 'Thank you for your business!',
-            taxRate: 16,
-            currency: 'ZMW',
+            receiptHeader: '',
+            receiptFooter: '',
+            taxRate: 0,
+            currency: '',
             // Report settings
             reportLogo: '',
-            reportSignature: 'Pharmacy Manager',
+            reportSignature: '',
             // Payment settings
-            paymentTerms: 'Payment due upon receipt',
-            invoicePrefix: 'INV',
-            receiptPrefix: 'RCP'
+            paymentTerms: '',
+            invoicePrefix: '',
+            receiptPrefix: ''
           },
           
           // Data sync and API integration
           loading: false,
           
           init() {
+            this.checkReadOnlyMode();
+            this.initializeAccountCreation();
             this.loadAccountFromAPI();
+            this.loadInvoices();
+            this.loadUsageStats();
             this.setupEventListeners();
           },
           
           loadAccountFromAPI() {
             this.loading = true;
+            
+            // First try to load from localStorage (registration data)
+            this.loadFromLocalStorage();
+            
+            // Then try to load from data sync if available
+            if (!window.adminDataSync) {
+              console.warn('Data sync not available, using localStorage/default values');
+              this.loading = false;
+              return;
+            }
+            
             try {
-              // Load user profile
+              // Load user profile from data sync (will override localStorage if available)
               window.adminDataSync.getData('userProfile', {})
               .then(profile => {
                 this.profile = {
-                  firstName: profile.firstName || '',
-                  lastName: profile.lastName || '',
-                  email: profile.email || '',
-                  phone: profile.phone || '',
-                  bio: profile.bio || ''
+                  firstName: profile.firstName || this.profile.firstName,
+                  lastName: profile.lastName || this.profile.lastName,
+                  email: profile.email || this.profile.email,
+                  phone: profile.phone || this.profile.phone,
+                  bio: profile.bio || this.profile.bio
                 };
                 
                 this.userInfo = {
-                  name: `${profile.firstName || ''} ${profile.lastName || ''}`,
+                  name: `${profile.firstName || this.profile.firstName} ${profile.lastName || this.profile.lastName}`,
                   role: profile.role || 'Admin',
-                  initials: `${profile.firstName?.[0] || 'U'}${profile.lastName?.[0] || 'H'}`,
-                  email: profile.email || ''
+                  initials: `${(profile.firstName || this.profile.firstName)?.[0] || 'U'}${(profile.lastName || this.profile.lastName)?.[0] || 'H'}`,
+                  email: profile.email || this.profile.email
                 };
               })
               .catch(error => {
-                console.error('Error loading user profile:', error);
-                this.showError('Failed to load user profile. Please try again.');
+                console.error('Error loading user profile from data sync:', error);
+                // Keep localStorage values if data sync fails
               });
-      return {
-        sidebarOpen: false,
-        activeSection: 'profile',
-        pharmacyInfo: {
-          name: 'Umi Health',
-          location: 'Lusaka, Zambia'
-        },
-        userInfo: {
-          name: 'Umi Health',
-          role: 'Admin',
-          initials: 'UH',
-          email: 'admin@umihealth.com'
-        },
-        profile: {
-          firstName: 'Umi',
-          lastName: 'Health',
-          email: 'admin@umihealth.com',
-          phone: '+260 977 123 456',
-          bio: 'Pharmacy management system administrator'
-        },
-        notifications: {
-          email: true,
-          push: false,
-          sales: true,
-          inventory: true,
-          prescriptions: true
-        },
-        pharmacySettings: {
-          name: 'Umi Health Pharmacy',
-          phone: '+260 977 123 456',
-          email: 'info@umihealth.com',
-          website: 'www.umihealth.com',
-          address: '123 Main Street',
-          city: 'Lusaka',
-          province: 'Lusaka Province',
-          postalCode: '10101',
-          // Receipt settings
-          receiptHeader: 'Umi Health Pharmacy',
-          receiptFooter: 'Thank you for your business!',
-          taxRate: 16,
-          currency: 'ZMW',
-          // Report settings
-          reportLogo: '',
-          reportSignature: 'Pharmacy Manager',
-          // Payment settings
-          paymentTerms: 'Payment due upon receipt',
-          invoicePrefix: 'INV',
-          receiptPrefix: 'RCP'
-        },
-        
-        // Data sync and API integration
-        loading: false,
-        
-        init() {
-          this.loadAccountFromAPI();
-          this.setupEventListeners();
-        },
-        
-        loadAccountFromAPI() {
-          this.loading = true;
-          try {
-            // Load user profile
-            window.adminDataSync.getData('userProfile', {})
-            .then(profile => {
-              this.profile = {
-                firstName: profile.firstName || '',
-                lastName: profile.lastName || '',
-                email: profile.email || '',
-                phone: profile.phone || '',
-                bio: profile.bio || ''
-              };
-              
-              this.userInfo = {
-                name: `${profile.firstName || ''} ${profile.lastName || ''}`,
-                role: profile.role || 'Admin',
-                initials: `${profile.firstName?.[0] || 'U'}${profile.lastName?.[0] || 'H'}`,
-                email: profile.email || ''
-              };
-            })
-            .catch(error => {
-              console.error('Error loading user profile:', error);
-              this.showError('Failed to load user profile. Please try again.');
-            });
             
-            // Load pharmacy settings
-            window.adminDataSync.getData('pharmacySettings', {})
-            .then(settings => {
-              this.pharmacySettings = {
-                name: settings.name || 'Umi Health Pharmacy',
-                phone: settings.phone || '',
-                email: settings.email || '',
-                website: settings.website || '',
-                address: settings.address || '',
-                city: settings.city || '',
-                province: settings.province || '',
-                postalCode: settings.postalCode || '',
-                receiptHeader: settings.receiptHeader || 'Umi Health Pharmacy',
-                receiptFooter: settings.receiptFooter || 'Thank you for your business!',
-                taxRate: settings.taxRate || 16,
-                currency: settings.currency || 'ZMW',
-                reportLogo: settings.reportLogo || '',
-                reportSignature: settings.reportSignature || 'Pharmacy Manager',
-                paymentTerms: settings.paymentTerms || 'Payment due upon receipt',
-                invoicePrefix: settings.invoicePrefix || 'INV',
-                receiptPrefix: settings.receiptPrefix || 'RCP'
-              };
-              
-              this.pharmacyInfo = {
-                name: settings.name || 'Umi Health',
-                location: `${settings.city || 'Lusaka'}, ${settings.province || 'Lusaka Province'}`
-              };
-            })
-            .catch(error => {
-              console.error('Error loading pharmacy settings:', error);
-              this.showError('Failed to load pharmacy settings. Please try again.');
-            });
+              // Load pharmacy settings from data sync (will override localStorage if available)
+              window.adminDataSync.getData('pharmacySettings', {})
+              .then(settings => {
+                this.pharmacySettings = {
+                  name: settings.name || this.pharmacySettings.name,
+                  phone: settings.phone || this.pharmacySettings.phone,
+                  email: settings.email || this.pharmacySettings.email,
+                  website: settings.website || this.pharmacySettings.website,
+                  address: settings.address || this.pharmacySettings.address,
+                  city: settings.city || this.pharmacySettings.city,
+                  province: settings.province || this.pharmacySettings.province,
+                  postalCode: settings.postalCode || this.pharmacySettings.postalCode,
+                  receiptHeader: settings.receiptHeader || this.pharmacySettings.receiptHeader,
+                  receiptFooter: settings.receiptFooter || this.pharmacySettings.receiptFooter,
+                  taxRate: settings.taxRate || this.pharmacySettings.taxRate,
+                  currency: settings.currency || this.pharmacySettings.currency,
+                  reportLogo: settings.reportLogo || this.pharmacySettings.reportLogo,
+                  reportSignature: settings.reportSignature || this.pharmacySettings.reportSignature,
+                  paymentTerms: settings.paymentTerms || this.pharmacySettings.paymentTerms,
+                  invoicePrefix: settings.invoicePrefix || this.pharmacySettings.invoicePrefix,
+                  receiptPrefix: settings.receiptPrefix || this.pharmacySettings.receiptPrefix
+                };
+                
+                this.pharmacyInfo = {
+                  name: settings.name || this.pharmacyInfo.name,
+                  location: `${settings.city || this.pharmacySettings.city}, ${settings.province || this.pharmacySettings.province}`
+                };
+              })
+              .catch(error => {
+                console.error('Error loading pharmacy settings from data sync:', error);
+                // Keep localStorage values if data sync fails
+              });
             
-            // Load notification settings
+            // Load notification settings from data sync
             window.adminDataSync.getData('notificationSettings', {})
             .then(notifications => {
               this.notifications = {
@@ -1517,221 +2013,1003 @@
               };
             })
             .catch(error => {
-              console.error('Error loading notification settings:', error);
-              this.showError('Failed to load notification settings. Please try again.');
+              console.error('Error loading notification settings from data sync:', error);
+              // Keep default values if data sync fails
             });
-            
-            this.loading = false;
-          } catch (error) {
-            console.error('Data sync not available:', error);
-            this.loading = false;
-          }
-        },
-        
-        setupEventListeners() {
-          if (window.adminDataSync) {
-            window.adminDataSync.on('userProfile-updated', (profile) => {
-              this.profile = {
-                firstName: profile.firstName || '',
-                lastName: profile.lastName || '',
-                email: profile.email || '',
-                phone: profile.phone || '',
-                bio: profile.bio || ''
-              };
-              
-              this.userInfo = {
-                name: `${profile.firstName || ''} ${profile.lastName || ''}`,
-                role: profile.role || 'Admin',
-                initials: `${profile.firstName?.[0] || 'U'}${profile.lastName?.[0] || 'H'}`,
-                email: profile.email || ''
-              };
-            });
-
-            window.adminDataSync.on('pharmacySettings-updated', (settings) => {
-              this.pharmacySettings = {
-                name: settings.name || 'Umi Health Pharmacy',
-                phone: settings.phone || '',
-                email: settings.email || '',
-                website: settings.website || '',
-                address: settings.address || '',
-                city: settings.city || '',
-                province: settings.province || '',
-                postalCode: settings.postalCode || '',
-                receiptHeader: settings.receiptHeader || 'Umi Health Pharmacy',
-                receiptFooter: settings.receiptFooter || 'Thank you for your business!',
-                taxRate: settings.taxRate || 16,
-                currency: settings.currency || 'ZMW',
-                reportLogo: settings.reportLogo || '',
-                reportSignature: settings.reportSignature || 'Pharmacy Manager',
-                paymentTerms: settings.paymentTerms || 'Payment due upon receipt',
-                invoicePrefix: settings.invoicePrefix || 'INV',
-                receiptPrefix: settings.receiptPrefix || 'RCP'
-              };
-              
-              this.pharmacyInfo = {
-                name: settings.name || 'Umi Health',
-                location: `${settings.city || 'Lusaka'}, ${settings.province || 'Lusaka Province'}`
-              };
-            });
-
-            window.adminDataSync.on('sync-error', (error) => {
-              console.error('Sync error:', error);
-              this.showWarning('Data synchronization error occurred');
-            });
-          }
-        },
-        
-        // Save methods
-        saveProfile() {
-          try {
-            window.adminAPI.updateUserProfile(this.profile)
-              .then(() => {
-                this.showSuccess('Profile updated successfully');
-              })
-              .catch(error => {
-                console.error('Error updating profile:', error);
-                this.showError('Failed to update profile. Please try again.');
-              });
-          } catch (error) {
-            console.error('API not available:', error);
-            this.showError('Failed to update profile. Please try again.');
-          }
-        },
-        
-        savePharmacySettings() {
-          try {
-            window.adminAPI.updatePharmacySettings(this.pharmacySettings)
-              .then(() => {
-                this.showSuccess('Pharmacy settings updated successfully');
-              })
-              .catch(error => {
-                console.error('Error updating pharmacy settings:', error);
-                this.showError('Failed to update pharmacy settings. Please try again.');
-              });
-          } catch (error) {
-            console.error('API not available:', error);
-            this.showError('Failed to update pharmacy settings. Please try again.');
-          }
-        },
-        
-        saveNotificationSettings() {
-          try {
-            window.adminAPI.updateNotificationSettings(this.notifications)
-              .then(() => {
-                this.showSuccess('Notification settings updated successfully');
-              })
-              .catch(error => {
-                console.error('Error updating notification settings:', error);
-                this.showError('Failed to update notification settings. Please try again.');
-              });
-          } catch (error) {
-            console.error('API not available:', error);
-            this.showError('Failed to update notification settings. Please try again.');
-          }
-        },
-        
-        // Notification methods
-        showSuccess(message) {
-          this.showNotification(message, 'success');
-        },
-
-        showError(message) {
-          this.showNotification(message, 'error');
-        },
-        
-        showWarning(message) {
-          this.showNotification(message, 'warning');
-        },
-        
-        showNotification(message, type = 'info') {
-          // Create notification element
-          const notification = document.createElement('div');
-          notification.className = `notification notification-${type}`;
-          notification.textContent = message;
-          document.body.appendChild(notification);
-
-          // Animate in
-          setTimeout(() => {
-            notification.classList.add('show');
-          }, 100);
-
-          // Remove after 5 seconds
-          setTimeout(() => {
-            notification.classList.remove('show');
-            setTimeout(() => {
-              if (notification.parentNode) {
-                document.body.removeChild(notification);
-              }
-            }, 300);
-          }, 5000);
-        },
-
-        // Upgrade functions
-        getPlanPrice(planType) {
-          const prices = {
-            'Care': 250,
-            'Care Plus': 450,
-            'Care Pro': 700
-          };
-          return prices[planType] || 0;
-        },
-        
-        formatDate(dateString) {
-          if (!dateString) return '';
-          const date = new Date(dateString);
-          return date.toLocaleDateString('en-US', { 
-            year: 'numeric', 
-            month: 'long', 
-            day: 'numeric' 
-          });
-        },
-        
-        upgradePlan(planType) {
-          this.selectedUpgradePlan = planType;
-          this.showUpgradeModal = true;
-        },
-        
-        selectUpgradePlan(planType) {
-          this.selectedUpgradePlan = planType;
-        },
-        
-        async confirmUpgrade() {
-          if (!this.selectedUpgradePlan || this.selectedUpgradePlan === this.subscription.planType) {
-            alert('Please select a different plan to upgrade');
-            return;
-          }
-          
-          try {
-            // Create upgrade request that requires approval
-            const response = await window.adminAPI.upgradeSubscription({
-              planType: this.selectedUpgradePlan,
-              billingCycle: 'monthly',
-              amount: this.getPlanPrice(this.selectedUpgradePlan),
-              currency: 'ZMW',
-              autoRenew: true,
-              requiresApproval: true,
-              requestedBy: this.userInfo.email,
-              planFrom: this.subscription.planType
-            });
-            
-            if (response.success) {
-              this.showSuccess(`Upgrade request submitted! Transaction ID: ${response.transactionId}. Your upgrade is pending approval.`);
-              this.showUpgradeModal = false;
-            } else {
-              this.showError('Upgrade request failed: ' + response.message);
+            } catch (error) {
+              console.error('Data sync not available:', error);
+              this.showError('Data sync services are not available. Using locally stored data.');
             }
-          } catch (error) {
-            console.error('Upgrade error:', error);
-            this.showError('Upgrade request failed. Please try again.');
-          }
-        },
+            
+            this.loading = false;
+          },
+          
+          loadFromLocalStorage() {
+            try {
+              // Load user data from localStorage
+              const currentUser = localStorage.getItem('umi_current_user');
+              const currentTenant = localStorage.getItem('umi_current_tenant');
+              const currentSubscription = localStorage.getItem('umi_current_subscription');
+              const notificationSettings = localStorage.getItem('umi_notification_settings');
+              
+              if (currentUser) {
+                const user = JSON.parse(currentUser);
+                // Split name into first and last name
+                const nameParts = user.name ? user.name.split(' ') : ['', ''];
+                
+                this.profile = {
+                  firstName: nameParts[0] || '',
+                  lastName: nameParts.slice(1).join(' ') || '',
+                  email: user.email || '',
+                  phone: this.profile.phone, // Keep existing phone if not in localStorage
+                  bio: this.profile.bio // Keep existing bio
+                };
+                
+                this.userInfo = {
+                  name: user.name || '',
+                  role: user.role || 'Admin',
+                  initials: nameParts.map(part => part[0]).join('').toUpperCase() || 'UH',
+                  email: user.email || ''
+                };
+              }
+              
+              if (currentTenant) {
+                const tenant = JSON.parse(currentTenant);
+                
+                this.pharmacySettings = {
+                  name: tenant.name || '',
+                  phone: this.pharmacySettings.phone,
+                  email: this.pharmacySettings.email,
+                  website: this.pharmacySettings.website,
+                  address: this.pharmacySettings.address,
+                  city: this.pharmacySettings.city,
+                  province: this.pharmacySettings.province,
+                  postalCode: this.pharmacySettings.postalCode,
+                  receiptHeader: tenant.name || 'Umi Health Pharmacy',
+                  receiptFooter: this.pharmacySettings.receiptFooter,
+                  taxRate: this.pharmacySettings.taxRate,
+                  currency: this.pharmacySettings.currency,
+                  reportLogo: this.pharmacySettings.reportLogo,
+                  reportSignature: this.pharmacySettings.reportSignature,
+                  paymentTerms: this.pharmacySettings.paymentTerms,
+                  invoicePrefix: this.pharmacySettings.invoicePrefix,
+                  receiptPrefix: this.pharmacySettings.receiptPrefix
+                };
+                
+                this.pharmacyInfo = {
+                  name: tenant.name || '',
+                  location: this.pharmacySettings.city && this.pharmacySettings.province 
+                    ? `${this.pharmacySettings.city}, ${this.pharmacySettings.province}`
+                    : 'Lusaka, Zambia'
+                };
+              }
+              
+              if (currentSubscription) {
+                const subscription = JSON.parse(currentSubscription);
+                this.subscription = {
+                  planType: subscription.plan || 'Care',
+                  status: subscription.status || 'Active',
+                  nextBilling: subscription.nextBilling || this.calculateNextBilling(subscription.accountCreated, subscription.trialStart, subscription.isTrial),
+                  trialStart: subscription.trialStart || null,
+                  trialEnd: subscription.trialEnd || null,
+                  isTrial: subscription.isTrial || false,
+                  trialDaysRemaining: subscription.trialDaysRemaining || 0,
+                  accountCreated: subscription.accountCreated || null,
+                  lastBillingDate: subscription.lastBillingDate || null
+                };
+                
+                // Check trial status
+                this.checkTrialStatus();
+                
+                // Update next billing if needed
+                this.updateNextBilling();
+              }
+              
+              if (notificationSettings) {
+                this.notifications = JSON.parse(notificationSettings);
+              }
+              
+              // Load password info
+              const passwordLastChanged = localStorage.getItem('umi_password_last_changed');
+              if (passwordLastChanged) {
+                this.passwordInfo.lastChanged = new Date(passwordLastChanged).toLocaleDateString();
+              }
+              
+              console.log('Loaded data from localStorage successfully');
+            } catch (error) {
+              console.error('Error loading data from localStorage:', error);
+              this.showError('Failed to load saved data. Using default values.');
+            }
+          },
+          
+          setupEventListeners() {
+            // Add any event listeners here
+            this.loadActiveSessions();
+          },
+          
+          // Password functions
+          isPasswordFormValid() {
+            return this.passwordForm.currentPassword &&
+                   this.passwordForm.newPassword &&
+                   this.passwordForm.confirmPassword &&
+                   this.passwordForm.newPassword === this.passwordForm.confirmPassword &&
+                   this.passwordRequirements.hasMinLength &&
+                   this.passwordRequirements.hasLetter &&
+                   this.passwordRequirements.hasNumber;
+          },
+          
+          validatePassword() {
+            const password = this.passwordForm.newPassword;
+            this.passwordRequirements.hasMinLength = password.length >= 8;
+            this.passwordRequirements.hasLetter = /[a-zA-Z]/.test(password);
+            this.passwordRequirements.hasNumber = /[0-9]/.test(password);
+          },
+          
+          async changePassword() {
+            if (!this.isPasswordFormValid()) {
+              this.showError('Please fill in all password requirements');
+              return;
+            }
+            
+            try {
+              if (!window.adminAPI) {
+                this.showError('API services are not available. Please try again later.');
+                return;
+              }
+              
+              const response = await window.adminAPI.changePassword({
+                currentPassword: this.passwordForm.currentPassword,
+                newPassword: this.passwordForm.newPassword
+              });
+              
+              if (response.success) {
+                this.showSuccess('Password changed successfully');
+                this.cancelPasswordChange();
+                this.passwordInfo.lastChanged = new Date().toLocaleDateString();
+                // Save to localStorage
+                localStorage.setItem('umi_password_last_changed', new Date().toISOString());
+              } else {
+                this.showError('Password change failed: ' + response.message);
+              }
+            } catch (error) {
+              console.error('Password change error:', error);
+              this.showError('Password change failed. Please try again.');
+            }
+          },
+          
+          cancelPasswordChange() {
+            this.showPasswordModal = false;
+            this.passwordForm = {
+              currentPassword: '',
+              newPassword: '',
+              confirmPassword: ''
+            };
+            this.passwordRequirements = {
+              hasMinLength: false,
+              hasLetter: false,
+              hasNumber: false
+            };
+          },
+          
+          // Sessions functions
+          loadActiveSessions() {
+            try {
+              // Load sessions from localStorage or API
+              const storedSessions = localStorage.getItem('umi_active_sessions');
+              if (storedSessions) {
+                this.activeSessions = JSON.parse(storedSessions);
+              } else {
+                // Create default current session
+                this.activeSessions = [{
+                  id: 'current',
+                  device: 'Current Device - ' + navigator.platform,
+                  location: 'Lusaka, Zambia',
+                  lastActive: 'Just now',
+                  current: true,
+                  ipAddress: '127.0.0.1'
+                }];
+                this.saveSessionsToStorage();
+              }
+            } catch (error) {
+              console.error('Error loading sessions:', error);
+              this.activeSessions = [];
+            }
+          },
+          
+          saveSessionsToStorage() {
+            try {
+              localStorage.setItem('umi_active_sessions', JSON.stringify(this.activeSessions));
+            } catch (error) {
+              console.error('Error saving sessions:', error);
+            }
+          },
+          
+          async revokeSession(sessionId) {
+            try {
+              if (!window.adminAPI) {
+                // Remove from localStorage
+                this.activeSessions = this.activeSessions.filter(s => s.id !== sessionId);
+                this.saveSessionsToStorage();
+                this.showSuccess('Session revoked successfully');
+                return;
+              }
+              
+              const response = await window.adminAPI.revokeSession(sessionId);
+              if (response.success) {
+                this.activeSessions = this.activeSessions.filter(s => s.id !== sessionId);
+                this.saveSessionsToStorage();
+                this.showSuccess('Session revoked successfully');
+              } else {
+                this.showError('Failed to revoke session: ' + response.message);
+              }
+            } catch (error) {
+              console.error('Revoke session error:', error);
+              this.showError('Failed to revoke session. Please try again.');
+            }
+          },
+          
+          async revokeAllSessions() {
+            try {
+              if (!window.adminAPI) {
+                // Keep only current session
+                this.activeSessions = this.activeSessions.filter(s => s.current);
+                this.saveSessionsToStorage();
+                this.showSuccess('All other sessions revoked successfully');
+                return;
+              }
+              
+              const response = await window.adminAPI.revokeAllSessions();
+              if (response.success) {
+                this.activeSessions = this.activeSessions.filter(s => s.current);
+                this.saveSessionsToStorage();
+                this.showSuccess('All other sessions revoked successfully');
+              } else {
+                this.showError('Failed to revoke sessions: ' + response.message);
+              }
+            } catch (error) {
+              console.error('Revoke all sessions error:', error);
+              this.showError('Failed to revoke sessions. Please try again.');
+            }
+          },
+          
+          // Invoices functions
+          loadInvoices() {
+            try {
+              // Load invoices from localStorage or generate realistic data
+              const storedInvoices = localStorage.getItem('umi_invoices');
+              if (storedInvoices) {
+                this.invoices = JSON.parse(storedInvoices);
+              } else {
+                // Generate realistic invoices with unique numbers based on current date
+                const currentDate = new Date();
+                const year = currentDate.getFullYear();
+                const month = String(currentDate.getMonth() + 1).padStart(2, '0');
+                
+                this.invoices = [
+                  {
+                    id: 'inv_' + Date.now() + '_001',
+                    number: `UMI-${year}${month}-001`,
+                    date: new Date(currentDate.getFullYear(), currentDate.getMonth(), 1).toISOString().split('T')[0],
+                    amount: (450 + Math.floor(Math.random() * 100)).toFixed(2),
+                    status: 'paid',
+                    description: 'Monthly subscription - Care Plus Plan'
+                  },
+                  {
+                    id: 'inv_' + Date.now() + '_002',
+                    number: `UMI-${year}${month}-002`,
+                    date: new Date(currentDate.getFullYear(), currentDate.getMonth() - 1, 1).toISOString().split('T')[0],
+                    amount: (450 + Math.floor(Math.random() * 100)).toFixed(2),
+                    status: 'paid',
+                    description: 'Monthly subscription - Care Plus Plan'
+                  },
+                  {
+                    id: 'inv_' + Date.now() + '_003',
+                    number: `UMI-${year}${month}-003`,
+                    date: new Date(currentDate.getFullYear(), currentDate.getMonth() - 2, 1).toISOString().split('T')[0],
+                    amount: (450 + Math.floor(Math.random() * 100)).toFixed(2),
+                    status: 'paid',
+                    description: 'Monthly subscription - Care Plus Plan'
+                  }
+                ];
+                this.saveInvoicesToStorage();
+              }
+            } catch (error) {
+              console.error('Error loading invoices:', error);
+              this.invoices = [];
+            }
+          },
+          
+          saveInvoicesToStorage() {
+            try {
+              localStorage.setItem('umi_invoices', JSON.stringify(this.invoices));
+            } catch (error) {
+              console.error('Error saving invoices:', error);
+            }
+          },
+          
+          generateInvoiceNumber() {
+            const currentDate = new Date();
+            const year = currentDate.getFullYear();
+            const month = String(currentDate.getMonth() + 1).padStart(2, '0');
+            const existingInvoices = this.invoices.filter(inv => 
+              inv.number.includes(`UMI-${year}${month}`)
+            );
+            const nextNumber = existingInvoices.length + 1;
+            return `UMI-${year}${month}-${String(nextNumber).padStart(3, '0')}`;
+          },
+          
+          createNewInvoice(description, amount) {
+            const newInvoice = {
+              id: 'inv_' + Date.now(),
+              number: this.generateInvoiceNumber(),
+              date: new Date().toISOString().split('T')[0],
+              amount: amount.toFixed(2),
+              status: 'pending',
+              description: description
+            };
+            this.invoices.unshift(newInvoice);
+            this.saveInvoicesToStorage();
+            return newInvoice;
+          },
+          
+          downloadInvoice(invoiceId) {
+            try {
+              const invoice = this.invoices.find(inv => inv.id === invoiceId);
+              if (invoice) {
+                // Generate PDF invoice
+                this.generatePDFInvoice(invoice);
+              }
+            } catch (error) {
+              console.error('Error downloading invoice:', error);
+              this.showError('Failed to download invoice');
+            }
+          },
+          
+          generatePDFInvoice(invoice) {
+            try {
+              // Create PDF content using jsPDF library
+              const { jsPDF } = window.jspdf;
+              if (jsPDF) {
+                const doc = new jsPDF();
+                
+                // Add header
+                doc.setFontSize(20);
+                doc.text('INVOICE', 105, 20, { align: 'center' });
+                
+                // Add invoice details
+                doc.setFontSize(12);
+                doc.text(`Invoice Number: ${invoice.number}`, 20, 40);
+                doc.text(`Date: ${invoice.date}`, 20, 50);
+                doc.text(`Amount: ZMW ${invoice.amount}`, 20, 60);
+                doc.text(`Status: ${invoice.status.toUpperCase()}`, 20, 70);
+                
+                // Add description
+                doc.setFontSize(11);
+                doc.text(`Description: ${invoice.description || 'Monthly subscription fee'}`, 20, 85);
+                
+                // Add footer
+                doc.setFontSize(10);
+                doc.text('Thank you for your business!', 20, 110);
+                doc.text('Umi Health Pharmacy', 20, 120);
+                doc.text('Lusaka, Zambia', 20, 130);
+                
+                // Save the PDF
+                doc.save(`invoice_${invoice.number}.pdf`);
+                this.showSuccess('Invoice PDF downloaded successfully');
+              } else {
+                // Fallback to text file if jsPDF is not available
+                const invoiceText = `
+Invoice: ${invoice.number}
+Date: ${invoice.date}
+Amount: ZMW ${invoice.amount}
+Status: ${invoice.status}
+Description: ${invoice.description || 'Monthly subscription fee'}
 
-        // Utility methods
-      }
-      }
-    }
-  </script>
+Thank you for your business!
+Umi Health Pharmacy
+Lusaka, Zambia
+                `.trim();
+                
+                const blob = new Blob([invoiceText], { type: 'text/plain' });
+                const url = window.URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                a.href = url;
+                a.download = `invoice_${invoice.number}.txt`;
+                a.click();
+                window.URL.revokeObjectURL(url);
+                
+                this.showSuccess('Invoice downloaded as text file (PDF library not available)');
+              }
+            } catch (error) {
+              console.error('Error generating PDF:', error);
+              this.showError('Failed to generate PDF invoice');
+            }
+          },
+          
+          // Usage statistics functions
+          loadUsageStats() {
+            try {
+              // Load usage stats from localStorage
+              const storedStats = localStorage.getItem('umi_usage_stats');
+              if (storedStats) {
+                this.usageStats = JSON.parse(storedStats);
+              } else {
+                // Default to zero if no data exists
+                this.usageStats = {
+                  currentMonthUsage: 0,
+                  totalPrescriptions: 0,
+                  inventoryItems: 0,
+                  activeUsers: 0
+                };
+                this.saveUsageStatsToStorage();
+              }
+            } catch (error) {
+              console.error('Error loading usage stats:', error);
+              this.usageStats = {
+                currentMonthUsage: 0,
+                totalPrescriptions: 0,
+                inventoryItems: 0,
+                activeUsers: 0
+              };
+            }
+          },
+          
+          saveUsageStatsToStorage() {
+            try {
+              localStorage.setItem('umi_usage_stats', JSON.stringify(this.usageStats));
+            } catch (error) {
+              console.error('Error saving usage stats:', error);
+            }
+          },
+          
+          // Cancellation functions
+          async confirmCancelSubscription() {
+            if (!this.cancelForm.confirmTerms) {
+              this.showError('Please confirm that you understand the consequences');
+              return;
+            }
+            
+            try {
+              if (!window.adminAPI) {
+                this.showError('API services are not available. Please try again later.');
+                return;
+              }
+              
+              const response = await window.adminAPI.cancelSubscription({
+                reason: this.cancelForm.reason,
+                userId: this.userInfo.email,
+                timestamp: new Date().toISOString()
+              });
+              
+              if (response.success) {
+                this.showSuccess('Subscription cancelled. Your account will become read-only and you will be logged out in 5 minutes.');
+                this.showCancelConfirmModal = false;
+                this.enableReadOnlyMode();
+                this.scheduleAutoLogout();
+              } else {
+                this.showError('Failed to cancel subscription: ' + response.message);
+              }
+            } catch (error) {
+              console.error('Cancel subscription error:', error);
+              this.showError('Failed to cancel subscription. Please try again.');
+            }
+          },
+          
+          enableReadOnlyMode() {
+            this.readOnlyMode = true;
+            // Disable all form inputs
+            const inputs = document.querySelectorAll('input, textarea, button:not(.btn-secondary)');
+            inputs.forEach(input => {
+              if (!input.classList.contains('btn-secondary')) {
+                input.disabled = true;
+              }
+            });
+            // Save read-only state
+            localStorage.setItem('umi_read_only_mode', 'true');
+            localStorage.setItem('umi_read_only_timestamp', new Date().toISOString());
+          },
+          
+          scheduleAutoLogout() {
+            // Schedule logout after 5 minutes
+            setTimeout(() => {
+              this.performAutoLogout();
+            }, 5 * 60 * 1000); // 5 minutes in milliseconds
+          },
+          
+          performAutoLogout() {
+            // Clear all auth data
+            localStorage.removeItem('umi_access_token');
+            localStorage.removeItem('umi_refresh_token');
+            localStorage.removeItem('umi_current_user');
+            localStorage.removeItem('umi_current_tenant');
+            localStorage.removeItem('umi_current_subscription');
+            
+            // Redirect to login page
+            window.location.href = '/public/login.html';
+          },
+          
+          calculateNextBilling(accountCreated, trialStart, isTrial) {
+            const now = new Date();
+            let baseDate;
+            
+            if (isTrial && trialStart) {
+              // For trials, next billing is trial end date
+              baseDate = new Date(trialStart);
+              baseDate.setDate(baseDate.getDate() + 14); // 14 days trial
+            } else if (accountCreated) {
+              // For regular accounts, calculate from account creation or last billing
+              baseDate = new Date(accountCreated);
+              
+              // Find the next billing date (monthly cycle)
+              while (baseDate <= now) {
+                baseDate.setMonth(baseDate.getMonth() + 1);
+              }
+            } else {
+              // Default to 30 days from now if no dates available
+              baseDate = new Date(now);
+              baseDate.setDate(baseDate.getDate() + 30);
+            }
+            
+            return baseDate.toISOString().split('T')[0];
+          },
+          
+          updateNextBilling() {
+            const now = new Date();
+            let nextBillingDate;
+            
+            if (this.subscription.isTrial && this.subscription.trialEnd) {
+              // Trial period - next billing is trial end
+              nextBillingDate = new Date(this.subscription.trialEnd);
+            } else if (this.subscription.lastBillingDate) {
+              // Regular billing - add one month to last billing date
+              nextBillingDate = new Date(this.subscription.lastBillingDate);
+              nextBillingDate.setMonth(nextBillingDate.getMonth() + 1);
+            } else if (this.subscription.accountCreated) {
+              // Calculate from account creation date
+              nextBillingDate = new Date(this.subscription.accountCreated);
+              
+              // Find the next monthly billing date
+              while (nextBillingDate <= now) {
+                nextBillingDate.setMonth(nextBillingDate.getMonth() + 1);
+              }
+            } else {
+              // Default fallback
+              nextBillingDate = new Date(now);
+              nextBillingDate.setDate(nextBillingDate.getDate() + 30);
+            }
+            
+            this.subscription.nextBilling = nextBillingDate.toISOString().split('T')[0];
+            this.saveSubscriptionToStorage();
+          },
+          
+          initializeAccountCreation() {
+            if (!this.subscription.accountCreated) {
+              // Set account creation date if not exists
+              const user = localStorage.getItem('umi_current_user');
+              if (user) {
+                const userData = JSON.parse(user);
+                // Use user creation date or current date as fallback
+                this.subscription.accountCreated = userData.createdAt || new Date().toISOString();
+              } else {
+                this.subscription.accountCreated = new Date().toISOString();
+              }
+              
+              // Set initial billing date
+              this.updateNextBilling();
+              this.saveSubscriptionToStorage();
+            }
+          },
+          
+          checkTrialStatus() {
+            if (this.subscription.isTrial && this.subscription.trialEnd) {
+              const now = new Date();
+              const trialEndDate = new Date(this.subscription.trialEnd);
+              const daysRemaining = Math.ceil((trialEndDate - now) / (1000 * 60 * 60 * 24));
+              
+              this.subscription.trialDaysRemaining = Math.max(0, daysRemaining);
+              
+              // If trial has expired
+              if (daysRemaining <= 0) {
+                this.expireTrial();
+              } else if (daysRemaining <= 3) {
+                // Show warning if trial is about to expire
+                this.showWarning(`Trial expires in ${daysRemaining} day${daysRemaining !== 1 ? 's' : ''}. Upgrade to continue using the service.`);
+              }
+            }
+          },
+          
+          startTrial(planType) {
+            const startDate = new Date();
+            const endDate = new Date(startDate);
+            endDate.setDate(endDate.getDate() + 14); // 2 weeks trial
+            
+            this.subscription = {
+              ...this.subscription,
+              planType: planType,
+              status: 'Trial',
+              isTrial: true,
+              trialStart: startDate.toISOString(),
+              trialEnd: endDate.toISOString(),
+              trialDaysRemaining: 14,
+              nextBilling: endDate.toISOString().split('T')[0]
+            };
+            
+            // Save to localStorage
+            this.saveSubscriptionToStorage();
+            this.showSuccess(`Trial started for ${planType} plan. You have 14 days to evaluate the service.`);
+          },
+          
+          expireTrial() {
+            this.subscription = {
+              ...this.subscription,
+              status: 'Expired',
+              isTrial: false,
+              trialDaysRemaining: 0
+            };
+            
+            // Enable read-only mode for expired trials
+            this.enableReadOnlyMode();
+            this.scheduleAutoLogout();
+            
+            // Save to localStorage
+            this.saveSubscriptionToStorage();
+            this.showError('Trial period has expired. Your account is now in read-only mode. Please upgrade to continue using the service.');
+          },
+          
+          saveSubscriptionToStorage() {
+            try {
+              const subscriptionData = {
+                plan: this.subscription.planType,
+                status: this.subscription.status,
+                nextBilling: this.subscription.nextBilling,
+                trialStart: this.subscription.trialStart,
+                trialEnd: this.subscription.trialEnd,
+                isTrial: this.subscription.isTrial,
+                trialDaysRemaining: this.subscription.trialDaysRemaining
+              };
+              localStorage.setItem('umi_current_subscription', JSON.stringify(subscriptionData));
+            } catch (error) {
+              console.error('Error saving subscription data:', error);
+            }
+          },
+          
+          checkReadOnlyMode() {
+            const readOnlyMode = localStorage.getItem('umi_read_only_mode');
+            const readOnlyTimestamp = localStorage.getItem('umi_read_only_timestamp');
+            
+            if (readOnlyMode === 'true' && readOnlyTimestamp) {
+              const timestamp = new Date(readOnlyTimestamp);
+              const now = new Date();
+              const minutesElapsed = (now - timestamp) / (1000 * 60);
+              
+              if (minutesElapsed < 5) {
+                this.enableReadOnlyMode();
+                this.scheduleAutoLogout();
+                this.showError('Your account is in read-only mode. You will be automatically logged out in ' + Math.ceil(5 - minutesElapsed) + ' minutes.');
+              } else {
+                // Clear expired read-only mode
+                localStorage.removeItem('umi_read_only_mode');
+                localStorage.removeItem('umi_read_only_timestamp');
+              }
+            }
+          },
+          
+          // Computed properties
+          get filteredSuggestions() {
+            if (!this.searchQuery || this.searchQuery.length < 2) return [];
+            return this.suggestions.filter(suggestion => 
+              suggestion.title.toLowerCase().includes(this.searchQuery.toLowerCase()) ||
+              suggestion.description.toLowerCase().includes(this.searchQuery.toLowerCase())
+            );
+          },
+          
+          // Watchers
+          'passwordForm.newPassword'() {
+            this.validatePassword();
+          },
+          
+          // Search methods
+          selectSuggestion(suggestion) {
+            this.activeSection = suggestion.id;
+            this.searchQuery = '';
+            this.searchOpen = false;
+          },
+          
+          // Save methods
+          saveProfile() {
+            try {
+              // Save to localStorage first
+              this.saveProfileToLocalStorage();
+              
+              if (!window.adminAPI) {
+                this.showError('API services are not available. Changes saved locally.');
+                return;
+              }
+              
+              window.adminAPI.updateUserProfile(this.profile)
+                .then(() => {
+                  this.showSuccess('Profile updated successfully');
+                })
+                .catch(error => {
+                  console.error('Error updating profile:', error);
+                  this.showError('Failed to update profile on server. Changes saved locally.');
+                });
+            } catch (error) {
+              console.error('API not available:', error);
+              this.saveProfileToLocalStorage();
+              this.showError('API services are not available. Changes saved locally.');
+            }
+          },
+          
+          saveProfileToLocalStorage() {
+            try {
+              // Update localStorage with new profile data
+              const currentUser = JSON.parse(localStorage.getItem('umi_current_user') || '{}');
+              currentUser.name = `${this.profile.firstName} ${this.profile.lastName}`;
+              currentUser.email = this.profile.email;
+              localStorage.setItem('umi_current_user', JSON.stringify(currentUser));
+              
+              // Update userInfo in the component
+              this.userInfo = {
+                name: currentUser.name,
+                role: currentUser.role || 'Admin',
+                initials: `${this.profile.firstName?.[0] || 'U'}${this.profile.lastName?.[0] || 'H'}`,
+                email: this.profile.email
+              };
+              
+              console.log('Profile saved to localStorage');
+            } catch (error) {
+              console.error('Error saving profile to localStorage:', error);
+            }
+          },
+          
+          savePharmacySettings() {
+            try {
+              // Save to localStorage first
+              this.savePharmacySettingsToLocalStorage();
+              
+              if (!window.adminAPI) {
+                this.showError('API services are not available. Changes saved locally.');
+                return;
+              }
+              
+              window.adminAPI.updatePharmacySettings(this.pharmacySettings)
+                .then(() => {
+                  this.showSuccess('Pharmacy settings updated successfully');
+                })
+                .catch(error => {
+                  console.error('Error updating pharmacy settings:', error);
+                  this.showError('Failed to update pharmacy settings on server. Changes saved locally.');
+                });
+            } catch (error) {
+              console.error('API not available:', error);
+              this.savePharmacySettingsToLocalStorage();
+              this.showError('API services are not available. Changes saved locally.');
+            }
+          },
+          
+          savePharmacySettingsToLocalStorage() {
+            try {
+              // Update localStorage with new pharmacy settings
+              const currentTenant = JSON.parse(localStorage.getItem('umi_current_tenant') || '{}');
+              currentTenant.name = this.pharmacySettings.name;
+              localStorage.setItem('umi_current_tenant', JSON.stringify(currentTenant));
+              
+              // Update pharmacyInfo in the component
+              this.pharmacyInfo = {
+                name: this.pharmacySettings.name,
+                location: `${this.pharmacySettings.city}, ${this.pharmacySettings.province}`
+              };
+              
+              console.log('Pharmacy settings saved to localStorage');
+            } catch (error) {
+              console.error('Error saving pharmacy settings to localStorage:', error);
+            }
+          },
+          
+          saveNotificationSettings() {
+            try {
+              // Save to localStorage first
+              this.saveNotificationSettingsToLocalStorage();
+              
+              if (!window.adminAPI) {
+                this.showError('API services are not available. Changes saved locally.');
+                return;
+              }
+              
+              window.adminAPI.updateNotificationSettings(this.notifications)
+                .then(() => {
+                  this.showSuccess('Notification settings updated successfully');
+                })
+                .catch(error => {
+                  console.error('Error updating notification settings:', error);
+                  this.showError('Failed to update notification settings on server. Changes saved locally.');
+                });
+            } catch (error) {
+              console.error('API not available:', error);
+              this.saveNotificationSettingsToLocalStorage();
+              this.showError('API services are not available. Changes saved locally.');
+            }
+          },
+          
+          saveNotificationSettingsToLocalStorage() {
+            try {
+              // Save notification settings to localStorage
+              localStorage.setItem('umi_notification_settings', JSON.stringify(this.notifications));
+              console.log('Notification settings saved to localStorage');
+            } catch (error) {
+              console.error('Error saving notification settings to localStorage:', error);
+            }
+          },
+          
+          // Notification methods
+          showSuccess(message) {
+            this.showNotification(message, 'success');
+          },
 
+          showError(message) {
+            this.showNotification(message, 'error');
+          },
+          
+          showWarning(message) {
+            this.showNotification(message, 'warning');
+          },
+          
+          showNotification(message, type = 'info') {
+            // Create notification element
+            const notification = document.createElement('div');
+            notification.className = `notification notification-${type}`;
+            notification.textContent = message;
+            document.body.appendChild(notification);
+
+            // Animate in
+            setTimeout(() => {
+              notification.classList.add('show');
+            }, 100);
+
+            // Remove after 5 seconds
+            setTimeout(() => {
+              notification.classList.remove('show');
+              setTimeout(() => {
+                if (notification.parentNode) {
+                  document.body.removeChild(notification);
+                }
+              }, 300);
+            }, 5000);
+          },
+
+          // Upgrade functions
+          getPlanPrice(planType) {
+            const prices = {
+              'Care': 250,
+              'Care Plus': 450,
+              'Care Pro': 700
+            };
+            return prices[planType] || 0;
+          },
+          
+          formatDate(dateString) {
+            if (!dateString) return '';
+            const date = new Date(dateString);
+            return date.toLocaleDateString('en-US', { 
+              year: 'numeric', 
+              month: 'long', 
+              day: 'numeric' 
+            });
+          },
+          
+          upgradePlan(planType) {
+            this.selectedUpgradePlan = planType;
+            this.showUpgradeModal = true;
+          },
+          
+          selectUpgradePlan(planType) {
+            this.selectedUpgradePlan = planType;
+          },
+          
+          cancelUpgrade() {
+            this.showUpgradeModal = false;
+            this.selectedUpgradePlan = null;
+          },
+          
+          async confirmUpgrade() {
+            if (!this.selectedUpgradePlan || this.selectedUpgradePlan === this.subscription.planType) {
+              alert('Please select a different plan to upgrade');
+              return;
+            }
+            
+            // Check if API is available
+            if (!window.adminAPI) {
+              this.showError('API services are not available. Please check your connection and try again.');
+              return;
+            }
+            
+            try {
+              this.upgradeRequestPending = true;
+              
+              // Create upgrade request that requires approval
+              const response = await window.adminAPI.upgradeSubscription({
+                planType: this.selectedUpgradePlan,
+                billingCycle: 'monthly',
+                amount: this.getPlanPrice(this.selectedUpgradePlan),
+                currency: 'ZMW',
+                autoRenew: true,
+                requiresApproval: true,
+                requestedBy: this.userInfo.email,
+                planFrom: this.subscription.planType,
+                requestDate: new Date().toISOString(),
+                pharmacyName: this.pharmacySettings.name,
+                pharmacyId: this.pharmacyInfo.name
+              });
+              
+              if (response && response.success) {
+                // Send notifications to super admin and operations
+                await this.sendUpgradeNotifications({
+                  planType: this.selectedUpgradePlan,
+                  planFrom: this.subscription.planType,
+                  amount: this.getPlanPrice(this.selectedUpgradePlan),
+                  requestedBy: this.userInfo.email,
+                  transactionId: response.transactionId,
+                  pharmacyName: this.pharmacySettings.name
+                });
+                
+                this.showSuccess(`Upgrade request submitted! Transaction ID: ${response.transactionId}. Your upgrade is pending approval from super admin and operations team.`);
+                this.showUpgradeModal = false;
+                this.selectedUpgradePlan = null;
+              } else {
+                this.showError('Upgrade request failed: ' + (response?.message || 'Unknown error'));
+              }
+            } catch (error) {
+              console.error('Upgrade error:', error);
+              if (error.message.includes('404')) {
+                this.showError('Upgrade service is not available. Please contact support.');
+              } else if (error.message.includes('Failed to execute')) {
+                this.showError('Server error occurred. Please try again later.');
+              } else {
+                this.showError('Upgrade request failed. Please try again.');
+              }
+            } finally {
+              this.upgradeRequestPending = false;
+            }
+          },
+          
+          async sendUpgradeNotifications(upgradeData) {
+            try {
+              // Send notification to super admin
+              await window.adminAPI.sendNotification({
+                type: 'upgrade_request',
+                recipient: 'super_admin',
+                subject: `Subscription Upgrade Request - ${upgradeData.pharmacyName}`,
+                message: `Upgrade request from ${upgradeData.planFrom} to ${upgradeData.planType} plan. Amount: ${upgradeData.amount} ZMW/month. Requested by: ${upgradeData.requestedBy}. Transaction ID: ${upgradeData.transactionId}`,
+                priority: 'high',
+                data: upgradeData
+              });
+              
+              // Send notification to operations team
+              await window.adminAPI.sendNotification({
+                type: 'upgrade_request',
+                recipient: 'operations',
+                subject: `Subscription Upgrade Approval Needed - ${upgradeData.pharmacyName}`,
+                message: `New upgrade request requires approval. Plan: ${upgradeData.planFrom} → ${upgradeData.planType}. Amount: ${upgradeData.amount} ZMW/month. Requested by: ${upgradeData.requestedBy}. Transaction ID: ${upgradeData.transactionId}`,
+                priority: 'high',
+                data: upgradeData
+              });
+              
+              console.log('Upgrade notifications sent successfully');
+            } catch (error) {
+              console.error('Failed to send upgrade notifications:', error);
+              // Continue with the process even if notifications fail
+            }
+          },
+        }
+      }
+    </script>
+
+    <!-- Include required styles and scripts -->
+    <link rel="stylesheet" href="../../shared/css/shared-styles.css">
+    <script src="../../shared/js/data-sync.js"></script>
+    <script src="../../shared/js/role-based-access.js"></script>
+    <script src="js/admin-api.js"></script>
     <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
 </body>
 </html>

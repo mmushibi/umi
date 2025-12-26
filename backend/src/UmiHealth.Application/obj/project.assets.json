@@ -234,6 +234,19 @@
           "bin/placeholder/UmiHealth.Core.dll": {}
         }
       },
+      "UmiHealth.Domain/1.0.0": {
+        "type": "project",
+        "framework": ".NETCoreApp,Version=v8.0",
+        "dependencies": {
+          "UmiHealth.Core": "1.0.0"
+        },
+        "compile": {
+          "bin/placeholder/UmiHealth.Domain.dll": {}
+        },
+        "runtime": {
+          "bin/placeholder/UmiHealth.Domain.dll": {}
+        }
+      },
       "UmiHealth.Shared/1.0.0": {
         "type": "project",
         "framework": ".NETCoreApp,Version=v8.0",
@@ -759,6 +772,11 @@
       "path": "../UmiHealth.Core/UmiHealth.Core.csproj",
       "msbuildProject": "../UmiHealth.Core/UmiHealth.Core.csproj"
     },
+    "UmiHealth.Domain/1.0.0": {
+      "type": "project",
+      "path": "../UmiHealth.Domain/UmiHealth.Domain.csproj",
+      "msbuildProject": "../UmiHealth.Domain/UmiHealth.Domain.csproj"
+    },
     "UmiHealth.Shared/1.0.0": {
       "type": "project",
       "path": "../UmiHealth.Shared/UmiHealth.Shared.csproj",
@@ -774,6 +792,7 @@
       "MediatR >= 12.2.0",
       "Microsoft.Extensions.Logging >= 8.0.0",
       "UmiHealth.Core >= 1.0.0",
+      "UmiHealth.Domain >= 1.0.0",
       "UmiHealth.Shared >= 1.0.0"
     ]
   },
@@ -783,11 +802,11 @@
   "project": {
     "version": "1.0.0",
     "restore": {
-      "projectUniqueName": "C:\\Users\\sepio\\Desktop\\Umi_Health\\backend\\src\\UmiHealth.Application\\UmiHealth.Application.csproj",
+      "projectUniqueName": "C:\\Users\\sepio\\Desktop\\Umi_Health\\Umi_Health\\backend\\src\\UmiHealth.Application\\UmiHealth.Application.csproj",
       "projectName": "UmiHealth.Application",
-      "projectPath": "C:\\Users\\sepio\\Desktop\\Umi_Health\\backend\\src\\UmiHealth.Application\\UmiHealth.Application.csproj",
+      "projectPath": "C:\\Users\\sepio\\Desktop\\Umi_Health\\Umi_Health\\backend\\src\\UmiHealth.Application\\UmiHealth.Application.csproj",
       "packagesPath": "C:\\Users\\sepio\\.nuget\\packages\\",
-      "outputPath": "C:\\Users\\sepio\\Desktop\\Umi_Health\\backend\\src\\UmiHealth.Application\\obj\\",
+      "outputPath": "C:\\Users\\sepio\\Desktop\\Umi_Health\\Umi_Health\\backend\\src\\UmiHealth.Application\\obj\\",
       "projectStyle": "PackageReference",
       "configFilePaths": [
         "C:\\Users\\sepio\\AppData\\Roaming\\NuGet\\NuGet.Config"
@@ -802,11 +821,14 @@
         "net8.0": {
           "targetAlias": "net8.0",
           "projectReferences": {
-            "C:\\Users\\sepio\\Desktop\\Umi_Health\\backend\\src\\UmiHealth.Core\\UmiHealth.Core.csproj": {
-              "projectPath": "C:\\Users\\sepio\\Desktop\\Umi_Health\\backend\\src\\UmiHealth.Core\\UmiHealth.Core.csproj"
+            "C:\\Users\\sepio\\Desktop\\Umi_Health\\Umi_Health\\backend\\src\\UmiHealth.Core\\UmiHealth.Core.csproj": {
+              "projectPath": "C:\\Users\\sepio\\Desktop\\Umi_Health\\Umi_Health\\backend\\src\\UmiHealth.Core\\UmiHealth.Core.csproj"
             },
-            "C:\\Users\\sepio\\Desktop\\Umi_Health\\backend\\src\\UmiHealth.Shared\\UmiHealth.Shared.csproj": {
-              "projectPath": "C:\\Users\\sepio\\Desktop\\Umi_Health\\backend\\src\\UmiHealth.Shared\\UmiHealth.Shared.csproj"
+            "C:\\Users\\sepio\\Desktop\\Umi_Health\\Umi_Health\\backend\\src\\UmiHealth.Domain\\UmiHealth.Domain.csproj": {
+              "projectPath": "C:\\Users\\sepio\\Desktop\\Umi_Health\\Umi_Health\\backend\\src\\UmiHealth.Domain\\UmiHealth.Domain.csproj"
+            },
+            "C:\\Users\\sepio\\Desktop\\Umi_Health\\Umi_Health\\backend\\src\\UmiHealth.Shared\\UmiHealth.Shared.csproj": {
+              "projectPath": "C:\\Users\\sepio\\Desktop\\Umi_Health\\Umi_Health\\backend\\src\\UmiHealth.Shared\\UmiHealth.Shared.csproj"
             }
           }
         }

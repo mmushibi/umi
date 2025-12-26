@@ -149,6 +149,11 @@ class AdminAPI {
     });
   }
 
+  // Product Management
+  async getProducts() {
+    return await this.request('/admin/products');
+  }
+
   // Inventory Management
   async getInventory(filters = {}) {
     const params = new URLSearchParams(filters);

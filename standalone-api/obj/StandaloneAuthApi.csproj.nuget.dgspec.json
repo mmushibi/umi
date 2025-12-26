@@ -1,17 +1,17 @@
 {
   "format": 1,
   "restore": {
-    "C:\\Users\\sepio\\Desktop\\Umi_Health\\standalone-api\\StandaloneAuthApi.csproj": {}
+    "C:\\Users\\sepio\\Desktop\\Umi_Health\\Umi_Health\\standalone-api\\StandaloneAuthApi.csproj": {}
   },
   "projects": {
-    "C:\\Users\\sepio\\Desktop\\Umi_Health\\standalone-api\\StandaloneAuthApi.csproj": {
+    "C:\\Users\\sepio\\Desktop\\Umi_Health\\Umi_Health\\standalone-api\\StandaloneAuthApi.csproj": {
       "version": "1.0.0",
       "restore": {
-        "projectUniqueName": "C:\\Users\\sepio\\Desktop\\Umi_Health\\standalone-api\\StandaloneAuthApi.csproj",
+        "projectUniqueName": "C:\\Users\\sepio\\Desktop\\Umi_Health\\Umi_Health\\standalone-api\\StandaloneAuthApi.csproj",
         "projectName": "StandaloneAuthApi",
-        "projectPath": "C:\\Users\\sepio\\Desktop\\Umi_Health\\standalone-api\\StandaloneAuthApi.csproj",
+        "projectPath": "C:\\Users\\sepio\\Desktop\\Umi_Health\\Umi_Health\\standalone-api\\StandaloneAuthApi.csproj",
         "packagesPath": "C:\\Users\\sepio\\.nuget\\packages\\",
-        "outputPath": "C:\\Users\\sepio\\Desktop\\Umi_Health\\standalone-api\\obj\\",
+        "outputPath": "C:\\Users\\sepio\\Desktop\\Umi_Health\\Umi_Health\\standalone-api\\obj\\",
         "projectStyle": "PackageReference",
         "configFilePaths": [
           "C:\\Users\\sepio\\AppData\\Roaming\\NuGet\\NuGet.Config"

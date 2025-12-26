@@ -1,0 +1,613 @@
+{
+  "format": 1,
+  "restore": {
+    "C:\\Users\\sepio\\Desktop\\Umi_Health\\Umi_Health\\backend\\src\\UmiHealth.Api\\UmiHealth.Api.csproj": {}
+  },
+  "projects": {
+    "C:\\Users\\sepio\\Desktop\\Umi_Health\\Umi_Health\\backend\\src\\UmiHealth.Api\\UmiHealth.Api.csproj": {
+      "version": "1.0.0",
+      "restore": {
+        "projectUniqueName": "C:\\Users\\sepio\\Desktop\\Umi_Health\\Umi_Health\\backend\\src\\UmiHealth.Api\\UmiHealth.Api.csproj",
+        "projectName": "UmiHealth.Api",
+        "projectPath": "C:\\Users\\sepio\\Desktop\\Umi_Health\\Umi_Health\\backend\\src\\UmiHealth.Api\\UmiHealth.Api.csproj",
+        "packagesPath": "C:\\Users\\sepio\\.nuget\\packages\\",
+        "outputPath": "C:\\Users\\sepio\\Desktop\\Umi_Health\\Umi_Health\\backend\\src\\UmiHealth.Api\\obj\\",
+        "projectStyle": "PackageReference",
+        "configFilePaths": [
+          "C:\\Users\\sepio\\AppData\\Roaming\\NuGet\\NuGet.Config"
+        ],
+        "originalTargetFrameworks": [
+          "net8.0"
+        ],
+        "sources": {
+          "https://api.nuget.org/v3/index.json": {}
+        },
+        "frameworks": {
+          "net8.0": {
+            "targetAlias": "net8.0",
+            "projectReferences": {
+              "C:\\Users\\sepio\\Desktop\\Umi_Health\\Umi_Health\\backend\\src\\UmiHealth.Application\\UmiHealth.Application.csproj": {
+                "projectPath": "C:\\Users\\sepio\\Desktop\\Umi_Health\\Umi_Health\\backend\\src\\UmiHealth.Application\\UmiHealth.Application.csproj"
+              },
+              "C:\\Users\\sepio\\Desktop\\Umi_Health\\Umi_Health\\backend\\src\\UmiHealth.Core\\UmiHealth.Core.csproj": {
+                "projectPath": "C:\\Users\\sepio\\Desktop\\Umi_Health\\Umi_Health\\backend\\src\\UmiHealth.Core\\UmiHealth.Core.csproj"
+              },
+              "C:\\Users\\sepio\\Desktop\\Umi_Health\\Umi_Health\\backend\\src\\UmiHealth.Identity\\UmiHealth.Identity.csproj": {
+                "projectPath": "C:\\Users\\sepio\\Desktop\\Umi_Health\\Umi_Health\\backend\\src\\UmiHealth.Identity\\UmiHealth.Identity.csproj"
+              },
+              "C:\\Users\\sepio\\Desktop\\Umi_Health\\Umi_Health\\backend\\src\\UmiHealth.Infrastructure\\UmiHealth.Infrastructure.csproj": {
+                "projectPath": "C:\\Users\\sepio\\Desktop\\Umi_Health\\Umi_Health\\backend\\src\\UmiHealth.Infrastructure\\UmiHealth.Infrastructure.csproj"
+              },
+              "C:\\Users\\sepio\\Desktop\\Umi_Health\\Umi_Health\\backend\\src\\UmiHealth.Shared\\UmiHealth.Shared.csproj": {
+                "projectPath": "C:\\Users\\sepio\\Desktop\\Umi_Health\\Umi_Health\\backend\\src\\UmiHealth.Shared\\UmiHealth.Shared.csproj"
+              }
+            }
+          }
+        },
+        "warningProperties": {
+          "warnAsError": [
+            "NU1605"
+          ]
+        },
+        "restoreAuditProperties": {
+          "enableAudit": "true",
+          "auditLevel": "low",
+          "auditMode": "direct"
+        },
+        "SdkAnalysisLevel": "10.0.100"
+      },
+      "frameworks": {
+        "net8.0": {
+          "targetAlias": "net8.0",
+          "dependencies": {
+            "AspNetCore.HealthChecks.Npgsql": {
+              "target": "Package",
+              "version": "[8.0.0, )"
+            },
+            "AspNetCore.HealthChecks.Redis": {
+              "target": "Package",
+              "version": "[8.0.0, )"
+            },
+            "Microsoft.AspNetCore.Authentication.JwtBearer": {
+              "target": "Package",
+              "version": "[8.0.0, )"
+            },
+            "Microsoft.AspNetCore.Mvc.Versioning": {
+              "target": "Package",
+              "version": "[5.1.0, )"
+            },
+            "Microsoft.AspNetCore.Mvc.Versioning.ApiExplorer": {
+              "target": "Package",
+              "version": "[5.1.0, )"
+            },
+            "Microsoft.AspNetCore.OpenApi": {
+              "target": "Package",
+              "version": "[8.0.0, )"
+            },
+            "Microsoft.Extensions.Diagnostics.HealthChecks": {
+              "target": "Package",
+              "version": "[8.0.0, )"
+            },
+            "Serilog.AspNetCore": {
+              "target": "Package",
+              "version": "[8.0.0, )"
+            },
+            "Serilog.Sinks.Console": {
+              "target": "Package",
+              "version": "[5.0.0, )"
+            },
+            "Swashbuckle.AspNetCore": {
+              "target": "Package",
+              "version": "[6.5.0, )"
+            },
+            "Swashbuckle.AspNetCore.Annotations": {
+              "target": "Package",
+              "version": "[6.5.0, )"
+            }
+          },
+          "imports": [
+            "net461",
+            "net462",
+            "net47",
+            "net471",
+            "net472",
+            "net48",
+            "net481"
+          ],
+          "assetTargetFallback": true,
+          "warn": true,
+          "frameworkReferences": {
+            "Microsoft.AspNetCore.App": {
+              "privateAssets": "none"
+            },
+            "Microsoft.NETCore.App": {
+              "privateAssets": "all"
+            }
+          },
+          "runtimeIdentifierGraphPath": "C:\\Program Files\\dotnet\\sdk\\10.0.100/PortableRuntimeIdentifierGraph.json"
+        }
+      }
+    },
+    "C:\\Users\\sepio\\Desktop\\Umi_Health\\Umi_Health\\backend\\src\\UmiHealth.Application\\UmiHealth.Application.csproj": {
+      "version": "1.0.0",
+      "restore": {
+        "projectUniqueName": "C:\\Users\\sepio\\Desktop\\Umi_Health\\Umi_Health\\backend\\src\\UmiHealth.Application\\UmiHealth.Application.csproj",
+        "projectName": "UmiHealth.Application",
+        "projectPath": "C:\\Users\\sepio\\Desktop\\Umi_Health\\Umi_Health\\backend\\src\\UmiHealth.Application\\UmiHealth.Application.csproj",
+        "packagesPath": "C:\\Users\\sepio\\.nuget\\packages\\",
+        "outputPath": "C:\\Users\\sepio\\Desktop\\Umi_Health\\Umi_Health\\backend\\src\\UmiHealth.Application\\obj\\",
+        "projectStyle": "PackageReference",
+        "configFilePaths": [
+          "C:\\Users\\sepio\\AppData\\Roaming\\NuGet\\NuGet.Config"
+        ],
+        "originalTargetFrameworks": [
+          "net8.0"
+        ],
+        "sources": {
+          "https://api.nuget.org/v3/index.json": {}
+        },
+        "frameworks": {
+          "net8.0": {
+            "targetAlias": "net8.0",
+            "projectReferences": {
+              "C:\\Users\\sepio\\Desktop\\Umi_Health\\Umi_Health\\backend\\src\\UmiHealth.Core\\UmiHealth.Core.csproj": {
+                "projectPath": "C:\\Users\\sepio\\Desktop\\Umi_Health\\Umi_Health\\backend\\src\\UmiHealth.Core\\UmiHealth.Core.csproj"
+              },
+              "C:\\Users\\sepio\\Desktop\\Umi_Health\\Umi_Health\\backend\\src\\UmiHealth.Domain\\UmiHealth.Domain.csproj": {
+                "projectPath": "C:\\Users\\sepio\\Desktop\\Umi_Health\\Umi_Health\\backend\\src\\UmiHealth.Domain\\UmiHealth.Domain.csproj"
+              },
+              "C:\\Users\\sepio\\Desktop\\Umi_Health\\Umi_Health\\backend\\src\\UmiHealth.Shared\\UmiHealth.Shared.csproj": {
+                "projectPath": "C:\\Users\\sepio\\Desktop\\Umi_Health\\Umi_Health\\backend\\src\\UmiHealth.Shared\\UmiHealth.Shared.csproj"
+              }
+            }
+          }
+        },
+        "warningProperties": {
+          "warnAsError": [
+            "NU1605"
+          ]
+        },
+        "restoreAuditProperties": {
+          "enableAudit": "true",
+          "auditLevel": "low",
+          "auditMode": "direct"
+        },
+        "SdkAnalysisLevel": "10.0.100"
+      },
+      "frameworks": {
+        "net8.0": {
+          "targetAlias": "net8.0",
+          "dependencies": {
+            "AutoMapper": {
+              "target": "Package",
+              "version": "[12.0.1, )"
+            },
+            "AutoMapper.Extensions.Microsoft.DependencyInjection": {
+              "target": "Package",
+              "version": "[12.0.1, )"
+            },
+            "FluentValidation": {
+              "target": "Package",
+              "version": "[11.8.0, )"
+            },
+            "FluentValidation.DependencyInjectionExtensions": {
+              "target": "Package",
+              "version": "[11.8.0, )"
+            },
+            "MediatR": {
+              "target": "Package",
+              "version": "[12.2.0, )"
+            },
+            "Microsoft.Extensions.Logging": {
+              "target": "Package",
+              "version": "[8.0.0, )"
+            }
+          },
+          "imports": [
+            "net461",
+            "net462",
+            "net47",
+            "net471",
+            "net472",
+            "net48",
+            "net481"
+          ],
+          "assetTargetFallback": true,
+          "warn": true,
+          "frameworkReferences": {
+            "Microsoft.NETCore.App": {
+              "privateAssets": "all"
+            }
+          },
+          "runtimeIdentifierGraphPath": "C:\\Program Files\\dotnet\\sdk\\10.0.100/PortableRuntimeIdentifierGraph.json"
+        }
+      }
+    },
+    "C:\\Users\\sepio\\Desktop\\Umi_Health\\Umi_Health\\backend\\src\\UmiHealth.Core\\UmiHealth.Core.csproj": {
+      "version": "1.0.0",
+      "restore": {
+        "projectUniqueName": "C:\\Users\\sepio\\Desktop\\Umi_Health\\Umi_Health\\backend\\src\\UmiHealth.Core\\UmiHealth.Core.csproj",
+        "projectName": "UmiHealth.Core",
+        "projectPath": "C:\\Users\\sepio\\Desktop\\Umi_Health\\Umi_Health\\backend\\src\\UmiHealth.Core\\UmiHealth.Core.csproj",
+        "packagesPath": "C:\\Users\\sepio\\.nuget\\packages\\",
+        "outputPath": "C:\\Users\\sepio\\Desktop\\Umi_Health\\Umi_Health\\backend\\src\\UmiHealth.Core\\obj\\",
+        "projectStyle": "PackageReference",
+        "configFilePaths": [
+          "C:\\Users\\sepio\\AppData\\Roaming\\NuGet\\NuGet.Config"
+        ],
+        "originalTargetFrameworks": [
+          "net8.0"
+        ],
+        "sources": {
+          "https://api.nuget.org/v3/index.json": {}
+        },
+        "frameworks": {
+          "net8.0": {
+            "targetAlias": "net8.0",
+            "projectReferences": {}
+          }
+        },
+        "warningProperties": {
+          "warnAsError": [
+            "NU1605"
+          ]
+        },
+        "restoreAuditProperties": {
+          "enableAudit": "true",
+          "auditLevel": "low",
+          "auditMode": "direct"
+        },
+        "SdkAnalysisLevel": "10.0.100"
+      },
+      "frameworks": {
+        "net8.0": {
+          "targetAlias": "net8.0",
+          "imports": [
+            "net461",
+            "net462",
+            "net47",
+            "net471",
+            "net472",
+            "net48",
+            "net481"
+          ],
+          "assetTargetFallback": true,
+          "warn": true,
+          "frameworkReferences": {
+            "Microsoft.NETCore.App": {
+              "privateAssets": "all"
+            }
+          },
+          "runtimeIdentifierGraphPath": "C:\\Program Files\\dotnet\\sdk\\10.0.100/PortableRuntimeIdentifierGraph.json"
+        }
+      }
+    },
+    "C:\\Users\\sepio\\Desktop\\Umi_Health\\Umi_Health\\backend\\src\\UmiHealth.Domain\\UmiHealth.Domain.csproj": {
+      "version": "1.0.0",
+      "restore": {
+        "projectUniqueName": "C:\\Users\\sepio\\Desktop\\Umi_Health\\Umi_Health\\backend\\src\\UmiHealth.Domain\\UmiHealth.Domain.csproj",
+        "projectName": "UmiHealth.Domain",
+        "projectPath": "C:\\Users\\sepio\\Desktop\\Umi_Health\\Umi_Health\\backend\\src\\UmiHealth.Domain\\UmiHealth.Domain.csproj",
+        "packagesPath": "C:\\Users\\sepio\\.nuget\\packages\\",
+        "outputPath": "C:\\Users\\sepio\\Desktop\\Umi_Health\\Umi_Health\\backend\\src\\UmiHealth.Domain\\obj\\",
+        "projectStyle": "PackageReference",
+        "configFilePaths": [
+          "C:\\Users\\sepio\\AppData\\Roaming\\NuGet\\NuGet.Config"
+        ],
+        "originalTargetFrameworks": [
+          "net8.0"
+        ],
+        "sources": {
+          "https://api.nuget.org/v3/index.json": {}
+        },
+        "frameworks": {
+          "net8.0": {
+            "targetAlias": "net8.0",
+            "projectReferences": {
+              "C:\\Users\\sepio\\Desktop\\Umi_Health\\Umi_Health\\backend\\src\\UmiHealth.Core\\UmiHealth.Core.csproj": {
+                "projectPath": "C:\\Users\\sepio\\Desktop\\Umi_Health\\Umi_Health\\backend\\src\\UmiHealth.Core\\UmiHealth.Core.csproj"
+              }
+            }
+          }
+        },
+        "warningProperties": {
+          "warnAsError": [
+            "NU1605"
+          ]
+        },
+        "restoreAuditProperties": {
+          "enableAudit": "true",
+          "auditLevel": "low",
+          "auditMode": "direct"
+        },
+        "SdkAnalysisLevel": "10.0.100"
+      },
+      "frameworks": {
+        "net8.0": {
+          "targetAlias": "net8.0",
+          "imports": [
+            "net461",
+            "net462",
+            "net47",
+            "net471",
+            "net472",
+            "net48",
+            "net481"
+          ],
+          "assetTargetFallback": true,
+          "warn": true,
+          "frameworkReferences": {
+            "Microsoft.NETCore.App": {
+              "privateAssets": "all"
+            }
+          },
+          "runtimeIdentifierGraphPath": "C:\\Program Files\\dotnet\\sdk\\10.0.100/PortableRuntimeIdentifierGraph.json"
+        }
+      }
+    },
+    "C:\\Users\\sepio\\Desktop\\Umi_Health\\Umi_Health\\backend\\src\\UmiHealth.Identity\\UmiHealth.Identity.csproj": {
+      "version": "1.0.0",
+      "restore": {
+        "projectUniqueName": "C:\\Users\\sepio\\Desktop\\Umi_Health\\Umi_Health\\backend\\src\\UmiHealth.Identity\\UmiHealth.Identity.csproj",
+        "projectName": "UmiHealth.Identity",
+        "projectPath": "C:\\Users\\sepio\\Desktop\\Umi_Health\\Umi_Health\\backend\\src\\UmiHealth.Identity\\UmiHealth.Identity.csproj",
+        "packagesPath": "C:\\Users\\sepio\\.nuget\\packages\\",
+        "outputPath": "C:\\Users\\sepio\\Desktop\\Umi_Health\\Umi_Health\\backend\\src\\UmiHealth.Identity\\obj\\",
+        "projectStyle": "PackageReference",
+        "configFilePaths": [
+          "C:\\Users\\sepio\\AppData\\Roaming\\NuGet\\NuGet.Config"
+        ],
+        "originalTargetFrameworks": [
+          "net8.0"
+        ],
+        "sources": {
+          "https://api.nuget.org/v3/index.json": {}
+        },
+        "frameworks": {
+          "net8.0": {
+            "targetAlias": "net8.0",
+            "projectReferences": {
+              "C:\\Users\\sepio\\Desktop\\Umi_Health\\Umi_Health\\backend\\src\\UmiHealth.Core\\UmiHealth.Core.csproj": {
+                "projectPath": "C:\\Users\\sepio\\Desktop\\Umi_Health\\Umi_Health\\backend\\src\\UmiHealth.Core\\UmiHealth.Core.csproj"
+              },
+              "C:\\Users\\sepio\\Desktop\\Umi_Health\\Umi_Health\\backend\\src\\UmiHealth.Infrastructure\\UmiHealth.Infrastructure.csproj": {
+                "projectPath": "C:\\Users\\sepio\\Desktop\\Umi_Health\\Umi_Health\\backend\\src\\UmiHealth.Infrastructure\\UmiHealth.Infrastructure.csproj"
+              },
+              "C:\\Users\\sepio\\Desktop\\Umi_Health\\Umi_Health\\backend\\src\\UmiHealth.Shared\\UmiHealth.Shared.csproj": {
+                "projectPath": "C:\\Users\\sepio\\Desktop\\Umi_Health\\Umi_Health\\backend\\src\\UmiHealth.Shared\\UmiHealth.Shared.csproj"
+              }
+            }
+          }
+        },
+        "warningProperties": {
+          "warnAsError": [
+            "NU1605"
+          ]
+        },
+        "restoreAuditProperties": {
+          "enableAudit": "true",
+          "auditLevel": "low",
+          "auditMode": "direct"
+        },
+        "SdkAnalysisLevel": "10.0.100"
+      },
+      "frameworks": {
+        "net8.0": {
+          "targetAlias": "net8.0",
+          "dependencies": {
+            "Microsoft.AspNetCore.Authentication.JwtBearer": {
+              "target": "Package",
+              "version": "[8.0.0, )"
+            },
+            "Microsoft.AspNetCore.Identity.EntityFrameworkCore": {
+              "target": "Package",
+              "version": "[8.0.0, )"
+            },
+            "Microsoft.Extensions.Logging": {
+              "target": "Package",
+              "version": "[8.0.0, )"
+            },
+            "Microsoft.IdentityModel.Tokens": {
+              "target": "Package",
+              "version": "[7.0.3, )"
+            },
+            "System.IdentityModel.Tokens.Jwt": {
+              "target": "Package",
+              "version": "[7.0.3, )"
+            }
+          },
+          "imports": [
+            "net461",
+            "net462",
+            "net47",
+            "net471",
+            "net472",
+            "net48",
+            "net481"
+          ],
+          "assetTargetFallback": true,
+          "warn": true,
+          "frameworkReferences": {
+            "Microsoft.NETCore.App": {
+              "privateAssets": "all"
+            }
+          },
+          "runtimeIdentifierGraphPath": "C:\\Program Files\\dotnet\\sdk\\10.0.100/PortableRuntimeIdentifierGraph.json"
+        }
+      }
+    },
+    "C:\\Users\\sepio\\Desktop\\Umi_Health\\Umi_Health\\backend\\src\\UmiHealth.Infrastructure\\UmiHealth.Infrastructure.csproj": {
+      "version": "1.0.0",
+      "restore": {
+        "projectUniqueName": "C:\\Users\\sepio\\Desktop\\Umi_Health\\Umi_Health\\backend\\src\\UmiHealth.Infrastructure\\UmiHealth.Infrastructure.csproj",
+        "projectName": "UmiHealth.Infrastructure",
+        "projectPath": "C:\\Users\\sepio\\Desktop\\Umi_Health\\Umi_Health\\backend\\src\\UmiHealth.Infrastructure\\UmiHealth.Infrastructure.csproj",
+        "packagesPath": "C:\\Users\\sepio\\.nuget\\packages\\",
+        "outputPath": "C:\\Users\\sepio\\Desktop\\Umi_Health\\Umi_Health\\backend\\src\\UmiHealth.Infrastructure\\obj\\",
+        "projectStyle": "PackageReference",
+        "configFilePaths": [
+          "C:\\Users\\sepio\\AppData\\Roaming\\NuGet\\NuGet.Config"
+        ],
+        "originalTargetFrameworks": [
+          "net8.0"
+        ],
+        "sources": {
+          "https://api.nuget.org/v3/index.json": {}
+        },
+        "frameworks": {
+          "net8.0": {
+            "targetAlias": "net8.0",
+            "projectReferences": {
+              "C:\\Users\\sepio\\Desktop\\Umi_Health\\Umi_Health\\backend\\src\\UmiHealth.Application\\UmiHealth.Application.csproj": {
+                "projectPath": "C:\\Users\\sepio\\Desktop\\Umi_Health\\Umi_Health\\backend\\src\\UmiHealth.Application\\UmiHealth.Application.csproj"
+              },
+              "C:\\Users\\sepio\\Desktop\\Umi_Health\\Umi_Health\\backend\\src\\UmiHealth.Core\\UmiHealth.Core.csproj": {
+                "projectPath": "C:\\Users\\sepio\\Desktop\\Umi_Health\\Umi_Health\\backend\\src\\UmiHealth.Core\\UmiHealth.Core.csproj"
+              }
+            }
+          }
+        },
+        "warningProperties": {
+          "warnAsError": [
+            "NU1605"
+          ]
+        },
+        "restoreAuditProperties": {
+          "enableAudit": "true",
+          "auditLevel": "low",
+          "auditMode": "direct"
+        },
+        "SdkAnalysisLevel": "10.0.100"
+      },
+      "frameworks": {
+        "net8.0": {
+          "targetAlias": "net8.0",
+          "dependencies": {
+            "Hangfire.AspNetCore": {
+              "target": "Package",
+              "version": "[1.8.12, )"
+            },
+            "Hangfire.PostgreSql": {
+              "target": "Package",
+              "version": "[1.20.8, )"
+            },
+            "Microsoft.EntityFrameworkCore": {
+              "target": "Package",
+              "version": "[8.0.0, )"
+            },
+            "Microsoft.EntityFrameworkCore.Design": {
+              "target": "Package",
+              "version": "[8.0.0, )"
+            },
+            "Microsoft.EntityFrameworkCore.Tools": {
+              "target": "Package",
+              "version": "[8.0.0, )"
+            },
+            "Microsoft.Extensions.Caching.StackExchangeRedis": {
+              "target": "Package",
+              "version": "[8.0.0, )"
+            },
+            "Npgsql.EntityFrameworkCore.PostgreSQL": {
+              "target": "Package",
+              "version": "[8.0.0, )"
+            },
+            "Serilog.Extensions.Hosting": {
+              "target": "Package",
+              "version": "[8.0.0, )"
+            },
+            "Serilog.Sinks.PostgreSQL": {
+              "target": "Package",
+              "version": "[2.3.0, )"
+            },
+            "StackExchange.Redis": {
+              "target": "Package",
+              "version": "[2.7.10, )"
+            }
+          },
+          "imports": [
+            "net461",
+            "net462",
+            "net47",
+            "net471",
+            "net472",
+            "net48",
+            "net481"
+          ],
+          "assetTargetFallback": true,
+          "warn": true,
+          "frameworkReferences": {
+            "Microsoft.NETCore.App": {
+              "privateAssets": "all"
+            }
+          },
+          "runtimeIdentifierGraphPath": "C:\\Program Files\\dotnet\\sdk\\10.0.100/PortableRuntimeIdentifierGraph.json"
+        }
+      }
+    },
+    "C:\\Users\\sepio\\Desktop\\Umi_Health\\Umi_Health\\backend\\src\\UmiHealth.Shared\\UmiHealth.Shared.csproj": {
+      "version": "1.0.0",
+      "restore": {
+        "projectUniqueName": "C:\\Users\\sepio\\Desktop\\Umi_Health\\Umi_Health\\backend\\src\\UmiHealth.Shared\\UmiHealth.Shared.csproj",
+        "projectName": "UmiHealth.Shared",
+        "projectPath": "C:\\Users\\sepio\\Desktop\\Umi_Health\\Umi_Health\\backend\\src\\UmiHealth.Shared\\UmiHealth.Shared.csproj",
+        "packagesPath": "C:\\Users\\sepio\\.nuget\\packages\\",
+        "outputPath": "C:\\Users\\sepio\\Desktop\\Umi_Health\\Umi_Health\\backend\\src\\UmiHealth.Shared\\obj\\",
+        "projectStyle": "PackageReference",
+        "configFilePaths": [
+          "C:\\Users\\sepio\\AppData\\Roaming\\NuGet\\NuGet.Config"
+        ],
+        "originalTargetFrameworks": [
+          "net8.0"
+        ],
+        "sources": {
+          "https://api.nuget.org/v3/index.json": {}
+        },
+        "frameworks": {
+          "net8.0": {
+            "targetAlias": "net8.0",
+            "projectReferences": {}
+          }
+        },
+        "warningProperties": {
+          "warnAsError": [
+            "NU1605"
+          ]
+        },
+        "restoreAuditProperties": {
+          "enableAudit": "true",
+          "auditLevel": "low",
+          "auditMode": "direct"
+        },
+        "SdkAnalysisLevel": "10.0.100"
+      },
+      "frameworks": {
+        "net8.0": {
+          "targetAlias": "net8.0",
+          "dependencies": {
+            "System.ComponentModel.Annotations": {
+              "target": "Package",
+              "version": "[5.0.0, )"
+            }
+          },
+          "imports": [
+            "net461",
+            "net462",
+            "net47",
+            "net471",
+            "net472",
+            "net48",
+            "net481"
+          ],
+          "assetTargetFallback": true,
+          "warn": true,
+          "frameworkReferences": {
+            "Microsoft.NETCore.App": {
+              "privateAssets": "all"
+            }
+          },
+          "runtimeIdentifierGraphPath": "C:\\Program Files\\dotnet\\sdk\\10.0.100/PortableRuntimeIdentifierGraph.json"
+        }
+      }
+    }
+  }
+}

@@ -1,0 +1,245 @@
+/* Tailwind CSS - Compiled Output */
+*, ::before, ::after {
+  box-sizing: border-box;
+  border-width: 0;
+  border-style: solid;
+  border-color: #e5e7eb;
+}
+
+::before, ::after {
+  --tw-content: '';
+}
+
+html {
+  line-height: 1.5;
+  -moz-tab-size: 4;
+  tab-size: 4;
+  font-family: ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, "Noto Sans", sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol", "Noto Color Emoji";
+  font-feature-settings: normal;
+  font-variation-settings: normal;
+}
+
+body {
+  margin: 0;
+  line-height: inherit;
+}
+
+/* Custom styles for UmiHealth Information Systems */
+:root {
+  --color-primary-blue: #2563EB;
+  --color-accent-teal: #14B8A6;
+  --color-text-white: #FFFFFF;
+  --color-subtle-blue: #EFF6FF;
+  --font-primary: 'Inter', sans-serif;
+}
+
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+body {
+  font-family: 'Nunito', 'Varela Round', sans-serif;
+  line-height: 1.5;
+}
+
+/* Utility classes */
+.text-primary-blue {
+  color: var(--color-primary-blue);
+}
+
+.text-accent-teal {
+  color: var(--color-accent-teal);
+}
+
+.bg-primary-blue {
+  background-color: var(--color-primary-blue);
+}
+
+.bg-accent-teal {
+  background-color: var(--color-accent-teal);
+}
+
+/* Component styles */
+.auth-container {
+  display: flex;
+  min-height: 100vh;
+}
+
+.auth-left {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 2rem;
+}
+
+.auth-right {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 2rem;
+  background: rgba(255, 255, 255, 0.05);
+  -webkit-backdrop-filter: blur(10px);
+  backdrop-filter: blur(10px);
+}
+
+.auth-card {
+  width: 100%;
+  max-width: 500px;
+  background: rgba(255, 255, 255, 0.1);
+  -webkit-backdrop-filter: blur(10px);
+  backdrop-filter: blur(10px);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  border-radius: 20px;
+  padding: 1.25rem;
+  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.2);
+  max-height: 95vh;
+  overflow-y: auto;
+  margin: 0 auto;
+}
+
+/* Form styles */
+.form-input {
+  width: 100%;
+  padding: 0.75rem;
+  background: rgba(255, 255, 255, 0.1);
+  border: 1px solid rgba(255, 255, 255, 0.3);
+  border-radius: 12px;
+  color: var(--color-text-white);
+  font-size: 0.85rem;
+  font-family: 'Varela Round', sans-serif;
+  transition: all 0.3s ease;
+}
+
+.form-input::placeholder {
+  color: rgba(255, 255, 255, 0.5);
+}
+
+.form-input:focus {
+  outline: none;
+  background: rgba(255, 255, 255, 0.15);
+  border-color: rgba(255, 255, 255, 0.5);
+}
+
+.form-select {
+  width: 100%;
+  padding: 0.75rem;
+  background: rgba(255, 255, 255, 0.1);
+  border: 1px solid rgba(255, 255, 255, 0.3);
+  border-radius: 12px;
+  color: var(--color-text-white);
+  font-size: 0.85rem;
+  font-family: 'Varela Round', sans-serif;
+  transition: all 0.3s ease;
+  cursor: pointer;
+}
+
+.form-select option {
+  background: var(--color-primary-blue);
+  color: var(--color-text-white);
+}
+
+/* Button styles */
+.submit-button {
+  width: 100%;
+  padding: 0.625rem;
+  background: var(--color-text-white);
+  color: var(--color-primary-blue);
+  border: none;
+  border-radius: 12px;
+  font-size: 0.85rem;
+  font-weight: 700;
+  font-family: 'Nunito', 'Varela Round', sans-serif;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  margin-bottom: 0.75rem;
+}
+
+.submit-button:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 10px 20px rgba(0, 0, 0, 0.2);
+}
+
+.submit-button:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+  transform: none;
+}
+
+/* Tab styles */
+.tab-bar {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 0.5rem;
+  margin-bottom: 1rem;
+  justify-content: center;
+  width: 100%;
+  max-width: auto;
+  margin-left: auto;
+  margin-right: auto;
+}
+
+.tab-button {
+  padding: 0.5rem 0.75rem;
+  border-radius: 12px;
+  border: 1px solid rgba(255, 255, 255, 0.3);
+  background: rgba(255, 255, 255, 0.05);
+  color: var(--color-text-white);
+  font-size: 0.75rem;
+  font-weight: 600;
+  text-align: center;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.tab-button.active {
+  background: rgba(20, 184, 166, 0.25);
+  border-color: var(--color-accent-teal);
+}
+
+/* Error and success messages */
+.error-message {
+  background: rgba(244, 76, 76, 0.2);
+  border: 1px solid rgba(244, 76, 76, 0.5);
+  color: #FCA5A5;
+  padding: 0.75rem;
+  border-radius: 8px;
+  font-size: 0.9rem;
+  margin-bottom: 1rem;
+}
+
+.success-message {
+  background: rgba(16, 185, 129, 0.2);
+  border: 1px solid rgba(16, 185, 129, 0.5);
+  color: #10B981;
+  padding: 0.75rem;
+  border-radius: 8px;
+  font-size: 0.9rem;
+  margin-bottom: 1rem;
+}
+
+/* Responsive design */
+@media (max-width: 768px) {
+  .auth-container {
+    flex-direction: column;
+  }
+
+  .auth-right {
+    display: none;
+  }
+
+  .auth-card {
+    max-width: 100%;
+    padding: 2rem 1.5rem;
+    max-height: none;
+  }
+
+  .tab-bar {
+    grid-template-columns: 1fr;
+  }
+}

@@ -927,26 +927,91 @@
   </div>
 
   <script>
-    // Mock API objects to prevent errors
-    window.UmiHealthInformationSystemsAPI = {
-      get: async (url) => {
-        console.log('Mock API GET:', url);
-        return { success: true };
-      }
-    };
-    
+    // Real API configuration
     window.authAPI = {
       register: async (data) => {
-        console.log('Mock registration:', data);
-        return {
-          success: true,
-          accessToken: 'mock-token',
-          refreshToken: 'mock-refresh',
-          user: { id: 1, name: data.adminFullName },
-          tenant: { id: 1, name: data.pharmacyName },
-          subscription: { plan: 'Care', status: 'Trial' },
-          redirectUrl: '/account/setup.html'
-        };
+        try {
+          const response = await fetch('http://localhost:5000/api/v1/auth/register', {
+            method: 'POST',
+            mode: 'cors',
+            headers: {
+              'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+              email: data.email,
+              password: data.password,
+              confirmPassword: data.confirmPassword,
+              adminFullName: data.adminFullName,
+              phoneNumber: data.phoneNumber,
+              pharmacyName: data.pharmacyName,
+              username: data.username
+            })
+          });
+
+          const result = await response.json();
+
+          if (response.ok && result.success) {
+            const data = result.data || {};
+            return {
+              success: true,
+              accessToken: data.accessToken || 'mock-token',
+              refreshToken: data.refreshToken || 'mock-refresh',
+              user: {
+                id: data.id || 1,
+                name: data.username || `${data.firstName} ${data.lastName}`,
+                email: data.email
+              },
+              tenant: {
+                id: data.tenantId || 1,
+                name: data.pharmacyName
+              },
+              subscription: { plan: 'Care', status: 'Trial' },
+              redirectUrl: result.redirectUrl || '/portals/admin/home.html'
+            };
+          } else {
+            return {
+              success: false,
+              message: result.message || 'Registration failed'
+            };
+          }
+        } catch (error) {
+          console.error('Registration error:', error);
+          
+          // Handle CORS error specifically
+          if (error.message && error.message.includes('CORS')) {
+            return {
+              success: false,
+              message: 'CORS Error: Backend server is not configured to allow requests from this domain. Please contact administrator.'
+            };
+          }
+          
+          // Handle network errors
+          if (error.message && error.message.includes('Failed to fetch')) {
+            return {
+              success: false,
+              message: 'Network Error: Unable to connect to the backend server. Please ensure the backend is running on http://localhost:5000'
+            };
+          }
+          
+          return {
+            success: false,
+            message: 'Network error. Please try again.'
+          };
+        }
+      }
+    };
+
+    // Real API for pharmacy name checking
+    window.UmiHealthInformationSystemsAPI = {
+      get: async (url) => {
+        try {
+          const response = await fetch(url);
+          const result = await response.json();
+          return result;
+        } catch (error) {
+          console.error('API error:', error);
+          return { success: true }; // Return success for now to prevent blocking
+        }
       }
     };
 
@@ -994,7 +1059,6 @@
             'pharmacyName',
             'physicalAddress',
             'province',
-            'pharmacyType',
             'adminFullName',
             'phoneNumber',
             'username',
@@ -1036,7 +1100,7 @@
             }
 
             const result = await window.UmiHealthInformationSystemsAPI.get(
-              `/api/auth/check-pharmacy-name/${encodeURIComponent(this.signupForm.pharmacyName)}`
+              `http://localhost:5000/api/auth/check-pharmacy-name/${encodeURIComponent(this.signupForm.pharmacyName)}`
             );
 
             if (!result.success) {
@@ -1085,7 +1149,6 @@
         validateForm() {
           this.fieldErrors = {};
 
-          // Validate plan
           // Validate password
           if (!this.signupForm.password) {
             this.fieldErrors.password = 'Password is required';
@@ -1093,9 +1156,13 @@
             this.fieldErrors.password = 'Password must have at least 6 characters, 1 letter, and 1 number';
           }
 
-          // Validate terms
+          // Validate password confirmation
           if (this.signupForm.password && this.signupForm.confirmPassword && this.signupForm.password !== this.signupForm.confirmPassword) {
             this.fieldErrors.confirmPassword = 'Passwords must match';
+          }
+
+          if (!this.signupForm.pharmacyName) {
+            this.fieldErrors.pharmacyName = 'Pharmacy name is required';
           }
 
           if (!this.signupForm.physicalAddress) {
@@ -1104,14 +1171,6 @@
 
           if (!this.signupForm.province) {
             this.fieldErrors.province = 'Please select a province';
-          }
-
-          if (!this.signupForm.pharmacyType) {
-            this.fieldErrors.pharmacyType = 'Please select a pharmacy type';
-          }
-
-          if (!this.signupForm.selectedPlan) {
-            this.fieldErrors.selectedPlan = 'Please pick a subscription plan';
           }
 
           if (!this.signupForm.adminFullName) {
@@ -1154,8 +1213,7 @@
           if (section === 'pharmacy') {
             return this.signupForm.pharmacyName.trim() &&
                    this.signupForm.physicalAddress.trim() &&
-                   this.signupForm.province &&
-                   this.signupForm.pharmacyType;
+                   this.signupForm.province;
           }
 
           if (section === 'admin') {
@@ -1220,7 +1278,7 @@
               province: this.signupForm.province,
               adminFullName: this.signupForm.adminFullName.trim(),
               phoneNumber: this.signupForm.phoneNumber.trim(),
-              email: this.signupForm.adminEmail.trim() || this.generateEmail(),
+              email: this.signupForm.adminEmail.trim() || generatedEmail,
               username: this.signupForm.username.trim(),
               password: this.signupForm.password,
               confirmPassword: this.signupForm.confirmPassword

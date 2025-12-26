@@ -7,7 +7,6 @@
     "install-deps": "npm install",
     "start": "node server.js"
   },
-  "devDependencies": {},
   "keywords": [
     "pharmacy",
     "healthcare",
@@ -15,5 +14,21 @@
     "system"
   ],
   "author": "Umi Health Information Systems",
-  "license": "MIT"
+  "license": "MIT",
+  "directories": {
+    "doc": "docs"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/mmushibi/umi.git"
+  },
+  "type": "commonjs",
+  "bugs": {
+    "url": "https://github.com/mmushibi/umi/issues"
+  },
+  "homepage": "https://github.com/mmushibi/umi#readme",
+  "dependencies": {
+    "cors": "^2.8.5",
+    "express": "^5.2.1"
+  }
 }

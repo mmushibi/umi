@@ -1,0 +1,59 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: background-jobs
+  namespace: umihealth
+  labels:
+    app: background-jobs
+    tier: backend
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: background-jobs
+  template:
+    metadata:
+      labels:
+        app: background-jobs
+        tier: backend
+    spec:
+      containers:
+      - name: background-jobs
+        image: umihealth/jobs:latest
+        env:
+        - name: ASPNETCORE_ENVIRONMENT
+          valueFrom:
+            configMapKeyRef:
+              name: umihealth-config
+              key: aspnetcore-environment
+        - name: ConnectionStrings__DefaultConnection
+          valueFrom:
+            secretKeyRef:
+              name: azure-secrets
+              key: postgres-connection
+        - name: Redis__ConnectionString
+          valueFrom:
+            secretKeyRef:
+              name: azure-secrets
+              key: redis-connection
+        - name: ApiBaseUrl
+          value: "http://umihealth-api"
+        resources:
+          requests:
+            memory: "256Mi"
+            cpu: "250m"
+          limits:
+            memory: "512Mi"
+            cpu: "500m"
+        livenessProbe:
+          httpGet:
+            path: /health
+            port: 8080
+          initialDelaySeconds: 30
+          periodSeconds: 10
+        readinessProbe:
+          httpGet:
+            path: /health/ready
+            port: 8080
+          initialDelaySeconds: 5
+          periodSeconds: 5

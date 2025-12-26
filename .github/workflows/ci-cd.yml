@@ -67,8 +67,8 @@ jobs:
       - name: Build and push Identity image
         uses: docker/build-push-action@v4
         with:
-          context: backend/UmiHealth.Identity/
-          file: backend/UmiHealth.Identity/Dockerfile
+          context: backend/
+          file: backend/src/UmiHealth.Identity/Dockerfile
           push: true
           tags: |
             ${{ env.REGISTRY }}/${{ github.repository }}/umihealth-identity:latest
@@ -77,8 +77,8 @@ jobs:
       - name: Build and push Background Jobs image
         uses: docker/build-push-action@v4
         with:
-          context: backend/UmiHealth.Jobs/
-          file: backend/UmiHealth.Jobs/Dockerfile
+          context: backend/
+          file: backend/src/UmiHealth.Jobs/Dockerfile
           push: true
           tags: |
             ${{ env.REGISTRY }}/${{ github.repository }}/umihealth-jobs:latest

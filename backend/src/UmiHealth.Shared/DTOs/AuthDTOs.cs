@@ -18,6 +18,13 @@ public class RegisterRequest
     public string PhoneNumber { get; set; } = string.Empty;
     public Guid TenantId { get; set; }
     public Guid? BranchId { get; set; }
+    
+    // Additional fields for pharmacy registration
+    public string PharmacyName { get; set; } = string.Empty;
+    public string PharmacyLicenseNumber { get; set; } = string.Empty;
+    public string Address { get; set; } = string.Empty;
+    public string Province { get; set; } = string.Empty;
+    public string Username { get; set; } = string.Empty;
 }
 
 public class RefreshTokenRequest

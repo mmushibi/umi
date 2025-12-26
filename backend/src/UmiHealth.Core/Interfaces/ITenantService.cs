@@ -1,4 +1,3 @@
-using UmiHealth.Domain.Entities;
 using UmiHealth.Core.Entities;
 
 namespace UmiHealth.Core.Interfaces;

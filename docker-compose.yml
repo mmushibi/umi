@@ -15,8 +15,8 @@ services:
       - umihealth-network
     environment:
       - ASPNETCORE_ENVIRONMENT=Production
-      - ApiServices__UmiHealthApi__Url=http://umihealth-api:5000
-      - ApiServices__IdentityService__Url=http://identity-service:5001
+      - ApiServices__UmiHealthApi__Url=http://umihealth-api:8080
+      - ApiServices__IdentityService__Url=http://identity-service:8080
     volumes:
       - ./certs:/app/certs:ro
     restart: unless-stopped
@@ -36,7 +36,7 @@ services:
       - ASPNETCORE_ENVIRONMENT=Production
       - ConnectionStrings__DefaultConnection=Host=postgres;Port=5432;Database=UmiHealth;Username=umihealth;Password=${POSTGRES_PASSWORD}
       - Redis__ConnectionString=redis:6379
-      - IdentityService__Url=http://identity-service:5001
+      - IdentityService__Url=http://identity-service:8080
       - JwtSettings__Secret=${JWT_SECRET}
       - JwtSettings__Issuer=${JWT_ISSUER}
       - JwtSettings__Audience=${JWT_AUDIENCE}
@@ -130,7 +130,12 @@ services:
       - ASPNETCORE_ENVIRONMENT=Production
       - ConnectionStrings__DefaultConnection=Host=postgres;Port=5432;Database=UmiHealth;Username=umihealth;Password=${POSTGRES_PASSWORD}
       - Redis__ConnectionString=redis:6379,password=${REDIS_PASSWORD}
-      - ApiBaseUrl=http://umihealth-api:5000
+      - ApiBaseUrl=http://umihealth-api:8080
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8080/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
     restart: unless-stopped
 
   # Monitoring
@@ -151,6 +156,11 @@ services:
     volumes:
       - ./monitoring/prometheus.yml:/etc/prometheus/prometheus.yml:ro
       - prometheus_data:/prometheus
+    healthcheck:
+      test: ["CMD", "wget", "--quiet", "--tries=1", "--spider", "http://localhost:9090/-/healthy"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
     restart: unless-stopped
 
   grafana:
@@ -167,6 +177,11 @@ services:
     volumes:
       - grafana_data:/var/lib/grafana
       - ./monitoring/grafana/provisioning:/etc/grafana/provisioning:ro
+    healthcheck:
+      test: ["CMD-SHELL", "wget --quiet --tries=1 --spider http://localhost:3000/api/health || curl -f http://localhost:3000/api/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
     restart: unless-stopped
 
   # Reverse Proxy (Optional - for production)
@@ -174,8 +189,8 @@ services:
     image: nginx:alpine
     container_name: umihealth-nginx
     ports:
-      - "80:80"
-      - "443:443"
+      - "8080:80"
+      - "8443:443"
     depends_on:
       - api-gateway
     networks:
@@ -183,6 +198,11 @@ services:
     volumes:
       - ./nginx/nginx.conf:/etc/nginx/nginx.conf:ro
       - ./nginx/ssl:/etc/nginx/ssl:ro
+    healthcheck:
+      test: ["CMD", "wget", "--quiet", "--tries=1", "--spider", "http://localhost:80/health || curl -f http://localhost:80/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
     restart: unless-stopped
     profiles:
       - production
