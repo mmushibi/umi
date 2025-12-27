@@ -4,7 +4,7 @@
  */
 class AdminAPI {
   constructor() {
-    this.baseURL = 'http://localhost:5000/api/v1';
+    this.baseURL = 'http://localhost:5000';
     this.token = localStorage.getItem('umi_access_token');
     this.tenantId = localStorage.getItem('umi_tenant_id');
   }
@@ -26,7 +26,15 @@ class AdminAPI {
 
   // Generic API request method
   async request(endpoint, options = {}) {
-    const url = `${this.baseURL}${endpoint}`;
+    let url = `${this.baseURL}${endpoint}`;
+    
+    // Handle query parameters for GET requests
+    if (options.params && options.method === 'GET') {
+      const params = new URLSearchParams(options.params);
+      url += `?${params.toString()}`;
+      delete options.params;
+    }
+    
     const config = {
       headers: this.getHeaders(),
       ...options
@@ -84,13 +92,17 @@ class AdminAPI {
   }
 
   // User Management
-  async getUsers(page = 1, limit = 20, filters = {}) {
+  async getUsers(page = 1, limit = 100, filters = {}) {
     const params = new URLSearchParams({
-      page,
-      limit,
+      page: page.toString(),
+      limit: limit.toString(),
       ...filters
     });
-    return await this.request(`/admin/users?${params}`);
+    
+    return await this.request('/admin/users', {
+      method: 'GET',
+      params
+    });
   }
 
   async createUser(userData) {
@@ -273,6 +285,21 @@ class AdminAPI {
 
   async getReports() {
     return await this.request('/admin/reports');
+  }
+
+  async scheduleReport(scheduleData) {
+    return await this.request('/admin/reports/schedule', {
+      method: 'POST',
+      body: JSON.stringify(scheduleData)
+    });
+  }
+
+  async getScheduledReports() {
+    return await this.request('/admin/reports/scheduled');
+  }
+
+  async getBranchData(branchId) {
+    return await this.request(`/admin/branches/${branchId}/data`);
   }
 
   async downloadReport(reportId) {

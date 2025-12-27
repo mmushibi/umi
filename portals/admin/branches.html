@@ -704,7 +704,29 @@
       }
 
       .page-title-section {
-        display: none;
+        display: block;
+        flex: 1;
+        margin-right: 0;
+      }
+
+      .page-title-section .page-title {
+        font-size: 1.125rem;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+      }
+
+      .header-left {
+        flex-direction: row;
+        align-items: center;
+        gap: 0.5rem;
+        width: 100%;
+      }
+
+      .search-bar {
+        flex: 0 0 auto;
+        width: auto;
+        min-width: 150px;
       }
 
       .branch-content {

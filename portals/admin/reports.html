@@ -575,7 +575,29 @@
       }
 
       .page-title-section {
-        display: none;
+        display: block;
+        flex: 1;
+        margin-right: 0;
+      }
+
+      .page-title-section .page-title {
+        font-size: 1.125rem;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+      }
+
+      .header-left {
+        flex-direction: row;
+        align-items: center;
+        gap: 0.5rem;
+        width: 100%;
+      }
+
+      .search-bar {
+        flex: 0 0 auto;
+        width: auto;
+        min-width: 150px;
       }
 
       .reports-content {
@@ -1324,8 +1346,8 @@
         <span class="material-symbols-rounded nav-icon">admin_panel_settings</span>
         <span>User Management</span>
       </a>
-      <!-- Branch navigation - conditionally shown based on tier -->
-      <a href="branches.html" class="nav-item" x-show="canManageBranches()" data-feature="multiple_branches">
+      <!-- Branch navigation - always show for admin users -->
+      <a href="branches.html" class="nav-item" x-show="true" data-feature="multiple_branches">
         <span class="material-symbols-rounded nav-icon">business</span>
         <span>Branches</span>
       </a>
@@ -1410,7 +1432,7 @@
           <button class="stat-button" data-stat="growth-rate">
             <span class="material-symbols-rounded">trending_up</span>
             <span>Growth Rate</span>
-            <strong id="growthRateCount">15%</strong>
+            <strong id="growthRateCount" x-text="growthRate"></strong>
           </button>
           <button class="stat-button" data-stat="top-products">
             <span class="material-symbols-rounded">star</span>
@@ -1448,14 +1470,12 @@
             </select>
           </label>
           <label>
-            <span>Location</span>
-            <select id="reportLocation" x-model="reportLocation">
-              <option value="all" selected>All Locations</option>
-              <option value="lusaka">Lusaka</option>
-              <option value="copperbelt">Copperbelt</option>
-              <option value="central">Central</option>
-              <option value="eastern">Eastern</option>
-              <option value="southern">Southern</option>
+            <span>Branch</span>
+            <select id="reportBranch" x-model="reportBranch">
+              <option value="all" selected>All Branches</option>
+              <template x-for="branch in availableBranches" :key="branch.id">
+                <option :value="branch.id" x-text="branch.name"></option>
+              </template>
             </select>
           </label>
         </div>
@@ -1559,28 +1579,28 @@
               <span class="metric-icon material-symbols-rounded">inventory</span>
               <div class="metric-info">
                 <span class="metric-label">Total Stock Value</span>
-                <span class="metric-value" x-text="formatCurrency(125430)"></span>
+                <span class="metric-value" x-text="formatCurrency(totalStockValue)"></span>
               </div>
             </div>
             <div class="metric-card">
               <span class="metric-icon material-symbols-rounded">trending_down</span>
               <div class="metric-info">
                 <span class="metric-label">Low Stock Items</span>
-                <span class="metric-value">23</span>
+                <span class="metric-value" x-text="lowStockItems"></span>
               </div>
             </div>
             <div class="metric-card">
               <span class="metric-icon material-symbols-rounded">warning</span>
               <div class="metric-info">
                 <span class="metric-label">Expiring Soon</span>
-                <span class="metric-value">8</span>
+                <span class="metric-value" x-text="expiringItems"></span>
               </div>
             </div>
             <div class="metric-card">
               <span class="metric-icon material-symbols-rounded">speed</span>
               <div class="metric-info">
                 <span class="metric-label">Turnover Rate</span>
-                <span class="metric-value">4.2x</span>
+                <span class="metric-value" x-text="turnoverRate"></span>
               </div>
             </div>
           </div>
@@ -1593,7 +1613,7 @@
               <p class="widget-subtitle">Patient behavior and demographics</p>
             </div>
             <button class="icon-button" type="button" data-menu="patient" aria-haspopup="true"
-              aria-expanded="false" aria-controls="customerMenu" aria-label="Customer menu">
+              aria-expanded="false" aria-controls="customerMenu" aria-label="Patient menu">
               <span class="material-symbols-rounded" aria-hidden="true">more_horiz</span>
             </button>
             <div class="widget-menu" id="customerMenu" hidden>
@@ -1605,20 +1625,20 @@
           </header>
           <div class="customer-insights">
             <div class="insight-item">
-              <span class="insight-label">Total Customers</span>
+              <span class="insight-label">Total Patients</span>
               <span class="insight-value" x-text="totalPatients.toLocaleString()"></span>
             </div>
             <div class="insight-item">
               <span class="insight-label">New This Month</span>
-              <span class="insight-value">+86</span>
+              <span class="insight-value" x-text="newPatients"></span>
             </div>
             <div class="insight-item">
-              <span class="insight-label">Repeat Customers</span>
-              <span class="insight-value">68%</span>
+              <span class="insight-label">Repeat Patients</span>
+              <span class="insight-value" x-text="repeatRate"></span>
             </div>
             <div class="insight-item">
               <span class="insight-label">Avg. Purchase Value</span>
-              <span class="insight-value" x-text="formatCurrency(145.60)"></span>
+              <span class="insight-value" x-text="formatCurrency(avgPurchaseValue)"></span>
             </div>
           </div>
         </article>
@@ -1630,7 +1650,7 @@
             <h2>Generated Reports</h2>
             <span>Access and download your previously generated reports</span>
           </div>
-          <button class="add-product-btn" id="scheduleReportButton" type="button">
+          <button class="add-product-btn" id="scheduleReportButton" type="button" @click="openScheduleReportModal()">
             <span class="material-symbols-rounded">schedule</span>
             Schedule Report
           </button>
@@ -1709,7 +1729,21 @@
         <div class="form-grid">
           <label>
             <span>Report Name</span>
-            <input type="text" id="formReportName" name="reportName" required placeholder="Enter report name" x-model="newReport.name">
+            <input 
+              type="text" 
+              id="formReportName" 
+              name="reportName" 
+              placeholder="Enter report name or leave blank to auto-generate" 
+              x-model="newReport.name"
+              @input="showReportNameSuggestions"
+              @blur="hideReportNameSuggestions"
+              list="report-name-suggestions"
+            >
+            <datalist id="report-name-suggestions">
+              <template x-for="suggestion in reportNameSuggestions" :key="suggestion">
+                <option :value="suggestion" x-text="suggestion"></option>
+              </template>
+            </datalist>
           </label>
           <label>
             <span>Report Type</span>
@@ -1758,6 +1792,87 @@
     </div>
   </section>
 
+  <!-- Schedule Report Modal -->
+  <section class="modal" id="scheduleReportModal" role="dialog" aria-modal="true" aria-labelledby="scheduleReportModalTitle"
+    :class="showScheduleReportModal ? '' : 'hidden'">
+    <div class="modal-content">
+      <header class="modal-header">
+        <h2 id="scheduleReportModalTitle">Schedule Report</h2>
+        <button type="button" class="modal-close" @click="showScheduleReportModal = false" aria-label="Close schedule report form">
+          <span class="material-symbols-rounded" aria-hidden="true">close</span>
+        </button>
+      </header>
+      <form id="scheduleReportForm" class="modal-body" @submit.prevent="submitScheduleReport">
+        <div class="form-grid">
+          <label>
+            <span>Report Name</span>
+            <input 
+              type="text" 
+              id="scheduleReportName" 
+              name="reportName" 
+              placeholder="Enter report name or leave blank to auto-generate" 
+              x-model="scheduledReport.name"
+              @input="showReportNameSuggestions"
+              @blur="hideReportNameSuggestions"
+              list="report-name-suggestions"
+            >
+          </label>
+          <label>
+            <span>Report Type</span>
+            <select id="scheduleReportType" name="reportType" required x-model="scheduledReport.type">
+              <option value="">Select report type</option>
+              <option value="sales">Sales Report</option>
+              <option value="inventory">Inventory Report</option>
+              <option value="financial">Financial Report</option>
+              <option value="customer">Customer Report</option>
+              <option value="patient">Patient Report</option>
+            </select>
+          </label>
+          <label>
+            <span>Schedule Frequency</span>
+            <select id="scheduleFrequency" name="frequency" required x-model="scheduledReport.frequency">
+              <option value="">Select frequency</option>
+              <option value="daily">Daily</option>
+              <option value="weekly">Weekly</option>
+              <option value="monthly">Monthly</option>
+              <option value="quarterly">Quarterly</option>
+              <option value="yearly">Yearly</option>
+            </select>
+          </label>
+          <label>
+            <span>Start Date</span>
+            <input type="date" id="scheduleStartDate" name="startDate" required x-model="scheduledReport.startDate">
+          </label>
+          <label>
+            <span>End Date</span>
+            <input type="date" id="scheduleEndDate" name="endDate" x-model="scheduledReport.endDate">
+          </label>
+          <label>
+            <span>Format</span>
+            <select id="scheduleFormat" name="format" required x-model="scheduledReport.format">
+              <option value="pdf">PDF</option>
+              <option value="excel">Excel</option>
+              <option value="csv">CSV</option>
+            </select>
+          </label>
+          <label>
+            <span>Email Recipients</span>
+            <input type="text" id="scheduleEmailRecipients" name="emailRecipients" placeholder="Enter email addresses separated by commas" x-model="scheduledReport.emailRecipients">
+          </label>
+        </div>
+        <label class="form-textarea">
+          <span>Description</span>
+          <textarea id="scheduleDescription" name="description" rows="3"
+            placeholder="Add optional notes about this scheduled report" x-model="scheduledReport.description"></textarea>
+        </label>
+      </form>
+      <footer class="modal-footer">
+        <button type="button" class="secondary" @click="showScheduleReportModal = false">Cancel</button>
+        <button type="submit" form="scheduleReportForm" class="primary">Schedule Report</button>
+      </footer>
+    </div>
+  </section>
+
   <!-- Alpine.js Component -->
   <script>
     function reportsSystem() {
@@ -1766,8 +1881,28 @@
         searchQuery: '',
         reportPeriod: 'week',
         reportType: 'all',
-        reportLocation: 'all',
+        reportBranch: 'all',
         showGenerateReportModal: false,
+        showScheduleReportModal: false,
+        
+        // Report name suggestions
+        reportNameSuggestions: [
+          'Monthly Sales Report',
+          'Weekly Inventory Summary',
+          'Financial Performance Report',
+          'Customer Analytics Report',
+          'Patient Health Statistics',
+          'Daily Sales Summary',
+          'Quarterly Financial Report',
+          'Annual Business Review',
+          'Product Performance Analysis',
+          'Branch Comparison Report',
+          'Prescription Trends Report',
+          'Payment Processing Report',
+          'Staff Performance Metrics',
+          'Operational Efficiency Report',
+          'Compliance and Audit Report'
+        ],
         
         // User and pharmacy info
         pharmacyInfo: {
@@ -1782,6 +1917,28 @@
         
         topProducts: [],
         reports: [],
+        scheduledReports: [],
+        
+        // Report objects
+        newReport: {
+          name: '',
+          type: '',
+          startDate: '',
+          endDate: '',
+          format: 'pdf',
+          email: 'no',
+          description: ''
+        },
+        scheduledReport: {
+          name: '',
+          type: '',
+          frequency: '',
+          startDate: '',
+          endDate: '',
+          format: 'pdf',
+          emailRecipients: '',
+          description: ''
+        },
         
         // Dashboard metrics
         totalRevenue: 0,
@@ -1789,12 +1946,348 @@
         totalPatients: 0,
         totalPrescriptions: 0,
         
+        // Real-time inventory metrics
+        totalStockValue: 0,
+        lowStockItems: 0,
+        expiringItems: 0,
+        turnoverRate: '0x',
+        
+        // Real-time patient metrics
+        newPatients: 0,
+        repeatRate: '0%',
+        avgPurchaseValue: 0,
+        
+        // Growth rate and branch data
+        growthRate: '0%',
+        availableBranches: [],
+        
         // Data sync and API integration
         loading: false,
         
         init() {
+          this.loadPharmacyInfo();
           this.loadReportsFromAPI();
+          this.loadScheduledReportsFromAPI();
           this.setupEventListeners();
+          this.setupRealtimeSync();
+          this.loadRealtimeMetrics();
+        },
+
+        loadRealtimeMetrics() {
+          // Load real-time metrics from data sync
+          if (window.dataSync) {
+            const inventory = window.dataSync.get('inventory') || [];
+            const patients = window.dataSync.get('patients') || [];
+            const sales = window.dataSync.get('sales') || [];
+            const branches = window.dataSync.get('branches') || [];
+            
+            this.updateInventoryMetrics(inventory);
+            this.updateCustomerMetrics(patients);
+            this.updateDashboardMetrics();
+            this.updateGrowthRate(sales);
+            this.updateBranchData(branches);
+          }
+          
+          // Load branches from API if available
+          this.loadBranches();
+          
+          // Load current branch info for sidebar
+          this.loadCurrentBranchInfo();
+        },
+
+        loadCurrentBranchInfo() {
+          // Load current branch information and update pharmacy info display
+          const currentBranch = localStorage.getItem('umi_current_branch');
+          if (currentBranch) {
+            try {
+              const branch = JSON.parse(currentBranch);
+              // Update pharmacy info with branch-specific data
+              this.pharmacyInfo = {
+                name: branch.name || this.pharmacyInfo.name,
+                location: `${branch.address || branch.city || 'Lusaka'}, ${branch.province || branch.country || 'Zambia'}`
+              };
+            } catch (error) {
+              console.error('Error loading current branch info:', error);
+            }
+          }
+          
+          // Also check if we have branch data from data sync
+          if (window.dataSync && this.availableBranches.length > 0) {
+            const currentBranchId = localStorage.getItem('umi_current_branch_id');
+            if (currentBranchId) {
+              const branch = this.availableBranches.find(b => b.id === currentBranchId);
+              if (branch) {
+                this.pharmacyInfo = {
+                  name: branch.name || this.pharmacyInfo.name,
+                  location: `${branch.address || branch.city || 'Lusaka'}, ${branch.province || branch.country || 'Zambia'}`
+                };
+              }
+            }
+          }
+        },
+
+        loadBranches() {
+          // Load branches from API or data sync
+          if (window.adminAPI) {
+            window.adminAPI.getBranches()
+              .then(branches => {
+                this.availableBranches = branches;
+              })
+              .catch(error => {
+                console.error('Error loading branches:', error);
+                // Fallback to data sync
+                if (window.dataSync) {
+                  this.availableBranches = window.dataSync.get('branches') || [];
+                }
+              });
+          } else if (window.dataSync) {
+            this.availableBranches = window.dataSync.get('branches') || [];
+          }
+        },
+
+        updateGrowthRate(sales) {
+          // Calculate growth rate based on sales data
+          if (sales && sales.length > 0) {
+            const now = new Date();
+            const currentMonth = now.getMonth();
+            const currentYear = now.getFullYear();
+            
+            const currentMonthSales = sales.filter(sale => {
+              const saleDate = new Date(sale.date);
+              return saleDate.getMonth() === currentMonth && saleDate.getFullYear() === currentYear;
+            });
+            
+            const lastMonth = new Date(currentYear, currentMonth - 1, 1);
+            const lastMonthSales = sales.filter(sale => {
+              const saleDate = new Date(sale.date);
+              return saleDate.getMonth() === lastMonth.getMonth() && saleDate.getFullYear() === lastMonth.getFullYear();
+            });
+            
+            const currentRevenue = currentMonthSales.reduce((sum, sale) => sum + (sale.amount || 0), 0);
+            const lastRevenue = lastMonthSales.reduce((sum, sale) => sum + (sale.amount || 0), 0);
+            
+            if (lastRevenue > 0) {
+              const growth = ((currentRevenue - lastRevenue) / lastRevenue) * 100;
+              this.growthRate = `${growth > 0 ? '+' : ''}${growth.toFixed(1)}%`;
+            } else {
+              this.growthRate = currentRevenue > 0 ? '+100%' : '0%';
+            }
+          } else {
+            this.growthRate = '0%';
+          }
+        },
+
+        // Report name suggestions and auto-generation
+        showReportNameSuggestions() {
+          // Filter suggestions based on input
+          const input = this.newReport.name || this.scheduledReport.name || '';
+          if (input.length > 0) {
+            this.reportNameSuggestions = this.reportNameSuggestions.filter(suggestion =>
+              suggestion.toLowerCase().includes(input.toLowerCase())
+            );
+          }
+        },
+
+        hideReportNameSuggestions() {
+          // Auto-generate report name if field is left blank
+          setTimeout(() => {
+            if (!this.newReport.name && this.newReport.type) {
+              this.newReport.name = this.generateReportName(this.newReport.type);
+            }
+            if (!this.scheduledReport.name && this.scheduledReport.type) {
+              this.scheduledReport.name = this.generateReportName(this.scheduledReport.type);
+            }
+          }, 200);
+        },
+
+        generateReportName(reportType) {
+          const now = new Date();
+          const dateStr = now.toLocaleDateString('en-ZM', { 
+            year: 'numeric', 
+            month: 'short', 
+            day: 'numeric' 
+          });
+          
+          const typeNames = {
+            'sales': 'Sales Report',
+            'inventory': 'Inventory Report',
+            'financial': 'Financial Report',
+            'customer': 'Customer Report',
+            'patient': 'Patient Report'
+          };
+          
+          return `${typeNames[reportType] || 'Report'} - ${dateStr}`;
+        },
+
+        // Schedule report functionality
+        openScheduleReportModal() {
+          this.showScheduleReportModal = true;
+          this.resetScheduledReport();
+        },
+
+        resetScheduledReport() {
+          this.scheduledReport = {
+            name: '',
+            type: '',
+            frequency: '',
+            startDate: '',
+            endDate: '',
+            format: 'pdf',
+            emailRecipients: '',
+            description: ''
+          };
+        },
+
+        submitScheduleReport() {
+          if (!this.scheduledReport.type || !this.scheduledReport.frequency || !this.scheduledReport.startDate) {
+            this.showError('Please fill in all required fields');
+            return;
+          }
+
+          // Auto-generate name if not provided
+          if (!this.scheduledReport.name) {
+            this.scheduledReport.name = this.generateReportName(this.scheduledReport.type);
+          }
+
+          // Use adminAPI for backend integration
+          if (window.adminAPI) {
+            const scheduleData = {
+              name: this.scheduledReport.name,
+              type: this.scheduledReport.type,
+              frequency: this.scheduledReport.frequency,
+              startDate: this.scheduledReport.startDate,
+              endDate: this.scheduledReport.endDate,
+              format: this.scheduledReport.format,
+              emailRecipients: this.scheduledReport.emailRecipients,
+              description: this.scheduledReport.description
+            };
+
+            window.adminAPI.scheduleReport(scheduleData)
+              .then(response => {
+                const scheduledReport = {
+                  id: response.id || Date.now(),
+                  name: this.scheduledReport.name,
+                  type: this.scheduledReport.type,
+                  frequency: this.scheduledReport.frequency,
+                  startDate: this.scheduledReport.startDate,
+                  endDate: this.scheduledReport.endDate,
+                  format: this.scheduledReport.format,
+                  emailRecipients: this.scheduledReport.emailRecipients,
+                  description: this.scheduledReport.description,
+                  status: 'Scheduled',
+                  createdAt: new Date().toISOString()
+                };
+
+                this.scheduledReports.unshift(scheduledReport);
+                this.showScheduleReportModal = false;
+                this.resetScheduledReport();
+                this.showSuccess('Report scheduled successfully!');
+                this.saveScheduledReports();
+              })
+              .catch(error => {
+                console.error('Error scheduling report:', error);
+                this.showError('Failed to schedule report. Please try again.');
+              });
+          } else {
+            // Fallback to local storage
+            const scheduledReport = {
+              id: Date.now(),
+              name: this.scheduledReport.name,
+              type: this.scheduledReport.type,
+              frequency: this.scheduledReport.frequency,
+              startDate: this.scheduledReport.startDate,
+              endDate: this.scheduledReport.endDate,
+              format: this.scheduledReport.format,
+              emailRecipients: this.scheduledReport.emailRecipients,
+              description: this.scheduledReport.description,
+              status: 'Scheduled',
+              createdAt: new Date().toISOString()
+            };
+
+            this.scheduledReports.unshift(scheduledReport);
+            this.showScheduleReportModal = false;
+            this.resetScheduledReport();
+            this.showSuccess('Report scheduled successfully!');
+            this.saveScheduledReports();
+          }
+        },
+
+        loadScheduledReportsFromAPI() {
+          // Load scheduled reports from API or localStorage
+          if (window.adminAPI) {
+            window.adminAPI.getScheduledReports()
+              .then(reports => {
+                this.scheduledReports = reports;
+              })
+              .catch(error => {
+                console.error('Error loading scheduled reports:', error);
+                this.loadSampleScheduledReports();
+              });
+          } else {
+            this.loadSampleScheduledReports();
+          }
+        },
+
+        loadSampleScheduledReports() {
+          // Initialize empty scheduled reports array - real data will be loaded from API
+          this.scheduledReports = [];
+        },
+
+        saveScheduledReports() {
+          // Save scheduled reports to localStorage for persistence
+          localStorage.setItem('umi_scheduled_reports', JSON.stringify(this.scheduledReports));
+          
+          // Trigger data sync
+          if (window.dataSync) {
+            window.dataSync.set('scheduledReports', this.scheduledReports);
+          }
+        },
+
+        // Load pharmacy info from localStorage
+        loadPharmacyInfo() {
+          try {
+            // Load from current tenant data
+            const currentTenant = localStorage.getItem('umi_current_tenant');
+            if (currentTenant) {
+              const tenant = JSON.parse(currentTenant);
+              this.pharmacyInfo = {
+                name: tenant.name || 'Umi Health',
+                location: `${tenant.address || tenant.city || 'Lusaka'}, ${tenant.province || tenant.country || 'Zambia'}`
+              };
+            } else {
+              // Fallback to pharmacy settings
+              const pharmacySettings = localStorage.getItem('pharmacySettings');
+              if (pharmacySettings) {
+                const settings = JSON.parse(pharmacySettings);
+                this.pharmacyInfo = {
+                  name: settings.name || 'Umi Health',
+                  location: `${settings.address || settings.city || 'Lusaka'}, ${settings.province || settings.country || 'Zambia'}`
+                };
+              } else {
+                // Try to load from current branch
+                const currentBranch = localStorage.getItem('umi_current_branch');
+                if (currentBranch) {
+                  const branch = JSON.parse(currentBranch);
+                  this.pharmacyInfo = {
+                    name: branch.name || 'Umi Health',
+                    location: `${branch.address || branch.city || 'Lusaka'}, ${branch.province || branch.country || 'Zambia'}`
+                  };
+                } else {
+                  // Default fallback
+                  this.pharmacyInfo = {
+                    name: 'Umi Health',
+                    location: 'Lusaka, Zambia'
+                  };
+                }
+              }
+            }
+          } catch (error) {
+            console.error('Error loading pharmacy info:', error);
+            this.pharmacyInfo = {
+              name: 'Umi Health',
+              location: 'Lusaka, Zambia'
+            };
+          }
         },
         
         loadReportsFromAPI() {
@@ -1884,6 +2377,192 @@
               this.showWarning('Data synchronization error occurred');
             });
           }
+
+          // Set up real-time data synchronization
+          this.setupRealtimeSync();
+        },
+
+        setupRealtimeSync() {
+          // Set up real-time data synchronization
+          if (window.dataSync) {
+            // Subscribe to reports changes
+            window.dataSync.subscribe('reports', (reports) => {
+              this.reports = reports;
+              this.updateReportMetrics();
+            });
+
+            // Subscribe to scheduled reports changes
+            window.dataSync.subscribe('scheduledReports', (scheduledReports) => {
+              this.scheduledReports = scheduledReports;
+            });
+
+            // Subscribe to sales data for real-time updates
+            window.dataSync.subscribe('sales', (sales) => {
+              this.updateDashboardMetrics();
+              this.updateGrowthRate(sales);
+            });
+
+            // Subscribe to inventory data
+            window.dataSync.subscribe('inventory', (inventory) => {
+              this.updateInventoryMetrics(inventory);
+            });
+
+            // Subscribe to patient data
+            window.dataSync.subscribe('patients', (patients) => {
+              this.updateCustomerMetrics(patients);
+            });
+
+            // Subscribe to branch data for multi-branch support
+            window.dataSync.subscribe('branches', (branches) => {
+              this.updateBranchData(branches);
+              this.loadCurrentBranchInfo(); // Update sidebar when branches change
+            });
+
+            // Subscribe to current branch changes
+            window.dataSync.subscribe('currentBranch', (branch) => {
+              if (branch) {
+                this.pharmacyInfo = {
+                  name: branch.name || this.pharmacyInfo.name,
+                  location: `${branch.address || branch.city || 'Lusaka'}, ${branch.province || branch.country || 'Zambia'}`
+                };
+              }
+            });
+          }
+
+          // Set up WebSocket connection for real-time updates if available
+          this.setupWebSocketConnection();
+        },
+
+        setupWebSocketConnection() {
+          // WebSocket connection for real-time updates
+          if (window.WebSocket) {
+            try {
+              const wsUrl = `ws://localhost:5000/ws/reports?tenant=${this.getTenantId()}`;
+              this.ws = new WebSocket(wsUrl);
+
+              this.ws.onopen = () => {
+                console.log('WebSocket connected for real-time reports updates');
+              };
+
+              this.ws.onmessage = (event) => {
+                const data = JSON.parse(event.data);
+                this.handleRealtimeUpdate(data);
+              };
+
+              this.ws.onerror = (error) => {
+                console.error('WebSocket error:', error);
+              };
+
+              this.ws.onclose = () => {
+                console.log('WebSocket connection closed');
+                // Attempt to reconnect after 5 seconds
+                setTimeout(() => {
+                  this.setupWebSocketConnection();
+                }, 5000);
+              };
+            } catch (error) {
+              console.error('Failed to establish WebSocket connection:', error);
+            }
+          }
+        },
+
+        handleRealtimeUpdate(data) {
+          switch (data.type) {
+            case 'report_generated':
+              this.reports.unshift(data.report);
+              this.showSuccess('New report generated!');
+              break;
+            case 'report_scheduled':
+              this.scheduledReports.unshift(data.scheduledReport);
+              this.showSuccess('Report scheduled successfully!');
+              break;
+            case 'sales_update':
+              this.updateDashboardMetrics();
+              this.updateGrowthRate(window.dataSync.get('sales') || []);
+              break;
+            case 'inventory_update':
+              this.updateInventoryMetrics(data.inventory);
+              break;
+            case 'patient_update':
+              this.updateCustomerMetrics(data.patients);
+              break;
+            default:
+              console.log('Unknown real-time update type:', data.type);
+          }
+        },
+
+        getTenantId() {
+          const currentTenant = localStorage.getItem('umi_current_tenant');
+          return currentTenant ? JSON.parse(currentTenant).id : 'default';
+        },
+
+        fetchFromAllBranches() {
+          // Fetch data from all branches if multi-branch is enabled
+          if (this.canManageBranches()) {
+            if (window.adminAPI) {
+              window.adminAPI.getBranches()
+                .then(branches => {
+                  branches.forEach(branch => {
+                    this.fetchBranchData(branch.id);
+                  });
+                })
+                .catch(error => {
+                  console.error('Error fetching branches:', error);
+                });
+            }
+          }
+        },
+
+        fetchBranchData(branchId) {
+          // Fetch specific branch data
+          if (window.adminAPI) {
+            window.adminAPI.getBranchData(branchId)
+              .then(data => {
+                this.mergeBranchData(data);
+              })
+              .catch(error => {
+                console.error(`Error fetching branch ${branchId} data:`, error);
+              });
+          }
+        },
+
+        mergeBranchData(branchData) {
+          // Merge branch data with current data
+          if (branchData.sales) {
+            this.reports = [...this.reports, ...branchData.sales];
+          }
+          if (branchData.inventory) {
+            this.updateInventoryMetrics(branchData.inventory);
+          }
+          if (branchData.patients) {
+            this.updateCustomerMetrics(branchData.patients);
+          }
+        },
+
+        updateBranchData(branches) {
+          // Update branch-related data
+          this.availableBranches = branches;
+          this.updateReportMetrics();
+        },
+
+        updateDashboardMetrics() {
+          // Update dashboard metrics with real-time data
+          if (window.dataSync) {
+            const sales = window.dataSync.get('sales') || [];
+            const patients = window.dataSync.get('patients') || [];
+            const prescriptions = window.dataSync.get('prescriptions') || [];
+
+            this.totalRevenue = sales.reduce((total, sale) => total + (sale.amount || 0), 0);
+            this.totalTransactions = sales.length;
+            this.totalPatients = patients.length;
+            this.totalPrescriptions = prescriptions.length;
+          } else {
+            // Default values when no data sync available
+            this.totalRevenue = 0;
+            this.totalTransactions = 0;
+            this.totalPatients = 0;
+            this.totalPrescriptions = 0;
+          }
         },
         
         updateReportMetrics() {
@@ -1941,22 +2620,6 @@
           }, 5000);
         },
 
-        get totalRevenue() {
-          return this.topProducts.reduce((total, product) => total + product.revenue, 0);
-        },
-
-        get totalTransactions() {
-          return Math.floor(Math.random() * 500) + 1000;
-        },
-
-        get totalPatients() {
-          return Math.floor(Math.random() * 200) + 400;
-        },
-
-        get totalPrescriptions() {
-          return Math.floor(Math.random() * 100) + 250;
-        },
-
         get filteredReports() {
           return this.reports.filter(report => {
             const matchesSearch = report.name.toLowerCase().includes(this.searchQuery.toLowerCase()) ||
@@ -1984,6 +2647,11 @@
         },
 
         submitGenerateReport() {
+          // Auto-generate name if not provided
+          if (!this.newReport.name && this.newReport.type) {
+            this.newReport.name = this.generateReportName(this.newReport.type);
+          }
+
           if (!this.newReport.name || !this.newReport.type || !this.newReport.startDate || !this.newReport.endDate) {
             this.showError('Please fill in all required fields');
             return;
@@ -2024,6 +2692,7 @@
               this.showGenerateReportModal = false;
               this.resetNewReport();
               this.showSuccess('Report generated successfully!');
+              this.saveReports();
               
               // Refresh reports list
               this.loadReportsFromAPI();
@@ -2033,7 +2702,7 @@
               this.showError('Failed to generate report. Please try again.');
             });
           } else {
-            // Fallback to local mock data
+            // Fallback to local storage with real data fetching
             const report = {
               id: Date.now(),
               name: this.newReport.name,
@@ -2041,13 +2710,47 @@
               period: `${this.formatDate(this.newReport.startDate)} - ${this.formatDate(this.newReport.endDate)}`,
               status: 'Completed',
               date: this.formatDate(new Date()),
-              amount: Math.floor(Math.random() * 10000) + 1000
+              amount: this.calculateReportAmount(this.newReport.type)
             };
 
             this.reports.unshift(report);
             this.showGenerateReportModal = false;
             this.resetNewReport();
             this.showSuccess('Report generated successfully!');
+            this.saveReports();
+          }
+        },
+
+        calculateReportAmount(reportType) {
+          // Calculate actual report amount based on real data
+          if (window.dataSync) {
+            switch (reportType) {
+              case 'sales':
+                const sales = window.dataSync.get('sales') || [];
+                return sales.reduce((total, sale) => total + (sale.amount || 0), 0);
+              case 'inventory':
+                const inventory = window.dataSync.get('inventory') || [];
+                return inventory.reduce((total, item) => total + ((item.quantity || 0) * (item.price || 0)), 0);
+              case 'financial':
+                return this.totalRevenue;
+              case 'customer':
+              case 'patient':
+                const patients = window.dataSync.get('patients') || [];
+                return patients.length;
+              default:
+                return 0;
+            }
+          }
+          return 0;
+        },
+
+        saveReports() {
+          // Save reports to localStorage for persistence
+          localStorage.setItem('umi_reports', JSON.stringify(this.reports));
+          
+          // Trigger data sync
+          if (window.dataSync) {
+            window.dataSync.set('reports', this.reports);
           }
         },
 
@@ -2078,16 +2781,40 @@
         },
 
         canManageBranches() {
-          const subscription = JSON.parse(localStorage.getItem('umi_subscription') || '{}');
-          const planType = subscription.planType || 'Care';
-          
-          const tierConfig = {
-            'Care': { maxBranches: 1 },
-            'Care Plus': { maxBranches: 3 },
-            'Care Pro': { maxBranches: 10 }
-          };
-          
-          return tierConfig[planType] ? tierConfig[planType].maxBranches > 1 : false;
+          try {
+            // Check if user is an admin role
+            const currentUser = JSON.parse(localStorage.getItem('umi_current_user') || '{}');
+            console.log('Current user:', currentUser); // Debug log
+            const isAdmin = currentUser.role === 'super_admin' || currentUser.role === 'tenant_admin' || currentUser.role === 'operations';
+            console.log('Is admin:', isAdmin); // Debug log
+            
+            // Admin users always have access to branches
+            if (isAdmin) {
+              return true;
+            }
+            
+            // For non-admin users, check subscription plan
+            const subscription = JSON.parse(localStorage.getItem('umi_subscription') || '{}');
+            console.log('Subscription:', subscription); // Debug log
+            const planType = subscription.planType || 'Care';
+            
+            const tierConfig = {
+              'Care': { maxBranches: 1 },
+              'Care Plus': { maxBranches: 3 },
+              'Care Pro': { maxBranches: 10 }
+            };
+            
+            const hasBranchPermission = tierConfig[planType] ? tierConfig[planType].maxBranches > 1 : false;
+            
+            // Check if there are actually multiple branches
+            const branches = this.availableBranches || [];
+            const hasMultipleBranches = branches.length > 1;
+            
+            return hasBranchPermission || hasMultipleBranches;
+          } catch (error) {
+            console.error('Error checking branch permissions:', error);
+            return false;
+          }
         },
 
         setupEventListeners() {
@@ -2365,43 +3092,55 @@
         },
 
         updateInventoryMetrics(inventory) {
-          // Update inventory metrics cards
-          if (inventory) {
-            const totalStockValue = inventory.reduce((sum, item) => sum + (item.value || 0), 0);
-            const lowStockItems = inventory.filter(item => item.stockLevel < item.minStock).length;
-            const expiringItems = inventory.filter(item => item.daysToExpiry < 30).length;
+          // Update inventory metrics with real data
+          if (inventory && inventory.length > 0) {
+            this.totalStockValue = inventory.reduce((sum, item) => sum + ((item.quantity || 0) * (item.price || 0)), 0);
+            this.lowStockItems = inventory.filter(item => item.stockLevel < (item.minStock || 10)).length;
+            this.expiringItems = inventory.filter(item => item.daysToExpiry < 30).length;
             
-            // Update DOM elements if they exist
-            const elements = {
-              totalStock: document.querySelector('.metric-value'),
-              lowStock: document.querySelectorAll('.metric-value')[1],
-              expiring: document.querySelectorAll('.metric-value')[2]
-            };
-            
-            if (elements.totalStock) elements.totalStock.textContent = this.formatCurrency(totalStockValue);
-            if (elements.lowStock) elements.lowStock.textContent = lowStockItems;
-            if (elements.expiring) elements.expiring.textContent = expiringItems;
+            // Calculate turnover rate
+            const totalItems = inventory.reduce((sum, item) => sum + (item.quantity || 0), 0);
+            const soldItems = inventory.reduce((sum, item) => sum + (item.sold || 0), 0);
+            this.turnoverRate = totalItems > 0 ? `${(soldItems / totalItems).toFixed(1)}x` : '0x';
+          } else {
+            // Default values when no data
+            this.totalStockValue = 0;
+            this.lowStockItems = 0;
+            this.expiringItems = 0;
+            this.turnoverRate = '0x';
           }
         },
 
         updateCustomerMetrics(patients) {
-          // Update customer insights
-          if (patients) {
-            const totalPatients = patients.length;
-            const newPatients = patients.filter(p => p.isNew).length;
-            const repeatPatients = patients.filter(p => p.isRepeat).length;
+          // Update customer insights with real data
+          if (patients && patients.length > 0) {
+            this.totalPatients = patients.length;
+            this.newPatients = patients.filter(p => p.isNew || this.isNewPatient(p.createdAt)).length;
             
-            // Update DOM elements if they exist
-            const elements = {
-              total: document.querySelector('.insight-value'),
-              new: document.querySelectorAll('.insight-value')[1],
-              repeat: document.querySelectorAll('.insight-value')[2]
-            };
+            const repeatPatients = patients.filter(p => p.visitCount > 1).length;
+            this.repeatRate = this.totalPatients > 0 ? `${Math.round((repeatPatients / this.totalPatients) * 100)}%` : '0%';
             
-            if (elements.total) elements.total.textContent = totalPatients.toLocaleString();
-            if (elements.new) elements.new.textContent = `+${newPatients}`;
-            if (elements.repeat) elements.repeat.textContent = `${Math.round((repeatPatients / totalPatients) * 100)}%`;
+            // Calculate average purchase value from sales data
+            if (window.dataSync) {
+              const sales = window.dataSync.get('sales') || [];
+              const totalSales = sales.reduce((sum, sale) => sum + (sale.amount || 0), 0);
+              this.avgPurchaseValue = sales.length > 0 ? totalSales / sales.length : 0;
+            }
+          } else {
+            // Default values when no data
+            this.totalPatients = 0;
+            this.newPatients = 0;
+            this.repeatRate = '0%';
+            this.avgPurchaseValue = 0;
           }
+        },
+
+        isNewPatient(createdAt) {
+          if (!createdAt) return false;
+          const createdDate = new Date(createdAt);
+          const thirtyDaysAgo = new Date();
+          thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
+          return createdDate > thirtyDaysAgo;
         },
 
         init() {
@@ -2413,15 +3152,15 @@
         },
 
         initCharts() {
-          // Revenue Chart
+          // Revenue Chart - Initialize with empty data, will be populated by real data
           const revenueCtx = document.getElementById('revenueChart').getContext('2d');
-          new Chart(revenueCtx, {
+          this.revenueChart = new Chart(revenueCtx, {
             type: 'line',
             data: {
-              labels: ['Week 1', 'Week 2', 'Week 3', 'Week 4'],
+              labels: [],
               datasets: [{
                 label: 'Revenue',
-                data: [12000, 15000, 13500, 18000],
+                data: [],
                 borderColor: 'rgb(0, 0, 0)',
                 backgroundColor: 'rgba(0, 0, 0, 0.1)',
                 tension: 0.4
@@ -2448,14 +3187,14 @@
             }
           });
 
-          // Category Chart
+          // Category Chart - Initialize with empty data
           const categoryCtx = document.getElementById('categoryChart').getContext('2d');
-          new Chart(categoryCtx, {
+          this.categoryChart = new Chart(categoryCtx, {
             type: 'doughnut',
             data: {
-              labels: ['Medication', 'Supplements', 'Medical Supplies'],
+              labels: [],
               datasets: [{
-                data: [45, 30, 25],
+                data: [],
                 backgroundColor: [
                   'rgba(0, 0, 0, 0.8)',
                   'rgba(107, 114, 128, 0.8)',
@@ -2474,62 +3213,69 @@
             }
           });
 
-          // Payment Chart
-          const paymentCtx = document.getElementById('paymentChart').getContext('2d');
-          new Chart(paymentCtx, {
-            type: 'bar',
-            data: {
-              labels: ['Cash', 'Card', 'Mobile', 'Insurance'],
-              datasets: [{
-                label: 'Transactions',
-                data: [120, 95, 80, 35],
-                backgroundColor: 'rgba(0, 0, 0, 0.6)'
-              }]
-            },
-            options: {
-              responsive: true,
-              maintainAspectRatio: false,
-              plugins: {
-                legend: {
-                  display: false
-                }
-              },
-              scales: {
-                y: {
-                  beginAtZero: true
-                }
-              }
-            }
-          });
+          // Load real data into charts
+          this.loadChartData();
+        },
 
-          // Visits Chart
-          const visitsCtx = document.getElementById('visitsChart').getContext('2d');
-          new Chart(visitsCtx, {
-            type: 'bar',
-            data: {
-              labels: ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'],
-              datasets: [{
-                label: 'Patient Visits',
-                data: [45, 52, 48, 58, 62, 35, 28],
-                backgroundColor: 'rgba(34, 197, 94, 0.6)'
-              }]
-            },
-            options: {
-              responsive: true,
-              maintainAspectRatio: false,
-              plugins: {
-                legend: {
-                  display: false
-                }
-              },
-              scales: {
-                y: {
-                  beginAtZero: true
-                }
-              }
-            }
+        loadChartData() {
+          // Load real data into charts
+          if (window.dataSync) {
+            const sales = window.dataSync.get('sales') || [];
+            const inventory = window.dataSync.get('inventory') || [];
+            
+            // Update revenue chart with real sales data
+            this.updateRevenueChartWithData(sales);
+            
+            // Update category chart with real inventory data
+            this.updateCategoryChartWithData(inventory);
+          }
+        },
+
+        updateRevenueChartWithData(sales) {
+          if (!this.revenueChart || !sales.length) return;
+          
+          // Group sales by period (week/month)
+          const groupedSales = this.groupSalesByPeriod(sales);
+          
+          this.revenueChart.data.labels = Object.keys(groupedSales);
+          this.revenueChart.data.datasets[0].data = Object.values(groupedSales);
+          this.revenueChart.update();
+        },
+
+        updateCategoryChartWithData(inventory) {
+          if (!this.categoryChart || !inventory.length) return;
+          
+          // Group inventory by category
+          const groupedInventory = this.groupInventoryByCategory(inventory);
+          
+          this.categoryChart.data.labels = Object.keys(groupedInventory);
+          this.categoryChart.data.datasets[0].data = Object.values(groupedInventory);
+          this.categoryChart.update();
+        },
+
+        groupSalesByPeriod(sales) {
+          const grouped = {};
+          sales.forEach(sale => {
+            const period = this.getPeriodFromDate(new Date(sale.date));
+            grouped[period] = (grouped[period] || 0) + (sale.amount || 0);
           });
-        }
+          return grouped;
+        },
+
+        groupInventoryByCategory(inventory) {
+          const grouped = {};
+          inventory.forEach(item => {
+            const category = item.category || 'Uncategorized';
+            grouped[category] = (grouped[category] || 0) + (item.quantity || 0);
+          });
+          return grouped;
+        },
+
+        getPeriodFromDate(date) {
+          // Get week or month period from date
+          const week = Math.ceil(date.getDate() / 7);
+          return `Week ${week}`;
+        },
       }
     }
   </script>

@@ -14,6 +14,7 @@
   <script src="../shared/js/role-based-access.js"></script>
   <script src="../admin/js/admin-api.js"></script>
   <script src="js/cashier-api.js"></script>
+  <script src="../../shared/js/data-manager.js"></script>
   <link rel="stylesheet" href="../../shared/css/cashier-notifications.css">
   <link rel="stylesheet" href="css/patients-specific.css">
   <style>
@@ -1575,7 +1576,7 @@
       </header>
       <form id="patientForm" class="modal-body">
         <div class="form-section">
-          <h4>Personal Information</h4>
+          <h4>Patient Information</h4>
           <div class="form-grid">
             <label>
               <span>First Name *</span>
@@ -1584,10 +1585,6 @@
             <label>
               <span>Last Name *</span>
               <input type="text" id="formLastName" name="lastName" required>
-            </label>
-            <label>
-              <span>Date of Birth *</span>
-              <input type="date" id="formDateOfBirth" name="dateOfBirth" required>
             </label>
             <label>
               <span>Gender *</span>
@@ -1599,46 +1596,14 @@
               </select>
             </label>
             <label>
-              <span>NRC Number *</span>
-              <input type="text" id="formNRC" name="nrc" required>
-            </label>
-            <label>
-              <span>Blood Type</span>
-              <select id="formBloodType" name="bloodType">
-                <option value="">Select Blood Type</option>
-                <option value="A+">A+</option>
-                <option value="A-">A-</option>
-                <option value="B+">B+</option>
-                <option value="B-">B-</option>
-                <option value="AB+">AB+</option>
-                <option value="AB-">AB-</option>
-                <option value="O+">O+</option>
-                <option value="O-">O-</option>
-              </select>
-            </label>
-          </div>
-        </div>
-
-        <div class="form-section">
-          <h4>Contact Information</h4>
-          <div class="form-grid">
-            <label>
               <span>Phone Number *</span>
               <input type="tel" id="formPhone" name="phone" required>
             </label>
-            <label>
-              <span>Email Address</span>
-              <input type="email" id="formEmail" name="email">
-            </label>
-            <label class="form-full-width">
-              <span>Physical Address *</span>
-              <input type="text" id="formAddress" name="address" required>
-            </label>
           </div>
         </div>
 
         <div class="form-section">
-          <h4>Medical Information</h4>
+          <h4>Emergency Contact</h4>
           <div class="form-grid">
             <label>
               <span>Emergency Contact Name *</span>
@@ -1647,61 +1612,6 @@
             <label>
               <span>Emergency Contact Phone *</span>
               <input type="tel" id="formEmergencyPhone" name="emergencyPhone" required>
-            </label>
-            <label>
-              <span>Relationship to Patient *</span>
-              <select id="formEmergencyRelationship" name="emergencyRelationship" required>
-                <option value="">Select Relationship</option>
-                <option value="spouse">Spouse</option>
-                <option value="parent">Parent</option>
-                <option value="child">Child</option>
-                <option value="sibling">Sibling</option>
-                <option value="friend">Friend</option>
-                <option value="other">Other</option>
-              </select>
-            </label>
-            <label>
-              <span>Primary Physician</span>
-              <input type="text" id="formPrimaryPhysician" name="primaryPhysician">
-            </label>
-          </div>
-          <label class="form-textarea">
-            <span>Known Allergies</span>
-            <textarea id="formAllergies" name="allergies" rows="3"
-              placeholder="List any known allergies..."></textarea>
-          </label>
-          <label class="form-textarea">
-            <span>Chronic Conditions</span>
-            <textarea id="formChronicConditions" name="chronicConditions" rows="3"
-              placeholder="List any chronic conditions..."></textarea>
-          </label>
-          <label class="form-textarea">
-            <span>Current Medications</span>
-            <textarea id="formCurrentMedications" name="currentMedications" rows="3"
-              placeholder="List current medications..."></textarea>
-          </label>
-        </div>
-
-        <div class="form-section">
-          <h4>Insurance Information</h4>
-          <div class="form-grid">
-            <label>
-              <span>Insurance Provider</span>
-              <input type="text" id="formInsuranceProvider" name="insuranceProvider">
-            </label>
-            <label>
-              <span>Policy Number</span>
-              <input type="text" id="formPolicyNumber" name="policyNumber">
-            </label>
-            <label>
-              <span>Insurance Type</span>
-              <select id="formInsuranceType" name="insuranceType">
-                <option value="">Select Type</option>
-                <option value="private">Private</option>
-                <option value="company">Company</option>
-                <option value="government">Government</option>
-                <option value="none">None</option>
-              </select>
             </label>
           </div>
         </div>
@@ -2006,6 +1916,9 @@
 
   <!-- Alpine.js Component -->
   <script>
+    // Initialize data manager for patients
+    const cashierDataManager = new UmiDataManager('cashier', '/api/patients');
+    
     function patientSystem() {
       return {
         sidebarOpen: false,
@@ -2519,9 +2432,9 @@
         },
 
         // Initialize
-        init() {
+        async init() {
           // Load real data from API
-          this.loadPatientsFromAPI();
+          await this.loadPatientsFromAPI();
           
           // Set up event listeners
           this.setupEventListeners();
@@ -2529,42 +2442,77 @@
           // Set up data sync listeners
           this.setupDataSyncListeners();
           
+          // Setup auto-save
+          cashierDataManager.setupAutoSave(() => this.patients);
+          
+          // Add sync button to header
+          this.addSyncButton();
+          
           // Initial render
           this.renderPatientsTable();
           this.updatePatientStats();
         },
 
-        loadPatientsFromAPI() {
+        addSyncButton() {
+          const headerRight = document.querySelector('.header-right');
+          if (!headerRight) return;
+          
+          const syncButton = document.createElement('button');
+          syncButton.className = 'create-button sync-button';
+          syncButton.innerHTML = `
+            <span class="material-symbols-rounded">sync</span>
+            <span>Sync</span>
+          `;
+          syncButton.addEventListener('click', async () => {
+            try {
+              syncButton.disabled = true;
+              syncButton.innerHTML = `
+                <span class="material-symbols-rounded">sync</span>
+                <span>Syncing...</span>
+              `;
+              
+              await cashierDataManager.syncWithServer();
+              await this.loadPatientsFromAPI();
+              
+            } catch (error) {
+              console.error('Sync failed:', error);
+            } finally {
+              syncButton.disabled = false;
+              syncButton.innerHTML = `
+                <span class="material-symbols-rounded">sync</span>
+                <span>Sync</span>
+              `;
+            }
+          });
+          
+          headerRight.appendChild(syncButton);
+        },
+
+        async loadPatientsFromAPI() {
           try {
-            window.cashierDataSync.getData('patients')
-              .then(patients => {
-                this.patients = patients.map(p => ({
-                  id: p.id,
-                  patientId: p.patientNumber,
-                  firstName: p.firstName,
-                  lastName: p.lastName,
-                  dateOfBirth: p.dateOfBirth,
-                  gender: p.gender,
-                  phone: p.phone,
-                  email: p.email,
-                  address: p.address,
-                  status: p.status,
-                  registrationDate: p.createdAt,
-                  emergencyContact: p.emergencyContact,
-                  medicalHistory: p.medicalHistory,
-                  allergies: p.allergies,
-                  insuranceInfo: p.insuranceInfo
-                }));
-                this.renderPatientsTable();
-                this.updatePatientStats();
-              })
-              .catch(error => {
-                console.error('Error loading patients:', error);
-                this.showError('Failed to load patients. Please try again.');
-              });
+            const patients = await cashierDataManager.load();
+            this.patients = patients.map(p => ({
+              id: p.id,
+              patientId: p.patientNumber || p.id,
+              firstName: p.firstName,
+              lastName: p.lastName,
+              dateOfBirth: p.dateOfBirth,
+              gender: p.gender,
+              phone: p.phone,
+              email: p.email,
+              address: p.address,
+              status: p.status,
+              registrationDate: p.createdAt,
+              emergencyContact: p.emergencyContact,
+              medicalHistory: p.medicalHistory,
+              allergies: p.allergies,
+              insuranceInfo: p.insuranceInfo
+            }));
+            this.renderPatientsTable();
+            this.updatePatientStats();
           } catch (error) {
-            console.error('Data sync not available:', error);
-            this.loadSampleData();
+            console.error('Error loading patients:', error);
+            this.showError('Failed to load patients. Please try again.');
           }
         },
 

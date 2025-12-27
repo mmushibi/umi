@@ -1381,7 +1381,29 @@
       }
 
       .page-title-section {
-        display: none;
+        display: block;
+        flex: 1;
+        margin-right: 0;
+      }
+
+      .page-title-section .page-title {
+        font-size: 1.125rem;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+      }
+
+      .header-left {
+        flex-direction: row;
+        align-items: center;
+        gap: 0.5rem;
+        width: 100%;
+      }
+
+      .search-bar {
+        flex: 0 0 auto;
+        width: auto;
+        min-width: 150px;
       }
 
       .users-content {
@@ -1583,6 +1605,53 @@
     .shift-slots {
       min-height: 200px;
       padding: 0.5rem;
+    }
+
+    .shift-slot {
+      background: var(--color-surface);
+      border: 1px solid var(--color-border);
+      border-radius: 0.375rem;
+      padding: 0.5rem;
+      margin-bottom: 0.5rem;
+      transition: all 0.2s ease;
+    }
+
+    .shift-slot:hover {
+      border-color: var(--color-primary);
+      box-shadow: 0 2px 4px rgba(99, 102, 241, 0.1);
+    }
+
+    .shift-slot.empty {
+      opacity: 0.6;
+      text-align: center;
+      font-style: italic;
+      color: var(--color-text-muted);
+    }
+
+    .shift-employee {
+      font-weight: 500;
+      font-size: 0.8125rem;
+      color: var(--color-text-primary);
+    }
+
+    .shift-time {
+      font-size: 0.75rem;
+      color: var(--color-text-muted);
+      margin-top: 0.25rem;
+    }
+
+    .shift-date {
+      font-size: 0.75rem;
+      color: var(--color-primary);
+      font-weight: 500;
+      margin-top: 0.25rem;
+    }
+
+    .shift-branch {
+      font-size: 0.75rem;
+      color: var(--color-text-muted);
+      font-style: italic;
+      margin-top: 0.25rem;
     }
 
     /* Attendance Controls */
@@ -2360,6 +2429,7 @@
           this.setupEventListeners();
           this.setupRealtimeSync();
           this.updateEmployeeStats();
+          this.switchTab('schedule');
         },
 
         // Load pharmacy info from localStorage
@@ -2382,30 +2452,151 @@
         async loadBranches() {
           try {
             this.loading = true;
-            const branches = await this.api.getBranches();
-            this.branches = branches;
+            
+            // First try to get branches from localStorage (shared with branches page)
+            await this.loadBranchesFromStorage();
+            
+            // Then try to load from API
+            const response = await this.api.getBranches();
+            this.branches = response.data || response;
+            
+            // Store branches in localStorage for sharing with other pages
+            localStorage.setItem('umi_branches', JSON.stringify(this.branches));
+            
             this.populateBranchSelect();
           } catch (error) {
             console.error('Error loading branches:', error);
-            this.showError('Failed to load branches');
+            // Fallback to sample branches if API fails
+            this.loadSampleBranches();
+            this.showError('Using sample branches - API connection failed');
           } finally {
             this.loading = false;
           }
+        },
+
+        // Load branches from localStorage (shared with branches page)
+        async loadBranchesFromStorage() {
+          try {
+            const storedBranches = localStorage.getItem('umi_branches');
+            if (storedBranches) {
+              this.branches = JSON.parse(storedBranches);
+              this.populateBranchSelect();
+            }
+          } catch (error) {
+            console.error('Error loading branches from storage:', error);
+          }
+        },
+
+        // Load sample branches as fallback
+        loadSampleBranches() {
+          this.branches = [];
+          this.populateBranchSelect();
+          this.showError('Unable to load branches. Please check your connection.');
         },
 
         // Load employees from API
         async loadEmployees() {
           try {
             this.loading = true;
+            
+            // First try to get data from account page (localStorage)
+            await this.loadAccountData();
+            
+            // Then try to load from API
             const response = await this.api.getUsers(this.currentPage, this.itemsPerPage, this.getFilters());
             this.employees = response.data || response;
             this.renderEmployeesTable();
             this.updateEmployeeStats();
           } catch (error) {
             console.error('Error loading employees:', error);
-            this.showError('Failed to load employees');
+            // Fallback to sample data if API fails
+            this.loadSampleEmployees();
+            this.showError('Using sample data - API connection failed');
           } finally {
             this.loading = false;
+          }
+        },
+
+        // Load account data from localStorage (shared with account page)
+        async loadAccountData() {
+          try {
+            const currentTenant = localStorage.getItem('umi_current_tenant');
+            const currentUser = localStorage.getItem('umi_current_user');
+            
+            if (currentTenant) {
+              const tenant = JSON.parse(currentTenant);
+              this.pharmacyInfo = {
+                name: tenant.name || 'Umi Health',
+                location: `${tenant.city || 'Lusaka'}, ${tenant.province || 'Zambia'}`
+              };
+            }
+            
+            if (currentUser) {
+              const user = JSON.parse(currentUser);
+              this.userInfo = {
+                name: user.name || user.firstName + ' ' + user.lastName,
+                role: user.role || 'Admin',
+                initials: (user.name || user.firstName + ' ' + user.lastName).split(' ').map(n => n[0]).join('').toUpperCase()
+              };
+            }
+          } catch (error) {
+            console.error('Error loading account data:', error);
+          }
+        },
+
+        // Fallback when API fails - no sample data
+        loadSampleEmployees() {
+          this.employees = [];
+          this.renderEmployeesTable();
+          this.updateEmployeeStats();
+          this.showError('Unable to load employees. Please check your connection.');
+        },
+
+        // Update week dates with real-time values
+        updateWeekDates(weekType) {
+          const today = new Date();
+          const currentDay = today.getDay(); // 0 = Sunday, 1 = Monday, etc.
+          const mondayOffset = currentDay === 0 ? -6 : 1 - currentDay; // Adjust for Sunday
+          
+          let monday;
+          switch (weekType) {
+            case 'previous':
+              monday = new Date(today);
+              monday.setDate(today.getDate() + mondayOffset - 7);
+              break;
+            case 'next':
+              monday = new Date(today);
+              monday.setDate(today.getDate() + mondayOffset + 7);
+              break;
+            case 'current':
+            default:
+              monday = new Date(today);
+              monday.setDate(today.getDate() + mondayOffset);
+              break;
+          }
+
+          const weekDays = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
+          const dayElements = document.querySelectorAll('.day-date');
+          
+          weekDays.forEach((day, index) => {
+            const currentDate = new Date(monday);
+            currentDate.setDate(monday.getDate() + index);
+            
+            if (dayElements[index]) {
+              const formattedDate = currentDate.toLocaleDateString('en-US', {
+                month: 'short',
+                day: 'numeric'
+              });
+              dayElements[index].textContent = formattedDate;
+            }
+          });
+
+          // Store current week dates for shift assignments
+          this.currentWeekDates = [];
+          for (let i = 0; i < 7; i++) {
+            const date = new Date(monday);
+            date.setDate(monday.getDate() + i);
+            this.currentWeekDates.push(date.toISOString().split('T')[0]);
           }
         },
 
@@ -2446,12 +2637,14 @@
           if (userId !== this.getCurrentUserId()) {
             this.renderEmployeesTable();
             this.updateEmployeeStats();
+            this.loadShiftAssignments(); // Refresh shift assignments
             this.showNotification(`Employee ${type} successfully`, 'info');
           }
         },
 
         // Handle branch updates
         handleBranchUpdate(data) {
+          console.log('Branch update received:', data);
           const { type, branch } = data;
           
           switch (type) {
@@ -2461,7 +2654,7 @@
             case 'updated':
               const index = this.branches.findIndex(br => br.id === branch.id);
               if (index !== -1) {
-                this.branches[index] = branch;
+                this.branches[index] = { ...this.branches[index], ...branch };
               }
               break;
             case 'deleted':
@@ -2470,6 +2663,8 @@
           }
           
           this.populateBranchSelect();
+          // Refresh shift assignments to show updated branch info
+          this.loadShiftAssignments();
         },
 
         // Populate branch select dropdown
@@ -2986,38 +3181,80 @@
         },
 
         loadShiftAssignments() {
-          // Sample shift assignments
-          const shiftAssignments = [
-            { employee: 'John Doe', shift: 'morning', day: 'monday' },
-            { employee: 'Jane Smith', shift: 'afternoon', day: 'tuesday' },
-            // Add more assignments as needed
-          ];
+          // Use real employee data for shift assignments
+          const shiftSlots = document.querySelectorAll('.shift-slots');
           
-          // Populate shift slots
-          document.querySelectorAll('.shift-slots').forEach(slot => {
-            slot.innerHTML = '<div class="shift-slot">No shift assigned</div>';
+          shiftSlots.forEach((slot, index) => {
+            const currentDate = this.currentWeekDates ? this.currentWeekDates[index] : new Date().toISOString().split('T')[0];
+            
+            // Get employees assigned to this day (simplified - in real app this would come from API)
+            const dayEmployees = this.employees.filter((employee, empIndex) => empIndex % 7 === index);
+            
+            if (dayEmployees.length > 0) {
+              slot.innerHTML = dayEmployees.map(employee => {
+                const branch = this.branches.find(b => b.id === employee.branchId);
+                const branchName = branch ? branch.name : 'Unassigned';
+                
+                return `
+                  <div class="shift-slot">
+                    <div class="shift-employee">${employee.firstName} ${employee.lastName}</div>
+                    <div class="shift-time">${this.formatShift(employee.defaultShift || 'morning')}</div>
+                    <div class="shift-branch">${branchName}</div>
+                    <div class="shift-date">${currentDate}</div>
+                  </div>
+                `;
+              }).join('');
+            } else {
+              slot.innerHTML = `
+                <div class="shift-slot empty">
+                  <div class="shift-date">${currentDate}</div>
+                  <div class="shift-employee">No shift assigned</div>
+                </div>
+              `;
+            }
           });
         },
 
-        loadAttendanceData() {
-          const tbody = document.getElementById('attendanceTableBody');
-          const today = new Date().toISOString().split('T')[0];
+        generateSchedule() {
+          if (this.employees.length === 0) {
+            this.showError('No employees available to generate schedule');
+            return;
+          }
           
-          tbody.innerHTML = this.employees.map(employee => `
-            <tr>
-              <td>${employee.firstName} ${employee.lastName}</td>
-              <td><input type="time" class="attendance-input" data-employee="${employee.id}" data-type="checkin"></td>
-              <td><input type="time" class="attendance-input" data-employee="${employee.id}" data-type="checkout"></td>
-              <td>0</td>
-              <td><span class="status-badge secondary">Not marked</span></td>
-              <td><input type="text" placeholder="Notes..." class="attendance-notes" data-employee="${employee.id}"></td>
-              <td>
-                <button class="action-btn save" onclick="employeeSystem.saveAttendance('${employee.id}')">
-                  <span class="material-symbols-rounded">save</span>
-                </button>
-              </td>
-            </tr>
-          `).join('');
+          // Simple schedule generation - distribute employees across the week
+          const shiftSlots = document.querySelectorAll('.shift-slots');
+          
+          shiftSlots.forEach((slot, index) => {
+            const currentDate = this.currentWeekDates ? this.currentWeekDates[index] : new Date().toISOString().split('T')[0];
+            
+            // Assign employees to this day (round-robin distribution)
+            const dayEmployees = this.employees.filter((employee, empIndex) => empIndex % 7 === index);
+            
+            if (dayEmployees.length > 0) {
+              slot.innerHTML = dayEmployees.map(employee => {
+                const branch = this.branches.find(b => b.id === employee.branchId);
+                const branchName = branch ? branch.name : 'Unassigned';
+                
+                return `
+                  <div class="shift-slot">
+                    <div class="shift-employee">${employee.firstName} ${employee.lastName}</div>
+                    <div class="shift-time">${this.formatShift(employee.defaultShift || 'morning')}</div>
+                    <div class="shift-branch">${branchName}</div>
+                    <div class="shift-date">${currentDate}</div>
+                  </div>
+                `;
+              }).join('');
+            } else {
+              slot.innerHTML = `
+                <div class="shift-slot empty">
+                  <div class="shift-date">${currentDate}</div>
+                  <div class="shift-employee">No shift assigned</div>
+                </div>
+              `;
+            }
+          });
+          
+          this.showSuccess('Schedule generated successfully!');
         },
 
         loadLeaveData() {
@@ -3307,68 +3544,8 @@
           window.URL.revokeObjectURL(url);
         },
 
-        init() {
-          this.loadUsersFromAPI();
-          this.setupEventListeners();
-          this.renderEmployeesTable();
-          this.updateEmployeeStats();
-          this.switchTab('schedule');
-        },
-
-        loadUsersFromAPI() {
-          this.loading = true;
-          
-          // Use adminAPI for backend integration
-          if (window.adminAPI) {
-            window.adminAPI.getUsers(1, 100, {})
-              .then(users => {
-                this.employees = users.map(user => ({
-                  id: user.id,
-                  firstName: user.firstName || user.name?.split(' ')[0] || '',
-                  lastName: user.lastName || user.name?.split(' ')[1] || '',
-                  email: user.email,
-                  phone: user.phone || user.phoneNumber || '',
-                  role: user.role || 'staff',
-                  department: user.department || 'pharmacy',
-                  status: user.status || 'active',
-                  hireDate: user.hireDate || user.createdAt?.split('T')[0] || '',
-                  salary: user.salary || 0,
-                  employmentType: user.employmentType || 'full-time',
-                  defaultShift: user.defaultShift || 'morning',
-                  workDays: user.workDays || 'monday-friday',
-                  nrc: user.nrc || user.nationalId || '',
-                  licenseNumber: user.licenseNumber || '',
-                  licenseExpiry: user.licenseExpiry || '',
-                  qualifications: user.qualifications || '',
-                  experience: user.experience || 0
-                }));
-                
-                this.updateEmployeeStats();
-                this.renderEmployeesTable();
-                this.loading = false;
-              })
-              .catch(error => {
-                console.error('Error loading users:', error);
-                this.showError('Failed to load users. Please try again.');
-                this.loading = false;
-                // Fallback to mock data
-                this.loadSampleData();
-              });
-          } else {
-            // Fallback to mock data
-            this.loadSampleData();
-            this.loading = false;
-          }
-        },
-
-        loadSampleData() {
-          // No sample data - using real API endpoints only
-          this.employees = [];
-          this.leaveRequests = [];
-          this.performanceReviews = [];
-          this.attendanceRecords = [];
-        },
-
+        
+        
         setupEventListeners() {
           // Modal close buttons
           document.querySelectorAll('[data-close]').forEach(btn => {
@@ -3391,6 +3568,22 @@
           // Action buttons
           document.getElementById('addEmployeeBtn')?.addEventListener('click', () => this.openAddEmployeeModal());
           document.getElementById('exportEmployees')?.addEventListener('click', () => this.exportEmployees());
+          document.getElementById('manageShiftsBtn')?.addEventListener('click', () => {
+            this.switchTab('schedule');
+          });
+
+          // Week selector for schedule
+          document.getElementById('weekSelector')?.addEventListener('change', (e) => {
+            this.updateWeekDates(e.target.value);
+          });
+
+          // Generate schedule button
+          document.getElementById('generateSchedule')?.addEventListener('click', () => {
+            this.generateSchedule();
+          });
+
+          // Initialize week dates
+          this.updateWeekDates('current');
 
           // Tab switching
           document.querySelectorAll('.tab-pane').forEach(tab => {

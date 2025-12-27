@@ -2500,9 +2500,30 @@
         });
       });
       
+      // Load pharmacy info from localStorage
+      function loadPharmacyInfo() {
+        try {
+          const currentTenant = localStorage.getItem('umi_current_tenant');
+          if (currentTenant) {
+            const tenant = JSON.parse(currentTenant);
+            this.pharmacyInfo = {
+              name: tenant.name || 'Umi Health',
+              location: `${tenant.city || 'Lusaka'}, ${tenant.province || 'Zambia'}`
+            };
+          }
+        } catch (error) {
+          console.error('Error loading pharmacy info:', error);
+        }
+      }
+      
       // Initialize
-      loadProducts();
-      updateCart();
+      function init() {
+        loadPharmacyInfo();
+        loadProducts();
+        updateCart();
+      }
+      
+      init();
       
       // Update shift info
       document.getElementById('shiftCashierName').textContent = 'John Doe';
@@ -2685,9 +2706,11 @@
         },
 
         generateReceipt(transaction) {
+          // Generate proper receipt number
+          const receiptNumber = this.generateReceiptNumber();
+          
           // Load pharmacy settings from localStorage
           const pharmacySettings = JSON.parse(localStorage.getItem('pharmacySettings') || '{}');
-          const receiptPrefix = pharmacySettings.receiptPrefix || 'RCP';
           const taxRate = (pharmacySettings.taxRate || 16) / 100;
           
           // Calculate tax using pharmacy settings
@@ -2701,7 +2724,7 @@
           
           // Convert POS transaction to receipt format
           const receiptData = {
-            transactionId: receiptPrefix + transaction.id,
+            transactionId: receiptNumber,
             date: transaction.date,
             patient: {
               name: transaction.customer,
@@ -2806,6 +2829,26 @@
           window.URL.revokeObjectURL(url);
           
           alert('Report downloaded successfully!');
+        },
+
+        // Generate system receipt numbers
+        generateReceiptNumber() {
+          const date = new Date();
+          const year = date.getFullYear();
+          const month = String(date.getMonth() + 1).padStart(2, '0');
+          const day = String(date.getDate()).padStart(2, '0');
+          
+          // Get existing receipts from localStorage to determine sequence
+          const existingReceipts = JSON.parse(localStorage.getItem('posTransactions') || '[]');
+          const todayReceipts = existingReceipts.filter(receipt => {
+            const receiptDate = new Date(receipt.date);
+            return receiptDate.toDateString() === date.toDateString();
+          });
+          
+          const count = todayReceipts.length + 1;
+          const receiptPrefix = JSON.parse(localStorage.getItem('pharmacySettings') || '{}').receiptPrefix || 'RCP';
+          
+          return `${receiptPrefix}-${year}${month}${day}-${String(count).padStart(3, '0')}`;
         },
 
         formatCurrency(amount) {

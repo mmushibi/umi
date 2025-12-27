@@ -1,18 +1,12 @@
 <!DOCTYPE html>
 <html lang="en" x-data="prescriptionSystem()">
 <head>
-  <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>Prescriptions - Umi Health Information Systems</title>
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@100;400;500;600;700&family=Varela+Round&family=Nunito:wght@400;600;700&display=swap" rel="stylesheet">
-  <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Rounded:wght@300;400;500;600;700&display=swap" rel="stylesheet">
-  <script src="https://cdn.tailwindcss.com"></script>
-  <link rel="stylesheet" href="../shared/css/shared-styles.css">
-  <script src="../shared/js/data-sync.js"></script>
-  <script src="../shared/js/role-based-access.js"></script>
-  <script src="../admin/js/admin-api.js"></script>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Prescriptions - Umi Health Pharmacy</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap">
+  <link rel="stylesheet" href="https://fonts.googleapis.com/icon?family=Material+Symbols+Rounded:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200" />
   <style>
     :root {
       --color-primary: #000000;
@@ -968,10 +962,12 @@
       right: 0;
       bottom: 0;
       background: rgba(0, 0, 0, 0.5);
-      z-index: 1000;
-      display: flex;
-      align-items: center;
-      justify-content: center;
+      z-index: 999;
+      display: none;
+    }
+
+    .overlay:not([hidden]) {
+      display: block;
     }
 
     .modal {
@@ -982,9 +978,13 @@
       bottom: 0;
       background: rgba(0, 0, 0, 0.5);
       z-index: 1000;
-      display: flex;
+      display: none;
       align-items: center;
       justify-content: center;
+    }
+
+    .modal:not([hidden]) {
+      display: flex;
     }
 
     .modal-content {
@@ -1170,6 +1170,178 @@
       gap: 1rem;
     }
 
+    /* Drug Interaction Styles */
+    .drug-interaction-section {
+      margin: 1.5rem 0;
+      padding: 1rem;
+      border: 2px solid var(--color-warning);
+      border-radius: 12px;
+      background: rgba(239, 68, 68, 0.05);
+    }
+
+    .interaction-alerts {
+      margin-top: 1rem;
+    }
+
+    .interaction-alert {
+      display: flex;
+      align-items: flex-start;
+      gap: 0.75rem;
+      padding: 0.75rem;
+      margin-bottom: 0.5rem;
+      border-radius: 8px;
+      font-size: 0.875rem;
+    }
+
+    .interaction-alert.critical {
+      background: rgba(239, 68, 68, 0.1);
+      border-left: 4px solid var(--color-warning);
+      color: #dc2626;
+    }
+
+    .interaction-alert.moderate {
+      background: rgba(251, 191, 36, 0.1);
+      border-left: 4px solid #f59e0b;
+      color: #d97706;
+    }
+
+    .interaction-alert.mild {
+      background: rgba(250, 204, 21, 0.1);
+      border-left: 4px solid #eab308;
+      color: #ca8a04;
+    }
+
+    .interaction-alert .material-symbols-rounded {
+      font-size: 1.25rem;
+      flex-shrink: 0;
+    }
+
+    .interaction-alert-content {
+      flex: 1;
+    }
+
+    .interaction-alert-title {
+      font-weight: 600;
+      margin-bottom: 0.25rem;
+    }
+
+    .interaction-alert-description {
+      font-size: 0.8rem;
+      opacity: 0.9;
+    }
+
+    /* E-Prescribing Styles */
+    .eprescribe-section {
+      margin: 1.5rem 0;
+      padding: 1rem;
+      border: 1px solid var(--color-accent);
+      border-radius: 12px;
+      background: rgba(20, 184, 166, 0.05);
+    }
+
+    .eprescribe-status {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      padding: 0.5rem 1rem;
+      border-radius: 8px;
+      font-size: 0.875rem;
+      font-weight: 500;
+    }
+
+    .eprescribe-status.sent {
+      background: rgba(34, 197, 94, 0.1);
+      color: var(--color-success);
+    }
+
+    .eprescribe-status.pending {
+      background: rgba(251, 191, 36, 0.1);
+      color: #d97706;
+    }
+
+    .eprescribe-status.failed {
+      background: rgba(239, 68, 68, 0.1);
+      color: var(--color-warning);
+    }
+
+    /* Label Printing Styles */
+    .label-preview {
+      border: 2px dashed var(--color-border);
+      border-radius: 8px;
+      padding: 1rem;
+      margin: 1rem 0;
+      background: var(--color-surface);
+      font-family: 'Courier New', monospace;
+      font-size: 0.75rem;
+      line-height: 1.2;
+    }
+
+    .label-header {
+      text-align: center;
+      font-weight: bold;
+      margin-bottom: 0.5rem;
+      border-bottom: 1px solid var(--color-border);
+      padding-bottom: 0.5rem;
+    }
+
+    .label-content {
+      margin: 0.5rem 0;
+    }
+
+    .label-footer {
+      margin-top: 1rem;
+      padding-top: 0.5rem;
+      border-top: 1px solid var(--color-border);
+      font-size: 0.6rem;
+      text-align: center;
+    }
+
+    /* Reports Modal Styles */
+    .modal-content-large {
+      max-width: 900px;
+      width: 90%;
+    }
+
+    .report-results {
+      margin-top: 2rem;
+      padding: 1rem;
+      border: 1px solid var(--color-border);
+      border-radius: 8px;
+      background: var(--color-surface);
+    }
+
+    .report-metrics {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: 1rem;
+      margin: 1rem 0;
+    }
+
+    .metric {
+      padding: 1rem;
+      background: var(--color-background);
+      border-radius: 8px;
+      border: 1px solid var(--color-border);
+    }
+
+    .report-table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 1rem;
+    }
+
+    .report-table th,
+    .report-table td {
+      padding: 0.75rem;
+      text-align: left;
+      border-bottom: 1px solid var(--color-border);
+    }
+
+    .report-table th {
+      background: var(--color-surface);
+      font-weight: 600;
+    }
+
     @media (max-width: 768px) {
       .sidebar {
         transform: translateX(-100%);
@@ -1202,6 +1374,88 @@
       .prescriptions-grid {
         grid-template-columns: 1fr;
       }
+      
+      .header {
+        padding: 1rem;
+      }
+      
+      .header-right {
+        gap: 0.5rem;
+      }
+      
+      .create-button {
+        padding: 0.5rem 1rem;
+        font-size: 0.8rem;
+      }
+      
+      .modal-content {
+        width: 95%;
+        margin: 1rem;
+      }
+      
+      .form-grid {
+        grid-template-columns: 1fr;
+      }
+      
+      .prescription-table {
+        font-size: 0.875rem;
+      }
+      
+      .prescription-table th,
+      .prescription-table td {
+        padding: 0.5rem;
+      }
+    }
+    
+    /* Button focus and accessibility */
+    button:focus {
+      outline: 2px solid var(--color-accent);
+      outline-offset: 2px;
+    }
+    
+    button:hover {
+      transform: translateY(-1px);
+      transition: all 0.2s ease;
+    }
+    
+    /* Loading states */
+    .loading {
+      opacity: 0.6;
+      pointer-events: none;
+    }
+    
+    /* Notification styles */
+    .notification {
+      position: fixed;
+      top: 20px;
+      right: 20px;
+      padding: 1rem 1.5rem;
+      border-radius: 8px;
+      color: white;
+      font-weight: 500;
+      z-index: 10000;
+      transform: translateX(100%);
+      transition: transform 0.3s ease;
+    }
+    
+    .notification.show {
+      transform: translateX(0);
+    }
+    
+    .notification-success {
+      background: var(--color-success);
+    }
+    
+    .notification-error {
+      background: var(--color-warning);
+    }
+    
+    .notification-warning {
+      background: #f59e0b;
+    }
+    
+    .notification-info {
+      background: var(--color-accent);
     }
   </style>
 </head>
@@ -1316,8 +1570,22 @@
       </div>
 
       <div class="header-right">
-        <!-- Header elements removed per request -->
+      <button class="create-button" id="reportsButton">
+        <span class="material-symbols-rounded">assessment</span>
+        <span>Reports</span>
+      </button>
+      <button class="create-button" id="addPrescriptionButton">
+        <span class="material-symbols-rounded">add</span>
+        <span>New Prescription</span>
+      </button>
+      <div class="user-profile">
+        <div class="user-avatar">UH</div>
+        <div class="user-info">
+          <div class="user-name">Umi Health</div>
+          <div class="user-role">Admin</div>
+        </div>
       </div>
+    </div>
     </header>
 
     <section class="content-area">
@@ -1347,10 +1615,6 @@
               <strong id="urgentPrescriptionsCount">0</strong>
             </button>
           </div>
-          <button class="add-product-btn" id="addPrescriptionButton" type="button">
-            <span class="material-symbols-rounded">add</span>
-            New Prescription
-          </button>
         </div>
 
         <div class="widgets-row">
@@ -1519,7 +1783,37 @@
         </article>
       </section>
     </div>
-  </div>
+  </main>
+
+  <!-- Alpine.js Component - Must be defined before main script -->
+  <script>
+    function prescriptionSystem() {
+      return {
+        sidebarOpen: false,
+        // User and pharmacy info
+        pharmacyInfo: {
+          name: 'Umi Health',
+          location: 'Lusaka, Zambia'
+        },
+        // Search functionality
+        query: '',
+        searchOpen: false,
+        filteredSuggestions: [],
+        
+        // Methods
+        logout() {
+          console.log('Logging out...');
+        },
+        
+        selectSuggestion(suggestion) {
+          this.query = suggestion.title;
+          this.searchOpen = false;
+        }
+      };
+    }
+  </script>
+
+  <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
 
   <div class="overlay" id="modalOverlay" hidden></div>
 
@@ -1609,19 +1903,146 @@
           <label>
             <span>Status</span>
             <select id="formStatus" name="status">
-              <option value="pending">Pending</option>
-              <option value="processing">Processing</option>
-              <option value="ready">Ready to Pick Up</option>
+              <option value="entered">Entered</option>
+              <option value="reviewed">Reviewed</option>
+              <option value="filled">Filled</option>
               <option value="dispensed">Dispensed</option>
+              <option value="ready">Ready to Pick Up</option>
               <option value="collected">Collected</option>
+              <option value="delivered">Delivered</option>
             </select>
           </label>
+        </div>
+
+        <!-- E-Prescribing Section -->
+        <div class="eprescribe-section">
+          <h4 class="form-section-title">
+            <span class="material-symbols-rounded">send</span>
+            E-Prescribing
+          </h4>
+          <div class="form-grid">
+            <label>
+              <span>E-Prescribe Method</span>
+              <select id="formEprescribeMethod" name="eprescribeMethod">
+                <option value="none">No E-Prescribing</option>
+                <option value="electronic">Electronic Transmission</option>
+                <option value="fax">E-Fax</option>
+                <option value="email">Email</option>
+              </select>
+            </label>
+            <label>
+              <span>Recipient Pharmacy</span>
+              <input type="text" id="formRecipientPharmacy" name="recipientPharmacy" placeholder="Pharmacy name or ID">
+            </label>
+          </div>
+          <div id="eprescribeStatus" class="eprescribe-status" style="display: none;">
+            <span class="material-symbols-rounded">info</span>
+            <span id="eprescribeStatusText">Not sent</span>
+          </div>
+        </div>
+
+        <!-- Label Printing Section -->
+        <div class="label-section">
+          <h4 class="form-section-title">
+            <span class="material-symbols-rounded">label</span>
+            Label Printing
+          </h4>
+          <div class="form-grid">
+            <label>
+              <span>Label Type</span>
+              <select id="formLabelType" name="labelType">
+                <option value="standard">Standard Label</option>
+                <option value="warning">Warning Label</option>
+                <option value="caution">Caution Label</option>
+                <option value="childproof">Child-Resistant Warning</option>
+              </select>
+            </label>
+            <label>
+              <span>Print Quantity</span>
+              <input type="number" id="formLabelQuantity" name="labelQuantity" min="1" max="5" value="1">
+            </label>
+          </div>
+          <div class="label-preview" id="labelPreview" style="display: none;">
+            <div class="label-header">PRESCRIPTION LABEL</div>
+            <div class="label-content" id="labelContent"></div>
+            <div class="label-footer">Umi Health Pharmacy • Lusaka, Zambia</div>
+          </div>
         </div>
 
         <label class="form-textarea">
           <span>Special Instructions</span>
           <textarea id="formInstructions" name="instructions" rows="2"
             placeholder="Add any special instructions or warnings"></textarea>
+        </label>
+
+        <!-- Drug Interaction Check Section -->
+        <div class="drug-interaction-section" id="drugInteractionSection" style="display: none;">
+          <h4 class="form-section-title">
+            <span class="material-symbols-rounded" style="color: var(--color-warning);">warning</span>
+            Drug Interaction Alerts (DUR)
+          </h4>
+          <div id="interactionAlerts" class="interaction-alerts"></div>
+        </div>
+
+        <!-- Insurance Information Section -->
+        <h4 class="form-section-title">Insurance Information</h4>
+        <div class="form-grid">
+          <label>
+            <span>Insurance Provider</span>
+            <select id="formInsuranceProvider" name="insuranceProvider">
+              <option value="">No Insurance</option>
+              <option value="nhima">NHIMA</option>
+              <option value="private">Private Insurance</option>
+              <option value="company">Company Scheme</option>
+            </select>
+          </label>
+          <label>
+            <span>Policy Number</span>
+            <input type="text" id="formPolicyNumber" name="policyNumber" placeholder="Policy/Membership number">
+          </label>
+          <label>
+            <span>Authorization Code</span>
+            <input type="text" id="formAuthCode" name="authCode" placeholder="Pre-authorization code if required">
+          </label>
+          <label>
+            <span>Coverage Type</span>
+            <select id="formCoverageType" name="coverageType">
+              <option value="full">Full Coverage</option>
+              <option value="partial">Partial Coverage</option>
+              <option value="copay">Copay Required</option>
+              <option value="cash">Cash Payment</option>
+            </select>
+          </label>
+        </div>
+
+        <!-- Delivery Information Section -->
+        <h4 class="form-section-title">Delivery Information</h4>
+        <div class="form-grid">
+          <label>
+            <span>Delivery Method</span>
+            <select id="formDeliveryMethod" name="deliveryMethod">
+              <option value="pickup">Pickup at Pharmacy</option>
+              <option value="delivery">Home Delivery</option>
+              <option value="courier">Courier Service</option>
+            </select>
+          </label>
+          <label>
+            <span>Delivery Address</span>
+            <input type="text" id="formDeliveryAddress" name="deliveryAddress" placeholder="Delivery address if applicable">
+          </label>
+          <label>
+            <span>Delivery Date</span>
+            <input type="date" id="formDeliveryDate" name="deliveryDate">
+          </label>
+          <label>
+            <span>Delivery Time</span>
+            <input type="time" id="formDeliveryTime" name="deliveryTime">
+          </label>
+        </div>
+        <label class="form-textarea">
+          <span>Delivery Instructions</span>
+          <textarea id="formDeliveryInstructions" name="deliveryInstructions" rows="2"
+            placeholder="Special delivery instructions or landmark"></textarea>
         </label>
       </form>
       <footer class="modal-footer">
@@ -1644,16 +2065,398 @@
       <footer class="modal-footer" id="prescriptionActionModalFooter"></footer>
     </div>
   </section>
+
+  <!-- Reports Modal -->
+  <section class="modal" id="reportsModal" role="dialog" aria-modal="true" aria-labelledby="reportsModalTitle" hidden>
+    <div class="modal-content modal-content-large">
+      <header class="modal-header">
+        <h2 id="reportsModalTitle">Prescription Reports</h2>
+        <button type="button" class="modal-close" data-close="reportsModal" aria-label="Close reports modal">
+          <span class="material-symbols-rounded" aria-hidden="true">close</span>
+        </button>
+      </header>
+      <div class="modal-body">
+        <div class="form-grid">
+          <label>
+            <span>Report Type</span>
+            <select id="reportType">
+              <option value="daily">Daily Report</option>
+              <option value="weekly">Weekly Report</option>
+              <option value="monthly">Monthly Report</option>
+              <option value="drug_usage">Drug Usage Report</option>
+              <option value="insurance">Insurance Claims Report</option>
+            </select>
+          </label>
+          <label>
+            <span>Date Range</span>
+            <select id="dateRange">
+              <option value="today">Today</option>
+              <option value="week">This Week</option>
+              <option value="month">This Month</option>
+              <option value="custom">Custom Range</option>
+            </select>
+          </label>
+        </div>
+        <div id="reportResults" class="report-results" style="display: none;">
+          <h4>Report Results</h4>
+          <div id="reportContent"></div>
+        </div>
+      </div>
+      <footer class="modal-footer">
+        <button type="button" class="secondary" data-close="reportsModal">Close</button>
+        <button type="button" class="primary" id="generateReport">Generate Report</button>
+      </footer>
+    </div>
+  </section>
   </main>
 
   <script>
-    // Prescription Management JavaScript
-    document.addEventListener('DOMContentLoaded', function() {
+    // Inline UmiDataManager to fix loading issues
+    class UmiDataManager {
+      constructor(portalType, apiEndpoint) {
+        this.portalType = portalType;
+        this.apiEndpoint = apiEndpoint;
+        this.storageKey = `umi_${portalType}_data`;
+        this.autoSaveInterval = 30000;
+        this.lastSaveTime = null;
+        this.isOnline = navigator.onLine;
+        this.syncQueue = [];
+        
+        this.setupConnectivityListeners();
+      }
+
+      setupConnectivityListeners() {
+        window.addEventListener('online', () => {
+          this.isOnline = true;
+          console.log('Back online - processing sync queue');
+          this.processSyncQueue();
+        });
+        
+        window.addEventListener('offline', () => {
+          this.isOnline = false;
+          console.log('Gone offline - using localStorage only');
+        });
+      }
+
+      async save(data, action = 'create') {
+        try {
+          const dataWithMeta = {
+            ...data,
+            portalType: this.portalType,
+            action: action,
+            timestamp: new Date().toISOString(),
+            deviceId: this.getDeviceId()
+          };
+
+          if (this.isOnline) {
+            try {
+              const result = await this.saveToAPI(dataWithMeta);
+              this.showSaveIndicator('Saved to server', 'success');
+              return result;
+            } catch (apiError) {
+              console.warn('API save failed, using localStorage:', apiError);
+              this.syncQueue.push(dataWithMeta);
+              return this.saveToLocalStorage(dataWithMeta);
+            }
+          } else {
+            this.syncQueue.push(dataWithMeta);
+            return this.saveToLocalStorage(dataWithMeta);
+          }
+        } catch (error) {
+          console.error('Save failed:', error);
+          this.showSaveIndicator('Save failed', 'error');
+          throw error;
+        }
+      }
+
+      async load(forceRefresh = false) {
+        try {
+          if (this.isOnline && !forceRefresh) {
+            try {
+              const serverData = await this.loadFromAPI();
+              this.saveToLocalStorage(serverData);
+              return serverData;
+            } catch (apiError) {
+              console.warn('API load failed, using cache:', apiError);
+              return this.loadFromLocalStorage();
+            }
+          } else {
+            return this.loadFromLocalStorage();
+          }
+        } catch (error) {
+          console.error('Load failed:', error);
+          return [];
+        }
+      }
+
+      async saveToAPI(data) {
+        const response = await fetch(this.apiEndpoint, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${this.getAuthToken()}`,
+            'X-Portal-Type': this.portalType
+          },
+          body: JSON.stringify(data)
+        });
+
+        if (!response.ok) {
+          throw new Error(`HTTP error! status: ${response.status}`);
+        }
+
+        return await response.json();
+      }
+
+      async loadFromAPI() {
+        const response = await fetch(`${this.apiEndpoint}?portal=${this.portalType}&limit=100`, {
+          method: 'GET',
+          headers: {
+            'Authorization': `Bearer ${this.getAuthToken()}`,
+            'X-Portal-Type': this.portalType
+          }
+        });
+
+        if (!response.ok) {
+          throw new Error(`HTTP error! status: ${response.status}`);
+        }
+
+        const result = await response.json();
+        return result.data || result;
+      }
+
+      async updateItem(id, updates) {
+        const updateData = {
+          id,
+          ...updates,
+          portalType: this.portalType,
+          action: 'update',
+          timestamp: new Date().toISOString()
+        };
+
+        if (this.isOnline) {
+          try {
+            const response = await fetch(`${this.apiEndpoint}/${id}`, {
+              method: 'PUT',
+              headers: {
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${this.getAuthToken()}`,
+                'X-Portal-Type': this.portalType
+              },
+              body: JSON.stringify(updateData)
+            });
+
+            if (!response.ok) {
+              throw new Error(`HTTP error! status: ${response.status}`);
+            }
+
+            return await response.json();
+          } catch (error) {
+            this.syncQueue.push(updateData);
+            throw error;
+          }
+        } else {
+          this.syncQueue.push(updateData);
+          return this.saveToLocalStorage(updateData);
+        }
+      }
+
+      async deleteItem(id) {
+        const deleteData = {
+          id,
+          portalType: this.portalType,
+          action: 'delete',
+          timestamp: new Date().toISOString()
+        };
+
+        if (this.isOnline) {
+          try {
+            const response = await fetch(`${this.apiEndpoint}/${id}`, {
+              method: 'DELETE',
+              headers: {
+                'Authorization': `Bearer ${this.getAuthToken()}`,
+                'X-Portal-Type': this.portalType
+              }
+            });
+
+            if (!response.ok) {
+              throw new Error(`HTTP error! status: ${response.status}`);
+            }
+
+            return true;
+          } catch (error) {
+            this.syncQueue.push(deleteData);
+            throw error;
+          }
+        } else {
+          this.syncQueue.push(deleteData);
+          return true;
+        }
+      }
+
+      saveToLocalStorage(data) {
+        try {
+          const currentData = this.loadFromLocalStorage();
+          const updatedData = Array.isArray(data) ? data : [...currentData, data];
+          
+          localStorage.setItem(this.storageKey, JSON.stringify({
+            data: updatedData,
+            lastSaved: new Date().toISOString(),
+            version: '1.0',
+            portalType: this.portalType
+          }));
+          
+          this.lastSaveTime = new Date();
+          this.showSaveIndicator('Saved locally', 'info');
+          return data;
+        } catch (error) {
+          console.error('localStorage save failed:', error);
+          throw error;
+        }
+      }
+
+      loadFromLocalStorage() {
+        try {
+          const saved = localStorage.getItem(this.storageKey);
+          if (saved) {
+            const parsed = JSON.parse(saved);
+            console.log(`Loaded ${parsed.data?.length || 0} items from localStorage for ${this.portalType}`);
+            return parsed.data || [];
+          }
+        } catch (error) {
+          console.error('localStorage load failed:', error);
+        }
+        return [];
+      }
+
+      async processSyncQueue() {
+        if (this.syncQueue.length === 0 || !this.isOnline) return;
+
+        console.log(`Processing ${this.syncQueue.length} items in sync queue`);
+        
+        const failedItems = [];
+        
+        for (const item of this.syncQueue) {
+          try {
+            await this.saveToAPI(item);
+          } catch (error) {
+            console.error('Sync failed for item:', item, error);
+            failedItems.push(item);
+          }
+        }
+        
+        this.syncQueue = failedItems;
+        
+        if (failedItems.length === 0) {
+          this.showSaveIndicator('All items synced', 'success');
+        } else {
+          this.showSaveIndicator(`${failedItems.length} items failed to sync`, 'warning');
+        }
+      }
+
+      setupAutoSave(dataGetter) {
+        setInterval(() => {
+          const currentData = dataGetter();
+          if (currentData && currentData.length > 0) {
+            this.saveToLocalStorage(currentData);
+            this.showSaveIndicator('Auto-saved', 'info');
+          }
+        }, this.autoSaveInterval);
+      }
+
+      async syncWithServer() {
+        try {
+          this.showSaveIndicator('Syncing...', 'info');
+          await this.processSyncQueue();
+          const serverData = await this.loadFromAPI();
+          this.saveToLocalStorage(serverData);
+          this.showSaveIndicator('Sync complete', 'success');
+          return serverData;
+        } catch (error) {
+          console.error('Sync failed:', error);
+          this.showSaveIndicator('Sync failed', 'error');
+          throw error;
+        }
+      }
+
+      getAuthToken() {
+        return localStorage.getItem('umi_auth_token') || 
+               sessionStorage.getItem('umi_auth_token') || 
+               '';
+      }
+
+      getDeviceId() {
+        let deviceId = localStorage.getItem('umi_device_id');
+        if (!deviceId) {
+          deviceId = 'device_' + Math.random().toString(36).substr(2, 9);
+          localStorage.setItem('umi_device_id', deviceId);
+        }
+        return deviceId;
+      }
+
+      showSaveIndicator(message, type = 'info') {
+        const existing = document.querySelector('.save-indicator');
+        if (existing) {
+          existing.remove();
+        }
+
+        const indicator = document.createElement('div');
+        indicator.className = 'save-indicator';
+        indicator.textContent = message;
+        
+        const colors = {
+          success: 'var(--color-success)',
+          error: 'var(--color-warning)',
+          info: 'var(--color-accent)',
+          warning: '#f59e0b'
+        };
+        
+        indicator.style.cssText = `
+          position: fixed;
+          bottom: 20px;
+          right: 20px;
+          background: ${colors[type]};
+          color: white;
+          padding: 0.75rem 1.25rem;
+          border-radius: 8px;
+          font-size: 0.875rem;
+          font-weight: 500;
+          z-index: 10000;
+          opacity: 0;
+          transform: translateY(20px);
+          transition: all 0.3s ease;
+          box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+        `;
+        
+        document.body.appendChild(indicator);
+        
+        setTimeout(() => {
+          indicator.style.opacity = '1';
+          indicator.style.transform = 'translateY(0)';
+        }, 100);
+        
+        setTimeout(() => {
+          indicator.style.opacity = '0';
+          indicator.style.transform = 'translateY(20px)';
+          setTimeout(() => {
+            if (indicator.parentNode) {
+              document.body.removeChild(indicator);
+            }
+          }, 300);
+        }, 3000);
+      }
+    }
+    
+    // Initialize data manager for prescriptions
+    const dataManager = new UmiDataManager('admin', '/api/prescriptions');
+    
+    document.addEventListener('DOMContentLoaded', async function() {
       // Modal elements
       const prescriptionModal = document.getElementById('prescriptionModal');
       const prescriptionActionModal = document.getElementById('prescriptionActionModal');
+      const reportsModal = document.getElementById('reportsModal');
       const modalOverlay = document.getElementById('modalOverlay');
       const addPrescriptionButton = document.getElementById('addPrescriptionButton');
+      const reportsButton = document.getElementById('reportsButton');
       const prescriptionForm = document.getElementById('prescriptionForm');
       
       // Table elements
@@ -1674,34 +2477,106 @@
       let currentPage = 1;
       const pageSize = 10;
       
-      // Sample medications for dropdown
-      const medications = [
-        'Paracetamol 500mg',
-        'Amoxicillin 250mg',
-        'Ibuprofen 400mg',
-        'Vitamin C 1000mg',
-        'Cough Syrup',
-        'Aspirin 75mg',
-        'Azithromycin 250mg',
-        'Multivitamin',
-        'Antacid Tablets',
-        'Ciprofloxacin 500mg'
-      ];
+      // Medications will be loaded from inventory API
+      let medications = [];
       
       // Initialize
-      function init() {
-        loadSampleData();
-        populateMedicationDropdown();
-        updateStatCounts();
-        renderPrescriptionTable();
-        setupEventListeners();
+      async function init() {
+        try {
+          await Promise.all([
+            loadSampleData(),
+            loadMedicationsFromInventory()
+          ]);
+          populateMedicationDropdown();
+          updateStatCounts();
+          renderPrescriptionTable();
+          setupEventListeners();
+          
+          // Setup auto-save
+          dataManager.setupAutoSave();
+          
+          // Add sync button to header
+          addSyncButton();
+          
+          console.log('Prescription system initialized successfully');
+        } catch (error) {
+          console.error('Failed to initialize prescription system:', error);
+        }
       }
       
-      // Load prescription data - real data will be loaded from API
-      function loadSampleData() {
-        // Initialize empty prescriptions array - real data will be loaded from API
-        prescriptions = [];
-        filteredPrescriptions = [];
+      // Load prescription data with shared data manager
+      async function loadSampleData() {
+        try {
+          prescriptions = await dataManager.load();
+          filteredPrescriptions = [...prescriptions];
+          console.log('Loaded prescriptions:', prescriptions.length);
+        } catch (error) {
+          console.error('Failed to load prescriptions:', error);
+          prescriptions = [];
+          filteredPrescriptions = [];
+        }
+      }
+      
+      // Load medications from inventory API
+      async function loadMedicationsFromInventory() {
+        try {
+          const response = await fetch('/api/inventory/medications');
+          if (response.ok) {
+            const data = await response.json();
+            medications = data.map(med => `${med.name} ${med.strength}${med.formulation}`);
+            console.log('Loaded medications from inventory:', medications.length);
+          } else {
+            // Fallback to common medications if API fails
+            medications = [
+              'Paracetamol 500mg',
+              'Amoxicillin 250mg',
+              'Ibuprofen 400mg',
+              'Vitamin C 1000mg',
+              'Cough Syrup',
+              'Aspirin 75mg',
+              'Azithromycin 250mg',
+              'Multivitamin',
+              'Antacid Tablets',
+              'Ciprofloxacin 500mg'
+            ];
+            console.log('Using fallback medication list');
+          }
+        } catch (error) {
+          console.error('Failed to load medications from inventory:', error);
+          // Fallback to common medications
+          medications = [
+            'Paracetamol 500mg',
+            'Amoxicillin 250mg',
+            'Ibuprofen 400mg',
+            'Vitamin C 1000mg',
+            'Cough Syrup',
+            'Aspirin 75mg',
+            'Azithromycin 250mg',
+            'Multivitamin',
+            'Antacid Tablets',
+            'Ciprofloxacin 500mg'
+          ];
+        }
+      }
+      
+      // Load patients for autocomplete
+      async function loadPatientsForSearch(query) {
+        try {
+          const response = await fetch(`/api/patients/search?q=${encodeURIComponent(query)}`);
+          if (response.ok) {
+            const patients = await response.json();
+            return patients.map(p => ({
+              id: p.id,
+              title: `${p.firstName} ${p.lastName}`,
+              subtitle: p.email || p.phone,
+              data: p
+            }));
+          }
+          return [];
+        } catch (error) {
+          console.error('Failed to search patients:', error);
+          return [];
+        }
       }
       
       // Populate medication dropdown
@@ -1767,10 +2642,84 @@
       
       // Setup event listeners
       function setupEventListeners() {
+        console.log('Setting up event listeners...');
+        
+        // Check if elements exist
+        if (!addPrescriptionButton) {
+          console.error('addPrescriptionButton not found');
+          return;
+        }
+        if (!reportsButton) {
+          console.error('reportsButton not found');
+          return;
+        }
+        
         // Add prescription button
         addPrescriptionButton.addEventListener('click', () => {
+          console.log('Add prescription button clicked');
           prescriptionModal.hidden = false;
           modalOverlay.hidden = false;
+        });
+        
+        // Reports button
+        reportsButton.addEventListener('click', () => {
+          console.log('Reports button clicked');
+          reportsModal.hidden = false;
+          modalOverlay.hidden = false;
+        });
+        
+        // Generate report button
+        document.getElementById('generateReport').addEventListener('click', () => {
+          const reportType = document.getElementById('reportType').value;
+          const dateRange = document.getElementById('dateRange').value;
+          const report = generatePrescriptionReport(reportType, dateRange);
+          
+          const reportResults = document.getElementById('reportResults');
+          const reportContent = document.getElementById('reportContent');
+          
+          reportResults.style.display = 'block';
+          reportContent.innerHTML = `
+            <h5>${report.title}</h5>
+            <p>Generated: ${new Date().toLocaleString()}</p>
+            <div class="report-metrics">
+              <div class="metric">
+                <strong>Total Prescriptions:</strong> ${report.data.length}
+              </div>
+              ${report.metrics ? `
+                <div class="metric">
+                  <strong>Filled:</strong> ${report.metrics.filled || 0}
+                </div>
+                <div class="metric">
+                  <strong>Pending:</strong> ${report.metrics.pending || 0}
+                </div>
+                <div class="metric">
+                  <strong>Urgent:</strong> ${report.metrics.urgent || 0}
+                </div>
+              ` : ''}
+            </div>
+            <table class="report-table">
+              <thead>
+                <tr>
+                  <th>ID</th>
+                  <th>Patient</th>
+                  <th>Medication</th>
+                  <th>Date</th>
+                  <th>Status</th>
+                </tr>
+              </thead>
+              <tbody>
+                ${report.data.map(p => `
+                  <tr>
+                    <td>${p.id}</td>
+                    <td>${p.patientName}</td>
+                    <td>${p.medication}</td>
+                    <td>${p.date}</td>
+                    <td><span class="status-badge ${p.status}">${p.status}</span></td>
+                  </tr>
+                `).join('')}
+              </tbody>
+            </table>
+          `;
         });
         
         // Modal close buttons
@@ -1786,38 +2735,112 @@
         modalOverlay.addEventListener('click', () => {
           prescriptionModal.hidden = true;
           prescriptionActionModal.hidden = true;
+          reportsModal.hidden = true;
           modalOverlay.hidden = true;
         });
         
-        // Prescription form submission
-        prescriptionForm.addEventListener('submit', (e) => {
+        // Prescription form submission with saving logic
+        prescriptionForm.addEventListener('submit', async (e) => {
           e.preventDefault();
           const formData = new FormData(prescriptionForm);
           
-          const newPrescription = {
-            id: 'RX' + String(prescriptions.length + 1).padStart(3, '0'),
-            patientName: formData.get('patientName'),
-            doctorName: formData.get('doctorName'),
-            medication: formData.get('medication'),
-            dosage: formData.get('dosage'),
-            quantity: parseInt(formData.get('quantity')),
-            date: new Date().toISOString().split('T')[0],
-            priority: formData.get('priority'),
-            status: formData.get('status')
-          };
-          
-          prescriptions.push(newPrescription);
-          filteredPrescriptions = [...prescriptions];
-          
-          updateStatCounts();
-          renderPrescriptionTable();
-          
-          prescriptionModal.hidden = true;
-          modalOverlay.hidden = true;
-          prescriptionForm.reset();
-          
-          alert('Prescription created successfully!');
+          try {
+            // Show loading state
+            const submitButton = prescriptionForm.querySelector('button[type="submit"]');
+            const originalText = submitButton.textContent;
+            submitButton.textContent = 'Saving...';
+            submitButton.disabled = true;
+            
+            // Create new prescription object
+            const newPrescription = {
+              id: 'RX' + Date.now().toString().slice(-6),
+              patientName: formData.get('patientName'),
+              doctorName: formData.get('doctorName'),
+              medication: formData.get('medication'),
+              dosage: formData.get('dosage'),
+              quantity: formData.get('quantity'),
+              sig: formData.get('sig'),
+              priority: formData.get('priority'),
+              status: formData.get('status') || 'entered',
+              date: new Date().toISOString().split('T')[0],
+              instructions: formData.get('instructions'),
+              insuranceProvider: formData.get('insuranceProvider'),
+              policyNumber: formData.get('policyNumber'),
+              deliveryMethod: formData.get('deliveryMethod'),
+              createdAt: new Date().toISOString(),
+              updatedAt: new Date().toISOString()
+            };
+            
+            // Save to API first, then fallback to localStorage
+            try {
+              await dataManager.save(newPrescription, 'create');
+            } catch (saveError) {
+              console.warn('Save failed:', saveError);
+              // Error is already handled by dataManager
+            }
+            
+            // Update local arrays
+            prescriptions.push(newPrescription);
+            filteredPrescriptions = [...prescriptions];
+            
+            // Update UI
+            updateStatCounts();
+            renderPrescriptionTable();
+            
+            // Close modal and reset form
+            prescriptionModal.hidden = true;
+            modalOverlay.hidden = true;
+            prescriptionForm.reset();
+            
+            // Show success message
+            dataManager.showSaveIndicator('Prescription created successfully!');
+            
+          } catch (error) {
+            console.error('Error saving prescription:', error);
+            dataManager.showSaveIndicator('Error saving prescription');
+          } finally {
+            // Reset button state
+            const submitButton = prescriptionForm.querySelector('button[type="submit"]');
+            submitButton.textContent = originalText;
+            submitButton.disabled = false;
+          }
         });
+        
+        // Add sync button function
+        function addSyncButton() {
+          const headerRight = document.querySelector('.header-right');
+          const syncButton = document.createElement('button');
+          syncButton.className = 'create-button sync-button';
+          syncButton.innerHTML = `
+            <span class="material-symbols-rounded">sync</span>
+            <span>Sync</span>
+          `;
+          syncButton.addEventListener('click', async () => {
+            try {
+              syncButton.disabled = true;
+              syncButton.innerHTML = `
+                <span class="material-symbols-rounded">sync</span>
+                <span>Syncing...</span>
+              `;
+              
+              await dataManager.syncWithServer();
+              updateStatCounts();
+              renderPrescriptionTable();
+              
+            } catch (error) {
+              console.error('Sync failed:', error);
+              dataManager.showSaveIndicator('Sync failed');
+            } finally {
+              syncButton.disabled = false;
+              syncButton.innerHTML = `
+                <span class="material-symbols-rounded">sync</span>
+                <span>Sync</span>
+              `;
+            }
+          });
+          
+          headerRight.appendChild(syncButton);
+        }
         
         // Search functionality
         prescriptionSearchInput.addEventListener('input', (e) => {
@@ -1878,17 +2901,55 @@
           });
         });
         
+        // Add medication change listener for DUR checking
+        document.getElementById('formMedication').addEventListener('change', (e) => {
+          const patientName = document.getElementById('formPatientName').value;
+          if (patientName && e.target.value) {
+            const patientProfile = loadPatientProfile(patientName);
+            const alerts = checkDrugInteractions(e.target.value, patientProfile.currentMedications);
+            if (alerts.length > 0) {
+              showInteractionAlerts(alerts);
+            } else {
+              document.getElementById('drugInteractionSection').style.display = 'none';
+            }
+          }
+        });
+
+        // Add label printing functionality
+        document.getElementById('formLabelType').addEventListener('change', (e) => {
+          const labelPreview = document.getElementById('labelPreview');
+          const labelContent = document.getElementById('labelContent');
+          
+          if (e.target.value) {
+            const formData = new FormData(prescriptionForm);
+            const mockPrescription = {
+              id: 'RX001',
+              patientName: formData.get('patientName') || 'Sample Patient',
+              medication: formData.get('medication') || 'Sample Medication',
+              dosage: formData.get('dosage') || '500mg',
+              quantity: formData.get('quantity') || '30',
+              sig: formData.get('sig') || 'Take 1 tablet daily',
+              doctorName: formData.get('doctorName') || 'Dr. Sample',
+              instructions: formData.get('instructions')
+            };
+            
+            labelContent.textContent = generatePrescriptionLabel(mockPrescription);
+            labelPreview.style.display = 'block';
+          } else {
+            labelPreview.style.display = 'none';
+          }
+        });
+        
         // Stat button clicks
         statButtons.forEach(button => {
           button.addEventListener('click', () => {
             const stat = button.dataset.stat;
-            // Filter by stat type
             if (stat === 'pending-prescriptions') {
-              filteredPrescriptions = prescriptions.filter(p => p.status === 'pending');
+              filteredPrescriptions = prescriptions.filter(p => p.status === 'entered' || p.status === 'reviewed');
             } else if (stat === 'processing-prescriptions') {
-              filteredPrescriptions = prescriptions.filter(p => p.status === 'processing');
+              filteredPrescriptions = prescriptions.filter(p => p.status === 'filled' || p.status === 'dispensed');
             } else if (stat === 'completed-prescriptions') {
-              filteredPrescriptions = prescriptions.filter(p => p.status === 'ready');
+              filteredPrescriptions = prescriptions.filter(p => p.status === 'ready' || p.status === 'collected' || p.status === 'delivered');
             } else if (stat === 'urgent-prescriptions') {
               filteredPrescriptions = prescriptions.filter(p => p.priority === 'urgent');
             }
@@ -1977,6 +3038,30 @@
           background: #d1fae5;
           color: #059669;
         }
+        .status-badge.entered {
+          background: #e0e7ff;
+          color: #3730a3;
+        }
+        .status-badge.reviewed {
+          background: #fef3c7;
+          color: #d97706;
+        }
+        .status-badge.filled {
+          background: #dbeafe;
+          color: #2563eb;
+        }
+        .status-badge.dispensed {
+          background: #e0e7ff;
+          color: #6366f1;
+        }
+        .status-badge.collected {
+          background: #d1fae5;
+          color: #10b981;
+        }
+        .status-badge.delivered {
+          background: #d1fae5;
+          color: #059669;
+        }
         .action-btn {
           padding: 0.25rem 0.5rem;
           border: 1px solid var(--color-border);
@@ -2000,192 +3085,290 @@
       `;
       document.head.appendChild(style);
       
-      // Initialize the system
-      init();
+      // Initialize the system with a small delay to ensure DOM is ready
+      setTimeout(() => {
+        init();
+      }, 100);
     });
 
-  <!-- Alpine.js Component -->
-  <script>
-    function prescriptionSystem() {
-      return {
-        sidebarOpen: false,
-        // User and pharmacy info
-        pharmacyInfo: {
-          name: 'Umi Health',
-          location: 'Lusaka, Zambia'
-        },
-        userInfo: {
-          name: 'Umi Health',
-          role: 'Admin',
-          initials: 'UH'
-        },
-        prescriptions: [],
-        
-        // Dashboard metrics
-        totalPrescriptions: 0,
-        pendingCount: 0,
-        readyCount: 0,
-        todayCount: 0,
-        
-        // Data sync and API integration
-        loading: false,
-        
-        init() {
-          this.loadPrescriptionsFromAPI();
-          this.setupEventListeners();
-        },
-        
-        loadPrescriptionsFromAPI() {
-          this.loading = true;
-          try {
-            window.adminDataSync.getData('prescriptions', {
-              page: 1,
-              pageSize: 50,
-              search: this.searchQuery
-            })
-            .then(prescriptions => {
-              this.prescriptions = prescriptions.map(p => ({
-                id: p.id,
-                patientName: p.patientName,
-                doctorName: p.doctorName,
-                medication: p.medication,
-                dosage: p.dosage,
-                quantity: p.quantity,
-                date: p.prescriptionDate ? new Date(p.prescriptionDate).toLocaleDateString() : '',
-                priority: p.priority || 'normal',
-                status: p.status || 'pending'
-              }));
-              
-              // Update dashboard metrics
-              this.updatePrescriptionMetrics();
-              this.loading = false;
-            })
-            .catch(error => {
-              console.error('Error loading prescriptions:', error);
-              this.showError('Failed to load prescriptions. Please try again.');
-              this.loading = false;
-            });
-          } catch (error) {
-            console.error('Data sync not available:', error);
-            this.loading = false;
-          }
-        },
-        
-        setupEventListeners() {
-          if (window.adminDataSync) {
-            window.adminDataSync.on('prescriptions-updated', (prescriptions) => {
-              this.prescriptions = prescriptions.map(p => ({
-                id: p.id,
-                patientName: p.patientName,
-                doctorName: p.doctorName,
-                medication: p.medication,
-                dosage: p.dosage,
-                quantity: p.quantity,
-                date: p.prescriptionDate ? new Date(p.prescriptionDate).toLocaleDateString() : '',
-                priority: p.priority || 'normal',
-                status: p.status || 'pending'
-              }));
-              
-              this.updatePrescriptionMetrics();
-            });
-
-            window.adminDataSync.on('sync-error', (error) => {
-              console.error('Sync error:', error);
-              this.showWarning('Data synchronization error occurred');
-            });
-          }
-        },
-        
-        updatePrescriptionMetrics() {
-          this.totalPrescriptions = this.prescriptions.length;
-          this.pendingCount = this.prescriptions.filter(p => p.status === 'pending').length;
-          this.readyCount = this.prescriptions.filter(p => p.status === 'ready').length;
-          
-          const today = new Date().toISOString().split('T')[0];
-          this.todayCount = this.prescriptions.filter(p => p.date === today).length;
-        },
-        
-        // Notification methods
-        showSuccess(message) {
-          this.showNotification(message, 'success');
-        },
-
-        showError(message) {
-          this.showNotification(message, 'error');
-        },
-
-        showWarning(message) {
-          this.showNotification(message, 'warning');
-        },
-
-        showNotification(message, type = 'info') {
-          // Create notification element
-          const notification = document.createElement('div');
-          notification.className = `notification notification-${type}`;
-          notification.textContent = message;
-          document.body.appendChild(notification);
-
-          // Animate in
-          setTimeout(() => {
-            notification.classList.add('show');
-          }, 100);
-
-          // Remove after 5 seconds
-          setTimeout(() => {
-            notification.classList.remove('show');
-            setTimeout(() => {
-              if (notification.parentNode) {
-                document.body.removeChild(notification);
-              }
-            }, 300);
-          }, 5000);
-        },
-
-        showNotification(message, type = 'info') {
-          // Create notification element
-          const notification = document.createElement('div');
-          notification.className = `notification notification-${type}`;
-          notification.textContent = message;
-          document.body.appendChild(notification);
-
-          // Animate in
-          setTimeout(() => {
-            notification.classList.add('show');
-          }, 100);
-
-          // Remove after 5 seconds
-          setTimeout(() => {
-            notification.classList.remove('show');
-            setTimeout(() => {
-              if (notification.parentNode) {
-                document.body.removeChild(notification);
-              }
-            }, 300);
-          }, 5000);
-        },
-
-        processPrescription(prescriptionId) {
-          const prescription = this.prescriptions.find(p => p.id === prescriptionId);
-          if (prescription) {
-            prescription.status = 'ready';
-            console.log('Prescription processed:', prescriptionId);
-          }
-        },
-
-        completePrescription(prescriptionId) {
-          const prescription = this.prescriptions.find(p => p.id === prescriptionId);
-          if (prescription) {
-            prescription.status = 'completed';
-            console.log('Prescription completed:', prescriptionId);
-          }
-        },
-
-        viewPrescription(prescriptionId) {
-          const prescription = this.prescriptions.find(p => p.id === prescriptionId);
-          console.log('View prescription:', prescription);
-          // Implement detailed view functionality
+    // Drug Interaction Database (DUR System)
+    const drugInteractions = {
+      'Warfarin': {
+        interactions: {
+          'Aspirin': { severity: 'critical', description: 'Increased bleeding risk' },
+          'Ibuprofen': { severity: 'moderate', description: 'Increased bleeding risk' },
+          'Amoxicillin': { severity: 'mild', description: 'Enhanced anticoagulant effect' }
+        }
+      },
+      'Simvastatin': {
+        interactions: {
+          'Azithromycin': { severity: 'critical', description: 'Rhabdomyolysis risk' },
+          'Clarithromycin': { severity: 'critical', description: 'Rhabdomyolysis risk' }
+        }
+      },
+      'Lisinopril': {
+        interactions: {
+          'Potassium': { severity: 'moderate', description: 'Hyperkalemia risk' },
+          'NSAIDs': { severity: 'moderate', description: 'Reduced renal function' }
         }
       }
+    };
+
+    // Drug Interaction Checking Function
+    function checkDrugInteractions(medication, patientMedications = []) {
+      const alerts = [];
+      const medName = medication.split(' ')[0]; // Get base medication name
+      
+      if (drugInteractions[medName]) {
+        patientMedications.forEach(patientMed => {
+          const patientMedName = patientMed.split(' ')[0];
+          if (drugInteractions[medName].interactions[patientMedName]) {
+            const interaction = drugInteractions[medName].interactions[patientMedName];
+            alerts.push({
+              severity: interaction.severity,
+              title: `${medName} + ${patientMedName}`,
+              description: interaction.description
+            });
+          }
+        });
+      }
+      
+      return alerts;
+    }
+
+    // Patient Profile Integration
+    function loadPatientProfile(patientName) {
+      // Mock patient data - in real system, this would come from patient database
+      const patientProfiles = {
+        'John Doe': {
+          allergies: ['Penicillin', 'Sulfa drugs'],
+          conditions: ['Hypertension', 'Diabetes Type 2'],
+          currentMedications: ['Lisinopril 10mg', 'Metformin 500mg'],
+          lastVisit: '2024-12-15'
+        },
+        'Jane Smith': {
+          allergies: ['Aspirin'],
+          conditions: ['Asthma'],
+          currentMedications: ['Albuterol inhaler'],
+          lastVisit: '2024-12-10'
+        }
+      };
+      
+      return patientProfiles[patientName] || {
+        allergies: [],
+        conditions: [],
+        currentMedications: [],
+        lastVisit: null
+      };
+    }
+
+    // Show Interaction Alerts Function
+    function showInteractionAlerts(alerts) {
+      const interactionSection = document.getElementById('drugInteractionSection');
+      const alertsContainer = document.getElementById('interactionAlerts');
+      
+      interactionSection.style.display = 'block';
+      alertsContainer.innerHTML = alerts.map(alert => `
+        <div class="interaction-alert ${alert.severity}">
+          <span class="material-symbols-rounded">
+            ${alert.severity === 'critical' ? 'error' : alert.severity === 'moderate' ? 'warning' : 'info'}
+          </span>
+          <div class="interaction-alert-content">
+            <div class="interaction-alert-title">${alert.title}</div>
+            <div class="interaction-alert-description">${alert.description}</div>
+          </div>
+        </div>
+      `).join('');
+    }
+
+    // Insurance Adjudication System
+    function processInsuranceClaim(prescriptionData) {
+      return new Promise((resolve) => {
+        // Simulate insurance claim processing
+        setTimeout(() => {
+          const claimResult = {
+            status: 'approved',
+            authorizationCode: 'AUTH' + Math.random().toString(36).substr(2, 9).toUpperCase(),
+            coverageAmount: prescriptionData.totalCost * 0.8, // 80% coverage
+            patientResponsibility: prescriptionData.totalCost * 0.2, // 20% copay
+            restrictions: [],
+            approvedDate: new Date().toISOString()
+          };
+          
+          resolve(claimResult);
+        }, 2000); // Simulate 2-second processing time
+      });
+    }
+
+    // E-Prescribing System
+    function sendEPrescription(prescriptionData, method, recipient) {
+      return new Promise((resolve) => {
+        setTimeout(() => {
+          const result = {
+            status: 'sent',
+            transmissionId: 'EP' + Math.random().toString(36).substr(2, 9).toUpperCase(),
+            sentTime: new Date().toISOString(),
+            recipient: recipient,
+            method: method
+          };
+          resolve(result);
+        }, 1500); // Simulate transmission time
+      });
+    }
+
+    // Label Generation System
+    function generatePrescriptionLabel(prescriptionData) {
+      const labelContent = `
+Patient: ${prescriptionData.patientName}
+Rx#: ${prescriptionData.id}
+Date: ${new Date().toLocaleDateString()}
+
+${prescriptionData.medication}
+${prescriptionData.dosage}
+Quantity: ${prescriptionData.quantity}
+
+Directions: ${prescriptionData.sig || 'As prescribed by doctor'}
+
+Prescriber: ${prescriptionData.doctorName}
+Pharmacy: Umi Health Pharmacy
+Phone: +260 123 4567
+${prescriptionData.instructions ? '\nSpecial Instructions: ' + prescriptionData.instructions : ''}
+      `.trim();
+      
+      return labelContent;
+    }
+
+    // Refill Management System
+    function checkRefillEligibility(prescriptionId) {
+      // Mock refill eligibility check
+      const prescription = prescriptions.find(p => p.id === prescriptionId);
+      if (prescription) {
+        const lastFillDate = new Date(prescription.date);
+        const daysSinceFill = Math.floor((new Date() - lastFillDate) / (1000 * 60 * 60 * 24));
+        const refillDays = 30; // Standard 30-day refill period
+        
+        return {
+          eligible: daysSinceFill >= refillDays - 5, // Allow 5 days early
+          daysUntilRefill: Math.max(0, refillDays - daysSinceFill),
+          remainingRefills: prescription.remainingRefills || 3
+        };
+      }
+      return null;
+    }
+
+    // Delivery Tracking System
+    function trackDelivery(prescriptionId, deliveryData) {
+      return new Promise((resolve) => {
+        setTimeout(() => {
+          const trackingInfo = {
+            trackingId: 'TRK' + Math.random().toString(36).substr(2, 9).toUpperCase(),
+            status: 'preparing',
+            estimatedDelivery: deliveryData.deliveryDate,
+            deliveryMethod: deliveryData.deliveryMethod,
+            address: deliveryData.deliveryAddress,
+            updates: [
+              { time: new Date().toISOString(), status: 'Order received', description: 'Prescription is being prepared' }
+            ]
+          };
+          resolve(trackingInfo);
+        }, 1000);
+      });
+    }
+
+    function updateDeliveryStatus(trackingId, newStatus, description) {
+      // In a real system, this would update a database
+      console.log(`Delivery ${trackingId} updated to ${newStatus}: ${description}`);
+    }
+
+    // Comprehensive Reporting System
+    function generatePrescriptionReport(reportType, dateRange) {
+      const reports = {
+        daily: {
+          title: 'Daily Prescription Report',
+          data: prescriptions.filter(p => {
+            const today = new Date().toISOString().split('T')[0];
+            return p.date === today;
+          }),
+          metrics: {
+            total: prescriptions.filter(p => p.date === new Date().toISOString().split('T')[0]).length,
+            filled: prescriptions.filter(p => p.date === new Date().toISOString().split('T')[0] && p.status === 'filled').length,
+            pending: prescriptions.filter(p => p.date === new Date().toISOString().split('T')[0] && p.status === 'entered').length,
+            urgent: prescriptions.filter(p => p.date === new Date().toISOString().split('T')[0] && p.priority === 'urgent').length
+          }
+        },
+        weekly: {
+          title: 'Weekly Prescription Report',
+          data: prescriptions.filter(p => {
+            const weekAgo = new Date();
+            weekAgo.setDate(weekAgo.getDate() - 7);
+            return new Date(p.date) >= weekAgo;
+          })
+        },
+        monthly: {
+          title: 'Monthly Prescription Report', 
+          data: prescriptions.filter(p => {
+            const monthAgo = new Date();
+            monthAgo.setMonth(monthAgo.getMonth() - 1);
+            return new Date(p.date) >= monthAgo;
+          })
+        }
+      };
+      
+      return reports[reportType] || reports.daily;
+    }
+
+    // Security & Compliance Features
+    function logPrescriptionAction(action, prescriptionId, userId, details) {
+      const auditLog = {
+        timestamp: new Date().toISOString(),
+        action: action,
+        prescriptionId: prescriptionId,
+        userId: userId,
+        details: details,
+        ipAddress: '127.0.0.1' // In real system, get actual IP
+      };
+      
+      // In a real system, this would be stored securely
+      console.log('Audit Log:', auditLog);
+      return auditLog;
+    }
+
+    function validateControlledSubstance(medication) {
+      const controlledSubstances = [
+        'Oxycodone', 'Morphine', 'Fentanyl', 'Adderall', 'Ritalin', 
+        'Xanax', 'Valium', 'Ambien', 'Tramadol', 'Codeine'
+      ];
+      
+      return controlledSubstances.some(controlled => 
+        medication.toLowerCase().includes(controlled.toLowerCase())
+      );
+    }
+
+    function checkPrescriptionAuthenticity(prescriptionData) {
+      // Mock validation - in real system would verify prescriber credentials, DEA number, etc.
+      const validationResults = {
+        isValid: true,
+        warnings: [],
+        errors: []
+      };
+      
+      // Check for controlled substances
+      if (validateControlledSubstance(prescriptionData.medication)) {
+        validationResults.warnings.push('Controlled substance detected - additional verification required');
+        logPrescriptionAction('CONTROLLED_SUBSTANCE_DETECTED', prescriptionData.id, 'system', {
+          medication: prescriptionData.medication,
+          doctorName: prescriptionData.doctorName
+        });
+      }
+      
+      // Check prescription age
+      const prescriptionAge = Math.floor((new Date() - new Date(prescriptionData.date)) / (1000 * 60 * 60 * 24));
+      if (prescriptionAge > 365) {
+        validationResults.errors.push('Prescription is too old (over 1 year)');
+        validationResults.isValid = false;
+      }
+      
+      return validationResults;
     }
   </script>
 

@@ -1825,8 +1825,25 @@
         loading: false,
         
         init() {
+          this.loadPharmacyInfo();
           this.loadInventoryFromAPI();
           this.setupEventListeners();
+        },
+
+        // Load pharmacy info from localStorage
+        loadPharmacyInfo() {
+          try {
+            const currentTenant = localStorage.getItem('umi_current_tenant');
+            if (currentTenant) {
+              const tenant = JSON.parse(currentTenant);
+              this.pharmacyInfo = {
+                name: tenant.name || 'Umi Health',
+                location: `${tenant.city || 'Lusaka'}, ${tenant.province || 'Zambia'}`
+              };
+            }
+          } catch (error) {
+            console.error('Error loading pharmacy info:', error);
+          }
         },
         
         loadInventoryFromAPI() {

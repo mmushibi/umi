@@ -652,7 +652,29 @@
       }
 
       .page-title-section {
-        display: none;
+        display: block;
+        flex: 1;
+        margin-right: 0;
+      }
+
+      .page-title-section .page-title {
+        font-size: 1.125rem;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+      }
+
+      .header-left {
+        flex-direction: row;
+        align-items: center;
+        gap: 0.5rem;
+        width: 100%;
+      }
+
+      .search-bar {
+        flex: 0 0 auto;
+        width: auto;
+        min-width: 150px;
       }
 
       .payments-content {
@@ -1347,9 +1369,9 @@
       </div>
     </div>
 
-    <div class="tenant-info">
-      <div class="tenant-name" x-text="tenantInfo.name"></div>
-      <div class="tenant-location" x-text="tenantInfo.location"></div>
+    <div class="pharmacy-info">
+      <div class="pharmacy-name" x-text="pharmacyInfo.name"></div>
+      <div class="pharmacy-location" x-text="pharmacyInfo.location"></div>
     </div>
 
     <nav class="nav-menu">
@@ -1377,17 +1399,21 @@
         <span class="material-symbols-rounded nav-icon">receipt_long</span>
         <span>Sales</span>
       </a>
-      <a href="reports.html" class="nav-item">
-        <span class="material-symbols-rounded nav-icon">analytics</span>
-        <span>Reports</span>
-      </a>
       <a href="payments.html" class="nav-item active">
         <span class="material-symbols-rounded nav-icon">payments</span>
         <span>Payments</span>
       </a>
+      <a href="reports.html" class="nav-item">
+        <span class="material-symbols-rounded nav-icon">analytics</span>
+        <span>Reports</span>
+      </a>
       <a href="user-management.html" class="nav-item">
         <span class="material-symbols-rounded nav-icon">admin_panel_settings</span>
         <span>User Management</span>
+      </a>
+      <a href="branches.html" class="nav-item">
+        <span class="material-symbols-rounded nav-icon">business</span>
+        <span>Branches</span>
       </a>
       <a href="account.html" class="nav-item">
         <span class="material-symbols-rounded nav-icon">settings</span>
@@ -2023,7 +2049,8 @@
         quotationSearch: '',
         creditNoteSearch: '',
         claimSearch: '',
-        tenantInfo: {
+        // User and pharmacy info
+        pharmacyInfo: {
           name: 'Umi Health',
           location: 'Lusaka, Zambia'
         },
@@ -2102,10 +2129,52 @@
           window.print();
         },
 
+        // Generate system numbers
+        generateInvoiceNumber() {
+          const date = new Date();
+          const year = date.getFullYear();
+          const month = String(date.getMonth() + 1).padStart(2, '0');
+          const count = this.invoices.length + 1;
+          return `INV-${year}${month}-${String(count).padStart(4, '0')}`;
+        },
+
+        generateQuotationNumber() {
+          const date = new Date();
+          const year = date.getFullYear();
+          const month = String(date.getMonth() + 1).padStart(2, '0');
+          const count = this.quotations.length + 1;
+          return `QUO-${year}${month}-${String(count).padStart(4, '0')}`;
+        },
+
+        generateCreditNoteNumber() {
+          const date = new Date();
+          const year = date.getFullYear();
+          const month = String(date.getMonth() + 1).padStart(4, '0');
+          const count = this.creditNotes.length + 1;
+          return `CN-${year}${month}-${String(count).padStart(4, '0')}`;
+        },
+
         init() {
+          this.loadPharmacyInfo();
           this.loadPaymentsFromAPI();
           this.setupEventListeners();
           this.updatePaymentStats();
+        },
+
+        // Load pharmacy info from localStorage
+        loadPharmacyInfo() {
+          try {
+            const currentTenant = localStorage.getItem('umi_current_tenant');
+            if (currentTenant) {
+              const tenant = JSON.parse(currentTenant);
+              this.pharmacyInfo = {
+                name: tenant.name || 'Umi Health',
+                location: `${tenant.city || 'Lusaka'}, ${tenant.province || 'Zambia'}`
+              };
+            }
+          } catch (error) {
+            console.error('Error loading pharmacy info:', error);
+          }
         },
 
         loadPaymentsFromAPI() {
@@ -2218,12 +2287,54 @@
           document.getElementById(modalId).hidden = false;
           document.getElementById('modalOverlay').hidden = false;
           document.body.style.overflow = 'hidden';
+          
+          // Auto-generate document numbers
+          if (modalId === 'invoiceModal') {
+            const invoiceNumberField = document.getElementById('invoiceNumber');
+            if (invoiceNumberField && !invoiceNumberField.value) {
+              invoiceNumberField.value = this.generateInvoiceNumber();
+              invoiceNumberField.readOnly = true;
+            }
+          } else if (modalId === 'quotationModal') {
+            const quotationNumberField = document.getElementById('quotationNumber');
+            if (quotationNumberField && !quotationNumberField.value) {
+              quotationNumberField.value = this.generateQuotationNumber();
+              quotationNumberField.readOnly = true;
+            }
+          } else if (modalId === 'creditNoteModal') {
+            const creditNoteNumberField = document.getElementById('creditNoteNumber');
+            if (creditNoteNumberField && !creditNoteNumberField.value) {
+              creditNoteNumberField.value = this.generateCreditNoteNumber();
+              creditNoteNumberField.readOnly = true;
+            }
+          }
         },
 
         closeModal(modalId) {
           document.getElementById(modalId).hidden = true;
           document.getElementById('modalOverlay').hidden = true;
           document.body.style.overflow = '';
+          
+          // Reset readonly state and clear number fields when closing modals
+          if (modalId === 'invoiceModal') {
+            const invoiceNumberField = document.getElementById('invoiceNumber');
+            if (invoiceNumberField) {
+              invoiceNumberField.readOnly = false;
+              invoiceNumberField.value = '';
+            }
+          } else if (modalId === 'quotationModal') {
+            const quotationNumberField = document.getElementById('quotationNumber');
+            if (quotationNumberField) {
+              quotationNumberField.readOnly = false;
+              quotationNumberField.value = '';
+            }
+          } else if (modalId === 'creditNoteModal') {
+            const creditNoteNumberField = document.getElementById('creditNoteNumber');
+            if (creditNoteNumberField) {
+              creditNoteNumberField.readOnly = false;
+              creditNoteNumberField.value = '';
+            }
+          }
         },
 
         // Document Type Tabs
@@ -2347,6 +2458,9 @@
           const formData = new FormData(event.target);
           const invoiceData = Object.fromEntries(formData.entries());
           
+          // Ensure we use the system-generated number
+          const invoiceNumber = document.getElementById('invoiceNumber').value || this.generateInvoiceNumber();
+          
           // Calculate totals
           const items = this.getInvoiceItems();
           const subtotal = items.reduce((sum, item) => sum + (item.quantity * item.price), 0);
@@ -2356,7 +2470,7 @@
           // Use adminAPI for backend integration
           if (window.adminAPI) {
             const invoicePayload = {
-              invoiceNumber: invoiceData.invoiceNumber,
+              invoiceNumber: invoiceNumber,
               customerName: invoiceData.customerName,
               customerEmail: invoiceData.customerEmail,
               customerPhone: invoiceData.customerPhone,
@@ -2490,6 +2604,9 @@
           const formData = new FormData(event.target);
           const quotationData = Object.fromEntries(formData.entries());
           
+          // Ensure we use the system-generated number
+          const quotationNumber = document.getElementById('quotationNumber').value || this.generateQuotationNumber();
+          
           const items = this.getQuotationItems();
           const subtotal = items.reduce((sum, item) => sum + (item.quantity * item.price), 0);
           const tax = subtotal * 0.16;
@@ -2498,7 +2615,7 @@
           // Use adminAPI for backend integration
           if (window.adminAPI) {
             const quotationPayload = {
-              quotationNumber: quotationData.quotationNumber,
+              quotationNumber: quotationNumber,
               customerName: quotationData.quoteCustomerName,
               customerEmail: quotationData.quoteCustomerEmail,
               customerPhone: quotationData.quoteCustomerPhone,
@@ -2629,10 +2746,13 @@
           const formData = new FormData(event.target);
           const creditNoteData = Object.fromEntries(formData.entries());
           
+          // Ensure we use the system-generated number
+          const creditNoteNumber = document.getElementById('creditNoteNumber').value || this.generateCreditNoteNumber();
+          
           // Use adminAPI for backend integration
           if (window.adminAPI) {
             const creditNotePayload = {
-              creditNoteNumber: creditNoteData.creditNoteNumber,
+              creditNoteNumber: creditNoteNumber,
               originalInvoice: creditNoteData.originalInvoice,
               customerName: creditNoteData.creditCustomerName,
               creditAmount: creditNoteData.creditAmount,

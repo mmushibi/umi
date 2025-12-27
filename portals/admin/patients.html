@@ -1109,9 +1109,9 @@
       </div>
     </div>
 
-    <div class="tenant-info">
-      <div class="tenant-name" x-text="tenantInfo.name"></div>
-      <div class="tenant-location" x-text="tenantInfo.location"></div>
+    <div class="pharmacy-info">
+      <div class="pharmacy-name" x-text="pharmacyInfo.name"></div>
+      <div class="pharmacy-location" x-text="pharmacyInfo.location"></div>
     </div>
 
     <nav class="nav-menu">
@@ -1151,8 +1151,7 @@
         <span class="material-symbols-rounded nav-icon">admin_panel_settings</span>
         <span>User Management</span>
       </a>
-      <!-- Branch navigation - conditionally shown based on tier -->
-      <a href="branches.html" class="nav-item" x-show="canManageBranches()" data-feature="multiple_branches">
+      <a href="branches.html" class="nav-item">
         <span class="material-symbols-rounded nav-icon">business</span>
         <span>Branches</span>
       </a>
@@ -1223,6 +1222,10 @@
              <p>Manage patient profiles, medical history, and prescription records.</p>
           </div>
           <div class="header-actions">
+            <button class="secondary-button" id="syncDataBtn" @click="syncData()" title="Sync data with server">
+              <span class="material-symbols-rounded">sync</span>
+              Sync
+            </button>
             <button class="secondary-button" id="importPatientsBtn" data-action="import-patients">
               <span class="material-symbols-rounded">upload</span>
               Import Patients
@@ -1594,7 +1597,7 @@
       </header>
       <form id="patientForm" class="modal-body">
         <div class="form-section">
-          <h4>Personal Information</h4>
+          <h4>Patient Information</h4>
           <div class="form-grid">
             <label>
               <span>First Name *</span>
@@ -1603,10 +1606,6 @@
             <label>
               <span>Last Name *</span>
               <input type="text" id="formLastName" name="lastName" required>
-            </label>
-            <label>
-              <span>Date of Birth *</span>
-              <input type="date" id="formDateOfBirth" name="dateOfBirth" required>
             </label>
             <label>
               <span>Gender *</span>
@@ -1618,46 +1617,14 @@
               </select>
             </label>
             <label>
-              <span>NRC Number *</span>
-              <input type="text" id="formNRC" name="nrc" required>
-            </label>
-            <label>
-              <span>Blood Type</span>
-              <select id="formBloodType" name="bloodType">
-                <option value="">Select Blood Type</option>
-                <option value="A+">A+</option>
-                <option value="A-">A-</option>
-                <option value="B+">B+</option>
-                <option value="B-">B-</option>
-                <option value="AB+">AB+</option>
-                <option value="AB-">AB-</option>
-                <option value="O+">O+</option>
-                <option value="O-">O-</option>
-              </select>
-            </label>
-          </div>
-        </div>
-
-        <div class="form-section">
-          <h4>Contact Information</h4>
-          <div class="form-grid">
-            <label>
               <span>Phone Number *</span>
               <input type="tel" id="formPhone" name="phone" required>
             </label>
-            <label>
-              <span>Email Address</span>
-              <input type="email" id="formEmail" name="email">
-            </label>
-            <label class="form-full-width">
-              <span>Physical Address *</span>
-              <input type="text" id="formAddress" name="address" required>
-            </label>
           </div>
         </div>
 
         <div class="form-section">
-          <h4>Medical Information</h4>
+          <h4>Emergency Contact</h4>
           <div class="form-grid">
             <label>
               <span>Emergency Contact Name *</span>
@@ -1666,61 +1633,6 @@
             <label>
               <span>Emergency Contact Phone *</span>
               <input type="tel" id="formEmergencyPhone" name="emergencyPhone" required>
-            </label>
-            <label>
-              <span>Relationship to Patient *</span>
-              <select id="formEmergencyRelationship" name="emergencyRelationship" required>
-                <option value="">Select Relationship</option>
-                <option value="spouse">Spouse</option>
-                <option value="parent">Parent</option>
-                <option value="child">Child</option>
-                <option value="sibling">Sibling</option>
-                <option value="friend">Friend</option>
-                <option value="other">Other</option>
-              </select>
-            </label>
-            <label>
-              <span>Primary Physician</span>
-              <input type="text" id="formPrimaryPhysician" name="primaryPhysician">
-            </label>
-          </div>
-          <label class="form-textarea">
-            <span>Known Allergies</span>
-            <textarea id="formAllergies" name="allergies" rows="3"
-              placeholder="List any known allergies..."></textarea>
-          </label>
-          <label class="form-textarea">
-            <span>Chronic Conditions</span>
-            <textarea id="formChronicConditions" name="chronicConditions" rows="3"
-              placeholder="List any chronic conditions..."></textarea>
-          </label>
-          <label class="form-textarea">
-            <span>Current Medications</span>
-            <textarea id="formCurrentMedications" name="currentMedications" rows="3"
-              placeholder="List current medications..."></textarea>
-          </label>
-        </div>
-
-        <div class="form-section">
-          <h4>Insurance Information</h4>
-          <div class="form-grid">
-            <label>
-              <span>Insurance Provider</span>
-              <input type="text" id="formInsuranceProvider" name="insuranceProvider">
-            </label>
-            <label>
-              <span>Policy Number</span>
-              <input type="text" id="formPolicyNumber" name="policyNumber">
-            </label>
-            <label>
-              <span>Insurance Type</span>
-              <select id="formInsuranceType" name="insuranceType">
-                <option value="">Select Type</option>
-                <option value="private">Private</option>
-                <option value="company">Company</option>
-                <option value="government">Government</option>
-                <option value="none">None</option>
-              </select>
             </label>
           </div>
         </div>
@@ -2030,7 +1942,10 @@
         sidebarOpen: false,
         searchQuery: '',
         showAddModal: false,
-        tenantInfo: {
+        editingPatientId: null,
+        loading: false,
+        // User and pharmacy info
+        pharmacyInfo: {
           name: 'Umi Health',
           location: 'Lusaka, Zambia'
         },
@@ -2105,14 +2020,68 @@
           // Implement view functionality
         },
 
-        editPatient(patient) {
-          console.log('Edit patient:', patient);
-          // Implement edit functionality
+        async editPatient(patientId) {
+          try {
+            const patient = this.patients.find(p => p.id === patientId);
+            if (!patient) {
+              this.showNotification('Patient not found', 'error');
+              return;
+            }
+            
+            // Populate form with patient data
+            this.populateEditForm(patient);
+            
+            // Change modal title and button text
+            document.getElementById('patientModalTitle').textContent = 'Edit Patient';
+            document.getElementById('submitPatient').textContent = 'Update Patient';
+            
+            // Store editing state
+            this.editingPatientId = patientId;
+            
+            // Open modal
+            this.openModal('patientModal');
+            
+          } catch (error) {
+            console.error('Error editing patient:', error);
+            this.showNotification('Failed to edit patient', 'error');
+          }
         },
 
-        deletePatient(patientId) {
-          if (confirm('Are you sure you want to delete this patient record?')) {
-            this.patients = this.patients.filter(p => p.id !== patientId);
+        // Populate edit form
+        populateEditForm(patient) {
+          const form = document.getElementById('patientForm');
+          
+          // Fill all form fields
+          Object.keys(patient).forEach(key => {
+            const field = form.querySelector(`[name="${key}"]`);
+            if (field) {
+              field.value = patient[key] || '';
+            }
+          });
+        },
+
+        async deletePatient(patientId) {
+          try {
+            const patient = this.patients.find(p => p.id === patientId);
+            const patientName = patient ? `${patient.firstName} ${patient.lastName}` : 'this patient';
+            
+            if (confirm(`Are you sure you want to delete ${patientName}? This action cannot be undone.`)) {
+              // Delete via API
+              await window.adminAPI.deletePatient(patientId);
+              
+              // Remove from local state
+              this.patients = this.patients.filter(p => p.id !== patientId);
+              
+              // Show success message
+              this.showNotification('Patient deleted successfully', 'success');
+              
+              // Refresh data
+              await this.loadPatients();
+              this.updatePatientStats();
+            }
+          } catch (error) {
+            console.error('Error deleting patient:', error);
+            this.showNotification('Failed to delete patient: ' + error.message, 'error');
           }
         },
 
@@ -2130,25 +2099,250 @@
         },
 
         // Patient Form Management
-        submitPatientForm(event) {
+        async submitPatientForm(event) {
           event.preventDefault();
-          const formData = new FormData(event.target);
-          const patientData = Object.fromEntries(formData.entries());
           
-          // Add patient to list
-          const newPatient = {
-            id: Date.now().toString(),
-            ...patientData,
-            createdAt: new Date().toISOString(),
-            status: 'active'
-          };
+          const submitBtn = document.getElementById('submitPatient');
+          const originalText = submitBtn.textContent;
           
-          this.patients.push(newPatient);
-          this.closeModal('patientModal');
-          event.target.reset();
+          try {
+            // Show loading state
+            submitBtn.disabled = true;
+            submitBtn.textContent = this.editingPatientId ? 'Updating...' : 'Saving...';
+            
+            const formData = new FormData(event.target);
+            const patientData = Object.fromEntries(formData.entries());
+            
+            // Validate required fields
+            if (!this.validatePatientData(patientData)) {
+              return;
+            }
+            
+            let savedPatient;
+            
+            if (this.editingPatientId) {
+              // Update existing patient
+              savedPatient = await window.adminAPI.updatePatient(this.editingPatientId, patientData);
+              
+              // Update in local state
+              const index = this.patients.findIndex(p => p.id === this.editingPatientId);
+              if (index !== -1) {
+                this.patients[index] = savedPatient;
+              }
+              
+              this.showNotification('Patient updated successfully!', 'success');
+            } else {
+              // Create new patient
+              const newPatient = {
+                ...patientData,
+                createdAt: new Date().toISOString(),
+                status: 'active'
+              };
+              
+              savedPatient = await window.adminAPI.createPatient(newPatient);
+              
+              // Add to local state
+              this.patients.push(savedPatient);
+              
+              this.showNotification('Patient created successfully!', 'success');
+            }
+            
+            // Close modal and reset form
+            this.closeModal('patientModal');
+            event.target.reset();
+            
+            // Reset editing state
+            this.editingPatientId = null;
+            document.getElementById('patientModalTitle').textContent = 'Add New Patient';
+            document.getElementById('submitPatient').textContent = 'Create Patient';
+            
+            // Refresh data
+            await this.loadPatients();
+            this.updatePatientStats();
+            
+          } catch (error) {
+            console.error('Error saving patient:', error);
+            this.showNotification('Failed to save patient: ' + error.message, 'error');
+          } finally {
+            // Reset button state
+            submitBtn.disabled = false;
+            submitBtn.textContent = originalText;
+          }
+        },
+
+        // Validate patient data
+        validatePatientData(data) {
+          const requiredFields = ['firstName', 'lastName', 'gender', 'phone', 'emergencyContact', 'emergencyPhone'];
           
-          // Update stats
+          for (const field of requiredFields) {
+            if (!data[field] || data[field].trim() === '') {
+              this.showNotification(`Please fill in the ${field.replace(/([A-Z])/g, ' $1').trim()} field`, 'error');
+              return false;
+            }
+          }
+          
+          // Validate phone number
+          if (!/^\+260\d{9}$/.test(data.phone) && !/^\d{10}$/.test(data.phone)) {
+            this.showNotification('Please enter a valid Zambian phone number', 'error');
+            return false;
+          }
+          
+          // Validate emergency phone number
+          if (!/^\+260\d{9}$/.test(data.emergencyPhone) && !/^\d{10}$/.test(data.emergencyPhone)) {
+            this.showNotification('Please enter a valid emergency contact phone number', 'error');
+            return false;
+          }
+          
+          return true;
+        },
+
+        // Load patients from API
+        async loadPatients() {
+          try {
+            this.loading = true;
+            const response = await window.adminAPI.getPatients();
+            this.patients = response.patients || [];
+            this.renderPatientsTable(this.patients);
+          } catch (error) {
+            console.error('Error loading patients:', error);
+            this.showNotification('Failed to load patients', 'error');
+            // Fallback to localStorage if API fails
+            this.loadPatientsFromStorage();
+          } finally {
+            this.loading = false;
+          }
+        },
+
+        // Load patients from localStorage (fallback)
+        loadPatientsFromStorage() {
+          try {
+            const stored = localStorage.getItem('umi_patients');
+            if (stored) {
+              this.patients = JSON.parse(stored);
+              this.renderPatientsTable(this.patients);
+            }
+          } catch (error) {
+            console.error('Error loading patients from storage:', error);
+            this.patients = [];
+          }
+        },
+
+        // Save patients to localStorage (backup)
+        savePatientsToStorage() {
+          try {
+            localStorage.setItem('umi_patients', JSON.stringify(this.patients));
+          } catch (error) {
+            console.error('Error saving patients to storage:', error);
+          }
+        },
+
+        // Sync data with server
+        async syncData() {
+          try {
+            this.showNotification('Syncing data...', 'info');
+            
+            // Sync patients
+            await this.loadPatients();
+            
+            // Sync other data
+            await window.adminAPI.syncPharmacyData();
+            
+            this.showNotification('Data synced successfully!', 'success');
+          } catch (error) {
+            console.error('Sync error:', error);
+            this.showNotification('Sync failed: ' + error.message, 'error');
+          }
+        },
+
+        // Show notification
+        showNotification(message, type = 'info') {
+          // Create notification element
+          const notification = document.createElement('div');
+          notification.className = `notification notification-${type}`;
+          notification.textContent = message;
+          
+          // Style the notification
+          Object.assign(notification.style, {
+            position: 'fixed',
+            top: '20px',
+            right: '20px',
+            padding: '12px 20px',
+            borderRadius: '8px',
+            color: 'white',
+            fontWeight: '500',
+            zIndex: '10000',
+            opacity: '0',
+            transform: 'translateX(100%)',
+            transition: 'all 0.3s ease'
+          });
+          
+          // Set background color based on type
+          switch (type) {
+            case 'success':
+              notification.style.background = '#22c55e';
+              break;
+            case 'error':
+              notification.style.background = '#ef4444';
+              break;
+            case 'warning':
+              notification.style.background = '#f59e0b';
+              break;
+            default:
+              notification.style.background = '#3b82f6';
+          }
+          
+          // Add to page
+          document.body.appendChild(notification);
+          
+          // Animate in
+          setTimeout(() => {
+            notification.style.opacity = '1';
+            notification.style.transform = 'translateX(0)';
+          }, 100);
+          
+          // Remove after 3 seconds
+          setTimeout(() => {
+            notification.style.opacity = '0';
+            notification.style.transform = 'translateX(100%)';
+            setTimeout(() => {
+              if (notification.parentNode) {
+                notification.parentNode.removeChild(notification);
+              }
+            }, 300);
+          }, 3000);
+        },
+
+        init() {
+          this.loadPharmacyInfo();
+          // Load patients from API on initialization
+          this.loadPatients();
           this.updatePatientStats();
+          
+          // Auto-sync every 30 seconds
+          setInterval(() => {
+            this.syncData();
+          }, 30000);
+          
+          // Save to localStorage on any change
+          this.$watch('patients', () => {
+            this.savePatientsToStorage();
+          });
+        },
+
+        // Load pharmacy info from localStorage
+        loadPharmacyInfo() {
+          try {
+            const currentTenant = localStorage.getItem('umi_current_tenant');
+            if (currentTenant) {
+              const tenant = JSON.parse(currentTenant);
+              this.pharmacyInfo = {
+                name: tenant.name || 'Umi Health',
+                location: `${tenant.city || 'Lusaka'}, ${tenant.province || 'Zambia'}`
+              };
+            }
+          } catch (error) {
+            console.error('Error loading pharmacy info:', error);
+          }
         },
 
         // Tab Management
@@ -2597,7 +2791,14 @@
           });
 
           // Action buttons
-          document.getElementById('addPatientBtn').addEventListener('click', () => this.openModal('patientModal'));
+          document.getElementById('addPatientBtn').addEventListener('click', () => {
+            // Reset editing state for new patient
+            this.editingPatientId = null;
+            document.getElementById('patientModalTitle').textContent = 'Add New Patient';
+            document.getElementById('submitPatient').textContent = 'Create Patient';
+            document.getElementById('patientForm').reset();
+            this.openModal('patientModal');
+          });
           document.getElementById('importPatientsBtn').addEventListener('click', () => this.openModal('csvImportModal'));
           document.getElementById('downloadTemplateBtn').addEventListener('click', () => this.downloadTemplate());
           document.getElementById('resetFilters').addEventListener('click', () => this.resetFilters());

@@ -574,6 +574,95 @@
       font-size: 1.25rem;
     }
 
+    /* Loading Overlay Styles */
+    .loading-overlay {
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background: rgba(255,255,255,0.8);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      z-index: 9998;
+    }
+
+    .loading-overlay span {
+      margin-left: 1rem;
+    }
+
+    /* Icon Size Classes */
+    .info-icon, .warning-icon, .check-icon {
+      font-size: 1rem;
+    }
+
+    /* Loading States */
+    .loading {
+      opacity: 0.6;
+      pointer-events: none;
+    }
+
+    .loading-spinner {
+      display: inline-block;
+      width: 20px;
+      height: 20px;
+      border: 3px solid rgba(0, 0, 0, 0.1);
+      border-radius: 50%;
+      border-top-color: var(--color-primary);
+      animation: spin 1s ease-in-out infinite;
+    }
+
+    @keyframes spin {
+      to { transform: rotate(360deg); }
+    }
+
+    /* Notification Styles */
+    .notification {
+      position: fixed;
+      top: 20px;
+      right: 20px;
+      padding: 1rem 1.5rem;
+      border-radius: 8px;
+      color: white;
+      font-weight: 500;
+      z-index: 9999;
+      transform: translateX(100%);
+      transition: transform 0.3s ease;
+      max-width: 300px;
+    }
+
+    .notification.show {
+      transform: translateX(0);
+    }
+
+    .notification-success {
+      background: var(--color-success);
+    }
+
+    .notification-error {
+      background: var(--color-warning);
+    }
+
+    .notification-warning {
+      background: #f59e0b;
+    }
+
+    .notification-info {
+      background: var(--color-primary);
+    }
+
+    /* Enhanced Responsive Design */
+    @media (max-width: 1024px) {
+      .charts-grid {
+        grid-template-columns: 1fr;
+      }
+      
+      .stats-grid {
+        grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      }
+    }
+
     @media (max-width: 768px) {
       .sidebar {
         transform: translateX(-100%);
@@ -601,15 +690,18 @@
 
       .stats-grid {
         grid-template-columns: 1fr;
+        gap: 1rem;
       }
 
       .charts-grid {
         grid-template-columns: 1fr;
+        gap: 1rem;
       }
 
       .controls-bar {
         flex-direction: column;
         align-items: stretch;
+        gap: 0.5rem;
       }
 
       .search-input {
@@ -623,6 +715,70 @@
       .sales-table th,
       .sales-table td {
         padding: 0.5rem;
+      }
+
+      .action-buttons {
+        flex-direction: column;
+        gap: 0.25rem;
+      }
+
+      .chart-container {
+        height: 250px;
+      }
+
+      .header-left {
+        flex-direction: row;
+        align-items: center;
+        gap: 0.5rem;
+        width: 100%;
+      }
+
+      .page-title-section {
+        display: block;
+        flex: 1;
+        margin-right: 0;
+      }
+
+      .page-title-section .page-title {
+        font-size: 1.125rem;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+      }
+
+      .search-bar {
+        flex: 0 0 auto;
+        width: auto;
+        min-width: 150px;
+      }
+    }
+
+    @media (max-width: 480px) {
+      .stat-card {
+        padding: 1rem;
+      }
+
+      .stat-value {
+        font-size: 1.5rem;
+      }
+
+      .chart-card {
+        padding: 1rem;
+      }
+
+      .sales-table {
+        font-size: 0.7rem;
+      }
+
+      .sales-table th,
+      .sales-table td {
+        padding: 0.25rem;
+      }
+
+      .action-btn {
+        width: 28px;
+        height: 28px;
+        font-size: 0.75rem;
       }
     }
   </style>
@@ -743,20 +899,29 @@
     </header>
 
     <!-- Sales Content -->
-    <div class="sales-content">
+    <div class="sales-content" :class="loading ? 'loading' : ''">
+      <!-- Loading Indicator -->
+      <div x-show="loading" class="loading-overlay" style="position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(255,255,255,0.8); display: flex; align-items: center; justify-content: center; z-index: 9998;">
+        <div class="loading-spinner"></div>
+        <span style="margin-left: 1rem;">Loading sales data...</span>
+      </div>
       <!-- Stats Grid -->
       <div class="stats-grid">
         <div class="stat-card">
           <div class="stat-header">
             <div class="stat-icon primary">
-              <span class="material-symbols-rounded">attach_money</span>
+              <span class="material-symbols-rounded">money</span>
             </div>
           </div>
           <div class="stat-value" x-text="formatCurrency(todayRevenue)"></div>
           <div class="stat-label">Today's Revenue</div>
-          <div class="stat-change positive">
+          <div class="stat-change positive" x-show="todayRevenue > 0">
             <span class="material-symbols-rounded trending-up">trending_up</span>
-            <span>+12% from yesterday</span>
+            <span x-text="getRevenueChange()"></span>
+          </div>
+          <div class="stat-change" x-show="todayRevenue === 0">
+            <span class="material-symbols-rounded info-icon">info</span>
+            <span>No sales today</span>
           </div>
         </div>
 
@@ -768,9 +933,13 @@
           </div>
           <div class="stat-value" x-text="totalTransactions"></div>
           <div class="stat-label">Total Transactions</div>
-          <div class="stat-change positive">
+          <div class="stat-change positive" x-show="totalTransactions > 0">
             <span class="material-symbols-rounded trending-up">trending_up</span>
-            <span>+8% from last week</span>
+            <span x-text="getTransactionChange()"></span>
+          </div>
+          <div class="stat-change" x-show="totalTransactions === 0">
+            <span class="material-symbols-rounded info-icon">info</span>
+            <span>No transactions</span>
           </div>
         </div>
 
@@ -782,9 +951,13 @@
           </div>
           <div class="stat-value" x-text="pendingTransactions"></div>
           <div class="stat-label">Pending Transactions</div>
-          <div class="stat-change negative">
-            <span class="material-symbols-rounded" style="font-size: 1rem;">warning</span>
-            <span>Need attention</span>
+          <div class="stat-change negative" x-show="pendingTransactions > 0">
+            <span class="material-symbols-rounded warning-icon">warning</span>
+            <span x-text="`${pendingTransactions} pending`"></span>
+          </div>
+          <div class="stat-change positive" x-show="pendingTransactions === 0">
+            <span class="material-symbols-rounded check-icon">check_circle</span>
+            <span>All caught up</span>
           </div>
         </div>
 
@@ -796,9 +969,13 @@
           </div>
           <div class="stat-value" x-text="formatCurrency(averageSale)"></div>
           <div class="stat-label">Average Sale</div>
-          <div class="stat-change positive">
+          <div class="stat-change positive" x-show="averageSale > 0">
             <span class="material-symbols-rounded trending-up">trending_up</span>
-            <span>+5% increase</span>
+            <span x-text="getAverageChange()"></span>
+          </div>
+          <div class="stat-change" x-show="averageSale === 0">
+            <span class="material-symbols-rounded info-icon">info</span>
+            <span>No data yet</span>
           </div>
         </div>
       </div>
@@ -901,113 +1078,162 @@
   </main>
 
   <!-- Alpine.js Component -->
-  <script>
-    function salesSystem() {
-      return {
-        sidebarOpen: false,
-        searchQuery: '',
-        showFilterMenu: false,
-        // User and pharmacy info
-        pharmacyInfo: {
-          name: 'Umi Health',
-          location: 'Lusaka, Zambia'
-        },
-        userInfo: {
-          name: 'Umi Health',
-          role: 'Admin',
-          initials: 'UH'
-        },
-        sales: [],
-        
-        // Dashboard metrics
-        todayRevenue: 0,
-        totalTransactions: 0,
-        pendingTransactions: 0,
-        averageSale: 0,
-        
-        // Data sync and API integration
-        loading: false,
-        
-        init() {
-          this.loadPharmacyInfo();
-          this.loadSalesData();
-          this.setupEventListeners();
-        },
-        
-        // Load pharmacy info from localStorage
-        loadPharmacyInfo() {
-          try {
-            const currentTenant = localStorage.getItem('umi_current_tenant');
-            if (currentTenant) {
-              const tenant = JSON.parse(currentTenant);
-              this.pharmacyInfo = {
-                name: tenant.name || 'Umi Health',
-                location: `${tenant.city || 'Lusaka'}, ${tenant.province || 'Zambia'}`
-              };
-            }
-          } catch (error) {
-            console.error('Error loading pharmacy info:', error);
-          }
-        },
-        
-        loadSalesFromAPI() {
-          this.loading = true;
-          try {
-            window.adminDataSync.getData('sales', {
-              page: 1,
-              pageSize: 50,
-              search: this.searchQuery
-            })
-            .then(sales => {
-              this.sales = sales.map(s => ({
+      <script>
+        function salesSystem() {
+          return {
+            sidebarOpen: false,
+            searchQuery: '',
+            showFilterMenu: false,
+            // User and pharmacy info
+            pharmacyInfo: {
+              name: 'Umi Health',
+              location: 'Lusaka, Zambia'
+            },
+            userInfo: {
+              name: 'Umi Health',
+              role: 'Admin',
+              initials: 'UH'
+            },
+            sales: [],
+            
+            // Dashboard metrics
+            todayRevenue: 0,
+            totalTransactions: 0,
+            pendingTransactions: 0,
+            averageSale: 0,
+            
+            // Data loading methods
+            async loadSalesData() {
+              this.loading = true;
+              try {
+                // Try API first
+                const sales = await window.adminAPI.getSales({
+                  page: 1,
+                  pageSize: 50,
+                  search: this.searchQuery
+                });
+                
+                this.sales = sales.map(s => ({
+                  id: s.id,
+                  receiptNumber: s.receiptNumber || `RCP-${s.id}`,
+                  customer: s.customerName || 'Walk-in Customer',
+                  date: s.saleDate ? new Date(s.saleDate).toLocaleDateString() : new Date().toLocaleDateString(),
+                  items: s.items ? s.items.length : 1,
+                  paymentMethod: s.paymentMethod || 'Cash',
+                  status: s.status || 'completed',
+                  amount: s.totalAmount || s.amount || 0
+                }));
+                
+                this.updateSalesMetrics();
+                this.updateCharts();
+                this.showSuccess('Sales data loaded successfully');
+              } catch (error) {
+                console.error('API failed, using local data:', error);
+                this.loadLocalSalesData();
+                this.showWarning('Using offline data - API unavailable');
+              } finally {
+                this.loading = false;
+              }
+            },
+            
+            loadLocalSalesData() {
+              // Fallback to local storage data
+              const localSales = window.dataSync.get('sales') || [];
+              this.sales = localSales.map(s => ({
                 id: s.id,
-                receiptNumber: s.receiptNumber || s.id,
-                customer: s.customerName,
-                date: s.saleDate ? new Date(s.saleDate).toLocaleDateString() : '',
-                items: s.items ? s.items.length : 0,
-                paymentMethod: s.paymentMethod,
+                receiptNumber: s.receiptNumber || `RCP-${s.id}`,
+                customer: s.customerName || 'Walk-in Customer',
+                date: s.saleDate ? new Date(s.saleDate).toLocaleDateString() : new Date().toLocaleDateString(),
+                items: s.items ? s.items.length : 1,
+                paymentMethod: s.paymentMethod || 'Cash',
                 status: s.status || 'completed',
-                amount: s.totalAmount || 0
-              }));
-              
-              // Update dashboard metrics
-              this.updateSalesMetrics();
-              this.loading = false;
-            })
-            .catch(error => {
-              console.error('Error loading sales:', error);
-              this.showError('Failed to load sales. Please try again.');
-              this.loading = false;
-            });
-          } catch (error) {
-            console.error('Data sync not available:', error);
-            this.loading = false;
-          }
-        },
-        
-        setupEventListeners() {
-          if (window.adminDataSync) {
-            window.adminDataSync.on('sales-updated', (sales) => {
-              this.sales = sales.map(s => ({
-                id: s.id,
-                receiptNumber: s.receiptNumber || s.id,
-                customer: s.customerName,
-                date: s.saleDate ? new Date(s.saleDate).toLocaleDateString() : '',
-                items: s.items ? s.items.length : 0,
-                paymentMethod: s.paymentMethod,
-                status: s.status || 'completed',
-                amount: s.totalAmount || 0
+                amount: s.totalAmount || s.amount || 0
               }));
               
               this.updateSalesMetrics();
-            });
-
-            window.adminDataSync.on('sync-error', (error) => {
-              console.error('Sync error:', error);
-              this.showWarning('Data synchronization error occurred');
-            });
-          }
-        },
+              this.updateCharts();
+            },
+            
+            // Calculate change percentages
+            getRevenueChange() {
+              const yesterday = new Date();
+              yesterday.setDate(yesterday.getDate() - 1);
+              const yesterdayStr = yesterday.toISOString().split('T')[0];
+              
+              const yesterdaySales = this.sales.filter(sale => 
+                sale.date === yesterdayStr && sale.status === 'completed'
+              );
+              const yesterdayRevenue = yesterdaySales.reduce((total, sale) => total + sale.amount, 0);
+              
+              if (yesterdayRevenue === 0) return 'New sales today';
+              
+              const change = ((this.todayRevenue - yesterdayRevenue) / yesterdayRevenue * 100).toFixed(1);
+              const sign = change >= 0 ? '+' : '';
+              return `${sign}${change}% from yesterday`;
+            },
+            
+            getTransactionChange() {
+              const lastWeek = new Date();
+              lastWeek.setDate(lastWeek.getDate() - 7);
+              const lastWeekStr = lastWeek.toISOString().split('T')[0];
+              
+              const lastWeekSales = this.sales.filter(sale => 
+                new Date(sale.date) >= lastWeek && sale.status === 'completed'
+              );
+              const thisWeekSales = this.sales.filter(sale => 
+                new Date(sale.date) >= new Date().setDate(new Date().getDate() - 7) && sale.status === 'completed'
+              );
+              
+              if (lastWeekSales.length === 0) return 'First week';
+              
+              const change = ((thisWeekSales.length - lastWeekSales.length) / lastWeekSales.length * 100).toFixed(1);
+              const sign = change >= 0 ? '+' : '';
+              return `${sign}${change}% from last week`;
+            },
+            
+            getAverageChange() {
+              const lastMonth = new Date();
+              lastMonth.setMonth(lastMonth.getMonth() - 1);
+              
+              const lastMonthSales = this.sales.filter(sale => 
+                new Date(sale.date) >= lastMonth && sale.status === 'completed'
+              );
+              
+              if (lastMonthSales.length === 0) return 'No history';
+              
+              const lastMonthAvg = lastMonthSales.reduce((total, sale) => total + sale.amount, 0) / lastMonthSales.length;
+              const change = ((this.averageSale - lastMonthAvg) / lastMonthAvg * 100).toFixed(1);
+              const sign = change >= 0 ? '+' : '';
+              return `${sign}${change}% from last month`;
+            },
+            
+            setupEventListeners() {
+              // Listen for real-time updates
+              if (window.dataSync) {
+                window.dataSync.subscribe('sales', (sales) => {
+                  this.sales = sales.map(s => ({
+                    id: s.id,
+                    receiptNumber: s.receiptNumber || `RCP-${s.id}`,
+                    customer: s.customerName || 'Walk-in Customer',
+                    date: s.saleDate ? new Date(s.saleDate).toLocaleDateString() : new Date().toLocaleDateString(),
+                    items: s.items ? s.items.length : 1,
+                    paymentMethod: s.paymentMethod || 'Cash',
+                    status: s.status || 'completed',
+                    amount: s.totalAmount || s.amount || 0
+                  }));
+                  
+                  this.updateSalesMetrics();
+                  this.updateCharts();
+                });
+              }
+              
+              // Auto-refresh data every 30 seconds
+              setInterval(() => {
+                if (!this.loading) {
+                  this.loadSalesData();
+                }
+              }, 30000);
+            },
         
         updateSalesMetrics() {
           const today = new Date().toISOString().split('T')[0];
@@ -1089,13 +1315,66 @@
         },
 
         viewSale(sale) {
+          // Show sale details in a modal or navigate to detail page
+          this.showInfo(`Viewing details for sale ${sale.receiptNumber}`);
           console.log('View sale:', sale);
-          // Implement detailed view functionality
         },
 
         printReceipt(sale) {
+          // Print receipt functionality
+          this.showSuccess(`Printing receipt ${sale.receiptNumber}`);
           console.log('Print receipt:', sale);
-          window.print();
+          
+          // Create a printable receipt
+          const receiptContent = this.generateReceiptContent(sale);
+          const printWindow = window.open('', '_blank');
+          printWindow.document.write(receiptContent);
+          printWindow.document.close();
+          printWindow.print();
+        },
+        
+        generateReceiptContent(sale) {
+          return `
+            <!DOCTYPE html>
+            <html>
+            <head>
+              <title>Receipt ${sale.receiptNumber}</title>
+              <style>
+                body { font-family: Arial, sans-serif; padding: 20px; }
+                .header { text-align: center; margin-bottom: 30px; }
+                .receipt-info { margin-bottom: 20px; }
+                .items { margin-bottom: 20px; }
+                .total { font-weight: bold; font-size: 18px; }
+              </style>
+            </head>
+            <body>
+              <div class="header">
+                <h2>${this.pharmacyInfo.name}</h2>
+                <p>${this.pharmacyInfo.location}</p>
+                <h3>RECEIPT</h3>
+              </div>
+              <div class="receipt-info">
+                <p><strong>Receipt #:</strong> ${sale.receiptNumber}</p>
+                <p><strong>Date:</strong> ${sale.date}</p>
+                <p><strong>Customer:</strong> ${sale.customer}</p>
+                <p><strong>Payment:</strong> ${sale.paymentMethod}</p>
+              </div>
+              <div class="items">
+                <p><strong>Items:</strong> ${sale.items}</p>
+              </div>
+              <div class="total">
+                <p><strong>TOTAL:</strong> ${this.formatCurrency(sale.amount)}</p>
+              </div>
+              <div style="margin-top: 40px; text-align: center;">
+                <p>Thank you for your business!</p>
+              </div>
+            </body>
+            </html>
+          `;
+        },
+        
+        showInfo(message) {
+          this.showNotification(message, 'info');
         },
 
         formatCurrency(amount) {
@@ -1112,72 +1391,56 @@
         },
 
         init() {
+          this.loadPharmacyInfo();
+          this.loadSalesData();
+          this.setupEventListeners();
           this.initCharts();
         },
 
-        initCharts() {
-          // Revenue Chart
-          const revenueCtx = document.getElementById('revenueChart').getContext('2d');
-          new Chart(revenueCtx, {
-            type: 'line',
-            data: {
-              labels: ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'],
-              datasets: [{
-                label: 'Revenue',
-                data: [1200, 1900, 1500, 2100, 2400, 1800, 2200],
-                borderColor: 'rgb(0, 0, 0)',
-                backgroundColor: 'rgba(0, 0, 0, 0.1)',
-                tension: 0.4
-              }]
-            },
-            options: {
-              responsive: true,
-              maintainAspectRatio: false,
-              plugins: {
-                legend: {
-                  display: false
-                }
-              },
-              scales: {
-                y: {
-                  beginAtZero: true,
-                  ticks: {
-                    callback: function(value) {
-                      return 'ZMW ' + value;
-                    }
-                  }
-                }
+        updateCharts() {
+          // Update revenue chart with actual data
+          const revenueChart = Chart.getChart('revenueChart');
+          if (revenueChart && this.sales.length > 0) {
+            const last7Days = this.getLast7Days();
+            const revenueData = last7Days.map(day => {
+              const daySales = this.sales.filter(sale => 
+                sale.status === 'completed' && sale.date === day
+              );
+              return daySales.reduce((total, sale) => total + sale.amount, 0);
+            });
+            
+            revenueChart.data.datasets[0].data = revenueData;
+            revenueChart.update();
+          }
+          
+          // Update payment methods chart
+          const paymentChart = Chart.getChart('paymentChart');
+          if (paymentChart && this.sales.length > 0) {
+            const paymentMethods = {};
+            this.sales.forEach(sale => {
+              if (sale.status === 'completed') {
+                paymentMethods[sale.paymentMethod] = (paymentMethods[sale.paymentMethod] || 0) + 1;
               }
-            }
-          });
-
-          // Payment Methods Chart
-          const paymentCtx = document.getElementById('paymentChart').getContext('2d');
-          new Chart(paymentCtx, {
-            type: 'doughnut',
-            data: {
-              labels: ['Cash', 'Card', 'Mobile', 'Insurance'],
-              datasets: [{
-                data: [35, 30, 25, 10],
-                backgroundColor: [
-                  'rgba(0, 0, 0, 0.8)',
-                  'rgba(107, 114, 128, 0.8)',
-                  'rgba(156, 163, 175, 0.8)',
-                  'rgba(209, 213, 219, 0.8)'
-                ]
-              }]
-            },
-            options: {
-              responsive: true,
-              maintainAspectRatio: false,
-              plugins: {
-                legend: {
-                  position: 'bottom'
-                }
-              }
-            }
-          });
-        }
+            });
+            
+            const labels = Object.keys(paymentMethods);
+            const data = Object.values(paymentMethods);
+            
+            paymentChart.data.labels = labels;
+            paymentChart.data.datasets[0].data = data;
+            paymentChart.update();
+          }
+        },
+        
+        getLast7Days() {
+          const days = [];
+          for (let i = 6; i >= 0; i--) {
+            const date = new Date();
+            date.setDate(date.getDate() - i);
+            days.push(date.toLocaleDateString());
+          }
+          return days;
+        },
       }
     }
   </script>
