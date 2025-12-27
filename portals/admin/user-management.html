@@ -1776,9 +1776,9 @@
       </div>
     </div>
 
-    <div class="tenant-info">
-      <div class="tenant-name" x-text="tenantInfo.name"></div>
-      <div class="tenant-location" x-text="tenantInfo.location"></div>
+    <div class="pharmacy-info">
+      <div class="pharmacy-name" x-text="pharmacyInfo.name"></div>
+      <div class="pharmacy-location" x-text="pharmacyInfo.location"></div>
     </div>
 
     <nav class="nav-menu">
@@ -2337,8 +2337,8 @@
         selectedEmployees: [],
         currentTab: 'schedule',
         
-        // User and tenant info
-        tenantInfo: {
+        // User and pharmacy info
+        pharmacyInfo: {
           name: 'Umi Health',
           location: 'Lusaka, Zambia'
         },
@@ -2354,11 +2354,28 @@
         // Initialize the system
         init() {
           this.api = new AdminAPI();
+          this.loadPharmacyInfo();
           this.loadBranches();
           this.loadEmployees();
           this.setupEventListeners();
           this.setupRealtimeSync();
           this.updateEmployeeStats();
+        },
+
+        // Load pharmacy info from localStorage
+        loadPharmacyInfo() {
+          try {
+            const currentTenant = localStorage.getItem('umi_current_tenant');
+            if (currentTenant) {
+              const tenant = JSON.parse(currentTenant);
+              this.pharmacyInfo = {
+                name: tenant.name || 'Umi Health',
+                location: `${tenant.city || 'Lusaka'}, ${tenant.province || 'Zambia'}`
+              };
+            }
+          } catch (error) {
+            console.error('Error loading pharmacy info:', error);
+          }
         },
 
         // Load branches from API

@@ -639,9 +639,9 @@
       </div>
     </div>
 
-    <div class="tenant-info">
-      <div class="tenant-name" x-text="tenantInfo.name"></div>
-      <div class="tenant-location" x-text="tenantInfo.location"></div>
+    <div class="pharmacy-info">
+      <div class="pharmacy-name" x-text="pharmacyInfo.name"></div>
+      <div class="pharmacy-location" x-text="pharmacyInfo.location"></div>
     </div>
 
     <nav class="nav-menu">
@@ -907,7 +907,8 @@
         sidebarOpen: false,
         searchQuery: '',
         showFilterMenu: false,
-        tenantInfo: {
+        // User and pharmacy info
+        pharmacyInfo: {
           name: 'Umi Health',
           location: 'Lusaka, Zambia'
         },
@@ -928,8 +929,25 @@
         loading: false,
         
         init() {
-          this.loadSalesFromAPI();
+          this.loadPharmacyInfo();
+          this.loadSalesData();
           this.setupEventListeners();
+        },
+        
+        // Load pharmacy info from localStorage
+        loadPharmacyInfo() {
+          try {
+            const currentTenant = localStorage.getItem('umi_current_tenant');
+            if (currentTenant) {
+              const tenant = JSON.parse(currentTenant);
+              this.pharmacyInfo = {
+                name: tenant.name || 'Umi Health',
+                location: `${tenant.city || 'Lusaka'}, ${tenant.province || 'Zambia'}`
+              };
+            }
+          } catch (error) {
+            console.error('Error loading pharmacy info:', error);
+          }
         },
         
         loadSalesFromAPI() {
