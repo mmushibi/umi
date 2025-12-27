@@ -286,6 +286,93 @@ class AdminAPI {
     
     return await response.blob();
   }
+
+  // Account Management APIs
+  async updateUserProfile(profileData) {
+    return await this.request('/account/profile', {
+      method: 'PUT',
+      body: JSON.stringify(profileData)
+    });
+  }
+
+  async getUserProfile() {
+    return await this.request('/account/profile');
+  }
+
+  async updatePharmacySettings(settings) {
+    return await this.request('/account/pharmacy/settings', {
+      method: 'PUT',
+      body: JSON.stringify(settings)
+    });
+  }
+
+  async getPharmacySettings() {
+    return await this.request('/account/pharmacy/settings');
+  }
+
+  async updateNotificationSettings(settings) {
+    return await this.request('/account/notifications/settings', {
+      method: 'PUT',
+      body: JSON.stringify(settings)
+    });
+  }
+
+  async getNotificationSettings() {
+    return await this.request('/account/notifications/settings');
+  }
+
+  async changePassword(passwordData) {
+    return await this.request('/account/password/change', {
+      method: 'POST',
+      body: JSON.stringify(passwordData)
+    });
+  }
+
+  async getActiveSessions() {
+    return await this.request('/account/sessions');
+  }
+
+  async revokeSession(sessionId) {
+    return await this.request(`/account/sessions/${sessionId}/revoke`, {
+      method: 'POST'
+    });
+  }
+
+  async revokeAllSessions() {
+    return await this.request('/account/sessions/revoke-all', {
+      method: 'POST'
+    });
+  }
+
+  async cancelSubscription(cancelData) {
+    return await this.request('/account/subscription/cancel', {
+      method: 'POST',
+      body: JSON.stringify(cancelData)
+    });
+  }
+
+  async sendNotification(notificationData) {
+    return await this.request('/notifications/send', {
+      method: 'POST',
+      body: JSON.stringify(notificationData)
+    });
+  }
+
+  // Data Sync APIs
+  async syncUserData() {
+    return await this.request('/sync/user');
+  }
+
+  async syncPharmacyData() {
+    return await this.request('/sync/pharmacy');
+  }
+
+  async broadcastUpdate(updateData) {
+    return await this.request('/sync/broadcast', {
+      method: 'POST',
+      body: JSON.stringify(updateData)
+    });
+  }
 }
 
 // Initialize global admin API instance

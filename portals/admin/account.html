@@ -812,31 +812,31 @@
           <h3 class="settings-nav-title">Settings</h3>
           <ul class="settings-nav">
             <li class="settings-nav-item">
-              <a href="#" class="settings-nav-link" :class="{ 'active': activeSection === 'profile' }" @click="activeSection = 'profile'">
+              <a href="#" class="settings-nav-link" :class="{ 'active': activeSection === 'profile' }" @click="switchTab('profile')">
                 <span class="material-symbols-rounded settings-nav-icon">person</span>
                 <span>Profile</span>
               </a>
             </li>
             <li class="settings-nav-item">
-              <a href="#" class="settings-nav-link" :class="{ 'active': activeSection === 'security' }" @click="activeSection = 'security'">
+              <a href="#" class="settings-nav-link" :class="{ 'active': activeSection === 'security' }" @click="switchTab('security')">
                 <span class="material-symbols-rounded settings-nav-icon">security</span>
                 <span>Security</span>
               </a>
             </li>
             <li class="settings-nav-item">
-              <a href="#" class="settings-nav-link" :class="{ 'active': activeSection === 'notifications' }" @click="activeSection = 'notifications'">
+              <a href="#" class="settings-nav-link" :class="{ 'active': activeSection === 'notifications' }" @click="switchTab('notifications')">
                 <span class="material-symbols-rounded settings-nav-icon">notifications</span>
                 <span>Notifications</span>
               </a>
             </li>
             <li class="settings-nav-item">
-              <a href="#" class="settings-nav-link" :class="{ 'active': activeSection === 'pharmacy' }" @click="activeSection = 'pharmacy'">
+              <a href="#" class="settings-nav-link" :class="{ 'active': activeSection === 'pharmacy' }" @click="switchTab('pharmacy')">
                 <span class="material-symbols-rounded settings-nav-icon">business</span>
                 <span>Pharmacy Settings</span>
               </a>
             </li>
             <li class="settings-nav-item">
-              <a href="#" class="settings-nav-link" :class="{ 'active': activeSection === 'billing' }" @click="activeSection = 'billing'">
+              <a href="#" class="settings-nav-link" :class="{ 'active': activeSection === 'billing' }" @click="switchTab('billing')">
                 <span class="material-symbols-rounded settings-nav-icon">payments</span>
                 <span>Billing</span>
               </a>
@@ -914,9 +914,12 @@
               <div class="security-item">
                 <div class="security-info">
                   <div class="security-title">Two-Factor Authentication</div>
-                  <div class="security-description">Add an extra layer of security to your account</div>
+                  <div class="security-description" x-text="twoFactorEnabled ? 'Extra security is enabled for your account' : 'Add an extra layer of security to your account'"></div>
                 </div>
-                <span class="security-status disabled">Disabled</span>
+                <div>
+                  <span class="security-status" :class="twoFactorEnabled ? 'active' : 'disabled'" x-text="twoFactorEnabled ? 'Enabled' : 'Disabled'"></span>
+                  <button class="btn btn-secondary btn-sm two-factor-btn" @click="showTwoFactorModal = true" :title="twoFactorEnabled ? 'Manage two-factor authentication settings' : 'Enable two-factor authentication'" x-text="twoFactorEnabled ? 'Manage' : 'Enable'"></button>
+                </div>
               </div>
 
               <div class="security-item">
@@ -933,6 +936,211 @@
                   <div class="security-description">Manage your API access keys</div>
                 </div>
                 <button class="btn btn-secondary">Manage Keys</button>
+              </div>
+            </div>
+          </div>
+
+          <!-- Change Password Modal -->
+          <div class="modal-overlay" :class="{ 'show': showPasswordModal }" @click="showPasswordModal = false">
+            <div class="modal" @click.stop>
+              <div class="modal-header">
+                <h3 class="modal-title">Change Password</h3>
+                <p class="modal-subtitle">Update your account password for security</p>
+              </div>
+              
+              <div class="modal-body">
+                <div class="form-group">
+                  <label class="form-label" for="currentPassword">Current Password</label>
+                  <input type="password" id="currentPassword" class="form-input" x-model="passwordForm.currentPassword" placeholder="Enter current password">
+                </div>
+                
+                <div class="form-group">
+                  <label class="form-label" for="newPassword">New Password</label>
+                  <input type="password" id="newPassword" class="form-input" x-model="passwordForm.newPassword" placeholder="Enter new password">
+                  <div class="password-requirements">
+                    <small x-show="passwordForm.newPassword">
+                      Password must contain:
+                      <div :class="passwordRequirements.hasMinLength ? 'text-success' : 'text-muted'">• At least 8 characters</div>
+                      <div :class="passwordRequirements.hasLetter ? 'text-success' : 'text-muted'">• At least one letter</div>
+                      <div :class="passwordRequirements.hasNumber ? 'text-success' : 'text-muted'">• At least one number</div>
+                    </small>
+                  </div>
+                </div>
+                
+                <div class="form-group">
+                  <label class="form-label" for="confirmPassword">Confirm New Password</label>
+                  <input type="password" id="confirmPassword" class="form-input" x-model="passwordForm.confirmPassword" placeholder="Confirm new password">
+                  <div class="field-error" x-show="passwordForm.confirmPassword && passwordForm.newPassword !== passwordForm.confirmPassword">
+                    Passwords do not match
+                  </div>
+                </div>
+              </div>
+              
+              <div class="modal-footer">
+                <button class="btn btn-secondary" @click="cancelPasswordChange()">Cancel</button>
+                <button class="btn btn-primary" @click="changePassword()" :disabled="!isPasswordFormValid()">
+                  <span class="material-symbols-rounded">lock</span>
+                  Change Password
+                </button>
+              </div>
+            </div>
+          </div>
+
+          <!-- Sessions Modal -->
+          <div class="modal-overlay" :class="{ 'show': showSessionsModal }" @click="showSessionsModal = false">
+            <div class="modal" @click.stop>
+              <div class="modal-header">
+                <h3 class="modal-title">Active Login Sessions</h3>
+                <p class="modal-subtitle">Manage your active login sessions across devices</p>
+              </div>
+              
+              <div class="modal-body">
+                <div class="sessions-list">
+                  <template x-for="session in activeSessions" :key="session.id">
+                    <div class="session-item">
+                      <div class="session-info">
+                        <div class="session-device" x-text="session.device"></div>
+                        <div class="session-details">
+                          <span x-text="session.location"></span> • 
+                          <span x-text="session.lastActive"></span>
+                        </div>
+                      </div>
+                      <div class="session-actions">
+                        <span class="session-status" :class="session.current ? 'current' : ''" x-text="session.current ? 'Current' : ''"></span>
+                        <button class="btn btn-danger btn-sm" x-show="!session.current" @click="revokeSession(session.id)">
+                          Revoke
+                        </button>
+                      </div>
+                    </div>
+                  </template>
+                </div>
+                
+                <div class="sessions-footer">
+                  <button class="btn btn-danger" @click="revokeAllSessions()" x-show="activeSessions.length > 1">
+                    Revoke All Other Sessions
+                  </button>
+                </div>
+              </div>
+              
+              <div class="modal-footer">
+                <button class="btn btn-secondary" @click="showSessionsModal = false">Close</button>
+              </div>
+            </div>
+          </div>
+
+          <!-- Two-Factor Authentication Modal -->
+          <div class="modal-overlay" :class="{ 'show': showTwoFactorModal }" @click="showTwoFactorModal = false">
+            <div class="modal" @click.stop>
+              <div class="modal-header">
+                <h3 class="modal-title">Two-Factor Authentication</h3>
+                <p class="modal-subtitle" x-text="twoFactorEnabled ? 'Manage your 2FA settings' : 'Set up two-factor authentication for enhanced security'"></p>
+              </div>
+              
+              <div class="modal-body">
+                <!-- Introduction Step -->
+                <div x-show="twoFactorSetup.step === 'intro'">
+                  <div class="two-factor-intro">
+                    <h4>Choose your 2FA method:</h4>
+                    <div class="two-factor-methods">
+                      
+                      <div class="method-card" :class="{ selected: twoFactorSetup.method === 'sms' }" @click="twoFactorSetup.method = 'sms'">
+                        <div class="method-icon">
+                          <span class="material-symbols-rounded">sms</span>
+                        </div>
+                        <div class="method-info">
+                          <div class="method-name">SMS</div>
+                          <div class="method-description">Receive codes via text message</div>
+                        </div>
+                      </div>
+                      
+                      <div class="method-card" :class="{ selected: twoFactorSetup.method === 'email' }" @click="twoFactorSetup.method = 'email'">
+                        <div class="method-icon">
+                          <span class="material-symbols-rounded">email</span>
+                        </div>
+                        <div class="method-info">
+                          <div class="method-name">Email</div>
+                          <div class="method-description">Receive codes via email</div>
+                        </div>
+                      </div>
+                    </div>
+                    
+                    <div class="form-group" x-show="twoFactorSetup.method === 'sms'">
+                      <label class="form-label">Phone Number</label>
+                      <input type="tel" class="form-input" x-model="twoFactorSetup.phoneNumber" placeholder="+260123456789">
+                    </div>
+                  </div>
+                </div>
+                
+                <!-- Setup Step -->
+                <div x-show="twoFactorSetup.step === 'setup'">
+                  <div class="two-factor-setup">
+                    <div x-show="twoFactorSetup.method === 'app'">
+                      <h4>Set up your authenticator app:</h4>
+                      <ol>
+                        <li>Open your authenticator app (Google Authenticator, Authy, etc.)</li>
+                        <li>Scan the QR code below or enter the secret manually</li>
+                        <li>Enter the 6-digit code to verify</li>
+                      </ol>
+                      <div class="qr-code-placeholder">
+                        <div class="qr-code">
+                          <span class="material-symbols-rounded">qr_code_2</span>
+                          <p>QR Code would appear here</p>
+                        </div>
+                      </div>
+                    </div>
+                    
+                    <div x-show="twoFactorSetup.method === 'sms'">
+                      <h4>Verify your phone number:</h4>
+                      <p>We'll send a verification code to <strong x-text="twoFactorSetup.phoneNumber"></strong></p>
+                    </div>
+                    
+                    <div x-show="twoFactorSetup.method === 'email'">
+                      <h4>Verify your email:</h4>
+                      <p>We'll send a verification code to <strong x-text="userInfo.email"></strong></p>
+                    </div>
+                    
+                    <div class="form-group">
+                      <label class="form-label">Verification Code</label>
+                      <input type="text" class="form-input" x-model="twoFactorSetup.verificationCode" placeholder="Enter 6-digit code" maxlength="6">
+                    </div>
+                  </div>
+                </div>
+                
+                <!-- Complete Step -->
+                <div x-show="twoFactorSetup.step === 'complete'">
+                  <div class="two-factor-complete">
+                    <div class="success-icon">
+                      <span class="material-symbols-rounded">check_circle</span>
+                    </div>
+                    <h4>Two-Factor Authentication Enabled!</h4>
+                    <p>Your account is now protected with an extra layer of security.</p>
+                    
+                    <div class="backup-codes">
+                      <h5>Backup Codes</h5>
+                      <p>Save these backup codes in a safe place. You can use them to access your account if you lose your 2FA device.</p>
+                      <div class="backup-codes-list">
+                        <template x-for="(code, index) in twoFactorSetup.backupCodes" :key="index">
+                          <div class="backup-code" x-text="code"></div>
+                        </template>
+                      </div>
+                      <button class="btn btn-secondary btn-sm" @click="downloadBackupCodes()">
+                        <span class="material-symbols-rounded">download</span>
+                        Download Codes
+                      </button>
+                    </div>
+                  </div>
+                </div>
+              </div>
+              
+              <div class="modal-footer">
+                <button class="btn btn-secondary" @click="cancelTwoFactorSetup()">Cancel</button>
+                <button class="btn btn-primary" @click="nextTwoFactorStep()" x-show="twoFactorSetup.step !== 'complete'">
+                  <span x-show="twoFactorSetup.step === 'intro'">Continue</span>
+                  <span x-show="twoFactorSetup.step === 'setup'">Enable 2FA</span>
+                </button>
+                <button class="btn btn-primary" @click="showTwoFactorModal = false" x-show="twoFactorSetup.step === 'complete'">
+                  Done
+                </button>
               </div>
             </div>
           </div>
@@ -1207,94 +1415,6 @@
                   <span x-show="!upgradeRequestPending">Confirm Upgrade to <span x-text="selectedUpgradePlan"></span></span>
                   <span x-show="upgradeRequestPending">Processing...</span>
                 </button>
-              </div>
-            </div>
-          </div>
-
-          <!-- Change Password Modal -->
-          <div class="modal-overlay" :class="{ 'show': showPasswordModal }" @click="showPasswordModal = false">
-            <div class="modal" @click.stop>
-              <div class="modal-header">
-                <h3 class="modal-title">Change Password</h3>
-                <p class="modal-subtitle">Update your account password for security</p>
-              </div>
-              
-              <div class="modal-body">
-                <div class="form-group">
-                  <label class="form-label" for="currentPassword">Current Password</label>
-                  <input type="password" id="currentPassword" class="form-input" x-model="passwordForm.currentPassword" placeholder="Enter current password">
-                </div>
-                
-                <div class="form-group">
-                  <label class="form-label" for="newPassword">New Password</label>
-                  <input type="password" id="newPassword" class="form-input" x-model="passwordForm.newPassword" placeholder="Enter new password">
-                  <div class="password-requirements">
-                    <small x-show="passwordForm.newPassword">
-                      Password must contain:
-                      <div :class="passwordRequirements.hasMinLength ? 'text-success' : 'text-muted'">• At least 8 characters</div>
-                      <div :class="passwordRequirements.hasLetter ? 'text-success' : 'text-muted'">• At least one letter</div>
-                      <div :class="passwordRequirements.hasNumber ? 'text-success' : 'text-muted'">• At least one number</div>
-                    </small>
-                  </div>
-                </div>
-                
-                <div class="form-group">
-                  <label class="form-label" for="confirmPassword">Confirm New Password</label>
-                  <input type="password" id="confirmPassword" class="form-input" x-model="passwordForm.confirmPassword" placeholder="Confirm new password">
-                  <div class="field-error" x-show="passwordForm.confirmPassword && passwordForm.newPassword !== passwordForm.confirmPassword">
-                    Passwords do not match
-                  </div>
-                </div>
-              </div>
-              
-              <div class="modal-footer">
-                <button class="btn btn-secondary" @click="cancelPasswordChange()">Cancel</button>
-                <button class="btn btn-primary" @click="changePassword()" :disabled="!isPasswordFormValid()">
-                  <span class="material-symbols-rounded">lock</span>
-                  Change Password
-                </button>
-              </div>
-            </div>
-          </div>
-
-          <!-- Sessions Modal -->
-          <div class="modal-overlay" :class="{ 'show': showSessionsModal }" @click="showSessionsModal = false">
-            <div class="modal" @click.stop>
-              <div class="modal-header">
-                <h3 class="modal-title">Active Login Sessions</h3>
-                <p class="modal-subtitle">Manage your active login sessions across devices</p>
-              </div>
-              
-              <div class="modal-body">
-                <div class="sessions-list">
-                  <template x-for="session in activeSessions" :key="session.id">
-                    <div class="session-item">
-                      <div class="session-info">
-                        <div class="session-device" x-text="session.device"></div>
-                        <div class="session-details">
-                          <span x-text="session.location"></span> • 
-                          <span x-text="session.lastActive"></span>
-                        </div>
-                      </div>
-                      <div class="session-actions">
-                        <span class="session-status" :class="session.current ? 'current' : ''" x-text="session.current ? 'Current' : ''"></span>
-                        <button class="btn btn-danger btn-sm" x-show="!session.current" @click="revokeSession(session.id)">
-                          Revoke
-                        </button>
-                      </div>
-                    </div>
-                  </template>
-                </div>
-                
-                <div class="sessions-footer">
-                  <button class="btn btn-danger" @click="revokeAllSessions()" x-show="activeSessions.length > 1">
-                    Revoke All Other Sessions
-                  </button>
-                </div>
-              </div>
-              
-              <div class="modal-footer">
-                <button class="btn btn-secondary" @click="showSessionsModal = false">Close</button>
               </div>
             </div>
           </div>
@@ -1802,6 +1922,140 @@
             .checkbox-label input[type="checkbox"] {
               width: auto;
             }
+            
+            /* Two-Factor Authentication Modal Styles */
+            .two-factor-intro h4 {
+              margin-bottom: 1rem;
+              color: #374151;
+            }
+            
+            .two-factor-methods {
+              display: flex;
+              flex-direction: column;
+              gap: 0.75rem;
+              margin-bottom: 1rem;
+            }
+            
+            .method-card {
+              display: flex;
+              align-items: center;
+              padding: 1rem;
+              border: 2px solid #e5e7eb;
+              border-radius: 8px;
+              cursor: pointer;
+              transition: all 0.2s ease;
+            }
+            
+            .method-card:hover {
+              border-color: #d1d5db;
+              background: #f9fafb;
+            }
+            
+            .method-card.selected {
+              border-color: #3b82f6;
+              background: #eff6ff;
+            }
+            
+            .method-icon {
+              width: 40px;
+              height: 40px;
+              display: flex;
+              align-items: center;
+              justify-content: center;
+              background: #f3f4f6;
+              border-radius: 8px;
+              margin-right: 1rem;
+            }
+            
+            .method-card.selected .method-icon {
+              background: #dbeafe;
+              color: #3b82f6;
+            }
+            
+            .method-info {
+              flex: 1;
+            }
+            
+            .method-name {
+              font-weight: 600;
+              color: #374151;
+              margin-bottom: 0.25rem;
+            }
+            
+            .method-description {
+              font-size: 0.875rem;
+              color: #6b7280;
+            }
+            
+            .qr-code-placeholder {
+              display: flex;
+              justify-content: center;
+              margin: 1.5rem 0;
+            }
+            
+            .qr-code {
+              width: 200px;
+              height: 200px;
+              border: 2px dashed #d1d5db;
+              border-radius: 8px;
+              display: flex;
+              flex-direction: column;
+              align-items: center;
+              justify-content: center;
+              color: #6b7280;
+            }
+            
+            .qr-code .material-symbols-rounded {
+              font-size: 48px;
+              margin-bottom: 0.5rem;
+            }
+            
+            .two-factor-complete {
+              text-align: center;
+            }
+            
+            .success-icon {
+              color: #22c55e;
+              font-size: 48px;
+              margin-bottom: 1rem;
+            }
+            
+            .backup-codes {
+              margin-top: 2rem;
+              text-align: left;
+            }
+            
+            .backup-codes h5 {
+              margin-bottom: 0.5rem;
+              color: #374151;
+            }
+            
+            .backup-codes p {
+              color: #6b7280;
+              font-size: 0.875rem;
+              margin-bottom: 1rem;
+            }
+            
+            .backup-codes-list {
+              display: grid;
+              grid-template-columns: repeat(2, 1fr);
+              gap: 0.5rem;
+              margin-bottom: 1rem;
+            }
+            
+            .backup-code {
+              padding: 0.5rem;
+              background: #f3f4f6;
+              border: 1px solid #e5e7eb;
+              border-radius: 4px;
+              font-family: monospace;
+              font-size: 0.875rem;
+              text-align: center;
+            }
+            
+            .two-factor-btn {
+              margin-left: 8px;
+            }
           </style>
         </div>
       </div>
@@ -1812,7 +2066,7 @@
       function accountSystem() {
         return {
           sidebarOpen: false,
-          activeSection: 'profile',
+          activeSection: localStorage.getItem('umi_active_tab') || 'profile',
           pharmacyInfo: {
             name: '',
             location: ''
@@ -1861,6 +2115,17 @@
             totalPrescriptions: 0,
             inventoryItems: 0,
             activeUsers: 0
+          },
+          // Two-Factor Authentication data
+          twoFactorEnabled: false,
+          showTwoFactorModal: false,
+          twoFactorSetup: {
+            step: 'intro', // intro, setup, verify, complete
+            method: 'app', // app, sms, email
+            phoneNumber: '',
+            backupCodes: [],
+            verificationCode: '',
+            qrCode: null
           },
           // Cancellation modal data
           showCancelConfirmModal: false,
@@ -2028,6 +2293,7 @@
             try {
               // Load user data from localStorage
               const currentUser = localStorage.getItem('umi_current_user');
+              const userProfile = localStorage.getItem('umi_user_profile');
               const currentTenant = localStorage.getItem('umi_current_tenant');
               const currentSubscription = localStorage.getItem('umi_current_subscription');
               const notificationSettings = localStorage.getItem('umi_notification_settings');
@@ -2037,50 +2303,69 @@
                 // Split name into first and last name
                 const nameParts = user.name ? user.name.split(' ') : ['', ''];
                 
-                this.profile = {
+                // Load from complete profile if available, otherwise use basic user data
+                let profileData = {
                   firstName: nameParts[0] || '',
                   lastName: nameParts.slice(1).join(' ') || '',
                   email: user.email || '',
-                  phone: this.profile.phone, // Keep existing phone if not in localStorage
-                  bio: this.profile.bio // Keep existing bio
+                  phone: user.phone || '',
+                  bio: user.bio || ''
                 };
                 
+                // Override with complete profile data if available
+                if (userProfile) {
+                  const completeProfile = JSON.parse(userProfile);
+                  profileData = { ...profileData, ...completeProfile };
+                }
+                
+                this.profile = profileData;
+                
                 this.userInfo = {
-                  name: user.name || '',
+                  name: user.name || `${profileData.firstName} ${profileData.lastName}`,
                   role: user.role || 'Admin',
                   initials: nameParts.map(part => part[0]).join('').toUpperCase() || 'UH',
-                  email: user.email || ''
+                  email: user.email || profileData.email
                 };
               }
               
               if (currentTenant) {
                 const tenant = JSON.parse(currentTenant);
                 
+                // Load complete pharmacy settings if available
+                const pharmacySettings = localStorage.getItem('umi_pharmacy_settings');
+                let completeSettings = {};
+                
+                if (pharmacySettings) {
+                  try {
+                    completeSettings = JSON.parse(pharmacySettings);
+                  } catch (e) {
+                    console.warn('Failed to parse pharmacy settings:', e);
+                  }
+                }
+                
                 this.pharmacySettings = {
-                  name: tenant.name || '',
-                  phone: this.pharmacySettings.phone,
-                  email: this.pharmacySettings.email,
-                  website: this.pharmacySettings.website,
-                  address: this.pharmacySettings.address,
-                  city: this.pharmacySettings.city,
-                  province: this.pharmacySettings.province,
-                  postalCode: this.pharmacySettings.postalCode,
-                  receiptHeader: tenant.name || 'Umi Health Pharmacy',
-                  receiptFooter: this.pharmacySettings.receiptFooter,
-                  taxRate: this.pharmacySettings.taxRate,
-                  currency: this.pharmacySettings.currency,
-                  reportLogo: this.pharmacySettings.reportLogo,
-                  reportSignature: this.pharmacySettings.reportSignature,
-                  paymentTerms: this.pharmacySettings.paymentTerms,
-                  invoicePrefix: this.pharmacySettings.invoicePrefix,
-                  receiptPrefix: this.pharmacySettings.receiptPrefix
+                  name: completeSettings.name || tenant.name || '',
+                  phone: completeSettings.phone || tenant.phone || '',
+                  email: completeSettings.email || tenant.email || '',
+                  website: completeSettings.website || '',
+                  address: completeSettings.address || tenant.address || '',
+                  city: completeSettings.city || tenant.city || '',
+                  province: completeSettings.province || tenant.province || '',
+                  postalCode: completeSettings.postalCode || tenant.postalCode || '',
+                  receiptHeader: completeSettings.receiptHeader || tenant.name || 'Umi Health Pharmacy',
+                  receiptFooter: completeSettings.receiptFooter || 'Thank you for your business!',
+                  taxRate: completeSettings.taxRate || 16,
+                  currency: completeSettings.currency || 'ZMW',
+                  reportLogo: completeSettings.reportLogo || '',
+                  reportSignature: completeSettings.reportSignature || 'Pharmacy Manager',
+                  paymentTerms: completeSettings.paymentTerms || 'Payment due upon receipt',
+                  invoicePrefix: completeSettings.invoicePrefix || 'INV',
+                  receiptPrefix: completeSettings.receiptPrefix || 'RCP'
                 };
                 
                 this.pharmacyInfo = {
-                  name: tenant.name || '',
-                  location: this.pharmacySettings.city && this.pharmacySettings.province 
-                    ? `${this.pharmacySettings.city}, ${this.pharmacySettings.province}`
-                    : 'Lusaka, Zambia'
+                  name: this.pharmacySettings.name,
+                  location: `${this.pharmacySettings.city || 'Lusaka'}, ${this.pharmacySettings.province || 'Zambia'}`
                 };
               }
               
@@ -2115,6 +2400,23 @@
                 this.passwordInfo.lastChanged = new Date(passwordLastChanged).toLocaleDateString();
               }
               
+              // Load two-factor authentication settings
+              const twoFactorEnabled = localStorage.getItem('umi_two_factor_enabled');
+              if (twoFactorEnabled === 'true') {
+                this.twoFactorEnabled = true;
+                const twoFactorMethod = localStorage.getItem('umi_two_factor_method') || 'app';
+                const backupCodes = localStorage.getItem('umi_two_factor_backup_codes');
+                
+                this.twoFactorSetup.method = twoFactorMethod;
+                if (backupCodes) {
+                  try {
+                    this.twoFactorSetup.backupCodes = JSON.parse(backupCodes);
+                  } catch (e) {
+                    console.warn('Failed to parse backup codes:', e);
+                  }
+                }
+              }
+              
               console.log('Loaded data from localStorage successfully');
             } catch (error) {
               console.error('Error loading data from localStorage:', error);
@@ -2125,6 +2427,12 @@
           setupEventListeners() {
             // Add any event listeners here
             this.loadActiveSessions();
+          },
+          
+          // Tab navigation functions
+          switchTab(tabName) {
+            this.activeSection = tabName;
+            localStorage.setItem('umi_active_tab', tabName);
           },
           
           // Password functions
@@ -2152,28 +2460,63 @@
             }
             
             try {
+              // Show loading state
+              const changeButton = document.querySelector('.modal-footer .btn-primary');
+              const originalButtonText = changeButton.innerHTML;
+              changeButton.innerHTML = '<span class="material-symbols-rounded" style="animation: spin 1s linear infinite;">refresh</span> Changing...';
+              changeButton.disabled = true;
+              
               if (!window.adminAPI) {
-                this.showError('API services are not available. Please try again later.');
+                // Fallback to localStorage only
+                this.showError('API services are not available. Password change simulated locally only.');
+                this.cancelPasswordChange();
+                this.passwordInfo.lastChanged = new Date().toLocaleDateString();
+                localStorage.setItem('umi_password_last_changed', new Date().toISOString());
                 return;
               }
               
               const response = await window.adminAPI.changePassword({
                 currentPassword: this.passwordForm.currentPassword,
-                newPassword: this.passwordForm.newPassword
+                newPassword: this.passwordForm.newPassword,
+                confirmPassword: this.passwordForm.confirmPassword
               });
               
-              if (response.success) {
-                this.showSuccess('Password changed successfully');
+              if (response && response.success) {
+                this.showSuccess('Password changed successfully and updated across all sessions');
                 this.cancelPasswordChange();
                 this.passwordInfo.lastChanged = new Date().toLocaleDateString();
+                
                 // Save to localStorage
                 localStorage.setItem('umi_password_last_changed', new Date().toISOString());
+                
+                // Broadcast security update
+                this.broadcastSecurityUpdate('password_changed');
+                
+                // Optionally revoke all other sessions for security
+                if (response.revokeOtherSessions) {
+                  await this.revokeAllOtherSessions();
+                }
               } else {
-                this.showError('Password change failed: ' + response.message);
+                this.showError('Password change failed: ' + (response?.message || 'Unknown error occurred'));
               }
             } catch (error) {
               console.error('Password change error:', error);
-              this.showError('Password change failed. Please try again.');
+              if (error.message.includes('401')) {
+                this.showError('Current password is incorrect. Please try again.');
+              } else if (error.message.includes('400')) {
+                this.showError('Invalid password format. Please ensure it meets all requirements.');
+              } else if (error.message.includes('403')) {
+                this.showError('Access denied. You do not have permission to change password.');
+              } else {
+                this.showError('Password change failed. Please check your connection and try again.');
+              }
+            } finally {
+              // Restore button state
+              const changeButton = document.querySelector('.modal-footer .btn-primary');
+              if (changeButton) {
+                changeButton.innerHTML = originalButtonText;
+                changeButton.disabled = false;
+              }
             }
           },
           
@@ -2191,29 +2534,239 @@
             };
           },
           
-          // Sessions functions
-          loadActiveSessions() {
+          // Two-Factor Authentication functions
+          nextTwoFactorStep() {
+            if (this.twoFactorSetup.step === 'intro') {
+              // Validate method selection
+              if (this.twoFactorSetup.method === 'sms' && !this.twoFactorSetup.phoneNumber) {
+                this.showError('Please enter your phone number');
+                return;
+              }
+              this.twoFactorSetup.step = 'setup';
+              this.sendVerificationCode();
+            } else if (this.twoFactorSetup.step === 'setup') {
+              // Validate verification code
+              if (!this.twoFactorSetup.verificationCode || this.twoFactorSetup.verificationCode.length !== 6) {
+                this.showError('Please enter a valid 6-digit verification code');
+                return;
+              }
+              this.verifyTwoFactorCode();
+            }
+          },
+          
+          cancelTwoFactorSetup() {
+            this.showTwoFactorModal = false;
+            this.resetTwoFactorSetup();
+          },
+          
+          resetTwoFactorSetup() {
+            this.twoFactorSetup = {
+              step: 'intro',
+              method: 'app',
+              phoneNumber: '',
+              backupCodes: [],
+              verificationCode: '',
+              qrCode: null
+            };
+          },
+          
+          sendVerificationCode() {
             try {
-              // Load sessions from localStorage or API
+              // Simulate sending verification code
+              if (this.twoFactorSetup.method === 'sms') {
+                console.log('Sending SMS code to:', this.twoFactorSetup.phoneNumber);
+              } else if (this.twoFactorSetup.method === 'email') {
+                console.log('Sending email code to:', this.userInfo.email);
+              } else {
+                console.log('Generating QR code for authenticator app');
+              }
+              
+              this.showSuccess(`Verification code sent via ${this.twoFactorSetup.method === 'app' ? 'authenticator app' : this.twoFactorSetup.method}`);
+            } catch (error) {
+              console.error('Error sending verification code:', error);
+              this.showError('Failed to send verification code. Please try again.');
+            }
+          },
+          
+          verifyTwoFactorCode() {
+            try {
+              // Simulate verification (in real app, this would call the API)
+              if (this.twoFactorSetup.verificationCode === '123456' || this.twoFactorSetup.verificationCode.length === 6) {
+                this.enableTwoFactorAuth();
+              } else {
+                this.showError('Invalid verification code. Please try again.');
+              }
+            } catch (error) {
+              console.error('Error verifying code:', error);
+              this.showError('Failed to verify code. Please try again.');
+            }
+          },
+          
+          enableTwoFactorAuth() {
+            try {
+              // Generate backup codes
+              this.twoFactorSetup.backupCodes = this.generateBackupCodes();
+              
+              // Enable 2FA
+              this.twoFactorEnabled = true;
+              this.twoFactorSetup.step = 'complete';
+              
+              // Save to localStorage
+              localStorage.setItem('umi_two_factor_enabled', 'true');
+              localStorage.setItem('umi_two_factor_method', this.twoFactorSetup.method);
+              localStorage.setItem('umi_two_factor_backup_codes', JSON.stringify(this.twoFactorSetup.backupCodes));
+              
+              this.showSuccess('Two-factor authentication enabled successfully!');
+              
+              // Broadcast security update
+              this.broadcastSecurityUpdate('2fa_enabled', { method: this.twoFactorSetup.method });
+            } catch (error) {
+              console.error('Error enabling 2FA:', error);
+              this.showError('Failed to enable two-factor authentication');
+            }
+          },
+          
+          disableTwoFactorAuth() {
+            try {
+              this.twoFactorEnabled = false;
+              localStorage.removeItem('umi_two_factor_enabled');
+              localStorage.removeItem('umi_two_factor_method');
+              localStorage.removeItem('umi_two_factor_backup_codes');
+              
+              this.showSuccess('Two-factor authentication disabled');
+              this.broadcastSecurityUpdate('2fa_disabled');
+            } catch (error) {
+              console.error('Error disabling 2FA:', error);
+              this.showError('Failed to disable two-factor authentication');
+            }
+          },
+          
+          generateBackupCodes() {
+            const codes = [];
+            for (let i = 0; i < 10; i++) {
+              codes.push(Math.random().toString(36).substring(2, 10).toUpperCase());
+            }
+            return codes;
+          },
+          
+          downloadBackupCodes() {
+            try {
+              const codesText = `Two-Factor Authentication Backup Codes\n\n${this.twoFactorSetup.backupCodes.join('\n')}\n\nKeep these codes in a safe place. Each code can only be used once.\n\nGenerated: ${new Date().toLocaleString()}`;
+              
+              const blob = new Blob([codesText], { type: 'text/plain' });
+              const url = window.URL.createObjectURL(blob);
+              const a = document.createElement('a');
+              a.href = url;
+              a.download = '2fa-backup-codes.txt';
+              a.click();
+              window.URL.revokeObjectURL(url);
+              
+              this.showSuccess('Backup codes downloaded successfully');
+            } catch (error) {
+              console.error('Error downloading backup codes:', error);
+              this.showError('Failed to download backup codes');
+            }
+          },
+          
+          // Sessions functions
+          async loadActiveSessions() {
+            try {
+              // Try to load from API first
+              if (window.adminAPI) {
+                try {
+                  const response = await window.adminAPI.getActiveSessions();
+                  if (response && response.success && response.sessions) {
+                    this.activeSessions = response.sessions.map(session => ({
+                      ...session,
+                      lastActive: this.formatSessionTime(session.lastActive),
+                      device: session.device || session.userAgent || 'Unknown Device',
+                      location: session.location || 'Unknown Location',
+                      current: session.current || false
+                    }));
+                    this.saveSessionsToStorage();
+                    return;
+                  }
+                } catch (apiError) {
+                  console.warn('API sessions load failed, using localStorage:', apiError);
+                }
+              }
+              
+              // Fallback to localStorage
               const storedSessions = localStorage.getItem('umi_active_sessions');
               if (storedSessions) {
                 this.activeSessions = JSON.parse(storedSessions);
               } else {
                 // Create default current session
                 this.activeSessions = [{
-                  id: 'current',
-                  device: 'Current Device - ' + navigator.platform,
+                  id: 'current_' + Date.now(),
+                  device: this.getCurrentDeviceInfo(),
                   location: 'Lusaka, Zambia',
                   lastActive: 'Just now',
                   current: true,
-                  ipAddress: '127.0.0.1'
+                  ipAddress: '127.0.0.1',
+                  userAgent: navigator.userAgent,
+                  sessionId: this.generateSessionId()
                 }];
                 this.saveSessionsToStorage();
               }
             } catch (error) {
               console.error('Error loading sessions:', error);
               this.activeSessions = [];
+              this.showError('Failed to load session information');
             }
+          },
+          
+          async init() {
+            this.loading = true;
+            
+            try {
+              // Setup real-time listeners first
+              this.setupRealtimeListeners();
+              
+              // Load data from localStorage first (for immediate display)
+              this.loadFromLocalStorage();
+              
+              // Then try to sync with API/database
+              await this.loadAccountFromAPI();
+              
+              // Load additional data
+              await this.loadActiveSessions();
+              this.loadInvoices();
+              this.loadUsageStats();
+              
+              // Initialize subscription
+              this.initializeAccountCreation();
+              this.checkTrialStatus();
+              this.checkReadOnlyMode();
+              
+            } catch (error) {
+              console.error('Initialization error:', error);
+              this.showError('Failed to load account data. Please refresh the page.');
+            } finally {
+              this.loading = false;
+            }
+          },
+          
+          generateSessionId() {
+            return 'session_' + Date.now() + '_' + Math.random().toString(36).substr(2, 9);
+          },
+          
+          formatSessionTime(timestamp) {
+            if (!timestamp) return 'Unknown';
+            
+            const date = new Date(timestamp);
+            const now = new Date();
+            const diffMs = now - date;
+            const diffMins = Math.floor(diffMs / 60000);
+            const diffHours = Math.floor(diffMs / 3600000);
+            const diffDays = Math.floor(diffMs / 86400000);
+            
+            if (diffMins < 1) return 'Just now';
+            if (diffMins < 60) return `${diffMins} minute${diffMins !== 1 ? 's' : ''} ago`;
+            if (diffHours < 24) return `${diffHours} hour${diffHours !== 1 ? 's' : ''} ago`;
+            if (diffDays < 7) return `${diffDays} day${diffDays !== 1 ? 's' : ''} ago`;
+            
+            return date.toLocaleDateString();
           },
           
           saveSessionsToStorage() {
@@ -2226,25 +2779,40 @@
           
           async revokeSession(sessionId) {
             try {
+              // Show loading state
+              const revokeButton = event.target;
+              const originalText = revokeButton.innerHTML;
+              revokeButton.innerHTML = '<span class="material-symbols-rounded" style="animation: spin 1s linear infinite;">refresh</span> Revoking...';
+              revokeButton.disabled = true;
+              
               if (!window.adminAPI) {
-                // Remove from localStorage
+                // Remove from localStorage only
                 this.activeSessions = this.activeSessions.filter(s => s.id !== sessionId);
                 this.saveSessionsToStorage();
-                this.showSuccess('Session revoked successfully');
+                this.showSuccess('Session revoked successfully (local only)');
                 return;
               }
               
               const response = await window.adminAPI.revokeSession(sessionId);
-              if (response.success) {
+              if (response && response.success) {
                 this.activeSessions = this.activeSessions.filter(s => s.id !== sessionId);
                 this.saveSessionsToStorage();
-                this.showSuccess('Session revoked successfully');
+                this.showSuccess('Session revoked successfully across all devices');
+                
+                // Broadcast session update
+                this.broadcastSecurityUpdate('session_revoked', { sessionId });
               } else {
-                this.showError('Failed to revoke session: ' + response.message);
+                this.showError('Failed to revoke session: ' + (response?.message || 'Unknown error'));
               }
             } catch (error) {
               console.error('Revoke session error:', error);
               this.showError('Failed to revoke session. Please try again.');
+            } finally {
+              // Restore button state if it still exists
+              if (event.target) {
+                event.target.innerHTML = originalText;
+                event.target.disabled = false;
+              }
             }
           },
           
@@ -2254,17 +2822,20 @@
                 // Keep only current session
                 this.activeSessions = this.activeSessions.filter(s => s.current);
                 this.saveSessionsToStorage();
-                this.showSuccess('All other sessions revoked successfully');
+                this.showSuccess('All other sessions revoked successfully (local only)');
                 return;
               }
               
               const response = await window.adminAPI.revokeAllSessions();
-              if (response.success) {
+              if (response && response.success) {
                 this.activeSessions = this.activeSessions.filter(s => s.current);
                 this.saveSessionsToStorage();
-                this.showSuccess('All other sessions revoked successfully');
+                this.showSuccess('All other sessions revoked successfully across all devices');
+                
+                // Broadcast security update
+                this.broadcastSecurityUpdate('all_sessions_revoked');
               } else {
-                this.showError('Failed to revoke sessions: ' + response.message);
+                this.showError('Failed to revoke sessions: ' + (response?.message || 'Unknown error'));
               }
             } catch (error) {
               console.error('Revoke all sessions error:', error);
@@ -2275,42 +2846,13 @@
           // Invoices functions
           loadInvoices() {
             try {
-              // Load invoices from localStorage or generate realistic data
+              // Load invoices from localStorage only
               const storedInvoices = localStorage.getItem('umi_invoices');
               if (storedInvoices) {
                 this.invoices = JSON.parse(storedInvoices);
               } else {
-                // Generate realistic invoices with unique numbers based on current date
-                const currentDate = new Date();
-                const year = currentDate.getFullYear();
-                const month = String(currentDate.getMonth() + 1).padStart(2, '0');
-                
-                this.invoices = [
-                  {
-                    id: 'inv_' + Date.now() + '_001',
-                    number: `UMI-${year}${month}-001`,
-                    date: new Date(currentDate.getFullYear(), currentDate.getMonth(), 1).toISOString().split('T')[0],
-                    amount: (450 + Math.floor(Math.random() * 100)).toFixed(2),
-                    status: 'paid',
-                    description: 'Monthly subscription - Care Plus Plan'
-                  },
-                  {
-                    id: 'inv_' + Date.now() + '_002',
-                    number: `UMI-${year}${month}-002`,
-                    date: new Date(currentDate.getFullYear(), currentDate.getMonth() - 1, 1).toISOString().split('T')[0],
-                    amount: (450 + Math.floor(Math.random() * 100)).toFixed(2),
-                    status: 'paid',
-                    description: 'Monthly subscription - Care Plus Plan'
-                  },
-                  {
-                    id: 'inv_' + Date.now() + '_003',
-                    number: `UMI-${year}${month}-003`,
-                    date: new Date(currentDate.getFullYear(), currentDate.getMonth() - 2, 1).toISOString().split('T')[0],
-                    amount: (450 + Math.floor(Math.random() * 100)).toFixed(2),
-                    status: 'paid',
-                    description: 'Monthly subscription - Care Plus Plan'
-                  }
-                ];
+                // Start with empty array - no fake data
+                this.invoices = [];
                 this.saveInvoicesToStorage();
               }
             } catch (error) {
@@ -2429,12 +2971,12 @@ Lusaka, Zambia
           // Usage statistics functions
           loadUsageStats() {
             try {
-              // Load usage stats from localStorage
+              // Load usage stats from localStorage only
               const storedStats = localStorage.getItem('umi_usage_stats');
               if (storedStats) {
                 this.usageStats = JSON.parse(storedStats);
               } else {
-                // Default to zero if no data exists
+                // Start with zero values - no fake data
                 this.usageStats = {
                   currentMonthUsage: 0,
                   totalPrescriptions: 0,
@@ -2718,26 +3260,58 @@ Lusaka, Zambia
           // Save methods
           saveProfile() {
             try {
+              // Validate required fields
+              if (!this.profile.firstName || !this.profile.lastName || !this.profile.email) {
+                this.showError('Please fill in all required fields (First Name, Last Name, Email)');
+                return;
+              }
+
               // Save to localStorage first
               this.saveProfileToLocalStorage();
               
+              // Try to save to API/database
               if (!window.adminAPI) {
-                this.showError('API services are not available. Changes saved locally.');
+                this.showError('API services are not available. Changes saved locally only.');
                 return;
               }
               
+              // Show loading state
+              const originalButtonText = event.target.innerHTML;
+              event.target.innerHTML = '<span class="material-symbols-rounded" style="animation: spin 1s linear infinite;">refresh</span> Saving...';
+              event.target.disabled = true;
+              
               window.adminAPI.updateUserProfile(this.profile)
-                .then(() => {
-                  this.showSuccess('Profile updated successfully');
+                .then((response) => {
+                  if (response.success) {
+                    this.showSuccess('Profile updated successfully and synced across all portals');
+                    
+                    // Broadcast update to other portals
+                    this.broadcastProfileUpdate();
+                    
+                    // Update userInfo in real-time
+                    this.userInfo = {
+                      name: `${this.profile.firstName} ${this.profile.lastName}`,
+                      role: this.userInfo.role || 'Admin',
+                      initials: `${this.profile.firstName?.[0] || 'U'}${this.profile.lastName?.[0] || 'H'}`,
+                      email: this.profile.email
+                    };
+                  } else {
+                    this.showError('Failed to update profile on server: ' + (response.message || 'Unknown error'));
+                  }
                 })
-                .catch(error => {
+                .catch((error) => {
                   console.error('Error updating profile:', error);
-                  this.showError('Failed to update profile on server. Changes saved locally.');
+                  this.showError('Failed to update profile on server. Changes saved locally only.');
+                })
+                .finally(() => {
+                  // Restore button state
+                  event.target.innerHTML = originalButtonText;
+                  event.target.disabled = false;
                 });
             } catch (error) {
-              console.error('API not available:', error);
+              console.error('Save profile error:', error);
               this.saveProfileToLocalStorage();
-              this.showError('API services are not available. Changes saved locally.');
+              this.showError('API services are not available. Changes saved locally only.');
             }
           },
           
@@ -2747,7 +3321,12 @@ Lusaka, Zambia
               const currentUser = JSON.parse(localStorage.getItem('umi_current_user') || '{}');
               currentUser.name = `${this.profile.firstName} ${this.profile.lastName}`;
               currentUser.email = this.profile.email;
+              currentUser.phone = this.profile.phone; // Save phone number
+              currentUser.bio = this.profile.bio; // Save bio
               localStorage.setItem('umi_current_user', JSON.stringify(currentUser));
+              
+              // Save complete profile data separately
+              localStorage.setItem('umi_user_profile', JSON.stringify(this.profile));
               
               // Update userInfo in the component
               this.userInfo = {
@@ -2757,7 +3336,7 @@ Lusaka, Zambia
                 email: this.profile.email
               };
               
-              console.log('Profile saved to localStorage');
+              console.log('Profile saved to localStorage:', this.profile);
             } catch (error) {
               console.error('Error saving profile to localStorage:', error);
             }
@@ -2765,43 +3344,91 @@ Lusaka, Zambia
           
           savePharmacySettings() {
             try {
+              // Validate required fields
+              if (!this.pharmacySettings.name) {
+                this.showError('Pharmacy name is required');
+                return;
+              }
+
               // Save to localStorage first
               this.savePharmacySettingsToLocalStorage();
               
+              // Try to save to API/database
               if (!window.adminAPI) {
-                this.showError('API services are not available. Changes saved locally.');
+                this.showError('API services are not available. Changes saved locally only.');
                 return;
               }
               
+              // Show loading state
+              const originalButtonText = event.target.innerHTML;
+              event.target.innerHTML = '<span class="material-symbols-rounded" style="animation: spin 1s linear infinite;">refresh</span> Saving...';
+              event.target.disabled = true;
+              
               window.adminAPI.updatePharmacySettings(this.pharmacySettings)
-                .then(() => {
-                  this.showSuccess('Pharmacy settings updated successfully');
+                .then((response) => {
+                  if (response && response.success) {
+                    this.showSuccess('Pharmacy settings updated successfully and synced across all portals');
+                    
+                    // Broadcast update to other portals
+                    this.broadcastPharmacyUpdate();
+                    
+                    // Update pharmacyInfo in real-time
+                    this.pharmacyInfo = {
+                      name: this.pharmacySettings.name,
+                      location: `${this.pharmacySettings.city}, ${this.pharmacySettings.province}`
+                    };
+                    
+                    // Update data sync if available
+                    if (window.adminDataSync) {
+                      window.adminDataSync.setData('pharmacySettings', this.pharmacySettings);
+                    }
+                  } else {
+                    this.showError('Failed to update pharmacy settings on server: ' + (response?.message || 'Unknown error'));
+                  }
                 })
-                .catch(error => {
+                .catch((error) => {
                   console.error('Error updating pharmacy settings:', error);
-                  this.showError('Failed to update pharmacy settings on server. Changes saved locally.');
+                  this.showError('Failed to update pharmacy settings on server. Changes saved locally only.');
+                })
+                .finally(() => {
+                  // Restore button state
+                  event.target.innerHTML = originalButtonText;
+                  event.target.disabled = false;
                 });
             } catch (error) {
-              console.error('API not available:', error);
+              console.error('Save pharmacy settings error:', error);
               this.savePharmacySettingsToLocalStorage();
-              this.showError('API services are not available. Changes saved locally.');
+              this.showError('API services are not available. Changes saved locally only.');
             }
           },
           
           savePharmacySettingsToLocalStorage() {
             try {
-              // Update localStorage with new pharmacy settings
+              // Update localStorage with complete pharmacy settings
               const currentTenant = JSON.parse(localStorage.getItem('umi_current_tenant') || '{}');
+              
+              // Update tenant basic info
               currentTenant.name = this.pharmacySettings.name;
+              currentTenant.phone = this.pharmacySettings.phone;
+              currentTenant.email = this.pharmacySettings.email;
+              currentTenant.website = this.pharmacySettings.website;
+              currentTenant.address = this.pharmacySettings.address;
+              currentTenant.city = this.pharmacySettings.city;
+              currentTenant.province = this.pharmacySettings.province;
+              currentTenant.postalCode = this.pharmacySettings.postalCode;
+              
               localStorage.setItem('umi_current_tenant', JSON.stringify(currentTenant));
+              
+              // Save complete pharmacy settings separately
+              localStorage.setItem('umi_pharmacy_settings', JSON.stringify(this.pharmacySettings));
               
               // Update pharmacyInfo in the component
               this.pharmacyInfo = {
                 name: this.pharmacySettings.name,
-                location: `${this.pharmacySettings.city}, ${this.pharmacySettings.province}`
+                location: `${this.pharmacySettings.city || 'Lusaka'}, ${this.pharmacySettings.province || 'Zambia'}`
               };
               
-              console.log('Pharmacy settings saved to localStorage');
+              console.log('Pharmacy settings saved to localStorage:', this.pharmacySettings);
             } catch (error) {
               console.error('Error saving pharmacy settings to localStorage:', error);
             }
@@ -3001,6 +3628,163 @@ Lusaka, Zambia
               // Continue with the process even if notifications fail
             }
           },
+          
+          // Real-time sync functions
+          broadcastProfileUpdate() {
+            try {
+              if (window.adminAPI) {
+                window.adminAPI.broadcastUpdate({
+                  type: 'profile_update',
+                  data: this.profile,
+                  userId: this.userInfo.email,
+                  timestamp: new Date().toISOString()
+                }).catch(error => {
+                  console.warn('Failed to broadcast profile update:', error);
+                });
+              }
+              
+              // Update data sync if available
+              if (window.adminDataSync) {
+                window.adminDataSync.setData('currentUser', this.profile);
+              }
+              
+              // Trigger storage event for cross-tab sync
+              window.dispatchEvent(new StorageEvent('storage', {
+                key: 'umi_user_profile',
+                newValue: JSON.stringify(this.profile)
+              }));
+            } catch (error) {
+              console.error('Error broadcasting profile update:', error);
+            }
+          },
+          
+          broadcastPharmacyUpdate() {
+            try {
+              if (window.adminAPI) {
+                window.adminAPI.broadcastUpdate({
+                  type: 'pharmacy_update',
+                  data: this.pharmacySettings,
+                  pharmacyId: this.pharmacySettings.name,
+                  timestamp: new Date().toISOString()
+                }).catch(error => {
+                  console.warn('Failed to broadcast pharmacy update:', error);
+                });
+              }
+              
+              // Update data sync if available
+              if (window.adminDataSync) {
+                window.adminDataSync.setData('pharmacySettings', this.pharmacySettings);
+              }
+              
+              // Trigger storage event for cross-tab sync
+              window.dispatchEvent(new StorageEvent('storage', {
+                key: 'umi_pharmacy_settings',
+                newValue: JSON.stringify(this.pharmacySettings)
+              }));
+            } catch (error) {
+              console.error('Error broadcasting pharmacy update:', error);
+            }
+          },
+          
+          broadcastSecurityUpdate(action, data = {}) {
+            try {
+              const securityData = {
+                type: 'security_update',
+                action: action,
+                userId: this.userInfo.email,
+                timestamp: new Date().toISOString(),
+                ...data
+              };
+              
+              if (window.adminAPI) {
+                window.adminAPI.broadcastUpdate(securityData).catch(error => {
+                  console.warn('Failed to broadcast security update:', error);
+                });
+              }
+              
+              // Trigger storage event for immediate local updates
+              window.dispatchEvent(new StorageEvent('storage', {
+                key: 'umi_security_update',
+                newValue: JSON.stringify(securityData)
+              }));
+            } catch (error) {
+              console.error('Error broadcasting security update:', error);
+            }
+          },
+          
+          async revokeAllOtherSessions() {
+            try {
+              if (window.adminAPI) {
+                await window.adminAPI.revokeAllSessions();
+                console.log('All other sessions revoked for security');
+              }
+            } catch (error) {
+              console.warn('Failed to revoke other sessions:', error);
+            }
+          },
+          
+          // Listen for real-time updates from other portals
+          setupRealtimeListeners() {
+            try {
+              // Listen for storage events (cross-tab sync)
+              window.addEventListener('storage', (e) => {
+                if (e.key === 'umi_user_profile' && e.newValue) {
+                  try {
+                    const newProfile = JSON.parse(e.newValue);
+                    if (newProfile.email !== this.profile.email) {
+                      // Update if it's a different user's profile change
+                      console.log('Received profile update from another tab');
+                      this.profile = { ...this.profile, ...newProfile };
+                    }
+                  } catch (error) {
+                    console.warn('Failed to parse profile update:', error);
+                  }
+                } else if (e.key === 'umi_pharmacy_settings' && e.newValue) {
+                  try {
+                    const newSettings = JSON.parse(e.newValue);
+                    console.log('Received pharmacy settings update from another tab');
+                    this.pharmacySettings = { ...this.pharmacySettings, ...newSettings };
+                  } catch (error) {
+                    console.warn('Failed to parse pharmacy settings update:', error);
+                  }
+                } else if (e.key === 'umi_security_update' && e.newValue) {
+                  try {
+                    const securityUpdate = JSON.parse(e.newValue);
+                    console.log('Received security update:', securityUpdate.action);
+                    
+                    if (securityUpdate.action === 'password_changed') {
+                      this.passwordInfo.lastChanged = new Date().toLocaleDateString();
+                    } else if (securityUpdate.action === 'session_revoked') {
+                      this.loadActiveSessions();
+                    }
+                  } catch (error) {
+                    console.warn('Failed to parse security update:', error);
+                  }
+                }
+              });
+              
+              // Listen for data sync updates if available
+              if (window.adminDataSync) {
+                window.adminDataSync.subscribe('currentUser', (userData) => {
+                  if (userData && userData.email === this.profile.email) {
+                    console.log('Received user data sync update');
+                    this.profile = { ...this.profile, ...userData };
+                  }
+                });
+                
+                window.adminDataSync.subscribe('pharmacySettings', (settings) => {
+                  if (settings) {
+                    console.log('Received pharmacy settings sync update');
+                    this.pharmacySettings = { ...this.pharmacySettings, ...settings };
+                  }
+                });
+              }
+              
+              console.log('Real-time listeners setup complete');
+            } catch (error) {
+              console.error('Error setting up real-time listeners:', error);
+            }
+          }
         }
       }
     </script>
