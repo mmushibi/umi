@@ -13,7 +13,7 @@ class AuthAPI {
     getBaseURL() {
         // Determine if we're in development or production
         if (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1') {
-            return 'http://localhost:8080/api/v1';
+            return 'http://localhost:5000/api/v1';
         }
         
         // Extract subdomain for tenant-specific API calls

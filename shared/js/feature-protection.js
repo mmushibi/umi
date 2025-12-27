@@ -262,16 +262,70 @@ class FeatureProtection {
             modal.remove();
         }
     }
-    
-    // Public API
-    window.featureProtection = {
-        canAccessFeature: (feature) => this.canAccessFeature(feature),
-        upgradeToPlan: (plan) => this.upgradeToPlan(plan),
-        closeUpgradeDialog: () => this.closeUpgradeDialog()
-    };
 }
+
+// Public API
+window.featureProtection = {
+    canAccessFeature: (feature) => new FeatureProtection().canAccessFeature(feature),
+    upgradeToPlan: (plan) => new FeatureProtection().upgradeToPlan(plan),
+    closeUpgradeDialog: () => new FeatureProtection().closeUpgradeDialog()
+};
 
 // Initialize feature protection
 document.addEventListener('DOMContentLoaded', () => {
     new FeatureProtection();
 });
+
+// Branch Management Helper Functions
+window.branchManagement = {
+    canManageBranches() {
+        const subscription = JSON.parse(localStorage.getItem('umi_subscription') || '{}');
+        const planType = subscription.planType || 'Care';
+        
+        const tierConfig = {
+            'Care': { maxBranches: 1 },
+            'Care Plus': { maxBranches: 3 },
+            'Care Pro': { maxBranches: 10 }
+        };
+        
+        return tierConfig[planType] ? tierConfig[planType].maxBranches > 1 : false;
+    },
+    
+    getMaxBranches() {
+        const subscription = JSON.parse(localStorage.getItem('umi_subscription') || '{}');
+        const planType = subscription.planType || 'Care';
+        
+        const tierConfig = {
+            'Care': { maxBranches: 1 },
+            'Care Plus': { maxBranches: 3 },
+            'Care Pro': { maxBranches: 10 }
+        };
+        
+        return tierConfig[planType] ? tierConfig[planType].maxBranches : 1;
+    },
+    
+    getCurrentBranchCount() {
+        const branches = JSON.parse(localStorage.getItem('umi_branches') || '[]');
+        return branches.length;
+    },
+    
+    canAddBranch() {
+        return this.getCurrentBranchCount() < this.getMaxBranches();
+    },
+    
+    canDeleteBranch() {
+        return this.getCurrentBranchCount() > 1; // Can't delete the last branch
+    },
+    
+    getNextTier() {
+        const tiers = [
+            { name: 'Care', maxBranches: 1 },
+            { name: 'Care Plus', maxBranches: 3 },
+            { name: 'Care Pro', maxBranches: 10 }
+        ];
+        
+        const currentMax = this.getMaxBranches();
+        const currentIndex = tiers.findIndex(t => t.maxBranches === currentMax);
+        return currentIndex < tiers.length - 1 ? tiers[currentIndex + 1] : tiers[currentIndex];
+    }
+};

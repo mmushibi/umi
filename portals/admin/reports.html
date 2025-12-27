@@ -13,6 +13,7 @@
   <link rel="stylesheet" href="../shared/css/shared-styles.css">
   <script src="../shared/js/data-sync.js"></script>
   <script src="../shared/js/role-based-access.js"></script>
+  <script src="../shared/js/feature-protection.js"></script>
   <script src="../admin/js/admin-api.js"></script>
   <style>
     :root {
@@ -1323,6 +1324,11 @@
         <span class="material-symbols-rounded nav-icon">admin_panel_settings</span>
         <span>User Management</span>
       </a>
+      <!-- Branch navigation - conditionally shown based on tier -->
+      <a href="branches.html" class="nav-item" x-show="canManageBranches()" data-feature="multiple_branches">
+        <span class="material-symbols-rounded nav-icon">business</span>
+        <span>Branches</span>
+      </a>
       <a href="account.html" class="nav-item">
         <span class="material-symbols-rounded nav-icon">settings</span>
         <span>Account</span>
@@ -2068,6 +2074,19 @@
           if (confirm('Are you sure you want to logout?')) {
             window.location.href = 'index.html';
           }
+        },
+
+        canManageBranches() {
+          const subscription = JSON.parse(localStorage.getItem('umi_subscription') || '{}');
+          const planType = subscription.planType || 'Care';
+          
+          const tierConfig = {
+            'Care': { maxBranches: 1 },
+            'Care Plus': { maxBranches: 3 },
+            'Care Pro': { maxBranches: 10 }
+          };
+          
+          return tierConfig[planType] ? tierConfig[planType].maxBranches > 1 : false;
         },
 
         setupEventListeners() {
