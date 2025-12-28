@@ -274,6 +274,67 @@ body {
   min-height: 100px;
 }
 
+/* Notification Styles */
+.notification {
+  position: fixed;
+  top: 20px;
+  right: 20px;
+  padding: 1rem 1.5rem;
+  border-radius: 8px;
+  color: white;
+  font-weight: 500;
+  z-index: 9999;
+  transform: translateX(100%);
+  transition: transform 0.3s ease;
+  max-width: 400px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+}
+
+.notification.show {
+  transform: translateX(0);
+}
+
+.notification-success {
+  background: var(--color-success);
+}
+
+.notification-error {
+  background: var(--color-error);
+}
+
+.notification-warning {
+  background: var(--color-warning);
+}
+
+.notification-info {
+  background: var(--color-info);
+}
+
+.notification-message {
+  margin-bottom: 0.5rem;
+}
+
+.notification-actions {
+  display: flex;
+  gap: 0.5rem;
+  margin-top: 0.75rem;
+}
+
+.notification-action-btn {
+  background: rgba(255, 255, 255, 0.2);
+  border: 1px solid rgba(255, 255, 255, 0.3);
+  color: white;
+  padding: 0.25rem 0.75rem;
+  border-radius: 4px;
+  font-size: 0.875rem;
+  cursor: pointer;
+  transition: background-color 0.2s;
+}
+
+.notification-action-btn:hover {
+  background: rgba(255, 255, 255, 0.3);
+}
+
 /* Button Styles */
 .btn {
   padding: 0.75rem 1.5rem;

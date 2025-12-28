@@ -97,23 +97,6 @@
       font-family: 'Inter', sans-serif;
     }
 
-    .tenant-info {
-      padding: 1rem 1.5rem;
-      background: rgba(255, 255, 255, 0.1);
-      margin: 1rem 1.5rem;
-      border-radius: 12px;
-      font-size: 0.85rem;
-    }
-
-    .tenant-name {
-      font-weight: 600;
-      margin-bottom: 0.25rem;
-    }
-
-    .tenant-location {
-      opacity: 0.8;
-      font-size: 0.75rem;
-    }
 
     .nav-menu {
       padding: 1rem 0;
@@ -1845,10 +1828,6 @@
       </div>
     </div>
 
-    <div class="pharmacy-info">
-      <div class="pharmacy-name" x-text="pharmacyInfo.name"></div>
-      <div class="pharmacy-location" x-text="pharmacyInfo.location"></div>
-    </div>
 
     <nav class="nav-menu">
       <a href="home.html" class="nav-item">
@@ -1917,34 +1896,6 @@
         
         <div class="page-title-section">
           <h1 class="page-title">User Management</h1>
-        </div>
-        
-        <div class="search-bar" x-data="{ searchOpen: false, query: '' }">
-          <span class="material-symbols-rounded search-icon">search</span>
-          <input 
-            type="text" 
-            class="search-input" 
-            placeholder="Search users by name, email, or role..."
-            x-model="query"
-            @focus="searchOpen = true"
-            @input="searchOpen = true"
-            @blur="setTimeout(() => searchOpen = false, 200)"
-          >
-          
-          <div class="search-suggestions" :class="searchOpen && query.length > 0 ? 'show' : ''">
-            <template x-for="suggestion in filteredSuggestions" :key="suggestion.id">
-              <div class="suggestion-item" @click="selectSuggestion(suggestion)">
-                <div class="suggestion-icon">
-                  <span class="material-symbols-rounded" x-text="suggestion.icon"></span>
-                </div>
-                <div class="suggestion-content">
-                  <div class="suggestion-title" x-text="suggestion.title"></div>
-                  <div class="suggestion-description" x-text="suggestion.description"></div>
-                </div>
-                <div class="suggestion-type" x-text="suggestion.type"></div>
-              </div>
-            </template>
-          </div>
         </div>
       </div>
 
@@ -2278,9 +2229,14 @@
           </label>
           <label>
             <span>Branch Assignment</span>
-            <select id="formBranch" name="branch" required>
-              <option value="">Loading branches...</option>
-            </select>
+            <div style="display: flex; gap: 0.5rem; align-items: center;">
+              <select id="formBranch" name="branch" required>
+                <option value="">Loading branches...</option>
+              </select>
+              <button type="button" @click="refreshBranches()" title="Refresh branch data" style="padding: 0.5rem; border: 1px solid var(--color-border); background: var(--color-surface); border-radius: 4px; cursor: pointer;">
+                <span class="material-symbols-rounded" style="font-size: 1rem; color: var(--color-text-secondary);">refresh</span>
+              </button>
+            </div>
           </label>
           <label>
             <span>Date of Birth</span>
@@ -2448,7 +2404,7 @@
           }
         },
 
-        // Load branches from API
+        // Load branches from API with enhanced fallback to branches/account pages
         async loadBranches() {
           try {
             this.loading = true;
@@ -2456,19 +2412,37 @@
             // First try to get branches from localStorage (shared with branches page)
             await this.loadBranchesFromStorage();
             
-            // Then try to load from API
-            const response = await this.api.getBranches();
-            this.branches = response.data || response;
+            // If no branches in storage, try to load from account page data
+            if (this.branches.length === 0) {
+              await this.loadBranchesFromAccount();
+            }
             
-            // Store branches in localStorage for sharing with other pages
-            localStorage.setItem('umi_branches', JSON.stringify(this.branches));
+            // Then try to load from API to get fresh data
+            try {
+              const response = await this.api.getBranches();
+              const apiBranches = response.data || response;
+              
+              if (apiBranches && apiBranches.length > 0) {
+                this.branches = apiBranches;
+                // Store branches in localStorage for sharing with other pages
+                localStorage.setItem('umi_branches', JSON.stringify(this.branches));
+              }
+            } catch (apiError) {
+              console.warn('API branches fetch failed, using stored data:', apiError);
+              // Continue with stored branches if API fails
+            }
+            
+            // Final fallback - ensure we have at least the main branch
+            if (this.branches.length === 0) {
+              await this.createMainBranchFromAccount();
+            }
             
             this.populateBranchSelect();
           } catch (error) {
             console.error('Error loading branches:', error);
-            // Fallback to sample branches if API fails
+            // Ultimate fallback
             this.loadSampleBranches();
-            this.showError('Using sample branches - API connection failed');
+            this.showError('Unable to load branches. Please check your connection.');
           } finally {
             this.loading = false;
           }
@@ -2487,6 +2461,66 @@
           }
         },
 
+        // Load branches from account page data (tenant information)
+        async loadBranchesFromAccount() {
+          try {
+            const tenant = JSON.parse(localStorage.getItem('umi_current_tenant') || '{}');
+            if (tenant && tenant.name) {
+              // Check if we already have this branch in our list
+              const existingMainBranch = this.branches.find(b => b.isMain || b.id === 'main_branch');
+              if (!existingMainBranch) {
+                const mainBranch = {
+                  id: 'main_branch',
+                  name: tenant.name || 'Main Pharmacy',
+                  code: 'MAIN',
+                  phone: tenant.phone || '',
+                  email: tenant.email || '',
+                  address: tenant.address || '',
+                  city: tenant.city || 'Lusaka',
+                  country: 'Zambia',
+                  isActive: true,
+                  isMain: true
+                };
+                this.branches.push(mainBranch);
+                localStorage.setItem('umi_branches', JSON.stringify(this.branches));
+              }
+            }
+          } catch (error) {
+            console.error('Error loading branches from account data:', error);
+          }
+        },
+
+        // Create main branch from account data as ultimate fallback
+        async createMainBranchFromAccount() {
+          try {
+            const tenant = JSON.parse(localStorage.getItem('umi_current_tenant') || '{}');
+            const subscription = JSON.parse(localStorage.getItem('umi_subscription') || '{}');
+            
+            const pharmacyName = tenant.name || subscription.pharmacyName || 'Main Pharmacy';
+            const location = tenant.city || subscription.location || 'Lusaka';
+            
+            const mainBranch = {
+              id: 'main_branch',
+              name: pharmacyName,
+              code: 'MAIN',
+              phone: tenant.phone || '',
+              email: tenant.email || '',
+              address: tenant.address || '',
+              city: location,
+              country: 'Zambia',
+              isActive: true,
+              isMain: true
+            };
+            
+            this.branches = [mainBranch];
+            localStorage.setItem('umi_branches', JSON.stringify(this.branches));
+            
+            console.log('Created main branch from account data:', mainBranch);
+          } catch (error) {
+            console.error('Error creating main branch from account:', error);
+          }
+        },
+
         // Load sample branches as fallback
         loadSampleBranches() {
           this.branches = [];
@@ -2499,19 +2533,34 @@
           try {
             this.loading = true;
             
-            // First try to get data from account page (localStorage)
-            await this.loadAccountData();
+            // First try to load from localStorage for immediate display
+            const hasLocalData = this.loadEmployeesFromStorage();
             
-            // Then try to load from API
-            const response = await this.api.getUsers(this.currentPage, this.itemsPerPage, this.getFilters());
+            // Then try to load from API for fresh data
+            const response = await this.api.getUsers();
             this.employees = response.data || response;
+            
+            // Save fresh data to localStorage
+            this.saveEmployeesToStorage();
+            
+            // Sync any pending local changes
+            await this.syncPendingChanges();
+            
             this.renderEmployeesTable();
             this.updateEmployeeStats();
           } catch (error) {
             console.error('Error loading employees:', error);
-            // Fallback to sample data if API fails
-            this.loadSampleEmployees();
-            this.showError('Using sample data - API connection failed');
+            
+            // Fallback to localStorage if API fails
+            if (!this.loadEmployeesFromStorage()) {
+              // If no local data either, show error
+              this.employees = [];
+              this.renderEmployeesTable();
+              this.updateEmployeeStats();
+              this.showError('Unable to load employees. Please check your connection.');
+            } else {
+              this.showWarning('Using cached employee data. Some features may be limited.');
+            }
           } finally {
             this.loading = false;
           }
@@ -2612,6 +2661,50 @@
               this.handleBranchUpdate(data);
             });
           }
+
+          // Listen for localStorage changes from other pages (branches page, account page)
+          window.addEventListener('storage', (e) => {
+            if (e.key === 'umi_branches') {
+              // Branch data was updated from another page
+              console.log('Branch data updated from another page');
+              this.loadBranchesFromStorage();
+              this.populateBranchSelect();
+              this.showNotification('Branch data updated', 'info');
+            }
+            
+            if (e.key === 'umi_current_tenant') {
+              // Account/tenant data was updated from account page, reload branches
+              console.log('Tenant data updated, refreshing branches');
+              this.loadBranchesFromAccount();
+              this.populateBranchSelect();
+            }
+          });
+
+          // Listen for page visibility events for branch updates
+          document.addEventListener('visibilitychange', () => {
+            if (!document.hidden) {
+              // Page became visible again, check for updated branch data
+              this.loadBranchesFromStorage();
+            }
+          });
+
+          // Set up periodic sync to check for branch data updates
+          setInterval(() => {
+            const currentStoredBranches = localStorage.getItem('umi_branches');
+            if (currentStoredBranches) {
+              try {
+                const storedBranches = JSON.parse(currentStoredBranches);
+                // Check if branches have changed
+                if (JSON.stringify(storedBranches) !== JSON.stringify(this.branches)) {
+                  console.log('Branch data changed, updating...');
+                  this.branches = storedBranches;
+                  this.populateBranchSelect();
+                }
+              } catch (error) {
+                console.error('Error checking branch updates:', error);
+              }
+            }
+          }, 30000); // Check every 30 seconds
         },
 
         // Handle real-time employee updates
@@ -2672,13 +2765,34 @@
           const select = document.getElementById('formBranch');
           if (!select) return;
           
+          // Show loading state if branches are empty
+          if (this.branches.length === 0) {
+            select.innerHTML = '<option value="">Loading branches...</option>';
+            return;
+          }
+          
           select.innerHTML = '<option value="">Select branch</option>';
-          this.branches.forEach(branch => {
+          
+          // Sort branches by name, putting main branch first
+          const sortedBranches = [...this.branches].sort((a, b) => {
+            if (a.isMain) return -1;
+            if (b.isMain) return 1;
+            return a.name.localeCompare(b.name);
+          });
+          
+          sortedBranches.forEach(branch => {
             const option = document.createElement('option');
             option.value = branch.id;
-            option.textContent = branch.name;
+            option.textContent = branch.name + (branch.isMain ? ' (Main)' : '');
             select.appendChild(option);
           });
+        },
+
+        // Refresh branch data on demand
+        async refreshBranches() {
+          console.log('Refreshing branch data...');
+          await this.loadBranches();
+          this.showNotification('Branch data refreshed', 'success');
         },
 
         get totalUsers() {
@@ -2751,19 +2865,56 @@
         async submitSaveEmployee(event) {
           event.preventDefault();
           
+          console.log('=== SAVE EMPLOYEE DEBUG START ===');
+          console.log('Form element:', event.target);
+          console.log('Form data available:', !!event.target);
+          
+          // Check if API is available
+          console.log('API client:', this.api);
+          console.log('API client type:', typeof this.api);
+          console.log('AdminAPI available:', typeof AdminAPI);
+          
+          if (!this.api) {
+            console.error('API client is not initialized!');
+            this.showError('API client not initialized. Please refresh the page.');
+            return;
+          }
+          
+          console.log('Starting employee save process...');
+          
           const formData = new FormData(event.target);
           const password = formData.get('password');
           const confirmPassword = formData.get('confirmPassword');
           
+          console.log('Form data collected:', {
+            firstName: formData.get('firstName'),
+            lastName: formData.get('lastName'),
+            email: formData.get('email'),
+            employeeId: formData.get('employeeId'),
+            branch: formData.get('branch'),
+            password: password ? '***' : 'empty'
+          });
+          
           // Validate passwords match
           if (password !== confirmPassword) {
+            console.log('Password validation failed');
             this.showError('Passwords do not match. Please try again.');
             return;
           }
           
           // Validate password strength
           if (password.length < 6) {
+            console.log('Password too short');
             this.showError('Password must be at least 6 characters long.');
+            return;
+          }
+          
+          // Validate required fields
+          const requiredFields = ['firstName', 'lastName', 'email', 'phone', 'branch'];
+          const missingFields = requiredFields.filter(field => !formData.get(field));
+          if (missingFields.length > 0) {
+            console.log('Missing required fields:', missingFields);
+            this.showError(`Please fill in all required fields: ${missingFields.join(', ')}`);
             return;
           }
           
@@ -2794,6 +2945,8 @@
             permissions: this.getRolePermissions(formData.get('role'))
           };
           
+          console.log('Employee data prepared:', employeeData);
+          
           // Use real API for backend integration
           try {
             const userPayload = {
@@ -2818,10 +2971,16 @@
               password: employeeData.password
             };
 
+            console.log('API payload prepared:', userPayload);
+            console.log('About to make API call...');
+
             let response;
             if (employeeData.employeeId) {
+              console.log('Updating existing employee:', employeeData.employeeId);
               // Update existing user
               response = await this.api.updateUser(employeeData.employeeId, userPayload);
+              console.log('Update response:', response);
+              
               const index = this.employees.findIndex(emp => emp.id === employeeData.employeeId);
               if (index !== -1) {
                 this.employees[index] = { ...this.employees[index], ...response, updatedAt: new Date().toISOString() };
@@ -2829,8 +2988,11 @@
               this.broadcastUpdate('updated', response);
               this.showSuccess('Employee updated successfully!');
             } else {
+              console.log('Creating new employee');
               // Create new user
               response = await this.api.createUser(userPayload);
+              console.log('Create response:', response);
+              
               const newEmployee = {
                 id: response.id || this.generateEmployeeId(),
                 ...response,
@@ -2841,15 +3003,197 @@
               this.showSuccess('Employee created successfully!');
             }
 
+            console.log('Employee save process completed successfully');
+            console.log('=== SAVE EMPLOYEE DEBUG END ===');
+            
+            // Save to localStorage for offline support and data persistence
+            this.saveEmployeesToStorage();
+            
+            // Close modal and reset form
             this.closeModal('employeeModal');
             event.target.reset();
+            
+            // Update UI
             this.renderEmployeesTable();
             this.updateEmployeeStats();
             
+            // Show success notification with additional actions
+            this.showSuccessWithActions('Employee saved successfully!', [
+              {
+                text: 'View Employee',
+                action: () => this.viewEmployee(newEmployee?.id || response?.id)
+              },
+              {
+                text: 'Add Another',
+                action: () => this.openAddEmployeeModal()
+              }
+            ]);
+            
           } catch (error) {
+            console.error('=== SAVE EMPLOYEE ERROR ===');
             console.error('Error saving employee:', error);
-            this.showError('Failed to save employee. Please try again.');
+            console.error('Error details:', {
+              message: error.message,
+              stack: error.stack,
+              response: error.response,
+              status: error.status,
+              statusText: error.statusText
+            });
+            console.error('=== END ERROR DEBUG ===');
+            
+            // Enhanced error handling with fallback to local storage
+            if (error.status === 404 || error.status === 0) {
+              // API unavailable - save to localStorage as fallback
+              console.log('API unavailable, saving to localStorage as fallback');
+              this.saveEmployeeLocally(employeeData, userPayload);
+              this.showWarning('Employee saved locally. Will sync when connection is available.');
+            } else {
+              this.showError(`Failed to save employee: ${error.message || 'Unknown error'}`);
+            }
           }
+        },
+
+        // Save employees to localStorage for persistence
+        saveEmployeesToStorage() {
+          try {
+            const employeesData = {
+              employees: this.employees,
+              lastUpdated: new Date().toISOString(),
+              tenantId: this.getCurrentTenantId()
+            };
+            localStorage.setItem('umi_employees', JSON.stringify(employeesData));
+            console.log('Employees saved to localStorage:', this.employees.length);
+          } catch (error) {
+            console.error('Error saving employees to localStorage:', error);
+          }
+        },
+
+        // Load employees from localStorage
+        loadEmployeesFromStorage() {
+          try {
+            const stored = localStorage.getItem('umi_employees');
+            if (stored) {
+              const data = JSON.parse(stored);
+              if (data.tenantId === this.getCurrentTenantId()) {
+                this.employees = data.employees || [];
+                console.log('Loaded employees from localStorage:', this.employees.length);
+                return true;
+              }
+            }
+          } catch (error) {
+            console.error('Error loading employees from localStorage:', error);
+          }
+          return false;
+        },
+
+        // Save employee locally when API is unavailable
+        saveEmployeeLocally(employeeData, userPayload) {
+          const localEmployee = {
+            id: employeeData.employeeId || this.generateEmployeeId(),
+            ...userPayload,
+            createdAt: new Date().toISOString(),
+            isLocal: true,
+            needsSync: true
+          };
+
+          this.employees.push(localEmployee);
+          this.saveEmployeesToStorage();
+          this.renderEmployeesTable();
+          this.updateEmployeeStats();
+        },
+
+        // Sync pending local changes when API is available
+        async syncPendingChanges() {
+          try {
+            const pendingEmployees = this.employees.filter(emp => emp.needsSync);
+            
+            for (const employee of pendingEmployees) {
+              try {
+                const response = await this.api.createUser(employee);
+                // Update local record with server response
+                const index = this.employees.findIndex(emp => emp.id === employee.id);
+                if (index !== -1) {
+                  this.employees[index] = {
+                    ...response,
+                    createdAt: employee.createdAt,
+                    isLocal: false,
+                    needsSync: false
+                  };
+                }
+              } catch (error) {
+                console.error('Failed to sync employee:', employee.id, error);
+              }
+            }
+            
+            this.saveEmployeesToStorage();
+            this.renderEmployeesTable();
+            
+            if (pendingEmployees.length > 0) {
+              this.showSuccess(`Synced ${pendingEmployees.length} pending employee(s)`);
+            }
+          } catch (error) {
+            console.error('Error during sync:', error);
+          }
+        },
+
+        // Enhanced success notification with actions
+        showSuccessWithActions(message, actions = []) {
+          const notification = document.createElement('div');
+          notification.className = 'notification notification-success';
+          
+          const content = document.createElement('div');
+          content.innerHTML = `
+            <div class="notification-message">${message}</div>
+            ${actions.length > 0 ? '<div class="notification-actions"></div>' : ''}
+          `;
+          
+          notification.appendChild(content);
+          document.body.appendChild(notification);
+
+          // Add action buttons
+          if (actions.length > 0) {
+            const actionsContainer = content.querySelector('.notification-actions');
+            actions.forEach(action => {
+              const button = document.createElement('button');
+              button.className = 'notification-action-btn';
+              button.textContent = action.text;
+              button.onclick = () => {
+                action.action();
+                notification.remove();
+              };
+              actionsContainer.appendChild(button);
+            });
+          }
+
+          // Animate in
+          setTimeout(() => {
+            notification.classList.add('show');
+          }, 100);
+
+          // Auto-remove after 8 seconds (longer for actions)
+          setTimeout(() => {
+            notification.classList.remove('show');
+            setTimeout(() => {
+              if (notification.parentNode) {
+                document.body.removeChild(notification);
+              }
+            }, 300);
+          }, 8000);
+        },
+
+        // View employee details
+        viewEmployee(employeeId) {
+          const employee = this.employees.find(emp => emp.id === employeeId);
+          if (employee) {
+            this.editEmployee(employeeId);
+          }
+        },
+
+        // Open add employee modal
+        openAddEmployeeModal() {
+          this.openModal('employeeModal');
+          document.getElementById('employeeModalTitle').textContent = 'Add Employee';
+          document.getElementById('formEmployeeId').value = '';
         },
 
         // Helper methods
@@ -3623,6 +3967,33 @@
 
         showWarning(message) {
           this.showNotification(message, 'warning');
+        },
+
+        // Broadcast updates for real-time sync
+        broadcastUpdate(type, data) {
+          // Send update via DataSync if available
+          if (window.DataSync) {
+            window.DataSync.broadcast('employee_updates', {
+              type: type,
+              employee: data,
+              userId: this.getCurrentUserId(),
+              timestamp: new Date().toISOString()
+            });
+          }
+          
+          // Also update localStorage for cross-tab communication
+          const updateKey = `umi_employee_update_${Date.now()}`;
+          localStorage.setItem(updateKey, JSON.stringify({
+            type: type,
+            employee: data,
+            userId: this.getCurrentUserId(),
+            timestamp: new Date().toISOString()
+          }));
+          
+          // Remove old update keys to prevent localStorage bloat
+          setTimeout(() => {
+            localStorage.removeItem(updateKey);
+          }, 60000); // Remove after 1 minute
         },
 
         showNotification(message, type = 'info') {

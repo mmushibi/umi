@@ -18,15 +18,17 @@ if (app.Environment.IsDevelopment())
 app.UseHttpsRedirection();
 app.UseCors(policy => policy.AllowAnyOrigin().AllowAnyMethod().AllowAnyHeader());
 
-// Get in-memory database
+// Get in-memory databases
 var usersDb = app.Services.GetRequiredService<Dictionary<string, object>>();
 var tenantsDb = new Dictionary<string, object>();
 
 // Basic registration endpoint with database saving
-app.MapPost("/api/v1/auth/register", async (HttpRequest request, Dictionary<string, object> usersDb, Dictionary<string, object> tenantsDb) =>
+app.MapPost("/api/v1/auth/register", async (HttpRequest request) =>
 {
     try
     {
+        var usersDb = app.Services.GetRequiredService<Dictionary<string, object>>();
+        var tenantsDb = new Dictionary<string, object>();
         var formData = await request.ReadFromJsonAsync<Dictionary<string, string>>();
         
         if (formData == null || !formData.ContainsKey("email") || !formData.ContainsKey("pharmacyName"))
@@ -240,6 +242,129 @@ app.MapGet("/admin/users", (Dictionary<string, object> usersDb) =>
         success = true,
         data = users,
         total = users.Count
+    });
+});
+
+// Admin create user endpoint
+app.MapPost("/admin/users", async (HttpRequest request, Dictionary<string, object> usersDb) =>
+{
+    try
+    {
+        var userData = await request.ReadFromJsonAsync<Dictionary<string, object>>();
+        if (userData == null)
+        {
+            return Results.BadRequest(new { 
+                success = false, 
+                message = "Invalid user data" 
+            });
+        }
+
+        var userId = Guid.NewGuid().ToString();
+        var newUser = new {
+            id = userId,
+            firstName = userData.ContainsKey("firstName") ? userData["firstName"] : "",
+            lastName = userData.ContainsKey("lastName") ? userData["lastName"] : "",
+            email = userData.ContainsKey("email") ? userData["email"] : "",
+            phone = userData.ContainsKey("phone") ? userData["phone"] : "",
+            role = userData.ContainsKey("role") ? userData["role"] : "employee",
+            department = userData.ContainsKey("department") ? userData["department"] : "",
+            branchId = userData.ContainsKey("branchId") ? userData["branchId"] : "",
+            status = "active",
+            hireDate = userData.ContainsKey("hireDate") ? userData["hireDate"] : DateTime.UtcNow.ToString("yyyy-MM-dd"),
+            salary = userData.ContainsKey("salary") ? userData["salary"] : 0,
+            employmentType = userData.ContainsKey("employmentType") ? userData["employmentType"] : "full-time",
+            defaultShift = userData.ContainsKey("defaultShift") ? userData["defaultShift"] : "day",
+            workDays = userData.ContainsKey("workDays") ? userData["workDays"] : "monday-friday",
+            nrc = userData.ContainsKey("nrc") ? userData["nrc"] : "",
+            licenseNumber = userData.ContainsKey("licenseNumber") ? userData["licenseNumber"] : "",
+            licenseExpiry = userData.ContainsKey("licenseExpiry") ? userData["licenseExpiry"] : "",
+            qualifications = userData.ContainsKey("qualifications") ? userData["qualifications"] : "",
+            experience = userData.ContainsKey("experience") ? userData["experience"] : 0,
+            createdAt = DateTime.UtcNow,
+            tenantId = userData.ContainsKey("tenantId") ? userData["tenantId"] : "default-tenant"
+        };
+
+        usersDb[userId] = newUser;
+
+        return Results.Ok(new {
+            success = true,
+            data = newUser,
+            message = "User created successfully"
+        });
+    }
+    catch (Exception ex)
+    {
+        return Results.BadRequest(new { 
+            success = false, 
+            message = $"Error creating user: {ex.Message}" 
+        });
+    }
+});
+
+// Admin update user endpoint
+app.MapPut("/admin/users/{userId}", async (string userId, HttpRequest request, Dictionary<string, object> usersDb) =>
+{
+    try
+    {
+        if (!usersDb.ContainsKey(userId))
+        {
+            return Results.NotFound(new { 
+                success = false, 
+                message = "User not found" 
+            });
+        }
+
+        var userData = await request.ReadFromJsonAsync<Dictionary<string, object>>();
+        if (userData == null)
+        {
+            return Results.BadRequest(new { 
+                success = false, 
+                message = "Invalid user data" 
+            });
+        }
+
+        var existingUser = usersDb[userId];
+        // Update user properties (simplified - in production you'd merge properties properly)
+        var updatedUser = new {
+            id = userId,
+            firstName = userData.ContainsKey("firstName") ? userData["firstName"] : existingUser.GetType().GetProperty("firstName")?.GetValue(existingUser),
+            lastName = userData.ContainsKey("lastName") ? userData["lastName"] : existingUser.GetType().GetProperty("lastName")?.GetValue(existingUser),
+            email = userData.ContainsKey("email") ? userData["email"] : existingUser.GetType().GetProperty("email")?.GetValue(existingUser),
+            phone = userData.ContainsKey("phone") ? userData["phone"] : existingUser.GetType().GetProperty("phone")?.GetValue(existingUser),
+            role = userData.ContainsKey("role") ? userData["role"] : existingUser.GetType().GetProperty("role")?.GetValue(existingUser),
+            department = userData.ContainsKey("department") ? userData["department"] : existingUser.GetType().GetProperty("department")?.GetValue(existingUser),
+            branchId = userData.ContainsKey("branchId") ? userData["branchId"] : existingUser.GetType().GetProperty("branchId")?.GetValue(existingUser),
+            status = userData.ContainsKey("status") ? userData["status"] : existingUser.GetType().GetProperty("status")?.GetValue(existingUser),
+            updatedAt = DateTime.UtcNow,
+            tenantId = existingUser.GetType().GetProperty("tenantId")?.GetValue(existingUser)
+        };
+
+        usersDb[userId] = updatedUser;
+
+        return Results.Ok(new {
+            success = true,
+            data = updatedUser,
+            message = "User updated successfully"
+        });
+    }
+    catch (Exception ex)
+    {
+        return Results.BadRequest(new { 
+            success = false, 
+            message = $"Error updating user: {ex.Message}" 
+        });
+    }
+});
+
+// Admin branches endpoint
+app.MapGet("/admin/branches", () =>
+{
+    var branches = new object[0]; // Empty array - no sample data
+    
+    return Results.Ok(new {
+        success = true,
+        data = branches,
+        total = branches.Length
     });
 });
 
