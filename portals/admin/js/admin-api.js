@@ -4,7 +4,7 @@
  */
 class AdminAPI {
   constructor() {
-    this.baseURL = 'http://localhost:5000';
+    this.baseURL = 'http://localhost:5000/api/v1';
     this.token = localStorage.getItem('umi_access_token');
     this.tenantId = localStorage.getItem('umi_tenant_id');
   }

@@ -12,10 +12,21 @@ app.use(express.json());
 app.post('/api/v1/auth/register', (req, res) => {
     console.log('Received signup request:', JSON.stringify(req.body, null, 2));
     
-    const { email, password, confirmPassword, firstName, lastName, phoneNumber, pharmacyName, address, province, username } = req.body;
+    const { email, password, confirmPassword, adminFullName, firstName, lastName, phoneNumber, pharmacyName, address, province, username } = req.body;
+    
+    // Handle both adminFullName or firstName/lastName
+    let userFirstName, userLastName;
+    if (adminFullName) {
+        const names = adminFullName.split(' ');
+        userFirstName = names[0] || '';
+        userLastName = names.slice(1).join(' ') || '';
+    } else {
+        userFirstName = firstName || '';
+        userLastName = lastName || '';
+    }
     
     // Basic validation
-    if (!email || !password || !firstName || !lastName || !pharmacyName || !address || !province || !username) {
+    if (!email || !password || !userFirstName || !userLastName || !pharmacyName || !address || !province || !username) {
         return res.status(400).json({
             success: false,
             message: 'Missing required fields'
@@ -46,9 +57,9 @@ app.post('/api/v1/auth/register', (req, res) => {
             user: {
                 id: 'user-' + Date.now(),
                 email: email,
-                firstName: firstName,
-                lastName: lastName,
-                fullName: `${firstName} ${lastName}`,
+                firstName: userFirstName,
+                lastName: userLastName,
+                fullName: `${userFirstName} ${userLastName}`,
                 phoneNumber: phoneNumber
             },
             tenant: {

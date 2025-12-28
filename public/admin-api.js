@@ -10,7 +10,7 @@ class AdminAPI {
 
   getBaseURL() {
     return window.location.hostname === 'localhost' 
-      ? 'http://localhost:5000' 
+      ? 'http://localhost:5001' 
       : window.location.origin;
   }
 
