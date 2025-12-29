@@ -1551,7 +1551,7 @@
     </header>
 
     <!-- Inventory Content -->
-    <div class="inventory-content">
+    <div class="inventory-content" x-data="inventorySystem" x-init="init()">
       <!-- Stats Cards -->
       <div class="stats-grid">
         <div class="stat-card">
@@ -2732,18 +2732,9 @@
         async loadInventory() {
           this.loading.inventory = true;
           try {
-            // Load tenant-specific inventory with shared access
-            const inventoryData = await window.cashierAPI.getSharedInventory();
+            // Load inventory data
+            const inventoryData = await window.cashierAPI.getInventory();
             this.inventory = inventoryData.data || inventoryData || [];
-            
-            // Also try to sync with main pharmacy if needed
-            if (this.tenantId && this.branchId) {
-              try {
-                await window.cashierAPI.syncTenantInventory(this.tenantId);
-              } catch (syncError) {
-                console.log('Sync failed, using cached data:', syncError);
-              }
-            }
             
             this.calculateStats();
           } catch (error) {
@@ -3020,13 +3011,12 @@
 
         async syncInventory() {
           try {
-            this.showNotification('Syncing inventory with pharmacy...', 'info');
-            await window.cashierAPI.syncTenantInventory(this.tenantId);
+            this.showNotification('Refreshing inventory data...', 'info');
             await this.loadInventory();
-            this.showNotification('Inventory synced successfully', 'success');
+            this.showNotification('Inventory data refreshed', 'success');
           } catch (error) {
             console.error('Sync error:', error);
-            this.showNotification('Failed to sync inventory', 'error');
+            this.showNotification('Failed to refresh inventory', 'error');
           }
         },
 
@@ -3278,13 +3268,11 @@
   <script src="../admin/js/admin-api.js"></script>
   <script src="js/cashier-api.js"></script>
 
-  <script>
-  document.addEventListener('DOMContentLoaded', () => {
-    const inventoryApp = Alpine.data('inventorySystem', inventorySystem);
-    inventoryApp.init();
-  });
-</script>
-
   <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
+  <script>
+  document.addEventListener('alpine:init', () => {
+    Alpine.data('inventorySystem', inventorySystem);
+  });
+  </script>
 </body>
 </html>
