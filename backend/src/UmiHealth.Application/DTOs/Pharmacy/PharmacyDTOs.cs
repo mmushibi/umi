@@ -84,5 +84,12 @@ namespace UmiHealth.Application.DTOs.Pharmacy
         public string? BatchNumber { get; set; }
         public DateTime? ExpiryDate { get; set; }
         public string Status { get; set; } = "pending";
+        
+        // Additional properties for pharmacy service
+        public string Strength { get; set; } = string.Empty;
+        public string DosageForm { get; set; } = string.Empty;
+        public string GenericName { get; set; } = string.Empty;
+        public string Manufacturer { get; set; } = string.Empty;
+        public decimal ActualUnitCost { get; set; }
     }
 }

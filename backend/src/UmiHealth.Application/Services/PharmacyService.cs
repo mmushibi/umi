@@ -254,7 +254,7 @@ namespace UmiHealth.Application.Services
                 }).ToList(),
                 CreatedAt = o.CreatedAt,
                 UpdatedAt = o.UpdatedAt
-            });
+            }).ToList();
         }
 
         public async Task<ProcurementOrderDto> CreateProcurementOrderAsync(Guid tenantId, CreateProcurementOrderRequest request)
@@ -314,11 +314,10 @@ namespace UmiHealth.Application.Services
                 var orderItem = order.Items.FirstOrDefault(i => i.Id == receiveItem.OrderItemId);
                 if (orderItem != null)
                 {
-                    orderItem.QuantityReceived = receiveItem.QuantityReceived;
+                    orderItem.QuantityReceived = receiveItem.ReceivedQuantity;
                     orderItem.ActualUnitCost = receiveItem.ActualUnitCost;
                     orderItem.BatchNumber = receiveItem.BatchNumber;
                     orderItem.ExpiryDate = receiveItem.ExpiryDate;
-                    orderItem.Location = receiveItem.Location;
 
                     // Add to inventory
                     await AddToInventoryAsync(tenantId, orderItem, receiveItem);
@@ -392,7 +391,7 @@ namespace UmiHealth.Application.Services
 
             if (product == null)
             {
-                product = new Product
+                product = new UmiHealth.Core.Entities.Product
                 {
                     TenantId = tenantId,
                     Name = orderItem.ProductName,
@@ -417,22 +416,22 @@ namespace UmiHealth.Application.Services
 
             if (mainBranch != null)
             {
-                var inventory = new Inventory
+                var inventory = new UmiHealth.Core.Entities.Inventory
                 {
                     TenantId = tenantId,
                     BranchId = mainBranch.Id,
                     ProductId = product.Id,
-                    QuantityOnHand = receiveItem.QuantityReceived,
+                    QuantityOnHand = receiveItem.ReceivedQuantity,
                     QuantityReserved = 0,
                     BatchNumber = receiveItem.BatchNumber,
                     ExpiryDate = receiveItem.ExpiryDate,
                     CostPrice = receiveItem.ActualUnitCost,
                     SellingPrice = product.SellingPrice,
-                    Location = receiveItem.Location,
+                    Location = "Main Store", // Default location since not in DTO
                     LastStockUpdate = DateTime.UtcNow
                 };
 
-                _context.Inventory.Add(inventory);
+                _context.Inventories.Add(inventory);
                 await _context.SaveChangesAsync();
             }
         }

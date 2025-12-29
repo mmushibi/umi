@@ -21,6 +21,7 @@ namespace UmiHealth.Persistence.Data
         public DbSet<Notification> Notifications { get; set; }
         public DbSet<NotificationSettings> NotificationSettings { get; set; }
         public DbSet<PaymentTransaction> PaymentTransactions { get; set; }
+        public DbSet<RefundRequestEntity> RefundRequests { get; set; }
         
         // Multi-tenancy entities
         public DbSet<StockTransfer> StockTransfers { get; set; }

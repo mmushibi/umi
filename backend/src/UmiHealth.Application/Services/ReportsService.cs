@@ -83,7 +83,7 @@ namespace UmiHealth.Application.Services
 
         public async Task<InventoryReportDto> GetInventoryReportAsync(Guid tenantId, Guid? branchId = null, string category = null, bool? lowStock = null, bool? expiring = null)
         {
-            var query = _context.Inventory
+            var query = _context.Inventories
                 .Include(i => i.Product)
                 .Where(i => i.TenantId == tenantId);
 
@@ -338,10 +338,10 @@ namespace UmiHealth.Application.Services
         {
             var query = metric.ToLower() switch
             {
-                "sales" => _context.Sales.Where(s => s.TenantId == tenantId && s.CreatedAt >= startDate && s.CreatedAt <= endDate),
-                "prescriptions" => _context.Prescriptions.Where(p => p.TenantId == tenantId && p.CreatedAt >= startDate && p.CreatedAt <= endDate),
-                "patients" => _context.Patients.Where(p => p.TenantId == tenantId && p.CreatedAt >= startDate && p.CreatedAt <= endDate),
-                _ => _context.Sales.Where(s => s.TenantId == tenantId && s.CreatedAt >= startDate && s.CreatedAt <= endDate)
+                "sales" => (IQueryable<object>)_context.Sales.Where(s => s.TenantId == tenantId && s.CreatedAt >= startDate && s.CreatedAt <= endDate),
+                "prescriptions" => (IQueryable<object>)_context.Prescriptions.Where(p => p.TenantId == tenantId && p.CreatedAt >= startDate && p.CreatedAt <= endDate),
+                "patients" => (IQueryable<object>)_context.Patients.Where(p => p.TenantId == tenantId && p.CreatedAt >= startDate && p.CreatedAt <= endDate),
+                _ => (IQueryable<object>)_context.Sales.Where(s => s.TenantId == tenantId && s.CreatedAt >= startDate && s.CreatedAt <= endDate)
             };
 
             if (branchId.HasValue)
@@ -367,10 +367,10 @@ namespace UmiHealth.Application.Services
                         Date = g.Key,
                         Value = metric.ToLower() switch
                         {
-                            "sales" => g.OfType<Sale>().Sum(s => s.TotalAmount),
-                            "prescriptions" => g.OfType<Prescription>().Count(),
-                            "patients" => g.OfType<Patient>().Count(),
-                            _ => g.Count()
+                            "sales" => (object)g.OfType<Sale>().Sum(s => s.TotalAmount),
+                            "prescriptions" => (object)g.OfType<Prescription>().Count(),
+                            "patients" => (object)g.OfType<Patient>().Count(),
+                            _ => (object)g.Count()
                         }
                     })
                     .OrderBy(dp => dp.Date)
