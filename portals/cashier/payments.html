@@ -3892,8 +3892,8 @@
         // Bulk Payment Functions
         downloadBulkTemplate() {
           const csvContent = 'Customer Name,Email,Phone,Amount,Currency,Payment Method,Description\n' +
-                           'John Doe,john@example.com,+260123456789,150.00,ZMW,mobile_money,Monthly subscription\n' +
-                           'Jane Smith,jane@example.com,+260987654321,75.50,ZMW,card,Consultation fee';
+                           'Test Patient,test@example.com,+260123456789,150.00,ZMW,mobile_money,Monthly subscription\n' +
+                           'Test User,user@example.com,+260987654321,75.50,ZMW,card,Consultation fee';
           
           const blob = new Blob([csvContent], { type: 'text/csv' });
           const url = window.URL.createObjectURL(blob);

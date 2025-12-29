@@ -2172,14 +2172,14 @@
               })
               .catch(error => {
                 console.error('Error loading scheduled reports:', error);
-                this.loadSampleScheduledReports();
+                this.scheduledReports = [];
               });
           } else {
-            this.loadSampleScheduledReports();
+            this.scheduledReports = [];
           }
         },
 
-        loadSampleScheduledReports() {
+        loadScheduledReports() {
           // Initialize empty scheduled reports array - real data will be loaded from API
           this.scheduledReports = [];
         },
@@ -2267,11 +2267,10 @@
                 console.error('Error loading reports:', error);
                 this.showError('Failed to load reports. Please try again.');
                 this.loading = false;
-                // Fallback to mock data
-                this.loadSampleReports();
+                this.reports = [];
               });
           } else {
-            // Fallback to data sync or mock data
+            // Fallback to data sync or empty data
             try {
               window.adminDataSync.getData('reports', {
                 page: 1,
@@ -3022,11 +3021,6 @@
           this.topProducts = [];
         },
 
-        loadSampleReports() {
-          // Initialize empty reports array - real data will be loaded from API
-          this.reports = [];
-        },
-
         formatPeriod(startDate, endDate) {
           if (!startDate || !endDate) return '';
           return `${this.formatDate(startDate)} - ${this.formatDate(endDate)}`;
@@ -3095,11 +3089,9 @@
         },
 
         init() {
-          this.loadSampleTopProducts();
-          this.loadSampleReports();
+          this.loadReportsFromAPI();
           this.initCharts();
           this.setupEventListeners();
-          this.loadReportsFromAPI();
         },
 
         initCharts() {

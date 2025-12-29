@@ -3200,14 +3200,10 @@
             }
           }
           
-          // Use sample data as fallback
-          this.products = this.getSampleProducts();
+          // Load products from API
+          this.products = [];
           this.updateDashboardMetrics();
           this.loading = false;
-        },
-        
-        getSampleProducts() {
-          return [];
         },
         
         updateDashboardMetrics() {

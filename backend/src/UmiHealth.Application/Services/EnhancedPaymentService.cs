@@ -128,8 +128,8 @@ namespace UmiHealth.Application.Services
                     Reference = "REF001",
                     Amount = 150.00m,
                     PaymentMethod = "mobile_money",
-                    CustomerName = "John Doe",
-                    CustomerEmail = "john@example.com",
+                    CustomerName = "Moses Mushibi",
+                    CustomerEmail = "moses@example.com",
                     PhoneNumber = "+260123456789",
                     Description = "Payment for services"
                 }

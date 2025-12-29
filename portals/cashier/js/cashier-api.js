@@ -68,6 +68,10 @@ class CashierAPI {
     return await this.request('/sales/stats');
   }
 
+  async getSalesStats() {
+    return await this.request('/sales/stats');
+  }
+
   async getRecentSales(limit = 10) {
     return await this.request(`/sales?pageSize=${limit}`);
   }
@@ -117,8 +121,7 @@ class CashierAPI {
 
   async getSalesRevenueStats(period = 7) {
     const endDate = new Date();
-    const startDate = new Date();
-    startDate.setDate(endDate.getDate() - period);
+    const startDate = new Date(endDate.getTime() - (period * 24 * 60 * 60 * 1000));
     
     return await this.request(`/sales/stats?startDate=${startDate.toISOString()}&endDate=${endDate.toISOString()}`);
   }

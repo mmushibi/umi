@@ -1197,33 +1197,6 @@
           <h1 class="page-title">Patients Management</h1>
         </div>
         
-        <div class="search-bar" x-data="{ searchOpen: false, query: '' }">
-          <span class="material-symbols-rounded search-icon">search</span>
-          <input 
-            type="text" 
-            class="search-input" 
-            placeholder="Search patients by name, ID, or prescription..."
-            x-model="query"
-            @focus="searchOpen = true"
-            @input="searchOpen = true"
-            @blur="setTimeout(() => searchOpen = false, 200)"
-          >
-          
-          <div class="search-suggestions" :class="searchOpen && query.length > 0 ? 'show' : ''">
-            <template x-for="suggestion in filteredSuggestions" :key="suggestion.id">
-              <div class="suggestion-item" @click="selectSuggestion(suggestion)">
-                <div class="suggestion-icon">
-                  <span class="material-symbols-rounded" x-text="suggestion.icon"></span>
-                </div>
-                <div class="suggestion-content">
-                  <div class="suggestion-title" x-text="suggestion.title"></div>
-                  <div class="suggestion-description" x-text="suggestion.description"></div>
-                </div>
-                <div class="suggestion-type" x-text="suggestion.type"></div>
-              </div>
-            </template>
-          </div>
-        </div>
       </div>
 
       <div class="header-right">
@@ -1946,25 +1919,25 @@
   </section>
   </main>
 
+  <!-- Include API Client and Data Manager -->
+  <script src="js/cashier-api.js"></script>
+  <script src="js/data-manager.js"></script>
+  
   <!-- Alpine.js Component -->
   <script>
-    // Initialize data manager for patients
-    const cashierDataManager = new UmiDataManager('cashier', '/api/patients');
+    // Initialize API client and data manager
+    const api = new window.CashierAPI();
+    const dataManager = window.umiDataManager || new UmiDataManager('cashier', '/api/patients');
     
     function patientSystem() {
       return {
         sidebarOpen: false,
         searchQuery: '',
         showAddModal: false,
-        tenantInfo: {
-          name: 'Umi Health',
-          location: 'Lusaka, Zambia'
-        },
-        userInfo: {
-          name: 'Umi Health',
-          role: 'Admin',
-          initials: 'UH'
-        },
+        currentPatient: null,
+        isLoading: false,
+        patients: [],
+        filteredSuggestions: [],
         formatCurrency(amount) {
           return new Intl.NumberFormat('en-ZM', {
             style: 'currency',
@@ -1977,7 +1950,6 @@
             window.location.href = 'index.html';
           }
         },
-        patients: [],
 
         get filteredPatients() {
           if (!this.searchQuery) return this.patients;
@@ -2023,28 +1995,24 @@
           // Implement edit functionality
         },
 
-        deletePatient(patientId) {
+        async deletePatient(patientId) {
           if (confirm('Are you sure you want to delete this patient record?')) {
             try {
-              // Delete via API
-              window.cashierDataSync.apiCall(`/patients/${patientId}`, {}, 'DELETE')
-                .then(response => {
-                  if (response.success) {
-                    this.patients = this.patients.filter(p => p.id !== patientId);
-                    this.renderPatientsTable();
-                    this.updatePatientStats();
-                    this.showSuccess('Patient deleted successfully');
-                  } else {
-                    throw new Error(response.message);
-                  }
-                })
-                .catch(error => {
-                  console.error('Error deleting patient:', error);
-                  this.showError('Failed to delete patient: ' + error.message);
-                });
+              const response = await api.request(`/patients/${patientId}`, {
+                method: 'DELETE'
+              });
+              
+              if (response.success || response.status === 204) {
+                this.patients = this.patients.filter(p => p.id !== patientId);
+                this.renderPatientsTable();
+                this.updatePatientStats();
+                this.showSuccess('Patient deleted successfully');
+              } else {
+                throw new Error(response.message || 'Failed to delete patient');
+              }
             } catch (error) {
-              console.error('Data sync not available:', error);
-              this.showError('Data synchronization not available');
+              console.error('Error deleting patient:', error);
+              this.showError('Failed to delete patient: ' + error.message);
             }
           }
         },
@@ -2099,7 +2067,7 @@
         },
 
         // Patient Form Management
-        submitPatientForm(event) {
+        async submitPatientForm(event) {
           event.preventDefault();
           const formData = new FormData(event.target);
           const patientData = Object.fromEntries(formData.entries());
@@ -2119,44 +2087,46 @@
             insuranceInfo: patientData.insuranceInfo ? JSON.parse(patientData.insuranceInfo) : {}
           };
 
-          // Create patient via API
-          try {
-            window.cashierDataSync.createPatient(apiPatientData)
-              .then(newPatient => {
-                // Add patient to local list
-                const patient = {
-                  id: newPatient.id,
-                  patientId: newPatient.patientNumber,
-                  firstName: newPatient.firstName,
-                  lastName: newPatient.lastName,
-                  dateOfBirth: newPatient.dateOfBirth,
-                  gender: newPatient.gender,
-                  phone: newPatient.phone,
-                  email: newPatient.email,
-                  address: newPatient.address,
-                  status: newPatient.status,
-                  registrationDate: newPatient.createdAt,
-                  emergencyContact: newPatient.emergencyContact,
-                  medicalHistory: newPatient.medicalHistory,
-                  allergies: newPatient.allergies,
-                  insuranceInfo: newPatient.insuranceInfo
-                };
-                
-                this.patients.unshift(patient);
-                this.closeModal('patientModal');
-                event.target.reset();
-                this.renderPatientsTable();
-                this.updatePatientStats();
-                this.showSuccess('Patient created successfully');
-              })
-              .catch(error => {
-                console.error('Error creating patient:', error);
-                this.showError('Failed to create patient: ' + error.message);
-              });
-          } catch (error) {
-            console.error('Data sync not available:', error);
-            this.showError('Data synchronization not available');
+        // Create patient via API
+        try {
+          const response = await api.createPatient(apiPatientData);
+          
+          if (response.data) {
+            const newPatient = {
+              id: response.data.id,
+              patientId: response.data.patientNumber || response.data.id,
+              firstName: response.data.firstName,
+              lastName: response.data.lastName,
+              dateOfBirth: response.data.dateOfBirth,
+              gender: response.data.gender,
+              phone: response.data.phone,
+              email: response.data.email,
+              address: response.data.address,
+              bloodType: response.data.bloodType,
+              nrc: response.data.nrc,
+              status: response.data.status || 'active',
+              registrationDate: response.data.createdAt,
+              emergencyContact: response.data.emergencyContact?.name,
+              emergencyPhone: response.data.emergencyContact?.phone,
+              emergencyRelationship: response.data.emergencyContact?.relationship,
+              medicalHistory: response.data.medicalHistory,
+              allergies: response.data.allergies,
+              insuranceInfo: response.data.insuranceInfo
+            };
+            
+            this.patients.unshift(newPatient);
+            this.closeModal('patientModal');
+            event.target.reset();
+            this.renderPatientsTable();
+            this.updatePatientStats();
+            this.showSuccess('Patient created successfully');
+          } else {
+            throw new Error('Failed to create patient');
           }
+        } catch (error) {
+          console.error('Error creating patient:', error);
+          this.showError('Failed to create patient: ' + error.message);
+        }
         },
 
         // Tab Management
@@ -2225,6 +2195,18 @@
         // Table Rendering
         renderPatientsTable(patientsToRender = this.patients) {
           const tbody = document.getElementById('patientsTableBody');
+          
+          if (this.isLoading) {
+            tbody.innerHTML = `
+              <tr>
+                <td colspan="9" class="loading-state">
+                  <span class="material-symbols-rounded loading-icon">people</span>
+                  <p class="loading-text">Loading patient data...</p>
+                </td>
+              </tr>
+            `;
+            return;
+          }
           
           if (patientsToRender.length === 0) {
             tbody.innerHTML = `
@@ -2415,7 +2397,7 @@
 
         downloadTemplate() {
           const csvContent = 'firstName,lastName,dateOfBirth,gender,phone,email,address,nrc,bloodType,emergencyContact,emergencyPhone,emergencyRelationship\n' +
-                            'John,Doe,1990-01-01,male,+260123456789,john.doe@email.com,123 Main St,123456/78/9,A+,Jane Doe,+260987654321,Wife';
+                            'Sample,Patient,1990-01-01,male,+260123456789,sample.patient@email.com,123 Main St,123456/78/9,A+,Test Patient,+260987654321,Wife';
           
           const blob = new Blob([csvContent], { type: 'text/csv' });
           const url = window.URL.createObjectURL(blob);
@@ -2427,22 +2409,34 @@
         },
 
         // Statistics Update
-        updatePatientStats() {
-          document.getElementById('totalPatientsCount').textContent = this.patients.length;
-          
-          const activePrescriptions = this.patients.reduce((sum, p) => sum + Math.floor(Math.random() * 3), 0);
-          document.getElementById('activePrescriptionsCount').textContent = activePrescriptions;
-          
-          const criticalPatients = this.patients.filter(p => p.status === 'critical').length;
-          document.getElementById('criticalPatientsCount').textContent = criticalPatients;
-          
-          const currentMonth = new Date().getMonth();
-          const currentYear = new Date().getFullYear();
-          const newPatients = this.patients.filter(p => {
-            const createdDate = new Date(p.createdAt);
-            return createdDate.getMonth() === currentMonth && createdDate.getFullYear() === currentYear;
-          }).length;
-          document.getElementById('newPatientsCount').textContent = newPatients;
+        async updatePatientStats() {
+          try {
+            const response = await api.request('/patients/stats');
+            const stats = response.data || response;
+            
+            document.getElementById('totalPatientsCount').textContent = stats.totalPatients || 0;
+            document.getElementById('activePrescriptionsCount').textContent = '0'; // This would need a separate endpoint
+            document.getElementById('criticalPatientsCount').textContent = stats.inactivePatients || 0;
+            document.getElementById('newPatientsCount').textContent = stats.recentPatients || 0;
+          } catch (error) {
+            console.error('Error updating patient stats:', error);
+            // Fallback to local calculations
+            document.getElementById('totalPatientsCount').textContent = this.patients.length;
+            
+            const activePrescriptions = this.patients.reduce((sum, p) => sum + Math.floor(Math.random() * 3), 0);
+            document.getElementById('activePrescriptionsCount').textContent = activePrescriptions;
+            
+            const criticalPatients = this.patients.filter(p => p.status === 'critical').length;
+            document.getElementById('criticalPatientsCount').textContent = criticalPatients;
+            
+            const currentMonth = new Date().getMonth();
+            const currentYear = new Date().getFullYear();
+            const newPatients = this.patients.filter(p => {
+              const createdDate = new Date(p.registrationDate);
+              return createdDate.getMonth() === currentMonth && createdDate.getFullYear() === currentYear;
+            }).length;
+            document.getElementById('newPatientsCount').textContent = newPatients;
+          }
         },
 
         // Export Data
@@ -2468,21 +2462,25 @@
           // Load real data from API
           await this.loadPatientsFromAPI();
           
+          // Update statistics from backend
+          await this.updatePatientStats();
+          
           // Set up event listeners
           this.setupEventListeners();
           
           // Set up data sync listeners
           this.setupDataSyncListeners();
           
-          // Setup auto-save
-          cashierDataManager.setupAutoSave(() => this.patients);
+          // Setup auto-save with data manager
+          if (dataManager) {
+            dataManager.setupAutoSave(() => this.patients);
+          }
           
           // Add sync button to header
           this.addSyncButton();
           
           // Initial render
           this.renderPatientsTable();
-          this.updatePatientStats();
         },
 
         addSyncButton() {
@@ -2503,11 +2501,15 @@
                 <span>Syncing...</span>
               `;
               
-              await cashierDataManager.syncWithServer();
               await this.loadPatientsFromAPI();
+              
+              if (dataManager) {
+                await dataManager.refreshAll();
+              }
               
             } catch (error) {
               console.error('Sync failed:', error);
+              this.showError('Sync failed: ' + error.message);
             } finally {
               syncButton.disabled = false;
               syncButton.innerHTML = `
@@ -2520,10 +2522,18 @@
           headerRight.appendChild(syncButton);
         },
 
+        // Load patients from API
         async loadPatientsFromAPI() {
           try {
-            const patients = await cashierDataManager.load();
-            this.patients = patients.map(p => ({
+            this.isLoading = true;
+            const response = await api.getPatients({
+              page: 1,
+              pageSize: 100
+            });
+            
+            // Handle backend response format
+            const patientsData = response.patients || response.data || [];
+            this.patients = patientsData.map(p => ({
               id: p.id,
               patientId: p.patientNumber || p.id,
               firstName: p.firstName,
@@ -2533,27 +2543,37 @@
               phone: p.phone,
               email: p.email,
               address: p.address,
-              status: p.status,
+              bloodType: p.bloodType,
+              nrc: p.nrc,
+              status: p.status || 'active',
               registrationDate: p.createdAt,
-              emergencyContact: p.emergencyContact,
-              medicalHistory: p.medicalHistory,
-              allergies: p.allergies,
-              insuranceInfo: p.insuranceInfo
+              lastVisit: p.lastVisit,
+              emergencyContact: p.emergencyContact?.name,
+              emergencyPhone: p.emergencyContact?.phone,
+              emergencyRelationship: p.emergencyContact?.relationship,
+              medicalHistory: p.medicalHistory || {},
+              allergies: p.allergies || [],
+              insuranceInfo: p.insuranceInfo || {}
             }));
+            
             this.renderPatientsTable();
             this.updatePatientStats();
           } catch (error) {
             console.error('Error loading patients:', error);
             this.showError('Failed to load patients. Please try again.');
+            this.patients = [];
+          } finally {
+            this.isLoading = false;
           }
         },
 
         setupDataSyncListeners() {
-          if (window.cashierDataSync) {
-            window.cashierDataSync.on('patients-updated', (patients) => {
+          // Listen for data manager events if available
+          if (dataManager) {
+            dataManager.subscribe('patients', (patients) => {
               this.patients = patients.map(p => ({
                 id: p.id,
-                patientId: p.patientNumber,
+                patientId: p.patientNumber || p.id,
                 firstName: p.firstName,
                 lastName: p.lastName,
                 dateOfBirth: p.dateOfBirth,
@@ -2561,26 +2581,26 @@
                 phone: p.phone,
                 email: p.email,
                 address: p.address,
-                status: p.status,
+                bloodType: p.bloodType,
+                nrc: p.nrc,
+                status: p.status || 'active',
                 registrationDate: p.createdAt,
-                emergencyContact: p.emergencyContact,
-                medicalHistory: p.medicalHistory,
-                allergies: p.allergies,
-                insuranceInfo: p.insuranceInfo
+                lastVisit: p.lastVisit,
+                emergencyContact: p.emergencyContact?.name,
+                emergencyPhone: p.emergencyContact?.phone,
+                emergencyRelationship: p.emergencyContact?.relationship,
+                medicalHistory: p.medicalHistory || {},
+                allergies: p.allergies || [],
+                insuranceInfo: p.insuranceInfo || {}
               }));
               this.renderPatientsTable();
               this.updatePatientStats();
-            });
-
-            window.cashierDataSync.on('sync-error', (error) => {
-              console.error('Sync error:', error);
-              this.showWarning('Data synchronization error occurred');
             });
           }
         },
 
         loadSampleData() {
-          // Real data will be loaded from API
+          // Sample data removed - using real API data
           this.patients = [];
         },
 

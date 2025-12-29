@@ -413,7 +413,7 @@
 						],
 						"body": {
 							"mode": "raw",
-							"raw": "{\n  \"saleId\": \"{{sale_id}}\",\n  \"paymentMethod\": \"card\",\n  \"amount\": 67.48,\n  \"currency\": \"USD\",\n  \"cardDetails\": {\n    \"cardNumber\": \"4111111111111111\",\n    \"expiryMonth\": \"12\",\n    \"expiryYear\": \"2025\",\n    \"cvv\": \"123\",\n    \"cardholderName\": \"John Doe\"\n  },\n  \"billingAddress\": {\n    \"street\": \"123 Billing St\",\n    \"city\": \"Billing City\",\n    \"state\": \"Billing State\",\n    \"postalCode\": \"12345\",\n    \"country\": \"USA\"\n  },\n  \"processedBy\": \"{{user_id}}\"\n}"
+							"raw": "{\n  \"saleId\": \"{{sale_id}}\",\n  \"paymentMethod\": \"card\",\n  \"amount\": 67.48,\n  \"currency\": \"USD\",\n  \"cardDetails\": {\n    \"cardNumber\": \"4111111111111111\",\n    \"expiryMonth\": \"12\",\n    \"expiryYear\": \"2026\",\n    \"cvv\": \"123\",\n    \"cardholderName\": \"Moses Mushibi\"\n  },\n  \"billingAddress\": {\n    \"street\": \"123 Billing St\",\n    \"city\": \"Billing City\",\n    \"state\": \"Billing State\",\n    \"postalCode\": \"12345\",\n    \"country\": \"USA\"\n  },\n  \"processedBy\": \"{{user_id}}\"\n}"
 						},
 						"url": {
 							"raw": "{{base_url}}/api/v1/pos/payments",

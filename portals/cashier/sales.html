@@ -10,11 +10,7 @@
   <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Rounded:wght@300;400;500;600;700&display=swap" rel="stylesheet">
   <script src="https://cdn.tailwindcss.com"></script>
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-  <script src="../shared/js/data-sync.js"></script>
-  <script src="../shared/js/role-based-access.js"></script>
-  <script src="../admin/js/admin-api.js"></script>
-  <script src="js/cashier-api.js"></script>
-  <link rel="stylesheet" href="../../shared/css/cashier-notifications.css">
+  <link rel="stylesheet" href="../shared/css/cashier-notifications.css">
   <style>
     :root {
       --color-primary: #000000;
@@ -1265,9 +1261,12 @@
         updateRevenueChart(revenueStats) {
           const ctx = document.getElementById('revenueChart').getContext('2d');
           
+          // Ensure revenueStats is an array
+          const statsArray = Array.isArray(revenueStats) ? revenueStats : (revenueStats.data || []);
+          
           // Prepare chart data
-          const labels = revenueStats.map(stat => window.cashierAPI.formatDate(stat.date));
-          const data = revenueStats.map(stat => stat.revenue);
+          const labels = statsArray.map(stat => window.cashierAPI.formatDate(stat.date));
+          const data = statsArray.map(stat => stat.revenue);
           
           if (this.revenueChart) {
             this.revenueChart.destroy();
@@ -1310,9 +1309,12 @@
         updatePaymentChart(paymentStats) {
           const ctx = document.getElementById('paymentChart').getContext('2d');
           
+          // Ensure paymentStats is an array
+          const statsArray = Array.isArray(paymentStats) ? paymentStats : (paymentStats.data || []);
+          
           // Prepare chart data
-          const labels = paymentStats.map(stat => stat.method);
-          const data = paymentStats.map(stat => stat.count);
+          const labels = statsArray.map(stat => stat.method);
+          const data = statsArray.map(stat => stat.count);
           
           if (this.paymentChart) {
             this.paymentChart.destroy();

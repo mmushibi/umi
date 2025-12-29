@@ -2450,28 +2450,6 @@
           }).format(amount);
         },
         
-        loadSampleData() {
-          // Initialize empty data arrays - real data will be loaded from API
-          this.pendingPrescriptions = 0;
-          this.prescriptionsFilled = 0;
-          this.drugInteractions = 0;
-          this.patientConsultations = 0;
-          this.clinicalReviews = 0;
-          this.averageWaitTime = 0;
-          
-          // Initialize empty transactions array
-          this.transactions = [];
-          
-          // Initialize empty recent sales array
-          this.recentSales = [];
-          
-          // Initialize empty prescription queue array
-          this.prescriptionQueue = [];
-          
-          // Initialize empty sales performance array
-          this.salesPerformance = [];
-        },
-        
         renderDashboardContent() {
           // Render prescription queue
           this.renderPrescriptionQueue();
@@ -2580,7 +2558,7 @@
               alert('Sales data exported successfully!');
               break;
             case 'refresh-all-transactions':
-              this.loadSampleData();
+              console.log('Refreshing all transactions...');
               break;
             case 'view-all-transactions':
               console.log('Viewing all transactions...');
@@ -2628,35 +2606,19 @@
         },
         
         init() {
-          // Initialize empty data first
-          this.loadSampleData();
+          this.loadDashboardData();
           this.renderDashboardContent();
           this.setupEventListeners();
           
-          // Load real data from API after data sync is ready
-          if (window.pharmacistDataSync) {
-            // Wait for data sync to initialize
-            setTimeout(() => {
-              this.loadDashboardData();
-            }, 1000);
-          } else {
-            // Fallback to sample data if data sync not available
-            console.warn('Data sync not available, using sample data');
-          }
-          
           // Set up periodic updates
-          setInterval(() => {
-            if (window.pharmacistDataSync) {
+          if (window.pharmacistDataSync) {
+            setInterval(() => {
               this.loadDashboardData();
-            } else {
-              this.loadSampleData();
-              this.renderDashboardContent();
-            }
-          }, 30000); // Update every 30 seconds
-          
-          console.log('Home dashboard initialized');
+            }, 30000); // Update every 30 seconds
+          } else {
+            console.warn('Data sync not available, using empty data');
+          }
         },
-
         logout() {
           if (confirm('Are you sure you want to logout?')) {
             window.location.href = 'index.html';

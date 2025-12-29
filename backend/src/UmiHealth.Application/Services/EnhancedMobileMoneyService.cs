@@ -276,7 +276,7 @@ namespace UmiHealth.Application.Services
                     Currency = "ZMW",
                     Status = "completed",
                     TransactionDate = DateTime.UtcNow.AddHours(-2),
-                    CustomerName = "John Doe",
+                    CustomerName = "Moses Mushibi",
                     Reference = "MM001"
                 },
                 new MobileMoneyTransactionDto
