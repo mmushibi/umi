@@ -19,6 +19,6 @@ namespace UmiHealth.Infrastructure.Repositories
 
     public interface ITenantRepository<T> : UmiHealth.Core.Interfaces.ITenantRepository<T> where T : TenantEntity
     {
-        Task<IEnumerable<T>> GetByTenantAndBranchAsync(Guid tenantId, Guid branchId, CancellationToken cancellationToken = default);
+        Task<IReadOnlyList<T>> GetByTenantAndBranchAsync(Guid tenantId, Guid branchId, CancellationToken cancellationToken = default);
     }
 }

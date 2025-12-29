@@ -18,6 +18,9 @@ namespace UmiHealth.Application.Services
         Task<PaymentResponse> ProcessPaymentAsync(PaymentRequest request);
         Task<PaymentStatusResponse> CheckPaymentStatusAsync(string transactionId);
         Task<RefundResponse> ProcessRefundAsync(RefundRequest request);
+        Task<PaymentResponse> InitiatePaymentAsync(PaymentRequest request);
+        Task<PaymentStatusResponse> VerifyPaymentAsync(string transactionId);
+        Task<RefundResponse> RefundAsync(string transactionId, decimal amount);
     }
 
     public abstract class BaseMobileMoneyProvider : IMobileMoneyProvider
@@ -47,6 +50,26 @@ namespace UmiHealth.Application.Services
         public abstract Task<PaymentResponse> ProcessPaymentAsync(PaymentRequest request);
         public abstract Task<PaymentStatusResponse> CheckPaymentStatusAsync(string transactionId);
         public abstract Task<RefundResponse> ProcessRefundAsync(RefundRequest request);
+        
+        public virtual Task<PaymentResponse> InitiatePaymentAsync(PaymentRequest request)
+        {
+            return ProcessPaymentAsync(request);
+        }
+        
+        public virtual Task<PaymentStatusResponse> VerifyPaymentAsync(string transactionId)
+        {
+            return CheckPaymentStatusAsync(transactionId);
+        }
+        
+        public virtual Task<RefundResponse> RefundAsync(string transactionId, decimal amount)
+        {
+            return ProcessRefundAsync(new RefundRequest 
+            { 
+                TransactionId = transactionId, 
+                Amount = amount,
+                Reason = "Refund requested"
+            });
+        }
 
         protected async Task<T> MakeApiRequestAsync<T>(string endpoint, object request)
         {
@@ -88,14 +111,17 @@ namespace UmiHealth.Application.Services
 
     public class MtnMobileMoneyProvider : BaseMobileMoneyProvider
     {
+        private readonly ILogger<MtnMobileMoneyProvider> _logger;
+        
         public override string ProviderCode => "mtn";
         public override string ProviderName => "MTN Mobile Money";
         public override bool IsEnabled => true;
         public override string Icon => "mtn-icon";
 
-        public MtnMobileMoneyProvider(string apiKey, string baseUrl, ILogger logger, IHttpClientFactory httpClientFactory = null)
+        public MtnMobileMoneyProvider(string apiKey, string baseUrl, ILogger<MtnMobileMoneyProvider> logger, IHttpClientFactory httpClientFactory = null)
             : base(apiKey, baseUrl, logger, httpClientFactory)
         {
+            _logger = logger;
         }
 
         public override async Task<PaymentResponse> ProcessPaymentAsync(PaymentRequest request)
@@ -137,7 +163,7 @@ namespace UmiHealth.Application.Services
                 {
                     Success = false,
                     Message = "MTN Mobile Money payment processing failed",
-                    TransactionId = null
+                    TransactionId = null!
                 };
             }
         }
@@ -214,7 +240,7 @@ namespace UmiHealth.Application.Services
                 {
                     Success = false,
                     Message = "Airtel Money payment processing failed",
-                    TransactionId = null
+                    TransactionId = null!
                 };
             }
         }
@@ -275,7 +301,7 @@ namespace UmiHealth.Application.Services
                 {
                     Success = false,
                     Message = "Airtel Money refund failed",
-                    RefundId = null
+                    RefundId = null!
                 };
             }
         }

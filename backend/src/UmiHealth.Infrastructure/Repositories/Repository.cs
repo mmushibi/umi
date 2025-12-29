@@ -7,15 +7,16 @@ using System.Threading;
 using System.Threading.Tasks;
 using UmiHealth.Core.Entities;
 using UmiHealth.Core.Interfaces;
+using UmiHealth.Persistence.Data;
 
 namespace UmiHealth.Infrastructure.Repositories
 {
     public class Repository<T> : IRepository<T> where T : BaseEntity
     {
-        protected readonly AppDbContext _context;
+        protected readonly SharedDbContext _context;
         protected readonly DbSet<T> _dbSet;
 
-        public Repository(AppDbContext context)
+        public Repository(SharedDbContext context)
         {
             _context = context ?? throw new ArgumentNullException(nameof(context));
             _dbSet = context.Set<T>();

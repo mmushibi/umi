@@ -5,7 +5,8 @@ using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using UmiHealth.Domain.Entities;
-using UmiHealth.Infrastructure.Data;
+using UmiHealth.Core.Entities;
+using UmiHealth.Persistence.Data;
 
 namespace UmiHealth.Infrastructure.Repositories
 {
@@ -54,6 +55,29 @@ namespace UmiHealth.Infrastructure.Repositories
             return !await query.AnyAsync(cancellationToken);
         }
 
+        // Implement missing ITenantRepository methods
+        public async Task<IReadOnlyList<Tenant>> GetByTenantAsync(Guid tenantId, CancellationToken cancellationToken = default)
+        {
+            var result = await _dbSet
+                .Where(t => t.Id == tenantId)
+                .ToListAsync(cancellationToken);
+            return result.AsReadOnly();
+        }
+
+        public async Task<Tenant?> GetByIdAndTenantAsync(Guid id, Guid tenantId, CancellationToken cancellationToken = default)
+        {
+            return await _dbSet
+                .FirstOrDefaultAsync(t => t.Id == id && t.TenantId == tenantId, cancellationToken);
+        }
+
+        public async Task<IReadOnlyList<Tenant>> GetByTenantAndBranchAsync(Guid tenantId, Guid branchId, CancellationToken cancellationToken = default)
+        {
+            var result = await _dbSet
+                .Where(t => t.TenantId == tenantId)
+                .ToListAsync(cancellationToken);
+            return result.AsReadOnly();
+        }
+
         public async Task<IEnumerable<Tenant>> GetByTenantAsync(string tenantId, CancellationToken cancellationToken = default)
         {
             var tenantGuid = Guid.Parse(tenantId);
@@ -63,36 +87,36 @@ namespace UmiHealth.Infrastructure.Repositories
         }
     }
 
-    public interface IUserRepository : ITenantRepository<User>
+    public interface IUserRepository : ITenantRepository<UmiHealth.Core.Entities.User>
     {
-        Task<User?> GetByEmailAsync(string tenantId, string email, CancellationToken cancellationToken = default);
-        Task<User?> GetByUsernameAsync(string tenantId, string username, CancellationToken cancellationToken = default);
-        Task<IEnumerable<User>> GetByBranchAsync(string tenantId, string branchId, CancellationToken cancellationToken = default);
-        Task<IEnumerable<User>> GetByRoleAsync(string tenantId, string role, CancellationToken cancellationToken = default);
+        Task<UmiHealth.Core.Entities.User?> GetByEmailAsync(string tenantId, string email, CancellationToken cancellationToken = default);
+        Task<UmiHealth.Core.Entities.User?> GetByUsernameAsync(string tenantId, string username, CancellationToken cancellationToken = default);
+        Task<IEnumerable<UmiHealth.Core.Entities.User>> GetByBranchAsync(string tenantId, string branchId, CancellationToken cancellationToken = default);
+        Task<IEnumerable<UmiHealth.Core.Entities.User>> GetByRoleAsync(string tenantId, string role, CancellationToken cancellationToken = default);
         Task<bool> IsEmailAvailableAsync(string tenantId, string email, Guid? excludeUserId = null, CancellationToken cancellationToken = default);
     }
 
-    public class UserRepository : TenantRepository<User>
+    public class UserRepository : Repository<UmiHealth.Core.Entities.User>, ITenantRepository<UmiHealth.Core.Entities.User>
     {
         public UserRepository(SharedDbContext context) : base(context)
         {
         }
 
-        public async Task<User?> GetByEmailAsync(string tenantId, string email, CancellationToken cancellationToken = default)
+        public async Task<UmiHealth.Core.Entities.User?> GetByEmailAsync(string tenantId, string email, CancellationToken cancellationToken = default)
         {
             var tenantGuid = Guid.Parse(tenantId);
             return await _dbSet
                 .FirstOrDefaultAsync(u => u.TenantId == tenantGuid && u.Email.ToLower() == email.ToLower(), cancellationToken);
         }
 
-        public async Task<User?> GetByUsernameAsync(string tenantId, string username, CancellationToken cancellationToken = default)
+        public async Task<UmiHealth.Core.Entities.User?> GetByUsernameAsync(string tenantId, string username, CancellationToken cancellationToken = default)
         {
             var tenantGuid = Guid.Parse(tenantId);
             return await _dbSet
                 .FirstOrDefaultAsync(u => u.TenantId == tenantGuid && u.Username != null && u.Username.ToLower() == username.ToLower(), cancellationToken);
         }
 
-        public async Task<IEnumerable<User>> GetByBranchAsync(string tenantId, string branchId, CancellationToken cancellationToken = default)
+        public async Task<IEnumerable<UmiHealth.Core.Entities.User>> GetByBranchAsync(string tenantId, string branchId, CancellationToken cancellationToken = default)
         {
             var tenantGuid = Guid.Parse(tenantId);
             var branchGuid = Guid.Parse(branchId);
@@ -101,7 +125,7 @@ namespace UmiHealth.Infrastructure.Repositories
                 .ToListAsync(cancellationToken);
         }
 
-        public async Task<IEnumerable<User>> GetByRoleAsync(string tenantId, string role, CancellationToken cancellationToken = default)
+        public async Task<IEnumerable<UmiHealth.Core.Entities.User>> GetByRoleAsync(string tenantId, string role, CancellationToken cancellationToken = default)
         {
             var tenantGuid = Guid.Parse(tenantId);
             return await _dbSet
@@ -122,41 +146,43 @@ namespace UmiHealth.Infrastructure.Repositories
             return !await query.AnyAsync(cancellationToken);
         }
 
-        public override async Task<IEnumerable<User>> GetByTenantAsync(string tenantId, CancellationToken cancellationToken = default)
+        // Implement missing ITenantRepository methods
+        public async Task<IReadOnlyList<UmiHealth.Core.Entities.User>> GetByTenantAsync(Guid tenantId, CancellationToken cancellationToken = default)
         {
-            var tenantGuid = Guid.Parse(tenantId);
-            return await _dbSet
-                .Where(u => u.TenantId == tenantGuid)
+            var result = await _dbSet
+                .Where(u => u.TenantId == tenantId)
                 .ToListAsync(cancellationToken);
+            return result.AsReadOnly();
         }
 
-        public override async Task<IEnumerable<User>> GetByTenantAndBranchAsync(string tenantId, string branchId, CancellationToken cancellationToken = default)
+        public async Task<UmiHealth.Core.Entities.User?> GetByIdAndTenantAsync(Guid id, Guid tenantId, CancellationToken cancellationToken = default)
         {
-            return await GetByBranchAsync(tenantId, branchId, cancellationToken);
-        }
-
-        public override async Task<User?> GetByTenantAndIdAsync(string tenantId, object id, CancellationToken cancellationToken = default)
-        {
-            var tenantGuid = Guid.Parse(tenantId);
-            var userGuid = Guid.Parse(id.ToString());
             return await _dbSet
-                .FirstOrDefaultAsync(u => u.TenantId == tenantGuid && u.Id == userGuid, cancellationToken);
+                .FirstOrDefaultAsync(u => u.Id == id && u.TenantId == tenantId, cancellationToken);
+        }
+
+        public async Task<IReadOnlyList<UmiHealth.Core.Entities.User>> GetByTenantAndBranchAsync(Guid tenantId, Guid branchId, CancellationToken cancellationToken = default)
+        {
+            var result = await _dbSet
+                .Where(u => u.TenantId == tenantId && u.BranchId == branchId)
+                .ToListAsync(cancellationToken);
+            return result.AsReadOnly();
         }
     }
 
-    public interface IBranchRepository : ITenantRepository<Branch>
+    public interface IBranchRepository : ITenantRepository<UmiHealth.Core.Entities.Branch>
     {
-        Task<Branch?> GetByCodeAsync(string tenantId, string code, CancellationToken cancellationToken = default);
+        Task<UmiHealth.Core.Entities.Branch?> GetByCodeAsync(string tenantId, string code, CancellationToken cancellationToken = default);
         Task<bool> IsCodeAvailableAsync(string tenantId, string code, Guid? excludeBranchId = null, CancellationToken cancellationToken = default);
     }
 
-    public class BranchRepository : TenantRepository<Branch>
+    public class BranchRepository : Repository<UmiHealth.Core.Entities.Branch>, ITenantRepository<UmiHealth.Core.Entities.Branch>
     {
         public BranchRepository(SharedDbContext context) : base(context)
         {
         }
 
-        public async Task<Branch?> GetByCodeAsync(string tenantId, string code, CancellationToken cancellationToken = default)
+        public async Task<UmiHealth.Core.Entities.Branch?> GetByCodeAsync(string tenantId, string code, CancellationToken cancellationToken = default)
         {
             var tenantGuid = Guid.Parse(tenantId);
             return await _dbSet
@@ -176,29 +202,27 @@ namespace UmiHealth.Infrastructure.Repositories
             return !await query.AnyAsync(cancellationToken);
         }
 
-        public override async Task<IEnumerable<Branch>> GetByTenantAsync(string tenantId, CancellationToken cancellationToken = default)
+        // Implement missing ITenantRepository methods
+        public async Task<IReadOnlyList<UmiHealth.Core.Entities.Branch>> GetByTenantAsync(Guid tenantId, CancellationToken cancellationToken = default)
         {
-            var tenantGuid = Guid.Parse(tenantId);
-            return await _dbSet
-                .Where(b => b.TenantId == tenantGuid)
+            var result = await _dbSet
+                .Where(b => b.TenantId == tenantId)
                 .ToListAsync(cancellationToken);
+            return result.AsReadOnly();
         }
 
-        public override async Task<IEnumerable<Branch>> GetByTenantAndBranchAsync(string tenantId, string branchId, CancellationToken cancellationToken = default)
+        public async Task<UmiHealth.Core.Entities.Branch?> GetByIdAndTenantAsync(Guid id, Guid tenantId, CancellationToken cancellationToken = default)
         {
-            var tenantGuid = Guid.Parse(tenantId);
-            var branchGuid = Guid.Parse(branchId);
             return await _dbSet
-                .Where(b => b.TenantId == tenantGuid && b.Id == branchGuid)
-                .ToListAsync(cancellationToken);
+                .FirstOrDefaultAsync(b => b.Id == id && b.TenantId == tenantId, cancellationToken);
         }
 
-        public override async Task<Branch?> GetByTenantAndIdAsync(string tenantId, object id, CancellationToken cancellationToken = default)
+        public async Task<IReadOnlyList<UmiHealth.Core.Entities.Branch>> GetByTenantAndBranchAsync(Guid tenantId, Guid branchId, CancellationToken cancellationToken = default)
         {
-            var tenantGuid = Guid.Parse(tenantId);
-            var branchGuid = Guid.Parse(id.ToString());
-            return await _dbSet
-                .FirstOrDefaultAsync(b => b.TenantId == tenantGuid && b.Id == branchGuid, cancellationToken);
+            var result = await _dbSet
+                .Where(b => b.TenantId == tenantId && b.Id == branchId)
+                .ToListAsync(cancellationToken);
+            return result.AsReadOnly();
         }
     }
 }

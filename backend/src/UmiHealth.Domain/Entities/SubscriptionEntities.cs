@@ -3,6 +3,25 @@ using System.Collections.Generic;
 
 namespace UmiHealth.Domain.Entities
 {
+    public class SubscriptionPlan
+    {
+        public Guid Id { get; set; }
+        public string Name { get; set; } = string.Empty;
+        public string Description { get; set; } = string.Empty;
+        public decimal Price { get; set; }
+        public string Currency { get; set; } = "ZMW";
+        public string BillingCycle { get; set; } = "monthly"; // monthly, yearly
+        public int MaxUsers { get; set; }
+        public int MaxBranches { get; set; }
+        public bool IsActive { get; set; } = true;
+        public string Features { get; set; } = string.Empty;
+        public string? StorageQuota { get; set; }
+        public string? ApiQuota { get; set; }
+        public string? SupportLevel { get; set; }
+        public DateTime CreatedAt { get; set; }
+        public DateTime UpdatedAt { get; set; }
+    }
+
     public class SubscriptionTransaction
     {
         public Guid Id { get; set; }

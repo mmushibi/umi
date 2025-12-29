@@ -4,9 +4,9 @@ using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
-using UmiHealth.Application.DTOs;
 using UmiHealth.Domain.Entities;
-using UmiHealth.Infrastructure.Data;
+using UmiHealth.Persistence.Data;
+using UmiHealth.Application.DTOs;
 
 namespace UmiHealth.Application.Services
 {
@@ -163,13 +163,13 @@ namespace UmiHealth.Application.Services
                 GroupBy = groupBy,
                 TotalPatients = patients.Count,
                 NewPatients = patients.Count,
-                AgeDistribution = patients.GroupBy(p => CalculateAgeGroup(p.DateOfBirth))
+                AgeDistribution = patients.GroupBy(p => CalculateAgeGroup(p.DateOfBirth!))
                     .Select(g => new AgeGroupDto
                     {
                         AgeGroup = g.Key,
                         Count = g.Count()
                     }).ToList(),
-                GenderDistribution = patients.GroupBy(p => p.Gender)
+                GenderDistribution = patients.GroupBy(p => p.Gender!)
                     .Select(g => new GenderDto
                     {
                         Gender = g.Key,
