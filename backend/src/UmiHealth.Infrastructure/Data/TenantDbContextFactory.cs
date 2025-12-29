@@ -2,6 +2,8 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using System;
 using System.Threading.Tasks;
+using UmiHealth.Domain.Entities;
+using UmiHealth.Core.Entities;
 
 namespace UmiHealth.Infrastructure.Data
 {

@@ -6,7 +6,7 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 using UmiHealth.Application.DTOs;
 using UmiHealth.Domain.Entities;
-using UmiHealth.Infrastructure.Data;
+using UmiHealth.Persistence.Data;
 using System.Security.Cryptography;
 using System.Text;
 

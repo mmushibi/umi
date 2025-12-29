@@ -9,10 +9,8 @@ namespace UmiHealth.Domain.Entities
         public DateTime? DeletedAt { get; set; }
     }
 
-    public class Branch : ISoftDeletable
+    public class Branch : TenantEntity
     {
-        public Guid Id { get; set; }
-        public Guid TenantId { get; set; }
         public string Name { get; set; } = string.Empty;
         public string Code { get; set; } = string.Empty;
         public string? Address { get; set; }
@@ -30,9 +28,6 @@ namespace UmiHealth.Domain.Entities
         public string? ManagerContact { get; set; }
         public Dictionary<string, object> InventorySettings { get; set; } = new();
         public Dictionary<string, object> ReportingSettings { get; set; } = new();
-        public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
-        public DateTime UpdatedAt { get; set; } = DateTime.UtcNow;
-        public DateTime? DeletedAt { get; set; }
 
         // Navigation properties
         public virtual Tenant Tenant { get; set; } = null!;

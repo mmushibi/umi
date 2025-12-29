@@ -1,7 +1,7 @@
 {
   "version": 2,
-  "dgSpecHash": "UC6Z2W3EM4I=",
-  "success": false,
+  "dgSpecHash": "3YLwl568ZzY=",
+  "success": true,
   "projectFilePath": "C:\\Users\\sepio\\Desktop\\Umi_Health\\Umi_Health\\Umi_Health\\backend\\src\\UmiHealth.Application\\UmiHealth.Application.csproj",
   "expectedPackageFiles": [
     "C:\\Users\\sepio\\.nuget\\packages\\automapper\\12.0.1\\automapper.12.0.1.nupkg.sha512",
@@ -11,33 +11,49 @@
     "C:\\Users\\sepio\\.nuget\\packages\\mediatr\\12.2.0\\mediatr.12.2.0.nupkg.sha512",
     "C:\\Users\\sepio\\.nuget\\packages\\mediatr.contracts\\2.0.1\\mediatr.contracts.2.0.1.nupkg.sha512",
     "C:\\Users\\sepio\\.nuget\\packages\\microsoft.csharp\\4.7.0\\microsoft.csharp.4.7.0.nupkg.sha512",
+    "C:\\Users\\sepio\\.nuget\\packages\\microsoft.entityframeworkcore\\8.0.0\\microsoft.entityframeworkcore.8.0.0.nupkg.sha512",
+    "C:\\Users\\sepio\\.nuget\\packages\\microsoft.entityframeworkcore.abstractions\\8.0.0\\microsoft.entityframeworkcore.abstractions.8.0.0.nupkg.sha512",
+    "C:\\Users\\sepio\\.nuget\\packages\\microsoft.entityframeworkcore.analyzers\\8.0.0\\microsoft.entityframeworkcore.analyzers.8.0.0.nupkg.sha512",
+    "C:\\Users\\sepio\\.nuget\\packages\\microsoft.entityframeworkcore.relational\\8.0.0\\microsoft.entityframeworkcore.relational.8.0.0.nupkg.sha512",
+    "C:\\Users\\sepio\\.nuget\\packages\\microsoft.extensions.caching.abstractions\\8.0.0\\microsoft.extensions.caching.abstractions.8.0.0.nupkg.sha512",
+    "C:\\Users\\sepio\\.nuget\\packages\\microsoft.extensions.caching.memory\\8.0.0\\microsoft.extensions.caching.memory.8.0.0.nupkg.sha512",
     "C:\\Users\\sepio\\.nuget\\packages\\microsoft.extensions.configuration\\10.0.1\\microsoft.extensions.configuration.10.0.1.nupkg.sha512",
     "C:\\Users\\sepio\\.nuget\\packages\\microsoft.extensions.configuration.abstractions\\10.0.1\\microsoft.extensions.configuration.abstractions.10.0.1.nupkg.sha512",
     "C:\\Users\\sepio\\.nuget\\packages\\microsoft.extensions.configuration.binder\\10.0.1\\microsoft.extensions.configuration.binder.10.0.1.nupkg.sha512",
-    "C:\\Users\\sepio\\.nuget\\packages\\microsoft.extensions.dependencyinjection\\8.0.0\\microsoft.extensions.dependencyinjection.8.0.0.nupkg.sha512",
+    "C:\\Users\\sepio\\.nuget\\packages\\microsoft.extensions.configuration.commandline\\10.0.1\\microsoft.extensions.configuration.commandline.10.0.1.nupkg.sha512",
+    "C:\\Users\\sepio\\.nuget\\packages\\microsoft.extensions.configuration.environmentvariables\\10.0.1\\microsoft.extensions.configuration.environmentvariables.10.0.1.nupkg.sha512",
+    "C:\\Users\\sepio\\.nuget\\packages\\microsoft.extensions.configuration.fileextensions\\10.0.1\\microsoft.extensions.configuration.fileextensions.10.0.1.nupkg.sha512",
+    "C:\\Users\\sepio\\.nuget\\packages\\microsoft.extensions.configuration.json\\10.0.1\\microsoft.extensions.configuration.json.10.0.1.nupkg.sha512",
+    "C:\\Users\\sepio\\.nuget\\packages\\microsoft.extensions.configuration.usersecrets\\10.0.1\\microsoft.extensions.configuration.usersecrets.10.0.1.nupkg.sha512",
+    "C:\\Users\\sepio\\.nuget\\packages\\microsoft.extensions.dependencyinjection\\10.0.1\\microsoft.extensions.dependencyinjection.10.0.1.nupkg.sha512",
     "C:\\Users\\sepio\\.nuget\\packages\\microsoft.extensions.dependencyinjection.abstractions\\10.0.1\\microsoft.extensions.dependencyinjection.abstractions.10.0.1.nupkg.sha512",
     "C:\\Users\\sepio\\.nuget\\packages\\microsoft.extensions.diagnostics\\10.0.1\\microsoft.extensions.diagnostics.10.0.1.nupkg.sha512",
     "C:\\Users\\sepio\\.nuget\\packages\\microsoft.extensions.diagnostics.abstractions\\10.0.1\\microsoft.extensions.diagnostics.abstractions.10.0.1.nupkg.sha512",
+    "C:\\Users\\sepio\\.nuget\\packages\\microsoft.extensions.fileproviders.abstractions\\10.0.1\\microsoft.extensions.fileproviders.abstractions.10.0.1.nupkg.sha512",
+    "C:\\Users\\sepio\\.nuget\\packages\\microsoft.extensions.fileproviders.physical\\10.0.1\\microsoft.extensions.fileproviders.physical.10.0.1.nupkg.sha512",
+    "C:\\Users\\sepio\\.nuget\\packages\\microsoft.extensions.filesystemglobbing\\10.0.1\\microsoft.extensions.filesystemglobbing.10.0.1.nupkg.sha512",
+    "C:\\Users\\sepio\\.nuget\\packages\\microsoft.extensions.hosting\\10.0.1\\microsoft.extensions.hosting.10.0.1.nupkg.sha512",
+    "C:\\Users\\sepio\\.nuget\\packages\\microsoft.extensions.hosting.abstractions\\10.0.1\\microsoft.extensions.hosting.abstractions.10.0.1.nupkg.sha512",
     "C:\\Users\\sepio\\.nuget\\packages\\microsoft.extensions.http\\10.0.1\\microsoft.extensions.http.10.0.1.nupkg.sha512",
-    "C:\\Users\\sepio\\.nuget\\packages\\microsoft.extensions.logging\\8.0.0\\microsoft.extensions.logging.8.0.0.nupkg.sha512",
+    "C:\\Users\\sepio\\.nuget\\packages\\microsoft.extensions.logging\\10.0.1\\microsoft.extensions.logging.10.0.1.nupkg.sha512",
     "C:\\Users\\sepio\\.nuget\\packages\\microsoft.extensions.logging.abstractions\\10.0.1\\microsoft.extensions.logging.abstractions.10.0.1.nupkg.sha512",
+    "C:\\Users\\sepio\\.nuget\\packages\\microsoft.extensions.logging.configuration\\10.0.1\\microsoft.extensions.logging.configuration.10.0.1.nupkg.sha512",
+    "C:\\Users\\sepio\\.nuget\\packages\\microsoft.extensions.logging.console\\10.0.1\\microsoft.extensions.logging.console.10.0.1.nupkg.sha512",
+    "C:\\Users\\sepio\\.nuget\\packages\\microsoft.extensions.logging.debug\\10.0.1\\microsoft.extensions.logging.debug.10.0.1.nupkg.sha512",
+    "C:\\Users\\sepio\\.nuget\\packages\\microsoft.extensions.logging.eventlog\\10.0.1\\microsoft.extensions.logging.eventlog.10.0.1.nupkg.sha512",
+    "C:\\Users\\sepio\\.nuget\\packages\\microsoft.extensions.logging.eventsource\\10.0.1\\microsoft.extensions.logging.eventsource.10.0.1.nupkg.sha512",
     "C:\\Users\\sepio\\.nuget\\packages\\microsoft.extensions.options\\10.0.1\\microsoft.extensions.options.10.0.1.nupkg.sha512",
     "C:\\Users\\sepio\\.nuget\\packages\\microsoft.extensions.options.configurationextensions\\10.0.1\\microsoft.extensions.options.configurationextensions.10.0.1.nupkg.sha512",
     "C:\\Users\\sepio\\.nuget\\packages\\microsoft.extensions.primitives\\10.0.1\\microsoft.extensions.primitives.10.0.1.nupkg.sha512",
+    "C:\\Users\\sepio\\.nuget\\packages\\npgsql\\8.0.0\\npgsql.8.0.0.nupkg.sha512",
+    "C:\\Users\\sepio\\.nuget\\packages\\npgsql.entityframeworkcore.postgresql\\8.0.0\\npgsql.entityframeworkcore.postgresql.8.0.0.nupkg.sha512",
+    "C:\\Users\\sepio\\.nuget\\packages\\questpdf\\2024.12.1\\questpdf.2024.12.1.nupkg.sha512",
     "C:\\Users\\sepio\\.nuget\\packages\\system.componentmodel.annotations\\5.0.0\\system.componentmodel.annotations.5.0.0.nupkg.sha512",
-    "C:\\Users\\sepio\\.nuget\\packages\\system.diagnostics.diagnosticsource\\10.0.1\\system.diagnostics.diagnosticsource.10.0.1.nupkg.sha512"
+    "C:\\Users\\sepio\\.nuget\\packages\\system.diagnostics.diagnosticsource\\10.0.1\\system.diagnostics.diagnosticsource.10.0.1.nupkg.sha512",
+    "C:\\Users\\sepio\\.nuget\\packages\\system.diagnostics.eventlog\\10.0.1\\system.diagnostics.eventlog.10.0.1.nupkg.sha512",
+    "C:\\Users\\sepio\\.nuget\\packages\\system.io.pipelines\\10.0.1\\system.io.pipelines.10.0.1.nupkg.sha512",
+    "C:\\Users\\sepio\\.nuget\\packages\\system.text.encodings.web\\10.0.1\\system.text.encodings.web.10.0.1.nupkg.sha512",
+    "C:\\Users\\sepio\\.nuget\\packages\\system.text.json\\10.0.1\\system.text.json.10.0.1.nupkg.sha512"
   ],
-  "logs": [
-    {
-      "code": "NU1605",
-      "level": "Error",
-      "message": "Warning As Error: Detected package downgrade: Microsoft.Extensions.Logging from 10.0.1 to 8.0.0. Reference the package directly from the project to select a different version. \r\n UmiHealth.Application -> Microsoft.Extensions.Http 10.0.1 -> Microsoft.Extensions.Logging (>= 10.0.1) \r\n UmiHealth.Application -> Microsoft.Extensions.Logging (>= 8.0.0)",
-      "projectPath": "C:\\Users\\sepio\\Desktop\\Umi_Health\\Umi_Health\\Umi_Health\\backend\\src\\UmiHealth.Application\\UmiHealth.Application.csproj",
-      "filePath": "C:\\Users\\sepio\\Desktop\\Umi_Health\\Umi_Health\\Umi_Health\\backend\\src\\UmiHealth.Application\\UmiHealth.Application.csproj",
-      "libraryId": "Microsoft.Extensions.Logging",
-      "targetGraphs": [
-        "net8.0"
-      ]
-    }
-  ]
+  "logs": []
 }

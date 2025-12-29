@@ -1,0 +1,1276 @@
+<!DOCTYPE html>
+<html lang="en" x-data="shiftSystem()">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Shift Management - Umi Health Information Systems</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@100;400;500;600;700&family=Varela+Round&family=Nunito:wght@400;600;700&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Rounded:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <script src="https://cdn.tailwindcss.com"></script>
+  <style>
+    :root {
+      --color-primary: #000000;
+      --color-accent: #14B8A6;
+      --color-success: #22c55e;
+      --color-warning: #ef4444;
+      --color-text-primary: #000000;
+      --color-text-secondary: #6b7280;
+      --color-text-muted: #9ca3af;
+      --color-background: #ffffff;
+      --color-surface: #f9fafb;
+      --color-border: #e5e7eb;
+      --font-primary: 'Inter', sans-serif;
+      --sidebar-width: 280px;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      background: var(--color-background);
+      color: var(--color-text-primary);
+      font-family: 'Nunito', 'Varela Round', sans-serif;
+      line-height: 1.5;
+      overflow-x: hidden;
+    }
+
+    .sidebar {
+      position: fixed;
+      left: 0;
+      top: 0;
+      width: var(--sidebar-width);
+      height: 100vh;
+      background: var(--color-text-primary);
+      color: var(--color-accent);
+      z-index: 1000;
+      transition: transform 0.3s ease;
+      display: flex;
+      flex-direction: column;
+      overflow-y: auto;
+      overflow-x: hidden;
+    }
+
+    .sidebar-header {
+      padding: 1.5rem;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+    }
+
+    .logo-section {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+    }
+
+    .logo-icon {
+      width: 40px;
+      height: 40px;
+      background: rgba(255, 255, 255, 0.2);
+      border-radius: 10px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.5rem;
+    }
+
+    .logo-text {
+      font-size: 1.25rem;
+      font-weight: 700;
+      font-family: 'Inter', sans-serif;
+    }
+
+    .nav-menu {
+      padding: 1rem 0;
+      flex: 1;
+      overflow-y: auto;
+    }
+
+    .nav-item {
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+      padding: 0.875rem 1.5rem;
+      color: rgba(255, 255, 255, 0.8);
+      text-decoration: none;
+      transition: all 0.2s ease;
+      cursor: pointer;
+      font-size: 0.9rem;
+      font-weight: 500;
+    }
+
+    .nav-item:hover {
+      background: rgba(255, 255, 255, 0.1);
+      color: var(--color-accent);
+    }
+
+    .nav-item.active {
+      background: rgba(255, 255, 255, 0.15);
+      color: var(--color-accent);
+      border-left: 3px solid var(--color-accent);
+    }
+
+    .nav-icon {
+      font-size: 1.25rem;
+    }
+
+    .main-content {
+      margin-left: var(--sidebar-width);
+      min-height: 100vh;
+      transition: margin-left 0.3s ease;
+    }
+
+    .header {
+      background: white;
+      border-bottom: 1px solid #e2e8f0;
+      padding: 1rem 2rem;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      position: sticky;
+      top: 0;
+      z-index: 100;
+    }
+
+    .header-left {
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+    }
+
+    .page-title-section {
+      margin-right: 2rem;
+    }
+
+    .page-title-section .page-title {
+      font-size: 1.5rem;
+      font-weight: 700;
+      color: var(--color-text-primary);
+      margin: 0;
+      font-family: 'Inter', sans-serif;
+    }
+
+    .mobile-menu-toggle {
+      display: none;
+      background: none;
+      border: none;
+      font-size: 1.5rem;
+      color: var(--color-text-secondary);
+      cursor: pointer;
+    }
+
+    .header-right {
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+    }
+
+    .user-profile {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+      padding: 0.5rem;
+      border-radius: 16px;
+      cursor: pointer;
+      transition: all 0.3s ease;
+    }
+
+    .user-profile:hover {
+      background: var(--color-surface);
+    }
+
+    .user-avatar {
+      width: 36px;
+      height: 36px;
+      background: var(--color-text-primary);
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: var(--color-accent);
+      font-weight: 600;
+      font-size: 0.875rem;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+    }
+
+    .user-info {
+      display: flex;
+      flex-direction: column;
+    }
+
+    .user-name {
+      font-size: 0.875rem;
+      font-weight: 600;
+      color: var(--color-text-primary);
+    }
+
+    .user-role {
+      font-size: 0.75rem;
+      color: var(--color-text-secondary);
+    }
+
+    .shift-content {
+      padding: 2rem;
+      max-width: 1400px;
+      margin: 0 auto;
+    }
+
+    .current-shift-card {
+      background: var(--color-background);
+      border-radius: 20px;
+      border: 1px solid var(--color-border);
+      padding: 2rem;
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
+      margin-bottom: 2rem;
+    }
+
+    .shift-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 1.5rem;
+    }
+
+    .shift-title {
+      font-size: 1.25rem;
+      font-weight: 600;
+      color: var(--color-text-primary);
+      font-family: 'Inter', sans-serif;
+    }
+
+    .shift-status {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.5rem;
+      padding: 0.5rem 1rem;
+      border-radius: 12px;
+      font-size: 0.875rem;
+      font-weight: 600;
+    }
+
+    .shift-status.active {
+      background: rgba(34, 197, 94, 0.1);
+      color: var(--color-success);
+    }
+
+    .shift-status.inactive {
+      background: rgba(239, 68, 68, 0.1);
+      color: var(--color-warning);
+    }
+
+    .shift-details {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: 1.5rem;
+      margin-bottom: 1.5rem;
+    }
+
+    .detail-item {
+      display: flex;
+      flex-direction: column;
+    }
+
+    .detail-label {
+      font-size: 0.875rem;
+      color: var(--color-text-secondary);
+      margin-bottom: 0.25rem;
+    }
+
+    .detail-value {
+      font-size: 1.125rem;
+      font-weight: 600;
+      color: var(--color-text-primary);
+    }
+
+    .btn {
+      padding: 0.75rem 1.5rem;
+      border-radius: 12px;
+      font-size: 0.875rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      border: none;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+
+    .btn-primary {
+      background: var(--color-primary);
+      color: var(--color-accent);
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+    }
+
+    .btn-primary:hover {
+      background: var(--color-text-secondary);
+      transform: translateY(-2px);
+      box-shadow: 0 8px 24px rgba(0, 0, 0, 0.2);
+    }
+
+    .btn-success {
+      background: var(--color-success);
+      color: white;
+      box-shadow: 0 2px 8px rgba(34, 197, 94, 0.2);
+    }
+
+    .btn-success:hover {
+      background: #16a34a;
+      transform: translateY(-2px);
+      box-shadow: 0 8px 24px rgba(34, 197, 94, 0.3);
+    }
+
+    .btn-danger {
+      background: var(--color-warning);
+      color: white;
+      box-shadow: 0 2px 8px rgba(239, 68, 68, 0.2);
+    }
+
+    .btn-danger:hover {
+      background: #dc2626;
+      transform: translateY(-2px);
+      box-shadow: 0 8px 24px rgba(239, 68, 68, 0.3);
+    }
+
+    .shift-history {
+      background: var(--color-background);
+      border-radius: 20px;
+      border: 1px solid var(--color-border);
+      padding: 2rem;
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
+    }
+
+    .table-container {
+      overflow-x: auto;
+      border-radius: 12px;
+      border: 1px solid var(--color-border);
+    }
+
+    .shift-table {
+      width: 100%;
+      border-collapse: collapse;
+    }
+
+    .shift-table th {
+      background: var(--color-surface);
+      padding: 1rem;
+      text-align: left;
+      font-weight: 600;
+      color: var(--color-text-primary);
+      font-size: 0.875rem;
+      border-bottom: 1px solid var(--color-border);
+    }
+
+    .shift-table td {
+      padding: 1rem;
+      border-bottom: 1px solid var(--color-border);
+      font-size: 0.875rem;
+    }
+
+    .shift-table tr:hover {
+      background: var(--color-surface);
+    }
+
+    .logout-section {
+      padding: 1rem;
+      border-top: 1px solid rgba(255, 255, 255, 0.1);
+      margin-top: auto;
+    }
+
+    .logout-button {
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+      padding: 0.875rem 1.5rem;
+      color: rgba(255, 255, 255, 0.8);
+      text-decoration: none;
+      transition: all 0.2s ease;
+      cursor: pointer;
+      font-size: 0.9rem;
+      font-weight: 500;
+      width: 100%;
+      border: none;
+      background: transparent;
+      text-align: left;
+    }
+
+    .logout-button:hover {
+      background: rgba(239, 68, 68, 0.1);
+      color: var(--color-warning);
+    }
+
+    .logout-icon {
+      font-size: 1.25rem;
+    }
+
+    @media (max-width: 768px) {
+      .sidebar {
+        transform: translateX(-100%);
+      }
+
+      .sidebar.open {
+        transform: translateX(0);
+      }
+
+      .main-content {
+        margin-left: 0;
+      }
+
+      .mobile-menu-toggle {
+        display: block;
+      }
+
+      .page-title-section {
+        display: none;
+      }
+
+      .shift-content {
+        padding: 1rem;
+      }
+
+      .shift-details {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    @keyframes spin {
+      from {
+        transform: rotate(0deg);
+      }
+      to {
+        transform: rotate(360deg);
+      }
+    }
+
+    .animate-spin {
+      animation: spin 1s linear infinite;
+    }
+  </style>
+</head>
+<body>
+  <!-- Sidebar -->
+  <aside class="sidebar" :class="sidebarOpen ? 'open' : ''">
+    <div class="sidebar-header">
+      <div class="logo-section">
+        <div class="logo-icon">
+          <span class="material-symbols-rounded">medication</span>
+        </div>
+        <div class="logo-text">Umi Health</div>
+      </div>
+    </div>
+
+    <nav class="nav-menu">
+      <a href="home.html" class="nav-item">
+        <span class="material-symbols-rounded nav-icon">home</span>
+        <span>Home</span>
+      </a>
+      <a href="point-of-sale.html" class="nav-item">
+        <span class="material-symbols-rounded nav-icon">point_of_sale</span>
+        <span>Point of Sale</span>
+      </a>
+      <a href="patients.html" class="nav-item">
+        <span class="material-symbols-rounded nav-icon">people</span>
+        <span>Patients</span>
+      </a>
+      <a href="sales.html" class="nav-item">
+        <span class="material-symbols-rounded nav-icon">receipt_long</span>
+        <span>Sales</span>
+      </a>
+      <a href="payments.html" class="nav-item">
+        <span class="material-symbols-rounded nav-icon">payments</span>
+        <span>Payments</span>
+      </a>
+      <a href="inventory-quick.html" class="nav-item">
+        <span class="material-symbols-rounded nav-icon">inventory</span>
+        <span>Inventory</span>
+      </a>
+      <a href="queue-management.html" class="nav-item">
+        <span class="material-symbols-rounded nav-icon">queue</span>
+        <span>Queue</span>
+      </a>
+      <a href="shift-management.html" class="nav-item active">
+        <span class="material-symbols-rounded nav-icon">schedule</span>
+        <span>Shift Management</span>
+      </a>
+      <a href="reports.html" class="nav-item">
+        <span class="material-symbols-rounded nav-icon">summarize</span>
+        <span>Reports</span>
+      </a>
+      <a href="help.html" class="nav-item">
+        <span class="material-symbols-rounded nav-icon">help</span>
+        <span>Help & Training</span>
+      </a>
+      <a href="account.html" class="nav-item">
+        <span class="material-symbols-rounded nav-icon">settings</span>
+        <span>Account</span>
+      </a>
+    </nav>
+    
+    <div class="logout-section">
+      <button class="logout-button" @click="logout()">
+        <span class="material-symbols-rounded logout-icon">logout</span>
+        <span>Logout</span>
+      </button>
+    </div>
+  </aside>
+
+  <!-- Main Content -->
+  <main class="main-content">
+    <!-- Header -->
+    <header class="header">
+      <div class="header-left">
+        <button class="mobile-menu-toggle" @click="sidebarOpen = !sidebarOpen">
+          <span class="material-symbols-rounded">menu</span>
+        </button>
+        
+        <div class="page-title-section">
+          <h1 class="page-title">Shift Management</h1>
+        </div>
+      </div>
+
+      <div class="header-right">
+        <!-- User profile removed -->
+      </div>
+    </header>
+
+    <!-- Shift Content -->
+    <div class="shift-content">
+      <!-- Current Shift -->
+      <div class="current-shift-card">
+        <div class="shift-header">
+          <h2 class="shift-title">Current Shift</h2>
+          <span class="shift-status" :class="currentShift.isActive ? 'active' : 'inactive'" x-text="currentShift.isActive ? 'Active' : 'Inactive'"></span>
+        </div>
+
+        <div class="shift-details">
+          <div class="detail-item">
+            <span class="detail-label">Shift Type</span>
+            <select x-model="currentShift.type" @change="updateShiftTemplate" :disabled="currentShift.isActive" class="detail-value" style="background: transparent; border: 1px solid var(--color-border); border-radius: 8px; padding: 0.5rem; font-size: 1.0rem; font-weight: 600;">
+              <option value="Morning">Morning</option>
+              <option value="Afternoon">Afternoon</option>
+              <option value="Evening">Evening</option>
+              <option value="Night">Night</option>
+            </select>
+          </div>
+          <div class="detail-item">
+            <span class="detail-label">Start Time</span>
+            <span class="detail-value" x-text="formatTime(currentShift.startTime)"></span>
+          </div>
+          <div class="detail-item">
+            <span class="detail-label">End Time</span>
+            <span class="detail-value" x-text="formatTime(currentShift.endTime)"></span>
+          </div>
+          <div class="detail-item">
+            <span class="detail-label">Duration</span>
+            <span class="detail-value" x-text="currentShift.duration"></span>
+          </div>
+          <div class="detail-item">
+            <span class="detail-label">Transactions</span>
+            <span class="detail-value" x-text="currentShift.transactions"></span>
+          </div>
+          <div class="detail-item">
+            <span class="detail-label">Revenue</span>
+            <span class="detail-value" x-text="formatCurrency(currentShift.revenue)"></span>
+          </div>
+        </div>
+
+        <div class="detail-item" style="margin-bottom: 1.5rem;">
+          <span class="detail-label">Shift Handover Notes</span>
+          <textarea 
+            x-model="currentShift.handoverNotes" 
+            @input="saveShiftData"
+            placeholder="Add notes for the next shift..."
+            style="width: 100%; min-height: 80px; padding: 0.75rem; border: 1px solid var(--color-border); border-radius: 8px; resize: vertical; font-family: inherit;"
+            :disabled="!currentShift.isActive"
+          ></textarea>
+        </div>
+
+        <div style="display: flex; gap: 1rem;">
+          <button class="btn btn-success" @click="startShift" x-show="!currentShift.isActive">
+            <span class="material-symbols-rounded">play_arrow</span>
+            <span>Start Shift</span>
+          </button>
+          <button class="btn btn-danger" @click="endShift" x-show="currentShift.isActive">
+            <span class="material-symbols-rounded">stop</span>
+            <span>End Shift</span>
+          </button>
+          <button class="btn btn-primary" @click="takeBreak" x-show="currentShift.isActive">
+            <span class="material-symbols-rounded">pause</span>
+            <span>Take Break</span>
+          </button>
+        </div>
+      </div>
+
+      <!-- Shift History -->
+      <div class="shift-history">
+        <div class="shift-header">
+          <h2 class="shift-title">Shift History</h2>
+          <div style="display: flex; gap: 0.5rem; align-items: center;">
+            <button class="btn btn-primary" @click="refreshData" :disabled="loading.refresh">
+              <span class="material-symbols-rounded" x-show="!loading.refresh">refresh</span>
+              <span class="material-symbols-rounded animate-spin" x-show="loading.refresh">refresh</span>
+              <span x-text="loading.refresh ? 'Refreshing...' : 'Refresh'"></span>
+            </button>
+            <button class="btn btn-primary" @click="exportShiftReport">
+              <span class="material-symbols-rounded">download</span>
+              <span>Export</span>
+            </button>
+          </div>
+        </div>
+
+        <div class="table-container">
+          <table class="shift-table">
+            <thead>
+              <tr>
+                <th>Date</th>
+                <th>Shift Type</th>
+                <th>Start Time</th>
+                <th>End Time</th>
+                <th>Duration</th>
+                <th>Transactions</th>
+                <th>Revenue</th>
+                <th>Status</th>
+              </tr>
+            </thead>
+            <tbody>
+              <template x-for="shift in shiftHistory" :key="shift.id">
+                <tr>
+                  <td x-text="formatDate(shift.date)"></td>
+                  <td x-text="shift.type"></td>
+                  <td x-text="formatTime(shift.startTime)"></td>
+                  <td x-text="formatTime(shift.endTime)"></td>
+                  <td x-text="shift.duration"></td>
+                  <td x-text="shift.transactions"></td>
+                  <td x-text="formatCurrency(shift.revenue)"></td>
+                  <td>
+                    <span class="shift-status" :class="shift.status === 'completed' ? 'active' : 'inactive'" x-text="shift.status"></span>
+                  </td>
+                </tr>
+              </template>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  </main>
+
+  <!-- Alpine.js Component -->
+  <script>
+    function shiftSystem() {
+      return {
+        sidebarOpen: false,
+        userInfo: {
+          name: 'Cashier',
+          role: 'Cashier',
+          initials: 'C'
+        },
+        currentShift: {
+          isActive: false,
+          type: 'Morning',
+          startTime: '',
+          endTime: '',
+          duration: '0h 0m',
+          transactions: 0,
+          revenue: 0,
+          handoverNotes: ''
+        },
+        shiftHistory: [],
+        loading: {
+          refresh: false,
+          save: false
+        },
+        isOnline: navigator.onLine,
+        useDataManager: false,
+        shiftTemplates: {
+          'Morning': { start: '08:00', end: '16:00', duration: '8h 0m' },
+          'Afternoon': { start: '16:00', end: '00:00', duration: '8h 0m' },
+          'Evening': { start: '00:00', end: '08:00', duration: '8h 0m' }
+        },
+
+        async init() {
+          // Check for data manager availability
+          this.useDataManager = !!(window.umiDataManager);
+          
+          // Setup online/offline detection
+          this.setupConnectivityMonitoring();
+          
+          await this.loadUserInfo();
+          await this.loadShiftData();
+          this.setupDataSync();
+          this.setupRealtimeUpdates();
+          this.setupAutoSave();
+        },
+
+        async loadUserInfo() {
+          try {
+            const profile = await window.cashierAPI.getUserProfile();
+            this.userInfo = {
+              name: `${profile.firstName || ''} ${profile.lastName || ''}`.trim() || 'Cashier',
+              role: 'Cashier',
+              initials: this.getInitials(profile.firstName, profile.lastName)
+            };
+          } catch (error) {
+            console.error('Error loading user info:', error);
+            this.userInfo = {
+              name: 'Cashier',
+              role: 'Cashier',
+              initials: 'C'
+            };
+          }
+        },
+
+        getInitials(firstName, lastName) {
+          const first = firstName ? firstName.charAt(0).toUpperCase() : '';
+          const last = lastName ? lastName.charAt(0).toUpperCase() : '';
+          return (first + last) || 'C';
+        },
+
+        async loadShiftData() {
+          try {
+            let shiftData;
+            
+            // Try data manager first, fallback to API
+            if (this.useDataManager && window.umiDataManager) {
+              shiftData = await window.umiDataManager.getShiftData();
+            } else {
+              shiftData = await this.makeAPICall('getShiftData');
+            }
+            
+            this.currentShift = shiftData.current || this.getDefaultShift();
+            this.shiftHistory = shiftData.history || [];
+            
+            // Sync with data manager
+            if (window.dataSync) {
+              window.dataSync.set('currentShift', this.currentShift);
+              window.dataSync.set('shiftHistory', this.shiftHistory);
+            }
+          } catch (error) {
+            console.error('Error loading shift data:', error);
+            this.currentShift = this.getDefaultShift();
+            this.shiftHistory = [];
+            this.showNotification('Using offline mode - some features may be limited', 'info');
+          }
+        },
+
+        getDefaultShift() {
+          const now = new Date();
+          const hour = now.getHours();
+          let shiftType = 'Morning';
+          
+          if (hour >= 12 && hour < 20) {
+            shiftType = 'Afternoon';
+          } else if (hour >= 20 || hour < 8) {
+            shiftType = 'Evening';
+          }
+
+          return {
+            isActive: false,
+            type: shiftType,
+            startTime: '',
+            endTime: '',
+            duration: '0h 0m',
+            transactions: 0,
+            revenue: 0
+          };
+        },
+
+        async startShift() {
+          try {
+            // Validate shift data
+            const validation = this.validateShiftData(this.currentShift);
+            if (!validation.isValid) {
+              this.showNotification(`Validation failed: ${validation.errors.join(', ')}`, 'error');
+              return;
+            }
+            
+            const response = await this.makeAPICall('startShift', {
+              type: this.currentShift.type,
+              startTime: new Date().toISOString(),
+              handoverNotes: this.currentShift.handoverNotes
+            });
+            
+            this.currentShift = {
+              ...this.currentShift,
+              isActive: true,
+              startTime: response.startTime,
+              id: response.shiftId
+            };
+            
+            // Save to data sync
+            if (window.dataSync) {
+              window.dataSync.set('currentShift', this.currentShift);
+              window.dataSync.addAuditLog('shift_started', {
+                shiftId: response.shiftId,
+                shiftType: this.currentShift.type
+              });
+            }
+            
+            // Notify tenant admin
+            await this.notifyTenantAdmin('shift_started', this.currentShift);
+            
+            this.showNotification('Shift started successfully', 'success');
+          } catch (error) {
+            console.error('Error starting shift:', error);
+            
+            // Fallback to offline mode
+            if (!this.isOnline) {
+              this.currentShift.isActive = true;
+              this.currentShift.startTime = new Date().toISOString();
+              this.currentShift.id = `offline_${Date.now()}`;
+              this.saveShiftData();
+              this.showNotification('Shift started in offline mode', 'warning');
+            } else {
+              this.showNotification('Failed to start shift', 'error');
+            }
+          }
+        },
+
+        async endShift() {
+          if (confirm('Are you sure you want to end your current shift?')) {
+            try {
+              // Get final POS data before ending shift
+              const posData = await this.getPOSData();
+              
+              const response = await this.makeAPICall('endShift', {
+                shiftId: this.currentShift.id,
+                endTime: new Date().toISOString(),
+                finalTransactions: posData.transactions,
+                finalRevenue: posData.revenue,
+                handoverNotes: this.currentShift.handoverNotes
+              });
+              
+              // Move current shift to history
+              const completedShift = {
+                ...this.currentShift,
+                date: new Date().toISOString().split('T')[0],
+                endTime: response.endTime,
+                status: 'completed',
+                transactions: posData.transactions,
+                revenue: posData.revenue
+              };
+              
+              this.shiftHistory.unshift(completedShift);
+              
+              // Save to data sync
+              if (window.dataSync) {
+                window.dataSync.set('shiftHistory', this.shiftHistory);
+                window.dataSync.set('currentShift', this.getDefaultShift());
+                window.dataSync.addAuditLog('shift_ended', {
+                  shiftId: this.currentShift.id,
+                  finalTransactions: posData.transactions,
+                  finalRevenue: posData.revenue
+                });
+              }
+              
+              // Notify tenant admin
+              await this.notifyTenantAdmin('shift_ended', completedShift);
+              
+              this.currentShift = this.getDefaultShift();
+              this.showNotification('Shift ended successfully', 'success');
+            } catch (error) {
+              console.error('Error ending shift:', error);
+              
+              // Fallback to offline mode
+              if (!this.isOnline) {
+                const posData = await this.getPOSData();
+                const completedShift = {
+                  ...this.currentShift,
+                  date: new Date().toISOString().split('T')[0],
+                  endTime: new Date().toISOString(),
+                  status: 'completed',
+                  transactions: posData.transactions,
+                  revenue: posData.revenue
+                };
+                
+                this.shiftHistory.unshift(completedShift);
+                
+                // Save to offline storage
+                const offlineShifts = JSON.parse(localStorage.getItem('offline_shifts') || '[]');
+                offlineShifts.push(completedShift);
+                localStorage.setItem('offline_shifts', JSON.stringify(offlineShifts));
+                
+                this.currentShift = this.getDefaultShift();
+                this.saveShiftData();
+                this.showNotification('Shift ended in offline mode - will sync when online', 'warning');
+              } else {
+                this.showNotification('Failed to end shift', 'error');
+              }
+            }
+          }
+        },
+
+        async takeBreak() {
+          try {
+            await window.cashierAPI.takeBreak({
+              shiftId: this.currentShift.id
+            });
+            this.showNotification('Break started', 'info');
+          } catch (error) {
+            console.error('Error taking break:', error);
+            this.showNotification('Failed to start break', 'error');
+          }
+        },
+
+        formatTime(timeString) {
+          if (!timeString) return '--:--';
+          const date = new Date(timeString);
+          return date.toLocaleTimeString('en-US', { 
+            hour: '2-digit', 
+            minute: '2-digit'
+          });
+        },
+
+        formatDate(dateString) {
+          const date = new Date(dateString);
+          return date.toLocaleDateString('en-US', {
+            year: 'numeric',
+            month: 'short',
+            day: 'numeric'
+          });
+        },
+
+        formatCurrency(amount) {
+          return new Intl.NumberFormat('en-ZM', {
+            style: 'currency',
+            currency: 'ZMW'
+          }).format(amount).replace('ZMW', 'K');
+        },
+
+        showNotification(message, type = 'info') {
+          const notification = document.createElement('div');
+          notification.className = `notification notification-${type}`;
+          notification.textContent = message;
+          notification.style.cssText = `
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            padding: 1rem 1.5rem;
+            border-radius: 8px;
+            color: white;
+            font-weight: 500;
+            z-index: 10000;
+            transform: translateX(100%);
+            transition: transform 0.3s ease;
+            ${type === 'success' ? 'background: #22c55e;' : ''}
+            ${type === 'error' ? 'background: #ef4444;' : ''}
+            ${type === 'info' ? 'background: #3b82f6;' : ''}
+          `;
+          
+          document.body.appendChild(notification);
+          
+          setTimeout(() => {
+            notification.style.transform = 'translateX(0)';
+          }, 100);
+          
+          setTimeout(() => {
+            notification.style.transform = 'translateX(100%)';
+            setTimeout(() => {
+              document.body.removeChild(notification);
+            }, 300);
+          }, 3000);
+        },
+
+        logout() {
+          window.cashierAPI.logout()
+            .then(() => {
+              window.location.href = '../public/admin-signin.html';
+            })
+            .catch(error => {
+              console.error('Logout error:', error);
+              window.location.href = '../public/admin-signin.html';
+            });
+        },
+
+        // Data Synchronization
+        setupDataSync() {
+          if (window.dataSync) {
+            // Subscribe to shift data changes
+            window.dataSync.subscribe('currentShift', (shiftData) => {
+              this.currentShift = shiftData;
+            });
+            
+            window.dataSync.subscribe('shiftHistory', (history) => {
+              this.shiftHistory = history;
+            });
+          }
+        },
+
+        // Real-time Updates
+        setupRealtimeUpdates() {
+          // Update shift duration every minute
+          setInterval(() => {
+            if (this.currentShift.isActive && this.currentShift.startTime) {
+              this.updateShiftDuration();
+            }
+          }, 60000);
+
+          // Listen for POS data changes
+          window.addEventListener('pos-data-changed', (event) => {
+            if (this.currentShift.isActive) {
+              this.currentShift.transactions = event.detail.transactions || 0;
+              this.currentShift.revenue = event.detail.revenue || 0;
+            }
+          });
+        },
+
+        updateShiftDuration() {
+          if (this.currentShift.startTime) {
+            const start = new Date(this.currentShift.startTime);
+            const now = new Date();
+            const diff = now - start;
+            const hours = Math.floor(diff / (1000 * 60 * 60));
+            const minutes = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
+            this.currentShift.duration = `${hours}h ${minutes}m`;
+          }
+        },
+
+        // POS Data Integration
+        async getPOSData() {
+          try {
+            if (this.currentShift.id) {
+              const posData = await window.cashierAPI.getPOSData(this.currentShift.id);
+              return {
+                transactions: posData.transactions || 0,
+                revenue: posData.revenue || 0
+              };
+            }
+            
+            // Fallback to localStorage POS data
+            const posTransactions = JSON.parse(localStorage.getItem('pos_transactions') || '[]');
+            const today = new Date().toDateString();
+            const todayTransactions = posTransactions.filter(t => 
+              new Date(t.date).toDateString() === today
+            );
+            
+            return {
+              transactions: todayTransactions.length,
+              revenue: todayTransactions.reduce((sum, t) => sum + (t.total || 0), 0)
+            };
+          } catch (error) {
+            console.error('Error fetching POS data:', error);
+            return { transactions: 0, revenue: 0 };
+          }
+        },
+
+        // Tenant Admin Notification
+        async notifyTenantAdmin(action, data) {
+          try {
+            await window.cashierAPI.notifyDataChange('shift', {
+              action: action,
+              data: data,
+              timestamp: new Date().toISOString(),
+              userId: window.cashierAPI.getUserId()
+            });
+          } catch (error) {
+            console.error('Error notifying tenant admin:', error);
+          }
+        },
+
+        // Auto-save shift data
+        async saveShiftData() {
+          try {
+            if (window.dataSync) {
+              window.dataSync.set('currentShift', this.currentShift);
+              window.dataSync.set('shiftHistory', this.shiftHistory);
+            }
+          } catch (error) {
+            console.error('Error saving shift data:', error);
+          }
+        },
+
+        // Setup auto-save
+        setupAutoSave() {
+          // Auto-save every 30 seconds
+          setInterval(() => {
+            this.saveShiftData();
+          }, 30000);
+
+          // Save on page unload
+          window.addEventListener('beforeunload', () => {
+            this.saveShiftData();
+          });
+        },
+
+        // Data Validation
+        validateShiftData(shiftData) {
+          const errors = [];
+          
+          if (!shiftData.type) {
+            errors.push('Shift type is required');
+          }
+          
+          if (shiftData.startTime && !this.isValidDateTime(shiftData.startTime)) {
+            errors.push('Invalid start time');
+          }
+          
+          if (shiftData.endTime && !this.isValidDateTime(shiftData.endTime)) {
+            errors.push('Invalid end time');
+          }
+          
+          if (shiftData.revenue && (isNaN(shiftData.revenue) || shiftData.revenue < 0)) {
+            errors.push('Revenue must be a positive number');
+          }
+          
+          if (shiftData.transactions && (isNaN(shiftData.transactions) || shiftData.transactions < 0)) {
+            errors.push('Transactions must be a positive number');
+          }
+          
+          return {
+            isValid: errors.length === 0,
+            errors: errors
+          };
+        },
+
+        isValidDateTime(dateString) {
+          const date = new Date(dateString);
+          return date instanceof Date && !isNaN(date);
+        },
+
+        // Connectivity Monitoring
+        setupConnectivityMonitoring() {
+          window.addEventListener('online', () => {
+            this.isOnline = true;
+            this.showNotification('Connection restored', 'success');
+            this.syncOfflineData();
+          });
+          
+          window.addEventListener('offline', () => {
+            this.isOnline = false;
+            this.showNotification('Connection lost - working offline', 'warning');
+          });
+        },
+
+        // API Call with Fallback
+        async makeAPICall(method, ...args) {
+          if (!this.isOnline) {
+            throw new Error('Offline - API calls not available');
+          }
+          
+          try {
+            return await window.cashierAPI[method](...args);
+          } catch (error) {
+            console.error(`API call failed (${method}):`, error);
+            throw error;
+          }
+        },
+
+        // Refresh Functionality
+        async refreshData() {
+          this.loading.refresh = true;
+          try {
+            await this.loadShiftData();
+            this.showNotification('Data refreshed successfully', 'success');
+          } catch (error) {
+            console.error('Error refreshing data:', error);
+            this.showNotification('Failed to refresh data', 'error');
+          } finally {
+            this.loading.refresh = false;
+          }
+        },
+
+        // Shift Templates
+        updateShiftTemplate() {
+          if (this.shiftTemplates[this.currentShift.type]) {
+            const template = this.shiftTemplates[this.currentShift.type];
+            this.currentShift.duration = template.duration;
+            this.saveShiftData();
+          }
+        },
+
+        // Export Functionality
+        async exportShiftReport() {
+          try {
+            const reportData = {
+              currentShift: this.currentShift,
+              shiftHistory: this.shiftHistory,
+              exportDate: new Date().toISOString(),
+              currency: 'ZMW',
+              tenantId: window.cashierAPI.getTenantId()
+            };
+            
+            const csv = this.convertToCSV(reportData);
+            this.downloadFile(csv, `shift-report-${new Date().toISOString().split('T')[0]}.csv`);
+            this.showNotification('Shift report exported successfully', 'success');
+          } catch (error) {
+            console.error('Error exporting report:', error);
+            this.showNotification('Failed to export report', 'error');
+          }
+        },
+
+        convertToCSV(data) {
+          const headers = ['Date', 'Shift Type', 'Start Time', 'End Time', 'Duration', 'Transactions', 'Revenue', 'Status', 'Notes'];
+          const rows = data.shiftHistory.map(shift => [
+            shift.date || '',
+            shift.type || '',
+            this.formatTime(shift.startTime),
+            this.formatTime(shift.endTime),
+            shift.duration || '',
+            shift.transactions || 0,
+            shift.revenue || 0,
+            shift.status || '',
+            shift.handoverNotes || ''
+          ]);
+          
+          const csvContent = [
+            headers.join(','),
+            ...rows.map(row => row.map(cell => `"${cell}"`).join(','))
+          ].join('\n');
+          
+          return csvContent;
+        },
+
+        downloadFile(content, filename) {
+          const blob = new Blob([content], { type: 'text/csv' });
+          const url = window.URL.createObjectURL(blob);
+          const a = document.createElement('a');
+          a.href = url;
+          a.download = filename;
+          document.body.appendChild(a);
+          a.click();
+          document.body.removeChild(a);
+          window.URL.revokeObjectURL(url);
+        },
+
+        // Offline Data Sync
+        async syncOfflineData() {
+          try {
+            if (window.dataSync) {
+              const offlineShifts = JSON.parse(localStorage.getItem('offline_shifts') || '[]');
+              
+              for (const shift of offlineShifts) {
+                try {
+                  await this.makeAPICall('updateShift', shift.id, shift);
+                } catch (error) {
+                  console.error('Failed to sync shift:', error);
+                }
+              }
+              
+              localStorage.removeItem('offline_shifts');
+              this.showNotification('Offline data synced successfully', 'success');
+            }
+          } catch (error) {
+            console.error('Error syncing offline data:', error);
+          }
+        }
+      }
+    }
+  </script>
+
+  <!-- Include API and Data Sync Services -->
+  <script src="../shared/js/data-sync.js"></script>
+  <script src="../shared/js/role-based-access.js"></script>
+  <script src="../admin/js/admin-api.js"></script>
+  <script src="js/cashier-api.js"></script>
+
+  <script>
+  document.addEventListener('DOMContentLoaded', () => {
+    const shiftApp = Alpine.data('shiftSystem', shiftSystem);
+    shiftApp.init();
+  });
+</script>
+
+  <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
+</body>
+</html>

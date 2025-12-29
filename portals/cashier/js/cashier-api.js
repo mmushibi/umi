@@ -1205,6 +1205,28 @@ class CashierAPI {
     return await this.request(`/dashboard/mobile?tenantId=${this.tenantId}&branchId=${this.branchId}`);
   }
 
+  async createRefund(refundData) {
+    return await this.request('/refunds', {
+      method: 'POST',
+      body: JSON.stringify(refundData)
+    });
+  }
+
+  async getRefunds(filters = {}) {
+    const params = new URLSearchParams({
+      page: filters.page || 1,
+      pageSize: filters.pageSize || 50,
+      saleId: filters.saleId || '',
+      startDate: filters.startDate || '',
+      endDate: filters.endDate || ''
+    });
+    return await this.request(`/refunds?${params}`);
+  }
+
+  async getRefundDetails(refundId) {
+    return await this.request(`/refunds/${refundId}`);
+  }
+
   // Utility Methods
   formatCurrency(amount) {
     return new Intl.NumberFormat('en-ZM', {
@@ -1223,15 +1245,16 @@ class CashierAPI {
 
   // Error handling
   handleError(error, context = '') {
-    console.error(`Cashier API Error ${context}:`, error);
+    console.error(`Error in ${context}:`, error);
     
-    // You can implement custom error handling here
-    // For example, show toast notifications, redirect to login, etc.
+    // Show user-friendly error message
+    const errorMessage = error.message || 'An unexpected error occurred';
     
-    if (error.message.includes('401') || error.message.includes('Unauthorized')) {
-      // Token expired or invalid - redirect to login
-      localStorage.removeItem('umi_access_token');
-      window.location.href = '../index.html';
+    // You could integrate with a notification system here
+    if (window.paymentSystem && window.paymentSystem.showNotification) {
+      window.paymentSystem.showNotification(errorMessage, 'error');
+    } else {
+      alert(errorMessage);
     }
   }
 }

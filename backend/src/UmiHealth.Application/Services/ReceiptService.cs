@@ -1,12 +1,15 @@
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
+using UmiHealth.Domain.Entities;
+using UmiHealth.Persistence.Data;
 using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
 using UmiHealth.Domain.Entities;
-using UmiHealth.Infrastructure.Data;
+using UmiHealth.Persistence.Data;
 using UmiHealth.Shared.DTOs;
 
 namespace UmiHealth.Application.Services

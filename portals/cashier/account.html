@@ -632,6 +632,271 @@
       font-size: 1.25rem;
     }
 
+    /* Modal Styles */
+    .modal-overlay {
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background: rgba(0, 0, 0, 0.5);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      z-index: 1000;
+    }
+
+    .modal-content {
+      background: white;
+      border-radius: 16px;
+      max-width: 500px;
+      width: 90%;
+      max-height: 90vh;
+      overflow-y: auto;
+      box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+    }
+
+    .modal-large {
+      max-width: 700px;
+    }
+
+    .modal-header {
+      padding: 1.5rem;
+      border-bottom: 1px solid var(--color-border);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .modal-header h3 {
+      font-size: 1.25rem;
+      font-weight: 600;
+      color: var(--color-text-primary);
+      margin: 0;
+    }
+
+    .modal-close {
+      background: none;
+      border: none;
+      font-size: 1.5rem;
+      color: var(--color-text-secondary);
+      cursor: pointer;
+      padding: 0.5rem;
+      border-radius: 8px;
+      transition: all 0.2s ease;
+    }
+
+    .modal-close:hover {
+      background: var(--color-surface);
+      color: var(--color-text-primary);
+    }
+
+    .modal-body {
+      padding: 1.5rem;
+    }
+
+    .modal-footer {
+      padding: 1.5rem;
+      border-top: 1px solid var(--color-border);
+      display: flex;
+      gap: 1rem;
+      justify-content: flex-end;
+    }
+
+    /* Sessions Styles */
+    .sessions-list {
+      max-height: 400px;
+      overflow-y: auto;
+    }
+
+    .session-item {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 1rem;
+      border: 1px solid var(--color-border);
+      border-radius: 12px;
+      margin-bottom: 1rem;
+    }
+
+    .session-info {
+      flex: 1;
+    }
+
+    .session-device {
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+      margin-bottom: 0.5rem;
+    }
+
+    .session-device .material-symbols-rounded {
+      font-size: 1.5rem;
+      color: var(--color-text-secondary);
+    }
+
+    .session-name {
+      font-weight: 600;
+      color: var(--color-text-primary);
+      margin-bottom: 0.25rem;
+    }
+
+    .session-details {
+      font-size: 0.875rem;
+      color: var(--color-text-secondary);
+    }
+
+    .session-status {
+      font-size: 0.75rem;
+      font-weight: 500;
+      padding: 0.25rem 0.75rem;
+      border-radius: 12px;
+    }
+
+    .session-status.current {
+      background: rgba(34, 197, 94, 0.1);
+      color: var(--color-success);
+    }
+
+    .session-actions {
+      margin-left: 1rem;
+    }
+
+    .btn-sm {
+      padding: 0.5rem 1rem;
+      font-size: 0.75rem;
+    }
+
+    /* Two Factor Styles */
+    .qr-code-placeholder {
+      display: flex;
+      justify-content: center;
+      margin: 2rem 0;
+    }
+
+    .qr-code {
+      width: 200px;
+      height: 200px;
+      border: 2px solid var(--color-border);
+      border-radius: 12px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: var(--color-surface);
+    }
+
+    .qr-code .material-symbols-rounded {
+      font-size: 4rem;
+      color: var(--color-text-secondary);
+    }
+
+    .security-toggle {
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+    }
+
+    /* Radio Button Styles */
+    .radio-group {
+      display: flex;
+      flex-direction: column;
+      gap: 1rem;
+    }
+
+    .radio-option {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+      padding: 1rem;
+      border: 1px solid var(--color-border);
+      border-radius: 12px;
+      cursor: pointer;
+      transition: all 0.2s ease;
+    }
+
+    .radio-option:hover {
+      background: var(--color-surface);
+      border-color: var(--color-primary);
+    }
+
+    .radio-option input[type="radio"] {
+      display: none;
+    }
+
+    .radio-checkmark {
+      width: 20px;
+      height: 20px;
+      border: 2px solid var(--color-border);
+      border-radius: 50%;
+      position: relative;
+      transition: all 0.2s ease;
+    }
+
+    .radio-option input[type="radio"]:checked + .radio-checkmark {
+      border-color: var(--color-primary);
+      background: var(--color-primary);
+    }
+
+    .radio-option input[type="radio"]:checked + .radio-checkmark::after {
+      content: '';
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      width: 8px;
+      height: 8px;
+      background: white;
+      border-radius: 50%;
+    }
+
+    .radio-option span {
+      font-weight: 500;
+      color: var(--color-text-primary);
+    }
+
+    .radio-option small {
+      color: var(--color-text-secondary);
+      font-size: 0.75rem;
+      margin-left: auto;
+    }
+
+    .form-help {
+      font-size: 0.75rem;
+      color: var(--color-text-secondary);
+      margin-top: 0.25rem;
+    }
+
+    /* Loading States */
+    .loading-state {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: 3rem;
+      text-align: center;
+    }
+
+    .loading-spinner {
+      width: 40px;
+      height: 40px;
+      border: 4px solid var(--color-border);
+      border-top: 4px solid var(--color-primary);
+      border-radius: 50%;
+      animation: spin 1s linear infinite;
+      margin-bottom: 1rem;
+    }
+
+    @keyframes spin {
+      0% { transform: rotate(0deg); }
+      100% { transform: rotate(360deg); }
+    }
+
+    .loading-state p {
+      color: var(--color-text-secondary);
+      font-size: 0.875rem;
+      margin: 0;
+    }
+
     @media (max-width: 768px) {
       .sidebar {
         transform: translateX(-100%);
@@ -696,10 +961,6 @@
       </div>
     </div>
 
-    <div class="pharmacy-info">
-      <div class="pharmacy-name" x-text="pharmacyInfo.name"></div>
-      <div class="pharmacy-location" x-text="pharmacyInfo.location"></div>
-    </div>
 
     <nav class="nav-menu">
       <a href="home.html" class="nav-item">
@@ -721,6 +982,26 @@
       <a href="payments.html" class="nav-item">
         <span class="material-symbols-rounded nav-icon">payments</span>
         <span>Payments</span>
+      </a>
+      <a href="inventory-quick.html" class="nav-item">
+        <span class="material-symbols-rounded nav-icon">inventory</span>
+        <span>Inventory</span>
+      </a>
+      <a href="queue-management.html" class="nav-item">
+        <span class="material-symbols-rounded nav-icon">queue</span>
+        <span>Queue</span>
+      </a>
+      <a href="shift-management.html" class="nav-item">
+        <span class="material-symbols-rounded nav-icon">schedule</span>
+        <span>Shift Management</span>
+      </a>
+      <a href="reports.html" class="nav-item">
+        <span class="material-symbols-rounded nav-icon">summarize</span>
+        <span>Reports</span>
+      </a>
+      <a href="help.html" class="nav-item">
+        <span class="material-symbols-rounded nav-icon">help</span>
+        <span>Help & Training</span>
       </a>
       <a href="account.html" class="nav-item active">
         <span class="material-symbols-rounded nav-icon">settings</span>
@@ -749,33 +1030,6 @@
           <h1 class="page-title">Account Settings</h1>
         </div>
         
-        <div class="search-bar" x-data="{ searchOpen: false, query: '' }">
-          <span class="material-symbols-rounded search-icon">search</span>
-          <input 
-            type="text" 
-            class="search-input" 
-            placeholder="Search settings by name or category..."
-            x-model="query"
-            @focus="searchOpen = true"
-            @input="searchOpen = true"
-            @blur="setTimeout(() => searchOpen = false, 200)"
-          >
-          
-          <div class="search-suggestions" :class="searchOpen && query.length > 0 ? 'show' : ''">
-            <template x-for="suggestion in filteredSuggestions" :key="suggestion.id">
-              <div class="suggestion-item" @click="selectSuggestion(suggestion)">
-                <div class="suggestion-icon">
-                  <span class="material-symbols-rounded" x-text="suggestion.icon"></span>
-                </div>
-                <div class="suggestion-content">
-                  <div class="suggestion-title" x-text="suggestion.title"></div>
-                  <div class="suggestion-description" x-text="suggestion.description"></div>
-                </div>
-                <div class="suggestion-type" x-text="suggestion.type"></div>
-              </div>
-            </template>
-          </div>
-        </div>
       </div>
 
       <div class="header-right">
@@ -791,33 +1045,21 @@
           <h3 class="settings-nav-title">Settings</h3>
           <ul class="settings-nav-list">
             <li class="settings-nav-item">
-              <a href="#" class="settings-nav-link active" @click="activeSection = 'profile'">
+              <a href="#" class="settings-nav-link" :class="activeSection === 'profile' ? 'active' : ''" @click="setActiveSection('profile')">
                 <span class="material-symbols-rounded settings-nav-icon">person</span>
                 <span>Profile</span>
               </a>
             </li>
             <li class="settings-nav-item">
-              <a href="#" class="settings-nav-link" @click="activeSection = 'security'">
+              <a href="#" class="settings-nav-link" :class="activeSection === 'security' ? 'active' : ''" @click="setActiveSection('security')">
                 <span class="material-symbols-rounded settings-nav-icon">security</span>
                 <span>Security</span>
               </a>
             </li>
             <li class="settings-nav-item">
-              <a href="#" class="settings-nav-link" @click="activeSection = 'notifications'">
+              <a href="#" class="settings-nav-link" :class="activeSection === 'notifications' ? 'active' : ''" @click="setActiveSection('notifications')">
                 <span class="material-symbols-rounded settings-nav-icon">notifications</span>
                 <span>Notifications</span>
-              </a>
-            </li>
-            <li class="settings-nav-item">
-              <a href="#" class="settings-nav-link" @click="activeSection = 'pharmacy'">
-                <span class="material-symbols-rounded settings-nav-icon">business</span>
-                <span>Pharmacy Settings</span>
-              </a>
-            </li>
-            <li class="settings-nav-item">
-              <a href="#" class="settings-nav-link" @click="activeSection = 'billing'">
-                <span class="material-symbols-rounded settings-nav-icon">payments</span>
-                <span>Billing</span>
               </a>
             </li>
           </ul>
@@ -827,17 +1069,25 @@
         <div class="settings-content">
           <!-- Profile Section -->
           <div x-show="activeSection === 'profile'">
-            <div class="profile-section">
-              <div class="profile-avatar-large" x-text="userInfo.initials"></div>
-              <div class="profile-info">
-                <div class="profile-name" x-text="userInfo.name"></div>
-                <div class="profile-email" x-text="userInfo.email"></div>
-                <span class="profile-role">
-                  <span class="material-symbols-rounded profile-icon">person</span>
-                  <span x-text="userInfo.role"></span>
-                </span>
-              </div>
+            <!-- Profile Loading State -->
+            <div x-show="loading.profile" class="loading-state">
+              <div class="loading-spinner"></div>
+              <p>Loading profile information...</p>
             </div>
+            
+            <!-- Profile Content -->
+            <div x-show="!loading.profile">
+              <div class="profile-section">
+                <div class="profile-avatar-large" x-text="userInfo.initials"></div>
+                <div class="profile-info">
+                  <div class="profile-name" x-text="userInfo.name"></div>
+                  <div class="profile-email" x-text="userInfo.email"></div>
+                  <span class="profile-role">
+                    <span class="material-symbols-rounded profile-icon">person</span>
+                    <span x-text="userInfo.role"></span>
+                  </span>
+                </div>
+              </div>
 
             <div class="settings-section">
               <h2 class="section-title">Personal Information</h2>
@@ -867,7 +1117,7 @@
               </div>
 
               <div class="button-group">
-                <button class="btn btn-secondary">Cancel</button>
+                <button class="btn btn-secondary" @click="resetProfile">Cancel</button>
                 <button class="btn btn-primary" @click="saveProfile">
                   <span class="material-symbols-rounded">save</span>
                   <span>Save Changes</span>
@@ -878,49 +1128,66 @@
 
           <!-- Security Section -->
           <div x-show="activeSection === 'security'">
-            <div class="settings-section">
-              <h2 class="section-title">Security Settings</h2>
-              <p class="section-description">Manage your password and security preferences.</p>
-              
-              <div class="security-item">
-                <div class="security-info">
-                  <div class="security-title">Password</div>
-                  <div class="security-description">Last changed 30 days ago</div>
+            <!-- Security Loading State -->
+            <div x-show="loading.security" class="loading-state">
+              <div class="loading-spinner"></div>
+              <p>Loading security settings...</p>
+            </div>
+            
+            <!-- Security Content -->
+            <div x-show="!loading.security">
+              <div class="settings-section">
+                <h2 class="section-title">Security Settings</h2>
+                <p class="section-description">Manage your password and security preferences.</p>
+                
+                <!-- Change Password -->
+                <div class="security-item">
+                  <div class="security-info">
+                    <div class="security-title">Password</div>
+                    <div class="security-description" x-text="passwordInfo.lastChanged || 'Loading...'"></div>
                 </div>
-                <button class="btn btn-secondary">Change Password</button>
+                <button class="btn btn-secondary" @click="showPasswordModal = true">Change Password</button>
               </div>
 
+              <!-- Two-Factor Authentication -->
               <div class="security-item">
                 <div class="security-info">
                   <div class="security-title">Two-Factor Authentication</div>
                   <div class="security-description">Add an extra layer of security to your account</div>
                 </div>
-                <span class="security-status disabled">Disabled</span>
+                <div class="security-toggle">
+                  <div class="toggle-switch" :class="twoFactorEnabled ? 'active' : ''" @click="toggleTwoFactor">
+                    <div class="toggle-slider"></div>
+                  </div>
+                  <span class="security-status" :class="twoFactorEnabled ? 'enabled' : 'disabled'" x-text="twoFactorEnabled ? 'Enabled' : 'Disabled'"></span>
+                </div>
               </div>
 
+              <!-- Login Sessions -->
               <div class="security-item">
                 <div class="security-info">
                   <div class="security-title">Login Sessions</div>
                   <div class="security-description">Manage your active login sessions</div>
                 </div>
-                <button class="btn btn-secondary">View Sessions</button>
-              </div>
-
-              <div class="security-item">
-                <div class="security-info">
-                  <div class="security-title">API Keys</div>
-                  <div class="security-description">Manage your API access keys</div>
-                </div>
-                <button class="btn btn-secondary">Manage Keys</button>
+                <button class="btn btn-secondary" @click="showSessionsModal = true">View Sessions</button>
               </div>
             </div>
+          </div>
           </div>
 
           <!-- Notifications Section -->
           <div x-show="activeSection === 'notifications'">
-            <div class="settings-section">
-              <h2 class="section-title">Notification Preferences</h2>
-              <p class="section-description">Choose how you want to be notified about important updates.</p>
+            <!-- Notifications Loading State -->
+            <div x-show="loading.notifications" class="loading-state">
+              <div class="loading-spinner"></div>
+              <p>Loading notification preferences...</p>
+            </div>
+            
+            <!-- Notifications Content -->
+            <div x-show="!loading.notifications">
+              <div class="settings-section">
+                <h2 class="section-title">Notification Preferences</h2>
+                <p class="section-description">Choose how you want to be notified about important updates.</p>
               
               <div class="notification-item">
                 <div class="notification-info">
@@ -981,147 +1248,135 @@
             </div>
           </div>
 
-          <!-- Pharmacy Settings Section -->
-          <div x-show="activeSection === 'pharmacy'">
-            <div class="settings-section">
-              <h2 class="section-title">Pharmacy Settings</h2>
-              <p class="section-description">Configure your pharmacy's business information and preferences. These settings will be used across all documents including receipts, reports, and payments.</p>
-              
-              <div class="form-grid">
-                <div class="form-group">
-                  <label class="form-label" for="pharmacyName">Pharmacy Name</label>
-                  <input type="text" id="pharmacyName" class="form-input" x-model="pharmacySettings.name" placeholder="Enter pharmacy name">
+        </div>
+      </div>
+    </div>
+
+    <!-- Password Change Modal -->
+    <div x-show="showPasswordModal" class="modal-overlay" @click.self="showPasswordModal = false">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h3>Change Password</h3>
+          <button class="modal-close" @click="showPasswordModal = false">
+            <span class="material-symbols-rounded">close</span>
+          </button>
+        </div>
+        <div class="modal-body">
+          <div class="form-group">
+            <label class="form-label" for="currentPassword">Current Password</label>
+            <input type="password" id="currentPassword" class="form-input" x-model="passwordForm.current" placeholder="Enter current password">
+          </div>
+          <div class="form-group">
+            <label class="form-label" for="newPassword">New Password</label>
+            <input type="password" id="newPassword" class="form-input" x-model="passwordForm.new" placeholder="Enter new password">
+          </div>
+          <div class="form-group">
+            <label class="form-label" for="confirmPassword">Confirm New Password</label>
+            <input type="password" id="confirmPassword" class="form-input" x-model="passwordForm.confirm" placeholder="Confirm new password">
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button class="btn btn-secondary" @click="showPasswordModal = false">Cancel</button>
+          <button class="btn btn-primary" @click="changePassword">Change Password</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Sessions Modal -->
+    <div x-show="showSessionsModal" class="modal-overlay" @click.self="showSessionsModal = false">
+      <div class="modal-content modal-large">
+        <div class="modal-header">
+          <h3>Active Login Sessions</h3>
+          <button class="modal-close" @click="showSessionsModal = false">
+            <span class="material-symbols-rounded">close</span>
+          </button>
+        </div>
+        <div class="modal-body">
+          <div class="sessions-list">
+            <template x-for="session in sessions" :key="session.id">
+              <div class="session-item">
+                <div class="session-info">
+                  <div class="session-device">
+                    <span class="material-symbols-rounded" x-text="session.deviceIcon"></span>
+                    <div>
+                      <div class="session-name" x-text="session.deviceName"></div>
+                      <div class="session-details" x-text="`${session.browser} • ${session.location}`"></div>
+                    </div>
+                  </div>
+                  <div class="session-time">
+                    <div class="session-status" :class="session.current ? 'current' : ''" x-text="session.current ? 'Current session' : 'Last active ' + session.lastActive"></div>
+                  </div>
                 </div>
-                <div class="form-group">
-                  <label class="form-label" for="pharmacyPhone">Phone Number</label>
-                  <input type="tel" id="pharmacyPhone" class="form-input" x-model="pharmacySettings.phone" placeholder="Enter phone number">
-                </div>
-                <div class="form-group">
-                  <label class="form-label" for="pharmacyEmail">Email Address</label>
-                  <input type="email" id="pharmacyEmail" class="form-input" x-model="pharmacySettings.email" placeholder="Enter email address">
-                </div>
-                <div class="form-group">
-                  <label class="form-label" for="pharmacyWebsite">Website</label>
-                  <input type="url" id="pharmacyWebsite" class="form-input" x-model="pharmacySettings.website" placeholder="Enter website URL">
-                </div>
-                <div class="form-group full-width">
-                  <label class="form-label" for="pharmacyAddress">Address</label>
-                  <input type="text" id="pharmacyAddress" class="form-input" x-model="pharmacySettings.address" placeholder="Enter street address">
-                </div>
-                <div class="form-group">
-                  <label class="form-label" for="pharmacyCity">City</label>
-                  <input type="text" id="pharmacyCity" class="form-input" x-model="pharmacySettings.city" placeholder="Enter city">
-                </div>
-                <div class="form-group">
-                  <label class="form-label" for="pharmacyProvince">Province</label>
-                  <input type="text" id="pharmacyProvince" class="form-input" x-model="pharmacySettings.province" placeholder="Enter province">
-                </div>
-                <div class="form-group">
-                  <label class="form-label" for="pharmacyPostalCode">Postal Code</label>
-                  <input type="text" id="pharmacyPostalCode" class="form-input" x-model="pharmacySettings.postalCode" placeholder="Enter postal code">
+                <div class="session-actions" x-show="!session.current">
+                  <button class="btn btn-danger btn-sm" @click="revokeSession(session.id)">Revoke</button>
                 </div>
               </div>
+            </template>
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button class="btn btn-secondary" @click="showSessionsModal = false">Close</button>
+          <button class="btn btn-danger" @click="revokeAllSessions">Revoke All Other Sessions</button>
+        </div>
+      </div>
+    </div>
 
-              <h3 class="section-title section-title-sub">Receipt Settings</h3>
-              <p class="section-description">Configure how receipts and invoices appear across the system.</p>
-              
-              <div class="form-grid">
-                <div class="form-group">
-                  <label class="form-label" for="receiptHeader">Receipt Header</label>
-                  <input type="text" id="receiptHeader" class="form-input" x-model="pharmacySettings.receiptHeader" placeholder="Enter receipt header text">
-                </div>
-                <div class="form-group">
-                  <label class="form-label" for="receiptFooter">Receipt Footer</label>
-                  <input type="text" id="receiptFooter" class="form-input" x-model="pharmacySettings.receiptFooter" placeholder="Enter receipt footer text">
-                </div>
-                <div class="form-group">
-                  <label class="form-label" for="taxRate">Tax Rate (%)</label>
-                  <input type="number" id="taxRate" class="form-input" x-model="pharmacySettings.taxRate" min="0" max="100" step="0.1" placeholder="Enter tax rate">
-                </div>
-                <div class="form-group">
-                  <label class="form-label" for="currency">Currency</label>
-                  <input type="text" id="currency" class="form-input" x-model="pharmacySettings.currency" maxlength="3" placeholder="e.g., ZMW">
-                </div>
-              </div>
-
-              <h3 class="section-title section-title-sub">Report Settings</h3>
-              <p class="section-description">Configure report generation settings.</p>
-              
-              <div class="form-grid">
-                <div class="form-group">
-                  <label class="form-label" for="reportSignature">Report Signature</label>
-                  <input type="text" id="reportSignature" class="form-input" x-model="pharmacySettings.reportSignature" placeholder="Enter signature title">
-                </div>
-                <div class="form-group">
-                  <label class="form-label" for="invoicePrefix">Invoice Prefix</label>
-                  <input type="text" id="invoicePrefix" class="form-input" x-model="pharmacySettings.invoicePrefix" maxlength="10" placeholder="e.g., INV">
-                </div>
-                <div class="form-group">
-                  <label class="form-label" for="receiptPrefix">Receipt Prefix</label>
-                  <input type="text" id="receiptPrefix" class="form-input" x-model="pharmacySettings.receiptPrefix" maxlength="10" placeholder="e.g., RCP">
-                </div>
-                <div class="form-group">
-                  <label class="form-label" for="paymentTerms">Payment Terms</label>
-                  <input type="text" id="paymentTerms" class="form-input" x-model="pharmacySettings.paymentTerms" placeholder="Enter payment terms">
-                </div>
-              </div>
-
-              <div class="button-group">
-                <button class="btn btn-secondary">Cancel</button>
-                <button class="btn btn-primary" @click="savePharmacySettings">
-                  <span class="material-symbols-rounded">save</span>
-                  <span>Save Settings</span>
-                </button>
+    <!-- Two Factor Setup Modal -->
+    <div x-show="showTwoFactorModal" class="modal-overlay" @click.self="showTwoFactorModal = false">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h3 x-text="twoFactorEnabled ? 'Disable Two-Factor Authentication' : 'Enable Two-Factor Authentication'"></h3>
+          <button class="modal-close" @click="showTwoFactorModal = false">
+            <span class="material-symbols-rounded">close</span>
+          </button>
+        </div>
+        <div class="modal-body">
+          <div x-show="!twoFactorEnabled">
+            <p>Choose how you want to receive verification codes:</p>
+            
+            <div class="form-group">
+              <label class="form-label">Verification Method</label>
+              <div class="radio-group">
+                <label class="radio-option">
+                  <input type="radio" name="twoFactorMethod" value="email" x-model="twoFactorForm.method" @change="onTwoFactorMethodChange" checked>
+                  <span class="radio-checkmark"></span>
+                  <span>Email</span>
+                  <small x-text="`Send codes to ${profile.email}`"></small>
+                </label>
+                <label class="radio-option">
+                  <input type="radio" name="twoFactorMethod" value="phone" x-model="twoFactorForm.method" @change="onTwoFactorMethodChange">
+                  <span class="radio-checkmark"></span>
+                  <span>SMS</span>
+                  <small x-text="`Send codes to ${profile.phone}`"></small>
+                </label>
               </div>
             </div>
-          </div>
-
-          <!-- Billing Section -->
-          <div x-show="activeSection === 'billing'">
-            <div class="settings-section">
-              <h2 class="section-title">Billing & Subscription</h2>
-              <p class="section-description">Manage your subscription plan and payment methods.</p>
-              
-              <div class="security-item">
-                <div class="security-info">
-                  <div class="security-title">Current Plan</div>
-                  <div class="security-description">Professional Plan - ZMW 450/month</div>
-                </div>
-                <span class="security-status enabled">Active</span>
-              </div>
-
-              <div class="security-item">
-                <div class="security-info">
-                  <div class="security-title">Next Billing Date</div>
-                  <div class="security-description">January 24, 2025</div>
-                </div>
-                <button class="btn btn-secondary">View Invoice</button>
-              </div>
-
-              <div class="security-item">
-                <div class="security-info">
-                  <div class="security-title">Payment Method</div>
-                  <div class="security-description">Visa ending in 4242</div>
-                </div>
-                <button class="btn btn-secondary">Update</button>
-              </div>
-
-              <div class="security-item">
-                <div class="security-info">
-                  <div class="security-title">Usage Statistics</div>
-                  <div class="security-description">45% of monthly quota used</div>
-                </div>
-                <button class="btn btn-secondary">View Details</button>
-              </div>
-
-              <div class="button-group">
-                <button class="btn btn-danger">
-                  <span class="material-symbols-rounded">cancel</span>
-                  <span>Cancel Subscription</span>
-                </button>
-              </div>
+            
+            <div class="form-group">
+              <label class="form-label" for="verificationCode">Verification Code</label>
+              <input type="text" id="verificationCode" class="form-input" x-model="twoFactorForm.code" placeholder="Enter 6-digit code" maxlength="6" @input="twoFactorForm.code = twoFactorForm.code.replace(/[^0-9]/g, '')">
+              <small class="form-help">Check your email or phone for the verification code</small>
+            </div>
+            
+            <div class="form-group">
+              <button class="btn btn-secondary btn-sm" @click="sendVerificationCode" :disabled="twoFactorForm.cooldown > 0">
+                <span x-show="twoFactorForm.cooldown === 0">Resend Code</span>
+                <span x-show="twoFactorForm.cooldown > 0" x-text="`Resend in ${twoFactorForm.cooldown}s`"></span>
+              </button>
             </div>
           </div>
+          
+          <div x-show="twoFactorEnabled">
+            <p>Are you sure you want to disable two-factor authentication? This will make your account less secure.</p>
+            <div class="form-group">
+              <label class="form-label" for="confirmPassword">Enter your password to confirm</label>
+              <input type="password" id="confirmPassword" class="form-input" x-model="twoFactorForm.password" placeholder="Enter password">
+            </div>
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button class="btn btn-secondary" @click="showTwoFactorModal = false">Cancel</button>
+          <button class="btn btn-primary" @click="confirmTwoFactor" x-text="twoFactorEnabled ? 'Disable 2FA' : 'Enable 2FA'"></button>
         </div>
       </div>
     </div>
@@ -1132,202 +1387,471 @@
     function accountSystem() {
       return {
         sidebarOpen: false,
-        activeSection: 'profile',
-        pharmacyInfo: {
-          name: 'Umi Health',
-          location: 'Lusaka, Zambia'
-        },
+        activeSection: localStorage.getItem('activeSection') || 'profile',
         userInfo: {
-          name: 'Umi Health',
-          role: 'Admin',
-          initials: 'UH',
-          email: 'admin@umihealth.com'
+          name: '',
+          role: 'Cashier',
+          initials: '',
+          email: ''
         },
         profile: {
-          firstName: 'Umi',
-          lastName: 'Health',
-          email: 'admin@umihealth.com',
-          phone: '+260 977 123 456',
-          bio: 'Pharmacy management system administrator'
+          firstName: '',
+          lastName: '',
+          email: '',
+          phone: '',
+          bio: ''
         },
         notifications: {
-          email: true,
+          email: false,
           push: false,
-          sales: true,
-          inventory: true,
-          prescriptions: true
+          sales: false,
+          inventory: false,
+          prescriptions: false
         },
-        pharmacySettings: {
-          name: 'Umi Health Pharmacy',
-          phone: '+260 977 123 456',
-          email: 'info@umihealth.com',
-          website: 'www.umihealth.com',
-          address: '123 Main Street',
-          city: 'Lusaka',
-          province: 'Lusaka Province',
-          postalCode: '10101',
-          // Receipt settings
-          receiptHeader: 'Umi Health Pharmacy',
-          receiptFooter: 'Thank you for your business!',
-          taxRate: 16,
-          currency: 'ZMW',
-          // Report settings
-          reportLogo: '',
-          reportSignature: 'Pharmacy Manager',
-          // Payment settings
-          paymentTerms: 'Payment due upon receipt',
-          invoicePrefix: 'INV',
-          receiptPrefix: 'RCP'
+        
+        // Loading states
+        loading: {
+          profile: true,
+          notifications: true,
+          security: true
         },
+        
+        // Security related data
+        showPasswordModal: false,
+        showSessionsModal: false,
+        showTwoFactorModal: false,
+        twoFactorEnabled: false,
+        passwordInfo: {
+          lastChanged: ''
+        },
+        passwordForm: {
+          current: '',
+          new: '',
+          confirm: ''
+        },
+        twoFactorForm: {
+          method: 'email',
+          code: '',
+          password: '',
+          cooldown: 0
+        },
+        sessions: [],
 
         async loadAccountData() {
           try {
             // Load user profile
+            this.loading.profile = true;
             const profile = await window.cashierAPI.getUserProfile();
             this.updateProfile(profile);
+            this.loading.profile = false;
             
             // Load notification settings
+            this.loading.notifications = true;
             const notificationSettings = await window.cashierAPI.getNotificationSettings();
             this.updateNotifications(notificationSettings);
+            this.loading.notifications = false;
             
-            // Load pharmacy settings
-            const pharmacySettings = await window.cashierAPI.getPharmacySettings();
-            this.updatePharmacySettings(pharmacySettings);
+            // Load security data
+            this.loading.security = true;
+            await this.loadSecurityData();
+            this.loading.security = false;
             
           } catch (error) {
             console.error('Error loading account data:', error);
             window.cashierAPI.handleError(error, 'loadAccountData');
+            // Reset loading states on error
+            this.loading.profile = false;
+            this.loading.notifications = false;
+            this.loading.security = false;
+          }
+        },
+        
+        async loadSecurityData() {
+          try {
+            // Load password info
+            const passwordInfo = await window.cashierAPI.getPasswordInfo();
+            this.passwordInfo = passwordInfo;
+            
+            // Load 2FA status
+            const twoFactorStatus = await window.cashierAPI.getTwoFactorStatus();
+            this.twoFactorEnabled = twoFactorStatus.enabled;
+            
+            // Load sessions
+            const sessions = await window.cashierAPI.getLoginSessions();
+            this.sessions = sessions;
+            
+          } catch (error) {
+            console.error('Error loading security data:', error);
+            // Don't show error to user for security data loading
           }
         },
         
         updateProfile(profile) {
           this.profile = {
-            firstName: profile.firstName || this.profile.firstName,
-            lastName: profile.lastName || this.profile.lastName,
-            email: profile.email || this.profile.email,
-            phone: profile.phone || this.profile.phone,
-            bio: profile.bio || this.profile.bio
+            firstName: profile.firstName || '',
+            lastName: profile.lastName || '',
+            email: profile.email || '',
+            phone: profile.phone || '',
+            bio: profile.bio || ''
           };
           
           this.userInfo = {
             ...this.userInfo,
-            name: `${this.profile.firstName} ${this.profile.lastName}`,
-            email: this.profile.email,
-            initials: `${this.profile.firstName.charAt(0)}${this.profile.lastName.charAt(0)}`
+            name: `${profile.firstName || ''} ${profile.lastName || ''}`.trim() || 'Cashier',
+            email: profile.email || '',
+            initials: this.getInitials(profile.firstName, profile.lastName)
           };
+        },
+        
+        getInitials(firstName, lastName) {
+          const first = firstName ? firstName.charAt(0).toUpperCase() : '';
+          const last = lastName ? lastName.charAt(0).toUpperCase() : '';
+          return (first + last) || 'C';
         },
         
         updateNotifications(settings) {
           this.notifications = {
-            email: settings.email !== undefined ? settings.email : this.notifications.email,
-            push: settings.push !== undefined ? settings.push : this.notifications.push,
-            sales: settings.sales !== undefined ? settings.sales : this.notifications.sales,
-            inventory: settings.inventory !== undefined ? settings.inventory : this.notifications.inventory,
-            prescriptions: settings.prescriptions !== undefined ? settings.prescriptions : this.notifications.prescriptions
+            email: settings.email !== undefined ? settings.email : false,
+            push: settings.push !== undefined ? settings.push : false,
+            sales: settings.sales !== undefined ? settings.sales : false,
+            inventory: settings.inventory !== undefined ? settings.inventory : false,
+            prescriptions: settings.prescriptions !== undefined ? settings.prescriptions : false
           };
         },
         
-        updatePharmacySettings(settings) {
-          this.pharmacySettings = {
-            ...this.pharmacySettings,
-            name: settings.name || this.pharmacySettings.name,
-            phone: settings.phone || this.pharmacySettings.phone,
-            email: settings.email || this.pharmacySettings.email,
-            website: settings.website || this.pharmacySettings.website,
-            address: settings.address || this.pharmacySettings.address,
-            city: settings.city || this.pharmacySettings.city,
-            province: settings.province || this.pharmacySettings.province,
-            postalCode: settings.postalCode || this.pharmacySettings.postalCode,
-            receiptHeader: settings.receiptHeader || this.pharmacySettings.receiptHeader,
-            receiptFooter: settings.receiptFooter || this.pharmacySettings.receiptFooter,
-            taxRate: settings.taxRate || this.pharmacySettings.taxRate,
-            currency: settings.currency || this.pharmacySettings.currency,
-            reportSignature: settings.reportSignature || this.pharmacySettings.reportSignature,
-            paymentTerms: settings.paymentTerms || this.pharmacySettings.paymentTerms,
-            invoicePrefix: settings.invoicePrefix || this.pharmacySettings.invoicePrefix,
-            receiptPrefix: settings.receiptPrefix || this.pharmacySettings.receiptPrefix
-          };
-          
-          // Update pharmacyInfo display
-          this.pharmacyInfo.name = this.pharmacySettings.name;
-          this.pharmacyInfo.location = `${this.pharmacySettings.city}, ${this.pharmacySettings.province}`;
+        resetProfile() {
+          // Reload profile data from API to reset form
+          this.loadAccountData();
         },
         
         async saveProfile() {
           try {
-            await window.cashierAPI.updateProfile(this.profile);
-            alert('Profile updated successfully!');
+            const response = await window.cashierAPI.updateProfile(this.profile);
+            
+            // Update userInfo display
+            this.userInfo.name = `${this.profile.firstName} ${this.profile.lastName}`.trim() || 'Cashier';
+            this.userInfo.email = this.profile.email;
+            this.userInfo.initials = this.getInitials(this.profile.firstName, this.profile.lastName);
+            
+            // Show success message
+            this.showNotification('Profile updated successfully!', 'success');
+            
+            // Notify tenant admin and operations about the change
+            await window.cashierAPI.notifyUserChange({
+                type: 'profile_update',
+                userId: response.userId,
+                tenantId: response.tenantId,
+                changes: this.profile
+            });
+            
           } catch (error) {
             console.error('Error saving profile:', error);
             window.cashierAPI.handleError(error, 'saveProfile');
-            alert('Failed to update profile. Please try again.');
+            this.showNotification('Failed to update profile. Please try again.', 'error');
           }
         },
         
         async saveNotifications() {
           try {
-            await window.cashierAPI.updateNotificationSettings(this.notifications);
-            alert('Notification preferences saved successfully!');
+            const response = await window.cashierAPI.updateNotificationSettings(this.notifications);
+            
+            // Show success message
+            this.showNotification('Notification preferences saved successfully!', 'success');
+            
+            // Notify tenant admin about notification preference changes
+            await window.cashierAPI.notifyUserChange({
+                type: 'notification_settings_update',
+                userId: response.userId,
+                tenantId: response.tenantId,
+                changes: this.notifications
+            });
+            
           } catch (error) {
             console.error('Error saving notifications:', error);
             window.cashierAPI.handleError(error, 'saveNotifications');
-            alert('Failed to save notification preferences. Please try again.');
+            this.showNotification('Failed to save notification preferences. Please try again.', 'error');
           }
         },
         
-        async savePharmacySettings() {
-          try {
-            await window.cashierAPI.updatePharmacySettings(this.pharmacySettings);
-            
-            // Save to localStorage for global access
-            localStorage.setItem('pharmacySettings', JSON.stringify(this.pharmacySettings));
-            
-            // Update pharmacyInfo display
-            this.pharmacyInfo.name = this.pharmacySettings.name;
-            this.pharmacyInfo.location = `${this.pharmacySettings.city}, ${this.pharmacySettings.province}`;
-            
-            alert('Pharmacy settings updated successfully! These settings will now be used across all documents and receipts.');
-          } catch (error) {
-            console.error('Error saving pharmacy settings:', error);
-            window.cashierAPI.handleError(error, 'savePharmacySettings');
-            alert('Failed to update pharmacy settings. Please try again.');
-          }
+        setActiveSection(section) {
+          this.activeSection = section;
+          localStorage.setItem('activeSection', section);
+        },
+        
+        showNotification(message, type = 'info') {
+          // Create notification element
+          const notification = document.createElement('div');
+          notification.className = `notification notification-${type}`;
+          notification.textContent = message;
+          notification.style.cssText = `
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            padding: 1rem 1.5rem;
+            border-radius: 8px;
+            color: white;
+            font-weight: 500;
+            z-index: 10000;
+            transform: translateX(100%);
+            transition: transform 0.3s ease;
+            ${type === 'success' ? 'background: #22c55e;' : ''}
+            ${type === 'error' ? 'background: #ef4444;' : ''}
+            ${type === 'info' ? 'background: #3b82f6;' : ''}
+          `;
+          
+          document.body.appendChild(notification);
+          
+          // Slide in
+          setTimeout(() => {
+            notification.style.transform = 'translateX(0)';
+          }, 100);
+          
+          // Remove after 3 seconds
+          setTimeout(() => {
+            notification.style.transform = 'translateX(100%)';
+            setTimeout(() => {
+              document.body.removeChild(notification);
+            }, 300);
+          }, 3000);
         },
         
         async changePassword() {
           try {
-            const currentPassword = document.getElementById('currentPassword').value;
-            const newPassword = document.getElementById('newPassword').value;
-            const confirmPassword = document.getElementById('confirmPassword').value;
-            
-            if (newPassword !== confirmPassword) {
-              alert('New passwords do not match!');
+            if (!this.passwordForm.current || !this.passwordForm.new || !this.passwordForm.confirm) {
+              this.showNotification('Please fill in all password fields', 'error');
               return;
             }
             
-            if (newPassword.length < 8) {
-              alert('Password must be at least 8 characters long!');
+            if (this.passwordForm.new !== this.passwordForm.confirm) {
+              this.showNotification('New passwords do not match!', 'error');
               return;
             }
             
-            await window.cashierAPI.changePassword({
-              currentPassword,
-              newPassword,
-              confirmPassword
+            if (this.passwordForm.new.length < 8) {
+              this.showNotification('Password must be at least 8 characters long!', 'error');
+              return;
+            }
+            
+            const response = await window.cashierAPI.changePassword({
+              currentPassword: this.passwordForm.current,
+              newPassword: this.passwordForm.new,
+              confirmPassword: this.passwordForm.confirm
             });
             
-            // Clear form
-            document.getElementById('currentPassword').value = '';
-            document.getElementById('newPassword').value = '';
-            document.getElementById('confirmPassword').value = '';
+            // Clear form and close modal
+            this.passwordForm = { current: '', new: '', confirm: '' };
+            this.showPasswordModal = false;
             
-            alert('Password changed successfully!');
+            // Update password info from API response
+            if (response.lastChanged) {
+              this.passwordInfo.lastChanged = response.lastChanged;
+            } else {
+              // Format current date if not provided by API
+              this.passwordInfo.lastChanged = new Date().toLocaleDateString();
+            }
+            
+            this.showNotification('Password changed successfully!', 'success');
+            
+            // Notify tenant admin about password change
+            await window.cashierAPI.notifyUserChange({
+                type: 'password_change',
+                userId: response.userId,
+                tenantId: response.tenantId,
+                timestamp: new Date().toISOString()
+            });
+            
           } catch (error) {
             console.error('Error changing password:', error);
             window.cashierAPI.handleError(error, 'changePassword');
-            alert('Failed to change password. Please check your current password and try again.');
+            this.showNotification('Failed to change password. Please check your current password and try again.', 'error');
           }
         },
+        
+        async toggleTwoFactor() {
+          // Check if user has valid contact info for 2FA
+          if (!this.twoFactorEnabled && !this.profile.email && !this.profile.phone) {
+            this.showNotification('Please add an email address or phone number to your profile before enabling 2FA', 'error');
+            return;
+          }
+          
+          this.showTwoFactorModal = true;
+          this.twoFactorForm = { method: 'email', code: '', password: '', cooldown: 0 };
+          
+          // Auto-send verification code when opening modal for enabling 2FA
+          if (!this.twoFactorEnabled) {
+            await this.sendVerificationCode();
+          }
+        },
+        
+        async onTwoFactorMethodChange() {
+          // Reset code and cooldown when method changes
+          this.twoFactorForm.code = '';
+          this.twoFactorForm.cooldown = 0;
+          
+          // Auto-send new code for new method
+          if (!this.twoFactorEnabled) {
+            await this.sendVerificationCode();
+          }
+        },
+        
+        async sendVerificationCode() {
+          try {
+            if (this.twoFactorForm.cooldown > 0) {
+              return; // Don't send if cooldown is active
+            }
+            
+            const method = this.twoFactorForm.method;
+            const destination = method === 'email' ? this.profile.email : this.profile.phone;
+            
+            if (!destination) {
+              this.showNotification(`Please add your ${method} address in your profile first`, 'error');
+              return;
+            }
+            
+            await window.cashierAPI.sendTwoFactorCode({
+              method: method,
+              destination: destination
+            });
+            
+            // Start cooldown timer (60 seconds)
+            this.twoFactorForm.cooldown = 60;
+            const cooldownInterval = setInterval(() => {
+              this.twoFactorForm.cooldown--;
+              if (this.twoFactorForm.cooldown <= 0) {
+                clearInterval(cooldownInterval);
+              }
+            }, 1000);
+            
+            this.showNotification(`Verification code sent to ${destination}`, 'success');
+            
+          } catch (error) {
+            console.error('Error sending verification code:', error);
+            window.cashierAPI.handleError(error, 'sendVerificationCode');
+            this.showNotification('Failed to send verification code. Please try again.', 'error');
+          }
+        },
+        
+        async confirmTwoFactor() {
+          try {
+            if (this.twoFactorEnabled) {
+              // Disable 2FA
+              if (!this.twoFactorForm.password) {
+                this.showNotification('Please enter your password to disable 2FA', 'error');
+                return;
+              }
+              
+              await window.cashierAPI.disableTwoFactor({
+                password: this.twoFactorForm.password
+              });
+              
+              this.twoFactorEnabled = false;
+              this.showNotification('Two-factor authentication disabled', 'success');
+              
+            } else {
+              // Enable 2FA
+              if (!this.twoFactorForm.code || this.twoFactorForm.code.length !== 6) {
+                this.showNotification('Please enter a valid 6-digit verification code', 'error');
+                return;
+              }
+              
+              const method = this.twoFactorForm.method;
+              const destination = method === 'email' ? this.profile.email : this.profile.phone;
+              
+              await window.cashierAPI.enableTwoFactor({
+                method: method,
+                destination: destination,
+                code: this.twoFactorForm.code
+              });
+              
+              this.twoFactorEnabled = true;
+              this.showNotification(`Two-factor authentication enabled via ${method}`, 'success');
+            }
+            
+            this.showTwoFactorModal = false;
+            this.twoFactorForm = { method: 'email', code: '', password: '', cooldown: 0 };
+            
+            // Notify tenant admin about 2FA change
+            await window.cashierAPI.notifyUserChange({
+                type: '2fa_change',
+                userId: window.cashierAPI.getUserId(),
+                tenantId: window.cashierAPI.getTenantId(),
+                enabled: this.twoFactorEnabled,
+                method: this.twoFactorEnabled ? method : null,
+                timestamp: new Date().toISOString()
+            });
+            
+          } catch (error) {
+            console.error('Error toggling 2FA:', error);
+            window.cashierAPI.handleError(error, 'confirmTwoFactor');
+            this.showNotification('Failed to update two-factor authentication. Please try again.', 'error');
+          }
+        },
+        
+        async revokeSession(sessionId) {
+          try {
+            await window.cashierAPI.revokeSession(sessionId);
+            
+            // Remove session from list
+            this.sessions = this.sessions.filter(s => s.id !== sessionId);
+            
+            this.showNotification('Session revoked successfully', 'success');
+            
+            // Notify about session revocation
+            await window.cashierAPI.notifyUserChange({
+                type: 'session_revoked',
+                sessionId: sessionId,
+                userId: window.cashierAPI.getUserId(),
+                tenantId: window.cashierAPI.getTenantId(),
+                timestamp: new Date().toISOString()
+            });
+            
+          } catch (error) {
+            console.error('Error revoking session:', error);
+            window.cashierAPI.handleError(error, 'revokeSession');
+            this.showNotification('Failed to revoke session. Please try again.', 'error');
+          }
+        },
+        
+        async revokeAllSessions() {
+          try {
+            await window.cashierAPI.revokeAllSessions();
+            
+            // Reload sessions to show only current session
+            await this.loadSecurityData();
+            
+            this.showNotification('All other sessions revoked successfully', 'success');
+            
+            // Notify about mass session revocation
+            await window.cashierAPI.notifyUserChange({
+                type: 'all_sessions_revoked',
+                userId: window.cashierAPI.getUserId(),
+                tenantId: window.cashierAPI.getTenantId(),
+                timestamp: new Date().toISOString()
+            });
+            
+          } catch (error) {
+            console.error('Error revoking all sessions:', error);
+            window.cashierAPI.handleError(error, 'revokeAllSessions');
+            this.showNotification('Failed to revoke sessions. Please try again.', 'error');
+          }
+        },
+        
+        logout() {
+          // Clear local storage
+          localStorage.removeItem('activeSection');
+          
+          // Call logout API
+          window.cashierAPI.logout()
+            .then(() => {
+              // Redirect to login page
+              window.location.href = '../public/admin-signin.html';
+            })
+            .catch(error => {
+              console.error('Logout error:', error);
+              // Still redirect even if API call fails
+              window.location.href = '../public/admin-signin.html';
+            });
+        }
       }
     }
   </script>
@@ -1342,7 +1866,16 @@
   // Initialize account system when DOM is ready
   document.addEventListener('DOMContentLoaded', () => {
     const accountApp = Alpine.data('accountSystem', accountSystem);
-    accountApp.loadAccountData();
+    // Load account data after Alpine is initialized
+    setTimeout(() => {
+      accountApp.loadAccountData();
+    }, 100);
+  });
+  
+  // Save active section before page unload
+  window.addEventListener('beforeunload', () => {
+    const activeSection = localStorage.getItem('activeSection') || 'profile';
+    localStorage.setItem('activeSection', activeSection);
   });
 </script>
 

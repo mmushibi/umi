@@ -1,10 +1,11 @@
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Logging;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using UmiHealth.Domain.Entities;
-using UmiHealth.Infrastructure.Data;
+using UmiHealth.Persistence.Data;
 
 namespace UmiHealth.Application.Services
 {

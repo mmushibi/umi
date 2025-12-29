@@ -21,7 +21,7 @@
 
   <ItemGroup>
     <ProjectReference Include="..\UmiHealth.Core\UmiHealth.Core.csproj" />
-    <ProjectReference Include="..\UmiHealth.Application\UmiHealth.Application.csproj" />
+    <ProjectReference Include="..\UmiHealth.Persistence\UmiHealth.Persistence.csproj" />
   </ItemGroup>
 
 </Project>

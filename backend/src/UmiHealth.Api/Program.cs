@@ -99,6 +99,7 @@ builder.Services.AddSwaggerGen(options =>
 // Database configuration
 builder.Services.AddInfrastructure(builder.Configuration);
 builder.Services.AddApplication();
+builder.Services.AddPersistence(builder.Configuration);
 
 // Add security services
 builder.Services.AddDataEncryption(builder.Configuration);
@@ -116,6 +117,10 @@ builder.Services.AddScoped<IBranchInventoryService, BranchInventoryService>();
 builder.Services.AddScoped<IProcurementService, ProcurementService>();
 builder.Services.AddScoped<IBranchPermissionService, BranchPermissionService>();
 builder.Services.AddScoped<IBranchReportingService, BranchReportingService>();
+
+// Queue Management Services
+builder.Services.AddScoped<IQueueService, QueueService>();
+builder.Services.AddScoped<IQueueNotificationService, QueueNotificationService>();
 
 // CORS configuration - hardened for production
 builder.Services.AddCors(options =>

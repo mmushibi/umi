@@ -748,45 +748,266 @@
       background: var(--color-background);
     }
 
-    /* Quick Stats */
+    /* Enhanced Stats Cards */
     .quick-stats {
       display: grid;
       grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
       gap: 1rem;
+      margin-bottom: 2rem;
+      padding: 1.5rem;
+      background: linear-gradient(135deg, var(--color-surface) 0%, rgba(255, 255, 255, 0.9) 100%);
+      border-radius: 16px;
+      border: 1px solid var(--color-border);
+      box-shadow: 0 4px 20px rgba(0, 0, 0, 0.05);
     }
 
     .stat-button {
-      background: var(--color-surface);
-      border: 1px solid var(--color-border);
-      border-radius: 12px;
-      padding: 1.5rem;
       display: flex;
       flex-direction: column;
       align-items: center;
-      gap: 0.5rem;
+      gap: 0.75rem;
+      padding: 1.5rem 1rem;
+      border: 1px solid var(--color-border);
+      border-radius: 12px;
+      background: var(--color-background);
+      color: var(--color-text-primary);
+      transition: all 0.3s ease;
       cursor: pointer;
-      transition: all 0.2s ease;
+      position: relative;
+      overflow: hidden;
     }
 
     .stat-button:hover {
+      transform: translateY(-4px);
+      box-shadow: 0 8px 25px rgba(0, 0, 0, 0.1);
+      border-color: var(--color-accent);
+      background: linear-gradient(135deg, var(--color-accent) 0%, #0d9488 100%);
+      color: white;
+    }
+
+    .stat-button:active {
       transform: translateY(-2px);
-      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
     }
 
     .stat-button .material-symbols-rounded {
       font-size: 2rem;
-      color: var(--color-primary);
+      color: var(--color-accent);
+      transition: all 0.3s ease;
+    }
+
+    .stat-button:hover .material-symbols-rounded {
+      color: white;
+      transform: scale(1.1);
     }
 
     .stat-button strong {
       font-size: 1.5rem;
       font-weight: 700;
-      color: var(--color-text-primary);
+      line-height: 1.2;
+      transition: all 0.3s ease;
     }
 
     .stat-button span {
       font-size: 0.875rem;
+      font-weight: 500;
+      opacity: 0.8;
+      transition: all 0.3s ease;
+    }
+
+    .stat-button:hover span {
+      opacity: 1;
+    }
+
+    /* Enhanced stat card colors */
+    .stat-button[data-stat="total-revenue"] {
+      background: linear-gradient(135deg, #22c55e 0%, #16a34a 100%);
+      border-color: #22c55e;
+      color: white;
+    }
+
+    .stat-button[data-stat="total-revenue"] .material-symbols-rounded {
+      color: white;
+    }
+
+    .stat-button[data-stat="pending-payments"] {
+      background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%);
+      border-color: #f59e0b;
+      color: white;
+    }
+
+    .stat-button[data-stat="pending-payments"] .material-symbols-rounded {
+      color: white;
+    }
+
+    .stat-button[data-stat="overdue"] {
+      background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);
+      border-color: #ef4444;
+      color: white;
+    }
+
+    .stat-button[data-stat="overdue"] .material-symbols-rounded {
+      color: white;
+    }
+
+    .stat-button[data-stat="this-month"] {
+      background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
+      border-color: #3b82f6;
+      color: white;
+    }
+
+    .stat-button[data-stat="this-month"] .material-symbols-rounded {
+      color: white;
+    }
+
+    .stat-button[data-stat="bulk-payments"] {
+      background: linear-gradient(135deg, #8b5cf6 0%, #6366f1 100%);
+      border-color: #8b5cf6;
+      color: white;
+    }
+
+    .stat-button[data-stat="bulk-payments"] .material-symbols-rounded {
+      color: white;
+    }
+
+    .stat-button[data-stat="recurring-active"] {
+      background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+      border-color: #10b981;
+      color: white;
+    }
+
+    .stat-button[data-stat="recurring-active"] .material-symbols-rounded {
+      color: white;
+    }
+
+    .stat-button[data-stat="reminders-sent"] {
+      background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%);
+      border-color: #f59e0b;
+      color: white;
+    }
+
+    .stat-button[data-stat="reminders-sent"] .material-symbols-rounded {
+      color: white;
+    }
+
+    .stat-button[data-stat="reconciliation-pending"] {
+      background: linear-gradient(135deg, #6366f1 0%, #4f46e5 100%);
+      border-color: #6366f1;
+      color: white;
+    }
+
+    .stat-button[data-stat="reconciliation-pending"] .material-symbols-rounded {
+      color: white;
+    }
+
+    .stat-button[data-stat="mobile-money-transactions"] {
+      background: linear-gradient(135deg, #14b8a6 0%, #0d9488 100%);
+      border-color: #14b8a6;
+      color: white;
+    }
+
+    .stat-button[data-stat="mobile-money-transactions"] .material-symbols-rounded {
+      color: white;
+    }
+
+    /* Stats Header Section */
+    .stats-header {
+      text-align: center;
+      margin-bottom: 2rem;
+      padding: 2rem 1.5rem;
+      background: linear-gradient(135deg, var(--color-surface) 0%, rgba(255, 255, 255, 0.95) 100%);
+      border-radius: 16px;
+      border: 1px solid var(--color-border);
+      box-shadow: 0 4px 20px rgba(0, 0, 0, 0.05);
+    }
+
+    .stats-title {
+      font-size: 2rem;
+      font-weight: 700;
+      color: var(--color-text-primary);
+      margin-bottom: 0.5rem;
+      background: linear-gradient(135deg, var(--color-primary) 0%, #1a1a1a 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+      -webkit-text-fill-color: transparent;
+      -moz-background-clip: text;
+      -moz-text-fill-color: transparent;
+      text-fill-color: transparent;
+    }
+
+    .stats-subtitle {
+      font-size: 1rem;
       color: var(--color-text-secondary);
+      margin: 0;
+      line-height: 1.5;
+    }
+
+    /* Stats responsive design */
+    @media (max-width: 768px) {
+      .quick-stats {
+        grid-template-columns: repeat(2, 1fr);
+        gap: 0.75rem;
+        padding: 1rem;
+        margin-bottom: 1.5rem;
+      }
+
+      .stat-button {
+        padding: 1rem 0.75rem;
+        gap: 0.5rem;
+      }
+
+      .stat-button .material-symbols-rounded {
+        font-size: 1.5rem;
+      }
+
+      .stat-button strong {
+        font-size: 1.25rem;
+      }
+
+      .stat-button span {
+        font-size: 0.75rem;
+      }
+    }
+
+    @media (max-width: 480px) {
+      .quick-stats {
+        grid-template-columns: 1fr;
+        gap: 0.5rem;
+        padding: 0.75rem;
+      }
+
+      .stat-button {
+        padding: 0.875rem 0.625rem;
+        gap: 0.375rem;
+      }
+
+      .stat-button .material-symbols-rounded {
+        font-size: 1.25rem;
+      }
+
+      .stat-button strong {
+        font-size: 1.125rem;
+      }
+
+      .stat-button span {
+        font-size: 0.7rem;
+      }
+    }
+
+    /* Tablet responsiveness */
+    @media (min-width: 769px) and (max-width: 1024px) {
+      .quick-stats {
+        grid-template-columns: repeat(3, 1fr);
+      }
+    }
+
+    /* Large desktop - ensure max 5 columns */
+    @media (min-width: 1200px) {
+      .quick-stats {
+        grid-template-columns: repeat(5, 1fr);
+        max-width: 1400px;
+        margin: 0 auto 2rem;
+      }
     }
 
     /* Document Tabs */
@@ -1271,7 +1492,179 @@
       color: #6b7280;
     }
 
-    /* Responsive Design */
+    /* Enhanced Payment Actions */
+    .enhanced-actions {
+      display: flex;
+      flex-direction: column;
+      gap: 1rem;
+    }
+
+    .action-row {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: 1rem;
+    }
+
+    .action-card {
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+      padding: 1.25rem;
+      border: 1px solid var(--color-border);
+      border-radius: 12px;
+      background: var(--color-background);
+      transition: all 0.3s ease;
+      cursor: pointer;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .action-card:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 8px 25px rgba(0, 0, 0, 0.1);
+      border-color: var(--color-accent);
+    }
+
+    .action-card:active {
+      transform: translateY(0);
+    }
+
+    .action-card.primary {
+      background: linear-gradient(135deg, var(--color-primary) 0%, #1a1a1a 100%);
+      color: white;
+      border-color: var(--color-primary);
+    }
+
+    .action-card.primary:hover {
+      box-shadow: 0 8px 25px rgba(0, 0, 0, 0.2);
+    }
+
+    .action-icon {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      width: 48px;
+      height: 48px;
+      border-radius: 12px;
+      background: rgba(20, 184, 166, 0.1);
+      flex-shrink: 0;
+    }
+
+    .action-card.primary .action-icon {
+      background: rgba(255, 255, 255, 0.2);
+    }
+
+    .action-icon .material-symbols-rounded {
+      font-size: 24px;
+      color: var(--color-accent);
+    }
+
+    .action-card.primary .action-icon .material-symbols-rounded {
+      color: white;
+    }
+
+    .action-content {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      gap: 0.25rem;
+      min-width: 0;
+    }
+
+    .action-content strong {
+      font-size: 0.95rem;
+      font-weight: 600;
+      color: var(--color-text-primary);
+      line-height: 1.2;
+    }
+
+    .action-card.primary .action-content strong {
+      color: white;
+    }
+
+    .action-content span {
+      font-size: 0.8rem;
+      color: var(--color-text-secondary);
+      line-height: 1.3;
+    }
+
+    .action-card.primary .action-content span {
+      color: rgba(255, 255, 255, 0.8);
+    }
+
+    /* Mobile responsiveness for enhanced actions */
+    @media (max-width: 768px) {
+      .enhanced-actions {
+        gap: 0.75rem;
+      }
+
+      .action-row {
+        grid-template-columns: 1fr;
+        gap: 0.75rem;
+      }
+
+      .action-card {
+        padding: 1rem;
+        gap: 0.75rem;
+      }
+
+      .action-icon {
+        width: 40px;
+        height: 40px;
+      }
+
+      .action-icon .material-symbols-rounded {
+        font-size: 20px;
+      }
+
+      .action-content strong {
+        font-size: 0.9rem;
+      }
+
+      .action-content span {
+        font-size: 0.75rem;
+      }
+    }
+
+    @media (max-width: 480px) {
+      .action-card {
+        padding: 0.875rem;
+        gap: 0.625rem;
+      }
+
+      .action-icon {
+        width: 36px;
+        height: 36px;
+      }
+
+      .action-icon .material-symbols-rounded {
+        font-size: 18px;
+      }
+
+      .action-content strong {
+        font-size: 0.85rem;
+      }
+
+      .action-content span {
+        font-size: 0.7rem;
+      }
+    }
+
+    /* Tablet responsiveness */
+    @media (min-width: 769px) and (max-width: 1024px) {
+      .action-row {
+        grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+      }
+    }
+
+    /* Large desktop - ensure max 5 columns */
+    @media (min-width: 1200px) {
+      .action-row {
+        grid-template-columns: repeat(5, 1fr);
+        max-width: 1200px;
+        margin: 0 auto;
+      }
+    }
     @media (max-width: 768px) {
       .content-header {
         flex-direction: column;
@@ -1337,6 +1730,249 @@
         gap: 1rem;
       }
     }
+
+    /* Enhanced Payment Features Styles */
+    .bulk-payment-section,
+    .reconciliation-section {
+      display: flex;
+      flex-direction: column;
+      gap: 1.5rem;
+    }
+
+    .template-section,
+    .upload-section {
+      padding: 1rem;
+      border: 1px solid var(--color-border);
+      border-radius: 8px;
+      background: var(--color-surface);
+    }
+
+    .file-upload-area {
+      border: 2px dashed var(--color-border);
+      border-radius: 8px;
+      padding: 2rem;
+      text-align: center;
+      cursor: pointer;
+      transition: all 0.3s ease;
+    }
+
+    .file-upload-area:hover {
+      border-color: var(--color-accent);
+      background: rgba(20, 184, 166, 0.05);
+    }
+
+    .file-upload-area .material-symbols-rounded {
+      font-size: 2rem;
+      color: var(--color-accent);
+      margin-bottom: 0.5rem;
+    }
+
+    .file-info {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      padding: 0.75rem;
+      background: var(--color-surface);
+      border: 1px solid var(--color-border);
+      border-radius: 8px;
+      margin-top: 1rem;
+    }
+
+    .remove-file {
+      background: none;
+      border: none;
+      color: var(--color-warning);
+      cursor: pointer;
+      padding: 0.25rem;
+      border-radius: 4px;
+    }
+
+    .preview-section {
+      padding: 1rem;
+      background: var(--color-surface);
+      border: 1px solid var(--color-border);
+      border-radius: 8px;
+    }
+
+    .preview-stats {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+      gap: 1rem;
+      margin-bottom: 1rem;
+    }
+
+    .preview-table {
+      max-height: 300px;
+      overflow: auto;
+      border: 1px solid var(--color-border);
+      border-radius: 8px;
+    }
+
+    .reconciliation-options {
+      display: flex;
+      flex-direction: column;
+      gap: 0.75rem;
+      padding: 1rem;
+      background: var(--color-surface);
+      border: 1px solid var(--color-border);
+      border-radius: 8px;
+    }
+
+    .reconciliation-options label {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      cursor: pointer;
+    }
+
+    .reconciliation-results {
+      padding: 1rem;
+      background: var(--color-surface);
+      border: 1px solid var(--color-border);
+      border-radius: 8px;
+    }
+
+    .results-stats {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+      gap: 1rem;
+      margin-bottom: 1rem;
+    }
+
+    .template-options {
+      display: flex;
+      gap: 0.5rem;
+      flex-wrap: wrap;
+      margin-top: 0.5rem;
+    }
+
+    .template-btn {
+      padding: 0.5rem 1rem;
+      background: var(--color-surface);
+      border: 1px solid var(--color-border);
+      border-radius: 6px;
+      cursor: pointer;
+      font-size: 0.875rem;
+      transition: all 0.3s ease;
+    }
+
+    .template-btn:hover {
+      background: var(--color-accent);
+      color: white;
+    }
+
+    .ussd-section {
+      padding: 1rem;
+      background: var(--color-surface);
+      border: 1px solid var(--color-border);
+      border-radius: 8px;
+      margin-top: 1rem;
+    }
+
+    .ussd-instructions {
+      background: white;
+      padding: 1rem;
+      border-radius: 6px;
+      border: 1px solid var(--color-border);
+      font-family: monospace;
+      margin-bottom: 1rem;
+    }
+
+    .ussd-status {
+      padding: 0.75rem;
+      background: rgba(20, 184, 166, 0.1);
+      border: 1px solid var(--color-accent);
+      border-radius: 6px;
+      color: var(--color-accent);
+      font-weight: 500;
+    }
+
+    .analytics-modal {
+      max-width: 1200px;
+      width: 95%;
+    }
+
+    .analytics-controls {
+      display: flex;
+      flex-direction: column;
+      gap: 1.5rem;
+      margin-bottom: 2rem;
+    }
+
+    .date-range-selector {
+      display: flex;
+      gap: 1rem;
+      align-items: end;
+      flex-wrap: wrap;
+    }
+
+    .report-options {
+      display: flex;
+      gap: 0.5rem;
+      flex-wrap: wrap;
+    }
+
+    .report-btn {
+      padding: 0.75rem 1rem;
+      background: var(--color-surface);
+      border: 1px solid var(--color-border);
+      border-radius: 6px;
+      cursor: pointer;
+      transition: all 0.3s ease;
+    }
+
+    .report-btn:hover,
+    .report-btn.active {
+      background: var(--color-accent);
+      color: white;
+    }
+
+    .analytics-content {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 2rem;
+      margin-bottom: 2rem;
+    }
+
+    .chart-container {
+      background: white;
+      padding: 1rem;
+      border-radius: 8px;
+      border: 1px solid var(--color-border);
+      height: 300px;
+    }
+
+    .analytics-tables {
+      grid-column: 1 / -1;
+    }
+
+    .export-options {
+      display: flex;
+      gap: 1rem;
+      justify-content: flex-end;
+      padding-top: 1rem;
+      border-top: 1px solid var(--color-border);
+    }
+
+    /* Responsive adjustments */
+    @media (max-width: 768px) {
+      .analytics-content {
+        grid-template-columns: 1fr;
+      }
+      
+      .date-range-selector {
+        flex-direction: column;
+        align-items: stretch;
+      }
+      
+      .report-options {
+        justify-content: center;
+      }
+      
+      .export-options {
+        justify-content: center;
+      }
+    }
   </style>
 </head>
 <body>
@@ -1373,6 +2009,26 @@
         <span class="material-symbols-rounded nav-icon">payments</span>
         <span>Payments</span>
       </a>
+      <a href="inventory-quick.html" class="nav-item">
+        <span class="material-symbols-rounded nav-icon">inventory</span>
+        <span>Inventory</span>
+      </a>
+      <a href="queue-management.html" class="nav-item">
+        <span class="material-symbols-rounded nav-icon">queue</span>
+        <span>Queue</span>
+      </a>
+      <a href="shift-management.html" class="nav-item">
+        <span class="material-symbols-rounded nav-icon">schedule</span>
+        <span>Shift Management</span>
+      </a>
+      <a href="reports.html" class="nav-item">
+        <span class="material-symbols-rounded nav-icon">summarize</span>
+        <span>Reports</span>
+      </a>
+      <a href="help.html" class="nav-item">
+        <span class="material-symbols-rounded nav-icon">help</span>
+        <span>Help & Training</span>
+      </a>
       <a href="account.html" class="nav-item">
         <span class="material-symbols-rounded nav-icon">settings</span>
         <span>Account</span>
@@ -1400,33 +2056,7 @@
           <h1 class="page-title">Payment Management</h1>
         </div>
         
-        <div class="search-bar" x-data="{ searchOpen: false, query: '' }">
-          <span class="material-symbols-rounded search-icon">search</span>
-          <input 
-            type="text" 
-            class="search-input" 
-            placeholder="Search payments by ID, patient, or amount..."
-            x-model="query"
-            @focus="searchOpen = true"
-            @input="searchOpen = true"
-            @blur="setTimeout(() => searchOpen = false, 200)"
-          >
-          
-          <div class="search-suggestions" :class="searchOpen && query.length > 0 ? 'show' : ''">
-            <template x-for="suggestion in filteredSuggestions" :key="suggestion.id">
-              <div class="suggestion-item" @click="selectSuggestion(suggestion)">
-                <div class="suggestion-icon">
-                  <span class="material-symbols-rounded" x-text="suggestion.icon"></span>
-                </div>
-                <div class="suggestion-content">
-                  <div class="suggestion-title" x-text="suggestion.title"></div>
-                  <div class="suggestion-description" x-text="suggestion.description"></div>
-                </div>
-                <div class="suggestion-type" x-text="suggestion.type"></div>
-              </div>
-            </template>
-          </div>
-        </div>
+        
       </div>
 
       <div class="header-right">
@@ -1435,31 +2065,13 @@
     </header>
 
     <section class="content-area">
-        <div class="content-header">
-          <div>
-            <span>Streamline your billing and payment processes</span>
-          </div>
-          <div class="payment-actions">
-            <button class="primary" id="newInvoiceBtn">
-              <span class="material-symbols-rounded">add</span>
-              New Invoice
-            </button>
-            <button class="secondary" id="newQuotationBtn">
-              <span class="material-symbols-rounded">description</span>
-              New Quotation
-            </button>
-            <button class="secondary" id="newCreditNoteBtn">
-              <span class="material-symbols-rounded">assignment_return</span>
-              New Credit Note
-            </button>
-            <button class="secondary" id="newInsuranceClaimBtn">
-              <span class="material-symbols-rounded">health_and_safety</span>
-              New Insurance Claim
-            </button>
-          </div>
+        <!-- Enhanced Stats Section with Subtitle -->
+        <div class="stats-header">
+          <h2 class="stats-title">Payment Analytics Dashboard</h2>
+          <p class="stats-subtitle">Real-time insights into your payment performance and financial metrics</p>
         </div>
-
-        <!-- Quick Stats -->
+        
+        <!-- Quick Stats - Moved to Top -->
         <div class="quick-stats">
           <button class="stat-button" data-stat="total-revenue">
             <span class="material-symbols-rounded">payments</span>
@@ -1481,6 +2093,131 @@
             <strong>ZMW 0.00</strong>
             <span>This Month</span>
           </button>
+          <button class="stat-button" data-stat="bulk-payments">
+            <span class="material-symbols-rounded">upload_file</span>
+            <strong>0</strong>
+            <span>Bulk Processed</span>
+          </button>
+          <button class="stat-button" data-stat="recurring-active">
+            <span class="material-symbols-rounded">repeat</span>
+            <strong>0</strong>
+            <span>Recurring Active</span>
+          </button>
+          <button class="stat-button" data-stat="reminders-sent">
+            <span class="material-symbols-rounded">notifications</span>
+            <strong>0</strong>
+            <span>Reminders Sent</span>
+          </button>
+          <button class="stat-button" data-stat="reconciliation-pending">
+            <span class="material-symbols-rounded">account_balance</span>
+            <strong>0</strong>
+            <span>Reconciliation Pending</span>
+          </button>
+          <button class="stat-button" data-stat="mobile-money-transactions">
+            <span class="material-symbols-rounded">smartphone</span>
+            <strong>0</strong>
+            <span>Mobile Money Today</span>
+          </button>
+        </div>
+
+        <!-- Payment Actions Section -->
+        <div class="content-header">
+          <div class="payment-actions enhanced-actions">
+            <div class="action-row">
+              <button class="primary action-card" id="newInvoiceBtn">
+                <div class="action-icon">
+                  <span class="material-symbols-rounded">add</span>
+                </div>
+                <div class="action-content">
+                  <strong>New Invoice</strong>
+                  <span>Create professional invoices</span>
+                </div>
+              </button>
+              <button class="secondary action-card" id="newQuotationBtn">
+                <div class="action-icon">
+                  <span class="material-symbols-rounded">description</span>
+                </div>
+                <div class="action-content">
+                  <strong>Quotation</strong>
+                  <span>Generate price quotes</span>
+                </div>
+              </button>
+              <button class="secondary action-card" id="newCreditNoteBtn">
+                <div class="action-icon">
+                  <span class="material-symbols-rounded">assignment_return</span>
+                </div>
+                <div class="action-content">
+                  <strong>Credit Note</strong>
+                  <span>Process refunds</span>
+                </div>
+              </button>
+              <button class="secondary action-card" id="newInsuranceClaimBtn">
+                <div class="action-icon">
+                  <span class="material-symbols-rounded">health_and_safety</span>
+                </div>
+                <div class="action-content">
+                  <strong>Insurance</strong>
+                  <span>File claims</span>
+                </div>
+              </button>
+              <button class="secondary action-card" id="bulkPaymentBtn">
+                <div class="action-icon">
+                  <span class="material-symbols-rounded">upload_file</span>
+                </div>
+                <div class="action-content">
+                  <strong>Bulk Upload</strong>
+                  <span>Process multiple payments</span>
+                </div>
+              </button>
+            </div>
+            <div class="action-row">
+              <button class="secondary action-card" id="recurringPaymentBtn">
+                <div class="action-icon">
+                  <span class="material-symbols-rounded">repeat</span>
+                </div>
+                <div class="action-content">
+                  <strong>Recurring</strong>
+                  <span>Setup subscriptions</span>
+                </div>
+              </button>
+              <button class="secondary action-card" id="paymentReminderBtn">
+                <div class="action-icon">
+                  <span class="material-symbols-rounded">notifications</span>
+                </div>
+                <div class="action-content">
+                  <strong>Reminders</strong>
+                  <span>Schedule notifications</span>
+                </div>
+              </button>
+              <button class="secondary action-card" id="reconciliationBtn">
+                <div class="action-icon">
+                  <span class="material-symbols-rounded">account_balance</span>
+                </div>
+                <div class="action-content">
+                  <strong>Reconcile</strong>
+                  <span>Match transactions</span>
+                </div>
+              </button>
+              <button class="secondary action-card" id="mobileMoneyBtn">
+                <div class="action-icon">
+                  <span class="material-symbols-rounded">smartphone</span>
+                </div>
+                <div class="action-content">
+                  <strong>Mobile Money</strong>
+                  <span>Process mobile payments</span>
+                </div>
+              </button>
+              <button class="secondary action-card" id="advancedReportsBtn">
+                <div class="action-icon">
+                  <span class="material-symbols-rounded">analytics</span>
+                </div>
+                <div class="action-content">
+                  <strong>Analytics</strong>
+                  <span>View reports & insights</span>
+                </div>
+              </button>
+            </div>
+          </div>
         </div>
 
         <!-- Document Type Tabs -->
@@ -1508,6 +2245,26 @@
           <button class="doc-tab" data-type="reports">
             <span class="material-symbols-rounded">summarize</span>
             Reports
+          </button>
+          <button class="doc-tab" data-type="bulk-payments">
+            <span class="material-symbols-rounded">upload_file</span>
+            Bulk Payments
+          </button>
+          <button class="doc-tab" data-type="recurring">
+            <span class="material-symbols-rounded">repeat</span>
+            Recurring
+          </button>
+          <button class="doc-tab" data-type="reminders">
+            <span class="material-symbols-rounded">notifications</span>
+            Reminders
+          </button>
+          <button class="doc-tab" data-type="reconciliation">
+            <span class="material-symbols-rounded">account_balance</span>
+            Reconciliation
+          </button>
+          <button class="doc-tab" data-type="mobile-money">
+            <span class="material-symbols-rounded">smartphone</span>
+            Mobile Money
           </button>
         </div>
 
@@ -1977,6 +2734,383 @@
         <button type="button" class="secondary" data-close="documentPreviewModal">Close</button>
         <button type="button" class="secondary" id="printDocumentBtn">Print</button>
         <button type="button" class="primary" id="downloadDocumentBtn">Download</button>
+      </footer>
+    </div>
+  </section>
+
+  <!-- Bulk Payment Upload Modal -->
+  <section class="modal" id="bulkPaymentModal" role="dialog" aria-modal="true" aria-labelledby="bulkPaymentTitle" hidden>
+    <div class="modal-content">
+      <header class="modal-header">
+        <h2 id="bulkPaymentTitle">Bulk Payment Processing</h2>
+        <button type="button" class="modal-close" data-close="bulkPaymentModal" aria-label="Close bulk payment">
+          <span class="material-symbols-rounded" aria-hidden="true">close</span>
+        </button>
+      </header>
+      <div class="modal-body">
+        <div class="bulk-payment-section">
+          <div class="template-section">
+            <h3>Download Template</h3>
+            <p>Download the CSV template to prepare your bulk payment data:</p>
+            <button type="button" class="secondary" id="downloadTemplateBtn">
+              <span class="material-symbols-rounded">download</span>
+              Download CSV Template
+            </button>
+          </div>
+          
+          <div class="upload-section">
+            <h3>Upload Payment File</h3>
+            <div class="file-upload-area" id="bulkFileUpload">
+              <span class="material-symbols-rounded">cloud_upload</span>
+              <p>Drag and drop your CSV/Excel file here or click to browse</p>
+              <input type="file" id="bulkPaymentFile" accept=".csv,.xlsx,.xls" hidden>
+            </div>
+            <div class="file-info" id="bulkFileInfo" hidden>
+              <span class="material-symbols-rounded">description</span>
+              <span id="bulkFileName"></span>
+              <button type="button" class="remove-file" id="removeBulkFile">
+                <span class="material-symbols-rounded">close</span>
+              </button>
+            </div>
+          </div>
+          
+          <div class="preview-section" id="bulkPreviewSection" hidden>
+            <h3>Preview</h3>
+            <div class="preview-stats" id="bulkPreviewStats"></div>
+            <div class="preview-table" id="bulkPreviewTable"></div>
+          </div>
+        </div>
+      </div>
+      <footer class="modal-footer">
+        <button type="button" class="secondary" data-close="bulkPaymentModal">Cancel</button>
+        <button type="button" class="primary" id="processBulkPaymentBtn" disabled>Process Payments</button>
+      </footer>
+    </div>
+  </section>
+
+  <!-- Recurring Payment Modal -->
+  <section class="modal" id="recurringPaymentModal" role="dialog" aria-modal="true" aria-labelledby="recurringPaymentTitle" hidden>
+    <div class="modal-content">
+      <header class="modal-header">
+        <h2 id="recurringPaymentTitle">Recurring Payment Setup</h2>
+        <button type="button" class="modal-close" data-close="recurringPaymentModal" aria-label="Close recurring payment">
+          <span class="material-symbols-rounded" aria-hidden="true">close</span>
+        </button>
+      </header>
+      <div class="modal-body">
+        <form id="recurringPaymentForm" class="form-grid">
+          <label>
+            <span>Customer Name</span>
+            <input type="text" id="recurringCustomerName" placeholder="Enter customer name" required>
+          </label>
+          <label>
+            <span>Customer Email</span>
+            <input type="email" id="recurringCustomerEmail" placeholder="customer@email.com">
+          </label>
+          <label>
+            <span>Payment Amount</span>
+            <input type="number" id="recurringAmount" placeholder="0.00" step="0.01" min="0" required>
+          </label>
+          <label>
+            <span>Currency</span>
+            <select id="recurringCurrency">
+              <option value="ZMW">ZMW</option>
+              <option value="USD">USD</option>
+              <option value="EUR">EUR</option>
+            </select>
+          </label>
+          <label>
+            <span>Frequency</span>
+            <select id="recurringFrequency">
+              <option value="daily">Daily</option>
+              <option value="weekly">Weekly</option>
+              <option value="monthly">Monthly</option>
+              <option value="quarterly">Quarterly</option>
+              <option value="yearly">Yearly</option>
+            </select>
+          </label>
+          <label>
+            <span>Start Date</span>
+            <input type="date" id="recurringStartDate" required>
+          </label>
+          <label>
+            <span>End Date</span>
+            <input type="date" id="recurringEndDate">
+          </label>
+          <label>
+            <span>Payment Method</span>
+            <select id="recurringPaymentMethod">
+              <option value="mobile_money">Mobile Money</option>
+              <option value="card">Card</option>
+              <option value="bank_transfer">Bank Transfer</option>
+            </select>
+          </label>
+          <label>
+            <span>Mobile Money Provider</span>
+            <select id="recurringMobileProvider">
+              <option value="mtn">MTN</option>
+              <option value="airtel">Airtel</option>
+              <option value="zamtel">Zamtel</option>
+            </select>
+          </label>
+          <label>
+            <span>Phone Number</span>
+            <input type="tel" id="recurringPhoneNumber" placeholder="+260 XXX XXX XXX">
+          </label>
+          <label class="form-textarea form-textarea-grid">
+            <span>Description</span>
+            <textarea id="recurringDescription" rows="3" placeholder="Payment description"></textarea>
+          </label>
+        </form>
+      </div>
+      <footer class="modal-footer">
+        <button type="button" class="secondary" data-close="recurringPaymentModal">Cancel</button>
+        <button type="button" class="primary" id="saveRecurringPaymentBtn">Setup Recurring Payment</button>
+      </footer>
+    </div>
+  </section>
+
+  <!-- Payment Reminder Modal -->
+  <section class="modal" id="paymentReminderModal" role="dialog" aria-modal="true" aria-labelledby="paymentReminderTitle" hidden>
+    <div class="modal-content">
+      <header class="modal-header">
+        <h2 id="paymentReminderTitle">Payment Reminder Setup</h2>
+        <button type="button" class="modal-close" data-close="paymentReminderModal" aria-label="Close payment reminder">
+          <span class="material-symbols-rounded" aria-hidden="true">close</span>
+        </button>
+      </header>
+      <div class="modal-body">
+        <form id="paymentReminderForm" class="form-grid">
+          <label>
+            <span>Customer Name</span>
+            <input type="text" id="reminderCustomerName" placeholder="Enter customer name" required>
+          </label>
+          <label>
+            <span>Customer Email</span>
+            <input type="email" id="reminderCustomerEmail" placeholder="customer@email.com">
+          </label>
+          <label>
+            <span>Customer Phone</span>
+            <input type="tel" id="reminderCustomerPhone" placeholder="+260 XXX XXX XXX">
+          </label>
+          <label>
+            <span>Outstanding Amount</span>
+            <input type="number" id="reminderAmount" placeholder="0.00" step="0.01" min="0" required>
+          </label>
+          <label>
+            <span>Due Date</span>
+            <input type="date" id="reminderDueDate" required>
+          </label>
+          <label>
+            <span>Reminder Type</span>
+            <select id="reminderType">
+              <option value="email">Email</option>
+              <option value="sms">SMS</option>
+              <option value="both">Email & SMS</option>
+            </select>
+          </label>
+          <label>
+            <span>Schedule</span>
+            <select id="reminderSchedule">
+              <option value="immediate">Send Immediately</option>
+              <option value="1day">1 Day Before Due</option>
+              <option value="3days">3 Days Before Due</option>
+              <option value="1week">1 Week Before Due</option>
+              <option value="custom">Custom Schedule</option>
+            </select>
+          </label>
+          <label>
+            <span>Custom Schedule Date</span>
+            <input type="datetime-local" id="reminderCustomDate">
+          </label>
+          <label class="form-textarea form-textarea-grid">
+            <span>Message Template</span>
+            <textarea id="reminderMessage" rows="4" placeholder="Custom reminder message..."></textarea>
+          </label>
+          <div class="template-options">
+            <h4>Quick Templates</h4>
+            <button type="button" class="template-btn" data-template="gentle">Gentle Reminder</button>
+            <button type="button" class="template-btn" data-template="urgent">Urgent Reminder</button>
+            <button type="button" class="template-btn" data-template="final">Final Notice</button>
+          </div>
+        </form>
+      </div>
+      <footer class="modal-footer">
+        <button type="button" class="secondary" data-close="paymentReminderModal">Cancel</button>
+        <button type="button" class="primary" id="saveReminderBtn">Schedule Reminder</button>
+      </footer>
+    </div>
+  </section>
+
+  <!-- Payment Reconciliation Modal -->
+  <section class="modal" id="reconciliationModal" role="dialog" aria-modal="true" aria-labelledby="reconciliationTitle" hidden>
+    <div class="modal-content">
+      <header class="modal-header">
+        <h2 id="reconciliationTitle">Payment Reconciliation</h2>
+        <button type="button" class="modal-close" data-close="reconciliationModal" aria-label="Close reconciliation">
+          <span class="material-symbols-rounded" aria-hidden="true">close</span>
+        </button>
+      </header>
+      <div class="modal-body">
+        <div class="reconciliation-section">
+          <div class="upload-section">
+            <h3>Import Bank Statement</h3>
+            <div class="file-upload-area" id="statementFileUpload">
+              <span class="material-symbols-rounded">account_balance</span>
+              <p>Upload bank statement (CSV or OFX format)</p>
+              <input type="file" id="statementFile" accept=".csv,.ofx" hidden>
+            </div>
+            <div class="file-info" id="statementFileInfo" hidden>
+              <span class="material-symbols-rounded">description</span>
+              <span id="statementFileName"></span>
+              <button type="button" class="remove-file" id="removeStatementFile">
+                <span class="material-symbols-rounded">close</span>
+              </button>
+            </div>
+          </div>
+          
+          <div class="reconciliation-options">
+            <h3>Reconciliation Options</h3>
+            <label>
+              <input type="checkbox" id="autoReconcile" checked>
+              <span>Auto-match transactions</span>
+            </label>
+            <label>
+              <input type="checkbox" id="toleranceMatching" checked>
+              <span>Allow amount tolerance (±5%)</span>
+            </label>
+            <label>
+              <input type="checkbox" id="dateMatching" checked>
+              <span>Match by date range (±3 days)</span>
+            </label>
+          </div>
+          
+          <div class="reconciliation-results" id="reconciliationResults" hidden>
+            <h3>Reconciliation Results</h3>
+            <div class="results-stats" id="reconciliationStats"></div>
+            <div class="results-table" id="reconciliationTable"></div>
+          </div>
+        </div>
+      </div>
+      <footer class="modal-footer">
+        <button type="button" class="secondary" data-close="reconciliationModal">Cancel</button>
+        <button type="button" class="primary" id="startReconciliationBtn">Start Reconciliation</button>
+      </footer>
+    </div>
+  </section>
+
+  <!-- Mobile Money Modal -->
+  <section class="modal" id="mobileMoneyModal" role="dialog" aria-modal="true" aria-labelledby="mobileMoneyTitle" hidden>
+    <div class="modal-content">
+      <header class="modal-header">
+        <h2 id="mobileMoneyTitle">Mobile Money Payment</h2>
+        <button type="button" class="modal-close" data-close="mobileMoneyModal" aria-label="Close mobile money">
+          <span class="material-symbols-rounded" aria-hidden="true">close</span>
+        </button>
+      </header>
+      <div class="modal-body">
+        <form id="mobileMoneyForm" class="form-grid">
+          <label>
+            <span>Provider</span>
+            <select id="mobileProvider">
+              <option value="mtn">MTN Mobile Money</option>
+              <option value="airtel">Airtel Money</option>
+              <option value="zamtel">Zamtel Money</option>
+            </select>
+          </label>
+          <label>
+            <span>Phone Number</span>
+            <input type="tel" id="mobilePhoneNumber" placeholder="+260 XXX XXX XXX" required>
+          </label>
+          <label>
+            <span>Amount</span>
+            <input type="number" id="mobileAmount" placeholder="0.00" step="0.01" min="0" required>
+          </label>
+          <label>
+            <span>Customer Name</span>
+            <input type="text" id="mobileCustomerName" placeholder="Enter customer name" required>
+          </label>
+          <label>
+            <span>Payment Type</span>
+            <select id="mobilePaymentType">
+              <option value="direct">Direct Payment</option>
+              <option value="ussd">USSD Initiated</option>
+            </select>
+          </label>
+          <label class="form-textarea form-textarea-grid">
+            <span>Description</span>
+            <textarea id="mobileDescription" rows="3" placeholder="Payment description"></textarea>
+          </label>
+          
+          <div class="ussd-section" id="ussdSection" hidden>
+            <h3>USSD Payment Instructions</h3>
+            <div class="ussd-instructions" id="ussdInstructions"></div>
+            <div class="ussd-status" id="ussdStatus"></div>
+          </div>
+        </form>
+      </div>
+      <footer class="modal-footer">
+        <button type="button" class="secondary" data-close="mobileMoneyModal">Cancel</button>
+        <button type="button" class="primary" id="processMobilePaymentBtn">Process Payment</button>
+      </footer>
+    </div>
+  </section>
+
+  <!-- Advanced Analytics Modal -->
+  <section class="modal" id="analyticsModal" role="dialog" aria-modal="true" aria-labelledby="analyticsTitle" hidden>
+    <div class="modal-content analytics-modal">
+      <header class="modal-header">
+        <h2 id="analyticsTitle">Payment Analytics & Reports</h2>
+        <button type="button" class="modal-close" data-close="analyticsModal" aria-label="Close analytics">
+          <span class="material-symbols-rounded" aria-hidden="true">close</span>
+        </button>
+      </header>
+      <div class="modal-body">
+        <div class="analytics-controls">
+          <div class="date-range-selector">
+            <label>
+              <span>Start Date</span>
+              <input type="date" id="analyticsStartDate">
+            </label>
+            <label>
+              <span>End Date</span>
+              <input type="date" id="analyticsEndDate">
+            </label>
+            <button type="button" class="primary" id="generateAnalyticsBtn">Generate Report</button>
+          </div>
+          
+          <div class="report-options">
+            <button type="button" class="report-btn" data-report="summary">Summary Report</button>
+            <button type="button" class="report-btn" data-report="trends">Trends Analysis</button>
+            <button type="button" class="report-btn" data-report="methods">Payment Methods</button>
+            <button type="button" class="report-btn" data-report="customers">Customer Analysis</button>
+            <button type="button" class="report-btn" data-report="tax">Tax Report</button>
+          </div>
+        </div>
+        
+        <div class="analytics-content" id="analyticsContent">
+          <div class="chart-container">
+            <canvas id="revenueChart"></canvas>
+          </div>
+          <div class="chart-container">
+            <canvas id="paymentMethodsChart"></canvas>
+          </div>
+          <div class="analytics-tables" id="analyticsTables"></div>
+        </div>
+        
+        <div class="export-options">
+          <button type="button" class="secondary" id="exportPdfBtn">
+            <span class="material-symbols-rounded">picture_as_pdf</span>
+            Export PDF
+          </button>
+          <button type="button" class="secondary" id="exportExcelBtn">
+            <span class="material-symbols-rounded">table_chart</span>
+            Export Excel
+          </button>
+        </div>
+      </div>
+      <footer class="modal-footer">
+        <button type="button" class="secondary" data-close="analyticsModal">Close</button>
       </footer>
     </div>
   </section>
@@ -2747,6 +3881,521 @@
           }
         },
 
+        // Enhanced Payment Features
+        bulkPayments: [],
+        recurringPayments: [],
+        paymentReminders: [],
+        reconciliationData: null,
+        mobileMoneyTransactions: [],
+        analyticsData: null,
+
+        // Bulk Payment Functions
+        downloadBulkTemplate() {
+          const csvContent = 'Customer Name,Email,Phone,Amount,Currency,Payment Method,Description\n' +
+                           'John Doe,john@example.com,+260123456789,150.00,ZMW,mobile_money,Monthly subscription\n' +
+                           'Jane Smith,jane@example.com,+260987654321,75.50,ZMW,card,Consultation fee';
+          
+          const blob = new Blob([csvContent], { type: 'text/csv' });
+          const url = window.URL.createObjectURL(blob);
+          const a = document.createElement('a');
+          a.href = url;
+          a.download = 'bulk_payment_template.csv';
+          a.click();
+          window.URL.revokeObjectURL(url);
+        },
+
+        handleBulkFileUpload(event) {
+          const file = event.target.files[0];
+          if (!file) return;
+
+          const reader = new FileReader();
+          reader.onload = (e) => {
+            const content = e.target.result;
+            this.parseBulkPaymentFile(content);
+          };
+          reader.readAsText(file);
+        },
+
+        parseBulkPaymentFile(content) {
+          const lines = content.split('\n');
+          const headers = lines[0].split(',');
+          const payments = [];
+
+          for (let i = 1; i < lines.length; i++) {
+            const values = lines[i].split(',');
+            if (values.length === headers.length) {
+              payments.push({
+                customerName: values[0],
+                email: values[1],
+                phone: values[2],
+                amount: parseFloat(values[3]),
+                currency: values[4],
+                paymentMethod: values[5],
+                description: values[6]
+              });
+            }
+          }
+
+          this.bulkPayments = payments;
+          this.showBulkPreview(payments);
+        },
+
+        showBulkPreview(payments) {
+          const previewSection = document.getElementById('bulkPreviewSection');
+          const previewStats = document.getElementById('bulkPreviewStats');
+          const previewTable = document.getElementById('bulkPreviewTable');
+          const processBtn = document.getElementById('processBulkPaymentBtn');
+
+          const totalAmount = payments.reduce((sum, p) => sum + p.amount, 0);
+          
+          previewStats.innerHTML = `
+            <div class="stat-card">
+              <h4>Total Payments</h4>
+              <p>${payments.length}</p>
+            </div>
+            <div class="stat-card">
+              <h4>Total Amount</h4>
+              <p>${this.formatCurrency(totalAmount)}</p>
+            </div>
+            <div class="stat-card">
+              <h4>Average Amount</h4>
+              <p>${this.formatCurrency(totalAmount / payments.length)}</p>
+            </div>
+          `;
+
+          previewTable.innerHTML = `
+            <table>
+              <thead>
+                <tr>
+                  <th>Customer</th>
+                  <th>Amount</th>
+                  <th>Method</th>
+                  <th>Status</th>
+                </tr>
+              </thead>
+              <tbody>
+                ${payments.map(p => `
+                  <tr>
+                    <td>${p.customerName}</td>
+                    <td>${this.formatCurrency(p.amount)}</td>
+                    <td>${p.paymentMethod}</td>
+                    <td><span class="status-badge warning">Pending</span></td>
+                  </tr>
+                `).join('')}
+              </tbody>
+            </table>
+          `;
+
+          previewSection.hidden = false;
+          processBtn.disabled = false;
+        },
+
+        async processBulkPayments() {
+          try {
+            const response = await window.cashierAPI.bulkPaymentProcess({
+              payments: this.bulkPayments,
+              tenantId: this.getCurrentTenantId()
+            });
+            
+            if (response.success) {
+              this.showNotification('Bulk payments processed successfully', 'success');
+              this.closeModal('bulkPaymentModal');
+              this.loadDocuments(this.currentDocumentType);
+            } else {
+              this.showNotification(response.message || 'Failed to process bulk payments', 'error');
+            }
+          } catch (error) {
+            console.error('Error processing bulk payments:', error);
+            this.showNotification('Error processing bulk payments', 'error');
+          }
+        },
+
+        // Recurring Payment Functions
+        async saveRecurringPayment() {
+          const form = document.getElementById('recurringPaymentForm');
+          const formData = new FormData(form);
+          const data = Object.fromEntries(formData.entries());
+
+          try {
+            const response = await window.cashierAPI.createRecurringPayment({
+              ...data,
+              tenantId: this.getCurrentTenantId(),
+              amount: parseFloat(data.amount)
+            });
+            
+            if (response.success) {
+              this.showNotification('Recurring payment setup successful', 'success');
+              this.closeModal('recurringPaymentModal');
+              this.loadDocuments('recurring');
+            } else {
+              this.showNotification(response.message || 'Failed to setup recurring payment', 'error');
+            }
+          } catch (error) {
+            console.error('Error setting up recurring payment:', error);
+            this.showNotification('Error setting up recurring payment', 'error');
+          }
+        },
+
+        // Payment Reminder Functions
+        async savePaymentReminder() {
+          const form = document.getElementById('paymentReminderForm');
+          const formData = new FormData(form);
+          const data = Object.fromEntries(formData.entries());
+
+          try {
+            const response = await window.cashierAPI.createPaymentReminder({
+              ...data,
+              tenantId: this.getCurrentTenantId(),
+              amount: parseFloat(data.amount)
+            });
+            
+            if (response.success) {
+              this.showNotification('Payment reminder scheduled successfully', 'success');
+              this.closeModal('paymentReminderModal');
+              this.loadDocuments('reminders');
+            } else {
+              this.showNotification(response.message || 'Failed to schedule reminder', 'error');
+            }
+          } catch (error) {
+            console.error('Error scheduling reminder:', error);
+            this.showNotification('Error scheduling reminder', 'error');
+          }
+        },
+
+        // Payment Reconciliation Functions
+        async startReconciliation() {
+          const fileInput = document.getElementById('statementFile');
+          const file = fileInput.files[0];
+          
+          if (!file) {
+            this.showNotification('Please select a bank statement file', 'error');
+            return;
+          }
+
+          const options = {
+            autoReconcile: document.getElementById('autoReconcile').checked,
+            toleranceMatching: document.getElementById('toleranceMatching').checked,
+            dateMatching: document.getElementById('dateMatching').checked
+          };
+
+          try {
+            const response = await window.cashierAPI.importBankStatement({
+              file: file,
+              options: options,
+              tenantId: this.getCurrentTenantId()
+            });
+            
+            if (response.success) {
+              this.showReconciliationResults(response.data);
+            } else {
+              this.showNotification(response.message || 'Reconciliation failed', 'error');
+            }
+          } catch (error) {
+            console.error('Error during reconciliation:', error);
+            this.showNotification('Error during reconciliation', 'error');
+          }
+        },
+
+        showReconciliationResults(data) {
+          const resultsSection = document.getElementById('reconciliationResults');
+          const resultsStats = document.getElementById('reconciliationStats');
+          const resultsTable = document.getElementById('reconciliationTable');
+
+          resultsStats.innerHTML = `
+            <div class="stat-card">
+              <h4>Total Transactions</h4>
+              <p>${data.totalTransactions}</p>
+            </div>
+            <div class="stat-card">
+              <h4>Matched</h4>
+              <p>${data.matchedTransactions}</p>
+            </div>
+            <div class="stat-card">
+              <h4>Unmatched</h4>
+              <p>${data.unmatchedTransactions}</p>
+            </div>
+            <div class="stat-card">
+              <h4>Discrepancies</h4>
+              <p>${data.discrepancies}</p>
+            </div>
+          `;
+
+          resultsTable.innerHTML = `
+            <table>
+              <thead>
+                <tr>
+                  <th>Date</th>
+                  <th>Description</th>
+                  <th>Amount</th>
+                  <th>Status</th>
+                  <th>Action</th>
+                </tr>
+              </thead>
+              <tbody>
+                ${data.transactions.map(t => `
+                  <tr>
+                    <td>${t.date}</td>
+                    <td>${t.description}</td>
+                    <td>${this.formatCurrency(t.amount)}</td>
+                    <td><span class="status-badge ${t.status === 'matched' ? 'success' : 'warning'}">${t.status}</span></td>
+                    <td>
+                      ${t.status === 'unmatched' ? 
+                        `<button class="action-btn edit" onclick="paymentSystem().manualMatch('${t.id}')">
+                          <span class="material-symbols-rounded">link</span>
+                        </button>` : 
+                        `<button class="action-btn view" onclick="paymentSystem().viewMatch('${t.id}')">
+                          <span class="material-symbols-rounded">visibility</span>
+                        </button>`
+                      }
+                    </td>
+                  </tr>
+                `).join('')}
+              </tbody>
+            </table>
+          `;
+
+          resultsSection.hidden = false;
+        },
+
+        // Mobile Money Functions
+        async processMobilePayment() {
+          const form = document.getElementById('mobileMoneyForm');
+          const formData = new FormData(form);
+          const data = Object.fromEntries(formData.entries());
+
+          try {
+            const response = await fetch('/api/enhanced-mobile-money/ussd', {
+              method: 'POST',
+              headers: {
+                'Content-Type': 'application/json'
+              },
+              body: JSON.stringify({
+                ...data,
+                tenantId: this.getCurrentTenantId(),
+                amount: parseFloat(data.amount)
+              })
+            });
+
+            const result = await response.json();
+            
+            if (result.success) {
+              if (data.paymentType === 'ussd') {
+                this.showUssdInstructions(result.data);
+              } else {
+                this.showNotification('Mobile money payment initiated', 'success');
+                this.closeModal('mobileMoneyModal');
+              }
+            } else {
+              this.showNotification(result.message || 'Payment failed', 'error');
+            }
+          } catch (error) {
+            console.error('Error processing mobile money payment:', error);
+            this.showNotification('Error processing payment', 'error');
+          }
+        },
+
+        showUssdInstructions(data) {
+          const ussdSection = document.getElementById('ussdSection');
+          const ussdInstructions = document.getElementById('ussdInstructions');
+          const ussdStatus = document.getElementById('ussdStatus');
+
+          ussdInstructions.innerHTML = `
+            <p><strong>Dial:</strong> ${data.ussdCode}</p>
+            <p><strong>Session ID:</strong> ${data.sessionId}</p>
+            <p><strong>Amount:</strong> ${this.formatCurrency(data.amount)}</p>
+            <p><strong>Expires:</strong> ${new Date(data.expiresAt).toLocaleString()}</p>
+          `;
+
+          ussdStatus.innerHTML = 'Waiting for USSD completion...';
+          ussdSection.hidden = false;
+
+          // Poll for status
+          this.pollUssdStatus(data.sessionId);
+        },
+
+        async pollUssdStatus(sessionId) {
+          const maxAttempts = 30;
+          let attempts = 0;
+
+          const checkStatus = async () => {
+            if (attempts >= maxAttempts) {
+              document.getElementById('ussdStatus').innerHTML = 'Session expired';
+              return;
+            }
+
+            try {
+              const response = await fetch(`/api/enhanced-mobile-money/ussd-status/${sessionId}`);
+              const result = await response.json();
+
+              if (result.success) {
+                const statusElement = document.getElementById('ussdStatus');
+                
+                if (result.data.status === 'completed') {
+                  statusElement.innerHTML = 'Payment completed successfully!';
+                  statusElement.className = 'ussd-status success';
+                  setTimeout(() => this.closeModal('mobileMoneyModal'), 2000);
+                } else if (result.data.status === 'failed') {
+                  statusElement.innerHTML = `Payment failed: ${result.data.message}`;
+                  statusElement.className = 'ussd-status error';
+                } else {
+                  attempts++;
+                  setTimeout(checkStatus, 5000); // Check again in 5 seconds
+                }
+              }
+            } catch (error) {
+              console.error('Error checking USSD status:', error);
+              attempts++;
+              setTimeout(checkStatus, 5000);
+            }
+          };
+
+          checkStatus();
+        },
+
+        // Analytics Functions
+        async generateAnalytics() {
+          const startDate = document.getElementById('analyticsStartDate').value;
+          const endDate = document.getElementById('analyticsEndDate').value;
+
+          if (!startDate || !endDate) {
+            this.showNotification('Please select date range', 'error');
+            return;
+          }
+
+          try {
+            const response = await fetch(`/api/advanced-reporting/analytics?tenantId=${this.getCurrentTenantId()}&startDate=${startDate}&endDate=${endDate}`);
+            const result = await response.json();
+
+            if (result.success) {
+              this.analyticsData = result.data;
+              this.renderAnalytics(result.data);
+            } else {
+              this.showNotification(result.message || 'Failed to generate analytics', 'error');
+            }
+          } catch (error) {
+            console.error('Error generating analytics:', error);
+            this.showNotification('Error generating analytics', 'error');
+          }
+        },
+
+        renderAnalytics(data) {
+          this.renderRevenueChart(data.dailyRevenue);
+          this.renderPaymentMethodsChart(data.paymentMethodDistribution);
+          this.renderAnalyticsTables(data);
+        },
+
+        renderRevenueChart(dailyRevenue) {
+          const ctx = document.getElementById('revenueChart').getContext('2d');
+          new Chart(ctx, {
+            type: 'line',
+            data: {
+              labels: dailyRevenue.map(d => d.date),
+              datasets: [{
+                label: 'Daily Revenue',
+                data: dailyRevenue.map(d => d.revenue),
+                borderColor: '#14B8A6',
+                backgroundColor: 'rgba(20, 184, 166, 0.1)',
+                tension: 0.4
+              }]
+            },
+            options: {
+              responsive: true,
+              maintainAspectRatio: false
+            }
+          });
+        },
+
+        renderPaymentMethodsChart(methods) {
+          const ctx = document.getElementById('paymentMethodsChart').getContext('2d');
+          new Chart(ctx, {
+            type: 'doughnut',
+            data: {
+              labels: methods.map(m => m.paymentMethod),
+              datasets: [{
+                data: methods.map(m => m.amount),
+                backgroundColor: ['#14B8A6', '#3B82F6', '#F59E0B', '#EF4444']
+              }]
+            },
+            options: {
+              responsive: true,
+              maintainAspectRatio: false
+            }
+          });
+        },
+
+        renderAnalyticsTables(data) {
+          const tablesContainer = document.getElementById('analyticsTables');
+          tablesContainer.innerHTML = `
+            <div class="analytics-table">
+              <h3>Top Customers</h3>
+              <table>
+                <thead>
+                  <tr>
+                    <th>Customer</th>
+                    <th>Total Amount</th>
+                    <th>Transactions</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  ${data.topCustomers.slice(0, 10).map(c => `
+                    <tr>
+                      <td>${c.customerName}</td>
+                      <td>${this.formatCurrency(c.totalAmount)}</td>
+                      <td>${c.transactionCount}</td>
+                    </tr>
+                  `).join('')}
+                </tbody>
+              </table>
+            </div>
+          `;
+        },
+
+        async exportAnalytics(format) {
+          const startDate = document.getElementById('analyticsStartDate').value;
+          const endDate = document.getElementById('analyticsEndDate').value;
+
+          try {
+            const response = await fetch(`/api/advanced-reporting/export?tenantId=${this.getCurrentTenantId()}&startDate=${startDate}&endDate=${endDate}&format=${format}`);
+            const blob = await response.blob();
+            
+            const url = window.URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `payment_analytics.${format}`;
+            a.click();
+            window.URL.revokeObjectURL(url);
+          } catch (error) {
+            console.error('Error exporting analytics:', error);
+            this.showNotification('Error exporting analytics', 'error');
+          }
+        },
+
+        // Utility Functions
+        getCurrentTenantId() {
+          // In a real implementation, this would get tenant ID from authentication
+          return '00000000-0000-0000-0000-000000000000';
+        },
+
+        showNotification(message, type = 'info') {
+          // Simple notification implementation
+          const notification = document.createElement('div');
+          notification.className = `notification ${type}`;
+          notification.textContent = message;
+          notification.style.cssText = `
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            padding: 1rem;
+            background: ${type === 'success' ? '#22c55e' : type === 'error' ? '#ef4444' : '#3b82f6'};
+            color: white;
+            border-radius: 8px;
+            z-index: 9999;
+          `;
+          
+          document.body.appendChild(notification);
+          setTimeout(() => notification.remove(), 3000);
+        },
+
         setupEventListeners() {
           // Document type tabs
           document.querySelectorAll('.doc-tab').forEach(tab => {
@@ -2761,6 +4410,47 @@
           document.getElementById('newQuotationBtn').addEventListener('click', () => this.openModal('quotationModal'));
           document.getElementById('newCreditNoteBtn').addEventListener('click', () => this.openModal('creditNoteModal'));
           document.getElementById('newInsuranceClaimBtn').addEventListener('click', () => this.openModal('insuranceClaimModal'));
+
+          // Enhanced payment feature buttons
+          document.getElementById('bulkPaymentBtn').addEventListener('click', () => this.openModal('bulkPaymentModal'));
+          document.getElementById('recurringPaymentBtn').addEventListener('click', () => this.openModal('recurringPaymentModal'));
+          document.getElementById('paymentReminderBtn').addEventListener('click', () => this.openModal('paymentReminderModal'));
+          document.getElementById('reconciliationBtn').addEventListener('click', () => this.openModal('reconciliationModal'));
+          document.getElementById('mobileMoneyBtn').addEventListener('click', () => this.openModal('mobileMoneyModal'));
+          document.getElementById('advancedReportsBtn').addEventListener('click', () => this.openModal('analyticsModal'));
+
+          // Bulk payment handlers
+          document.getElementById('downloadTemplateBtn').addEventListener('click', () => this.downloadBulkTemplate());
+          document.getElementById('bulkFileUpload').addEventListener('click', () => document.getElementById('bulkPaymentFile').click());
+          document.getElementById('bulkPaymentFile').addEventListener('change', (e) => this.handleBulkFileUpload(e));
+          document.getElementById('processBulkPaymentBtn').addEventListener('click', () => this.processBulkPayments());
+
+          // Recurring payment handlers
+          document.getElementById('saveRecurringPaymentBtn').addEventListener('click', () => this.saveRecurringPayment());
+
+          // Payment reminder handlers
+          document.getElementById('saveReminderBtn').addEventListener('click', () => this.savePaymentReminder());
+          document.querySelectorAll('.template-btn').forEach(btn => {
+            btn.addEventListener('click', (e) => this.setReminderTemplate(e.target.dataset.template));
+          });
+
+          // Reconciliation handlers
+          document.getElementById('statementFileUpload').addEventListener('click', () => document.getElementById('statementFile').click());
+          document.getElementById('startReconciliationBtn').addEventListener('click', () => this.startReconciliation());
+
+          // Mobile money handlers
+          document.getElementById('processMobilePaymentBtn').addEventListener('click', () => this.processMobilePayment());
+
+          // Analytics handlers
+          document.getElementById('generateAnalyticsBtn').addEventListener('click', () => this.generateAnalytics());
+          document.getElementById('exportPdfBtn').addEventListener('click', () => this.exportAnalytics('pdf'));
+          document.getElementById('exportExcelBtn').addEventListener('click', () => this.exportAnalytics('excel'));
+
+          // Payment type change handler
+          document.getElementById('mobilePaymentType').addEventListener('change', (e) => {
+            const ussdSection = document.getElementById('ussdSection');
+            ussdSection.hidden = e.target.value !== 'ussd';
+          });
 
           // Search
           document.getElementById('paymentTableSearch').addEventListener('input', () => this.searchPayments());

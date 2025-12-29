@@ -6,6 +6,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using UmiHealth.Domain.Entities;
 using UmiHealth.Infrastructure.Data;
+using UmiHealth.Persistence.Data;
 
 namespace UmiHealth.Application.Services
 {

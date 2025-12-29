@@ -1778,6 +1778,26 @@
         <span class="material-symbols-rounded nav-icon">payments</span>
         <span>Payments</span>
       </a>
+      <a href="inventory-quick.html" class="nav-item">
+        <span class="material-symbols-rounded nav-icon">inventory</span>
+        <span>Inventory</span>
+      </a>
+      <a href="queue-management.html" class="nav-item">
+        <span class="material-symbols-rounded nav-icon">queue</span>
+        <span>Queue</span>
+      </a>
+      <a href="shift-management.html" class="nav-item">
+        <span class="material-symbols-rounded nav-icon">schedule</span>
+        <span>Shift Management</span>
+      </a>
+      <a href="reports.html" class="nav-item">
+        <span class="material-symbols-rounded nav-icon">summarize</span>
+        <span>Reports</span>
+      </a>
+      <a href="help.html" class="nav-item">
+        <span class="material-symbols-rounded nav-icon">help</span>
+        <span>Help & Training</span>
+      </a>
       <a href="account.html" class="nav-item">
         <span class="material-symbols-rounded nav-icon">settings</span>
         <span>Account</span>
@@ -1920,6 +1940,10 @@
                   <dd id="shiftTotalSales">ZMW 0.00</dd>
                 </div>
               </dl>
+              <div class="shift-actions" style="margin-top: 1rem; display: flex; gap: 0.5rem;">
+                <button class="btn btn-primary btn-sm" @click="openShift(0)" style="font-size: 0.75rem; padding: 0.5rem 1rem;">Open Shift</button>
+                <button class="btn btn-secondary btn-sm" @click="closeShift()" style="font-size: 0.75rem; padding: 0.5rem 1rem;">Close Shift</button>
+              </div>
             </div>
           </article>
         </div>
@@ -2493,6 +2517,18 @@
           role: 'Admin',
           initials: 'UH'
         },
+        // Shift management
+        shiftInfo: {
+          isOpen: false,
+          openedAt: null,
+          openedBy: '',
+          startingCash: 0,
+          currentCash: 0,
+          sales: [],
+          expectedCash: 0
+        },
+        // Patient selection for prescription handling
+        selectedPatient: null,
         products: [
           { id: 1, name: 'Paracetamol 500mg', price: 25.50, stock: 150, category: 'medication' },
           { id: 2, name: 'Amoxicillin 250mg', price: 85.00, stock: 80, category: 'medication' },
@@ -2540,6 +2576,55 @@
           if (product.stock <= 0) {
             alert('Product is out of stock');
             return;
+          }
+          
+          // Check for expiry alerts
+          if (product.expiryDate) {
+            const expiryDate = new Date(product.expiryDate);
+            const today = new Date();
+            const daysUntilExpiry = Math.ceil((expiryDate - today) / (1000 * 60 * 60 * 24));
+            
+            if (daysUntilExpiry <= 0) {
+              if (!confirm(`Warning: ${product.name} has expired! Do you still want to add it to the cart?`)) {
+                return;
+              }
+            } else if (daysUntilExpiry <= 30) {
+              if (!confirm(`Warning: ${product.name} expires in ${daysUntilExpiry} days! Do you want to continue?`)) {
+                return;
+              }
+            }
+          }
+          
+          // Check for negative profit margin
+          if (product.costPrice && product.sellingPrice && product.costPrice >= product.sellingPrice) {
+            if (!confirm(`Warning: ${product.name} has zero or negative profit margin! Do you still want to add it to the cart?`)) {
+              return;
+            }
+          }
+          
+          // Check for controlled substances
+          if (product.category === 'medication' && product.requiresPrescription) {
+            if (!this.selectedPatient) {
+              alert('Controlled medications require patient information. Please select a patient first.');
+              return;
+            }
+            
+            if (!confirm(`Warning: ${product.name} is a controlled substance. Patient details and prescription verification are required before sale. Continue?`)) {
+              return;
+            }
+            
+            // Log controlled substance sale attempt
+            this.logControlledSubstanceSale(product, this.selectedPatient);
+          }
+          
+          // Check for potential drug interactions (simplified)
+          if (product.category === 'medication' && this.cart.length > 0) {
+            const existingMeds = this.cart.filter(item => item.category === 'medication');
+            if (existingMeds.length > 0) {
+              if (!confirm(`Warning: Potential drug interactions detected with existing medications in cart. Please verify with pharmacist. Continue?`)) {
+                return;
+              }
+            }
           }
           
           const existingItem = this.cart.find(item => item.id === product.id);

@@ -4,7 +4,6 @@ using System.IO;
 using System.Threading.Tasks;
 using UmiHealth.Shared.DTOs;
 using QuestPDF.Fluent;
-using QuestPDF.Helpers;
 using QuestPDF.Infrastructure;
 
 namespace UmiHealth.Application.Services
