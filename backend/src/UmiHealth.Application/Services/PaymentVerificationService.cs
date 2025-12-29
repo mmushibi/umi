@@ -6,6 +6,7 @@ using System.Threading.Tasks;
 using UmiHealth.Application.DTOs;
 using UmiHealth.Domain.Entities;
 using UmiHealth.Infrastructure.Data;
+using UmiHealth.Persistence.Data;
 
 namespace UmiHealth.Application.Services
 {

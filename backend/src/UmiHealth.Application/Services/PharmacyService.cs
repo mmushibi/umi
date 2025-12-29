@@ -5,8 +5,10 @@ using System.Threading.Tasks;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 using UmiHealth.Application.DTOs;
+using UmiHealth.Application.DTOs.Pharmacy;
 using UmiHealth.Domain.Entities;
-using UmiHealth.Infrastructure.Data;
+using UmiHealth.Core.Entities;
+using UmiHealth.Persistence.Data;
 
 namespace UmiHealth.Application.Services
 {
@@ -106,7 +108,7 @@ namespace UmiHealth.Application.Services
 
         public async Task<IEnumerable<SupplierDto>> GetSuppliersAsync(Guid tenantId)
         {
-            var suppliers = await _context.Suppliers
+            var suppliers = await _context.Set<UmiHealth.Core.Entities.Supplier>()
                 .Where(s => s.TenantId == tenantId && s.DeletedAt == null)
                 .OrderBy(s => s.Name)
                 .ToListAsync();
@@ -129,7 +131,7 @@ namespace UmiHealth.Application.Services
 
         public async Task<SupplierDto> GetSupplierByIdAsync(Guid tenantId, Guid supplierId)
         {
-            var supplier = await _context.Suppliers
+            var supplier = await _context.Set<UmiHealth.Core.Entities.Supplier>()
                 .FirstOrDefaultAsync(s => s.Id == supplierId && s.TenantId == tenantId && s.DeletedAt == null);
 
             if (supplier == null)
@@ -153,7 +155,7 @@ namespace UmiHealth.Application.Services
 
         public async Task<SupplierDto> CreateSupplierAsync(Guid tenantId, CreateSupplierRequest request)
         {
-            var supplier = new Supplier
+            var supplier = new UmiHealth.Core.Entities.Supplier
             {
                 TenantId = tenantId,
                 Name = request.Name,
@@ -163,12 +165,12 @@ namespace UmiHealth.Application.Services
                 Address = request.Address,
                 LicenseNumber = request.LicenseNumber,
                 PaymentTerms = request.PaymentTerms,
-                IsActive = request.IsActive,
+                IsActive = true,
                 CreatedAt = DateTime.UtcNow,
                 UpdatedAt = DateTime.UtcNow
             };
 
-            _context.Suppliers.Add(supplier);
+            _context.Set<UmiHealth.Core.Entities.Supplier>().Add(supplier);
             await _context.SaveChangesAsync();
 
             return await GetSupplierByIdAsync(tenantId, supplier.Id);
@@ -176,7 +178,7 @@ namespace UmiHealth.Application.Services
 
         public async Task<SupplierDto> UpdateSupplierAsync(Guid tenantId, Guid supplierId, UpdateSupplierRequest request)
         {
-            var supplier = await _context.Suppliers
+            var supplier = await _context.Set<UmiHealth.Core.Entities.Supplier>()
                 .FirstOrDefaultAsync(s => s.Id == supplierId && s.TenantId == tenantId && s.DeletedAt == null);
 
             if (supplier == null)
@@ -192,7 +194,7 @@ namespace UmiHealth.Application.Services
             supplier.IsActive = request.IsActive;
             supplier.UpdatedAt = DateTime.UtcNow;
 
-            _context.Suppliers.Update(supplier);
+            _context.Set<UmiHealth.Core.Entities.Supplier>().Update(supplier);
             await _context.SaveChangesAsync();
 
             return await GetSupplierByIdAsync(tenantId, supplierId);
@@ -200,7 +202,7 @@ namespace UmiHealth.Application.Services
 
         public async Task<bool> DeleteSupplierAsync(Guid tenantId, Guid supplierId)
         {
-            var supplier = await _context.Suppliers
+            var supplier = await _context.Set<UmiHealth.Core.Entities.Supplier>()
                 .FirstOrDefaultAsync(s => s.Id == supplierId && s.TenantId == tenantId && s.DeletedAt == null);
 
             if (supplier == null)
@@ -209,7 +211,7 @@ namespace UmiHealth.Application.Services
             supplier.DeletedAt = DateTime.UtcNow;
             supplier.UpdatedAt = DateTime.UtcNow;
 
-            _context.Suppliers.Update(supplier);
+            _context.Set<UmiHealth.Core.Entities.Supplier>().Update(supplier);
             await _context.SaveChangesAsync();
 
             return true;
