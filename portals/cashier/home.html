@@ -1798,6 +1798,26 @@
         <span class="material-symbols-rounded nav-icon">payments</span>
         <span>Payments</span>
       </a>
+      <a href="inventory-quick.html" class="nav-item">
+        <span class="material-symbols-rounded nav-icon">inventory</span>
+        <span>Inventory</span>
+      </a>
+      <a href="queue-management.html" class="nav-item">
+        <span class="material-symbols-rounded nav-icon">queue</span>
+        <span>Queue</span>
+      </a>
+      <a href="shift-management.html" class="nav-item">
+        <span class="material-symbols-rounded nav-icon">schedule</span>
+        <span>Shift Management</span>
+      </a>
+      <a href="reports.html" class="nav-item">
+        <span class="material-symbols-rounded nav-icon">summarize</span>
+        <span>Reports</span>
+      </a>
+      <a href="help.html" class="nav-item">
+        <span class="material-symbols-rounded nav-icon">help</span>
+        <span>Help & Training</span>
+      </a>
       <a href="account.html" class="nav-item">
         <span class="material-symbols-rounded nav-icon">settings</span>
         <span>Account</span>
@@ -2361,46 +2381,8 @@
         },
 
         processSale() {
-          // Sample transaction data for demonstration
-          const transactionData = {
-            patient: {
-              name: 'John Mushibi',
-              id: 'P001234',
-              prescriptionNumber: 'RX123456',
-              insurance: 'MediCare Zambia'
-            },
-            items: [
-              {
-                type: 'prescription',
-                name: 'Amoxicillin',
-                strength: '500mg',
-                dosageForm: 'capsules',
-                quantity: 30,
-                prescriptionNumber: 'RX123456',
-                unitPrice: 10.00,
-                totalPrice: 10.00,
-                copay: 10.00,
-                insuranceCoverage: 0
-              },
-              {
-                type: 'otc',
-                name: 'Vitamin C',
-                strength: '1000mg',
-                dosageForm: 'tablets',
-                quantity: 1,
-                unitPrice: 8.99,
-                totalPrice: 8.99
-              }
-            ],
-            payment: {
-              method: 'debit',
-              amount: 19.71,
-              cardLastFour: '1234',
-              authorizationCode: 'ABC123'
-            }
-          };
-
-          this.generateReceipt(transactionData);
+          // This would process real transaction data
+          this.showNotification('Sale processing not yet implemented', 'info');
         },
         
         formatCurrency(amount) {
@@ -2634,7 +2616,7 @@
               alert('Sales data exported successfully!');
               break;
             case 'refresh-all-transactions':
-              this.loadSampleData();
+              this.loadDashboardData();
               break;
             case 'view-all-transactions':
               console.log('Viewing all transactions...');

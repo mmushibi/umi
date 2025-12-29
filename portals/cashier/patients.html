@@ -1150,6 +1150,26 @@
         <span class="material-symbols-rounded nav-icon">payments</span>
         <span>Payments</span>
       </a>
+      <a href="inventory-quick.html" class="nav-item">
+        <span class="material-symbols-rounded nav-icon">inventory</span>
+        <span>Inventory</span>
+      </a>
+      <a href="queue-management.html" class="nav-item">
+        <span class="material-symbols-rounded nav-icon">queue</span>
+        <span>Queue</span>
+      </a>
+      <a href="shift-management.html" class="nav-item">
+        <span class="material-symbols-rounded nav-icon">schedule</span>
+        <span>Shift Management</span>
+      </a>
+      <a href="reports.html" class="nav-item">
+        <span class="material-symbols-rounded nav-icon">summarize</span>
+        <span>Reports</span>
+      </a>
+      <a href="help.html" class="nav-item">
+        <span class="material-symbols-rounded nav-icon">help</span>
+        <span>Help & Training</span>
+      </a>
       <a href="account.html" class="nav-item">
         <span class="material-symbols-rounded nav-icon">settings</span>
         <span>Account</span>
@@ -1989,8 +2009,8 @@
         },
 
         get prescriptionCount() {
-          // Mock data - would come from prescriptions API
-          return Math.floor(Math.random() * 50) + 100;
+          // This would come from prescriptions API
+          return 0;
         },
 
         viewPatient(patient) {
@@ -2560,7 +2580,7 @@
         },
 
         loadSampleData() {
-          // Initialize empty patients array - real data will be loaded from API
+          // Real data will be loaded from API
           this.patients = [];
         },
 
