@@ -84,23 +84,6 @@
       font-family: 'Inter', sans-serif;
     }
 
-    .tenant-info {
-      padding: 1rem 1.5rem;
-      background: rgba(255, 255, 255, 0.1);
-      margin: 1rem 1.5rem;
-      border-radius: 12px;
-      font-size: 0.85rem;
-    }
-
-    .tenant-name {
-      font-weight: 600;
-      margin-bottom: 0.25rem;
-    }
-
-    .tenant-location {
-      opacity: 0.8;
-      font-size: 0.75rem;
-    }
 
     .nav-menu {
       padding: 1rem 0;
@@ -1158,12 +1141,124 @@
       overflow: hidden;
     }
 
+    /* Search Suggestions Styles */
+    .search-container {
+      position: relative;
+      flex: 1;
+      max-width: 400px;
+    }
+
+    .search-bar {
+      position: relative;
+    }
+
+    .search-input {
+      width: 100%;
+      padding: 0.75rem 1rem 0.75rem 2.5rem;
+      border: 1px solid var(--color-border);
+      border-radius: 8px;
+      font-size: 0.875rem;
+      transition: all 0.3s ease;
+    }
+
+    .search-input:focus {
+      outline: none;
+      border-color: var(--color-primary);
+      box-shadow: 0 0 0 4px rgba(0, 0, 0, 0.1);
+    }
+
+    .search-icon {
+      position: absolute;
+      left: 0.75rem;
+      top: 50%;
+      transform: translateY(-50%);
+      color: var(--color-text-muted);
+      font-size: 1.125rem;
+    }
+
+    .search-suggestions {
+      position: absolute;
+      top: 100%;
+      left: 0;
+      right: 0;
+      background: var(--color-background);
+      border: 1px solid var(--color-border);
+      border-radius: 8px;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+      z-index: 1000;
+      max-height: 300px;
+      overflow-y: auto;
+      opacity: 0;
+      visibility: hidden;
+      transform: translateY(-10px);
+      transition: all 0.3s ease;
+    }
+
+    .search-suggestions.show {
+      opacity: 1;
+      visibility: visible;
+      transform: translateY(0);
+    }
+
+    .suggestion-item {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+      padding: 0.75rem 1rem;
+      cursor: pointer;
+      transition: background 0.2s ease;
+      border-bottom: 1px solid var(--color-border);
+    }
+
+    .suggestion-item:last-child {
+      border-bottom: none;
+    }
+
+    .suggestion-item:hover {
+      background: var(--color-surface);
+    }
+
+    .suggestion-icon {
+      width: 32px;
+      height: 32px;
+      background: var(--color-surface);
+      border-radius: 6px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: var(--color-primary);
+    }
+
+    .suggestion-content {
+      flex: 1;
+    }
+
+    .suggestion-title {
+      font-weight: 600;
+      font-size: 0.875rem;
+      color: var(--color-text-primary);
+      margin-bottom: 0.25rem;
+    }
+
+    .suggestion-description {
+      font-size: 0.75rem;
+      color: var(--color-text-secondary);
+    }
+
+    .suggestion-price {
+      font-weight: 700;
+      color: var(--color-primary);
+      font-size: 0.875rem;
+    }
+
     .pos-products-header {
       display: flex;
       justify-content: space-between;
-      align-items: center;
+      align-items: flex-start;
       padding: 1.5rem;
       border-bottom: 1px solid var(--color-border);
+      gap: 1rem;
+      flex-wrap: wrap;
     }
 
     .pos-products-header h2 {
@@ -1245,7 +1340,7 @@
       overflow: hidden;
       display: flex;
       flex-direction: column;
-      max-height: 600px;
+      max-height: 80vh;
     }
 
     .cart-header {
@@ -1267,19 +1362,31 @@
       flex: 1;
       padding: 1rem;
       overflow-y: auto;
+      max-height: 500px;
     }
 
     .cart-empty {
       text-align: center;
-      padding: 2rem;
+      padding: 3rem 2rem;
       color: var(--color-text-secondary);
+      min-height: 200px;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
     }
 
     .cart-empty i {
-      font-size: 3rem;
+      font-size: 4rem;
       opacity: 0.3;
-      margin-bottom: 1rem;
-      display: block;
+      margin-bottom: 1.5rem;
+    }
+
+    .cart-empty p {
+      font-size: 1.125rem;
+      font-weight: 500;
+      margin: 0;
+      opacity: 0.7;
     }
 
     .cart-summary {
@@ -1773,10 +1880,6 @@
       </div>
     </div>
 
-    <div class="pharmacy-info">
-      <div class="pharmacy-name" x-text="pharmacyInfo.name"></div>
-      <div class="pharmacy-location" x-text="pharmacyInfo.location"></div>
-    </div>
 
     <nav class="nav-menu">
       <a href="home.html" class="nav-item">
@@ -1815,6 +1918,11 @@
         <span class="material-symbols-rounded nav-icon">admin_panel_settings</span>
         <span>User Management</span>
       </a>
+      <!-- Branch navigation - always visible for all users -->
+      <a href="branches.html" class="nav-item">
+        <span class="material-symbols-rounded nav-icon">business</span>
+        <span>Branches</span>
+      </a>
       <a href="account.html" class="nav-item">
         <span class="material-symbols-rounded nav-icon">settings</span>
         <span>Account</span>
@@ -1840,34 +1948,6 @@
         
         <div class="page-title-section">
           <h1 class="page-title">Point of Sale</h1>
-        </div>
-        
-        <div class="search-bar" x-data="{ searchOpen: false, query: '' }">
-          <span class="material-symbols-rounded search-icon">search</span>
-          <input 
-            type="text" 
-            class="search-input" 
-            placeholder="Search products, sales, or transactions..."
-            x-model="query"
-            @focus="searchOpen = true"
-            @input="searchOpen = true"
-            @blur="setTimeout(() => searchOpen = false, 200)"
-          >
-          
-          <div class="search-suggestions" :class="searchOpen && query.length > 0 ? 'show' : ''">
-            <template x-for="suggestion in filteredSuggestions" :key="suggestion.id">
-              <div class="suggestion-item" @click="selectSuggestion(suggestion)">
-                <div class="suggestion-icon">
-                  <span class="material-symbols-rounded" x-text="suggestion.icon"></span>
-                </div>
-                <div class="suggestion-content">
-                  <div class="suggestion-title" x-text="suggestion.title"></div>
-                  <div class="suggestion-description" x-text="suggestion.description"></div>
-                </div>
-                <div class="suggestion-type" x-text="suggestion.type"></div>
-              </div>
-            </template>
-          </div>
         </div>
       </div>
 
@@ -1966,6 +2046,36 @@
           <div class="pos-products">
             <div class="pos-products-header">
               <h2>Products</h2>
+              <div class="search-container">
+                <div class="search-bar" x-data="{ searchOpen: false, query: '' }">
+                  <span class="material-symbols-rounded search-icon">search</span>
+                  <input 
+                    type="text" 
+                    class="search-input" 
+                    placeholder="Search products..."
+                    x-model="query"
+                    @focus="searchOpen = true"
+                    @input="searchOpen = true, $dispatch('product-search', { query: query })"
+                    @blur="setTimeout(() => searchOpen = false, 200)"
+                    id="productSearchInput"
+                  >
+                  
+                  <div class="search-suggestions" :class="searchOpen && query.length > 0 ? 'show' : ''" id="searchSuggestions">
+                    <template x-for="suggestion in filteredSuggestions" :key="suggestion.id">
+                      <div class="suggestion-item" @click="selectSuggestion(suggestion)">
+                        <div class="suggestion-icon">
+                          <span class="material-symbols-rounded" x-text="suggestion.icon"></span>
+                        </div>
+                        <div class="suggestion-content">
+                          <div class="suggestion-title" x-text="suggestion.title"></div>
+                          <div class="suggestion-description" x-text="suggestion.description"></div>
+                        </div>
+                        <div class="suggestion-price" x-text="suggestion.price"></div>
+                      </div>
+                    </template>
+                  </div>
+                </div>
+              </div>
               <div class="category-tabs">
                 <button class="category-tab active" data-category="all">All</button>
                 <button class="category-tab" data-category="Antibiotics">Antibiotics</button>
@@ -2521,12 +2631,49 @@
         loadPharmacyInfo();
         loadProducts();
         updateCart();
+        
+        // Add event listener for product search
+        document.addEventListener('product-search', (event) => {
+          const posData = window.Alpine?.evaluate(document.querySelector('[x-data]'), 'posSystem()');
+          if (posData && posData.onProductSearch) {
+            posData.onProductSearch(event);
+          }
+        });
+        
+        // Add event listeners for report buttons
+        const printReportBtn = document.getElementById('printReportBtn');
+        const generateReportBtn = document.getElementById('generateReportBtn');
+        
+        printReportBtn?.addEventListener('click', () => {
+          const posData = window.Alpine?.evaluate(document.querySelector('[x-data]'), 'posSystem()');
+          if (posData && posData.printReport) {
+            posData.printReport();
+          }
+        });
+        
+        generateReportBtn?.addEventListener('click', () => {
+          const posData = window.Alpine?.evaluate(document.querySelector('[x-data]'), 'posSystem()');
+          if (posData && posData.downloadReport) {
+            posData.downloadReport();
+          }
+        });
+        
+        // Add event listener for period filter
+        const periodFilter = document.getElementById('periodFilter');
+        periodFilter?.addEventListener('change', (e) => {
+          const posData = window.Alpine?.evaluate(document.querySelector('[x-data]'), 'posSystem()');
+          if (posData) {
+            posData.reportTimeRange = e.target.value;
+            posData.loadTransactions();
+          }
+        });
       }
       
       init();
       
       // Update shift info
-      document.getElementById('shiftCashierName').textContent = 'John Doe';
+      const loggedInUser = localStorage.getItem('umi_user_name') || 'Cashier';
+      document.getElementById('shiftCashierName').textContent = loggedInUser;
       document.getElementById('shiftOpenedAt').textContent = new Date().toLocaleTimeString();
     });
 
@@ -2534,6 +2681,8 @@
       return {
         sidebarOpen: false,
         searchQuery: '',
+        searchSuggestions: [],
+        searchOpen: false,
         activeCategory: 'all',
         customerName: '',
         amountReceived: 0,
@@ -2553,6 +2702,39 @@
         },
         products: [],
 
+        get filteredSuggestions() {
+          if (!this.searchQuery || this.searchQuery.length < 2) {
+            return [];
+          }
+          
+          const query = this.searchQuery.toLowerCase();
+          return this.products
+            .filter(product => 
+              product.name.toLowerCase().includes(query) ||
+              (product.genericName && product.genericName.toLowerCase().includes(query)) ||
+              (product.category && product.category.toLowerCase().includes(query))
+            )
+            .slice(0, 8)
+            .map(product => ({
+              id: product.id,
+              title: product.name,
+              description: `${product.genericName || ''} • ${product.category || ''}`,
+              price: `ZMW ${product.price.toFixed(2)}`,
+              icon: 'medication',
+              product: product
+            }));
+        },
+
+        selectSuggestion(suggestion) {
+          this.addToCart(suggestion.product);
+          this.searchQuery = '';
+          this.searchOpen = false;
+        },
+
+        onProductSearch(event) {
+          this.searchQuery = event.detail.query;
+        },
+
         get filteredProducts() {
           let filtered = this.products;
           
@@ -2560,9 +2742,12 @@
             filtered = filtered.filter(product => product.category === this.activeCategory);
           }
           
-          if (this.searchQuery) {
+          if (this.searchQuery && this.searchQuery.length >= 2) {
+            const query = this.searchQuery.toLowerCase();
             filtered = filtered.filter(product => 
-              product.name.toLowerCase().includes(this.searchQuery.toLowerCase())
+              product.name.toLowerCase().includes(query) ||
+              (product.genericName && product.genericName.toLowerCase().includes(query)) ||
+              (product.category && product.category.toLowerCase().includes(query))
             );
           }
           
@@ -2811,24 +2996,222 @@
           this.recentTransactions = filteredTransactions.slice(0, 10); // Show last 10 transactions
         },
 
-        downloadReport() {
+        printReport() {
           const transactions = this.recentTransactions;
-          let csvContent = 'Transaction ID,Customer,Items,Subtotal,Tax,Total,Method,Date,Time\n';
+          
+          if (transactions.length === 0) {
+            alert('No transactions to print');
+            return;
+          }
+          
+          // Create a printable window
+          const printWindow = window.open('', '_blank');
+          
+          let html = `
+            <!DOCTYPE html>
+            <html>
+            <head>
+              <title>POS Transactions Report</title>
+              <style>
+                body { font-family: Arial, sans-serif; margin: 20px; }
+                .header { text-align: center; margin-bottom: 30px; }
+                .header h1 { color: #333; }
+                .header p { color: #666; }
+                .transaction { margin-bottom: 20px; padding: 15px; border: 1px solid #ddd; border-radius: 5px; }
+                .transaction-header { font-weight: bold; margin-bottom: 10px; }
+                .transaction-details { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+                .detail-item { margin-bottom: 5px; }
+                .items-list { margin-top: 10px; font-style: italic; }
+                .footer { margin-top: 30px; text-align: center; color: #666; }
+                @media print { body { margin: 10px; } }
+              </style>
+            </head>
+            <body>
+              <div class="header">
+                <h1>Point of Sale Transactions Report</h1>
+                <p>Period: ${this.reportTimeRange.charAt(0).toUpperCase() + this.reportTimeRange.slice(1)}</p>
+                <p>Generated: ${new Date().toLocaleString()}</p>
+                <p>Cashier: ${this.userInfo.name}</p>
+              </div>
+          `;
           
           transactions.forEach(transaction => {
-            const itemsList = transaction.items.map(item => `${item.name}(${item.quantity})`).join('; ');
-            csvContent += `${transaction.id},"${transaction.customer}","${itemsList}",${transaction.subtotal},${transaction.tax},${transaction.total},${transaction.method},${transaction.date},${transaction.time}\n`;
+            const itemsList = transaction.items.map(item => `${item.name} (${item.quantity})`).join(', ');
+            html += `
+              <div class="transaction">
+                <div class="transaction-header">
+                  Transaction #${transaction.id} - ${transaction.time}
+                </div>
+                <div class="transaction-details">
+                  <div class="detail-item"><strong>Customer:</strong> ${transaction.customer}</div>
+                  <div class="detail-item"><strong>Method:</strong> ${transaction.method}</div>
+                  <div class="detail-item"><strong>Subtotal:</strong> ZMW ${transaction.subtotal.toFixed(2)}</div>
+                  <div class="detail-item"><strong>Tax:</strong> ZMW ${transaction.tax.toFixed(2)}</div>
+                  <div class="detail-item"><strong>Total:</strong> ZMW ${transaction.total.toFixed(2)}</div>
+                  <div class="detail-item"><strong>Date:</strong> ${transaction.date}</div>
+                </div>
+                <div class="items-list">
+                  <strong>Items:</strong> ${itemsList}
+                </div>
+              </div>
+            `;
           });
           
-          const blob = new Blob([csvContent], { type: 'text/csv' });
-          const url = window.URL.createObjectURL(blob);
-          const a = document.createElement('a');
-          a.href = url;
-          a.download = `pos-report-${this.reportTimeRange}-${new Date().toISOString().split('T')[0]}.csv`;
-          a.click();
-          window.URL.revokeObjectURL(url);
+          html += `
+              <div class="footer">
+                <p>Total Transactions: ${transactions.length}</p>
+                <p>Total Revenue: ZMW ${transactions.reduce((sum, t) => sum + t.total, 0).toFixed(2)}</p>
+                <hr>
+                <p>Generated by Umi Health POS System</p>
+              </div>
+            </body>
+            </html>
+          `;
           
-          alert('Report downloaded successfully!');
+          printWindow.document.write(html);
+          printWindow.document.close();
+          printWindow.print();
+          
+          // Close the window after printing (with a small delay)
+          setTimeout(() => {
+            printWindow.close();
+          }, 1000);
+        },
+
+        downloadReport() {
+          const transactions = this.recentTransactions;
+          
+          if (transactions.length === 0) {
+            alert('No transactions to export');
+            return;
+          }
+          
+          // Generate PDF content using jsPDF-like approach
+          const { jsPDF } = window.jspdf || {};
+          
+          if (typeof jsPDF === 'undefined') {
+            // Fallback: Create a printable HTML page that can be saved as PDF
+            const pdfWindow = window.open('', '_blank');
+            
+            let html = `
+              <!DOCTYPE html>
+              <html>
+              <head>
+                <title>POS Transactions Report - PDF</title>
+                <style>
+                  body { font-family: Arial, sans-serif; margin: 20px; color: #333; }
+                  .header { text-align: center; margin-bottom: 30px; border-bottom: 2px solid #333; padding-bottom: 20px; }
+                  .header h1 { color: #333; margin-bottom: 10px; }
+                  .header p { color: #666; margin: 5px 0; }
+                  .transaction { margin-bottom: 20px; padding: 15px; border: 1px solid #ddd; border-radius: 5px; page-break-inside: avoid; }
+                  .transaction-header { font-weight: bold; margin-bottom: 10px; background: #f5f5f5; padding: 10px; border-radius: 3px; }
+                  .transaction-details { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+                  .detail-item { margin-bottom: 5px; }
+                  .items-list { margin-top: 10px; font-style: italic; background: #f9f9f9; padding: 10px; border-radius: 3px; }
+                  .footer { margin-top: 30px; text-align: center; color: #666; border-top: 2px solid #333; padding-top: 20px; }
+                  .summary { background: #f0f0f0; padding: 15px; border-radius: 5px; margin: 20px 0; }
+                  @media print { body { margin: 10px; } .transaction { page-break-inside: avoid; } }
+                </style>
+              </head>
+              <body>
+                <div class="header">
+                  <h1>Umi Health - Point of Sale Report</h1>
+                  <p><strong>Period:</strong> ${this.reportTimeRange.charAt(0).toUpperCase() + this.reportTimeRange.slice(1)}</p>
+                  <p><strong>Generated:</strong> ${new Date().toLocaleString()}</p>
+                  <p><strong>Cashier:</strong> ${this.userInfo.name}</p>
+                  <p><strong>Pharmacy:</strong> ${this.pharmacyInfo.name}</p>
+                </div>
+                
+                <div class="summary">
+                  <h3>Summary</h3>
+                  <p><strong>Total Transactions:</strong> ${transactions.length}</p>
+                  <p><strong>Total Revenue:</strong> ZMW ${transactions.reduce((sum, t) => sum + t.total, 0).toFixed(2)}</p>
+                  <p><strong>Total Tax Collected:</strong> ZMW ${transactions.reduce((sum, t) => sum + t.tax, 0).toFixed(2)}</p>
+                </div>
+            `;
+            
+            transactions.forEach(transaction => {
+              const itemsList = transaction.items.map(item => `${item.name} (${item.quantity})`).join(', ');
+              html += `
+                <div class="transaction">
+                  <div class="transaction-header">
+                    Transaction #${transaction.id} - ${transaction.time}
+                  </div>
+                  <div class="transaction-details">
+                    <div class="detail-item"><strong>Customer:</strong> ${transaction.customer}</div>
+                    <div class="detail-item"><strong>Payment:</strong> ${transaction.method.charAt(0).toUpperCase() + transaction.method.slice(1)}</div>
+                    <div class="detail-item"><strong>Subtotal:</strong> ZMW ${transaction.subtotal.toFixed(2)}</div>
+                    <div class="detail-item"><strong>Tax (16%):</strong> ZMW ${transaction.tax.toFixed(2)}</div>
+                    <div class="detail-item"><strong>Total:</strong> ZMW ${transaction.total.toFixed(2)}</div>
+                    <div class="detail-item"><strong>Date:</strong> ${new Date(transaction.date).toLocaleDateString()}</div>
+                  </div>
+                  <div class="items-list">
+                    <strong>Items Purchased:</strong> ${itemsList}
+                  </div>
+                </div>
+              `;
+            });
+            
+            html += `
+                <div class="footer">
+                  <p><strong>Report Generated by Umi Health POS System</strong></p>
+                  <p>${this.pharmacyInfo.name} • ${this.pharmacyInfo.location}</p>
+                  <p>Page 1 of 1</p>
+                </div>
+              </body>
+              </html>
+            `;
+            
+            pdfWindow.document.write(html);
+            pdfWindow.document.close();
+            
+            // Instructions for saving as PDF
+            setTimeout(() => {
+              alert('To save as PDF: Use Ctrl+P (or Cmd+P on Mac) and select "Save as PDF" as the destination');
+            }, 500);
+            
+          } else {
+            // If jsPDF is available, use it directly
+            const doc = new jsPDF();
+            
+            // Add title
+            doc.setFontSize(20);
+            doc.text('Umi Health - POS Report', 105, 20, { align: 'center' });
+            
+            // Add metadata
+            doc.setFontSize(12);
+            doc.text(`Period: ${this.reportTimeRange.charAt(0).toUpperCase() + this.reportTimeRange.slice(1)}`, 20, 35);
+            doc.text(`Generated: ${new Date().toLocaleString()}`, 20, 45);
+            doc.text(`Cashier: ${this.userInfo.name}`, 20, 55);
+            
+            // Add summary
+            doc.setFontSize(14);
+            doc.text('Summary', 20, 75);
+            doc.setFontSize(10);
+            doc.text(`Total Transactions: ${transactions.length}`, 20, 85);
+            doc.text(`Total Revenue: ZMW ${transactions.reduce((sum, t) => sum + t.total, 0).toFixed(2)}`, 20, 95);
+            
+            // Add transactions
+            let yPosition = 115;
+            transactions.forEach((transaction, index) => {
+              if (yPosition > 250) {
+                doc.addPage();
+                yPosition = 20;
+              }
+              
+              doc.setFontSize(12);
+              doc.text(`Transaction #${transaction.id}`, 20, yPosition);
+              doc.setFontSize(10);
+              doc.text(`Customer: ${transaction.customer}`, 20, yPosition + 10);
+              doc.text(`Total: ZMW ${transaction.total.toFixed(2)}`, 20, yPosition + 20);
+              doc.text(`Date: ${new Date(transaction.date).toLocaleDateString()}`, 20, yPosition + 30);
+              
+              yPosition += 45;
+            });
+            
+            // Save the PDF
+            doc.save(`pos-report-${this.reportTimeRange}-${new Date().toISOString().split('T')[0]}.pdf`);
+          }
         },
 
         // Generate system receipt numbers

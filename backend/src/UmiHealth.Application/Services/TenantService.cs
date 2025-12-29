@@ -1,6 +1,9 @@
 using Microsoft.EntityFrameworkCore;
 using System;
+using System.Collections.Generic;
+using System.Linq;
 using System.Threading.Tasks;
+using UmiHealth.Core.Interfaces;
 using UmiHealth.Domain.Entities;
 using UmiHealth.Infrastructure.Data;
 

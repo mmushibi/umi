@@ -235,7 +235,7 @@ app.MapPost("/api/v1/users", async (HttpRequest request, Dictionary<string, obje
 });
 
 // Admin users endpoint - return all registered users
-app.MapGet("/admin/users", (Dictionary<string, object> usersDb) =>
+app.MapGet("/api/v1/admin/users", (Dictionary<string, object> usersDb) =>
 {
     var users = usersDb.Values.ToList();
     return Results.Ok(new {
@@ -246,7 +246,7 @@ app.MapGet("/admin/users", (Dictionary<string, object> usersDb) =>
 });
 
 // Admin create user endpoint
-app.MapPost("/admin/users", async (HttpRequest request, Dictionary<string, object> usersDb) =>
+app.MapPost("/api/v1/admin/users", async (HttpRequest request, Dictionary<string, object> usersDb) =>
 {
     try
     {
@@ -357,7 +357,7 @@ app.MapPut("/admin/users/{userId}", async (string userId, HttpRequest request, D
 });
 
 // Admin branches endpoint
-app.MapGet("/admin/branches", () =>
+app.MapGet("/api/v1/admin/branches", () =>
 {
     var branches = new object[0]; // Empty array - no sample data
     

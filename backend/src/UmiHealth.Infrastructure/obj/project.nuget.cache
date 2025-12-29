@@ -1,8 +1,8 @@
 {
   "version": 2,
-  "dgSpecHash": "vKO7E//5yIA=",
+  "dgSpecHash": "/sMdP8/+VV0=",
   "success": true,
-  "projectFilePath": "C:\\Users\\sepio\\Desktop\\Umi_Health\\Umi_Health\\backend\\src\\UmiHealth.Infrastructure\\UmiHealth.Infrastructure.csproj",
+  "projectFilePath": "C:\\Users\\sepio\\Desktop\\Umi_Health\\Umi_Health\\Umi_Health\\backend\\src\\UmiHealth.Infrastructure\\UmiHealth.Infrastructure.csproj",
   "expectedPackageFiles": [
     "C:\\Users\\sepio\\.nuget\\packages\\automapper\\12.0.1\\automapper.12.0.1.nupkg.sha512",
     "C:\\Users\\sepio\\.nuget\\packages\\automapper.extensions.microsoft.dependencyinjection\\12.0.1\\automapper.extensions.microsoft.dependencyinjection.12.0.1.nupkg.sha512",

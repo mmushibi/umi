@@ -8,15 +8,6 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@100;400;500;600;700&family=Varela+Round&family=Nunito:wght@400;600;700&display=swap" rel="stylesheet">
   <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Rounded:wght@300;400;500;600;700&display=swap" rel="stylesheet">
-  <script src="https://cdn.tailwindcss.com"></script>
-  <!-- Include API and Data Sync Services -->
-  <script src="../shared/js/data-sync.js"></script>
-  <script src="../shared/js/role-based-access.js"></script>
-  <script src="../admin/js/admin-api.js"></script>
-  <script src="js/cashier-api.js"></script>
-  <script src="../../shared/js/data-manager.js"></script>
-  <link rel="stylesheet" href="../../shared/css/cashier-notifications.css">
-  <link rel="stylesheet" href="css/patients-specific.css">
   <style>
     :root {
       --color-primary: #000000;
@@ -64,6 +55,48 @@
       overflow-x: hidden;
     }
 
+    /* Hidden attribute support */
+    [hidden] {
+      display: none !important;
+    }
+
+    /* Notification Styles */
+    .notification {
+      position: fixed;
+      top: 20px;
+      right: 20px;
+      padding: 1rem 1.5rem;
+      border-radius: 8px;
+      color: white;
+      font-weight: 500;
+      z-index: 10000;
+      opacity: 0;
+      transform: translateX(100%);
+      transition: all 0.3s ease;
+      max-width: 400px;
+    }
+
+    .notification.show {
+      opacity: 1;
+      transform: translateX(0);
+    }
+
+    .notification-success {
+      background: var(--color-success);
+    }
+
+    .notification-error {
+      background: var(--color-warning);
+    }
+
+    .notification-warning {
+      background: #f59e0b;
+    }
+
+    .notification-info {
+      background: var(--color-primary);
+    }
+
     .sidebar-header {
       padding: 1.5rem;
       border-bottom: 1px solid rgba(255, 255, 255, 0.1);
@@ -92,23 +125,6 @@
       font-family: 'Inter', sans-serif;
     }
 
-    .tenant-info {
-      padding: 1rem 1.5rem;
-      background: rgba(255, 255, 255, 0.1);
-      margin: 1rem 1.5rem;
-      border-radius: 12px;
-      font-size: 0.85rem;
-    }
-
-    .tenant-name {
-      font-weight: 600;
-      margin-bottom: 0.25rem;
-    }
-
-    .tenant-location {
-      opacity: 0.8;
-      font-size: 0.75rem;
-    }
 
     .nav-menu {
       padding: 1rem 0;
@@ -1112,10 +1128,6 @@
       </div>
     </div>
 
-    <div class="tenant-info">
-      <div class="tenant-name" x-text="tenantInfo.name"></div>
-      <div class="tenant-location" x-text="tenantInfo.location"></div>
-    </div>
 
     <nav class="nav-menu">
       <a href="home.html" class="nav-item">

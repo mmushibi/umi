@@ -5,6 +5,7 @@ using System.Threading.Tasks;
 using System;
 using System.Collections.Generic;
 using System.Net.Http;
+using Microsoft.Extensions.DependencyInjection;
 using UmiHealth.Shared.DTOs;
 
 namespace UmiHealth.Application.Services

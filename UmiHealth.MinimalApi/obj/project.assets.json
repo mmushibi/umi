@@ -88,11 +88,11 @@
   "project": {
     "version": "1.0.0",
     "restore": {
-      "projectUniqueName": "C:\\Users\\sepio\\Desktop\\Umi_Health\\Umi_Health\\UmiHealth.MinimalApi\\UmiHealth.MinimalApi.csproj",
+      "projectUniqueName": "C:\\Users\\sepio\\Desktop\\Umi_Health\\Umi_Health\\Umi_Health\\UmiHealth.MinimalApi\\UmiHealth.MinimalApi.csproj",
       "projectName": "UmiHealth.MinimalApi",
-      "projectPath": "C:\\Users\\sepio\\Desktop\\Umi_Health\\Umi_Health\\UmiHealth.MinimalApi\\UmiHealth.MinimalApi.csproj",
+      "projectPath": "C:\\Users\\sepio\\Desktop\\Umi_Health\\Umi_Health\\Umi_Health\\UmiHealth.MinimalApi\\UmiHealth.MinimalApi.csproj",
       "packagesPath": "C:\\Users\\sepio\\.nuget\\packages\\",
-      "outputPath": "C:\\Users\\sepio\\Desktop\\Umi_Health\\Umi_Health\\UmiHealth.MinimalApi\\obj\\",
+      "outputPath": "C:\\Users\\sepio\\Desktop\\Umi_Health\\Umi_Health\\Umi_Health\\UmiHealth.MinimalApi\\obj\\",
       "projectStyle": "PackageReference",
       "configFilePaths": [
         "C:\\Users\\sepio\\AppData\\Roaming\\NuGet\\NuGet.Config"
