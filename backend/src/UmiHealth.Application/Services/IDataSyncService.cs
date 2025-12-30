@@ -1,11 +1,5 @@
 using System.Threading.Tasks;
-using UmiHealth.Api.Controllers;
+using UmiHealth.Application.DTOs;
 
-namespace UmiHealth.Application.Services
-{
-    public interface IDataSyncService
-    {
-        Task<SyncStatusDto> GetSyncStatusAsync();
-        Task TriggerSyncAsync(string syncType);
-    }
-}
+// This file is deprecated - IDataSyncService interface is now defined in DataSyncService.cs
+// to avoid conflicts and duplicate definitions.

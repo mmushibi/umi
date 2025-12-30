@@ -90,7 +90,7 @@ namespace UmiHealth.Application.DTOs
 
     public class UpgradeSubscriptionRequest
     {
-        public string NewPlan { get; set; } = string.Empty;
+        public string TargetPlan { get; set; } = string.Empty;
         public bool ProRated { get; set; } = true;
     }
 

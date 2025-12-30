@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 using UmiHealth.Application.DTOs;
+using UmiHealth.Application.DTOs.Pharmacy;
 
 namespace UmiHealth.Application.Services
 {

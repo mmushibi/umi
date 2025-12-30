@@ -26,6 +26,8 @@ namespace UmiHealth.Domain.Entities
         public string? ErrorMessage { get; set; }
         public string? RequestId { get; set; }
         public string? CorrelationId { get; set; }
+        public string? SessionId { get; set; }
+        public DateTime Timestamp { get; set; }
         public string? Metadata { get; set; }
     }
 }

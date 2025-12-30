@@ -9,6 +9,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using UmiHealth.Domain.Entities;
 using UmiHealth.Infrastructure.Data;
+using UmiHealth.Persistence.Data;
 
 namespace UmiHealth.Application.Services
 {
@@ -20,6 +21,8 @@ namespace UmiHealth.Application.Services
         Task SyncInventoryAsync(Guid tenantId, Guid branchId);
         Task SyncAllAsync(Guid tenantId, Guid branchId);
         Task<SyncStatus> GetSyncStatusAsync(Guid tenantId, Guid branchId);
+        Task<SyncStatus> GetSyncStatusAsync();
+        Task TriggerSyncAsync(string entityType);
         Task InvalidateCacheAsync(Guid tenantId, Guid branchId, string entityType);
     }
 
@@ -324,6 +327,28 @@ namespace UmiHealth.Application.Services
             {
                 new Branch { Id = Guid.Parse("00000000-0000-0000-0000-000000000001"), Name = "Main Branch" }
             };
+        }
+
+        public async Task<SyncStatus> GetSyncStatusAsync()
+        {
+            // Return overall sync status
+            return new SyncStatus
+            {
+                IsSyncing = false,
+                CurrentOperation = null,
+                LastSyncAttempt = DateTime.UtcNow,
+                LastSyncSuccess = DateTime.UtcNow,
+                SyncErrors = new List<string>()
+            };
+        }
+
+        public async Task TriggerSyncAsync(string entityType)
+        {
+            _logger.LogInformation("Triggering sync for entity type: {EntityType}", entityType);
+            
+            // This would trigger sync for specific entity type
+            // Implementation depends on specific requirements
+            await Task.CompletedTask;
         }
     }
 

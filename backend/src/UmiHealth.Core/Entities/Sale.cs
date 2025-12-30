@@ -15,6 +15,8 @@ public class Sale : TenantEntity
     public string? Notes { get; set; }
     public string? PrescriptionNumber { get; set; }
     public string Status { get; set; } = "Completed"; // Pending, Completed, Cancelled, Refunded
+    public string PaymentMethod { get; set; } = string.Empty;
+    public string PaymentStatus { get; set; } = "Completed";
     
     // Navigation properties
     public virtual Tenant Tenant { get; set; } = null!;

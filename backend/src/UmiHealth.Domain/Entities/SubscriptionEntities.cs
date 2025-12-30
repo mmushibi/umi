@@ -81,6 +81,7 @@ namespace UmiHealth.Domain.Entities
         public Guid UserId { get; set; }
         public Guid? ApprovedBy { get; set; }
         public decimal Amount { get; set; }
+        public decimal ChargeAmount => Amount; // Computed property for compatibility
         public string Currency { get; set; } = "ZMW";
         public int BillingMonth { get; set; }
         public int BillingYear { get; set; }

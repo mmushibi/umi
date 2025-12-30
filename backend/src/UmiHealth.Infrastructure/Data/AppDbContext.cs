@@ -1,5 +1,7 @@
 using Microsoft.EntityFrameworkCore;
+using System.Linq.Expressions;
 using UmiHealth.Core.Entities;
+using UmiHealth.Domain.Entities;
 
 namespace UmiHealth.Infrastructure.Data;
 
@@ -10,34 +12,34 @@ public class AppDbContext : DbContext
     }
 
     // DbSet properties for all entities
-    public DbSet<Tenant> Tenants { get; set; }
-    public DbSet<Branch> Branches { get; set; }
-    public DbSet<User> Users { get; set; }
-    public DbSet<Role> Roles { get; set; }
-    public DbSet<UserRole> UserRoles { get; set; }
-    public DbSet<RoleClaim> RoleClaims { get; set; }
-    public DbSet<UserClaim> UserClaims { get; set; }
-    public DbSet<RefreshToken> RefreshTokens { get; set; }
-    public DbSet<Product> Products { get; set; }
-    public DbSet<Inventory> Inventories { get; set; }
-    public DbSet<StockTransaction> StockTransactions { get; set; }
-    public DbSet<Supplier> Suppliers { get; set; }
-    public DbSet<PurchaseOrder> PurchaseOrders { get; set; }
-    public DbSet<PurchaseOrderItem> PurchaseOrderItems { get; set; }
-    public DbSet<Sale> Sales { get; set; }
-    public DbSet<SaleItem> SaleItems { get; set; }
-    public DbSet<Payment> Payments { get; set; }
-    public DbSet<SaleReturn> SaleReturns { get; set; }
-    public DbSet<Patient> Patients { get; set; }
-    public DbSet<Prescription> Prescriptions { get; set; }
-    public DbSet<PrescriptionItem> PrescriptionItems { get; set; }
+    public DbSet<UmiHealth.Domain.Entities.Tenant> Tenants { get; set; }
+    public DbSet<UmiHealth.Core.Entities.Branch> Branches { get; set; }
+    public DbSet<UmiHealth.Core.Entities.User> Users { get; set; }
+    public DbSet<UmiHealth.Core.Entities.Role> Roles { get; set; }
+    public DbSet<UmiHealth.Core.Entities.UserRole> UserRoles { get; set; }
+    public DbSet<UmiHealth.Core.Entities.RoleClaim> RoleClaims { get; set; }
+    public DbSet<UmiHealth.Core.Entities.UserClaim> UserClaims { get; set; }
+    public DbSet<UmiHealth.Core.Entities.RefreshToken> RefreshTokens { get; set; }
+    public DbSet<UmiHealth.Core.Entities.Product> Products { get; set; }
+    public DbSet<UmiHealth.Core.Entities.Inventory> Inventories { get; set; }
+    public DbSet<UmiHealth.Core.Entities.StockTransaction> StockTransactions { get; set; }
+    public DbSet<UmiHealth.Core.Entities.Supplier> Suppliers { get; set; }
+    public DbSet<UmiHealth.Core.Entities.PurchaseOrder> PurchaseOrders { get; set; }
+    public DbSet<UmiHealth.Core.Entities.PurchaseOrderItem> PurchaseOrderItems { get; set; }
+    public DbSet<UmiHealth.Core.Entities.Sale> Sales { get; set; }
+    public DbSet<UmiHealth.Core.Entities.SaleItem> SaleItems { get; set; }
+    public DbSet<UmiHealth.Core.Entities.Payment> Payments { get; set; }
+    public DbSet<UmiHealth.Core.Entities.SaleReturn> SaleReturns { get; set; }
+    public DbSet<UmiHealth.Core.Entities.Patient> Patients { get; set; }
+    public DbSet<UmiHealth.Core.Entities.Prescription> Prescriptions { get; set; }
+    public DbSet<UmiHealth.Core.Entities.PrescriptionItem> PrescriptionItems { get; set; }
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
         base.OnModelCreating(modelBuilder);
 
         // Configure Tenant entity
-        modelBuilder.Entity<Tenant>(entity =>
+        modelBuilder.Entity<UmiHealth.Domain.Entities.Tenant>(entity =>
         {
             entity.HasKey(e => e.Id);
             entity.Property(e => e.Name).IsRequired().HasMaxLength(200);
@@ -49,7 +51,7 @@ public class AppDbContext : DbContext
         });
 
         // Configure Branch entity
-        modelBuilder.Entity<Branch>(entity =>
+        modelBuilder.Entity<UmiHealth.Core.Entities.Branch>(entity =>
         {
             entity.HasKey(e => e.Id);
             entity.Property(e => e.Name).IsRequired().HasMaxLength(200);
@@ -58,7 +60,7 @@ public class AppDbContext : DbContext
         });
 
         // Configure User entity
-        modelBuilder.Entity<User>(entity =>
+        modelBuilder.Entity<UmiHealth.Core.Entities.User>(entity =>
         {
             entity.HasKey(e => e.Id);
             entity.Property(e => e.Email).IsRequired().HasMaxLength(200);
@@ -72,12 +74,13 @@ public class AppDbContext : DbContext
         });
 
         // Configure Role entity
-        modelBuilder.Entity<Role>(entity =>
+        modelBuilder.Entity<UmiHealth.Core.Entities.Role>(entity =>
         {
             entity.HasKey(e => e.Id);
             entity.Property(e => e.Name).IsRequired().HasMaxLength(100);
             entity.Property(e => e.NormalizedName).IsRequired().HasMaxLength(100);
-            entity.HasOne(e => e.Tenant).WithMany(t => t.Users).HasForeignKey(e => e.TenantId);
+            // Skip the Roles navigation for now due to type mismatch between Core and Domain Tenant
+            entity.HasOne(e => e.Tenant).WithMany().HasForeignKey(e => e.TenantId);
         });
 
         // Configure UserRole entity
@@ -89,7 +92,7 @@ public class AppDbContext : DbContext
         });
 
         // Configure Product entity
-        modelBuilder.Entity<Product>(entity =>
+        modelBuilder.Entity<UmiHealth.Core.Entities.Product>(entity =>
         {
             entity.HasKey(e => e.Id);
             entity.Property(e => e.Name).IsRequired().HasMaxLength(200);
@@ -102,7 +105,7 @@ public class AppDbContext : DbContext
         });
 
         // Configure Inventory entity
-        modelBuilder.Entity<Inventory>(entity =>
+        modelBuilder.Entity<UmiHealth.Core.Entities.Inventory>(entity =>
         {
             entity.HasKey(e => e.Id);
             entity.HasOne(e => e.Branch).WithMany(b => b.Inventories).HasForeignKey(e => e.BranchId);
@@ -111,7 +114,7 @@ public class AppDbContext : DbContext
         });
 
         // Configure Patient entity
-        modelBuilder.Entity<Patient>(entity =>
+        modelBuilder.Entity<UmiHealth.Core.Entities.Patient>(entity =>
         {
             entity.HasKey(e => e.Id);
             entity.Property(e => e.FirstName).IsRequired().HasMaxLength(100);
@@ -122,7 +125,7 @@ public class AppDbContext : DbContext
         });
 
         // Configure Sale entity
-        modelBuilder.Entity<Sale>(entity =>
+        modelBuilder.Entity<UmiHealth.Core.Entities.Sale>(entity =>
         {
             entity.HasKey(e => e.Id);
             entity.Property(e => e.SaleNumber).IsRequired().HasMaxLength(50);
@@ -133,7 +136,7 @@ public class AppDbContext : DbContext
         });
 
         // Configure Prescription entity
-        modelBuilder.Entity<Prescription>(entity =>
+        modelBuilder.Entity<UmiHealth.Core.Entities.Prescription>(entity =>
         {
             entity.HasKey(e => e.Id);
             entity.Property(e => e.PrescriptionNumber).IsRequired().HasMaxLength(50);

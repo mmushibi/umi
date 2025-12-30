@@ -8,14 +8,19 @@ public class User : TenantEntity
     public string Email { get; set; } = string.Empty;
     public string PhoneNumber { get; set; } = string.Empty;
     public string PasswordHash { get; set; } = string.Empty;
+    public string Role { get; set; } = string.Empty;
     public bool IsActive { get; set; } = true;
     public bool EmailConfirmed { get; set; } = false;
     public bool PhoneNumberConfirmed { get; set; } = false;
     public bool TwoFactorEnabled { get; set; } = false;
     public int FailedLoginAttempts { get; set; } = 0;
     public DateTime? LastLoginAt { get; set; }
+    public DateTime? LockoutEnd { get; set; }
     public string? RefreshToken { get; set; }
     public DateTime? RefreshTokenExpiry { get; set; }
+    
+    // Computed properties
+    public string FullName => $"{FirstName} {LastName}";
     
     // Navigation properties
     public virtual Tenant Tenant { get; set; } = null!;

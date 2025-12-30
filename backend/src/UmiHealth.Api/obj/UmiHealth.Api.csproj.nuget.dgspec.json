@@ -29,11 +29,11 @@
               "C:\\Users\\sepio\\Desktop\\Umi_Health\\Umi_Health\\Umi_Health\\backend\\src\\UmiHealth.Application\\UmiHealth.Application.csproj": {
                 "projectPath": "C:\\Users\\sepio\\Desktop\\Umi_Health\\Umi_Health\\Umi_Health\\backend\\src\\UmiHealth.Application\\UmiHealth.Application.csproj"
               },
-              "C:\\Users\\sepio\\Desktop\\Umi_Health\\Umi_Health\\Umi_Health\\backend\\src\\UmiHealth.Core\\UmiHealth.Core.csproj": {
-                "projectPath": "C:\\Users\\sepio\\Desktop\\Umi_Health\\Umi_Health\\Umi_Health\\backend\\src\\UmiHealth.Core\\UmiHealth.Core.csproj"
+              "c:\\Users\\sepio\\Desktop\\Umi_Health\\Umi_Health\\Umi_Health\\backend\\src\\UmiHealth.Core\\UmiHealth.Core.csproj": {
+                "projectPath": "c:\\Users\\sepio\\Desktop\\Umi_Health\\Umi_Health\\Umi_Health\\backend\\src\\UmiHealth.Core\\UmiHealth.Core.csproj"
               },
-              "C:\\Users\\sepio\\Desktop\\Umi_Health\\Umi_Health\\Umi_Health\\backend\\src\\UmiHealth.Identity\\UmiHealth.Identity.csproj": {
-                "projectPath": "C:\\Users\\sepio\\Desktop\\Umi_Health\\Umi_Health\\Umi_Health\\backend\\src\\UmiHealth.Identity\\UmiHealth.Identity.csproj"
+              "c:\\Users\\sepio\\Desktop\\Umi_Health\\Umi_Health\\Umi_Health\\backend\\src\\UmiHealth.Identity\\UmiHealth.Identity.csproj": {
+                "projectPath": "c:\\Users\\sepio\\Desktop\\Umi_Health\\Umi_Health\\Umi_Health\\backend\\src\\UmiHealth.Identity\\UmiHealth.Identity.csproj"
               },
               "C:\\Users\\sepio\\Desktop\\Umi_Health\\Umi_Health\\Umi_Health\\backend\\src\\UmiHealth.Infrastructure\\UmiHealth.Infrastructure.csproj": {
                 "projectPath": "C:\\Users\\sepio\\Desktop\\Umi_Health\\Umi_Health\\Umi_Health\\backend\\src\\UmiHealth.Infrastructure\\UmiHealth.Infrastructure.csproj"
@@ -86,7 +86,7 @@
             },
             "Microsoft.Extensions.Diagnostics.HealthChecks": {
               "target": "Package",
-              "version": "[8.0.0, )"
+              "version": "[8.0.8, )"
             },
             "Serilog.AspNetCore": {
               "target": "Package",
@@ -150,11 +150,14 @@
           "net8.0": {
             "targetAlias": "net8.0",
             "projectReferences": {
-              "C:\\Users\\sepio\\Desktop\\Umi_Health\\Umi_Health\\Umi_Health\\backend\\src\\UmiHealth.Core\\UmiHealth.Core.csproj": {
-                "projectPath": "C:\\Users\\sepio\\Desktop\\Umi_Health\\Umi_Health\\Umi_Health\\backend\\src\\UmiHealth.Core\\UmiHealth.Core.csproj"
+              "c:\\Users\\sepio\\Desktop\\Umi_Health\\Umi_Health\\Umi_Health\\backend\\src\\UmiHealth.Core\\UmiHealth.Core.csproj": {
+                "projectPath": "c:\\Users\\sepio\\Desktop\\Umi_Health\\Umi_Health\\Umi_Health\\backend\\src\\UmiHealth.Core\\UmiHealth.Core.csproj"
               },
               "C:\\Users\\sepio\\Desktop\\Umi_Health\\Umi_Health\\Umi_Health\\backend\\src\\UmiHealth.Domain\\UmiHealth.Domain.csproj": {
                 "projectPath": "C:\\Users\\sepio\\Desktop\\Umi_Health\\Umi_Health\\Umi_Health\\backend\\src\\UmiHealth.Domain\\UmiHealth.Domain.csproj"
+              },
+              "C:\\Users\\sepio\\Desktop\\Umi_Health\\Umi_Health\\Umi_Health\\backend\\src\\UmiHealth.Infrastructure\\UmiHealth.Infrastructure.csproj": {
+                "projectPath": "C:\\Users\\sepio\\Desktop\\Umi_Health\\Umi_Health\\Umi_Health\\backend\\src\\UmiHealth.Infrastructure\\UmiHealth.Infrastructure.csproj"
               },
               "C:\\Users\\sepio\\Desktop\\Umi_Health\\Umi_Health\\Umi_Health\\backend\\src\\UmiHealth.Persistence\\UmiHealth.Persistence.csproj": {
                 "projectPath": "C:\\Users\\sepio\\Desktop\\Umi_Health\\Umi_Health\\Umi_Health\\backend\\src\\UmiHealth.Persistence\\UmiHealth.Persistence.csproj"
@@ -189,6 +192,10 @@
               "target": "Package",
               "version": "[12.0.1, )"
             },
+            "CsvHelper": {
+              "target": "Package",
+              "version": "[30.0.1, )"
+            },
             "FluentValidation": {
               "target": "Package",
               "version": "[11.8.0, )"
@@ -197,9 +204,25 @@
               "target": "Package",
               "version": "[11.8.0, )"
             },
+            "Hangfire.MemoryStorage": {
+              "target": "Package",
+              "version": "[1.8.1, )"
+            },
+            "IdentityModel": {
+              "target": "Package",
+              "version": "[7.0.0, )"
+            },
             "MediatR": {
               "target": "Package",
               "version": "[12.2.0, )"
+            },
+            "Microsoft.AspNetCore.Authorization": {
+              "target": "Package",
+              "version": "[8.0.8, )"
+            },
+            "Microsoft.AspNetCore.Mvc": {
+              "target": "Package",
+              "version": "[2.2.0, )"
             },
             "Microsoft.Extensions.Hosting": {
               "target": "Package",
@@ -216,6 +239,10 @@
             "QuestPDF": {
               "target": "Package",
               "version": "[2024.12.1, )"
+            },
+            "System.IdentityModel.Tokens.Jwt": {
+              "target": "Package",
+              "version": "[7.0.3, )"
             }
           },
           "imports": [
@@ -238,14 +265,14 @@
         }
       }
     },
-    "C:\\Users\\sepio\\Desktop\\Umi_Health\\Umi_Health\\Umi_Health\\backend\\src\\UmiHealth.Core\\UmiHealth.Core.csproj": {
+    "c:\\Users\\sepio\\Desktop\\Umi_Health\\Umi_Health\\Umi_Health\\backend\\src\\UmiHealth.Core\\UmiHealth.Core.csproj": {
       "version": "1.0.0",
       "restore": {
-        "projectUniqueName": "C:\\Users\\sepio\\Desktop\\Umi_Health\\Umi_Health\\Umi_Health\\backend\\src\\UmiHealth.Core\\UmiHealth.Core.csproj",
+        "projectUniqueName": "c:\\Users\\sepio\\Desktop\\Umi_Health\\Umi_Health\\Umi_Health\\backend\\src\\UmiHealth.Core\\UmiHealth.Core.csproj",
         "projectName": "UmiHealth.Core",
-        "projectPath": "C:\\Users\\sepio\\Desktop\\Umi_Health\\Umi_Health\\Umi_Health\\backend\\src\\UmiHealth.Core\\UmiHealth.Core.csproj",
+        "projectPath": "c:\\Users\\sepio\\Desktop\\Umi_Health\\Umi_Health\\Umi_Health\\backend\\src\\UmiHealth.Core\\UmiHealth.Core.csproj",
         "packagesPath": "C:\\Users\\sepio\\.nuget\\packages\\",
-        "outputPath": "C:\\Users\\sepio\\Desktop\\Umi_Health\\Umi_Health\\Umi_Health\\backend\\src\\UmiHealth.Core\\obj\\",
+        "outputPath": "c:\\Users\\sepio\\Desktop\\Umi_Health\\Umi_Health\\Umi_Health\\backend\\src\\UmiHealth.Core\\obj\\",
         "projectStyle": "PackageReference",
         "configFilePaths": [
           "C:\\Users\\sepio\\AppData\\Roaming\\NuGet\\NuGet.Config"
@@ -319,8 +346,8 @@
           "net8.0": {
             "targetAlias": "net8.0",
             "projectReferences": {
-              "C:\\Users\\sepio\\Desktop\\Umi_Health\\Umi_Health\\Umi_Health\\backend\\src\\UmiHealth.Core\\UmiHealth.Core.csproj": {
-                "projectPath": "C:\\Users\\sepio\\Desktop\\Umi_Health\\Umi_Health\\Umi_Health\\backend\\src\\UmiHealth.Core\\UmiHealth.Core.csproj"
+              "c:\\Users\\sepio\\Desktop\\Umi_Health\\Umi_Health\\Umi_Health\\backend\\src\\UmiHealth.Core\\UmiHealth.Core.csproj": {
+                "projectPath": "c:\\Users\\sepio\\Desktop\\Umi_Health\\Umi_Health\\Umi_Health\\backend\\src\\UmiHealth.Core\\UmiHealth.Core.csproj"
               }
             }
           }
@@ -360,14 +387,14 @@
         }
       }
     },
-    "C:\\Users\\sepio\\Desktop\\Umi_Health\\Umi_Health\\Umi_Health\\backend\\src\\UmiHealth.Identity\\UmiHealth.Identity.csproj": {
+    "c:\\Users\\sepio\\Desktop\\Umi_Health\\Umi_Health\\Umi_Health\\backend\\src\\UmiHealth.Identity\\UmiHealth.Identity.csproj": {
       "version": "1.0.0",
       "restore": {
-        "projectUniqueName": "C:\\Users\\sepio\\Desktop\\Umi_Health\\Umi_Health\\Umi_Health\\backend\\src\\UmiHealth.Identity\\UmiHealth.Identity.csproj",
+        "projectUniqueName": "c:\\Users\\sepio\\Desktop\\Umi_Health\\Umi_Health\\Umi_Health\\backend\\src\\UmiHealth.Identity\\UmiHealth.Identity.csproj",
         "projectName": "UmiHealth.Identity",
-        "projectPath": "C:\\Users\\sepio\\Desktop\\Umi_Health\\Umi_Health\\Umi_Health\\backend\\src\\UmiHealth.Identity\\UmiHealth.Identity.csproj",
+        "projectPath": "c:\\Users\\sepio\\Desktop\\Umi_Health\\Umi_Health\\Umi_Health\\backend\\src\\UmiHealth.Identity\\UmiHealth.Identity.csproj",
         "packagesPath": "C:\\Users\\sepio\\.nuget\\packages\\",
-        "outputPath": "C:\\Users\\sepio\\Desktop\\Umi_Health\\Umi_Health\\Umi_Health\\backend\\src\\UmiHealth.Identity\\obj\\",
+        "outputPath": "c:\\Users\\sepio\\Desktop\\Umi_Health\\Umi_Health\\Umi_Health\\backend\\src\\UmiHealth.Identity\\obj\\",
         "projectStyle": "PackageReference",
         "configFilePaths": [
           "C:\\Users\\sepio\\AppData\\Roaming\\NuGet\\NuGet.Config"
@@ -382,8 +409,8 @@
           "net8.0": {
             "targetAlias": "net8.0",
             "projectReferences": {
-              "C:\\Users\\sepio\\Desktop\\Umi_Health\\Umi_Health\\Umi_Health\\backend\\src\\UmiHealth.Core\\UmiHealth.Core.csproj": {
-                "projectPath": "C:\\Users\\sepio\\Desktop\\Umi_Health\\Umi_Health\\Umi_Health\\backend\\src\\UmiHealth.Core\\UmiHealth.Core.csproj"
+              "c:\\Users\\sepio\\Desktop\\Umi_Health\\Umi_Health\\Umi_Health\\backend\\src\\UmiHealth.Core\\UmiHealth.Core.csproj": {
+                "projectPath": "c:\\Users\\sepio\\Desktop\\Umi_Health\\Umi_Health\\Umi_Health\\backend\\src\\UmiHealth.Core\\UmiHealth.Core.csproj"
               },
               "C:\\Users\\sepio\\Desktop\\Umi_Health\\Umi_Health\\Umi_Health\\backend\\src\\UmiHealth.Infrastructure\\UmiHealth.Infrastructure.csproj": {
                 "projectPath": "C:\\Users\\sepio\\Desktop\\Umi_Health\\Umi_Health\\Umi_Health\\backend\\src\\UmiHealth.Infrastructure\\UmiHealth.Infrastructure.csproj"
@@ -418,9 +445,17 @@
               "target": "Package",
               "version": "[8.0.0, )"
             },
+            "Microsoft.Extensions.Http": {
+              "target": "Package",
+              "version": "[9.0.0, )"
+            },
             "Microsoft.Extensions.Logging": {
               "target": "Package",
-              "version": "[10.0.1, )"
+              "version": "[9.0.0, )"
+            },
+            "Microsoft.Extensions.Logging.Abstractions": {
+              "target": "Package",
+              "version": "[9.0.0, )"
             },
             "Microsoft.IdentityModel.Tokens": {
               "target": "Package",
@@ -473,8 +508,8 @@
           "net8.0": {
             "targetAlias": "net8.0",
             "projectReferences": {
-              "C:\\Users\\sepio\\Desktop\\Umi_Health\\Umi_Health\\Umi_Health\\backend\\src\\UmiHealth.Core\\UmiHealth.Core.csproj": {
-                "projectPath": "C:\\Users\\sepio\\Desktop\\Umi_Health\\Umi_Health\\Umi_Health\\backend\\src\\UmiHealth.Core\\UmiHealth.Core.csproj"
+              "c:\\Users\\sepio\\Desktop\\Umi_Health\\Umi_Health\\Umi_Health\\backend\\src\\UmiHealth.Core\\UmiHealth.Core.csproj": {
+                "projectPath": "c:\\Users\\sepio\\Desktop\\Umi_Health\\Umi_Health\\Umi_Health\\backend\\src\\UmiHealth.Core\\UmiHealth.Core.csproj"
               },
               "C:\\Users\\sepio\\Desktop\\Umi_Health\\Umi_Health\\Umi_Health\\backend\\src\\UmiHealth.Persistence\\UmiHealth.Persistence.csproj": {
                 "projectPath": "C:\\Users\\sepio\\Desktop\\Umi_Health\\Umi_Health\\Umi_Health\\backend\\src\\UmiHealth.Persistence\\UmiHealth.Persistence.csproj"
@@ -508,23 +543,31 @@
             },
             "Microsoft.EntityFrameworkCore": {
               "target": "Package",
-              "version": "[8.0.0, )"
+              "version": "[8.0.8, )"
             },
             "Microsoft.EntityFrameworkCore.Design": {
               "target": "Package",
-              "version": "[8.0.0, )"
+              "version": "[8.0.8, )"
             },
             "Microsoft.EntityFrameworkCore.Tools": {
               "target": "Package",
-              "version": "[8.0.0, )"
+              "version": "[8.0.8, )"
             },
             "Microsoft.Extensions.Caching.StackExchangeRedis": {
               "target": "Package",
-              "version": "[8.0.0, )"
+              "version": "[8.0.8, )"
+            },
+            "Microsoft.Extensions.Diagnostics.HealthChecks": {
+              "target": "Package",
+              "version": "[8.0.8, )"
+            },
+            "Microsoft.Extensions.Diagnostics.HealthChecks.EntityFrameworkCore": {
+              "target": "Package",
+              "version": "[8.0.8, )"
             },
             "Npgsql.EntityFrameworkCore.PostgreSQL": {
               "target": "Package",
-              "version": "[8.0.0, )"
+              "version": "[8.0.8, )"
             },
             "Serilog.Extensions.Hosting": {
               "target": "Package",
@@ -536,7 +579,7 @@
             },
             "StackExchange.Redis": {
               "target": "Package",
-              "version": "[2.7.10, )"
+              "version": "[2.7.27, )"
             }
           },
           "imports": [

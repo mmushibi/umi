@@ -2,6 +2,7 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Configuration;
 using System;
 using System.Threading.Tasks;
+using UmiHealth.Infrastructure.Data;
 
 namespace UmiHealth.Infrastructure.MultiTenant
 {

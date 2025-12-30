@@ -10,6 +10,8 @@ namespace UmiHealth.Domain.Entities
     {
         public string QueueNumber { get; set; } = string.Empty;
         public string PatientName { get; set; } = string.Empty;
+        public string Name { get; set; } = string.Empty; // Added for compatibility
+        public int Age { get; set; }
         public string PhoneNumber { get; set; } = string.Empty;
         public string Email { get; set; } = string.Empty;
         public string Complaint { get; set; } = string.Empty;
@@ -18,8 +20,10 @@ namespace UmiHealth.Domain.Entities
         public DateTime JoinTime { get; set; }
         public DateTime? StartTime { get; set; }
         public DateTime? EndTime { get; set; }
+        public DateTime? CompleteTime { get; set; } // Added for compatibility
         public string? AssignedProviderId { get; set; }
         public string? AssignedProviderName { get; set; }
+        public User? AssignedProvider { get; set; } // Added for compatibility
         public string? Notes { get; set; }
         public int? WaitTimeMinutes { get; set; }
         public string? ServiceType { get; set; }
@@ -39,12 +43,18 @@ namespace UmiHealth.Domain.Entities
         public string ActionBy { get; set; } = string.Empty;
         public string ActionByRole { get; set; } = string.Empty;
         public DateTime ActionTime { get; set; }
+        public DateTime Timestamp { get; set; } // Added for compatibility
         public string? PreviousStatus { get; set; }
         public string? NewStatus { get; set; }
         public string? Notes { get; set; }
+        public string Details { get; set; } = string.Empty; // Added for compatibility
         public string? IpAddress { get; set; }
         public string? UserAgent { get; set; }
         public string? Metadata { get; set; }
+        public string PatientName { get; set; } = string.Empty; // Added for compatibility
+        public string QueueNumber { get; set; } = string.Empty; // Added for compatibility
+        public User? User { get; set; } // Added for compatibility
+        public Guid? PatientId { get; set; } // Added for compatibility
     }
 
     /// <summary>
@@ -52,13 +62,20 @@ namespace UmiHealth.Domain.Entities
     /// </summary>
     public class QueueSettings : TenantEntity
     {
-        public string SettingKey { get; set; } = string.Empty;
-        public string SettingValue { get; set; } = string.Empty;
-        public string Description { get; set; } = string.Empty;
-        public string Category { get; set; } = string.Empty;
-        public bool IsActive { get; set; } = true;
-        public string? UpdatedBy { get; set; }
+        public Guid BranchId { get; set; }
+        public double TargetWaitTime { get; set; } // in minutes
+        public double AutoEscalateWaitTime { get; set; } // in minutes
+        public int MaxQueueSize { get; set; }
+        public bool EnableAutoNotifications { get; set; }
+        public bool EnableSoundNotifications { get; set; }
+        public bool EnableSmsNotifications { get; set; }
+        public bool EnableWhatsAppNotifications { get; set; }
+        public bool EnableEmailNotifications { get; set; }
+        public string? DefaultNotificationMessage { get; set; }
+        public DateTime CreatedAt { get; set; }
         public DateTime? UpdatedAt { get; set; }
+        public string? CreatedBy { get; set; }
+        public string? UpdatedBy { get; set; }
     }
 
     /// <summary>
@@ -144,5 +161,35 @@ namespace UmiHealth.Domain.Entities
         public string? BranchId { get; set; }
         public string? Specialization { get; set; }
         public string? Metadata { get; set; }
+    }
+
+    /// <summary>
+    /// Refund request entity for managing refund requests
+    /// </summary>
+    public class RefundRequestEntity : TenantEntity
+    {
+        public Guid PaymentId { get; set; }
+        public Guid CustomerId { get; set; }
+        public decimal Amount { get; set; }
+        public string Reason { get; set; } = string.Empty;
+        public string Description { get; set; } = string.Empty;
+        public string ProductCategory { get; set; } = string.Empty;
+        public string Status { get; set; } = string.Empty; // pending, approved, rejected, completed, approval_failed
+        public string ReferenceNumber { get; set; } = string.Empty;
+        public Guid RequestedBy { get; set; }
+        public DateTime RequestedAt { get; set; }
+        public Guid? ApprovedBy { get; set; }
+        public DateTime? ApprovedAt { get; set; }
+        public string? ApprovalNotes { get; set; }
+        public Guid? RefundId { get; set; }
+        public DateTime? RefundProcessedAt { get; set; }
+        public string? FailureReason { get; set; }
+        public bool RequiresApproval { get; set; }
+        public bool AutoApprove { get; set; }
+        public decimal MaxRefundAmount { get; set; }
+        public int RefundWindowDays { get; set; }
+
+        public virtual Payment Payment { get; set; } = null!;
+        public virtual Patient Customer { get; set; } = null!;
     }
 }

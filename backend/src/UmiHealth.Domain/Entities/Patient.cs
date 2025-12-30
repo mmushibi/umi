@@ -25,7 +25,16 @@ public class Patient : TenantEntity
     public string? EmergencyContactRelationship { get; set; }
     public string InsuranceProvider { get; set; } = string.Empty;
     public string InsurancePolicyNumber { get; set; } = string.Empty;
-    public bool IsActive { get; set; }
+    public string PatientNumber { get; set; } = string.Empty;
+    public string Phone { get; set; } = string.Empty;
+    public string EmergencyContact { get; set; } = string.Empty;
+    public string MedicalHistory { get; set; } = string.Empty;
+    public string InsuranceInfo { get; set; } = string.Empty;
+    public string Status { get; set; } = "active";
+    public bool IsActive { get; set; } = true;
+    
+    // Computed properties
+    public string FullName => $"{FirstName} {LastName}";
 
     public virtual ICollection<Prescription> Prescriptions { get; set; } = new List<Prescription>();
     public virtual ICollection<Sale> Sales { get; set; } = new List<Sale>();

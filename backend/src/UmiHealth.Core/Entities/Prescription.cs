@@ -11,6 +11,9 @@ public class Prescription : TenantEntity
     public Guid? DispensedBy { get; set; }
     public DateTime? DispensedAt { get; set; }
     public string Status { get; set; } = string.Empty; // Pending, Dispensed, Cancelled
+    public string DispensedItems { get; set; } = string.Empty;
+    public Guid PrescriberId { get; set; }
+    public DateTime DatePrescribed { get; set; }
     
     // Navigation properties
     public virtual Tenant Tenant { get; set; } = null!;

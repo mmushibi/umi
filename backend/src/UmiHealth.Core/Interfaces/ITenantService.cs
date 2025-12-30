@@ -7,6 +7,7 @@ public interface ITenantService
     Task<Tenant?> GetTenantByIdAsync(Guid tenantId, CancellationToken cancellationToken = default);
     Task<Tenant?> GetTenantBySubdomainAsync(string subdomain, CancellationToken cancellationToken = default);
     Task<IReadOnlyList<Tenant>> GetAllTenantsAsync(CancellationToken cancellationToken = default);
+    Task<IEnumerable<Tenant>> GetAllAsync();
     Task<Tenant> CreateTenantAsync(CreateTenantRequest request, CancellationToken cancellationToken = default);
     Task<Tenant> UpdateTenantAsync(Guid tenantId, UpdateTenantRequest request, CancellationToken cancellationToken = default);
     Task<bool> DeleteTenantAsync(Guid tenantId, CancellationToken cancellationToken = default);

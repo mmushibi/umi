@@ -4,6 +4,13 @@ using System;
 using System.Threading.Tasks;
 using UmiHealth.Domain.Entities;
 using UmiHealth.Core.Entities;
+using UmiHealth.Persistence.Data;
+using Prescription = UmiHealth.Core.Entities.Prescription;
+using Sale = UmiHealth.Core.Entities.Sale;
+using Payment = UmiHealth.Core.Entities.Payment;
+using Patient = UmiHealth.Core.Entities.Patient;
+using Product = UmiHealth.Core.Entities.Product;
+using Inventory = UmiHealth.Core.Entities.Inventory;
 
 namespace UmiHealth.Infrastructure.Data
 {
@@ -395,7 +402,7 @@ namespace UmiHealth.Infrastructure.Data
         private void ApplySoftDeletes(ModelBuilder modelBuilder)
         {
             var entityTypes = modelBuilder.Model.GetEntityTypes()
-                .Where(e => typeof(ISoftDeletable).IsAssignableFrom(e.ClrType));
+                .Where(e => typeof(UmiHealth.Persistence.Data.ISoftDeletable).IsAssignableFrom(e.ClrType));
 
             foreach (var entityType in entityTypes)
             {

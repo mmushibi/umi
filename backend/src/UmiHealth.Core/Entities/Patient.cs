@@ -23,7 +23,16 @@ public class Patient : TenantEntity
     public string? EmergencyContactRelationship { get; set; }
     public string InsuranceProvider { get; set; } = string.Empty;
     public string InsurancePolicyNumber { get; set; } = string.Empty;
+    public string PatientNumber { get; set; } = string.Empty;
+    public string Phone { get; set; } = string.Empty;
+    public string EmergencyContact { get; set; } = string.Empty;
+    public string MedicalHistory { get; set; } = string.Empty;
+    public string InsuranceInfo { get; set; } = string.Empty;
+    public string Status { get; set; } = "active";
     public bool IsActive { get; set; } = true;
+    
+    // Computed properties
+    public string FullName => $"{FirstName} {LastName}";
     
     // Navigation properties
     public virtual Tenant Tenant { get; set; } = null!;

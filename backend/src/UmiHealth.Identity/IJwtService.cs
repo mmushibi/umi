@@ -1,3 +1,4 @@
+using System.Security.Claims;
 using UmiHealth.Core.Entities;
 
 namespace UmiHealth.Identity

@@ -1,11 +1,11 @@
 using System;
 using System.Collections.Generic;
+using UmiHealth.Core.Entities;
 
 namespace UmiHealth.Domain.Entities
 {
-    public class Tenant
+    public class Tenant : TenantEntity
     {
-        public Guid Id { get; set; }
         public string Name { get; set; } = string.Empty;
         public string Subdomain { get; set; } = string.Empty;
         public string DatabaseName { get; set; } = string.Empty;
@@ -24,14 +24,12 @@ namespace UmiHealth.Domain.Entities
         public string? BillingInfo { get; set; }
         public string? ComplianceSettings { get; set; }
         public bool IsActive { get; set; } = true;
-        public DateTime CreatedAt { get; set; }
-        public DateTime UpdatedAt { get; set; }
-        public DateTime? DeletedAt { get; set; }
 
         // Navigation properties
         public virtual ICollection<Branch> Branches { get; set; } = new List<Branch>();
         public virtual ICollection<Subscription> Subscriptions { get; set; } = new List<Subscription>();
         public virtual ICollection<User> Users { get; set; } = new List<User>();
+        public virtual ICollection<UmiHealth.Core.Entities.Role> Roles { get; set; } = new List<UmiHealth.Core.Entities.Role>();
     }
 
     public class Subscription
@@ -74,6 +72,9 @@ namespace UmiHealth.Domain.Entities
         public DateTime CreatedAt { get; set; }
         public DateTime UpdatedAt { get; set; }
         public DateTime? LastLoginAt { get; set; }
+        
+        // Computed properties
+        public string FullName => $"{FirstName} {LastName}";
 
         // Navigation properties
         public virtual Tenant Tenant { get; set; } = null!;

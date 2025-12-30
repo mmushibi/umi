@@ -5,7 +5,9 @@ using UmiHealth.Infrastructure.Data;
 using UmiHealth.Infrastructure.Cache;
 using UmiHealth.Infrastructure.Storage;
 using UmiHealth.Infrastructure.Repositories;
+using UmiHealth.Persistence.Data;
 using StackExchange.Redis;
+using Microsoft.Extensions.Diagnostics.HealthChecks;
 
 namespace UmiHealth.Infrastructure.Configuration
 {
@@ -44,8 +46,7 @@ namespace UmiHealth.Infrastructure.Configuration
         public static IServiceCollection AddHealthChecks(this IServiceCollection services, IConfiguration configuration)
         {
             services.AddHealthChecks()
-                .AddDbContextCheck<SharedDbContext>("shared_database")
-                .AddRedis(configuration.GetConnectionString("Redis") ?? "localhost:6379", "redis");
+                .AddDbContextCheck<SharedDbContext>("shared_database");
 
             return services;
         }

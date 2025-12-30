@@ -1,5 +1,6 @@
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Storage;
+using Npgsql;
 using UmiHealth.Core.Entities;
 
 namespace UmiHealth.Infrastructure

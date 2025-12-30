@@ -3,8 +3,9 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using StackExchange.Redis;
-using UmiHealth.Application.Services;
+// using UmiHealth.Application.Services; // Temporarily commented out due to project reference issue
 using UmiHealth.Core.Interfaces;
+using UmiHealth.Core.Entities;
 using UmiHealth.Infrastructure.Cache;
 using UmiHealth.Infrastructure.Data;
 using UmiHealth.Infrastructure.Repositories;
@@ -34,27 +35,27 @@ public static class DependencyInjection
         services.AddScoped<ICacheService, RedisCacheServiceAdapter>();
 
         // Repositories
-        services.AddScoped(typeof(IRepository<>), typeof(Repository<>));
-        services.AddScoped(typeof(ITenantRepository<>), typeof(TenantRepository<>));
+        services.AddScoped(typeof(UmiHealth.Core.Interfaces.IRepository<>), typeof(Repository<>));
+        services.AddScoped(typeof(UmiHealth.Core.Interfaces.ITenantRepository<>), typeof(TenantRepository<>));
 
         // Specific repositories
-        services.AddScoped<ITenantRepository<Tenant>, TenantRepository<Tenant>>();
-        services.AddScoped<ITenantRepository<Branch>, BranchRepository>();
-        services.AddScoped<ITenantRepository<User>, UserRepository>();
-        services.AddScoped<ITenantRepository<Product>, ProductRepository>();
-        services.AddScoped<ITenantRepository<Inventory>, InventoryRepository>();
-        services.AddScoped<ITenantRepository<Patient>, PatientRepository>();
-        services.AddScoped<ITenantRepository<Sale>, SaleRepository>();
-        services.AddScoped<ITenantRepository<Prescription>, PrescriptionRepository>();
+        services.AddScoped<UmiHealth.Core.Interfaces.ITenantRepository<UmiHealth.Domain.Entities.Tenant>, TenantRepository>();
+        services.AddScoped<UmiHealth.Core.Interfaces.ITenantRepository<UmiHealth.Core.Entities.Branch>, BranchRepository>();
+        services.AddScoped<UmiHealth.Core.Interfaces.ITenantRepository<UmiHealth.Core.Entities.User>, UserRepository>();
+        services.AddScoped<UmiHealth.Core.Interfaces.ITenantRepository<UmiHealth.Core.Entities.Product>, ProductRepository>();
+        services.AddScoped<UmiHealth.Core.Interfaces.ITenantRepository<UmiHealth.Core.Entities.Inventory>, InventoryRepository>();
+        services.AddScoped<UmiHealth.Core.Interfaces.ITenantRepository<UmiHealth.Core.Entities.Patient>, PatientRepository>();
+        services.AddScoped<UmiHealth.Core.Interfaces.ITenantRepository<UmiHealth.Core.Entities.Sale>, SaleRepository>();
+        services.AddScoped<UmiHealth.Core.Interfaces.ITenantRepository<UmiHealth.Core.Entities.Prescription>, PrescriptionRepository>();
 
         // File Storage
         services.AddScoped<IFileStorageService, LocalFileStorageService>();
 
-        // Application Services
-        services.AddScoped<ISubscriptionService, SubscriptionService>();
-        services.AddScoped<INotificationService, NotificationService>();
-        services.AddScoped<IAdditionalUserService, AdditionalUserService>();
-        services.AddScoped<IPaymentVerificationService, PaymentVerificationService>();
+        // Application Services - Temporarily commented out due to project reference issue
+        // services.AddScoped<ISubscriptionService, SubscriptionService>();
+        // services.AddScoped<INotificationService, NotificationService>();
+        // services.AddScoped<IAdditionalUserService, AdditionalUserService>();
+        // services.AddScoped<IPaymentVerificationService, PaymentVerificationService>();
 
         // Logging
         services.AddLogging(builder =>
@@ -72,11 +73,12 @@ public class BranchRepository : TenantRepository<Branch>
 {
     public BranchRepository(AppDbContext context) : base(context) { }
 
-    public override async Task<IEnumerable<Branch>> GetByTenantAndBranchAsync(Guid tenantId, Guid branchId, CancellationToken cancellationToken = default)
+    public override async Task<IReadOnlyList<Branch>> GetByTenantAndBranchAsync(Guid tenantId, Guid branchId, CancellationToken cancellationToken = default)
     {
-        return await _dbSet
+        var result = await _dbSet
             .Where(b => b.TenantId == tenantId && b.Id == branchId)
             .ToListAsync(cancellationToken);
+        return result.AsReadOnly();
     }
 }
 
@@ -84,11 +86,12 @@ public class UserRepository : TenantRepository<User>
 {
     public UserRepository(AppDbContext context) : base(context) { }
 
-    public override async Task<IEnumerable<User>> GetByTenantAndBranchAsync(Guid tenantId, Guid branchId, CancellationToken cancellationToken = default)
+    public override async Task<IReadOnlyList<User>> GetByTenantAndBranchAsync(Guid tenantId, Guid branchId, CancellationToken cancellationToken = default)
     {
-        return await _dbSet
+        var result = await _dbSet
             .Where(u => u.TenantId == tenantId && u.BranchId == branchId)
             .ToListAsync(cancellationToken);
+        return result.AsReadOnly();
     }
 }
 
@@ -101,12 +104,13 @@ public class InventoryRepository : TenantRepository<Inventory>
 {
     public InventoryRepository(AppDbContext context) : base(context) { }
 
-    public override async Task<IEnumerable<Inventory>> GetByTenantAndBranchAsync(Guid tenantId, Guid branchId, CancellationToken cancellationToken = default)
+    public override async Task<IReadOnlyList<Inventory>> GetByTenantAndBranchAsync(Guid tenantId, Guid branchId, CancellationToken cancellationToken = default)
     {
-        return await _dbSet
+        var result = await _dbSet
             .Where(i => i.TenantId == tenantId && i.BranchId == branchId)
             .Include(i => i.Product)
             .ToListAsync(cancellationToken);
+        return result.AsReadOnly();
     }
 }
 
@@ -119,14 +123,15 @@ public class SaleRepository : TenantRepository<Sale>
 {
     public SaleRepository(AppDbContext context) : base(context) { }
 
-    public override async Task<IEnumerable<Sale>> GetByTenantAndBranchAsync(Guid tenantId, Guid branchId, CancellationToken cancellationToken = default)
+    public override async Task<IReadOnlyList<Sale>> GetByTenantAndBranchAsync(Guid tenantId, Guid branchId, CancellationToken cancellationToken = default)
     {
-        return await _dbSet
+        var result = await _dbSet
             .Where(s => s.TenantId == tenantId && s.BranchId == branchId)
             .Include(s => s.Patient)
             .Include(s => s.Items)
             .ThenInclude(si => si.Product)
             .ToListAsync(cancellationToken);
+        return result.AsReadOnly();
     }
 }
 
@@ -134,14 +139,15 @@ public class PrescriptionRepository : TenantRepository<Prescription>
 {
     public PrescriptionRepository(AppDbContext context) : base(context) { }
 
-    public override async Task<IEnumerable<Prescription>> GetByTenantAndBranchAsync(Guid tenantId, Guid branchId, CancellationToken cancellationToken = default)
+    public override async Task<IReadOnlyList<Prescription>> GetByTenantAndBranchAsync(Guid tenantId, Guid branchId, CancellationToken cancellationToken = default)
     {
-        return await _dbSet
+        var result = await _dbSet
             .Where(p => p.TenantId == tenantId)
             .Include(p => p.Patient)
             .Include(p => p.Doctor)
             .Include(p => p.Items)
             .ThenInclude(pi => pi.Product)
             .ToListAsync(cancellationToken);
+        return result.AsReadOnly();
     }
 }

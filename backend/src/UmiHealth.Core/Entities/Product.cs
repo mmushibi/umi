@@ -16,7 +16,15 @@ public class Product : TenantEntity
     public bool IsControlledSubstance { get; set; }
     public string StorageConditions { get; set; } = string.Empty;
     public decimal UnitPrice { get; set; }
+    public decimal UnitCost { get; set; }
+    public decimal SellingPrice { get; set; }
     public string? ImageUrl { get; set; }
+    public string Form { get; set; } = string.Empty;
+    public string StorageRequirements { get; set; } = string.Empty;
+    public string Pricing { get; set; } = string.Empty;
+    public string Images { get; set; } = string.Empty;
+    public string Status { get; set; } = "active";
+    public string Sku { get; set; } = string.Empty;
     public bool IsActive { get; set; } = true;
     
     // Navigation properties

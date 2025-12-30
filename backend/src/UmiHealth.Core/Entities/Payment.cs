@@ -8,6 +8,10 @@ public class Payment : TenantEntity
     public string PaymentStatus { get; set; } = "Completed"; // Pending, Completed, Failed, Refunded
     public DateTime PaymentDate { get; set; }
     public string? TransactionReference { get; set; }
+    public string? PaymentGateway { get; set; }
+    public string? GatewayResponse { get; set; }
+    public string Status { get; set; } = "pending";
+    public string Currency { get; set; } = "ZMW";
     public string? CardLastFour { get; set; }
     public string? MobileNumber { get; set; }
     public string? Notes { get; set; }

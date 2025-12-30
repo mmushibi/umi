@@ -1,4 +1,6 @@
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Configuration;
+using Microsoft.AspNetCore.Builder;
 using UmiHealth.Infrastructure.Configuration;
 using UmiHealth.Infrastructure.MultiTenant;
 
@@ -9,18 +11,7 @@ namespace UmiHealth.Infrastructure
         /// <summary>
         /// Adds the complete data layer infrastructure to the service collection
         /// </summary>
-        public static IServiceCollection AddUmiHealthDataLayer(this IServiceCollection services)
-        {
-            services.AddDataLayer();
-            services.AddHealthChecks();
-            
-            return services;
-        }
-
-        /// <summary>
-        /// Adds the complete data layer infrastructure with configuration
-        /// </summary>
-        public static IServiceCollection AddUmiHealthDataLayer(this IServiceCollection services, Microsoft.Extensions.Configuration.IConfiguration configuration)
+        public static IServiceCollection AddUmiHealthDataLayer(this IServiceCollection services, IConfiguration configuration)
         {
             services.AddDataLayer(configuration);
             services.AddHealthChecks(configuration);

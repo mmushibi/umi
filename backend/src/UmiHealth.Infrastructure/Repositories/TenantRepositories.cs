@@ -6,37 +6,39 @@ using System.Threading;
 using System.Threading.Tasks;
 using UmiHealth.Domain.Entities;
 using UmiHealth.Core.Entities;
+using Tenant = UmiHealth.Domain.Entities.Tenant;
 using UmiHealth.Persistence.Data;
+using UmiHealth.Infrastructure.Data;
 
 namespace UmiHealth.Infrastructure.Repositories
 {
-    public interface ITenantRepository : ITenantRepository<Tenant>
+    public interface ITenantRepository : ITenantRepository<UmiHealth.Domain.Entities.Tenant>
     {
-        Task<Tenant?> GetBySubdomainAsync(string subdomain, CancellationToken cancellationToken = default);
-        Task<Tenant?> GetByDatabaseNameAsync(string databaseName, CancellationToken cancellationToken = default);
-        Task<IEnumerable<Tenant>> GetActiveTenantsAsync(CancellationToken cancellationToken = default);
+        Task<UmiHealth.Domain.Entities.Tenant?> GetBySubdomainAsync(string subdomain, CancellationToken cancellationToken = default);
+        Task<UmiHealth.Domain.Entities.Tenant?> GetByDatabaseNameAsync(string databaseName, CancellationToken cancellationToken = default);
+        Task<IEnumerable<UmiHealth.Domain.Entities.Tenant>> GetActiveTenantsAsync(CancellationToken cancellationToken = default);
         Task<bool> IsSubdomainAvailableAsync(string subdomain, Guid? excludeTenantId = null, CancellationToken cancellationToken = default);
     }
 
-    public class TenantRepository : Repository<Tenant>, ITenantRepository
+    public class TenantRepository : AppRepository<UmiHealth.Domain.Entities.Tenant>, ITenantRepository
     {
-        public TenantRepository(SharedDbContext context) : base(context)
+        public TenantRepository(AppDbContext context) : base(context)
         {
         }
 
-        public async Task<Tenant?> GetBySubdomainAsync(string subdomain, CancellationToken cancellationToken = default)
+        public async Task<UmiHealth.Domain.Entities.Tenant?> GetBySubdomainAsync(string subdomain, CancellationToken cancellationToken = default)
         {
             return await _dbSet
                 .FirstOrDefaultAsync(t => t.Subdomain.ToLower() == subdomain.ToLower(), cancellationToken);
         }
 
-        public async Task<Tenant?> GetByDatabaseNameAsync(string databaseName, CancellationToken cancellationToken = default)
+        public async Task<UmiHealth.Domain.Entities.Tenant?> GetByDatabaseNameAsync(string databaseName, CancellationToken cancellationToken = default)
         {
             return await _dbSet
                 .FirstOrDefaultAsync(t => t.DatabaseName == databaseName, cancellationToken);
         }
 
-        public async Task<IEnumerable<Tenant>> GetActiveTenantsAsync(CancellationToken cancellationToken = default)
+        public async Task<IEnumerable<UmiHealth.Domain.Entities.Tenant>> GetActiveTenantsAsync(CancellationToken cancellationToken = default)
         {
             return await _dbSet
                 .Where(t => t.Status == "active")
@@ -56,7 +58,7 @@ namespace UmiHealth.Infrastructure.Repositories
         }
 
         // Implement missing ITenantRepository methods
-        public async Task<IReadOnlyList<Tenant>> GetByTenantAsync(Guid tenantId, CancellationToken cancellationToken = default)
+        public async Task<IReadOnlyList<UmiHealth.Domain.Entities.Tenant>> GetByTenantAsync(Guid tenantId, CancellationToken cancellationToken = default)
         {
             var result = await _dbSet
                 .Where(t => t.Id == tenantId)
@@ -64,13 +66,13 @@ namespace UmiHealth.Infrastructure.Repositories
             return result.AsReadOnly();
         }
 
-        public async Task<Tenant?> GetByIdAndTenantAsync(Guid id, Guid tenantId, CancellationToken cancellationToken = default)
+        public async Task<UmiHealth.Domain.Entities.Tenant?> GetByIdAndTenantAsync(Guid id, Guid tenantId, CancellationToken cancellationToken = default)
         {
             return await _dbSet
                 .FirstOrDefaultAsync(t => t.Id == id && t.TenantId == tenantId, cancellationToken);
         }
 
-        public async Task<IReadOnlyList<Tenant>> GetByTenantAndBranchAsync(Guid tenantId, Guid branchId, CancellationToken cancellationToken = default)
+        public async Task<IReadOnlyList<UmiHealth.Domain.Entities.Tenant>> GetByTenantAndBranchAsync(Guid tenantId, Guid branchId, CancellationToken cancellationToken = default)
         {
             var result = await _dbSet
                 .Where(t => t.TenantId == tenantId)
@@ -78,12 +80,18 @@ namespace UmiHealth.Infrastructure.Repositories
             return result.AsReadOnly();
         }
 
-        public async Task<IEnumerable<Tenant>> GetByTenantAsync(string tenantId, CancellationToken cancellationToken = default)
+        public async Task<IEnumerable<UmiHealth.Domain.Entities.Tenant>> GetByTenantAsync(string tenantId, CancellationToken cancellationToken = default)
         {
             var tenantGuid = Guid.Parse(tenantId);
             return await _dbSet
                 .Where(t => t.Id == tenantGuid)
                 .ToListAsync(cancellationToken);
+        }
+
+        public async Task UpdateRangeAsync(IEnumerable<UmiHealth.Domain.Entities.Tenant> entities, CancellationToken cancellationToken = default)
+        {
+            _dbSet.UpdateRange(entities);
+            await _context.SaveChangesAsync(cancellationToken);
         }
     }
 
@@ -96,9 +104,9 @@ namespace UmiHealth.Infrastructure.Repositories
         Task<bool> IsEmailAvailableAsync(string tenantId, string email, Guid? excludeUserId = null, CancellationToken cancellationToken = default);
     }
 
-    public class UserRepository : Repository<UmiHealth.Core.Entities.User>, ITenantRepository<UmiHealth.Core.Entities.User>
+    public class UserRepository : AppRepository<UmiHealth.Core.Entities.User>, ITenantRepository<UmiHealth.Core.Entities.User>
     {
-        public UserRepository(SharedDbContext context) : base(context)
+        public UserRepository(AppDbContext context) : base(context)
         {
         }
 
@@ -113,7 +121,7 @@ namespace UmiHealth.Infrastructure.Repositories
         {
             var tenantGuid = Guid.Parse(tenantId);
             return await _dbSet
-                .FirstOrDefaultAsync(u => u.TenantId == tenantGuid && u.Username != null && u.Username.ToLower() == username.ToLower(), cancellationToken);
+                .FirstOrDefaultAsync(u => u.TenantId == tenantGuid && u.UserName != null && u.UserName.ToLower() == username.ToLower(), cancellationToken);
         }
 
         public async Task<IEnumerable<UmiHealth.Core.Entities.User>> GetByBranchAsync(string tenantId, string branchId, CancellationToken cancellationToken = default)
@@ -167,6 +175,12 @@ namespace UmiHealth.Infrastructure.Repositories
                 .Where(u => u.TenantId == tenantId && u.BranchId == branchId)
                 .ToListAsync(cancellationToken);
             return result.AsReadOnly();
+        }
+
+        public async Task UpdateRangeAsync(IEnumerable<UmiHealth.Core.Entities.User> entities, CancellationToken cancellationToken = default)
+        {
+            _dbSet.UpdateRange(entities);
+            await _context.SaveChangesAsync(cancellationToken);
         }
     }
 
@@ -223,6 +237,12 @@ namespace UmiHealth.Infrastructure.Repositories
                 .Where(b => b.TenantId == tenantId && b.Id == branchId)
                 .ToListAsync(cancellationToken);
             return result.AsReadOnly();
+        }
+
+        public async Task UpdateRangeAsync(IEnumerable<UmiHealth.Core.Entities.Branch> entities, CancellationToken cancellationToken = default)
+        {
+            _dbSet.UpdateRange(entities);
+            await _context.SaveChangesAsync(cancellationToken);
         }
     }
 }

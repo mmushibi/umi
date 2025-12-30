@@ -17,4 +17,5 @@ public interface ITenantRepository<T> : IRepository<T> where T : TenantEntity
 {
     Task<IReadOnlyList<T>> GetByTenantAsync(Guid tenantId, CancellationToken cancellationToken = default);
     Task<T?> GetByIdAndTenantAsync(Guid id, Guid tenantId, CancellationToken cancellationToken = default);
+    Task UpdateRangeAsync(IEnumerable<T> entities, CancellationToken cancellationToken = default);
 }

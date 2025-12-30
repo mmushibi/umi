@@ -13,7 +13,7 @@ using System.Reflection;
 [assembly: System.Reflection.AssemblyCompanyAttribute("UmiHealth.Infrastructure")]
 [assembly: System.Reflection.AssemblyConfigurationAttribute("Debug")]
 [assembly: System.Reflection.AssemblyFileVersionAttribute("1.0.0.0")]
-[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+d0d85b4cd82aed8ebd5f8f4b479d1ad2bfa604ea")]
+[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+2fafb6a6e184583dcffda4da1dba8b0f9e097d6c")]
 [assembly: System.Reflection.AssemblyProductAttribute("UmiHealth.Infrastructure")]
 [assembly: System.Reflection.AssemblyTitleAttribute("UmiHealth.Infrastructure")]
 [assembly: System.Reflection.AssemblyVersionAttribute("1.0.0.0")]
