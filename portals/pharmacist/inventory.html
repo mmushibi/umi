@@ -1,13 +1,17 @@
 <!DOCTYPE html>
-<html lang="en" x-data="inventorySystem()">
+<html lang="en" x-data="inventorySystem()" x-init="init()">
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>Inventory - Umi Health Information Systems</title>
+  <title>Inventory Management - Umi Health Information Systems</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@100;400;500;600;700&family=Varela+Round&family=Nunito:wght@400;600;700&display=swap" rel="stylesheet">
   <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Rounded:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://unpkg.com/alpinejs@3.x.x/dist/cdn.min.js" defer></script>
+  <link rel="stylesheet" href="css/pharmacist-styles.css">
+  <script src="../js/api-client.js"></script>
   <style>
     :root {
       --color-primary: #000000;
@@ -34,7 +38,8 @@
       background: var(--color-background);
       color: var(--color-text-primary);
       font-family: 'Nunito', 'Varela Round', sans-serif;
-      line-height: 1.5;
+      font-size: 13px;
+      line-height: 1.4;
       overflow-x: hidden;
     }
 
@@ -53,11 +58,6 @@
       flex-direction: column;
       overflow-y: auto;
       overflow-x: hidden;
-    }
-
-    /* Hidden attribute support */
-    [hidden] {
-      display: none !important;
     }
 
     /* Notification Styles */
@@ -97,13 +97,37 @@
       background: var(--color-primary);
     }
 
-    /* Search suggestions */
-    .search-suggestions {
-      display: none;
+    .demo-indicator {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      padding: 0.5rem 1rem;
+      background: var(--color-warning);
+      color: white;
+      border-radius: 20px;
+      font-size: 0.75rem;
+      font-weight: 600;
+      margin-right: 1rem;
     }
 
-    .search-suggestions.show {
-      display: block;
+    .sync-indicator {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      padding: 0.5rem 1rem;
+      background: var(--color-success);
+      color: white;
+      border-radius: 20px;
+      font-size: 0.75rem;
+      font-weight: 600;
+      margin-right: 1rem;
+      animation: pulse 2s infinite;
+    }
+
+    @keyframes pulse {
+      0% { opacity: 1; }
+      50% { opacity: 0.7; }
+      100% { opacity: 1; }
     }
 
     .sidebar-header {
@@ -118,22 +142,21 @@
     }
 
     .logo-icon {
-      width: 40px;
-      height: 40px;
+      width: 32px;
+      height: 32px;
       background: rgba(255, 255, 255, 0.2);
-      border-radius: 10px;
+      border-radius: 8px;
       display: flex;
       align-items: center;
       justify-content: center;
-      font-size: 1.5rem;
+      font-size: 1.2rem;
     }
 
     .logo-text {
-      font-size: 1.25rem;
-      font-weight: 700;
+      font-size: 1rem;
+      font-weight: 600;
       font-family: 'Inter', sans-serif;
     }
-
 
     .nav-menu {
       padding: 1rem 0;
@@ -144,13 +167,13 @@
     .nav-item {
       display: flex;
       align-items: center;
-      gap: 1rem;
-      padding: 0.875rem 1.5rem;
+      gap: 0.75rem;
+      padding: 0.75rem 1.25rem;
       color: rgba(255, 255, 255, 0.8);
       text-decoration: none;
       transition: all 0.2s ease;
       cursor: pointer;
-      font-size: 0.9rem;
+      font-size: 0.8rem;
       font-weight: 500;
     }
 
@@ -166,7 +189,7 @@
     }
 
     .nav-icon {
-      font-size: 1.25rem;
+      font-size: 1rem;
     }
 
     /* Main Content Area */
@@ -195,13 +218,9 @@
       gap: 1rem;
     }
 
-    .page-title-section {
-      margin-right: 2rem;
-    }
-
-    .page-title-section .page-title {
-      font-size: 1.5rem;
-      font-weight: 700;
+    .page-title {
+      font-size: 1.25rem;
+      font-weight: 600;
       color: var(--color-text-primary);
       margin: 0;
       font-family: 'Inter', sans-serif;
@@ -211,161 +230,59 @@
       display: none;
       background: none;
       border: none;
-      font-size: 1.5rem;
+      font-size: 1.25rem;
       color: var(--color-text-secondary);
       cursor: pointer;
     }
 
-    .header-right {
-      display: flex;
-      align-items: center;
-      gap: 1rem;
-    }
-
-    .create-button {
-      background: var(--color-primary);
-      color: var(--color-accent);
-      border: none;
-      padding: 0.625rem 1.25rem;
-      border-radius: 16px;
-      font-size: 0.875rem;
-      font-weight: 600;
-      cursor: pointer;
-      display: flex;
-      align-items: center;
-      gap: 0.5rem;
-      transition: all 0.3s ease;
-      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
-    }
-
-    .create-button:hover {
-      background: var(--color-text-secondary);
-      transform: translateY(-2px);
-      box-shadow: 0 8px 24px rgba(0, 0, 0, 0.2);
-    }
-
-    .user-profile {
-      display: flex;
-      align-items: center;
-      gap: 0.75rem;
-      padding: 0.5rem;
-      border-radius: 16px;
-      cursor: pointer;
-      transition: all 0.3s ease;
-    }
-
-    .user-profile:hover {
-      background: var(--color-surface);
-    }
-
-    .user-avatar {
-      width: 36px;
-      height: 36px;
-      background: var(--color-text-primary);
-      border-radius: 50%;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      color: var(--color-accent);
-      font-weight: 600;
-      font-size: 0.875rem;
-      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
-    }
-
-    .user-info {
-      display: flex;
-      flex-direction: column;
-    }
-
-    .user-name {
-      font-size: 0.875rem;
+    .mobile-title {
+      display: none;
+      font-size: 1rem;
       font-weight: 600;
       color: var(--color-text-primary);
-    }
-
-    .user-role {
-      font-size: 0.75rem;
-      color: var(--color-text-secondary);
+      font-family: 'Inter', sans-serif;
     }
 
     /* Inventory Content */
     .inventory-content {
-      padding: 2rem;
+      padding: 1.25rem;
+      max-width: 1400px;
+      margin: 0 auto;
+      font-size: 13px;
     }
 
+    /* Stats Cards */
     .stats-grid {
       display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-      gap: 1.5rem;
-      margin-bottom: 2rem;
+      grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+      gap: 0.75rem;
+      margin-bottom: 1.5rem;
     }
 
     .stat-card {
-      background: var(--color-background);
-      border-radius: 20px;
-      padding: 1.5rem;
+      background: white;
+      border-radius: 8px;
+      padding: 1rem;
       border: 1px solid var(--color-border);
-      transition: all 0.3s ease;
-      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
+      box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04);
+      font-size: 13px;
     }
 
-    .stat-card:hover {
-      transform: translateY(-4px);
-      box-shadow: 0 8px 24px rgba(0, 0, 0, 0.12);
-    }
-
-    .stat-header {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
+    .stat-label {
+      font-size: 0.75rem;
+      color: var(--color-text-secondary);
       margin-bottom: 1rem;
-    }
-
-    .stat-icon {
-      width: 48px;
-      height: 48px;
-      border-radius: 16px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      font-size: 1.5rem;
-    }
-
-    .stat-icon.primary {
-      background: rgba(0, 0, 0, 0.1);
-      color: var(--color-primary);
-    }
-
-    .stat-icon.success {
-      background: rgba(34, 197, 94, 0.1);
-      color: var(--color-success);
-    }
-
-    .stat-icon.warning {
-      background: rgba(239, 68, 68, 0.1);
-      color: var(--color-warning);
     }
 
     .stat-value {
       font-size: 2rem;
       font-weight: 700;
       color: var(--color-text-primary);
-      margin-bottom: 0.25rem;
-      font-family: 'Inter', sans-serif;
-    }
-
-    .stat-label {
-      color: var(--color-text-secondary);
-      font-size: 0.875rem;
-      margin-bottom: 0.5rem;
     }
 
     .stat-change {
-      font-size: 0.75rem;
-      font-weight: 600;
-      display: flex;
-      align-items: center;
-      gap: 0.25rem;
+      font-size: 0.5rem;
+      margin-top: 0.25rem;
     }
 
     .stat-change.positive {
@@ -376,217 +293,628 @@
       color: var(--color-warning);
     }
 
-    /* Inventory Table */
-    .inventory-section {
-      background: var(--color-background);
-      border-radius: 20px;
-      border: 1px solid var(--color-border);
-      overflow: hidden;
-      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
-    }
-
-    .section-header {
-      padding: 1.5rem;
-      border-bottom: 1px solid var(--color-border);
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-    }
-
-    .section-title {
-      font-size: 1.125rem;
-      font-weight: 600;
-      color: var(--color-text-primary);
-      font-family: 'Inter', sans-serif;
-    }
-
-    .controls-bar {
-      display: flex;
-      gap: 1rem;
-      align-items: center;
-    }
-
-    .search-bar {
-      position: relative;
-    }
-
-    .search-input {
-      width: 300px;
-      padding: 0.5rem 1rem 0.5rem 2.5rem;
-      border: 1px solid var(--color-border);
-      border-radius: 8px;
-      font-size: 0.875rem;
-      transition: all 0.3s ease;
-    }
-
-    .search-input:focus {
-      outline: none;
-      border-color: var(--color-primary);
-      box-shadow: 0 0 0 4px rgba(0, 0, 0, 0.1);
-    }
-
-    .search-icon {
-      position: absolute;
-      left: 0.75rem;
-      top: 50%;
-      transform: translateY(-50%);
-      color: var(--color-text-muted);
-      font-size: 1rem;
-    }
-
-    .filter-dropdown {
-      position: relative;
-    }
-
-    .filter-button {
-      display: flex;
-      align-items: center;
-      gap: 0.5rem;
-      padding: 0.5rem 1rem;
-      border: 1px solid var(--color-border);
-      background: var(--color-background);
-      border-radius: 8px;
-      cursor: pointer;
-      font-size: 0.875rem;
-      transition: all 0.2s ease;
-    }
-
-    .filter-button:hover {
+    /* Filter Section */
+    .filter-section {
       background: var(--color-surface);
+      border-radius: 12px;
+      padding: 0.875rem;
+      margin-bottom: 1.25rem;
+      border: 1px solid var(--color-border);
+      font-size: 13px;
     }
 
-    .table-container {
-      overflow-x: auto;
+    .filter-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: 1rem;
+      align-items: end;
     }
 
-    .inventory-table {
+    /* Spreadsheet Table Styles */
+    .spreadsheet-table {
       width: 100%;
       border-collapse: collapse;
+      background: white;
+      border-radius: 8px;
+      overflow: hidden;
+      box-shadow: 0 1px 4px rgba(0, 0, 0, 0.04);
     }
 
-    .inventory-table th {
+    .spreadsheet-table th {
       background: var(--color-surface);
-      padding: 1rem;
+      padding: 0.5rem;
       text-align: left;
       font-weight: 600;
-      font-size: 0.875rem;
       color: var(--color-text-primary);
-      border-bottom: 1px solid var(--color-border);
+      border-bottom: 2px solid var(--color-border);
+      font-size: 0.625rem;
     }
 
-    .inventory-table td {
-      padding: 1rem;
+    .spreadsheet-table td {
+      padding: 0.5rem;
       border-bottom: 1px solid var(--color-border);
-      font-size: 0.875rem;
+      font-size: 0.625rem;
+      vertical-align: top;
     }
 
-    .inventory-table tr:hover {
+    .spreadsheet-table .table-row {
+      cursor: pointer;
+      transition: background-color 0.2s ease;
+    }
+
+    .spreadsheet-table .table-row:hover {
       background: var(--color-surface);
     }
 
-    .product-name {
-      font-weight: 600;
-      color: var(--color-text-primary);
-    }
-
-    .product-category {
-      font-size: 0.75rem;
-      color: var(--color-text-muted);
-      margin-top: 0.125rem;
-    }
-
-    .stock-badge {
+    /* Stock Status Badge */
+    .stock-status {
       display: inline-flex;
       align-items: center;
       gap: 0.25rem;
-      padding: 0.25rem 0.75rem;
-      border-radius: 12px;
-      font-size: 0.75rem;
+      padding: 0.25rem 0.5rem;
+      border-radius: 8px;
+      font-size: 0.625rem;
       font-weight: 600;
     }
 
-    .stock-badge.in-stock {
+    .stock-status.in-stock {
       background: rgba(34, 197, 94, 0.1);
       color: var(--color-success);
     }
 
-    .stock-badge.low-stock {
+    .stock-status.low-stock {
+      background: rgba(251, 191, 36, 0.1);
+      color: #d97706;
+    }
+
+    .stock-status.out-of-stock {
       background: rgba(239, 68, 68, 0.1);
       color: var(--color-warning);
     }
 
-    .stock-badge.out-of-stock {
-      background: rgba(0, 0, 0, 0.1);
-      color: var(--color-text-secondary);
-    }
-
-    .status-badge {
+    /* Expiry Status Badge */
+    .expiry-status {
       display: inline-flex;
       align-items: center;
       gap: 0.25rem;
-      padding: 0.25rem 0.75rem;
-      border-radius: 12px;
-      font-size: 0.75rem;
+      padding: 0.25rem 0.5rem;
+      border-radius: 8px;
+      font-size: 0.625rem;
       font-weight: 600;
     }
 
-    .status-badge.active {
+    .expiry-status.expired {
+      background: rgba(239, 68, 68, 0.1);
+      color: var(--color-warning);
+    }
+
+    .expiry-status.expiring-soon {
+      background: rgba(251, 191, 36, 0.1);
+      color: #d97706;
+    }
+
+    .expiry-status.good {
       background: rgba(34, 197, 94, 0.1);
       color: var(--color-success);
     }
 
-    .status-badge.inactive {
-      background: rgba(0, 0, 0, 0.1);
+    /* Alert Panel */
+    .alert-panel {
+      background: white;
+      border-radius: 12px;
+      border: 1px solid var(--color-border);
+      padding: 1rem;
+      margin-bottom: 1.5rem;
+      box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04);
+    }
+
+    .alert-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 1rem;
+    }
+
+    .alert-title {
+      font-size: 0.875rem;
+      font-weight: 600;
+      color: var(--color-text-primary);
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+
+    .alert-count {
+      background: var(--color-warning);
+      color: white;
+      padding: 0.125rem 0.5rem;
+      border-radius: 12px;
+      font-size: 0.625rem;
+      font-weight: 600;
+    }
+
+    .alert-list {
+      display: flex;
+      flex-direction: column;
+      gap: 0.5rem;
+      max-height: 200px;
+      overflow-y: auto;
+    }
+
+    .alert-item {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 0.5rem;
+      border-radius: 6px;
+      font-size: 0.75rem;
+      border-left: 3px solid;
+    }
+
+    .alert-item.critical {
+      background: rgba(239, 68, 68, 0.05);
+      border-left-color: var(--color-warning);
+    }
+
+    .alert-item.warning {
+      background: rgba(251, 191, 36, 0.05);
+      border-left-color: #d97706;
+    }
+
+    .alert-item.info {
+      background: rgba(59, 130, 246, 0.05);
+      border-left-color: #3b82f6;
+    }
+
+    .alert-content {
+      flex: 1;
+    }
+
+    .alert-content strong {
+      color: var(--color-text-primary);
+    }
+
+    .alert-actions {
+      display: flex;
+      gap: 0.25rem;
+    }
+
+    .alert-btn {
+      padding: 0.25rem 0.5rem;
+      border: none;
+      border-radius: 4px;
+      font-size: 0.625rem;
+      cursor: pointer;
+      transition: all 0.2s ease;
+    }
+
+    .alert-btn.primary {
+      background: var(--color-primary);
+      color: var(--color-accent);
+    }
+
+    .alert-btn.secondary {
+      background: var(--color-surface);
       color: var(--color-text-secondary);
     }
 
-    .action-buttons {
+    /* Real-time indicator */
+    .real-time-indicator {
+      position: fixed;
+      top: 20px;
+      right: 20px;
+      background: var(--color-success);
+      color: white;
+      padding: 0.5rem 1rem;
+      border-radius: 20px;
+      font-size: 0.75rem;
+      font-weight: 600;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      z-index: 1000;
+      opacity: 0;
+      transform: translateY(-10px);
+      transition: all 0.3s ease;
+    }
+
+    .real-time-indicator.active {
+      opacity: 1;
+      transform: translateY(0);
+    }
+
+    .pulse {
+      width: 8px;
+      height: 8px;
+      background: white;
+      border-radius: 50%;
+      animation: pulse 2s infinite;
+    }
+
+    @keyframes pulse {
+      0% { opacity: 1; }
+      50% { opacity: 0.3; }
+      100% { opacity: 1; }
+    }
+
+    /* Expiry highlighting */
+    .expired-item {
+      background: rgba(239, 68, 68, 0.05) !important;
+      border-left: 3px solid var(--color-warning);
+    }
+
+    .expiring-soon-item {
+      background: rgba(251, 191, 36, 0.05) !important;
+      border-left: 3px solid #d97706;
+    }
+
+    /* Reporting Section */
+    .reporting-section {
+      background: white;
+      border-radius: 12px;
+      border: 1px solid var(--color-border);
+      padding: 1.5rem;
+      margin-top: 2rem;
+      box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04);
+    }
+
+    .reporting-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 1.5rem;
+    }
+
+    .reporting-title {
+      font-size: 1rem;
+      font-weight: 600;
+      color: var(--color-text-primary);
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+
+    .reporting-actions {
       display: flex;
       gap: 0.5rem;
     }
 
-    .action-btn {
-      width: 32px;
-      height: 32px;
+    .charts-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+      gap: 1.5rem;
+      margin-bottom: 1.5rem;
+    }
+
+    .chart-container {
+      background: var(--color-surface);
+      border-radius: 8px;
+      padding: 1rem;
       border: 1px solid var(--color-border);
-      background: var(--color-background);
-      border-radius: 6px;
+    }
+
+    .chart-title {
+      font-size: 0.875rem;
+      font-weight: 600;
+      color: var(--color-text-primary);
+      margin-bottom: 1rem;
+    }
+
+    .chart-placeholder {
+      height: 200px;
+      background: linear-gradient(45deg, #f0f0f0 25%, transparent 25%, transparent 75%, #f0f0f0 75%, #f0f0f0),
+                  linear-gradient(45deg, #f0f0f0 25%, transparent 25%, transparent 75%, #f0f0f0 75%, #f0f0f0);
+      background-size: 20px 20px;
+      background-position: 0 0, 10px 10px;
+      border-radius: 4px;
       display: flex;
       align-items: center;
       justify-content: center;
-      cursor: pointer;
-      font-size: 0.875rem;
-      transition: all 0.2s ease;
+      color: var(--color-text-muted);
+      font-size: 0.75rem;
     }
 
-    .action-btn:hover {
+    .summary-table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 1rem;
+    }
+
+    .summary-table th {
+      background: var(--color-surface);
+      padding: 0.5rem;
+      text-align: left;
+      font-weight: 600;
+      color: var(--color-text-primary);
+      font-size: 0.75rem;
+      border-bottom: 1px solid var(--color-border);
+    }
+
+    .summary-table td {
+      padding: 0.5rem;
+      border-bottom: 1px solid var(--color-border);
+      font-size: 0.75rem;
+    }
+
+    .text-xs {
+      font-size: 0.625rem;
+    }
+
+    /* File Upload Styles */
+    .file-upload-area {
+      border: 2px dashed var(--color-border);
+      border-radius: 8px;
+      padding: 2rem;
+      text-align: center;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      position: relative;
       background: var(--color-surface);
     }
 
-    .action-btn.edit {
+    .file-upload-area:hover {
+      border-color: var(--color-primary);
+      background: rgba(0, 0, 0, 0.02);
+    }
+
+    .file-upload-area.drag-over {
+      border-color: var(--color-primary);
+      background: rgba(0, 0, 0, 0.05);
+      transform: scale(1.02);
+    }
+
+    .file-input {
+      position: absolute;
+      inset: 0;
+      opacity: 0;
+      cursor: pointer;
+    }
+
+    .file-upload-content {
+      pointer-events: none;
+    }
+
+    .file-selected {
+      pointer-events: none;
+    }
+
+    .import-preview {
+      background: var(--color-surface);
+      border-radius: 8px;
+      padding: 1rem;
+      margin-top: 1rem;
+    }
+
+    .preview-table-container {
+      max-height: 300px;
+      overflow-y: auto;
+      border: 1px solid var(--color-border);
+      border-radius: 6px;
+      margin-top: 0.5rem;
+    }
+
+    .preview-table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 0.75rem;
+    }
+
+    .preview-table th {
+      background: var(--color-surface);
+      padding: 0.5rem;
+      text-align: left;
+      font-weight: 600;
+      border-bottom: 1px solid var(--color-border);
+      position: sticky;
+      top: 0;
+    }
+
+    .preview-table td {
+      padding: 0.5rem;
+      border-bottom: 1px solid #f3f4f6;
+    }
+
+    .text-green-600 {
+      color: #16a34a;
+    }
+
+    .text-red-600 {
+      color: #dc2626;
+    }
+
+    /* Action Buttons - Icons Only */
+    .action-buttons {
+      display: flex;
+      gap: 0.25rem;
+      flex-wrap: wrap;
+    }
+
+    .action-btn {
+      width: 24px;
+      height: 24px;
+      border-radius: 4px;
+      border: none;
+      background: var(--color-surface);
+      color: var(--color-text-secondary);
+      cursor: pointer;
+      transition: all 0.2s ease;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 0.75rem;
+    }
+
+    .action-btn:hover {
+      background: var(--color-border);
+      color: var(--color-text-primary);
+    }
+
+    /* Button Styles */
+    .btn {
+      padding: 0.375rem 0.875rem;
+      border-radius: 6px;
+      font-size: 0.625rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      border: none;
+      display: inline-flex;
+      align-items: center;
+      gap: 0.25rem;
+      text-decoration: none;
+    }
+
+    .btn-primary {
+      background: var(--color-primary);
+      color: var(--color-accent);
+    }
+
+    .btn-primary:hover {
+      background: #333;
+      transform: translateY(-0.5px);
+    }
+
+    .btn-secondary {
+      background: var(--color-surface);
+      color: var(--color-text-secondary);
+      border: 1px solid var(--color-border);
+    }
+
+    .btn-secondary:hover {
+      background: var(--color-border);
+    }
+
+    /* Modal Styles */
+    .modal-overlay {
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background: rgba(0, 0, 0, 0.5);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      z-index: 1000;
+    }
+
+    .modal-content {
+      background: white;
+      border-radius: 12px;
+      padding: 1.25rem;
+      max-width: 600px;
+      width: 90%;
+      max-height: 90vh;
+      overflow-y: auto;
+      font-size: 12px;
+    }
+
+    .modal-content.large {
+      max-width: 900px;
+    }
+
+    .modal-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 1rem;
+    }
+
+    .modal-title {
+      font-size: 0.875rem;
+      font-weight: 600;
+      color: var(--color-text-primary);
+    }
+
+    .modal-close {
+      background: none;
+      border: none;
+      font-size: 0.875rem;
+      color: var(--color-text-secondary);
+      cursor: pointer;
+      padding: 0.25rem;
+    }
+
+    /* Form Styles */
+    .form-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+      gap: 1rem;
+    }
+
+    .form-group {
+      display: flex;
+      flex-direction: column;
+    }
+
+    .form-label {
+      font-size: 0.75rem;
+      font-weight: 500;
+      color: var(--color-text-primary);
+      margin-bottom: 0.25rem;
+    }
+
+    .form-input {
+      padding: 0.375rem 0.5rem;
+      border: 1px solid var(--color-border);
+      border-radius: 4px;
+      font-size: 0.75rem;
+      transition: border-color 0.2s ease;
+    }
+
+    .form-input:focus {
+      outline: none;
+      border-color: var(--color-primary);
+      box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+    }
+
+    .form-select {
+      padding: 0.375rem 0.5rem;
+      border: 1px solid var(--color-border);
+      border-radius: 4px;
+      font-size: 0.75rem;
+      background: white;
+      transition: border-color 0.2s ease;
+    }
+
+    .form-select:focus {
+      outline: none;
+      border-color: var(--color-primary);
+      box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+    }
+
+    .form-textarea {
+      resize: vertical;
+      min-height: 60px;
+    }
+
+    .mb-4 {
+      margin-bottom: 1rem;
+    }
+
+    .mb-6 {
+      margin-bottom: 1.5rem;
+    }
+
+    .text-lg {
+      font-size: 1rem;
+      font-weight: 600;
       color: var(--color-primary);
     }
 
-    .action-btn.delete {
-      color: var(--color-warning);
-    }
-
-    .stat-change .material-symbols-rounded {
-      font-size: 1rem;
-    }
-
-    .stock-badge .material-symbols-rounded {
+    .text-sm {
       font-size: 0.75rem;
     }
 
-    .status-badge .material-symbols-rounded {
-      font-size: 0.75rem;
+    .modal-actions {
+      display: flex;
+      justify-content: flex-end;
+      gap: 1rem;
+      padding-top: 1rem;
+      border-top: 1px solid var(--color-border);
     }
 
-    .action-btn .material-symbols-rounded {
-      font-size: 0.875rem;
-    }
-
+    /* Logout Section */
     .logout-section {
       padding: 1rem;
       border-top: 1px solid rgba(255, 255, 255, 0.1);
@@ -596,13 +924,13 @@
     .logout-button {
       display: flex;
       align-items: center;
-      gap: 1rem;
-      padding: 0.875rem 1.5rem;
+      gap: 0.75rem;
+      padding: 0.75rem 1.25rem;
       color: rgba(255, 255, 255, 0.8);
       text-decoration: none;
       transition: all 0.2s ease;
       cursor: pointer;
-      font-size: 0.9rem;
+      font-size: 0.8rem;
       font-weight: 500;
       width: 100%;
       border: none;
@@ -615,624 +943,7 @@
       color: var(--color-warning);
     }
 
-    .logout-icon {
-      font-size: 1.25rem;
-    }
-
-    /* New Template Styles */
-    .content-area {
-      padding: 2rem;
-    }
-
-    .content-header {
-      display: flex;
-      justify-content: space-between;
-      align-items: flex-start;
-      margin-bottom: 2rem;
-      gap: 2rem;
-    }
-
-    .content-header > div:first-child p {
-      color: var(--color-text-secondary);
-      font-size: 1rem;
-      margin: 0;
-    }
-
-    .quick-stats {
-      display: flex;
-      gap: 1rem;
-    }
-
-    .stat-button {
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      padding: 1rem;
-      background: var(--color-background);
-      border: 1px solid var(--color-border);
-      border-radius: 12px;
-      cursor: pointer;
-      transition: all 0.3s ease;
-      min-width: 120px;
-    }
-
-    .stat-button:hover {
-      transform: translateY(-2px);
-      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
-    }
-
-    .stat-button span {
-      font-size: 0.75rem;
-      color: var(--color-text-secondary);
-      margin-bottom: 0.5rem;
-    }
-
-    .stat-button strong {
-      font-size: 1.5rem;
-      font-weight: 700;
-      color: var(--color-text-primary);
-    }
-
-    .header-actions {
-      display: flex;
-      gap: 0.75rem;
-    }
-
-    .secondary-btn {
-      display: flex;
-      align-items: center;
-      gap: 0.5rem;
-      padding: 0.75rem 1.25rem;
-      background: var(--color-background);
-      border: 1px solid var(--color-border);
-      border-radius: 8px;
-      cursor: pointer;
-      font-size: 0.875rem;
-      font-weight: 500;
-      transition: all 0.3s ease;
-    }
-
-    .secondary-btn:hover {
-      background: var(--color-surface);
-      border-color: var(--color-primary);
-    }
-
-    .add-product-btn {
-      display: flex;
-      align-items: center;
-      gap: 0.5rem;
-      padding: 0.75rem 1.25rem;
-      background: var(--color-primary);
-      color: var(--color-accent);
-      border: none;
-      border-radius: 8px;
-      cursor: pointer;
-      font-size: 0.875rem;
-      font-weight: 600;
-      transition: all 0.3s ease;
-    }
-
-    .add-product-btn:hover {
-      background: var(--color-text-secondary);
-      transform: translateY(-2px);
-    }
-
-    .widgets-row {
-      display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
-      gap: 1.5rem;
-      margin-bottom: 2rem;
-    }
-
-    .widget {
-      background: var(--color-background);
-      border: 1px solid var(--color-border);
-      border-radius: 12px;
-      overflow: hidden;
-    }
-
-    .widget-header {
-      display: flex;
-      justify-content: space-between;
-      align-items: flex-start;
-      padding: 1.5rem;
-      border-bottom: 1px solid var(--color-border);
-    }
-
-    .widget-title {
-      font-size: 1.125rem;
-      font-weight: 600;
-      color: var(--color-text-primary);
-      margin: 0 0 0.25rem 0;
-    }
-
-    .widget-subtitle {
-      font-size: 0.875rem;
-      color: var(--color-text-secondary);
-      margin: 0;
-    }
-
-    .icon-button {
-      width: 32px;
-      height: 32px;
-      border: 1px solid var(--color-border);
-      background: var(--color-background);
-      border-radius: 6px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      cursor: pointer;
-      transition: all 0.2s ease;
-    }
-
-    .icon-button:hover {
-      background: var(--color-surface);
-    }
-
-    .widget-menu {
-      position: absolute;
-      background: var(--color-background);
-      border: 1px solid var(--color-border);
-      border-radius: 8px;
-      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
-      z-index: 100;
-      min-width: 150px;
-    }
-
-    .widget-menu button {
-      width: 100%;
-      padding: 0.5rem 1rem;
-      border: none;
-      background: none;
-      text-align: left;
-      cursor: pointer;
-      display: flex;
-      align-items: center;
-      gap: 0.5rem;
-      font-size: 0.875rem;
-    }
-
-    .widget-menu button:hover {
-      background: var(--color-surface);
-    }
-
-    .chart-container {
-      padding: 1.5rem;
-      height: 200px;
-    }
-
-    .expiry-list {
-      padding: 1.5rem;
-      max-height: 200px;
-      overflow-y: auto;
-    }
-
-    .product-list-container {
-      background: var(--color-background);
-      border: 1px solid var(--color-border);
-      border-radius: 12px;
-      overflow: hidden;
-    }
-
-    .product-list-header {
-      padding: 1.5rem;
-      border-bottom: 1px solid var(--color-border);
-    }
-
-    .product-list-header h2 {
-      font-size: 1.25rem;
-      font-weight: 600;
-      color: var(--color-text-primary);
-      margin: 0 0 0.25rem 0;
-    }
-
-    .product-list-header span {
-      font-size: 0.875rem;
-      color: var(--color-text-secondary);
-    }
-
-    .table-controls {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      padding: 1rem 1.5rem;
-      border-bottom: 1px solid var(--color-border);
-      gap: 1rem;
-    }
-
-    .control-group {
-      display: flex;
-      align-items: center;
-      gap: 0.5rem;
-    }
-
-    .table-search {
-      position: relative;
-      display: flex;
-      align-items: center;
-    }
-
-    .table-search i {
-      position: absolute;
-      left: 0.75rem;
-      color: var(--color-text-muted);
-      font-size: 0.875rem;
-    }
-
-    .table-search input {
-      padding: 0.5rem 1rem 0.5rem 2.5rem;
-      border: 1px solid var(--color-border);
-      border-radius: 6px;
-      font-size: 0.875rem;
-      width: 300px;
-    }
-
-    .table-search input:focus {
-      outline: none;
-      border-color: var(--color-primary);
-    }
-
-    .nav-actions {
-      display: flex;
-      gap: 0.5rem;
-    }
-
-    .control-button {
-      display: flex;
-      align-items: center;
-      gap: 0.5rem;
-      padding: 0.5rem 1rem;
-      border: 1px solid var(--color-border);
-      background: var(--color-background);
-      border-radius: 6px;
-      cursor: pointer;
-      font-size: 0.875rem;
-      transition: all 0.2s ease;
-    }
-
-    .control-button:hover {
-      background: var(--color-surface);
-    }
-
-    .table-scroll {
-      overflow-x: auto;
-    }
-
-    .product-table {
-      width: 100%;
-      border-collapse: collapse;
-    }
-
-    .product-table th {
-      background: var(--color-surface);
-      padding: 1rem;
-      text-align: left;
-      font-weight: 600;
-      font-size: 0.875rem;
-      color: var(--color-text-primary);
-      border-bottom: 1px solid var(--color-border);
-    }
-
-    .product-table td {
-      padding: 1rem;
-      border-bottom: 1px solid var(--color-border);
-      font-size: 0.875rem;
-    }
-
-    .product-table tr:hover {
-      background: var(--color-surface);
-    }
-
-    .table-empty {
-      text-align: center;
-      padding: 3rem;
-      color: var(--color-text-secondary);
-    }
-
-    .table-empty i {
-      font-size: 3rem;
-      opacity: 0.3;
-      margin-bottom: 1rem;
-    }
-
-    .pagination {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      padding: 1rem 1.5rem;
-      border-top: 1px solid var(--color-border);
-    }
-
-    /* Modal Styles */
-    .overlay {
-      position: fixed;
-      top: 0;
-      left: 0;
-      right: 0;
-      bottom: 0;
-      background: rgba(0, 0, 0, 0.5);
-      z-index: 1000;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-    }
-
-    .modal {
-      position: fixed;
-      top: 0;
-      left: 0;
-      right: 0;
-      bottom: 0;
-      background: rgba(0, 0, 0, 0.5);
-      z-index: 1000;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-    }
-
-    .modal-content {
-      background: var(--color-background);
-      border-radius: 12px;
-      box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1);
-      max-width: 600px;
-      width: 90%;
-      max-height: 90vh;
-      overflow-y: auto;
-    }
-
-    .modal-header {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      padding: 1.5rem;
-      border-bottom: 1px solid var(--color-border);
-    }
-
-    .modal-header h2 {
-      font-size: 1.25rem;
-      font-weight: 600;
-      color: var(--color-text-primary);
-      margin: 0;
-    }
-
-    .modal-close {
-      width: 32px;
-      height: 32px;
-      border: 1px solid var(--color-border);
-      background: var(--color-background);
-      border-radius: 6px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      cursor: pointer;
-      transition: all 0.2s ease;
-    }
-
-    .modal-close:hover {
-      background: var(--color-surface);
-    }
-
-    .modal-body {
-      padding: 1.5rem;
-    }
-
-    .form-grid {
-      display: grid;
-      grid-template-columns: repeat(2, 1fr);
-      gap: 1rem;
-      margin-bottom: 1.5rem;
-    }
-
-    .form-grid label {
-      display: flex;
-      flex-direction: column;
-      gap: 0.5rem;
-    }
-
-    .form-grid label span {
-      font-size: 0.875rem;
-      font-weight: 500;
-      color: var(--color-text-primary);
-    }
-
-    .form-grid input,
-    .form-grid select {
-      padding: 0.75rem;
-      border: 1px solid var(--color-border);
-      border-radius: 6px;
-      font-size: 0.875rem;
-    }
-
-    .form-grid input:focus,
-    .form-grid select:focus {
-      outline: none;
-      border-color: var(--color-primary);
-    }
-
-    .form-textarea {
-      display: flex;
-      flex-direction: column;
-      gap: 0.5rem;
-    }
-
-    .form-textarea span {
-      font-size: 0.875rem;
-      font-weight: 500;
-      color: var(--color-text-primary);
-    }
-
-    .form-textarea textarea {
-      padding: 0.75rem;
-      border: 1px solid var(--color-border);
-      border-radius: 6px;
-      font-size: 0.875rem;
-      resize: vertical;
-    }
-
-    .form-textarea textarea:focus {
-      outline: none;
-      border-color: var(--color-primary);
-    }
-
-    .modal-footer {
-      display: flex;
-      justify-content: flex-end;
-      gap: 0.75rem;
-      padding: 1.5rem;
-      border-top: 1px solid var(--color-border);
-    }
-
-    .modal-footer button {
-      padding: 0.75rem 1.5rem;
-      border-radius: 6px;
-      font-size: 0.875rem;
-      font-weight: 500;
-      cursor: pointer;
-      transition: all 0.3s ease;
-    }
-
-    .modal-footer button.secondary {
-      background: var(--color-background);
-      border: 1px solid var(--color-border);
-      color: var(--color-text-primary);
-    }
-
-    .modal-footer button.secondary:hover {
-      background: var(--color-surface);
-    }
-
-    .modal-footer button.primary {
-      background: var(--color-primary);
-      color: var(--color-accent);
-      border: none;
-    }
-
-    .modal-footer button.primary:hover {
-      background: var(--color-text-secondary);
-    }
-
-    /* Bulk Upload Specific Styles */
-    .upload-instructions {
-      margin-bottom: 1.5rem;
-      padding: 1rem;
-      background: var(--color-surface);
-      border-radius: 8px;
-    }
-
-    .upload-instructions h3 {
-      margin: 0 0 0.5rem 0;
-      color: var(--color-text-primary);
-    }
-
-    .upload-instructions p {
-      margin: 0 0 1rem 0;
-      color: var(--color-text-secondary);
-    }
-
-    .upload-instructions ul {
-      margin: 0 0 1rem 0;
-      padding-left: 1.5rem;
-    }
-
-    .upload-instructions li {
-      margin-bottom: 0.25rem;
-      color: var(--color-text-secondary);
-      font-size: 0.875rem;
-    }
-
-    .upload-area {
-      margin-bottom: 1.5rem;
-    }
-
-    .upload-label {
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      justify-content: center;
-      padding: 2rem;
-      border: 2px dashed var(--color-border);
-      border-radius: 8px;
-      cursor: pointer;
-      transition: all 0.3s ease;
-    }
-
-    .upload-label:hover {
-      border-color: var(--color-primary);
-      background: var(--color-surface);
-    }
-
-    .upload-label i {
-      font-size: 2rem;
-      margin-bottom: 0.5rem;
-      color: var(--color-text-muted);
-    }
-
-    .upload-label span {
-      color: var(--color-text-secondary);
-    }
-
-    .file-info {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      padding: 0.75rem;
-      background: var(--color-surface);
-      border-radius: 6px;
-      margin-top: 0.5rem;
-    }
-
-    .remove-file {
-      background: none;
-      border: none;
-      color: var(--color-warning);
-      cursor: pointer;
-      padding: 0.25rem;
-      border-radius: 4px;
-    }
-
-    .remove-file:hover {
-      background: rgba(239, 68, 68, 0.1);
-    }
-
-    .upload-preview {
-      margin-top: 1.5rem;
-    }
-
-    .upload-preview h4 {
-      margin: 0 0 1rem 0;
-      color: var(--color-text-primary);
-    }
-
-    .preview-table {
-      max-height: 200px;
-      overflow-y: auto;
-      border: 1px solid var(--color-border);
-      border-radius: 6px;
-    }
-
-    .preview-table table {
-      width: 100%;
-      border-collapse: collapse;
-    }
-
-    .preview-table th,
-    .preview-table td {
-      padding: 0.5rem;
-      text-align: left;
-      border-bottom: 1px solid var(--color-border);
-      font-size: 0.85rem;
-    }
-
-    .preview-table th {
-      background: var(--color-surface);
-      font-weight: 600;
-      color: var(--color-text-primary);
-    }
-
-    .preview-table td {
-      color: var(--color-text-secondary);
-    }
-
+    /* Responsive Design */
     @media (max-width: 768px) {
       .sidebar {
         transform: translateX(-100%);
@@ -1250,62 +961,144 @@
         display: block;
       }
 
-      .page-title-section {
+      .mobile-title {
+        display: block;
+      }
+
+      .page-title {
         display: none;
       }
 
-      .content-area {
+      .inventory-content {
         padding: 1rem;
       }
 
-      .content-header {
-        flex-direction: column;
-        align-items: stretch;
-        gap: 1rem;
+      .stats-grid {
+        grid-template-columns: repeat(2, 1fr);
       }
 
-      .quick-stats {
-        flex-wrap: wrap;
-      }
-
-      .stat-button {
-        min-width: 100px;
-        flex: 1;
-      }
-
-      .header-actions {
-        flex-wrap: wrap;
-      }
-
-      .widgets-row {
+      .filter-grid {
         grid-template-columns: 1fr;
       }
 
-      .table-controls {
-        flex-direction: column;
-        align-items: stretch;
-        gap: 1rem;
+      .spreadsheet-table {
+        font-size: 0.75rem;
       }
 
-      .control-group {
-        flex-wrap: wrap;
+      .spreadsheet-table th {
+        font-size: 0.625rem;
+        padding: 0.375rem;
+        white-space: nowrap;
       }
 
-      .table-search input {
-        width: 100%;
+      .spreadsheet-table td {
+        padding: 0.375rem;
+        font-size: 0.625rem;
       }
 
-      .nav-actions {
-        justify-content: center;
+      .spreadsheet-table .rx-number {
+        font-size: 0.625rem;
       }
 
-      .form-grid {
+      .spreadsheet-table .patient-name {
+        font-size: 0.625rem;
+      }
+
+      .status-badge, .priority-badge {
+        font-size: 0.5rem;
+        padding: 0.125rem 0.375rem;
+      }
+
+      .insurance-status, .inventory-status {
+        font-size: 0.5rem;
+      }
+
+      .insurance-status .material-symbols-rounded,
+      .inventory-status .material-symbols-rounded {
+        font-size: 0.75rem;
+      }
+
+      /* Hide less important columns on mobile */
+      .spreadsheet-table th:nth-child(7),
+      .spreadsheet-table th:nth-child(8),
+      .spreadsheet-table th:nth-child(9),
+      .spreadsheet-table th:nth-child(10),
+      .spreadsheet-table th:nth-child(11),
+      .spreadsheet-table th:nth-child(12),
+      .spreadsheet-table th:nth-child(13),
+      .spreadsheet-table th:nth-child(14),
+      .spreadsheet-table th:nth-child(15),
+      .spreadsheet-table th:nth-child(16),
+      .spreadsheet-table th:nth-child(17),
+      .spreadsheet-table td:nth-child(7),
+      .spreadsheet-table td:nth-child(8),
+      .spreadsheet-table td:nth-child(9),
+      .spreadsheet-table td:nth-child(10),
+      .spreadsheet-table td:nth-child(11),
+      .spreadsheet-table td:nth-child(12),
+      .spreadsheet-table td:nth-child(13),
+      .spreadsheet-table td:nth-child(14),
+      .spreadsheet-table td:nth-child(15),
+      .spreadsheet-table td:nth-child(16),
+      .spreadsheet-table td:nth-child(17) {
+        display: none;
+      }
+    }
+
+    @media (max-width: 480px) {
+      .stats-grid {
         grid-template-columns: 1fr;
       }
 
-      .modal-content {
-        width: 95%;
-        margin: 1rem;
+      .spreadsheet-table th {
+        font-size: 0.5rem;
+        padding: 0.25rem;
+      }
+
+      .spreadsheet-table td {
+        padding: 0.25rem;
+        font-size: 0.5rem;
+      }
+
+      /* Hide more columns on very small screens */
+      .spreadsheet-table th:nth-child(5),
+      .spreadsheet-table th:nth-child(6),
+      .spreadsheet-table th:nth-child(7),
+      .spreadsheet-table th:nth-child(8),
+      .spreadsheet-table th:nth-child(9),
+      .spreadsheet-table th:nth-child(10),
+      .spreadsheet-table th:nth-child(11),
+      .spreadsheet-table th:nth-child(12),
+      .spreadsheet-table th:nth-child(13),
+      .spreadsheet-table th:nth-child(14),
+      .spreadsheet-table th:nth-child(15),
+      .spreadsheet-table th:nth-child(16),
+      .spreadsheet-table th:nth-child(17),
+      .spreadsheet-table td:nth-child(5),
+      .spreadsheet-table td:nth-child(6),
+      .spreadsheet-table td:nth-child(7),
+      .spreadsheet-table td:nth-child(8),
+      .spreadsheet-table td:nth-child(9),
+      .spreadsheet-table td:nth-child(10),
+      .spreadsheet-table td:nth-child(11),
+      .spreadsheet-table td:nth-child(12),
+      .spreadsheet-table td:nth-child(13),
+      .spreadsheet-table td:nth-child(14),
+      .spreadsheet-table td:nth-child(15),
+      .spreadsheet-table td:nth-child(16),
+      .spreadsheet-table td:nth-child(17) {
+        display: none;
+      }
+
+      .quick-actions {
+        right: 1rem;
+        padding: 0.5rem;
+      }
+
+      .quick-action-btn {
+        width: 40px;
+        height: 40px;
+        font-size: 1rem;
       }
     }
   </style>
@@ -1322,57 +1115,52 @@
       </div>
     </div>
 
-
     <nav class="nav-menu">
       <a href="home.html" class="nav-item">
         <span class="material-symbols-rounded nav-icon">home</span>
         <span>Home</span>
       </a>
-      <a href="prescriptions.html" class="nav-item">
-        <span class="material-symbols-rounded nav-icon">prescriptions</span>
-        <span>Prescriptions</span>
-      </a>
       <a href="patients.html" class="nav-item">
         <span class="material-symbols-rounded nav-icon">people</span>
         <span>Patients</span>
       </a>
-      <a href="inventory.html" class="nav-item">
-        <span class="material-symbols-rounded nav-icon">inventory_2</span>
+      <a href="prescriptions.html" class="nav-item">
+        <span class="material-symbols-rounded nav-icon">prescriptions</span>
+        <span>Prescriptions</span>
+      </a>
+      <a href="inventory.html" class="nav-item active">
+        <span class="material-symbols-rounded nav-icon">inventory</span>
         <span>Inventory</span>
-      </a>
-      <a href="payments.html" class="nav-item">
-        <span class="material-symbols-rounded nav-icon">payments</span>
-        <span>Payments</span>
-      </a>
-      <a href="suppliers.html" class="nav-item">
-        <span class="material-symbols-rounded nav-icon">local_shipping</span>
-        <span>Suppliers</span>
       </a>
       <a href="clinical.html" class="nav-item">
         <span class="material-symbols-rounded nav-icon">medical_services</span>
-        <span>Clinical Support</span>
+        <span>Clinical</span>
       </a>
       <a href="compliance.html" class="nav-item">
-        <span class="material-symbols-rounded nav-icon">gavel</span>
+        <span class="material-symbols-rounded nav-icon">verified</span>
         <span>Compliance</span>
       </a>
       <a href="reports.html" class="nav-item">
         <span class="material-symbols-rounded nav-icon">analytics</span>
         <span>Reports</span>
       </a>
+      <a href="suppliers.html" class="nav-item">
+        <span class="material-symbols-rounded nav-icon">local_shipping</span>
+        <span>Suppliers</span>
+      </a>
       <a href="help.html" class="nav-item">
         <span class="material-symbols-rounded nav-icon">help</span>
         <span>Help & Training</span>
       </a>
       <a href="account.html" class="nav-item">
-        <span class="material-symbols-rounded nav-icon">settings</span>
+        <span class="material-symbols-rounded nav-icon">person</span>
         <span>Account</span>
       </a>
     </nav>
-    
+
     <div class="logout-section">
-      <button class="logout-button" @click="logout()">
-        <span class="material-symbols-rounded logout-icon">logout</span>
+      <button class="logout-button" @click="handleLogout()">
+        <span class="material-symbols-rounded">logout</span>
         <span>Logout</span>
       </button>
     </div>
@@ -1386,636 +1174,1410 @@
         <button class="mobile-menu-toggle" @click="sidebarOpen = !sidebarOpen">
           <span class="material-symbols-rounded">menu</span>
         </button>
-        
-        <div class="page-title-section">
-          <h1 class="page-title">Inventory Management</h1>
-        </div>
-        
-        <div class="search-bar" x-data="{ searchOpen: false, query: '' }">
-          <span class="material-symbols-rounded search-icon">search</span>
-          <input 
-            type="text" 
-            class="search-input" 
-            placeholder="Search inventory by product name, SKU, or category..."
-            x-model="query"
-            @focus="searchOpen = true"
-            @input="searchOpen = true"
-            @blur="setTimeout(() => searchOpen = false, 200)"
-          >
-          
-          <div class="search-suggestions" :class="searchOpen && query.length > 0 ? 'show' : ''">
-            <template x-for="suggestion in filteredSuggestions" :key="suggestion.id">
-              <div class="suggestion-item" @click="selectSuggestion(suggestion)">
-                <div class="suggestion-icon">
-                  <span class="material-symbols-rounded" x-text="suggestion.icon"></span>
-                </div>
-                <div class="suggestion-content">
-                  <div class="suggestion-title" x-text="suggestion.title"></div>
-                  <div class="suggestion-description" x-text="suggestion.description"></div>
-                </div>
-                <div class="suggestion-type" x-text="suggestion.type"></div>
-              </div>
-            </template>
-          </div>
-        </div>
+        <h1 class="page-title">Inventory Management</h1>
+        <span class="mobile-title">Inventory</span>
       </div>
-
       <div class="header-right">
-        <!-- Header elements removed per request -->
+        <div x-show="isDemoMode" class="demo-indicator">
+          <span class="material-symbols-rounded">info</span>
+          <span>Demo Mode</span>
+        </div>
+        <div x-show="!isDemoMode" class="sync-indicator" x-show="showRealTimeIndicator">
+          <span class="material-symbols-rounded">sync</span>
+          <span>Syncing...</span>
+        </div>
+        <div style="display: flex; gap: 0.5rem;">
+          <button x-show="!isDemoMode" class="btn btn-secondary" @click="refreshWithSync()" title="Manual Sync">
+            <span class="material-symbols-rounded">sync</span>
+            <span>Sync</span>
+          </button>
+          <button class="btn btn-secondary" @click="showImportModal = true">
+            <span class="material-symbols-rounded">upload_file</span>
+            <span>Import</span>
+          </button>
+          <button class="btn btn-primary" @click="showAddItemModal = true">
+            <span class="material-symbols-rounded">add</span>
+            <span>Add Item</span>
+          </button>
+        </div>
       </div>
     </header>
 
-    <section class="content-area">
-        <div class="content-header">
-          <div>
-            <p>Manage and track your pharmacy inventory in real-time.</p>
+    <!-- Inventory Content -->
+    <div class="inventory-content">
+      
+      <!-- Alerts Panel -->
+      <div class="alert-panel" x-show="alerts.length > 0">
+        <div class="alert-header">
+          <div class="alert-title">
+            <span class="material-symbols-rounded">notifications</span>
+            <span>Inventory Alerts</span>
+            <span class="alert-count" x-text="alerts.length"></span>
           </div>
-          <div class="quick-stats">
-            <button class="stat-button" data-stat="total-products">
-              <span>Total Products</span>
-              <strong id="totalProductsCount">—</strong>
-            </button>
-            <button class="stat-button" data-stat="low-stock">
-              <span>Low Stock</span>
-              <strong id="lowStockCount">—</strong>
-            </button>
-            <button class="stat-button" data-stat="out-of-stock">
-              <span>Out of Stock</span>
-              <strong id="outOfStockCount">—</strong>
-            </button>
-            <button class="stat-button" data-stat="expiring">
-              <span>Expiring Soon</span>
-              <strong id="expiringCount">—</strong>
-            </button>
-          </div>
-          <div class="header-actions">
-            <button class="secondary-btn" id="importButton" type="button" data-permission="manage_inventory">
-              <i class="fi fi-rr-upload" aria-hidden="true"></i>
-              Import
-            </button>
-            <button class="secondary-btn" id="exportButton" type="button">
-              <i class="fi fi-rr-download" aria-hidden="true"></i>
-              Export
-            </button>
-            <button class="add-product-btn" id="addProductButton" type="button">
-              <i class="fi fi-rr-plus" aria-hidden="true"></i>
-              Add Product
-            </button>
-          </div>
-        </div>
-
-        <div class="widgets-row">
-          <article class="widget">
-            <header class="widget-header">
-              <div>
-                <h3 class="widget-title">Stock Levels</h3>
-                <p class="widget-subtitle">Current inventory status</p>
-              </div>
-              <button class="icon-button" type="button" data-menu="stock" aria-haspopup="true"
-                aria-expanded="false" aria-controls="stockMenu" aria-label="Stock menu">
-                <i class="fi fi-rr-menu-dots" aria-hidden="true"></i>
-              </button>
-              <div class="widget-menu" id="stockMenu" hidden>
-                <button type="button" data-action="refresh-stock"><i class="fi fi-rr-refresh" aria-hidden="true"></i>Refresh data</button>
-                <button type="button" data-action="view-report"><i class="fi fi-rr-chart-line-up" aria-hidden="true"></i>View detailed report</button>
-              </div>
-            </header>
-            <div class="chart-container">
-              <canvas id="stockChart" aria-label="Stock levels overview"></canvas>
-            </div>
-          </article>
-
-          <article class="widget">
-            <header class="widget-header">
-              <div>
-                <h3 class="widget-title">Category Distribution</h3>
-                <p class="widget-subtitle">Products by category</p>
-              </div>
-              <button class="icon-button" type="button" data-menu="category" aria-haspopup="true"
-                aria-expanded="false" aria-controls="categoryMenu" aria-label="Category menu">
-                <i class="fi fi-rr-menu-dots" aria-hidden="true"></i>
-              </button>
-              <div class="widget-menu" id="categoryMenu" hidden>
-                <button type="button" data-action="refresh-category"><i class="fi fi-rr-refresh" aria-hidden="true"></i>Refresh data</button>
-                <button type="button" data-action="export-category"><i class="fi fi-rr-download" aria-hidden="true"></i>Export report</button>
-              </div>
-            </header>
-            <div class="chart-container">
-              <canvas id="categoryChart" aria-label="Category distribution"></canvas>
-            </div>
-          </article>
-
-          <article class="widget">
-            <header class="widget-header">
-              <div>
-                <h3 class="widget-title">Expiry Tracking</h3>
-                <p class="widget-subtitle">Products expiring in next 30 days</p>
-              </div>
-              <button class="icon-button" type="button" data-menu="expiry" aria-haspopup="true"
-                aria-expanded="false" aria-controls="expiryMenu" aria-label="Expiry menu">
-                <i class="fi fi-rr-menu-dots" aria-hidden="true"></i>
-              </button>
-              <div class="widget-menu" id="expiryMenu" hidden>
-                <button type="button" data-action="refresh-expiry"><i class="fi fi-rr-refresh" aria-hidden="true"></i>Refresh list</button>
-                <button type="button" data-action="view-all-expiry"><i class="fi fi-rr-list" aria-hidden="true"></i>View all expiring</button>
-              </div>
-            </header>
-            <div class="expiry-list" id="expiryList"></div>
-          </article>
-        </div>
-
-        <article class="product-list-container">
-          <header class="product-list-header">
-            <div>
-              <h2>Product Inventory</h2>
-              <span>Manage your pharmacy products and stock levels</span>
-            </div>
-          </header>
-
-          <div class="table-controls">
-            <div class="control-group">
-              <label class="table-search">
-                <i class="fi fi-rr-search" aria-hidden="true"></i>
-                <input id="productSearchInput" type="search" placeholder="Search products by name, code or category"
-                  autocomplete="off">
-                <div class="search-autocomplete" id="productSearchAutocomplete" role="listbox" hidden></div>
-              </label>
-              <button class="icon-button" id="filterToggle" type="button" aria-haspopup="true" aria-expanded="false"
-                aria-controls="filterPanel" title="Filters">
-                <i class="fi fi-rr-filter" aria-hidden="true"></i>
-              </button>
-              <button class="icon-button" id="sortToggle" type="button" aria-haspopup="true" aria-expanded="false"
-                aria-controls="sortPanel" title="Sort">
-                <i class="fi fi-rr-bars-sort" aria-hidden="true"></i>
-              </button>
-              <button class="icon-button" id="columnsToggle" type="button" aria-haspopup="true" aria-expanded="false"
-                aria-controls="columnsPanel" title="Manage columns">
-                <i class="fi fi-rr-table-columns" aria-hidden="true"></i>
-              </button>
-            </div>
-            <div class="nav-actions">
-              <button class="control-button" type="button" data-action="bulk-edit">
-                <i class="fi fi-rr-edit" aria-hidden="true"></i>
-                Bulk Edit
-              </button>
-              <button class="control-button" type="button" data-action="print-labels">
-                <i class="fi fi-rr-print" aria-hidden="true"></i>
-                Print Labels
-              </button>
-            </div>
-          </div>
-          <div class="table-scroll">
-            <table class="product-table" id="productTable" aria-live="polite">
-              <thead>
-                <tr>
-                  <th scope="col" data-column="select">
-                    <input type="checkbox" id="selectAll" aria-label="Select all products">
-                  </th>
-                  <th scope="col" data-column="sku">Product Code</th>
-                  <th scope="col" data-column="name">Product Name</th>
-                  <th scope="col" data-column="category">Category</th>
-                  <th scope="col" data-column="stock">Stock</th>
-                  <th scope="col" data-column="price">Unit Price</th>
-                  <th scope="col" data-column="expiry">Expiry Date</th>
-                  <th scope="col" data-column="status">Status</th>
-                  <th scope="col" data-column="actions">Actions</th>
-                </tr>
-              </thead>
-              <tbody id="productTableBody"></tbody>
-            </table>
-          </div>
-
-          <div class="table-empty" id="productEmptyState" hidden>
-            <i class="fi fi-rr-box" aria-hidden="true"></i>
-            <p>No products match your filters. Adjust search or filters to view results.</p>
-          </div>
-
-          <footer class="pagination" id="pagination" hidden>
-            <div class="pagination-info" id="paginationInfo"></div>
-            <div class="pagination-controls" id="paginationControls"></div>
-            <div class="pagination-show">
-              <label>
-                Show
-                <select id="pageSizeSelect" aria-label="Select page size">
-                  <option value="10">10</option>
-                  <option value="20">20</option>
-                  <option value="50">50</option>
-                </select>
-                entries
-              </label>
-            </div>
-          </footer>
-          
-        </article>
-      </section>
-  </main>
-
-  <div class="overlay" id="modalOverlay" hidden></div>
-
-  <section class="modal" id="productModal" role="dialog" aria-modal="true" aria-labelledby="productModalTitle"
-    hidden>
-    <div class="modal-content">
-      <header class="modal-header">
-        <h2 id="productModalTitle">Add Product</h2>
-        <button type="button" class="modal-close" data-close="productModal" aria-label="Close add product form">
-          <i class="fi fi-rr-cross" aria-hidden="true"></i>
-        </button>
-      </header>
-      <form id="productForm" class="modal-body">
-        <div class="form-grid">
-          <label>
-            <span>Brand Name</span>
-            <input type="text" id="formProductName" name="productName" required>
-          </label>
-          <label>
-            <span>Generic Name</span>
-            <input type="text" id="formGenericName" name="genericName" required>
-          </label>
-          <label>
-            <span>Category</span>
-            <select id="formCategory" name="category" required>
-              <option value="">Select category</option>
-              <option value="Antibiotics">Antibiotics</option>
-              <option value="Analgesics">Analgesics</option>
-              <option value="Antimalarials">Antimalarials</option>
-              <option value="Antihypertensives">Antihypertensives</option>
-              <option value="Diabetes">Diabetes</option>
-              <option value="Vitamins & Supplements">Vitamins & Supplements</option>
-              <option value="OTC">OTC</option>
-              <option value="Community Health">Community Health</option>
-              <option value="Endocrinology">Endocrinology</option>
-            </select>
-          </label>
-          <label>
-            <span>Manufacture Date</span>
-            <input type="date" id="formManufactureDate" name="manufactureDate" required>
-          </label>
-          <label>
-            <span>Batch Number</span>
-            <input type="text" id="formBatchNumber" name="batchNumber" required>
-          </label>
-          <label>
-            <span>License Number</span>
-            <input type="text" id="formLicenseNumber" name="licenseNumber" required>
-          </label>
-          <label>
-            <span>Zambia REG Number</span>
-            <input type="text" id="formZambiaRegNumber" name="zambiaRegNumber" required>
-          </label>
-          <label>
-            <span>Packing Type</span>
-            <select id="formPackingType" name="packingType" required>
-              <option value="">Select packing type</option>
-              <option value="Box">Box</option>
-              <option value="Blister">Blister</option>
-              <option value="Bottle">Bottle</option>
-              <option value="Tube">Tube</option>
-              <option value="Sachet">Sachet</option>
-              <option value="Vial">Vial</option>
-              <option value="Ampoule">Ampoule</option>
-            </select>
-          </label>
-          <label>
-            <span>Cost Price (ZMW)</span>
-            <input type="number" id="formCostPrice" name="costPrice" min="0" step="0.01" required>
-          </label>
-          <label>
-            <span>Selling Price (ZMW)</span>
-            <input type="number" id="formSellingPrice" name="sellingPrice" min="0" step="0.01" required>
-          </label>
-          <label>
-            <span>Stock Quantity</span>
-            <input type="number" id="formStock" name="stockQuantity" min="0" required>
-          </label>
-          <label>
-            <span>Expiry Date</span>
-            <input type="date" id="formExpiry" name="expiryDate" required>
-          </label>
-        </div>
-        <label class="form-textarea">
-          <span>Description</span>
-          <textarea id="formDescription" name="description" rows="3"
-            placeholder="Add optional notes about the product"></textarea>
-        </label>
-      </form>
-      <footer class="modal-footer">
-        <button type="button" class="secondary" data-close="productModal">Cancel</button>
-        <button type="submit" form="productForm" class="primary" id="submitProduct">Save &amp; Continue</button>
-      </footer>
-    </div>
-  </section>
-
-  <section class="modal" id="bulkUploadModal" role="dialog" aria-modal="true" aria-labelledby="bulkUploadModalTitle"
-    hidden>
-    <div class="modal-content">
-      <header class="modal-header">
-        <h2 id="bulkUploadModalTitle">Bulk Upload Products</h2>
-        <button type="button" class="modal-close" data-close="bulkUploadModal" aria-label="Close bulk upload">
-          <i class="fi fi-rr-cross" aria-hidden="true"></i>
-        </button>
-      </header>
-      <div class="modal-body">
-        <div class="upload-instructions">
-          <h3>Instructions</h3>
-          <p>Upload a CSV file with the following columns:</p>
-          <ul>
-            <li>Brand Name</li>
-            <li>Generic Name</li>
-            <li>Category</li>
-            <li>Manufacture Date</li>
-            <li>Batch Number</li>
-            <li>License Number</li>
-            <li>Zambia REG Number</li>
-            <li>Packing Type</li>
-            <li>Cost Price</li>
-            <li>Selling Price</li>
-            <li>Stock Quantity</li>
-            <li>Expiry Date</li>
-            <li>Description (optional)</li>
-          </ul>
-          <button class="secondary-btn" id="downloadTemplateBtn">
-            <i class="fi fi-rr-download" aria-hidden="true"></i>
-            Download Template
+          <button class="btn btn-secondary btn-small" @click="dismissAllAlerts()">
+            <span class="material-symbols-rounded">clear_all</span>
+            <span>Clear All</span>
           </button>
         </div>
-        <div class="upload-area">
-          <label for="bulkFileInput" class="upload-label">
-            <i class="fi fi-rr-upload" aria-hidden="true"></i>
-            <span>Choose CSV file or drag and drop</span>
-            <input type="file" id="bulkFileInput" accept=".csv" hidden>
-          </label>
-          <div class="file-info" id="fileInfo" hidden>
-            <span id="fileName"></span>
-            <button type="button" class="remove-file" id="removeFile" title="Remove file">
-              <i class="fi fi-rr-cross" aria-hidden="true"></i>
+        <div class="alert-list">
+          <template x-for="alert in alerts" :key="alert.id">
+            <div class="alert-item" :class="alert.type">
+              <div class="alert-content">
+                <strong x-text="alert.title"></strong>
+                <span x-text="alert.message"></span>
+              </div>
+              <div class="alert-actions">
+                <button class="alert-btn primary" @click="handleAlert(alert)" x-text="alert.action"></button>
+                <button class="alert-btn secondary" @click="dismissAlert(alert.id)">
+                  <span class="material-symbols-rounded">close</span>
+                </button>
+              </div>
+            </div>
+          </template>
+        </div>
+      </div>
+
+      <!-- Stats Cards -->
+      <div class="stats-grid">
+        <div class="stat-card">
+          <div class="stat-label">Total Items</div>
+          <div class="stat-value" x-text="inventory.length"></div>
+          <div class="stat-change">Active inventory</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-label">In Stock</div>
+          <div class="stat-value" x-text="inventory.filter(item => item.stockStatus === 'in-stock').length"></div>
+          <div class="stat-change">Available items</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-label">Low Stock</div>
+          <div class="stat-value" x-text="inventory.filter(item => item.stockStatus === 'low-stock').length"></div>
+          <div class="stat-change">Needs reorder</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-label">Out of Stock</div>
+          <div class="stat-value" x-text="inventory.filter(item => item.stockStatus === 'out-of-stock').length"></div>
+          <div class="stat-change">Unavailable</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-label">Expiring Soon</div>
+          <div class="stat-value" x-text="inventory.filter(item => {
+            const daysLeft = getDaysUntilExpiry(item.expiryDate);
+            return daysLeft > 0 && daysLeft <= 30;
+          }).length"></div>
+          <div class="stat-change">Monitor expiry</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-label">Expired</div>
+          <div class="stat-value" x-text="inventory.filter(item => {
+            const daysLeft = getDaysUntilExpiry(item.expiryDate);
+            return daysLeft < 0;
+          }).length"></div>
+          <div class="stat-change">Remove items</div>
+        </div>
+      </div>
+
+      <!-- Filter Section -->
+      <div class="filter-section">
+        <div class="filter-grid">
+          <div class="form-group">
+            <label class="form-label">Search</label>
+            <input type="text" class="form-input" placeholder="Search by name, batch, or license..." x-model="searchQuery">
+          </div>
+          <div class="form-group">
+            <label class="form-label">Category</label>
+            <select class="form-select" x-model="selectedCategory">
+              <option value="">All Categories</option>
+              <option value="medications">Medications</option>
+              <option value="supplies">Medical Supplies</option>
+              <option value="equipment">Equipment</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Stock Status</label>
+            <select class="form-select" x-model="stockStatus">
+              <option value="">All Status</option>
+              <option value="in-stock">In Stock</option>
+              <option value="low-stock">Low Stock</option>
+              <option value="out-of-stock">Out of Stock</option>
+            </select>
+          </div>
+        </div>
+      </div>
+
+      <!-- Inventory Table -->
+      <div class="table-container">
+        <table class="spreadsheet-table">
+          <thead>
+            <tr>
+              <th>Generic Name</th>
+              <th>Brand Name</th>
+              <th>Strength</th>
+              <th>Form</th>
+              <th>NDC/Barcode</th>
+              <th>Batch Number</th>
+              <th>License Number</th>
+              <th>Zambia REG</th>
+              <th>Manufacture Date</th>
+              <th>Expiry Date</th>
+              <th>Packing Type</th>
+              <th>Supplier</th>
+              <th>Location</th>
+              <th>Storage</th>
+              <th>Stock</th>
+              <th>Cost</th>
+            </tr>
+          </thead>
+          <tbody>
+            <template x-for="item in filteredInventory" :key="item.id">
+              <tr class="table-row" 
+                  :class="getExpiryClass(item.expiryDate)" 
+                  @click="selectItem(item)"
+                  @dblclick="viewItem(item)">
+                <td x-text="item.genericName"></td>
+                <td x-text="item.brandName"></td>
+                <td x-text="item.strength || 'N/A'"></td>
+                <td x-text="item.form || 'N/A'"></td>
+                <td x-text="item.ndcBarcode || 'N/A'"></td>
+                <td x-text="item.batchNumber"></td>
+                <td x-text="item.licenseNumber || 'N/A'"></td>
+                <td x-text="item.zambiaRegNumber || 'N/A'"></td>
+                <td x-text="formatDate(item.manufactureDate)"></td>
+                <td>
+                  <div style="display: flex; flex-direction: column; gap: 0.125rem;">
+                    <span x-text="formatDate(item.expiryDate)"></span>
+                    <span class="expiry-status" :class="getExpiryStatus(item.expiryDate)" x-text="getExpiryStatusText(item.expiryDate)"></span>
+                  </div>
+                </td>
+                <td x-text="item.packingType || 'N/A'"></td>
+                <td x-text="item.supplier || 'N/A'"></td>
+                <td x-text="item.location || 'N/A'"></td>
+                <td x-text="item.storageConditions || 'N/A'"></td>
+                <td>
+                  <div style="display: flex; flex-direction: column; gap: 0.125rem;">
+                    <span class="stock-status" :class="item.stockStatus" x-text="item.stockQuantity"></span>
+                    <span class="text-xs" style="color: var(--color-text-muted);" x-show="item.minStockLevel">Min: <span x-text="item.minStockLevel"></span></span>
+                  </div>
+                </td>
+                <td>
+                  <div style="display: flex; flex-direction: column; gap: 0.125rem;">
+                    <span x-text="formatCurrency(item.unitCost || 0)"></span>
+                    <span class="text-xs" style="color: var(--color-text-muted);">Total: <span x-text="formatCurrency((item.unitCost || 0) * item.stockQuantity)"></span></span>
+                  </div>
+                </td>
+              </tr>
+            </template>
+          </tbody>
+        </table>
+      </div>
+
+      <!-- Reporting Section -->
+      <div class="reporting-section">
+        <div class="reporting-header">
+          <div class="reporting-title">
+            <span class="material-symbols-rounded">analytics</span>
+            <span>Inventory Analytics & Reports</span>
+          </div>
+          <div class="reporting-actions">
+            <button class="btn btn-secondary btn-small" @click="generateReport()">
+              <span class="material-symbols-rounded">download</span>
+              <span>Export Report</span>
+            </button>
+            <button class="btn btn-primary btn-small" @click="refreshReports()">
+              <span class="material-symbols-rounded">refresh</span>
+              <span>Refresh</span>
             </button>
           </div>
         </div>
-        <div class="upload-preview" id="uploadPreview" hidden>
-          <h4>Preview</h4>
-          <div class="preview-table">
-            <table>
+
+        <!-- Charts Grid -->
+        <div class="charts-grid">
+          <div class="chart-container">
+            <div class="chart-title">Stock Status Overview</div>
+            <div class="chart-placeholder">Stock Status Chart</div>
+          </div>
+          <div class="chart-container">
+            <div class="chart-title">Expiry Timeline</div>
+            <div class="chart-placeholder">Expiry Timeline Chart</div>
+          </div>
+          <div class="chart-container">
+            <div class="chart-title">Top Selling Items</div>
+            <div class="chart-placeholder">Sales Performance Chart</div>
+          </div>
+          <div class="chart-container">
+            <div class="chart-title">Inventory Value</div>
+            <div class="chart-placeholder">Value Analysis Chart</div>
+          </div>
+        </div>
+
+        <!-- Summary Tables -->
+        <div class="charts-grid">
+          <div class="chart-container">
+            <div class="chart-title">Low Stock Items</div>
+            <table class="summary-table">
               <thead>
                 <tr>
-                  <th>Brand Name</th>
-                  <th>Generic Name</th>
-                  <th>Category</th>
-                  <th>Stock</th>
-                  <th>Price</th>
+                  <th>Medication</th>
+                  <th>Current Stock</th>
+                  <th>Min Level</th>
+                  <th>Action</th>
                 </tr>
               </thead>
-              <tbody id="previewBody"></tbody>
+              <tbody>
+                <template x-for="item in lowStockItems" :key="item.id">
+                  <tr>
+                    <td x-text="`${item.genericName} ${item.strength}`"></td>
+                    <td x-text="item.stockQuantity"></td>
+                    <td x-text="item.minStockLevel"></td>
+                    <td>
+                      <button class="btn btn-primary btn-small" @click="reorderItem(item)">
+                        Reorder
+                      </button>
+                    </td>
+                  </tr>
+                </template>
+              </tbody>
+            </table>
+          </div>
+          <div class="chart-container">
+            <div class="chart-title">Expiring Items</div>
+            <table class="summary-table">
+              <thead>
+                <tr>
+                  <th>Medication</th>
+                  <th>Batch</th>
+                  <th>Expiry Date</th>
+                  <th>Days Left</th>
+                  <th>Action</th>
+                </tr>
+              </thead>
+              <tbody>
+                <template x-for="item in expiringItems" :key="item.id">
+                  <tr>
+                    <td x-text="`${item.genericName} ${item.strength}`"></td>
+                    <td x-text="item.batchNumber"></td>
+                    <td x-text="formatDate(item.expiryDate)"></td>
+                    <td x-text="getDaysUntilExpiry(item.expiryDate)"></td>
+                    <td>
+                      <button class="btn btn-secondary btn-small" @click="reviewExpiringItem(item)">
+                        Review
+                      </button>
+                    </td>
+                  </tr>
+                </template>
+              </tbody>
             </table>
           </div>
         </div>
       </div>
-      <footer class="modal-footer">
-        <button type="button" class="secondary" data-close="bulkUploadModal">Cancel</button>
-        <button type="button" class="primary" id="processBulkUpload" disabled>Upload Products</button>
-      </footer>
     </div>
-  </section>
+  </main>
 
-  <!-- Alpine.js Component -->
+  <!-- Add Item Modal -->
+  <div class="modal-overlay" x-show="showAddItemModal" @click.self="showAddItemModal = false">
+    <div class="modal-content large">
+      <div class="modal-header">
+        <h3 class="modal-title">Add New Inventory Item</h3>
+        <button class="modal-close" @click="showAddItemModal = false">
+          <span class="material-symbols-rounded">close</span>
+        </button>
+      </div>
+      <div class="modal-body">
+        <div class="mb-4">
+          <p class="text-sm text-gray-600"><strong>Item Details:</strong> Fill in the required fields, which usually include:</p>
+        </div>
+        
+        <form @submit.prevent="addItem()">
+          <!-- Drug Information Section -->
+          <div class="mb-6">
+            <h4 class="text-lg font-semibold mb-3 text-gray-800">Drug Information</h4>
+            <div class="form-grid">
+              <div class="form-group">
+                <label class="form-label">Generic Name *</label>
+                <input type="text" class="form-input" x-model="newItem.genericName" required>
+              </div>
+              <div class="form-group">
+                <label class="form-label">Brand Name *</label>
+                <input type="text" class="form-input" x-model="newItem.brandName" required>
+              </div>
+              <div class="form-group">
+                <label class="form-label">Drug Description</label>
+                <textarea class="form-input form-textarea" x-model="newItem.description" rows="2" placeholder="Additional drug information..."></textarea>
+              </div>
+              <div class="form-group">
+                <label class="form-label">NDC/Barcode *</label>
+                <input type="text" class="form-input" x-model="newItem.ndcBarcode" required placeholder="National Drug Code or barcode number">
+              </div>
+              <div class="form-group">
+                <label class="form-label">Strength *</label>
+                <input type="text" class="form-input" x-model="newItem.strength" required placeholder="e.g., 500mg">
+              </div>
+              <div class="form-group">
+                <label class="form-label">Form *</label>
+                <select class="form-select" x-model="newItem.form" required>
+                  <option value="">Select Form</option>
+                  <option value="Tablet">Tablet</option>
+                  <option value="Capsule">Capsule</option>
+                  <option value="Liquid">Liquid</option>
+                  <option value="Injection">Injection</option>
+                  <option value="Cream">Cream</option>
+                  <option value="Ointment">Ointment</option>
+                  <option value="Inhaler">Inhaler</option>
+                  <option value="Patch">Patch</option>
+                  <option value="Suppository">Suppository</option>
+                  <option value="Drops">Drops</option>
+                </select>
+              </div>
+            </div>
+          </div>
+
+          <!-- Supplier & Tracking Section -->
+          <div class="mb-6">
+            <h4 class="text-lg font-semibold mb-3 text-gray-800">Supplier & Tracking</h4>
+            <div class="form-grid">
+              <div class="form-group">
+                <label class="form-label">Supplier *</label>
+                <input type="text" class="form-input" x-model="newItem.supplier" required placeholder="Supplier name">
+              </div>
+              <div class="form-group">
+                <label class="form-label">Batch/Lot Number *</label>
+                <input type="text" class="form-input" x-model="newItem.batchNumber" required placeholder="For tracking recalls">
+              </div>
+              <div class="form-group">
+                <label class="form-label">License Number *</label>
+                <input type="text" class="form-input" x-model="newItem.licenseNumber" required>
+              </div>
+              <div class="form-group">
+                <label class="form-label">Zambia REG Number *</label>
+                <input type="text" class="form-input" x-model="newItem.zambiaRegNumber" required>
+              </div>
+              <div class="form-group">
+                <label class="form-label">Manufacture Date *</label>
+                <input type="date" class="form-input" x-model="newItem.manufactureDate" required>
+              </div>
+              <div class="form-group">
+                <label class="form-label">Expiry Date *</label>
+                <input type="date" class="form-input" x-model="newItem.expiryDate" required>
+              </div>
+            </div>
+          </div>
+
+          <!-- Inventory Section -->
+          <div class="mb-6">
+            <h4 class="text-lg font-semibold mb-3 text-gray-800">Inventory Details</h4>
+            <div class="form-grid">
+              <div class="form-group">
+                <label class="form-label">Initial Quantity *</label>
+                <input type="number" class="form-input" x-model="newItem.stockQuantity" required placeholder="Initial stock received">
+              </div>
+              <div class="form-group">
+                <label class="form-label">Packing Type *</label>
+                <select class="form-select" x-model="newItem.packingType" required>
+                  <option value="">Select Packing Type</option>
+                  <option value="Box">Box</option>
+                  <option value="Bottle">Bottle</option>
+                  <option value="Blister Pack">Blister Pack</option>
+                  <option value="Vial">Vial</option>
+                  <option value="Ampoule">Ampoule</option>
+                  <option value="Sachet">Sachet</option>
+                  <option value="Tube">Tube</option>
+                  <option value="Carton">Carton</option>
+                </select>
+              </div>
+              <div class="form-group">
+                <label class="form-label">Storage Location *</label>
+                <input type="text" class="form-input" x-model="newItem.location" required placeholder="e.g., Aisle 3, Shelf 2">
+              </div>
+              <div class="form-group">
+                <label class="form-label">Storage Conditions</label>
+                <select class="form-select" x-model="newItem.storageConditions">
+                  <option value="">Select Storage Conditions</option>
+                  <option value="Room Temperature">Room Temperature</option>
+                  <option value="Refrigerated">Refrigerated (2-8°C)</option>
+                  <option value="Frozen">Frozen (-20°C)</option>
+                  <option value="Cool">Cool (8-15°C)</option>
+                  <option value="Protected from Light">Protected from Light</option>
+                </select>
+              </div>
+            </div>
+          </div>
+
+          <!-- Financial Section -->
+          <div class="mb-6">
+            <h4 class="text-lg font-semibold mb-3 text-gray-800">Financial Information</h4>
+            <div class="form-grid">
+              <div class="form-group">
+                <label class="form-label">Unit Cost (ZMW) *</label>
+                <input type="number" step="0.01" class="form-input" x-model="newItem.unitCost" required placeholder="Cost per unit">
+              </div>
+              <div class="form-group">
+                <label class="form-label">Unit Price (ZMW) *</label>
+                <input type="number" step="0.01" class="form-input" x-model="newItem.unitPrice" required placeholder="Selling price per unit">
+              </div>
+              <div class="form-group">
+                <label class="form-label">Total Value (ZMW)</label>
+                <input type="number" step="0.01" class="form-input" x-model="newItem.totalValue" readonly :value="parseFloat(newItem.unitCost || 0) * parseInt(newItem.stockQuantity || 0)">
+              </div>
+              <div class="form-group">
+                <label class="form-label">Currency</label>
+                <select class="form-select" x-model="newItem.currency">
+                  <option value="ZMW">ZMW (Zambian Kwacha)</option>
+                  <option value="USD">USD (US Dollar)</option>
+                </select>
+              </div>
+            </div>
+          </div>
+
+          <!-- Inventory Controls Section -->
+          <div class="mb-6">
+            <h4 class="text-lg font-semibold mb-3 text-gray-800">Inventory Controls</h4>
+            <p class="text-sm text-gray-600 mb-3">Define your reorder points for automatic reordering:</p>
+            <div class="form-grid">
+              <div class="form-group">
+                <label class="form-label">Minimum Stock Level *</label>
+                <input type="number" class="form-input" x-model="newItem.minStockLevel" required placeholder="Reorder when below this quantity">
+              </div>
+              <div class="form-group">
+                <label class="form-label">Maximum Stock Level *</label>
+                <input type="number" class="form-input" x-model="newItem.maxStockLevel" required placeholder="Maximum quantity to maintain">
+              </div>
+              <div class="form-group">
+                <label class="form-label">Reorder Quantity *</label>
+                <input type="number" class="form-input" x-model="newItem.reorderQuantity" required placeholder="Quantity to reorder">
+              </div>
+              <div class="form-group">
+                <label class="form-label">Lead Time (Days)</label>
+                <input type="number" class="form-input" x-model="newItem.leadTime" placeholder="Days between order and delivery">
+              </div>
+            </div>
+          </div>
+
+          <div class="modal-actions">
+            <button type="button" class="btn btn-secondary" @click="showAddItemModal = false">Cancel</button>
+            <button type="submit" class="btn btn-primary">Add Item</button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+
+  <!-- Import Modal -->
+  <div class="modal-overlay" x-show="showImportModal" @click.self="showImportModal = false">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h3 class="modal-title">Bulk Import Inventory</h3>
+        <button class="modal-close" @click="showImportModal = false">
+          <span class="material-symbols-rounded">close</span>
+        </button>
+      </div>
+      <div class="modal-body">
+        <div class="mb-4">
+          <p class="text-sm text-gray-600">Import multiple inventory items from a CSV or Excel file.</p>
+        </div>
+        
+        <!-- File Upload Section -->
+        <div class="form-group mb-4">
+          <label class="form-label">Select File *</label>
+          <div class="file-upload-area" 
+               @dragover.prevent="dragOver = true" 
+               @dragleave.prevent="dragOver = false" 
+               @drop.prevent="handleFileDrop($event)"
+               :class="dragOver ? 'drag-over' : ''">
+            <input type="file" 
+                   @change="handleFileSelect($event)" 
+                   accept=".csv,.xlsx,.xls" 
+                   class="file-input" 
+                   x-ref="fileInput">
+            <div class="file-upload-content" x-show="!selectedFile">
+              <span class="material-symbols-rounded" style="font-size: 2rem; color: var(--color-text-muted);">cloud_upload</span>
+              <p class="text-sm mt-2">Drag and drop your file here, or click to browse</p>
+              <p class="text-xs text-gray-500 mt-1">Supported formats: CSV, Excel (.xlsx, .xls)</p>
+            </div>
+            <div class="file-selected" x-show="selectedFile">
+              <span class="material-symbols-rounded" style="color: var(--color-success);">check_circle</span>
+              <p class="text-sm mt-1" x-text="selectedFile?.name"></p>
+              <p class="text-xs text-gray-500" x-text="formatFileSize(selectedFile?.size)"></p>
+            </div>
+          </div>
+        </div>
+
+        <!-- Template Download -->
+        <div class="form-group mb-4">
+          <p class="text-sm text-gray-600 mb-2">Don't have a template? <button class="btn btn-secondary btn-small" @click="downloadTemplate()">Download Template</button></p>
+        </div>
+
+        <!-- Import Preview -->
+        <div class="import-preview" x-show="importData.length > 0">
+          <h4 class="text-lg font-semibold mb-3">Preview Import Data</h4>
+          <div class="preview-stats">
+            <span class="text-sm text-gray-600">Found <span x-text="importData.length" class="font-semibold"></span> items to import</span>
+          </div>
+          <div class="preview-table-container">
+            <table class="preview-table">
+              <thead>
+                <tr>
+                  <th>Generic Name</th>
+                  <th>Brand Name</th>
+                  <th>Strength</th>
+                  <th>Stock</th>
+                  <th>Status</th>
+                </tr>
+              </thead>
+              <tbody>
+                <template x-for="(item, index) in importData.slice(0, 5)" :key="index">
+                  <tr>
+                    <td x-text="item.genericName"></td>
+                    <td x-text="item.brandName"></td>
+                    <td x-text="item.strength"></td>
+                    <td x-text="item.stockQuantity"></td>
+                    <td>
+                      <span class="text-xs" 
+                            :class="item.valid ? 'text-green-600' : 'text-red-600'" 
+                            x-text="item.valid ? 'Valid' : 'Error'"></span>
+                    </td>
+                  </tr>
+                </template>
+              </tbody>
+            </table>
+            <div class="text-center text-sm text-gray-500 mt-2" x-show="importData.length > 5">
+              ... and <span x-text="importData.length - 5"></span> more items
+            </div>
+          </div>
+        </div>
+
+        <div class="modal-actions">
+          <button type="button" class="btn btn-secondary" @click="showImportModal = false">Cancel</button>
+          <button type="button" class="btn btn-primary" @click="processImport()" :disabled="!selectedFile || importProcessing">
+            <span x-show="!importProcessing">Import Items</span>
+            <span x-show="importProcessing">Processing...</span>
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Item Details Modal -->
+  <div class="modal-overlay" x-show="showItemDetailsModal" @click.self="showItemDetailsModal = false">
+    <div class="modal-content large">
+      <div class="modal-header">
+        <h3 class="modal-title" x-text="selectedItem?.brandName + ' - ' + selectedItem?.genericName"></h3>
+        <button class="modal-close" @click="showItemDetailsModal = false">
+          <span class="material-symbols-rounded">close</span>
+        </button>
+      </div>
+      <div class="modal-body">
+        <!-- Item Details Section -->
+        <div class="mb-6">
+          <h4 class="text-lg font-semibold mb-3">Item Details</h4>
+          <div class="form-grid">
+            <div class="form-group">
+              <label class="form-label">Generic Name</label>
+              <div class="form-value" x-text="selectedItem?.genericName"></div>
+            </div>
+            <div class="form-group">
+              <label class="form-label">Brand Name</label>
+              <div class="form-value" x-text="selectedItem?.brandName"></div>
+            </div>
+            <div class="form-group">
+              <label class="form-label">Strength</label>
+              <div class="form-value" x-text="selectedItem?.strength || 'N/A'"></div>
+            </div>
+            <div class="form-group">
+              <label class="form-label">Form</label>
+              <div class="form-value" x-text="selectedItem?.form || 'N/A'"></div>
+            </div>
+            <div class="form-group">
+              <label class="form-label">NDC/Barcode</label>
+              <div class="form-value" x-text="selectedItem?.ndcBarcode || 'N/A'"></div>
+            </div>
+            <div class="form-group">
+              <label class="form-label">Batch Number</label>
+              <div class="form-value" x-text="selectedItem?.batchNumber"></div>
+            </div>
+            <div class="form-group">
+              <label class="form-label">License Number</label>
+              <div class="form-value" x-text="selectedItem?.licenseNumber || 'N/A'"></div>
+            </div>
+            <div class="form-group">
+              <label class="form-label">Zambia REG Number</label>
+              <div class="form-value" x-text="selectedItem?.zambiaRegNumber || 'N/A'"></div>
+            </div>
+            <div class="form-group">
+              <label class="form-label">Manufacture Date</label>
+              <div class="form-value" x-text="formatDate(selectedItem?.manufactureDate)"></div>
+            </div>
+            <div class="form-group">
+              <label class="form-label">Expiry Date</label>
+              <div class="form-value">
+                <div x-text="formatDate(selectedItem?.expiryDate)"></div>
+                <span class="expiry-status" :class="getExpiryStatus(selectedItem?.expiryDate)" x-text="getExpiryStatusText(selectedItem?.expiryDate)"></span>
+              </div>
+            </div>
+            <div class="form-group">
+              <label class="form-label">Packing Type</label>
+              <div class="form-value" x-text="selectedItem?.packingType || 'N/A'"></div>
+            </div>
+            <div class="form-group">
+              <label class="form-label">Supplier</label>
+              <div class="form-value" x-text="selectedItem?.supplier || 'N/A'"></div>
+            </div>
+            <div class="form-group">
+              <label class="form-label">Location</label>
+              <div class="form-value" x-text="selectedItem?.location || 'N/A'"></div>
+            </div>
+            <div class="form-group">
+              <label class="form-label">Storage Conditions</label>
+              <div class="form-value" x-text="selectedItem?.storageConditions || 'N/A'"></div>
+            </div>
+            <div class="form-group">
+              <label class="form-label">Stock Quantity</label>
+              <div class="form-value">
+                <div x-text="selectedItem?.stockQuantity"></div>
+                <span class="stock-status" :class="selectedItem?.stockStatus" x-text="selectedItem?.stockStatus"></span>
+              </div>
+            </div>
+            <div class="form-group">
+              <label class="form-label">Unit Cost</label>
+              <div class="form-value" x-text="formatCurrency(selectedItem?.unitCost || 0)"></div>
+            </div>
+            <div class="form-group">
+              <label class="form-label">Unit Price</label>
+              <div class="form-value" x-text="formatCurrency(selectedItem?.unitPrice || 0)"></div>
+            </div>
+            <div class="form-group">
+              <label class="form-label">Total Value</label>
+              <div class="form-value" x-text="formatCurrency((selectedItem?.unitCost || 0) * (selectedItem?.stockQuantity || 0))"></div>
+            </div>
+            <div class="form-group">
+              <label class="form-label">Min Stock Level</label>
+              <div class="form-value" x-text="selectedItem?.minStockLevel || 'N/A'"></div>
+            </div>
+            <div class="form-group">
+              <label class="form-label">Max Stock Level</label>
+              <div class="form-value" x-text="selectedItem?.maxStockLevel || 'N/A'"></div>
+            </div>
+            <div class="form-group">
+              <label class="form-label">Reorder Quantity</label>
+              <div class="form-value" x-text="selectedItem?.reorderQuantity || 'N/A'"></div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Actions Section -->
+        <div class="mb-6">
+          <h4 class="text-lg font-semibold mb-3">Actions</h4>
+          <div class="action-buttons-grid" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 1rem;">
+            <button class="btn btn-primary" @click="editItem(selectedItem)">
+              <span class="material-symbols-rounded">edit</span>
+              Edit Item
+            </button>
+            <button class="btn btn-success" @click="dispenseItem(selectedItem)">
+              <span class="material-symbols-rounded">medication</span>
+              Dispense
+            </button>
+            <button class="btn btn-secondary" @click="reorderItem(selectedItem)">
+              <span class="material-symbols-rounded">shopping_cart</span>
+              Reorder
+            </button>
+            <button class="btn btn-warning" @click="deleteItem(selectedItem)">
+              <span class="material-symbols-rounded">delete</span>
+              Delete Item
+            </button>
+          </div>
+        </div>
+      </div>
+      <div class="modal-actions">
+        <button type="button" class="btn btn-secondary" @click="showItemDetailsModal = false">Close</button>
+      </div>
+    </div>
+  </div>
+
   <script>
-    // Inventory System with Backend Integration
     function inventorySystem() {
       return {
+        // Basic state
         sidebarOpen: false,
+        showAddItemModal: false,
+        showImportModal: false,
+        showItemDetailsModal: false,
+        showRealTimeIndicator: false,
+        selectedItem: null,
+        isDemoMode: !apiClient.isAuthenticated(),
         searchQuery: '',
-        showFilterMenu: false,
-        showAddModal: false,
-        loading: false,
-        tenantInfo: {
-          name: 'Umi Health',
-          location: 'Lusaka, Zambia'
-        },
-        userInfo: {
-          name: 'Umi Health',
-          role: 'Admin',
-          initials: 'UH'
-        },
-        products: [],
-        categories: [],
-        suppliers: [],
-        lowStockProducts: [],
-        expiringProducts: [],
+        selectedCategory: '',
+        stockStatus: '',
         
-        // Search suggestions
-        searchSuggestions: [],
-        filteredSuggestions: [],
+        // Import related variables
+        selectedFile: null,
+        dragOver: false,
+        importData: [],
+        importProcessing: false,
         
-        // Barcode scanning functionality
-        scannedBarcode: '',
-        manualBarcode: '',
-        isScanning: false,
-        currentStream: null,
-        currentCamera: 'environment',
-        availableCameras: [],
-        scannerContext: null,
+        newItem: {
+          genericName: '',
+          brandName: '',
+          description: '',
+          ndcBarcode: '',
+          strength: '',
+          form: '',
+          supplier: '',
+          batchNumber: '',
+          licenseNumber: '',
+          zambiaRegNumber: '',
+          manufactureDate: '',
+          expiryDate: '',
+          stockQuantity: 0,
+          packingType: '',
+          location: '',
+          storageConditions: '',
+          unitCost: 0,
+          unitPrice: 0,
+          totalValue: 0,
+          currency: 'ZMW',
+          minStockLevel: 0,
+          maxStockLevel: 0,
+          reorderQuantity: 0,
+          leadTime: 0
+        },
 
-        get filteredProducts() {
-          if (!this.searchQuery) return this.products;
+        alerts: [],
+
+        inventory: [],
+
+        get filteredInventory() {
+          return this.inventory.filter(item => {
+            const matchesSearch = !this.searchQuery || 
+              item.genericName.toLowerCase().includes(this.searchQuery.toLowerCase()) ||
+              item.brandName.toLowerCase().includes(this.searchQuery.toLowerCase()) ||
+              item.batchNumber.toLowerCase().includes(this.searchQuery.toLowerCase()) ||
+              item.licenseNumber.toLowerCase().includes(this.searchQuery.toLowerCase()) ||
+              item.zambiaRegNumber.toLowerCase().includes(this.searchQuery.toLowerCase()) ||
+              (item.ndcBarcode && item.ndcBarcode.toLowerCase().includes(this.searchQuery.toLowerCase())) ||
+              (item.strength && item.strength.toLowerCase().includes(this.searchQuery.toLowerCase())) ||
+              (item.form && item.form.toLowerCase().includes(this.searchQuery.toLowerCase())) ||
+              (item.supplier && item.supplier.toLowerCase().includes(this.searchQuery.toLowerCase())) ||
+              (item.location && item.location.toLowerCase().includes(this.searchQuery.toLowerCase()));
+            
+            const matchesCategory = !this.selectedCategory || item.category === this.selectedCategory;
+            const matchesStock = !this.stockStatus || item.stockStatus === this.stockStatus;
+            
+            return matchesSearch && matchesCategory && matchesStock;
+          });
+        },
+
+        get lowStockItems() {
+          return this.inventory.filter(item => 
+            item.stockStatus === 'low-stock' || item.stockQuantity <= item.minStockLevel
+          ).sort((a, b) => a.stockQuantity - b.stockQuantity);
+        },
+
+        get expiringItems() {
+          return this.inventory.filter(item => {
+            const status = this.getExpiryStatus(item.expiryDate);
+            return status === 'expiring-soon' || status === 'expired';
+          }).sort((a, b) => {
+            const daysA = this.getDaysUntilExpiry(a.expiryDate);
+            const daysB = this.getDaysUntilExpiry(b.expiryDate);
+            return daysA - daysB;
+          });
+        },
+
+        init() {
+          // Show demo mode notification if not authenticated
+          if (this.isDemoMode) {
+            this.showNotification('Demo Mode: Some features require login for full functionality', 'info');
+          }
           
-          return this.products.filter(product => 
-            product.name.toLowerCase().includes(this.searchQuery.toLowerCase()) ||
-            (product.sku && product.sku.toLowerCase().includes(this.searchQuery.toLowerCase())) ||
-            (product.category && product.category.toLowerCase().includes(this.searchQuery.toLowerCase()))
-          );
-        },
-        
-        get filteredSuggestions() {
-          if (!this.searchQuery || !this.searchSuggestions) return [];
+          this.loadInventory();
+          this.checkAlerts();
           
-          return this.searchSuggestions.filter(suggestion =>
-            suggestion.name.toLowerCase().includes(this.searchQuery.toLowerCase())
-          );
-        },
-
-        get totalProducts() {
-          return this.products.length;
-        },
-
-        get inStockCount() {
-          return this.products.filter(p => p.currentStock > p.minStockLevel).length;
-        },
-
-        get lowStockCount() {
-          return this.products.filter(p => p.currentStock <= p.minStockLevel && p.currentStock > 0).length;
-        },
-
-        get outOfStockCount() {
-          return this.products.filter(p => p.currentStock === 0).length;
-        },
-
-        get expiringCount() {
-          return this.expiringProducts.length;
-        },
-
-        get totalValue() {
-          return this.products.reduce((total, product) => total + (product.currentStock * product.unitPrice), 0);
-        },
-
-        getStockClass(stock, minStock) {
-          if (stock === 0) return 'out-of-stock';
-          if (stock <= minStock) return 'low-stock';
-          return 'in-stock';
-        },
-
-        async loadProducts() {
-          try {
-            this.loading = true;
-            const response = await window.pharmacistApi.inventory.getProducts();
-            this.products = response.products || [];
-            console.log('Products loaded:', this.products.length);
-          } catch (error) {
-            console.error('Failed to load products:', error);
-            this.showNotification('Failed to load products', 'error');
-          } finally {
-            this.loading = false;
+          // Start real-time sync for authenticated mode
+          if (!this.isDemoMode) {
+            this.startRealTimeSync();
           }
         },
 
-        async loadCategories() {
+        // API Methods
+        async loadInventory() {
           try {
-            const categories = await window.pharmacistApi.inventory.getCategories();
-            this.categories = categories || [];
-          } catch (error) {
-            console.error('Failed to load categories:', error);
-          }
-        },
-
-        async loadSuppliers() {
-          try {
-            const suppliers = await window.pharmacistApi.inventory.getSuppliers();
-            this.suppliers = suppliers || [];
-          } catch (error) {
-            console.error('Failed to load suppliers:', error);
-          }
-        },
-
-        async loadLowStockProducts() {
-          try {
-            const products = await window.pharmacistApi.inventory.getLowStock();
-            this.lowStockProducts = products || [];
-          } catch (error) {
-            console.error('Failed to load low stock products:', error);
-          }
-        },
-
-        async loadExpiringProducts() {
-          try {
-            const products = await window.pharmacistApi.inventory.getExpiring(30);
-            this.expiringProducts = products || [];
-          } catch (error) {
-            console.error('Failed to load expiring products:', error);
-          }
-        },
-
-        async createProduct(productData) {
-          try {
-            this.loading = true;
-            const product = await window.pharmacistApi.inventory.createProduct(productData);
-            this.products.push(product);
-            this.showNotification('Product created successfully', 'success');
-            return product;
-          } catch (error) {
-            console.error('Failed to create product:', error);
-            this.showNotification('Failed to create product', 'error');
-            throw error;
-          } finally {
-            this.loading = false;
-          }
-        },
-
-        async updateProduct(id, productData) {
-          try {
-            this.loading = true;
-            const updatedProduct = await window.pharmacistApi.inventory.updateProduct(id, productData);
-            const index = this.products.findIndex(p => p.id === id);
-            if (index !== -1) {
-              this.products[index] = updatedProduct;
+            if (this.isDemoMode) {
+              // Demo mode: Load from localStorage or use empty array
+              const storedInventory = localStorage.getItem('demo_inventory');
+              if (storedInventory) {
+                this.inventory = JSON.parse(storedInventory);
+              } else {
+                this.inventory = [];
+              }
+            } else {
+              // Authenticated mode: Load from API
+              const response = await apiClient.getInventory();
+              if (response.success) {
+                this.inventory = response.data || [];
+              } else {
+                console.error('Failed to load inventory:', response.message);
+                this.showNotification('Failed to load inventory', 'error');
+                this.inventory = [];
+              }
             }
-            this.showNotification('Product updated successfully', 'success');
-            return updatedProduct;
           } catch (error) {
-            console.error('Failed to update product:', error);
-            this.showNotification('Failed to update product', 'error');
-            throw error;
-          } finally {
-            this.loading = false;
+            console.error('Error loading inventory:', error);
+            this.showNotification('Error loading inventory', 'error');
+            this.inventory = [];
           }
         },
 
-        async deleteProduct(productId) {
-          if (!confirm('Are you sure you want to delete this product?')) {
+        async saveItem() {
+          try {
+            if (this.isDemoMode) {
+              // Demo mode: Save to localStorage
+              if (this.newItem.id) {
+                // Update existing item
+                const index = this.inventory.findIndex(item => item.id === this.newItem.id);
+                if (index > -1) {
+                  this.inventory[index] = { ...this.newItem, updatedAt: new Date().toISOString() };
+                }
+              } else {
+                // Create new item
+                const newItem = {
+                  ...this.newItem,
+                  id: Date.now().toString(),
+                  createdAt: new Date().toISOString(),
+                  updatedAt: new Date().toISOString()
+                };
+                this.inventory.push(newItem);
+              }
+              
+              // Save to localStorage
+              localStorage.setItem('demo_inventory', JSON.stringify(this.inventory));
+              this.showNotification(this.newItem.id ? 'Item updated successfully (Demo Mode)' : 'Item added successfully (Demo Mode)', 'success');
+              
+            } else {
+              // Authenticated mode: Save to API
+              let response;
+              if (this.newItem.id) {
+                response = await apiClient.updateProduct(this.newItem.id, this.newItem);
+              } else {
+                response = await apiClient.createProduct(this.newItem);
+              }
+
+              if (response.success) {
+                this.showNotification(this.newItem.id ? 'Item updated successfully' : 'Item added successfully', 'success');
+              } else {
+                this.showNotification(response.message || 'Failed to save item', 'error');
+                return;
+              }
+            }
+
+            this.showAddItemModal = false;
+            this.loadInventory(); // Reload inventory
+            this.resetNewItemForm();
+            
+          } catch (error) {
+            console.error('Error saving item:', error);
+            this.showNotification('Error saving item', 'error');
+          }
+        },
+
+        async deleteItem(item) {
+          if (confirm(`Are you sure you want to delete ${item.genericName}?`)) {
+            try {
+              if (this.isDemoMode) {
+                // Demo mode: Remove from localStorage
+                this.inventory = this.inventory.filter(i => i.id !== item.id);
+                localStorage.setItem('demo_inventory', JSON.stringify(this.inventory));
+                this.showNotification('Item deleted successfully (Demo Mode)', 'success');
+              } else {
+                // Authenticated mode: Delete via API
+                const response = await apiClient.deleteProduct(item.id);
+                if (response.success) {
+                  this.showNotification('Item deleted successfully', 'success');
+                } else {
+                  this.showNotification(response.message || 'Failed to delete item', 'error');
+                  return;
+                }
+              }
+              
+              this.showItemDetailsModal = false;
+              this.loadInventory(); // Reload inventory
+              this.checkAlerts();
+            } catch (error) {
+              console.error('Error deleting item:', error);
+              this.showNotification('Error deleting item', 'error');
+            }
+          }
+        },
+
+        async dispenseItem(item) {
+          const quantity = prompt(`Enter quantity to dispense for ${item.genericName}:`, '1');
+          if (quantity && !isNaN(quantity) && parseInt(quantity) > 0) {
+            try {
+              if (this.isDemoMode) {
+                // Demo mode: Update in localStorage
+                const itemIndex = this.inventory.findIndex(i => i.id === item.id);
+                if (itemIndex > -1) {
+                  const currentStock = this.inventory[itemIndex].stockQuantity || 0;
+                  const newStock = currentStock - parseInt(quantity);
+                  
+                  if (newStock >= 0) {
+                    this.inventory[itemIndex].stockQuantity = newStock;
+                    this.inventory[itemIndex].stockStatus = newStock === 0 ? 'out-of-stock' : 
+                                                   newStock <= (this.inventory[itemIndex].minStockLevel || 0) ? 'low-stock' : 'in-stock';
+                    this.inventory[itemIndex].updatedAt = new Date().toISOString();
+                    
+                    localStorage.setItem('demo_inventory', JSON.stringify(this.inventory));
+                    this.showNotification(`Dispensed ${quantity} units successfully (Demo Mode)`, 'success');
+                  } else {
+                    this.showNotification('Insufficient stock available', 'error');
+                    return;
+                  }
+                }
+              } else {
+                // Authenticated mode: Use API
+                const response = await apiClient.request(`/inventory/${item.id}/dispense`, {
+                  method: 'POST',
+                  body: JSON.stringify({ quantity: parseInt(quantity) })
+                });
+
+                if (!response.success) {
+                  this.showNotification(response.message || 'Failed to dispense item', 'error');
+                  return;
+                }
+                
+                this.showNotification(`Dispensed ${quantity} units successfully`, 'success');
+              }
+
+              this.showItemDetailsModal = false;
+              this.loadInventory(); // Reload inventory
+              this.checkAlerts();
+            } catch (error) {
+              console.error('Error dispensing item:', error);
+              this.showNotification('Error dispensing item', 'error');
+            }
+          }
+        },
+
+        // Real-time Data Sync
+        startRealTimeSync() {
+          // Sync inventory data every 30 seconds
+          setInterval(async () => {
+            try {
+              await this.syncInventoryData();
+              await this.syncAlerts();
+              console.log('Real-time sync completed');
+            } catch (error) {
+              console.error('Real-time sync error:', error);
+            }
+          }, 30000); // Sync every 30 seconds
+
+          // Show sync indicator briefly
+          setInterval(() => {
+            this.showRealTimeIndicator = true;
+            setTimeout(() => {
+              this.showRealTimeIndicator = false;
+            }, 2000);
+          }, 30000); // Show indicator every 30 seconds
+        },
+
+        async syncInventoryData() {
+          try {
+            const response = await apiClient.getInventory();
+            if (response.success && response.data) {
+              // Check for new or updated items
+              const currentIds = this.inventory.map(item => item.id);
+              const newIds = response.data.map(item => item.id);
+              
+              // Update inventory with fresh data
+              this.inventory = response.data;
+              
+              // Notify about new items
+              const newItems = newIds.filter(id => !currentIds.includes(id));
+              if (newItems.length > 0) {
+                this.showNotification(`${newItems.length} new items synced`, 'success');
+              }
+            }
+          } catch (error) {
+            console.error('Inventory sync error:', error);
+          }
+        },
+
+        async syncAlerts() {
+          try {
+            await this.checkAlerts();
+          } catch (error) {
+            console.error('Alerts sync error:', error);
+          }
+        },
+
+        // Manual refresh with sync
+        async refreshWithSync() {
+          if (this.isDemoMode) {
+            this.showNotification('Login required for real-time sync features', 'warning');
+            return;
+          }
+          
+          this.showNotification('Syncing data...', 'info');
+          await this.syncInventoryData();
+          await this.syncAlerts();
+          this.showNotification('Data synced successfully', 'success');
+        },
+
+        async checkAlerts() {
+          try {
+            this.alerts = [];
+
+            if (this.isDemoMode) {
+              // Demo mode: Check local inventory for alerts
+              this.inventory.forEach(item => {
+                // Low stock alerts
+                if (item.stockQuantity > 0 && item.stockQuantity <= (item.minStockLevel || 0)) {
+                  this.alerts.push({
+                    id: `low-stock-${item.id}`,
+                    type: 'warning',
+                    title: 'Low Stock Alert',
+                    message: `${item.genericName} ${item.strength || ''} is below minimum level (${item.stockQuantity} units)`,
+                    action: 'Reorder'
+                  });
+                }
+
+                // Expiry alerts
+                if (item.expiryDate) {
+                  const daysLeft = this.getDaysUntilExpiry(item.expiryDate);
+                  if (daysLeft < 0) {
+                    this.alerts.push({
+                      id: `expired-${item.id}`,
+                      type: 'critical',
+                      title: 'Expired Medication',
+                      message: `${item.genericName} ${item.strength || ''} (Batch: ${item.batchNumber}) has expired`,
+                      action: 'Remove'
+                    });
+                  } else if (daysLeft <= 30) {
+                    this.alerts.push({
+                      id: `expiring-${item.id}`,
+                      type: 'warning',
+                      title: 'Expiring Soon',
+                      message: `${item.genericName} ${item.strength || ''} expires in ${daysLeft} days`,
+                      action: 'Review'
+                    });
+                  }
+                }
+              });
+            } else {
+              // Authenticated mode: Get alerts from API
+              const lowStockResponse = await apiClient.getLowStockProducts();
+              const expiringResponse = await apiClient.getExpiringProducts();
+
+              // Add low stock alerts
+              if (lowStockResponse.success && lowStockResponse.data) {
+                lowStockResponse.data.forEach(item => {
+                  this.alerts.push({
+                    id: `low-stock-${item.id}`,
+                    type: 'warning',
+                    title: 'Low Stock Alert',
+                    message: `${item.genericName} ${item.strength || ''} is below minimum level (${item.stockQuantity} units)`,
+                    action: 'Reorder'
+                  });
+                });
+              }
+
+              // Add expiring alerts
+              if (expiringResponse.success && expiringResponse.data) {
+                expiringResponse.data.forEach(item => {
+                  const daysLeft = this.getDaysUntilExpiry(item.expiryDate);
+                  if (daysLeft < 0) {
+                    this.alerts.push({
+                      id: `expired-${item.id}`,
+                      type: 'critical',
+                      title: 'Expired Medication',
+                      message: `${item.genericName} ${item.strength || ''} (Batch: ${item.batchNumber}) has expired`,
+                      action: 'Remove'
+                    });
+                  } else {
+                    this.alerts.push({
+                      id: `expiring-${item.id}`,
+                      type: 'warning',
+                      title: 'Expiring Soon',
+                      message: `${item.genericName} ${item.strength || ''} expires in ${daysLeft} days`,
+                      action: 'Review'
+                    });
+                  }
+                });
+              }
+            }
+          } catch (error) {
+            console.error('Error checking alerts:', error);
+          }
+        },
+
+        resetNewItemForm() {
+          this.newItem = {
+            genericName: '',
+            brandName: '',
+            description: '',
+            ndcBarcode: '',
+            strength: '',
+            form: '',
+            supplier: '',
+            batchNumber: '',
+            licenseNumber: '',
+            zambiaRegNumber: '',
+            manufactureDate: '',
+            expiryDate: '',
+            stockQuantity: 0,
+            packingType: '',
+            location: '',
+            storageConditions: '',
+            unitCost: 0,
+            unitPrice: 0,
+            totalValue: 0,
+            currency: 'ZMW',
+            minStockLevel: 0,
+            maxStockLevel: 0,
+            reorderQuantity: 0,
+            leadTime: 0
+          };
+        },
+
+        addAlert(alert) {
+          alert.id = Date.now();
+          this.alerts.unshift(alert);
+        },
+
+        dismissAlert(alertId) {
+          this.alerts = this.alerts.filter(alert => alert.id !== alertId);
+        },
+
+        dismissAllAlerts() {
+          this.alerts = [];
+        },
+
+        handleAlert(alert) {
+          if (alert.action === 'Reorder') {
+            // Trigger reorder for low stock items
+            console.log('Reordering items...');
+          } else if (alert.action === 'Remove') {
+            // Remove expired items
+            this.inventory = this.inventory.filter(item => {
+              const expiryStatus = this.getExpiryStatus(item.expiryDate);
+              return expiryStatus !== 'expired';
+            });
+          } else if (alert.action === 'Review') {
+            // Show items that need review
+            console.log('Reviewing expiring items...');
+          }
+          this.dismissAlert(alert.id);
+        },
+
+        getExpiryStatus(expiryDate) {
+          if (!expiryDate) return 'good';
+          
+          const today = new Date();
+          const expiry = new Date(expiryDate);
+          const daysUntilExpiry = Math.ceil((expiry - today) / (1000 * 60 * 60 * 24));
+          
+          if (daysUntilExpiry < 0) return 'expired';
+          if (daysUntilExpiry <= 30) return 'expiring-soon';
+          return 'good';
+        },
+
+        getExpiryStatusText(expiryDate) {
+          const status = this.getExpiryStatus(expiryDate);
+          if (status === 'expired') return 'Expired';
+          if (status === 'expiring-soon') return `Expires in ${this.getDaysUntilExpiry(expiryDate)} days`;
+          return 'Good';
+        },
+
+        getDaysUntilExpiry(expiryDate) {
+          if (!expiryDate) return 0;
+          const today = new Date();
+          const expiry = new Date(expiryDate);
+          return Math.ceil((expiry - today) / (1000 * 60 * 60 * 24));
+        },
+
+        getExpiryClass(expiryDate) {
+          const status = this.getExpiryStatus(expiryDate);
+          if (status === 'expired') return 'expired-item';
+          if (status === 'expiring-soon') return 'expiring-soon-item';
+          return '';
+        },
+
+        formatDate(dateString) {
+          if (!dateString) return 'N/A';
+          const date = new Date(dateString);
+          return date.toLocaleDateString('en-US', { 
+            year: 'numeric', 
+            month: 'short', 
+            day: 'numeric' 
+          });
+        },
+
+        scanBarcode(item) {
+          // Simulate barcode scanning
+          console.log('Scanning barcode for:', item.ndcBarcode);
+          // In real implementation, this would open camera/scanner
+          alert(`Scanning barcode: ${item.ndcBarcode}`);
+        },
+
+        dispenseItem(item) {
+          const quantity = prompt(`Enter quantity to dispense for ${item.genericName}:`, '1');
+          if (quantity && !isNaN(quantity) && parseInt(quantity) > 0) {
+            const qty = parseInt(quantity);
+            if (qty <= item.stockQuantity) {
+              item.stockQuantity -= qty;
+              // Update stock status
+              if (item.stockQuantity <= 0) {
+                item.stockStatus = 'out-of-stock';
+                item.stockQuantity = 0;
+              } else if (item.stockQuantity <= item.minStockLevel) {
+                item.stockStatus = 'low-stock';
+                this.addAlert({
+                  type: 'warning',
+                  title: 'Low Stock Alert',
+                  message: `${item.genericName} ${item.strength} is now below minimum level`,
+                  action: 'Reorder'
+                });
+              } else {
+                item.stockStatus = 'in-stock';
+              }
+              console.log(`Dispensed ${qty} units of ${item.genericName}`);
+              this.showItemDetailsModal = false;
+            } else {
+              alert('Insufficient stock available');
+            }
+          }
+        },
+
+        async addItem() {
+          // Validate required fields
+          if (!this.newItem.genericName || !this.newItem.brandName || !this.newItem.stockQuantity || !this.newItem.batchNumber) {
+            alert('Please fill in all required fields (Generic Name, Brand Name, Batch Number, and Stock Quantity)');
             return;
           }
 
-          try {
-            this.loading = true;
-            await window.pharmacistApi.inventory.deleteProduct(productId);
-            this.products = this.products.filter(p => p.id !== productId);
-            this.showNotification('Product deleted successfully', 'success');
-          } catch (error) {
-            console.error('Failed to delete product:', error);
-            this.showNotification('Failed to delete product', 'error');
-          } finally {
-            this.loading = false;
+          // Validate stock quantity
+          if (this.newItem.stockQuantity <= 0) {
+            alert('Stock quantity must be greater than 0');
+            return;
+          }
+
+          // Validate dates
+          if (this.newItem.expiryDate && new Date(this.newItem.expiryDate) <= new Date()) {
+            alert('Expiry date must be in the future');
+            return;
+          }
+
+          // Calculate total value
+          this.newItem.totalValue = parseFloat(this.newItem.unitCost || 0) * parseInt(this.newItem.stockQuantity || 0);
+
+          // Save using API
+          await this.saveItem();
+        },
+
+        editItem(item) {
+          // Open edit modal with current item data
+          this.newItem = { ...item };
+          this.showItemDetailsModal = false;
+          this.showAddItemModal = true;
+        },
+
+        viewItem(item) {
+          // Show item details (already selected)
+          this.selectedItem = item;
+          this.showItemDetailsModal = true;
+        },
+
+        deleteItem(item) {
+          if (confirm(`Are you sure you want to delete ${item.genericName}?`)) {
+            this.inventory = this.inventory.filter(i => i.id !== item.id);
+            this.showItemDetailsModal = false;
+            this.checkAlerts();
           }
         },
 
-        async bulkUploadProducts(products) {
-          try {
-            this.loading = true;
-            const response = await window.pharmacistApi.inventory.bulkUpload(products);
-            
-            if (response.successCount > 0) {
-              this.products.push(...response.createdProducts);
-              this.showNotification(`${response.successCount} products uploaded successfully`, 'success');
-            }
-            
-            if (response.failureCount > 0) {
-              this.showNotification(`${response.failureCount} products failed to upload`, 'error');
-            }
-            
-            return response;
-          } catch (error) {
-            console.error('Failed to bulk upload products:', error);
-            this.showNotification('Failed to upload products', 'error');
-            throw error;
-          } finally {
-            this.loading = false;
+        handleLogout() {
+          // TODO: Implement logout functionality
+          console.log('Logout clicked');
+        },
+
+        // Reporting Functions
+        generateReport() {
+          if (this.isDemoMode) {
+            this.showNotification('Login required for report generation features', 'warning');
+            return;
+          }
+          
+          const reportData = {
+            generatedAt: new Date().toISOString(),
+            totalItems: this.inventory.length,
+            inStock: this.inventory.filter(item => item.stockStatus === 'in-stock').length,
+            lowStock: this.inventory.filter(item => item.stockStatus === 'low-stock').length,
+            outOfStock: this.inventory.filter(item => item.stockStatus === 'out-of-stock').length,
+            expiringSoon: this.expiringItems.length,
+            expired: this.inventory.filter(item => this.getExpiryStatus(item.expiryDate) === 'expired').length,
+            totalValue: this.inventory.reduce((sum, item) => sum + (item.unitCost || 0) * item.stockQuantity, 0),
+            lowStockItems: this.lowStockItems,
+            expiringItems: this.expiringItems
+          };
+
+          // Create and download CSV report
+          const csv = this.convertToCSV(reportData);
+          this.downloadCSV(csv, 'inventory-report.csv');
+        },
+
+        convertToCSV(data) {
+          const headers = ['Generic Name', 'Brand Name', 'Strength', 'Form', 'Stock Quantity', 'Min Stock Level', 'Expiry Date', 'Location', 'Unit Cost', 'Unit Value'];
+          const rows = this.inventory.map(item => [
+            item.genericName,
+            item.brandName,
+            item.strength || '',
+            item.form || '',
+            item.stockQuantity,
+            item.minStockLevel || '',
+            item.expiryDate || '',
+            item.location || '',
+            item.unitCost || 0,
+            (item.unitCost || 0) * item.stockQuantity
+          ]);
+
+          const csvContent = [
+            headers.join(','),
+            ...rows.map(row => row.join(','))
+          ].join('\n');
+
+          return csvContent;
+        },
+
+        downloadCSV(csv, filename) {
+          const blob = new Blob([csv], { type: 'text/csv' });
+          const url = window.URL.createObjectURL(blob);
+          const a = document.createElement('a');
+          a.href = url;
+          a.download = filename;
+          a.click();
+          window.URL.revokeObjectURL(url);
+        },
+
+        refreshReports() {
+          // Refresh data and charts
+          if (!this.isDemoMode) {
+            this.refreshWithSync();
+          } else {
+            this.checkAlerts();
+            console.log('Reports refreshed (Demo Mode)');
           }
         },
 
-        editProduct(product) {
-          // Populate form with product data for editing
-          const form = document.getElementById('productForm');
-          if (form) {
-            form.brandName.value = product.name || '';
-            form.genericName.value = product.description || '';
-            form.category.value = product.category || '';
-            form.costPrice.value = product.costPrice || 0;
-            form.sellingPrice.value = product.unitPrice || 0;
-            form.stockQuantity.value = product.currentStock || 0;
-            form.expiryDate.value = product.expiryDate ? product.expiryDate.split('T')[0] : '';
-            form.description.value = product.description || '';
-            
-            // Store product ID for update
-            form.dataset.productId = product.id;
-            
-            // Show modal
-            document.getElementById('productModal').hidden = false;
-            document.getElementById('modalOverlay').hidden = false;
+        reorderItem(item) {
+          const quantity = prompt(`Enter reorder quantity for ${item.genericName} ${item.strength}:`, item.reorderQuantity || item.minStockLevel);
+          if (quantity && !isNaN(quantity) && parseInt(quantity) > 0) {
+            this.addAlert({
+              type: 'info',
+              title: 'Reorder Created',
+              message: `Order placed for ${quantity} units of ${item.genericName} ${item.strength}`,
+              action: 'Track'
+            });
+            this.showItemDetailsModal = false;
+            console.log(`Reordering ${quantity} units of ${item.genericName}`);
           }
-        },
-
-        formatCurrency(amount) {
-          return new Intl.NumberFormat('en-ZM', {
-            style: 'currency',
-            currency: 'ZMW'
-          }).format(amount);
         },
 
         showNotification(message, type = 'info') {
@@ -2023,284 +2585,240 @@
           const notification = document.createElement('div');
           notification.className = `notification notification-${type}`;
           notification.textContent = message;
+          
+          // Add to page
           document.body.appendChild(notification);
-
-          // Animate in
+          
+          // Show notification
           setTimeout(() => {
             notification.classList.add('show');
           }, 100);
-
-          // Remove after 5 seconds
+          
+          // Remove after 3 seconds
           setTimeout(() => {
             notification.classList.remove('show');
             setTimeout(() => {
-              if (notification.parentNode) {
-                document.body.removeChild(notification);
-              }
+              document.body.removeChild(notification);
             }, 300);
-          }, 5000);
-        },
-        
-        selectSuggestion(suggestion) {
-          if (!suggestion) return;
-          this.searchQuery = suggestion.title || suggestion.name || '';
-          this.searchOpen = false;
+          }, 3000);
         },
 
-        async init() {
-          // Load all data
-          await Promise.all([
-            this.loadProducts(),
-            this.loadCategories(),
-            this.loadSuppliers(),
-            this.loadLowStockProducts(),
-            this.loadExpiringProducts()
-          ]);
-
-          // Setup periodic sync
-          setInterval(() => {
-            this.loadProducts();
-            this.loadLowStockProducts();
-            this.loadExpiringProducts();
-          }, 60000); // Update every minute
-
-          console.log('Inventory system initialized');
-        },
-
-        logout() {
-          if (confirm('Are you sure you want to logout?')) {
-            window.location.href = 'index.html';
+        reviewExpiringItem(item) {
+          const daysLeft = this.getDaysUntilExpiry(item.expiryDate);
+          if (daysLeft < 0) {
+            if (confirm(`${item.genericName} ${item.strength} has expired. Remove from inventory?`)) {
+              this.inventory = this.inventory.filter(i => i.id !== item.id);
+              this.dismissAlert(this.alerts.find(a => a.message.includes(item.genericName))?.id);
+            }
+          } else {
+            alert(`${item.genericName} ${item.strength} expires in ${daysLeft} days. Consider discounting or returning to supplier.`);
           }
-        }
+        },
+
+        // Import Functions
+        handleFileSelect(event) {
+          const file = event.target.files[0];
+          if (file) {
+            this.selectedFile = file;
+            this.processImportFile(file);
+          }
+        },
+
+        handleFileDrop(event) {
+          const file = event.dataTransfer.files[0];
+          if (file) {
+            this.selectedFile = file;
+            this.processImportFile(file);
+          }
+          this.dragOver = false;
+        },
+
+        processImportFile(file) {
+          this.importData = [];
+          const reader = new FileReader();
+          
+          reader.onload = (e) => {
+            try {
+              const content = e.target.result;
+              const lines = content.split('\n');
+              const headers = lines[0].split(',').map(h => h.trim());
+              
+              for (let i = 1; i < lines.length; i++) {
+                if (lines[i].trim()) {
+                  const values = lines[i].split(',').map(v => v.trim());
+                  const item = this.parseImportRow(headers, values);
+                  if (item) {
+                    this.importData.push(item);
+                  }
+                }
+              }
+            } catch (error) {
+              console.error('Error parsing file:', error);
+              alert('Error parsing file. Please check the format and try again.');
+            }
+          };
+          
+          reader.readAsText(file);
+        },
+
+        parseImportRow(headers, values) {
+          const item = {
+            valid: true,
+            errors: []
+          };
+
+          headers.forEach((header, index) => {
+            const value = values[index] || '';
+            
+            switch(header.toLowerCase()) {
+              case 'generic name':
+              case 'genericname':
+                item.genericName = value;
+                if (!value) {
+                  item.valid = false;
+                  item.errors.push('Generic name is required');
+                }
+                break;
+              case 'brand name':
+              case 'brandname':
+                item.brandName = value;
+                break;
+              case 'strength':
+                item.strength = value;
+                break;
+              case 'form':
+                item.form = value;
+                break;
+              case 'stock quantity':
+              case 'stock':
+              case 'quantity':
+                item.stockQuantity = parseInt(value) || 0;
+                break;
+              case 'batch number':
+              case 'batch':
+                item.batchNumber = value;
+                break;
+              case 'ndc':
+              case 'barcode':
+              case 'ndc/barcode':
+                item.ndcBarcode = value;
+                break;
+              case 'expiry date':
+              case 'expiry':
+                item.expiryDate = value;
+                break;
+              case 'unit cost':
+              case 'cost':
+                item.unitCost = parseFloat(value) || 0;
+                break;
+              case 'unit price':
+              case 'price':
+                item.unitPrice = parseFloat(value) || 0;
+                break;
+              case 'supplier':
+                item.supplier = value;
+                break;
+              case 'location':
+                item.location = value;
+                break;
+            }
+          });
+
+          // Set default values for required fields
+          item.minStockLevel = item.minStockLevel || 10;
+          item.maxStockLevel = item.maxStockLevel || 100;
+          item.reorderQuantity = item.reorderQuantity || 20;
+          item.packingType = item.packingType || 'Box';
+          item.licenseNumber = item.licenseNumber || 'TBD';
+          item.zambiaRegNumber = item.zambiaRegNumber || 'TBD';
+          item.manufactureDate = item.manufactureDate || new Date().toISOString().split('T')[0];
+
+          return item;
+        },
+
+        processImport() {
+          if (!this.importData.length) {
+            alert('No valid data to import');
+            return;
+          }
+
+          this.importProcessing = true;
+          
+          setTimeout(() => {
+            const validItems = this.importData.filter(item => item.valid);
+            const invalidItems = this.importData.filter(item => !item.valid);
+            
+            // Add valid items to inventory
+            validItems.forEach(item => {
+              const newId = Math.max(...this.inventory.map(i => i.id), 0) + 1;
+              const stockStatus = item.stockQuantity > (item.minStockLevel || 10) ? 'in-stock' : 
+                               item.stockQuantity > 0 ? 'low-stock' : 'out-of-stock';
+              
+              this.inventory.push({
+                id: newId,
+                ...item,
+                stockStatus: stockStatus,
+                totalValue: (item.unitCost || 0) * item.stockQuantity
+              });
+            });
+
+            // Show results
+            let message = `Import completed!\n\n`;
+            message += `✅ Successfully imported: ${validItems.length} items\n`;
+            if (invalidItems.length > 0) {
+              message += `❌ Skipped invalid items: ${invalidItems.length}\n`;
+            }
+            
+            alert(message);
+            
+            // Reset and close
+            this.importData = [];
+            this.selectedFile = null;
+            this.importProcessing = false;
+            this.showImportModal = false;
+            this.checkAlerts();
+          }, 1500);
+        },
+
+        downloadTemplate() {
+          const template = [
+            'Generic Name,Brand Name,Strength,Form,NDC/Barcode,Batch Number,License Number,Zambia REG,Manufacture Date,Expiry Date,Packing Type,Supplier,Location,Storage,Stock,Cost',
+            'Paracetamol,Panadol,500mg,Tablet,123456789012,BATCH001,LIC001,ZMP001,2024-01-15,2025-01-15,Box,PharmaCorp Ltd,Aisle 3 Shelf 2,Room Temperature,100,2.50',
+            'Amoxicillin,Amoxil,250mg,Capsule,234567890123,BATCH002,LIC002,ZMP002,2024-02-20,2025-02-20,Bottle,MedSupply Inc,Aisle 1 Shelf 1,Refrigerated,50,8.00'
+          ].join('\n');
+
+          const blob = new Blob([template], { type: 'text/csv' });
+          const url = window.URL.createObjectURL(blob);
+          const a = document.createElement('a');
+          a.href = url;
+          a.download = 'inventory-import-template.csv';
+          a.click();
+          window.URL.revokeObjectURL(url);
+        },
+
+        formatFileSize(bytes) {
+          if (bytes === 0) return '0 Bytes';
+          const k = 1024;
+          const sizes = ['Bytes', 'KB', 'MB', 'GB'];
+          const i = Math.floor(Math.log(bytes) / Math.log(k));
+          return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
+        },
+
+        formatCurrency(amount) {
+          return new Intl.NumberFormat('en-ZM', {
+            style: 'currency',
+            currency: 'ZMW',
+            minimumFractionDigits: 2
+          }).format(amount);
+        },
+
+        selectItem(item) {
+          // Show item details modal
+          this.selectedItem = item;
+          this.showItemDetailsModal = true;
+        },
       }
     }
   </script>
-
-  <script>
-    // Modal and Bulk Upload Functionality with Backend Integration
-    document.addEventListener('DOMContentLoaded', function() {
-      // Modal elements
-      const productModal = document.getElementById('productModal');
-      const bulkUploadModal = document.getElementById('bulkUploadModal');
-      const modalOverlay = document.getElementById('modalOverlay');
-      const addProductButton = document.getElementById('addProductButton');
-      const importButton = document.getElementById('importButton');
-      
-      // Bulk upload elements
-      const bulkFileInput = document.getElementById('bulkFileInput');
-      const fileInfo = document.getElementById('fileInfo');
-      const uploadPreview = document.getElementById('uploadPreview');
-      const previewBody = document.getElementById('previewBody');
-      const processBulkUpload = document.getElementById('processBulkUpload');
-      const removeFile = document.getElementById('removeFile');
-      
-      // Initialize Alpine.js data
-      const inventoryData = Alpine.store('inventory');
-      
-      // Modal open/close handlers
-      addProductButton?.addEventListener('click', () => {
-        productModal.hidden = false;
-        modalOverlay.hidden = false;
-      });
-      
-      importButton?.addEventListener('click', () => {
-        bulkUploadModal.hidden = false;
-        modalOverlay.hidden = false;
-      });
-      
-      // Close modal handlers
-      document.querySelectorAll('[data-close]').forEach(button => {
-        button.addEventListener('click', (e) => {
-          const modalId = e.target.getAttribute('data-close');
-          document.getElementById(modalId).hidden = true;
-          modalOverlay.hidden = true;
-        });
-      });
-      
-      // Close modal when clicking overlay
-      modalOverlay?.addEventListener('click', () => {
-        productModal.hidden = true;
-        bulkUploadModal.hidden = true;
-        modalOverlay.hidden = true;
-      });
-      
-      // File upload handlers
-      bulkFileInput?.addEventListener('change', (e) => {
-        const file = e.target.files[0];
-        if (file) {
-          fileInfo.hidden = false;
-          document.getElementById('fileName').textContent = file.name;
-          processBulkUpload.disabled = false;
-          
-          // Parse CSV and show preview
-          const reader = new FileReader();
-          reader.onload = (e) => {
-            const csv = e.target.result;
-            const lines = csv.split('\n').filter(line => line.trim());
-            const headers = lines[0].split(',').map(h => h.trim());
-            const data = lines.slice(1, 6).map(line => {
-              const values = line.split(',').map(v => v.trim());
-              return headers.reduce((obj, header, index) => {
-                obj[header] = values[index] || '';
-                return obj;
-              }, {});
-            });
-            
-            uploadPreview.hidden = false;
-            previewBody.innerHTML = data.map(row => `
-              <tr>
-                <td>${row['Brand Name'] || ''}</td>
-                <td>${row['Generic Name'] || ''}</td>
-                <td>${row['Category'] || ''}</td>
-                <td>${row['Stock Quantity'] || ''}</td>
-                <td>${row['Selling Price'] || ''}</td>
-              </tr>
-            `).join('');
-          };
-          reader.readAsText(file);
-        }
-      });
-      
-      removeFile?.addEventListener('click', () => {
-        bulkFileInput.value = '';
-        fileInfo.hidden = true;
-        uploadPreview.hidden = true;
-        processBulkUpload.disabled = true;
-      });
-      
-      // Process bulk upload
-      processBulkUpload?.addEventListener('click', async () => {
-        const file = bulkFileInput.files[0];
-        if (file && inventoryData) {
-          try {
-            const reader = new FileReader();
-            reader.onload = async (e) => {
-              const csv = e.target.result;
-              const lines = csv.split('\n').filter(line => line.trim());
-              const headers = lines[0].split(',').map(h => h.trim());
-              const products = lines.slice(1).map(line => {
-                const values = line.split(',').map(v => v.trim());
-                return {
-                  name: values[0] || '',
-                  description: values[1] || '',
-                  category: values[2] || '',
-                  costPrice: parseFloat(values[8]) || 0,
-                  unitPrice: parseFloat(values[9]) || 0,
-                  currentStock: parseInt(values[10]) || 0,
-                  expiryDate: values[11] || '',
-                  sku: '',
-                  minStockLevel: 10,
-                  maxStockLevel: 1000,
-                  requiresPrescription: false,
-                  isActive: true
-                };
-              }).filter(p => p.name); // Filter out empty rows
-              
-              await inventoryData.bulkUploadProducts(products);
-              
-              bulkUploadModal.hidden = true;
-              modalOverlay.hidden = true;
-              bulkFileInput.value = '';
-              fileInfo.hidden = true;
-              uploadPreview.hidden = true;
-              processBulkUpload.disabled = true;
-            };
-            reader.readAsText(file);
-          } catch (error) {
-            console.error('Bulk upload error:', error);
-            alert('Failed to process bulk upload. Please check file format.');
-          }
-        }
-      });
-      
-      // Handle product form submission
-      productForm?.addEventListener('submit', async (e) => {
-        e.preventDefault();
-        const form = e.target;
-        const formData = new FormData(form);
-        const productId = form.dataset.productId;
-        
-        const productData = {
-          name: formData.get('brandName'),
-          description: formData.get('genericName'),
-          category: formData.get('category'),
-          costPrice: parseFloat(formData.get('costPrice')),
-          unitPrice: parseFloat(formData.get('sellingPrice')),
-          currentStock: parseInt(formData.get('stockQuantity')),
-          expiryDate: formData.get('expiryDate'),
-          sku: '',
-          minStockLevel: 10,
-          maxStockLevel: 1000,
-          requiresPrescription: false,
-          isActive: true
-        };
-        
-        try {
-          if (productId && inventoryData) {
-            // Update existing product
-            await inventoryData.updateProduct(productId, productData);
-          } else if (inventoryData) {
-            // Create new product
-            await inventoryData.createProduct(productData);
-          }
-          
-          productModal.hidden = true;
-          modalOverlay.hidden = true;
-          form.reset();
-          delete form.dataset.productId;
-        } catch (error) {
-          console.error('Product save error:', error);
-          alert('Failed to save product. Please try again.');
-        }
-      });
-      
-      // Widget menu functionality
-      document.querySelectorAll('[data-menu]').forEach(button => {
-        button.addEventListener('click', (e) => {
-          e.stopPropagation();
-          const menuId = e.target.closest('[data-menu]').getAttribute('data-menu');
-          const menu = document.getElementById(menuId + 'Menu');
-          
-          // Close all other menus
-          document.querySelectorAll('.widget-menu').forEach(m => {
-            if (m !== menu) m.hidden = true;
-          });
-          
-          menu.hidden = !menu.hidden;
-        });
-      });
-      
-      // Close menus when clicking outside
-      document.addEventListener('click', () => {
-        document.querySelectorAll('.widget-menu').forEach(menu => {
-          menu.hidden = true;
-        });
-      });
-      
-      // Update stats display
-      function updateStats() {
-        if (inventoryData) {
-          document.getElementById('totalProductsCount').textContent = inventoryData.totalProducts;
-          document.getElementById('lowStockCount').textContent = inventoryData.lowStockCount;
-          document.getElementById('outOfStockCount').textContent = inventoryData.outOfStockCount;
-          document.getElementById('expiringCount').textContent = inventoryData.expiringCount;
-        }
-      }
-      
-      // Watch for data changes
-      if (inventoryData) {
-        setInterval(updateStats, 1000);
-        updateStats();
-      }
-    });
-  </script>
-
-  <!-- Include API and Data Sync Services -->
-  <script src="../shared/js/data-sync.js"></script>
-  <script src="../shared/js/role-based-access.js"></script>
-  <script src="../admin/js/admin-api.js"></script>
-  <script src="js/pharmacist-api.js"></script>
-
-  <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
 </body>
 </html>

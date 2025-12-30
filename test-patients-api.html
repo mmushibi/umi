@@ -1,0 +1,219 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Test Patients API</title>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 20px; }
+        .test-section { margin: 20px 0; padding: 15px; border: 1px solid #ccc; }
+        button { padding: 10px; margin: 5px; }
+        .result { margin: 10px 0; padding: 10px; background: #f5f5f5; }
+        .error { background: #ffebee; }
+        .success { background: #e8f5e8; }
+    </style>
+</head>
+<body>
+    <h1>Patients API Test</h1>
+    
+    <div class="test-section">
+        <h3>Authentication Setup</h3>
+        <input type="text" id="tenantId" placeholder="Tenant ID" value="12345678-1234-1234-1234-123456789012">
+        <input type="text" id="token" placeholder="Auth Token" value="test-token">
+        <button onclick="setupAuth()">Setup Auth</button>
+    </div>
+
+    <div class="test-section">
+        <h3>Get Patients</h3>
+        <button onclick="getPatients()">Get All Patients</button>
+        <button onclick="searchPatients()">Search Patients</button>
+        <div id="patientsResult"></div>
+    </div>
+
+    <div class="test-section">
+        <h3>Create Patient</h3>
+        <button onclick="createPatient()">Create Test Patient</button>
+        <div id="createResult"></div>
+    </div>
+
+    <div class="test-section">
+        <h3>Update/Delete Patient</h3>
+        <input type="text" id="patientId" placeholder="Patient ID">
+        <button onclick="getPatient()">Get Patient</button>
+        <button onclick="updatePatient()">Update Patient</button>
+        <button onclick="deletePatient()">Delete Patient</button>
+        <div id="crudResult"></div>
+    </div>
+
+    <script>
+        let currentTenantId = '';
+        let currentToken = '';
+
+        function setupAuth() {
+            currentTenantId = document.getElementById('tenantId').value;
+            currentToken = document.getElementById('token').value;
+            
+            // Store in localStorage for API calls
+            localStorage.setItem('umi_current_user', JSON.stringify({
+                tenantId: currentTenantId,
+                firstName: 'Test',
+                lastName: 'User',
+                role: 'pharmacist'
+            }));
+            localStorage.setItem('umi_auth_token', currentToken);
+            
+            showResult('authResult', 'Auth setup complete', 'success');
+        }
+
+        async function getPatients() {
+            try {
+                const response = await fetch(`/api/v1/patients?tenantId=${currentTenantId}`, {
+                    headers: {
+                        'Authorization': `Bearer ${currentToken}`
+                    }
+                });
+                
+                const data = await response.json();
+                showResult('patientsResult', `Found ${data.total || data.length} patients: ${JSON.stringify(data, null, 2)}`, 'success');
+            } catch (error) {
+                showResult('patientsResult', `Error: ${error.message}`, 'error');
+            }
+        }
+
+        async function searchPatients() {
+            try {
+                const response = await fetch(`/api/v1/patients/search?tenantId=${currentTenantId}&query=John&limit=5`, {
+                    headers: {
+                        'Authorization': `Bearer ${currentToken}`
+                    }
+                });
+                
+                const data = await response.json();
+                showResult('patientsResult', `Search results: ${JSON.stringify(data, null, 2)}`, 'success');
+            } catch (error) {
+                showResult('patientsResult', `Error: ${error.message}`, 'error');
+            }
+        }
+
+        async function createPatient() {
+            const patientData = {
+                firstName: "Test",
+                lastName: "Patient",
+                dateOfBirth: "1990-01-01",
+                gender: "Male",
+                email: "test@example.com",
+                phone: "+1234567890",
+                address: "123 Test St",
+                city: "Test City",
+                country: "Test Country",
+                postalCode: "12345",
+                bloodType: "O+",
+                insuranceProvider: "Test Insurance",
+                insurancePolicyNumber: "POL123456"
+            };
+
+            try {
+                const response = await fetch(`/api/v1/patients?tenantId=${currentTenantId}`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${currentToken}`
+                    },
+                    body: JSON.stringify(patientData)
+                });
+                
+                const data = await response.json();
+                showResult('createResult', `Patient created: ${JSON.stringify(data, null, 2)}`, 'success');
+            } catch (error) {
+                showResult('createResult', `Error: ${error.message}`, 'error');
+            }
+        }
+
+        async function getPatient() {
+            const patientId = document.getElementById('patientId').value;
+            if (!patientId) {
+                showResult('crudResult', 'Please enter a patient ID', 'error');
+                return;
+            }
+
+            try {
+                const response = await fetch(`/api/v1/patients/${patientId}?tenantId=${currentTenantId}`, {
+                    headers: {
+                        'Authorization': `Bearer ${currentToken}`
+                    }
+                });
+                
+                const data = await response.json();
+                showResult('crudResult', `Patient details: ${JSON.stringify(data, null, 2)}`, 'success');
+            } catch (error) {
+                showResult('crudResult', `Error: ${error.message}`, 'error');
+            }
+        }
+
+        async function updatePatient() {
+            const patientId = document.getElementById('patientId').value;
+            if (!patientId) {
+                showResult('crudResult', 'Please enter a patient ID', 'error');
+                return;
+            }
+
+            const updateData = {
+                firstName: "Updated",
+                lastName: "Patient",
+                gender: "Male",
+                email: "updated@example.com",
+                phone: "+1234567890",
+                address: "456 Updated St",
+                city: "Updated City",
+                country: "Updated Country",
+                postalCode: "67890",
+                bloodType: "O+",
+                insuranceProvider: "Updated Insurance",
+                insurancePolicyNumber: "POL789012",
+                isActive: true
+            };
+
+            try {
+                const response = await fetch(`/api/v1/patients/${patientId}?tenantId=${currentTenantId}`, {
+                    method: 'PUT',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${currentToken}`
+                    },
+                    body: JSON.stringify(updateData)
+                });
+                
+                const data = await response.json();
+                showResult('crudResult', `Patient updated: ${JSON.stringify(data, null, 2)}`, 'success');
+            } catch (error) {
+                showResult('crudResult', `Error: ${error.message}`, 'error');
+            }
+        }
+
+        async function deletePatient() {
+            const patientId = document.getElementById('patientId').value;
+            if (!patientId) {
+                showResult('crudResult', 'Please enter a patient ID', 'error');
+                return;
+            }
+
+            try {
+                const response = await fetch(`/api/v1/patients/${patientId}?tenantId=${currentTenantId}`, {
+                    method: 'DELETE',
+                    headers: {
+                        'Authorization': `Bearer ${currentToken}`
+                    }
+                });
+                
+                const data = await response.json();
+                showResult('crudResult', `Patient deleted: ${JSON.stringify(data, null, 2)}`, 'success');
+            } catch (error) {
+                showResult('crudResult', `Error: ${error.message}`, 'error');
+            }
+        }
+
+        function showResult(elementId, message, type) {
+            const element = document.getElementById(elementId);
+            element.innerHTML = `<div class="${type}">${message}</div>`;
+        }
+    </script>
+</body>
+</html>

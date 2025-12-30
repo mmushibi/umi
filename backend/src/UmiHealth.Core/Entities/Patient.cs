@@ -2,6 +2,7 @@ namespace UmiHealth.Core.Entities;
 
 public class Patient : TenantEntity
 {
+    public string PatientNumber { get; set; } = string.Empty;
     public string FirstName { get; set; } = string.Empty;
     public string LastName { get; set; } = string.Empty;
     public DateTime DateOfBirth { get; set; }
@@ -9,7 +10,7 @@ public class Patient : TenantEntity
     public string? NationalId { get; set; }
     public string? PassportNumber { get; set; }
     public string Email { get; set; } = string.Empty;
-    public string PhoneNumber { get; set; } = string.Empty;
+    public string Phone { get; set; } = string.Empty;
     public string? AlternativePhone { get; set; }
     public string Address { get; set; } = string.Empty;
     public string City { get; set; } = string.Empty;
@@ -22,13 +23,7 @@ public class Patient : TenantEntity
     public string? EmergencyContactPhone { get; set; }
     public string? EmergencyContactRelationship { get; set; }
     public string InsuranceProvider { get; set; } = string.Empty;
-    public string InsurancePolicyNumber { get; set; } = string.Empty;
-    public string PatientNumber { get; set; } = string.Empty;
-    public string Phone { get; set; } = string.Empty;
-    public string EmergencyContact { get; set; } = string.Empty;
-    public string MedicalHistory { get; set; } = string.Empty;
-    public string InsuranceInfo { get; set; } = string.Empty;
-    public string Status { get; set; } = "active";
+    public string InsuranceNumber { get; set; } = string.Empty;
     public bool IsActive { get; set; } = true;
     
     // Computed properties
@@ -38,5 +33,4 @@ public class Patient : TenantEntity
     public virtual Tenant Tenant { get; set; } = null!;
     public virtual ICollection<Prescription> Prescriptions { get; set; } = new List<Prescription>();
     public virtual ICollection<Sale> Sales { get; set; } = new List<Sale>();
-    public virtual ICollection<SaleReturn> SaleReturns { get; set; } = new List<SaleReturn>();
 }

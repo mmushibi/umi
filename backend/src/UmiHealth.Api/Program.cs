@@ -16,6 +16,7 @@ using UmiHealth.Application.Services;
 using Microsoft.AspNetCore.Mvc.ApiExplorer;
 using Microsoft.AspNetCore.Mvc;
 using Swashbuckle.AspNetCore.SwaggerGen;
+using UmiHealth.Infrastructure.Data;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -42,6 +43,13 @@ builder.Services.AddCors(options =>
               .AllowAnyHeader();
     });
 });
+
+// Add Infrastructure and Application layers
+builder.Services.AddInfrastructure(builder.Configuration);
+builder.Services.AddApplication();
+
+// Register services
+builder.Services.AddScoped<IPatientService, PatientService>();
 
 var app = builder.Build();
 

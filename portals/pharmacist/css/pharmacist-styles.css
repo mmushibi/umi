@@ -5,20 +5,20 @@
 .beta-badge {
   background: #fbbf24;
   color: #92400e;
-  font-size: 0.75rem;
-  padding: 4px 8px;
-  border-radius: 6px;
-  margin-left: 12px;
+  font-size: 0.625rem;
+  padding: 3px 6px;
+  border-radius: 4px;
+  margin-left: 8px;
   font-weight: 600;
 }
 
 .beta-badge-small {
   background: #fbbf24;
   color: #92400e;
-  font-size: 0.625rem;
-  padding: 2px 6px;
-  border-radius: 4px;
-  margin-left: 8px;
+  font-size: 0.5rem;
+  padding: 1px 4px;
+  border-radius: 3px;
+  margin-left: 6px;
   font-weight: 600;
 }
 
@@ -29,14 +29,15 @@
 
 /* Small icon styling */
 .icon-small {
-  font-size: 0.75rem;
+  font-size: 0.625rem;
 }
 
 /* OTP input styling */
 .otp-input {
   font-family: monospace;
-  width: 200px;
+  width: 180px;
   margin: 0 auto;
+  font-size: 0.875rem;
 }
 
 /* Info section styling */
@@ -47,19 +48,19 @@
 
 .info-text {
   color: #64748b;
-  font-size: 0.875rem;
+  font-size: 0.75rem;
 }
 
 /* Section and subsection titles */
 .section-title {
-  margin-bottom: 1rem;
-  font-size: 1.25rem;
+  margin-bottom: 0.75rem;
+  font-size: 1rem;
   font-weight: 600;
 }
 
 .subsection-title {
-  margin-bottom: 0.5rem;
-  font-size: 1rem;
+  margin-bottom: 0.375rem;
+  font-size: 0.875rem;
   font-weight: 600;
 }
 
@@ -71,7 +72,7 @@
 }
 
 .patient-details {
-  font-size: 0.875rem;
+  font-size: 0.75rem;
   color: var(--color-text-secondary);
 }
 
@@ -79,7 +80,8 @@
 .no-history-message {
   text-align: center;
   color: var(--color-text-muted);
-  padding: 2rem;
+  padding: 1.5rem;
+  font-size: 0.75rem;
 }
 
 /* Severity indicators */
@@ -90,13 +92,13 @@
 }
 
 .severity-score {
-  font-size: 0.875rem;
+  font-size: 0.75rem;
   color: var(--color-text-secondary);
 }
 
 /* Recommendations section */
 .recommendations-section {
-  margin-top: 1rem;
+  margin-top: 0.75rem;
 }
 
 .recommendations-list {
@@ -543,7 +545,7 @@
   right: 0;
   bottom: 0;
   z-index: 50;
-  overflow-y-auto;
+  overflow-y: auto;
 }
 
 /* Home page dynamic styles */

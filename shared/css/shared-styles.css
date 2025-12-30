@@ -32,8 +32,50 @@ body {
   background: var(--color-background);
   color: var(--color-text-primary);
   font-family: var(--font-secondary);
-  line-height: 1.5;
+  font-size: 13px;
+  line-height: 1.4;
   overflow-x: hidden;
+}
+
+/* Typography Updates */
+.page-title {
+  font-size: 1.25rem;
+  font-weight: 600;
+  color: var(--color-text-primary);
+  margin: 0;
+  font-family: var(--font-primary);
+}
+
+.prescription-content {
+  font-size: 13px;
+}
+
+.filter-section {
+  font-size: 13px;
+}
+
+.status-badge {
+  font-size: 0.625rem;
+}
+
+.prescription-id {
+  font-size: 0.625rem;
+}
+
+.patient-name {
+  font-size: 0.875rem;
+}
+
+.date-text {
+  font-size: 0.5rem;
+}
+
+.medication-dosage {
+  font-size: 0.75rem;
+}
+
+.small-button {
+  font-size: 0.625rem;
 }
 
 /* Sidebar Styles */
@@ -65,28 +107,28 @@ body {
 }
 
 .logo-icon {
-  width: 40px;
-  height: 40px;
+  width: 32px;
+  height: 32px;
   background: rgba(255, 255, 255, 0.2);
-  border-radius: 10px;
+  border-radius: 8px;
   display: flex;
   align-items: center;
   justify-content: center;
-  font-size: 1.5rem;
+  font-size: 1.2rem;
 }
 
 .logo-text {
-  font-size: 1.25rem;
-  font-weight: 700;
+  font-size: 1rem;
+  font-weight: 600;
   font-family: var(--font-primary);
 }
 
 .pharmacy-info {
-  padding: 1rem 1.5rem;
+  padding: 0.75rem 1rem;
   background: rgba(255, 255, 255, 0.1);
-  margin: 1rem 1.5rem;
-  border-radius: 12px;
-  font-size: 0.85rem;
+  margin: 0.75rem 1rem;
+  border-radius: 8px;
+  font-size: 0.75rem;
 }
 
 .pharmacy-name {
@@ -108,13 +150,13 @@ body {
 .nav-item {
   display: flex;
   align-items: center;
-  gap: 1rem;
-  padding: 0.875rem 1.5rem;
+  gap: 0.75rem;
+  padding: 0.75rem 1.25rem;
   color: rgba(255, 255, 255, 0.8);
   text-decoration: none;
   transition: all 0.2s ease;
   cursor: pointer;
-  font-size: 0.9rem;
+  font-size: 0.8rem;
   font-weight: 500;
 }
 
@@ -130,7 +172,7 @@ body {
 }
 
 .nav-icon {
-  font-size: 1.25rem;
+  font-size: 1rem;
 }
 
 /* Main Content Area */
@@ -165,8 +207,8 @@ body {
 }
 
 .page-title-section .page-title {
-  font-size: 1.5rem;
-  font-weight: 700;
+  font-size: 1.25rem;
+  font-weight: 600;
   color: var(--color-text-primary);
   margin: 0;
   font-family: var(--font-primary);
@@ -176,7 +218,7 @@ body {
   display: none;
   background: none;
   border: none;
-  font-size: 1.5rem;
+  font-size: 1.25rem;
   color: var(--color-text-secondary);
   cursor: pointer;
 }
@@ -202,8 +244,8 @@ body {
 }
 
 .user-avatar {
-  width: 36px;
-  height: 36px;
+  width: 28px;
+  height: 28px;
   background: var(--color-text-primary);
   border-radius: 50%;
   display: flex;
@@ -211,8 +253,8 @@ body {
   justify-content: center;
   color: var(--color-accent);
   font-weight: 600;
-  font-size: 0.875rem;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+  font-size: 0.75rem;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
 }
 
 .user-info {
@@ -221,13 +263,13 @@ body {
 }
 
 .user-name {
-  font-size: 0.875rem;
+  font-size: 0.75rem;
   font-weight: 600;
   color: var(--color-text-primary);
 }
 
 .user-role {
-  font-size: 0.75rem;
+  font-size: 0.625rem;
   color: var(--color-text-secondary);
 }
 
@@ -250,15 +292,15 @@ body {
 .form-label {
   font-weight: 500;
   color: var(--color-text-primary);
-  margin-bottom: 0.5rem;
-  font-size: 0.875rem;
+  margin-bottom: 0.25rem;
+  font-size: 0.75rem;
 }
 
 .form-input {
-  padding: 0.75rem 1rem;
+  padding: 0.5rem 0.75rem;
   border: 1px solid var(--color-border);
-  border-radius: 12px;
-  font-size: 0.875rem;
+  border-radius: 8px;
+  font-size: 0.75rem;
   transition: all 0.3s ease;
   background: var(--color-background);
 }
@@ -279,15 +321,16 @@ body {
   position: fixed;
   top: 20px;
   right: 20px;
-  padding: 1rem 1.5rem;
-  border-radius: 8px;
+  padding: 0.75rem 1rem;
+  border-radius: 6px;
   color: white;
   font-weight: 500;
   z-index: 9999;
   transform: translateX(100%);
   transition: transform 0.3s ease;
-  max-width: 400px;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+  max-width: 350px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+  font-size: 0.75rem;
 }
 
 .notification.show {
@@ -335,18 +378,31 @@ body {
   background: rgba(255, 255, 255, 0.3);
 }
 
-/* Button Styles */
-.btn {
-  padding: 0.75rem 1.5rem;
-  border-radius: 12px;
-  font-size: 0.875rem;
+/* Button Small */
+.btn-small {
+  padding: 0.25rem 0.5rem;
+  border-radius: 8px;
+  font-size: 0.625rem;
   font-weight: 600;
   cursor: pointer;
   transition: all 0.3s ease;
   border: none;
   display: flex;
   align-items: center;
-  gap: 0.5rem;
+  gap: 0.25rem;
+  text-decoration: none;
+}
+.btn {
+  padding: 0.5rem 1rem;
+  border-radius: 8px;
+  font-size: 0.75rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  border: none;
+  display: flex;
+  align-items: center;
+  gap: 0.375rem;
   text-decoration: none;
   justify-content: center;
 }
@@ -405,34 +461,46 @@ body {
 /* Card Styles */
 .card {
   background: var(--color-background);
-  border-radius: 20px;
+  border-radius: 10px;
   border: 1px solid var(--color-border);
-  padding: 2rem;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
+  padding: 0.875rem;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04);
 }
 
+/* Filter Section */
+.filter-section {
+  background: var(--color-background);
+  border: 1px solid var(--color-border);
+  border-radius: 12px;
+  padding: 0.875rem;
+  margin-bottom: 1.25rem;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04);
+}
+
+/* Card Header */
 .card-header {
-  margin-bottom: 1.5rem;
+  margin-bottom: 0.75rem;
 }
 
 .card-title {
-  font-size: 1.25rem;
+  font-size: 1rem;
   font-weight: 600;
   color: var(--color-text-primary);
-  margin-bottom: 0.5rem;
+  margin-bottom: 0.375rem;
   font-family: var(--font-primary);
 }
 
 .card-description {
   color: var(--color-text-secondary);
-  font-size: 0.875rem;
+  font-size: 0.75rem;
 }
 
-/* Table Styles */
+/* Table Container */
 .table-container {
   overflow-x: auto;
   border-radius: 12px;
   border: 1px solid var(--color-border);
+  box-shadow: 0 1px 6px rgba(0, 0, 0, 0.04);
 }
 
 .table {
@@ -443,10 +511,10 @@ body {
 
 .table th {
   background: var(--color-surface);
-  padding: 1rem;
+  padding: 0.75rem;
   text-align: left;
   font-weight: 600;
-  font-size: 0.875rem;
+  font-size: 0.75rem;
   color: var(--color-text-primary);
   border-bottom: 1px solid var(--color-border);
   position: sticky;
@@ -455,9 +523,9 @@ body {
 }
 
 .table td {
-  padding: 1rem;
+  padding: 0.75rem;
   border-bottom: 1px solid var(--color-border);
-  font-size: 0.875rem;
+  font-size: 0.75rem;
 }
 
 .table tr:hover {
@@ -469,9 +537,9 @@ body {
   display: inline-flex;
   align-items: center;
   gap: 0.25rem;
-  padding: 0.25rem 0.75rem;
-  border-radius: 12px;
-  font-size: 0.75rem;
+  padding: 0.25rem 0.5rem;
+  border-radius: 8px;
+  font-size: 0.625rem;
   font-weight: 600;
 }
 
@@ -511,13 +579,13 @@ body {
 
 .modal {
   background: var(--color-background);
-  border-radius: 20px;
-  padding: 2rem;
+  border-radius: 12px;
+  padding: 1.25rem;
   max-width: 500px;
   width: 90%;
   max-height: 90vh;
   overflow-y: auto;
-  box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1);
+  box-shadow: 0 10px 15px -5px rgba(0, 0, 0, 0.1);
 }
 
 .modal-header {
@@ -528,7 +596,7 @@ body {
 }
 
 .modal-title {
-  font-size: 1.25rem;
+  font-size: 1rem;
   font-weight: 600;
   color: var(--color-text-primary);
   font-family: var(--font-primary);
@@ -537,7 +605,7 @@ body {
 .modal-close {
   background: none;
   border: none;
-  font-size: 1.5rem;
+  font-size: 1.25rem;
   cursor: pointer;
   color: var(--color-text-secondary);
   padding: 0.25rem;
@@ -549,12 +617,13 @@ body {
 
 /* Alert Styles */
 .alert {
-  padding: 1rem;
-  border-radius: 12px;
-  margin-bottom: 1rem;
+  padding: 0.75rem;
+  border-radius: 8px;
+  margin-bottom: 0.75rem;
   display: flex;
   align-items: center;
-  gap: 0.75rem;
+  gap: 0.5rem;
+  font-size: 0.75rem;
 }
 
 .alert-success {
@@ -577,8 +646,8 @@ body {
 
 /* Loading Spinner */
 .spinner {
-  width: 20px;
-  height: 20px;
+  width: 16px;
+  height: 16px;
   border: 2px solid var(--color-border);
   border-top: 2px solid var(--color-primary);
   border-radius: 50%;
@@ -662,8 +731,8 @@ body {
 
 /* Dashboard specific utilities */
 .dashboard-metrics { margin-bottom: 2rem; }
-.metric-card { font-size: 2rem; font-weight: 700; }
-.metric-subtitle { color: var(--color-text-muted); font-size: 0.875rem; }
+.metric-card { font-size: 1.5rem; font-weight: 700; }
+.metric-subtitle { color: var(--color-text-muted); font-size: 0.75rem; }
 .metric-icon-success { color: var(--color-success); }
 .metric-icon-info { color: var(--color-info); }
 .metric-icon-warning { color: var(--color-warning); }
@@ -672,13 +741,16 @@ body {
 
 /* Table utilities */
 .table-actions { padding: 0.5rem; }
-.action-button { font-size: 1rem; }
+.action-button { font-size: 0.875rem; }
 
 /* Empty state utilities */
-.empty-state { text-align: center; padding: 2rem; }
+.empty-state { text-align: center; padding: 1.5rem; }
 .empty-state-text { color: var(--color-text-muted); }
 
-/* Receipt Styles */
+/* Prescriptions Content */
+.prescriptions-content {
+  padding: 1.25rem;
+}
 .receipt-container {
   max-width: 400px;
   margin: 0 auto;

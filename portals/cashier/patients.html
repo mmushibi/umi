@@ -34,7 +34,8 @@
       background: var(--color-background);
       color: var(--color-text-primary);
       font-family: 'Nunito', 'Varela Round', sans-serif;
-      line-height: 1.5;
+      font-size: 13px;
+      line-height: 1.4;
       overflow-x: hidden;
     }
 
@@ -109,19 +110,19 @@
     }
 
     .logo-icon {
-      width: 40px;
-      height: 40px;
+      width: 32px;
+      height: 32px;
       background: rgba(255, 255, 255, 0.2);
-      border-radius: 10px;
+      border-radius: 8px;
       display: flex;
       align-items: center;
       justify-content: center;
-      font-size: 1.5rem;
+      font-size: 1.2rem;
     }
 
     .logo-text {
-      font-size: 1.25rem;
-      font-weight: 700;
+      font-size: 1rem;
+      font-weight: 600;
       font-family: 'Inter', sans-serif;
     }
 
@@ -135,13 +136,13 @@
     .nav-item {
       display: flex;
       align-items: center;
-      gap: 1rem;
-      padding: 0.875rem 1.5rem;
+      gap: 0.75rem;
+      padding: 0.75rem 1.25rem;
       color: rgba(255, 255, 255, 0.8);
       text-decoration: none;
       transition: all 0.2s ease;
       cursor: pointer;
-      font-size: 0.9rem;
+      font-size: 0.8rem;
       font-weight: 500;
     }
 
@@ -157,7 +158,7 @@
     }
 
     .nav-icon {
-      font-size: 1.25rem;
+      font-size: 1rem;
     }
 
     /* Main Content Area */
@@ -2459,7 +2460,14 @@
 
         // Initialize
         async init() {
-          // Load real data from API
+          // Check authentication first
+          const userStr = localStorage.getItem('umi_currentUser') || localStorage.getItem('umi_current_user');
+          if (!userStr || userStr === 'undefined' || userStr === 'null') {
+            console.warn('No user authentication found - demo mode enabled');
+            this.showNotification('Demo mode: Some features require login for full functionality', 'info');
+          }
+
+          // Load real data from API or localStorage
           await this.loadPatientsFromAPI();
           
           // Update statistics from backend
@@ -2476,11 +2484,16 @@
             dataManager.setupAutoSave(() => this.patients);
           }
           
-          // Add sync button to header
-          this.addSyncButton();
+          // Add sync button to header (only in authenticated mode)
+          if (userStr && userStr !== 'undefined' && userStr !== 'null') {
+            this.addSyncButton();
+          }
           
           // Initial render
           this.renderPatientsTable();
+          
+          const mode = (!userStr || userStr === 'undefined' || userStr === 'null') ? 'Demo' : 'Authenticated';
+          console.log(`Cashier patient system initialized (${mode} Mode)`);
         },
 
         addSyncButton() {
@@ -2526,46 +2539,92 @@
         async loadPatientsFromAPI() {
           try {
             this.isLoading = true;
-            const response = await api.getPatients({
-              page: 1,
-              pageSize: 100
-            });
             
-            // Handle backend response format
-            const patientsData = response.patients || response.data || [];
-            this.patients = patientsData.map(p => ({
-              id: p.id,
-              patientId: p.patientNumber || p.id,
-              firstName: p.firstName,
-              lastName: p.lastName,
-              dateOfBirth: p.dateOfBirth,
-              gender: p.gender,
-              phone: p.phone,
-              email: p.email,
-              address: p.address,
-              bloodType: p.bloodType,
-              nrc: p.nrc,
-              status: p.status || 'active',
-              registrationDate: p.createdAt,
-              lastVisit: p.lastVisit,
-              emergencyContact: p.emergencyContact?.name,
-              emergencyPhone: p.emergencyContact?.phone,
-              emergencyRelationship: p.emergencyContact?.relationship,
-              medicalHistory: p.medicalHistory || {},
+            // Check if we're in demo mode
+            const userStr = localStorage.getItem('umi_currentUser') || localStorage.getItem('umi_current_user');
+            if (!userStr || userStr === 'undefined' || userStr === 'null') {
+              // Demo mode: Load from localStorage
+              console.log('Demo mode: Loading patients from localStorage');
+              try {
+                const savedData = localStorage.getItem('umi_cashier_patients_data');
+                if (savedData) {
+                  const parsed = JSON.parse(savedData);
+                  this.patients = parsed.data || [];
+                } else {
+                  // Create demo data if none exists
+                  this.patients = [
+                    {
+                      id: 'demo-1',
+                      patientId: 'DEMO-001',
+                      firstName: 'John',
+                      lastName: 'Doe',
+                      dateOfBirth: '1990-01-01',
+                      gender: 'Male',
+                      phone: '+1234567890',
+                      email: 'john.doe@email.com',
+                      address: '123 Main St',
+                      bloodType: 'O+',
+                      nrc: '123456/78/9',
+                      status: 'active',
+                      registrationDate: '2023-01-01',
+                      lastVisit: '2023-12-01',
+                      emergencyContact: 'Jane Doe',
+                      emergencyPhone: '+0987654321',
+                      emergencyRelationship: 'Spouse',
+                      medicalHistory: {}
+                    }
+                  ];
+                }
+              } catch (error) {
+                console.error('Demo mode: Failed to load from localStorage:', error);
+                this.patients = [];
+              }
+            } else {
+              // Authenticated mode: Load from API
+              const response = await api.getPatients({
+                page: 1,
+                pageSize: 100
+              });
+              
+              // Handle backend response format
+              const patientsData = response.patients || response.data || [];
+              this.patients = patientsData.map(p => ({
+                id: p.id,
+                patientId: p.patientNumber || p.id,
+                firstName: p.firstName,
+                lastName: p.lastName,
+                dateOfBirth: p.dateOfBirth,
+                gender: p.gender,
+                phone: p.phone,
+                email: p.email,
+                address: p.address,
+                bloodType: p.bloodType,
+                nrc: p.nrc,
+                status: p.status || 'active',
+                registrationDate: p.createdAt,
+                lastVisit: p.lastVisit,
+                emergencyContact: p.emergencyContact?.name,
+                emergencyPhone: p.emergencyContact?.phone,
+                emergencyRelationship: p.emergencyContact?.relationship,
+                medicalHistory: p.medicalHistory || {},
               allergies: p.allergies || [],
               insuranceInfo: p.insuranceInfo || {}
             }));
             
             this.renderPatientsTable();
             this.updatePatientStats();
-          } catch (error) {
-            console.error('Error loading patients:', error);
-            this.showError('Failed to load patients. Please try again.');
-            this.patients = [];
-          } finally {
-            this.isLoading = false;
           }
-        },
+          
+          this.renderPatientsTable();
+          this.updatePatientStats();
+        } catch (error) {
+          console.error('Error loading patients:', error);
+          this.showError('Failed to load patients. Please try again.');
+          this.patients = [];
+        } finally {
+          this.isLoading = false;
+        }
+      },
 
         setupDataSyncListeners() {
           // Listen for data manager events if available

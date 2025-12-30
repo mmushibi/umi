@@ -824,6 +824,50 @@ class PharmacistApi {
                 method: 'PATCH',
                 body: JSON.stringify({ status })
             });
+        },
+
+        getSupplierDocuments: async (id) => {
+            return await this.request(`/suppliers/${id}/documents`);
+        },
+
+        uploadSupplierDocument: async (id, document) => {
+            const formData = new FormData();
+            formData.append('name', document.name);
+            formData.append('type', document.type);
+            if (document.file) {
+                formData.append('file', document.file);
+            }
+            
+            return await this.request(`/suppliers/${id}/documents`, {
+                method: 'POST',
+                body: formData,
+                headers: {} // Let browser set Content-Type for FormData
+            });
+        },
+
+        deleteSupplierDocument: async (documentId) => {
+            return await this.request(`/suppliers/documents/${documentId}`, {
+                method: 'DELETE'
+            });
+        },
+
+        downloadSupplierDocument: async (documentId) => {
+            const response = await this.request(`/suppliers/documents/${documentId}/download`);
+            return response;
+        },
+
+        bulkDeleteSuppliers: async (supplierIds) => {
+            return await this.request('/suppliers/bulk-delete', {
+                method: 'POST',
+                body: JSON.stringify({ supplierIds })
+            });
+        },
+
+        bulkUpdateSupplierStatus: async (supplierIds, status) => {
+            return await this.request('/suppliers/bulk-status-update', {
+                method: 'POST',
+                body: JSON.stringify({ supplierIds, status })
+            });
         }
     };
 

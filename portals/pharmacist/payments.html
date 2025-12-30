@@ -36,7 +36,8 @@
       background: var(--color-background);
       color: var(--color-text-primary);
       font-family: 'Nunito', 'Varela Round', sans-serif;
-      line-height: 1.5;
+      font-size: 13px;
+      line-height: 1.4;
       overflow-x: hidden;
     }
 
@@ -69,19 +70,19 @@
     }
 
     .logo-icon {
-      width: 40px;
-      height: 40px;
+      width: 32px;
+      height: 32px;
       background: rgba(255, 255, 255, 0.2);
-      border-radius: 10px;
+      border-radius: 8px;
       display: flex;
       align-items: center;
       justify-content: center;
-      font-size: 1.5rem;
+      font-size: 1.2rem;
     }
 
     .logo-text {
-      font-size: 1.25rem;
-      font-weight: 700;
+      font-size: 1rem;
+      font-weight: 600;
       font-family: 'Inter', sans-serif;
     }
 
@@ -95,13 +96,13 @@
     .nav-item {
       display: flex;
       align-items: center;
-      gap: 1rem;
-      padding: 0.875rem 1.5rem;
+      gap: 0.75rem;
+      padding: 0.75rem 1.25rem;
       color: rgba(255, 255, 255, 0.8);
       text-decoration: none;
       transition: all 0.2s ease;
       cursor: pointer;
-      font-size: 0.9rem;
+      font-size: 0.8rem;
       font-weight: 500;
     }
 
@@ -117,7 +118,7 @@
     }
 
     .nav-icon {
-      font-size: 1.25rem;
+      font-size: 1rem;
     }
 
     /* Main Content Area */
@@ -615,6 +616,40 @@
 
     .logout-icon {
       font-size: 1.25rem;
+    }
+
+    /* Demo Mode Banner */
+    .demo-banner {
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      background: linear-gradient(90deg, #667eea 0%, #764ba2 100%);
+      color: white;
+      padding: 0.5rem 1rem;
+      text-align: center;
+      font-size: 0.875rem;
+      font-weight: 500;
+      z-index: 10001;
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+    }
+
+    .demo-banner .close-btn {
+      position: absolute;
+      right: 1rem;
+      top: 50%;
+      transform: translateY(-50%);
+      background: none;
+      border: none;
+      color: white;
+      font-size: 1.25rem;
+      cursor: pointer;
+      opacity: 0.8;
+      transition: opacity 0.2s;
+    }
+
+    .demo-banner .close-btn:hover {
+      opacity: 1;
     }
 
     @media (max-width: 768px) {
@@ -1844,6 +1879,12 @@
   </style>
 </head>
 <body>
+  <div x-show="!isAuthenticated" class="demo-banner" x-transition>
+    <span>🔒 Authentication Required: Please login to access payment management</span>
+    <button class="close-btn" @click="window.location.href='/public/signin.html'">
+      sign in
+    </button>
+  </div>
   <!-- Sidebar -->
   <aside class="sidebar" :class="sidebarOpen ? 'open' : ''">
     <div class="sidebar-header">
@@ -1861,44 +1902,40 @@
         <span class="material-symbols-rounded nav-icon">home</span>
         <span>Home</span>
       </a>
-      <a href="prescriptions.html" class="nav-item">
-        <span class="material-symbols-rounded nav-icon">prescriptions</span>
-        <span>Prescriptions</span>
-      </a>
       <a href="patients.html" class="nav-item">
         <span class="material-symbols-rounded nav-icon">people</span>
         <span>Patients</span>
       </a>
+      <a href="prescriptions.html" class="nav-item">
+        <span class="material-symbols-rounded nav-icon">prescriptions</span>
+        <span>Prescriptions</span>
+      </a>
       <a href="inventory.html" class="nav-item">
-        <span class="material-symbols-rounded nav-icon">inventory_2</span>
+        <span class="material-symbols-rounded nav-icon">inventory</span>
         <span>Inventory</span>
-      </a>
-      <a href="payments.html" class="nav-item">
-        <span class="material-symbols-rounded nav-icon">payments</span>
-        <span>Payments</span>
-      </a>
-      <a href="suppliers.html" class="nav-item">
-        <span class="material-symbols-rounded nav-icon">local_shipping</span>
-        <span>Suppliers</span>
       </a>
       <a href="clinical.html" class="nav-item">
         <span class="material-symbols-rounded nav-icon">medical_services</span>
-        <span>Clinical Support</span>
+        <span>Clinical</span>
       </a>
       <a href="compliance.html" class="nav-item">
-        <span class="material-symbols-rounded nav-icon">gavel</span>
+        <span class="material-symbols-rounded nav-icon">verified</span>
         <span>Compliance</span>
       </a>
       <a href="reports.html" class="nav-item">
         <span class="material-symbols-rounded nav-icon">analytics</span>
         <span>Reports</span>
       </a>
+      <a href="suppliers.html" class="nav-item">
+        <span class="material-symbols-rounded nav-icon">local_shipping</span>
+        <span>Suppliers</span>
+      </a>
       <a href="help.html" class="nav-item">
         <span class="material-symbols-rounded nav-icon">help</span>
         <span>Help & Training</span>
       </a>
       <a href="account.html" class="nav-item">
-        <span class="material-symbols-rounded nav-icon">settings</span>
+        <span class="material-symbols-rounded nav-icon">person</span>
         <span>Account</span>
       </a>
     </nav>
@@ -2888,13 +2925,6 @@
           this.loading = true;
           this.error = null;
           try {
-            // Check if API is available
-            if (typeof window.pharmacistApi === 'undefined') {
-              console.warn('API not available, using mock data');
-              this.loadMockData();
-              return;
-            }
-
             const response = await window.pharmacistApi.payments.getPayments();
             const payments = response.data || [];
             this.invoices = payments.filter(p => p.type === 'invoice') || [];
@@ -2909,87 +2939,19 @@
             console.error('Failed to load payments:', error);
             this.error = 'Failed to load payments';
             // Initialize empty arrays on error
-            this.loadMockData();
+            this.invoices = [];
+            this.quotations = [];
+            this.creditNotes = [];
+            this.claims = [];
+            this.receipts = [];
           } finally {
             this.loading = false;
           }
         },
 
-        loadMockData() {
-          // Load mock data when API is not available
-          this.invoices = [
-            {
-              id: 1,
-              number: 'INV-001',
-              customer: 'John Doe',
-              amount: 150.00,
-              status: 'paid',
-              date: '2024-01-15',
-              type: 'invoice'
-            },
-            {
-              id: 2,
-              number: 'INV-002',
-              customer: 'Jane Smith',
-              amount: 200.00,
-              status: 'pending',
-              date: '2024-01-16',
-              type: 'invoice'
-            }
-          ];
-          this.quotations = [
-            {
-              id: 3,
-              number: 'QUO-001',
-              customer: 'Bob Johnson',
-              amount: 300.00,
-              status: 'draft',
-              date: '2024-01-17',
-              type: 'quotation'
-            }
-          ];
-          this.creditNotes = [];
-          this.claims = [];
-          this.receipts = [];
-          this.updatePaymentStats();
-        },
-
+        
         async createPayment(paymentData) {
           try {
-            // Check if API is available
-            if (typeof window.pharmacistApi === 'undefined') {
-              console.warn('API not available, creating mock payment');
-              const mockPayment = {
-                id: Date.now(),
-                ...paymentData,
-                date: new Date().toISOString().split('T')[0],
-                status: 'draft'
-              };
-              
-              // Add to appropriate array based on type
-              switch(mockPayment.type) {
-                case 'invoice':
-                  this.invoices.push(mockPayment);
-                  break;
-                case 'quotation':
-                  this.quotations.push(mockPayment);
-                  break;
-                case 'credit-note':
-                  this.creditNotes.push(mockPayment);
-                  break;
-                case 'insurance-claim':
-                  this.claims.push(mockPayment);
-                  break;
-                case 'receipt':
-                  this.receipts.push(mockPayment);
-                  break;
-              }
-              
-              this.updatePaymentStats();
-              this.showNotification('Payment created successfully (mock mode)', 'success');
-              return mockPayment;
-            }
-
             const response = await window.pharmacistApi.payments.createPayment(paymentData);
             const newPayment = response.data;
             
@@ -3393,11 +3355,12 @@
 
         // Generate invoice number
         generateInvoiceNumber() {
+          // Generate unique invoice number using timestamp
           const date = new Date();
           const year = date.getFullYear();
           const month = String(date.getMonth() + 1).padStart(2, '0');
-          const random = Math.floor(Math.random() * 1000).toString().padStart(3, '0');
-          return `INV-${year}${month}-${random}`;
+          const timestamp = date.getTime().toString().slice(-6);
+          return `INV-${year}${month}-${timestamp}`;
         },
 
         getInvoiceItems() {
@@ -3538,11 +3501,12 @@
 
         // Generate quotation number
         generateQuotationNumber() {
+          // Generate unique quote number using timestamp
           const date = new Date();
           const year = date.getFullYear();
           const month = String(date.getMonth() + 1).padStart(2, '0');
-          const random = Math.floor(Math.random() * 1000).toString().padStart(3, '0');
-          return `QUO-${year}${month}-${random}`;
+          const timestamp = date.getTime().toString().slice(-6);
+          return `QUO-${year}${month}-${timestamp}`;
         },
 
         getQuotationItems() {
@@ -3674,11 +3638,12 @@
 
         // Generate credit note number
         generateCreditNoteNumber() {
+          // Generate unique credit note number using timestamp
           const date = new Date();
           const year = date.getFullYear();
           const month = String(date.getMonth() + 1).padStart(2, '0');
-          const random = Math.floor(Math.random() * 1000).toString().padStart(3, '0');
-          return `CN-${year}${month}-${random}`;
+          const timestamp = date.getTime().toString().slice(-6);
+          return `CN-${year}${month}-${timestamp}`;
         },
 
         // Insurance Claim Management
@@ -3728,11 +3693,12 @@
 
         // Generate claim number
         generateClaimNumber() {
+          // Generate unique claim number using timestamp
           const date = new Date();
           const year = date.getFullYear();
           const month = String(date.getMonth() + 1).padStart(2, '0');
-          const random = Math.floor(Math.random() * 1000).toString().padStart(3, '0');
-          return `CLM-${year}${month}-${random}`;
+          const timestamp = date.getTime().toString().slice(-6);
+          return `CLM-${year}${month}-${timestamp}`;
         },
 
         // Modal Management for New Features

@@ -9,13 +9,16 @@
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@100;400;500;600;700&family=Varela+Round&family=Nunito:wght@400;600;700&display=swap" rel="stylesheet">
   <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Rounded:wght@300;400;500;600;700&display=swap" rel="stylesheet">
   <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://unpkg.com/alpinejs@3.x.x/dist/cdn.min.js" defer></script>
+  <link rel="stylesheet" href="css/pharmacist-styles.css">
+  <script src="../js/api-client.js"></script>
+  <script src="js/pharmacist-api.js"></script>
   <style>
     :root {
       --color-primary: #000000;
       --color-accent: #14B8A6;
       --color-success: #22c55e;
       --color-warning: #ef4444;
-      --color-info: #3b82f6;
       --color-text-primary: #000000;
       --color-text-secondary: #6b7280;
       --color-text-muted: #9ca3af;
@@ -36,7 +39,8 @@
       background: var(--color-background);
       color: var(--color-text-primary);
       font-family: 'Nunito', 'Varela Round', sans-serif;
-      line-height: 1.5;
+      font-size: 13px;
+      line-height: 1.4;
       overflow-x: hidden;
     }
 
@@ -69,38 +73,20 @@
     }
 
     .logo-icon {
-      width: 40px;
-      height: 40px;
+      width: 32px;
+      height: 32px;
       background: rgba(255, 255, 255, 0.2);
-      border-radius: 10px;
+      border-radius: 8px;
       display: flex;
       align-items: center;
       justify-content: center;
-      font-size: 1.5rem;
+      font-size: 1.2rem;
     }
 
     .logo-text {
-      font-size: 1.25rem;
-      font-weight: 700;
-      font-family: 'Inter', sans-serif;
-    }
-
-    .pharmacy-info {
-      padding: 1rem 1.5rem;
-      background: rgba(255, 255, 255, 0.1);
-      margin: 1rem 1.5rem;
-      border-radius: 12px;
-      font-size: 0.85rem;
-    }
-
-    .pharmacy-name {
+      font-size: 1rem;
       font-weight: 600;
-      margin-bottom: 0.25rem;
-    }
-
-    .pharmacy-location {
-      opacity: 0.8;
-      font-size: 0.75rem;
+      font-family: 'Inter', sans-serif;
     }
 
     .nav-menu {
@@ -112,13 +98,13 @@
     .nav-item {
       display: flex;
       align-items: center;
-      gap: 1rem;
-      padding: 0.875rem 1.5rem;
+      gap: 0.75rem;
+      padding: 0.75rem 1.25rem;
       color: rgba(255, 255, 255, 0.8);
       text-decoration: none;
       transition: all 0.2s ease;
       cursor: pointer;
-      font-size: 0.9rem;
+      font-size: 0.8rem;
       font-weight: 500;
     }
 
@@ -134,7 +120,7 @@
     }
 
     .nav-icon {
-      font-size: 1.25rem;
+      font-size: 1rem;
     }
 
     /* Main Content Area */
@@ -163,21 +149,9 @@
       gap: 1rem;
     }
 
-    .page-title-section {
-      margin-right: 2rem;
-    }
-
-    .mobile-page-title {
-      display: none;
+    .page-title {
       font-size: 1.25rem;
-      font-weight: 700;
-      color: var(--color-text-primary);
-      font-family: 'Inter', sans-serif;
-    }
-
-    .page-title-section .page-title {
-      font-size: 1.5rem;
-      font-weight: 700;
+      font-weight: 600;
       color: var(--color-text-primary);
       margin: 0;
       font-family: 'Inter', sans-serif;
@@ -187,22 +161,327 @@
       display: none;
       background: none;
       border: none;
-      font-size: 1.5rem;
+      font-size: 1.25rem;
       color: var(--color-text-secondary);
       cursor: pointer;
     }
 
-    /* Content Styles */
-    .content {
+    .mobile-title {
+      display: none;
+      font-size: 1rem;
+      font-weight: 600;
+      color: var(--color-text-primary);
+      font-family: 'Inter', sans-serif;
+    }
+
+    /* Clinical Content */
+    .clinical-content {
+      padding: 1.25rem;
+      max-width: 1400px;
+      margin: 0 auto;
+      font-size: 13px;
+    }
+
+    /* Notification Styles */
+    .notification {
+      position: fixed;
+      top: 20px;
+      right: 20px;
+      padding: 1rem 1.5rem;
+      border-radius: 8px;
+      color: white;
+      font-weight: 500;
+      z-index: 10000;
+      opacity: 0;
+      transform: translateX(100%);
+      transition: all 0.3s ease;
+      max-width: 400px;
+    }
+
+    .notification.show {
+      opacity: 1;
+      transform: translateX(0);
+    }
+
+    .notification-success {
+      background: var(--color-success);
+    }
+
+    .notification-error {
+      background: var(--color-warning);
+    }
+
+    .notification-warning {
+      background: #f59e0b;
+    }
+
+    .notification-info {
+      background: var(--color-primary);
+    }
+
+    /* Demo Indicator */
+    .demo-indicator {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      padding: 0.5rem 1rem;
+      background: var(--color-warning);
+      color: white;
+      border-radius: 20px;
+      font-size: 0.75rem;
+      font-weight: 600;
+      margin-right: 1rem;
+    }
+
+    /* Sync Indicator */
+    .sync-indicator {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      padding: 0.5rem 1rem;
+      background: var(--color-success);
+      color: white;
+      border-radius: 20px;
+      font-size: 0.75rem;
+      font-weight: 600;
+      margin-right: 1rem;
+      animation: pulse 2s infinite;
+    }
+
+    @keyframes pulse {
+      0% { opacity: 1; }
+      50% { opacity: 0.7; }
+      100% { opacity: 1; }
+    }
+
+    /* Logout Section */
+    .logout-section {
+      padding: 1rem;
+      border-top: 1px solid rgba(255, 255, 255, 0.1);
+      margin-top: auto;
+    }
+
+    .logout-button {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+      padding: 0.75rem 1.25rem;
+      color: rgba(255, 255, 255, 0.8);
+      text-decoration: none;
+      transition: all 0.2s ease;
+      cursor: pointer;
+      font-size: 0.8rem;
+      font-weight: 500;
+      width: 100%;
+      border: none;
+      background: transparent;
+      text-align: left;
+    }
+
+    .logout-button:hover {
+      background: rgba(239, 68, 68, 0.1);
+      color: var(--color-warning);
+    }
+
+    /* Toast Notification Styles */
+    .toast {
+      position: fixed;
+      top: 20px;
+      right: 20px;
+      padding: 1rem 1.5rem;
+      border-radius: 8px;
+      color: white;
+      font-weight: 500;
+      z-index: 10000;
+      opacity: 0;
+      transform: translateX(100%);
+      transition: all 0.3s ease;
+      max-width: 400px;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+    }
+
+    .toast.show {
+      opacity: 1;
+      transform: translateX(0);
+    }
+
+    .toast-success {
+      background: var(--color-success);
+    }
+
+    .toast-error {
+      background: var(--color-warning);
+    }
+
+    .toast-warning {
+      background: #f59e0b;
+    }
+
+    .toast-info {
+      background: var(--color-primary);
+    }
+
+    .toast-demo {
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    }
+
+    .toast-auth-required {
+      background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+    }
+
+    /* Demo Mode Banner */
+    .demo-banner {
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      background: linear-gradient(90deg, #667eea 0%, #764ba2 100%);
+      color: white;
+      padding: 0.5rem 1rem;
+      text-align: center;
+      font-size: 0.875rem;
+      font-weight: 500;
+      z-index: 10001;
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+    }
+
+    .demo-banner .close-btn {
+      position: absolute;
+      right: 1rem;
+      top: 50%;
+      transform: translateY(-50%);
+      background: none;
+      border: none;
+      color: white;
+      font-size: 1.25rem;
+      cursor: pointer;
+      opacity: 0.8;
+      transition: opacity 0.2s;
+    }
+
+    .demo-banner .close-btn:hover {
+      opacity: 1;
+    }
+
+    .demo-mode-indicator {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.5rem;
+      padding: 0.25rem 0.75rem;
+      background: rgba(102, 126, 234, 0.1);
+      color: #667eea;
+      border-radius: 20px;
+      font-size: 0.75rem;
+      font-weight: 600;
+      margin-left: 0.5rem;
+    }
+
+    .auth-required-overlay {
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background: rgba(0, 0, 0, 0.8);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: white;
+      font-size: 0.875rem;
+      font-weight: 500;
+      border-radius: 8px;
+      opacity: 0;
+      visibility: hidden;
+      transition: all 0.3s ease;
+      z-index: 10;
+    }
+
+    .auth-required-overlay.show {
+      opacity: 1;
+      visibility: visible;
+    }
+
+    .auth-required-content {
+      text-align: center;
       padding: 2rem;
+    }
+
+    .auth-required-content .material-symbols-rounded {
+      font-size: 2rem;
+      margin-bottom: 1rem;
+      color: #f093fb;
+    }
+
+    .login-prompt-btn {
+      margin-top: 1rem;
+      padding: 0.5rem 1rem;
+      background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+      color: white;
+      border: none;
+      border-radius: 6px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: transform 0.2s;
+    }
+
+    .login-prompt-btn:hover {
+      transform: translateY(-1px);
+    }
+
+    /* Responsive Design */
+    @media (max-width: 768px) {
+      .sidebar {
+        transform: translateX(-100%);
+      }
+
+      .sidebar.open {
+        transform: translateX(0);
+      }
+
+      .main-content {
+        margin-left: 0;
+      }
+
+      .mobile-menu-toggle {
+        display: block;
+      }
+
+      .mobile-title {
+        display: block;
+      }
+
+      .page-title {
+        display: none;
+      }
+
+      .clinical-content {
+        padding: 1rem;
+      }
+    }
+
+    /* Clinical Specific Styles */
+    .section-title {
+      font-size: 1.125rem;
+      font-weight: 600;
+      color: var(--color-text-primary);
+      margin-bottom: 1rem;
+      font-family: 'Inter', sans-serif;
+    }
+
+    .subsection-title {
+      font-size: 1rem;
+      font-weight: 600;
+      color: var(--color-text-primary);
+      margin-bottom: 0.75rem;
+      font-family: 'Inter', sans-serif;
     }
 
     /* Patient Search Styles */
     .patient-search-section {
       background: var(--color-surface);
-      border-radius: 16px;
-      padding: 1.5rem;
-      margin-bottom: 2rem;
+      border-radius: 12px;
+      padding: 1rem;
+      margin-bottom: 1.5rem;
       border: 1px solid var(--color-border);
     }
 
@@ -242,6 +521,7 @@
     .patient-name {
       font-weight: 600;
       color: var(--color-text-primary);
+      font-size: 0.875rem;
     }
 
     .patient-details {
@@ -258,243 +538,36 @@
       margin-top: 1rem;
     }
 
-    /* Clinical History Panel */
-    .history-panel {
-      background: var(--color-surface);
-      border-radius: 16px;
-      padding: 1.5rem;
-      margin-bottom: 2rem;
-      border: 1px solid var(--color-border);
-    }
-
-    .history-item {
-      padding: 0.75rem;
-      border-bottom: 1px solid var(--color-border);
-      font-size: 0.875rem;
-    }
-
-    .history-item:last-child {
-      border-bottom: none;
-    }
-
-    .history-date {
-      color: var(--color-text-muted);
-      font-size: 0.75rem;
-    }
-
-    .history-type {
-      font-weight: 600;
-      color: var(--color-text-primary);
-      margin-bottom: 0.25rem;
-    }
-
-    /* Drug Monograph Modal */
-    .modal-overlay {
-      position: fixed;
-      top: 0;
-      left: 0;
-      right: 0;
-      bottom: 0;
-      background: rgba(0, 0, 0, 0.5);
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      z-index: 2000;
-      /* Force hide initially */
-      opacity: 0;
-      visibility: hidden;
-      pointer-events: none;
-      transition: all 0.3s ease;
-    }
-
-    .modal-overlay.show {
-      opacity: 1;
-      visibility: visible;
-      pointer-events: auto;
-    }
-
-    .modal-content {
-      background: white;
-      border-radius: 16px;
-      max-width: 600px;
-      width: 90%;
-      max-height: 80vh;
-      overflow-y: auto;
-    }
-
-    .modal-header {
-      padding: 1.5rem;
-      border-bottom: 1px solid var(--color-border);
+    .patient-info-header {
       display: flex;
       justify-content: space-between;
-      align-items: center;
+      align-items: flex-start;
     }
 
-    .modal-body {
-      padding: 1.5rem;
-    }
-
-    .modal-footer {
-      padding: 1.5rem;
-      border-top: 1px solid var(--color-border);
-      display: flex;
-      gap: 1rem;
-      justify-content: flex-end;
-    }
-
-    /* Clinical Alerts */
-    .alerts-panel {
-      position: fixed;
-      top: 80px;
-      right: 20px;
-      width: 300px;
-      z-index: 1500;
-    }
-
-    .alert-notification {
-      background: white;
-      border-radius: 8px;
-      padding: 1rem;
-      margin-bottom: 0.5rem;
-      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
-      border-left: 4px solid var(--color-warning);
-    }
-
-    .alert-notification.high {
-      border-left-color: var(--color-warning);
-    }
-
-    .alert-notification.medium {
-      border-left-color: #f59e0b;
-    }
-
-    .alert-notification.low {
-      border-left-color: var(--color-info);
-    }
-
-    .alert-title {
-      font-weight: 600;
-      margin-bottom: 0.25rem;
-    }
-
-    .alert-message {
-      font-size: 0.875rem;
-      color: var(--color-text-secondary);
-    }
-
-    .alert-dismiss {
-      background: none;
-      border: none;
-      color: var(--color-text-muted);
-      cursor: pointer;
-      float: right;
-    }
-
-    /* Enhanced Form Styles */
-    .enhanced-form-group {
-      margin-bottom: 1.5rem;
-    }
-
-    .form-row-three {
+    /* Clinical Tools Grid */
+    .clinical-tools-grid {
       display: grid;
-      grid-template-columns: 1fr 1fr 1fr;
-      gap: 1rem;
+      grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+      gap: 1.5rem;
+      margin-top: 1.5rem;
     }
 
-    .severity-indicator {
-      display: inline-block;
-      width: 12px;
-      height: 12px;
-      border-radius: 50%;
-      margin-right: 0.5rem;
-    }
-
-    .severity-high {
-      background: var(--color-warning);
-    }
-
-    .severity-medium {
-      background: #f59e0b;
-    }
-
-    .severity-low {
-      background: var(--color-info);
-    }
-
-    .export-section {
-      background: var(--color-surface);
-      border-radius: 16px;
-      padding: 1.5rem;
-      margin-top: 2rem;
-      border: 1px solid var(--color-border);
-    }
-
-    .loading-spinner {
-      animation: spin 1s linear infinite;
-    }
-
-    @keyframes spin {
-      from { transform: rotate(0deg); }
-      to { transform: rotate(360deg); }
-    }
-
-    .btn-group {
-      display: flex;
-      gap: 0.5rem;
-      flex-wrap: wrap;
-    }
-
-    .btn-small {
-      padding: 0.5rem 1rem;
-      font-size: 0.75rem;
-    }
-
-    .info-badge {
-      background: var(--color-info);
-      color: white;
-      padding: 0.25rem 0.5rem;
-      border-radius: 4px;
-      font-size: 0.75rem;
-      font-weight: 500;
-    }
-
-    .warning-badge {
-      background: var(--color-warning);
-      color: white;
-      padding: 0.25rem 0.5rem;
-      border-radius: 4px;
-      font-size: 0.75rem;
-      font-weight: 500;
-    }
-
-    .success-badge {
-      background: var(--color-success);
-      color: white;
-      padding: 0.25rem 0.5rem;
-      border-radius: 4px;
-      font-size: 0.75rem;
-      font-weight: 500;
-    }
-
-    .tool-card {
-      background: var(--color-background);
-      border-radius: 20px;
+    .clinical-tool-card {
+      background: white;
+      border-radius: 12px;
       border: 1px solid var(--color-border);
       overflow: hidden;
       transition: all 0.3s ease;
       box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
-      display: flex;
-      flex-direction: column;
-      height: 100%;
     }
 
-    .tool-card:hover {
-      transform: translateY(-4px);
+    .clinical-tool-card:hover {
+      transform: translateY(-2px);
       box-shadow: 0 8px 24px rgba(0, 0, 0, 0.12);
     }
 
     .tool-header {
-      padding: 1.5rem;
+      padding: 1.25rem;
       border-bottom: 1px solid var(--color-border);
       display: flex;
       align-items: center;
@@ -504,7 +577,7 @@
     .tool-icon {
       width: 48px;
       height: 48px;
-      border-radius: 16px;
+      border-radius: 12px;
       display: flex;
       align-items: center;
       justify-content: center;
@@ -526,11 +599,6 @@
       color: #f59e0b;
     }
 
-    .tool-icon.alternative {
-      background: rgba(59, 130, 246, 0.1);
-      color: var(--color-info);
-    }
-
     .tool-title {
       flex: 1;
     }
@@ -549,15 +617,18 @@
     }
 
     .tool-content {
-      padding: 1.5rem;
-      flex: 1;
-      display: flex;
-      flex-direction: column;
+      padding: 1.25rem;
     }
 
     /* Form Styles */
+    .form-row {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 1rem;
+    }
+
     .form-group {
-      margin-bottom: 1.5rem;
+      margin-bottom: 1rem;
     }
 
     .form-label {
@@ -570,9 +641,9 @@
 
     .form-input {
       width: 100%;
-      padding: 0.75rem 1rem;
+      padding: 0.5rem 0.75rem;
       border: 1px solid var(--color-border);
-      border-radius: 12px;
+      border-radius: 8px;
       font-size: 0.875rem;
       transition: all 0.3s ease;
       background: var(--color-background);
@@ -581,14 +652,14 @@
     .form-input:focus {
       outline: none;
       border-color: var(--color-primary);
-      box-shadow: 0 0 0 4px rgba(0, 0, 0, 0.1);
+      box-shadow: 0 0 0 3px rgba(0, 0, 0, 0.1);
     }
 
     .form-select {
       width: 100%;
-      padding: 0.75rem 1rem;
+      padding: 0.5rem 0.75rem;
       border: 1px solid var(--color-border);
-      border-radius: 12px;
+      border-radius: 8px;
       font-size: 0.875rem;
       transition: all 0.3s ease;
       background: var(--color-background);
@@ -597,24 +668,19 @@
     .form-select:focus {
       outline: none;
       border-color: var(--color-primary);
-      box-shadow: 0 0 0 4px rgba(0, 0, 0, 0.1);
+      box-shadow: 0 0 0 3px rgba(0, 0, 0, 0.1);
     }
 
-    .form-row {
-      display: grid;
-      grid-template-columns: 1fr 1fr;
-      gap: 1rem;
-    }
-
+    /* Button Styles */
     .btn {
-      padding: 0.75rem 1.5rem;
-      border-radius: 12px;
+      padding: 0.625rem 1.25rem;
+      border-radius: 8px;
       font-size: 0.875rem;
       font-weight: 600;
       cursor: pointer;
       transition: all 0.3s ease;
       border: none;
-      display: flex;
+      display: inline-flex;
       align-items: center;
       gap: 0.5rem;
     }
@@ -626,9 +692,9 @@
     }
 
     .btn-primary:hover {
-      background: var(--color-text-secondary);
-      transform: translateY(-2px);
-      box-shadow: 0 8px 24px rgba(0, 0, 0, 0.2);
+      background: #333;
+      transform: translateY(-1px);
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
     }
 
     .btn-secondary {
@@ -641,171 +707,60 @@
       background: var(--color-border);
     }
 
-    /* Result Styles */
+    .btn-small {
+      padding: 0.375rem 0.75rem;
+      font-size: 0.75rem;
+    }
+
+    /* Result Container */
     .result-container {
-      margin-top: 1.5rem;
+      margin-top: 1rem;
       padding: 1rem;
-      border-radius: 12px;
+      border-radius: 8px;
       border: 1px solid var(--color-border);
-    }
-
-    .result-container.success {
-      background: rgba(34, 197, 94, 0.05);
-      border-color: var(--color-success);
-    }
-
-    .result-container.warning {
-      background: rgba(239, 68, 68, 0.05);
-      border-color: var(--color-warning);
-    }
-
-    .result-container.info {
-      background: rgba(59, 130, 246, 0.05);
-      border-color: var(--color-info);
-    }
-
-    .result-title {
-      font-weight: 600;
-      color: var(--color-text-primary);
-      margin-bottom: 0.5rem;
-      display: flex;
-      align-items: center;
-      gap: 0.5rem;
+      background: var(--color-surface);
     }
 
     .result-content {
-      color: var(--color-text-secondary);
       font-size: 0.875rem;
+      color: var(--color-text-secondary);
       line-height: 1.5;
     }
 
-    .alert-item {
-      display: flex;
-      align-items: flex-start;
-      gap: 0.75rem;
-      padding: 0.75rem;
-      border-radius: 8px;
-      margin-bottom: 0.75rem;
-    }
-
-    .alert-item.high {
-      background: rgba(239, 68, 68, 0.1);
-    }
-
-    .alert-item.medium {
-      background: rgba(245, 158, 11, 0.1);
-    }
-
-    .alert-item.low {
-      background: rgba(59, 130, 246, 0.1);
-    }
-
-    .alert-icon {
-      margin-top: 0.125rem;
-    }
-
-    .alert-content {
-      flex: 1;
-    }
-
-    .alert-title {
-      font-weight: 600;
-      color: var(--color-text-primary);
-      margin-bottom: 0.25rem;
-    }
-
-    .alert-description {
-      font-size: 0.875rem;
-      color: var(--color-text-secondary);
-    }
-
-    .logout-section {
-      padding: 1rem;
-      border-top: 1px solid rgba(255, 255, 255, 0.1);
-      margin-top: auto;
-    }
-
-    .logout-button {
-      display: flex;
-      align-items: center;
-      gap: 1rem;
-      padding: 0.875rem 1.5rem;
-      color: rgba(255, 255, 255, 0.8);
-      text-decoration: none;
-      transition: all 0.2s ease;
-      cursor: pointer;
-      font-size: 0.9rem;
-      font-weight: 500;
-      width: 100%;
-      border: none;
-      background: transparent;
-      text-align: left;
-    }
-
-    .logout-button:hover {
-      background: rgba(239, 68, 68, 0.1);
-      color: var(--color-warning);
-    }
-
-    .logout-icon {
-      font-size: 1.25rem;
-    }
-
-    /* Tool Grid Layout */
-    .tool-grid {
-      display: grid;
-      grid-template-columns: 1fr 1fr 1fr;
-      gap: 1.5rem;
-      margin-top: 2rem;
-    }
-
+    /* Responsive for Clinical Tools */
     @media (max-width: 1024px) {
-      .tool-grid {
-        grid-template-columns: 1fr 1fr;
-        gap: 1rem;
+      .clinical-tools-grid {
+        grid-template-columns: 1fr;
       }
     }
 
     @media (max-width: 768px) {
-      .sidebar {
-        transform: translateX(-100%);
-      }
-
-      .sidebar.open {
-        transform: translateX(0);
-      }
-
-      .main-content {
-        margin-left: 0;
-      }
-
-      .mobile-menu-toggle {
-        display: block;
-      }
-
-      .page-title-section {
-        display: none;
-      }
-
-      .mobile-page-title {
-        display: block;
-      }
-
-      .tool-grid {
-        grid-template-columns: 1fr;
-      }
-
       .form-row {
         grid-template-columns: 1fr;
       }
 
-      .content {
+      .clinical-tools-grid {
+        gap: 1rem;
+      }
+
+      .tool-header {
+        padding: 1rem;
+      }
+
+      .tool-content {
         padding: 1rem;
       }
     }
   </style>
 </head>
 <body>
+  <div x-show="!isAuthenticated" class="demo-banner" x-transition>
+    <span>🔒 Authentication Required: Please login to access clinical decision support tools</span>
+    <button class="close-btn" @click="window.location.href='/public/signin.html'">
+      sign in
+    </button>
+  </div>
+
   <!-- Sidebar -->
   <aside class="sidebar" :class="sidebarOpen ? 'open' : ''">
     <div class="sidebar-header">
@@ -817,57 +772,52 @@
       </div>
     </div>
 
-
     <nav class="nav-menu">
       <a href="home.html" class="nav-item">
         <span class="material-symbols-rounded nav-icon">home</span>
         <span>Home</span>
       </a>
-      <a href="prescriptions.html" class="nav-item">
-        <span class="material-symbols-rounded nav-icon">prescriptions</span>
-        <span>Prescriptions</span>
-      </a>
       <a href="patients.html" class="nav-item">
         <span class="material-symbols-rounded nav-icon">people</span>
         <span>Patients</span>
       </a>
+      <a href="prescriptions.html" class="nav-item">
+        <span class="material-symbols-rounded nav-icon">prescriptions</span>
+        <span>Prescriptions</span>
+      </a>
       <a href="inventory.html" class="nav-item">
-        <span class="material-symbols-rounded nav-icon">inventory_2</span>
+        <span class="material-symbols-rounded nav-icon">inventory</span>
         <span>Inventory</span>
-      </a>
-      <a href="payments.html" class="nav-item">
-        <span class="material-symbols-rounded nav-icon">payments</span>
-        <span>Payments</span>
-      </a>
-      <a href="suppliers.html" class="nav-item">
-        <span class="material-symbols-rounded nav-icon">local_shipping</span>
-        <span>Suppliers</span>
       </a>
       <a href="clinical.html" class="nav-item active">
         <span class="material-symbols-rounded nav-icon">medical_services</span>
-        <span>Clinical Support</span>
+        <span>Clinical</span>
       </a>
       <a href="compliance.html" class="nav-item">
-        <span class="material-symbols-rounded nav-icon">gavel</span>
+        <span class="material-symbols-rounded nav-icon">verified</span>
         <span>Compliance</span>
       </a>
       <a href="reports.html" class="nav-item">
         <span class="material-symbols-rounded nav-icon">analytics</span>
         <span>Reports</span>
       </a>
+      <a href="suppliers.html" class="nav-item">
+        <span class="material-symbols-rounded nav-icon">local_shipping</span>
+        <span>Suppliers</span>
+      </a>
       <a href="help.html" class="nav-item">
         <span class="material-symbols-rounded nav-icon">help</span>
         <span>Help & Training</span>
       </a>
       <a href="account.html" class="nav-item">
-        <span class="material-symbols-rounded nav-icon">settings</span>
+        <span class="material-symbols-rounded nav-icon">person</span>
         <span>Account</span>
       </a>
     </nav>
-    
+
     <div class="logout-section">
-      <button class="logout-button" @click="logout()">
-        <span class="material-symbols-rounded logout-icon">logout</span>
+      <button class="logout-button" @click="handleLogout()">
+        <span class="material-symbols-rounded">logout</span>
         <span>Logout</span>
       </button>
     </div>
@@ -881,17 +831,21 @@
         <button class="mobile-menu-toggle" @click="sidebarOpen = !sidebarOpen">
           <span class="material-symbols-rounded">menu</span>
         </button>
-        
-        <div class="mobile-page-title">Clinical Decision Support</div>
-        
-        <div class="page-title-section">
-          <h1 class="page-title">Clinical Decision Support</h1>
+        <h1 class="page-title">Clinical Decision Support</h1>
+        <span class="mobile-title">Clinical</span>
+      </div>
+      <div class="header-right">
+        <div x-show="!isAuthenticated" class="auth-required-indicator px-3 py-1 bg-yellow-100 text-yellow-800 rounded-full text-sm font-medium mr-2">
+          🔒 Login Required
+        </div>
+        <div style="display: flex; gap: 0.5rem;">
+          <!-- Header actions will be added here -->
         </div>
       </div>
     </header>
 
-    <!-- Content -->
-    <div class="content">
+    <!-- Clinical Content -->
+    <div class="clinical-content">
       <!-- Patient Search Section -->
       <div class="patient-search-section">
         <h2 class="section-title">Patient Selection</h2>
@@ -935,37 +889,10 @@
         </div>
       </div>
 
-      <!-- Clinical History Panel -->
-      <div x-show="selectedPatient" class="history-panel">
-        <h3 class="section-title">Recent Clinical History</h3>
-        <div x-show="clinicalHistory.length === 0" class="no-history-message">
-          No clinical history available for this patient
-        </div>
-        <template x-for="item in clinicalHistory" :key="item.id">
-          <div class="history-item">
-            <div class="history-date" x-text="new Date(item.timestamp).toLocaleString()"></div>
-            <div class="history-type" x-text="item.type.replace('_', ' ').toUpperCase()"></div>
-            <div x-text="item.description"></div>
-          </div>
-        </template>
-      </div>
-
-      <!-- Clinical Alerts Panel -->
-      <div x-show="clinicalAlerts.length > 0" class="alerts-panel">
-        <template x-for="alert in clinicalAlerts" :key="alert.id">
-          <div class="alert-notification" :class="alert.severity">
-            <button class="alert-dismiss" @click="dismissAlert(alert.id)">
-              <span class="material-symbols-rounded">close</span>
-            </button>
-            <div class="alert-title" x-text="alert.title"></div>
-            <div class="alert-message" x-text="alert.message"></div>
-          </div>
-        </template>
-      </div>
-      <!-- Tool Grid -->
-      <div class="tool-grid">
+      <!-- Clinical Tools Grid -->
+      <div class="clinical-tools-grid">
         <!-- Drug Interaction Checker -->
-        <div class="tool-card">
+        <div class="clinical-tool-card">
           <div class="tool-header">
             <div class="tool-icon interaction">
               <span class="material-symbols-rounded">warning</span>
@@ -980,78 +907,48 @@
               <div class="form-row">
                 <div class="form-group">
                   <label class="form-label">Drug 1</label>
-                  <div class="position-relative">
-                    <select class="form-select" x-model="interaction.drug1" title="Select first drug for interaction check">
-                      <option value="">Select drug...</option>
-                      <template x-for="drug in medications" :key="drug.id">
-                        <option :value="drug.id" x-text="drug.name"></option>
-                      </template>
-                    </select>
-                    <button type="button" class="btn btn-secondary btn-small icon-button-absolute" @click="showDrugMonograph(interaction.drug1)" x-show="interaction.drug1">
-                      <span class="material-symbols-rounded icon-button-small">info</span>
-                    </button>
-                  </div>
+                  <select class="form-select" x-model="interaction.drug1" :disabled="!isAuthenticated">
+                    <option value="">Select drug...</option>
+                    <template x-for="drug in medications" :key="drug.id">
+                      <option :value="drug.id" x-text="drug.name"></option>
+                    </template>
+                  </select>
                 </div>
                 <div class="form-group">
                   <label class="form-label">Drug 2</label>
-                  <div class="position-relative">
-                    <select class="form-select" x-model="interaction.drug2" title="Select second drug for interaction check">
-                      <option value="">Select drug...</option>
-                      <template x-for="drug in medications" :key="drug.id">
-                        <option :value="drug.id" x-text="drug.name"></option>
-                      </template>
-                    </select>
-                    <button type="button" class="btn btn-secondary btn-small icon-button-absolute" @click="showDrugMonograph(interaction.drug2)" x-show="interaction.drug2">
-                      <span class="material-symbols-rounded icon-button-small">info</span>
-                    </button>
-                  </div>
+                  <select class="form-select" x-model="interaction.drug2" :disabled="!isAuthenticated">
+                    <option value="">Select drug...</option>
+                    <template x-for="drug in medications" :key="drug.id">
+                      <option :value="drug.id" x-text="drug.name"></option>
+                    </template>
+                  </select>
                 </div>
               </div>
-              
-              <div class="enhanced-form-group" x-show="selectedPatient">
-                <label class="form-label">Severity Scoring</label>
-                <div class="severity-indicators">
-                  <span class="severity-indicator severity-low"></span><span>Low Risk</span>
-                  <span class="severity-indicator severity-medium"></span><span>Medium Risk</span>
-                  <span class="severity-indicator severity-high"></span><span>High Risk</span>
-                </div>
-              </div>
-              
-              <div class="btn-group">
-                <button type="submit" class="btn btn-primary" :disabled="loading">
-                  <span class="material-symbols-rounded" x-show="!loading">search</span>
-                  <span class="material-symbols-rounded loading-spinner" x-show="loading">refresh</span>
-                  <span x-text="loading ? 'Checking...' : 'Check Interactions'"></span>
-                </button>
-                <button type="button" class="btn btn-secondary" @click="checkTherapeuticDuplication" :disabled="!selectedPatient">
-                  <span class="material-symbols-rounded">content_copy</span>
-                  <span>Check Duplication</span>
-                </button>
-              </div>
+              <button type="submit" class="btn btn-primary" :disabled="loading || !isAuthenticated" @click="!isAuthenticated ? authManager.requireAuth('drug interaction checker') : null">
+                <span class="material-symbols-rounded" x-show="!loading">search</span>
+                <span x-text="loading ? 'Checking...' : 'Check Interactions'"></span>
+              </button>
             </form>
-
-            <div x-show="interaction.result" class="result-container" :class="interaction.result.type">
-              <div class="result-title">
-                <span class="material-symbols-rounded" x-text="interaction.result.icon"></span>
-                <span x-text="interaction.result.title"></span>
-                <span x-show="interaction.result.severityScore" class="severity-indicator" :class="`severity-${interaction.result.severityLevel}`"></span>
-                <span x-show="interaction.result.severityScore" x-text="`Score: ${interaction.result.severityScore}`" class="severity-score"></span>
-              </div>
-              <div class="result-content" x-html="interaction.result.content"></div>
-              <div x-show="interaction.result.recommendations" class="recommendations-section">
-                <strong>Recommendations:</strong>
-                <ul class="recommendations-list">
-                  <template x-for="rec in interaction.result.recommendations">
-                    <li x-text="rec"></li>
-                  </template>
-                </ul>
-              </div>
+            <div x-show="interaction.result" class="result-container">
+              <div class="result-content" x-html="interaction.result"></div>
             </div>
           </div>
         </div>
 
         <!-- Dosage Calculator -->
-        <div class="tool-card">
+        <div class="clinical-tool-card" style="position: relative;">
+          <div class="auth-required-overlay" :class="{ 'show': !isAuthenticated && !isDemoMode }">
+            <div class="auth-required-content">
+              <span class="material-symbols-rounded">lock</span>
+              <div>Login Required</div>
+              <div style="font-size: 0.75rem; opacity: 0.8; margin-top: 0.5rem;">
+                Please login to access dosage calculator
+              </div>
+              <button class="login-prompt-btn" @click="redirectToLogin()">
+                Login Now
+              </button>
+            </div>
+          </div>
           <div class="tool-header">
             <div class="tool-icon dosage">
               <span class="material-symbols-rounded">calculate</span>
@@ -1065,104 +962,48 @@
             <form @submit.prevent="calculateDosage">
               <div class="form-group">
                 <label class="form-label">Medication</label>
-                <div class="dosage-calculator-container">
-                  <select class="form-select" x-model="dosage.medication" title="Select medication for dosage calculation">
-                    <option value="">Select medication...</option>
-                    <template x-for="drug in medications" :key="drug.id">
-                      <option :value="drug.id" x-text="drug.name"></option>
-                    </template>
-                  </select>
-                  <button type="button" class="btn btn-secondary btn-small dosage-info-button" @click="showDrugMonograph(dosage.medication)" x-show="dosage.medication">
-                    <span class="material-symbols-rounded dosage-info-icon">info</span>
-                  </button>
-                </div>
+                <select class="form-select" x-model="dosage.medication" :disabled="!isAuthenticated && !isDemoMode">
+                  <option value="">Select medication...</option>
+                  <template x-for="drug in medications" :key="drug.id">
+                    <option :value="drug.id" x-text="drug.name"></option>
+                  </template>
+                </select>
               </div>
-              
               <div class="form-row">
                 <div class="form-group">
-                  <label class="form-label">Patient Weight (kg)</label>
-                  <input type="number" class="form-input" x-model="dosage.weight" placeholder="Enter weight">
+                  <label class="form-label">Weight (kg)</label>
+                  <input type="number" class="form-input" x-model="dosage.weight" placeholder="Enter weight" :disabled="!isAuthenticated && !isDemoMode">
                 </div>
                 <div class="form-group">
-                  <label class="form-label">Patient Age</label>
-                  <input type="number" class="form-input" x-model="dosage.age" placeholder="Enter age">
+                  <label class="form-label">Age</label>
+                  <input type="number" class="form-input" x-model="dosage.age" placeholder="Enter age" :disabled="!isAuthenticated && !isDemoMode">
                 </div>
               </div>
-              
-              <div class="form-row-three" x-show="selectedPatient">
-                <div class="form-group">
-                  <label class="form-label">Serum Creatinine (mg/dL)</label>
-                  <input type="number" step="0.1" class="form-input" x-model="dosage.creatinine" placeholder="1.0">
-                </div>
-                <div class="form-group">
-                  <label class="form-label">Child-Pugh Score</label>
-                  <select class="form-select" x-model="dosage.childPugh" title="Select Child-Pugh classification">
-                    <option value="">Normal</option>
-                    <option value="A">Class A (Mild)</option>
-                    <option value="B">Class B (Moderate)</option>
-                    <option value="C">Class C (Severe)</option>
-                  </select>
-                </div>
-                <div class="form-group">
-                  <label class="form-label">Pregnancy Trimester</label>
-                  <select class="form-select" x-model="dosage.trimester" title="Select pregnancy trimester">
-                    <option value="">Not Pregnant</option>
-                    <option value="1">First Trimester</option>
-                    <option value="2">Second Trimester</option>
-                    <option value="3">Third Trimester</option>
-                  </select>
-                </div>
-              </div>
-              
-              <div class="enhanced-form-group" x-show="selectedPatient && dosage.age >= 65">
-                <label class="form-label">Elderly Considerations</label>
-                <div class="elderly-considerations">
-                  <span class="warning-badge">Beers Criteria Check</span>
-                  <span class="consideration-text">Age-related dosage adjustments will be applied</span>
-                </div>
-              </div>
-              
-              <div class="btn-group">
-                <button type="submit" class="btn btn-primary" :disabled="loading">
-                  <span class="material-symbols-rounded" x-show="!loading">calculate</span>
-                  <span class="material-symbols-rounded loading-spinner" x-show="loading">refresh</span>
-                  <span x-text="loading ? 'Calculating...' : 'Calculate Dosage'"></span>
-                </button>
-                <button type="button" class="btn btn-secondary" @click="checkElderlyAppropriateness" x-show="dosage.age >= 65">
-                  <span class="material-symbols-rounded">elderly</span>
-                  <span>Check Beers Criteria</span>
-                </button>
-              </div>
+              <button type="submit" class="btn btn-primary" :disabled="loading || (!isAuthenticated && !isDemoMode)">
+                <span class="material-symbols-rounded" x-show="!loading">calculate</span>
+                <span x-text="loading ? 'Calculating...' : 'Calculate Dosage'"></span>
+              </button>
             </form>
-
-            <div x-show="dosage.result" class="result-container success">
-              <div class="result-title">
-                <span class="material-symbols-rounded">check_circle</span>
-                <span>Recommended Dosage</span>
-              </div>
+            <div x-show="dosage.result" class="result-container">
               <div class="result-content" x-text="dosage.result"></div>
-              <div x-show="dosage.renalAdjustment" class="adjustment-section">
-                <span class="info-badge">Renal Adjustment Applied</span>
-                <p class="adjustment-text" x-text="dosage.renalAdjustment"></p>
-              </div>
-              <div x-show="dosage.hepaticAdjustment" class="adjustment-section">
-                <span class="warning-badge">Hepatic Adjustment Applied</span>
-                <p class="adjustment-text" x-text="dosage.hepaticAdjustment"></p>
-              </div>
-              <div x-show="dosage.pregnancyWarning" class="adjustment-section">
-                <span class="warning-badge">Pregnancy Warning</span>
-                <p class="adjustment-text" x-text="dosage.pregnancyWarning"></p>
-              </div>
-              <div x-show="dosage.elderlyWarning" class="adjustment-section">
-                <span class="warning-badge">Elderly Consideration</span>
-                <p class="adjustment-text" x-text="dosage.elderlyWarning"></p>
-              </div>
             </div>
           </div>
         </div>
 
         <!-- Allergy Checker -->
-        <div class="tool-card">
+        <div class="clinical-tool-card" style="position: relative;">
+          <div class="auth-required-overlay" :class="{ 'show': !isAuthenticated && !isDemoMode }">
+            <div class="auth-required-content">
+              <span class="material-symbols-rounded">lock</span>
+              <div>Login Required</div>
+              <div style="font-size: 0.75rem; opacity: 0.8; margin-top: 0.5rem;">
+                Please login to access allergy checker
+              </div>
+              <button class="login-prompt-btn" @click="redirectToLogin()">
+                Login Now
+              </button>
+            </div>
+          </div>
           <div class="tool-header">
             <div class="tool-icon allergy">
               <span class="material-symbols-rounded">health_and_safety</span>
@@ -1176,243 +1017,172 @@
             <form @submit.prevent="checkAllergies">
               <div class="form-group">
                 <label class="form-label">Patient ID</label>
-                <input type="text" class="form-input" x-model="allergy.patientId" placeholder="Enter patient ID">
+                <input type="text" class="form-input" x-model="allergy.patientId" placeholder="Enter patient ID" :disabled="!isAuthenticated && !isDemoMode">
               </div>
               <div class="form-group">
-                <label class="form-label">Or Enter Allergies Manually</label>
-                <input type="text" class="form-input" x-model="allergy.allergies" placeholder="e.g., Penicillin, NSAIDs">
-              </div>
-              <div class="form-group">
-                <label class="form-label">Prescribed Medication</label>
-                <select class="form-select" x-model="allergy.medication" title="Select medication for allergy check">
+                <label class="form-label">Medication</label>
+                <select class="form-select" x-model="allergy.medication" :disabled="!isAuthenticated && !isDemoMode">
                   <option value="">Select medication...</option>
                   <template x-for="drug in medications" :key="drug.id">
                     <option :value="drug.id" x-text="drug.name"></option>
                   </template>
                 </select>
               </div>
-              <button type="submit" class="btn btn-primary" :disabled="loading">
+              <button type="submit" class="btn btn-primary" :disabled="loading || (!isAuthenticated && !isDemoMode)">
                 <span class="material-symbols-rounded" x-show="!loading">search</span>
-                <span class="material-symbols-rounded animate-spin" x-show="loading">refresh</span>
                 <span x-text="loading ? 'Checking...' : 'Check Allergies'"></span>
               </button>
             </form>
-
-            <div x-show="allergy.result" class="result-container" :class="allergy.result.type">
-              <div class="result-title">
-                <span class="material-symbols-rounded" x-text="allergy.result.icon"></span>
-                <span x-text="allergy.result.title"></span>
-              </div>
-              <div class="result-content" x-html="allergy.result.content"></div>
+            <div x-show="allergy.result" class="result-container">
+              <div class="result-content" x-html="allergy.result"></div>
             </div>
           </div>
-        </div>
-
-        <!-- Alternative Medications -->
-        <div class="tool-card">
-          <div class="tool-header">
-            <div class="tool-icon alternative">
-              <span class="material-symbols-rounded">swap_horiz</span>
-            </div>
-            <div class="tool-title">
-              <div class="tool-name">Alternative Medications</div>
-              <div class="tool-description">Find therapeutic alternatives</div>
-            </div>
-          </div>
-          <div class="tool-content">
-            <form @submit.prevent="findAlternatives">
-              <div class="form-group">
-                <label class="form-label">Current Medication</label>
-                <select class="form-select" x-model="alternative.medication" title="Select current medication for alternatives">
-                  <option value="">Select medication...</option>
-                  <template x-for="drug in medications" :key="drug.id">
-                    <option :value="drug.id" x-text="drug.name"></option>
-                  </template>
-                </select>
-              </div>
-              <div class="form-group">
-                <label class="form-label">Reason for Alternative</label>
-                <select class="form-select" x-model="alternative.reason" title="Select reason for alternative medication">
-                  <option value="">Select reason...</option>
-                  <option value="cost">Cost</option>
-                  <option value="side_effects">Side Effects</option>
-                  <option value="availability">Availability</option>
-                  <option value="contraindication">Contraindication</option>
-                  <option value="patient_preference">Patient Preference</option>
-                  <option value="formulation">Formulation Issues</option>
-                </select>
-              </div>
-              <div class="form-group">
-                <label class="form-label">Patient ID (Optional)</label>
-                <input type="text" class="form-input" x-model="alternative.patientId" placeholder="Enter patient ID for personalized alternatives">
-              </div>
-              <button type="submit" class="btn btn-primary" :disabled="loading">
-                <span class="material-symbols-rounded" x-show="!loading">search</span>
-                <span class="material-symbols-rounded animate-spin" x-show="loading">refresh</span>
-                <span x-text="loading ? 'Finding...' : 'Find Alternatives'"></span>
-              </button>
-            </form>
-
-            <div x-show="alternative.result" class="result-container info">
-              <div class="result-title">
-                <span class="material-symbols-rounded">info</span>
-                <span>Alternative Options</span>
-              </div>
-              <div class="result-content" x-html="alternative.result"></div>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      <!-- Export Section -->
-      <div class="export-section">
-        <h3 style="margin-bottom: 1rem; font-size: 1.125rem; font-weight: 600;">Export Clinical Report</h3>
-        <div class="btn-group">
-          <button class="btn btn-primary" @click="generateReport('pdf')" :disabled="!hasClinicalData()">
-            <span class="material-symbols-rounded">picture_as_pdf</span>
-            <span>Export PDF</span>
-          </button>
-          <button class="btn btn-secondary" @click="generateReport('print')" :disabled="!hasClinicalData()">
-            <span class="material-symbols-rounded">print</span>
-            <span>Print Report</span>
-          </button>
-          <button class="btn btn-secondary" @click="generateReport('email')" :disabled="!hasClinicalData()">
-            <span class="material-symbols-rounded">email</span>
-            <span>Email Report</span>
-          </button>
         </div>
       </div>
     </div>
   </main>
 
-
-
-  <script src="js/pharmacist-api.js"></script>
   <script>
-    // Force modal to be hidden on page load
-    document.addEventListener('DOMContentLoaded', function() {
-      // Hide any modal overlays immediately
-      const modals = document.querySelectorAll('.modal-overlay');
-      modals.forEach(modal => {
-        modal.style.display = 'none';
-        modal.style.opacity = '0';
-        modal.style.visibility = 'hidden';
-        modal.style.pointerEvents = 'none';
-        modal.classList.remove('show');
-      });
-      
-      console.log('Modal elements forced hidden on page load');
-    });
-    
     function clinicalSystem() {
       return {
         sidebarOpen: false,
         loading: false,
+        isAuthenticated: false,
+        isDemoMode: true,
+        showRealTimeIndicator: false,
+        demoBannerClosed: false,
         medications: [],
         selectedPatient: null,
         patientSearchQuery: '',
         patientSearchResults: [],
         showPatientResults: false,
-        clinicalHistory: [],
-        clinicalAlerts: [],
-        showDrugModal: false,
-        drugMonograph: {},
-        pharmacyInfo: {
-          name: '',
-          location: ''
-        },
+        
+        // Drug Interaction Data
         interaction: {
           drug1: '',
           drug2: '',
           result: null
         },
+        
+        // Dosage Calculator Data
         dosage: {
           medication: '',
           weight: '',
           age: '',
-          creatinine: '',
-          childPugh: '',
-          trimester: '',
-          patientId: '',
-          result: null,
-          renalAdjustment: null,
-          hepaticAdjustment: null,
-          pregnancyWarning: null,
-          elderlyWarning: null
-        },
-        allergy: {
-          patientId: '',
-          allergies: '',
-          medication: '',
           result: null
         },
-        alternative: {
-          medication: '',
-          reason: '',
+        
+        // Allergy Checker Data
+        allergy: {
           patientId: '',
+          medication: '',
           result: null
         },
 
+        // Initialize API client
+        apiClient: null,
+
         async init() {
-          // Force modal to be closed on initialization
-          this.showDrugModal = false;
-          this.drugMonograph = {};
+          // Initialize API client
+          this.apiClient = new PharmacistApi();
           
-          console.log('Clinical system initializing - forcing modal closed');
+          // Check authentication status
+          this.checkAuthenticationStatus();
           
-          // Add a delay to ensure modal is closed after Alpine.js initializes
-          setTimeout(() => {
-            this.showDrugModal = false;
-            this.drugMonograph = {};
-            console.log('Modal state after timeout:', this.showDrugModal);
-          }, 100);
-          
+          // Load initial data
           await this.loadInitialData();
-          // Load clinical alerts periodically
-          setInterval(() => this.loadClinicalAlerts(), 30000); // Every 30 seconds
+          
+          // Set up real-time sync indicator for authenticated users
+          if (this.isAuthenticated && !this.isDemoMode) {
+            this.setupRealTimeSync();
+          }
+          
+          // Load demo banner preference
+          this.demoBannerClosed = localStorage.getItem('demoBannerClosed') === 'true';
+        },
+
+        checkAuthenticationStatus() {
+          // Check if user is authenticated
+          this.isAuthenticated = !!(this.apiClient.token && this.apiClient.userId && this.apiClient.tenantId);
+          
+          // Determine if we're in demo mode
+          this.isDemoMode = !this.isAuthenticated;
+          
+          console.log('Authentication status:', {
+            isAuthenticated: this.isAuthenticated,
+            isDemoMode: this.isDemoMode,
+            hasToken: !!this.apiClient.token,
+            userId: this.apiClient.userId,
+            tenantId: this.apiClient.tenantId
+          });
+        },
+
+        setupRealTimeSync() {
+          // Set up periodic sync indicator for authenticated users
+          setInterval(() => {
+            if (this.isAuthenticated && !this.isDemoMode) {
+              this.showRealTimeIndicator = true;
+              setTimeout(() => {
+                this.showRealTimeIndicator = false;
+              }, 2000);
+            }
+          }, 30000);
         },
 
         async loadInitialData() {
           try {
-            // Load medications from inventory
-            const medicationsResponse = await window.pharmacistApi.clinical.getMedications();
-            this.medications = medicationsResponse.data || [];
-
-            // Load pharmacy info from account settings
-            const accountResponse = await window.pharmacistApi.account.getProfile();
-            if (accountResponse.data) {
-              this.pharmacyInfo.name = accountResponse.data.pharmacyName || 'Umi Health Pharmacy';
-              this.pharmacyInfo.location = accountResponse.data.location || 'Main Branch';
+            if (this.isAuthenticated && !this.isDemoMode) {
+              // Load real data from backend
+              await this.loadMedicationsFromBackend();
+            } else {
+              // Demo mode: load from localStorage or use empty array
+              this.loadDemoData();
             }
-
-            // Load recent decisions
-            await this.loadRecentDecisions();
-            
-            // Load clinical alerts
-            await this.loadClinicalAlerts();
           } catch (error) {
             console.error('Failed to load initial data:', error);
-            // Fallback to empty arrays if API fails
-            this.medications = [];
+            this.showToast('Failed to load medications', 'error');
+            
+            // Fallback to demo mode
+            this.isDemoMode = true;
+            this.loadDemoData();
           }
         },
 
-        async loadRecentDecisions() {
+        async loadMedicationsFromBackend() {
           try {
-            const response = await window.pharmacistApi.clinical.getRecentDecisions(10);
-            this.clinicalHistory = response.data || [];
+            const response = await this.apiClient.clinical.getMedications();
+            this.medications = response.data || [];
+            console.log('Loaded medications from backend:', this.medications.length);
           } catch (error) {
-            console.error('Failed to load recent decisions:', error);
+            console.error('Failed to load medications from backend:', error);
+            throw error;
           }
         },
 
-        async loadClinicalAlerts() {
-          try {
-            const patientId = this.selectedPatient ? this.selectedPatient.id : null;
-            const response = await window.pharmacistApi.clinical.getClinicalAlerts(patientId);
-            this.clinicalAlerts = response.data || [];
-          } catch (error) {
-            console.error('Failed to load clinical alerts:', error);
+        loadDemoData() {
+          // Try to load from localStorage first
+          const savedMedications = localStorage.getItem('demo_medications');
+          if (savedMedications) {
+            try {
+              this.medications = JSON.parse(savedMedications);
+              console.log('Loaded medications from localStorage:', this.medications.length);
+              return;
+            } catch (error) {
+              console.error('Failed to parse saved medications:', error);
+            }
+          }
+          
+          // Start with empty array - no sample data
+          this.medications = [];
+          this.saveDemoData();
+          
+          // Show demo toast
+          this.showToast('Demo Mode: No medications available. Add medications through inventory.', 'demo');
+        },
+
+        saveDemoData() {
+          if (this.isDemoMode) {
+            localStorage.setItem('demo_medications', JSON.stringify(this.medications));
           }
         },
 
@@ -1424,475 +1194,297 @@
           }
 
           try {
-            const response = await window.pharmacistApi.clinical.searchPatients(this.patientSearchQuery, 10);
-            this.patientSearchResults = response.data || [];
+            if (this.isAuthenticated && !this.isDemoMode) {
+              // Real backend search
+              const response = await this.apiClient.clinical.searchPatients(this.patientSearchQuery, 10);
+              this.patientSearchResults = response.data || [];
+            } else {
+              // Demo mode: search localStorage or return empty
+              this.searchDemoPatients();
+            }
           } catch (error) {
             console.error('Failed to search patients:', error);
+            this.showToast('Failed to search patients', 'error');
             this.patientSearchResults = [];
           }
         },
 
-        async selectPatient(patient) {
+        searchDemoPatients() {
+          // Demo mode: search from localStorage or return empty
+          const savedPatients = localStorage.getItem('demo_patients');
+          let patients = [];
+          
+          if (savedPatients) {
+            try {
+              patients = JSON.parse(savedPatients);
+            } catch (error) {
+              console.error('Failed to parse saved patients:', error);
+            }
+          }
+          
+          this.patientSearchResults = patients.filter(patient => 
+            patient.firstName.toLowerCase().includes(this.patientSearchQuery.toLowerCase()) ||
+            patient.lastName.toLowerCase().includes(this.patientSearchQuery.toLowerCase()) ||
+            patient.id.toLowerCase().includes(this.patientSearchQuery.toLowerCase())
+          );
+          
+          if (this.patientSearchResults.length === 0) {
+            this.showToast('Demo Mode: No patients found. Add patients through the Patients page.', 'demo');
+          }
+        },
+
+        selectPatient(patient) {
           this.selectedPatient = patient;
           this.patientSearchQuery = '';
           this.patientSearchResults = [];
           this.showPatientResults = false;
-
-          // Load patient-specific data
-          await this.loadPatientClinicalHistory(patient.id);
-          await this.loadClinicalAlerts();
-
+          
           // Auto-fill patient ID in forms
           this.allergy.patientId = patient.id;
-          this.alternative.patientId = patient.id;
-          this.dosage.patientId = patient.id;
-          this.dosage.age = patient.age;
+          
+          this.showToast(`Selected patient: ${patient.firstName} ${patient.lastName}`, 'success');
+          
+          // Save to demo storage
+          if (this.isDemoMode) {
+            localStorage.setItem('demo_selected_patient', JSON.stringify(patient));
+          }
         },
 
         clearPatient() {
           this.selectedPatient = null;
-          this.clinicalHistory = [];
           this.allergy.patientId = '';
-          this.alternative.patientId = '';
-          this.dosage.patientId = '';
-          this.dosage.age = '';
-          this.loadClinicalAlerts();
-        },
-
-        async loadPatientClinicalHistory(patientId) {
-          try {
-            const response = await window.pharmacistApi.clinical.getPatientClinicalHistory(patientId, 20);
-            this.clinicalHistory = response.data || [];
-          } catch (error) {
-            console.error('Failed to load patient clinical history:', error);
-            this.clinicalHistory = [];
-          }
-        },
-
-        async dismissAlert(alertId) {
-          try {
-            await window.pharmacistApi.clinical.dismissAlert(alertId);
-            this.clinicalAlerts = this.clinicalAlerts.filter(alert => alert.id !== alertId);
-          } catch (error) {
-            console.error('Failed to dismiss alert:', error);
-          }
-        },
-
-        // Drug monograph
-        async showDrugMonograph(drugId) {
-          if (!drugId) return;
           
-          // Prevent multiple modal opens
-          if (this.showDrugModal) {
-            return;
+          if (this.isDemoMode) {
+            localStorage.removeItem('demo_selected_patient');
           }
-
-          try {
-            const response = await window.pharmacistApi.clinical.getDrugMonograph(drugId);
-            this.drugMonograph = response.data || {};
-            this.showDrugModal = true;
-          } catch (error) {
-            console.error('Failed to load drug monograph:', error);
-            this.drugMonograph = { name: 'Information not available' };
-            this.showDrugModal = true;
-          }
+          
+          this.showToast('Patient selection cleared', 'info');
         },
 
-        closeDrugModal() {
-          console.log('Closing drug modal - called manually');
-          this.showDrugModal = false;
-          this.drugMonograph = {};
-        },
-        
-        // Debug function to check modal state
-        debugModalState() {
-          console.log('Modal state debug:', {
-            showDrugModal: this.showDrugModal,
-            drugMonograph: this.drugMonograph,
-            interaction: this.interaction,
-            dosage: this.dosage
-          });
-        },
-
-        // Therapeutic duplication checker
-        async checkTherapeuticDuplication() {
-          if (!this.selectedPatient || !this.interaction.drug1 || !this.interaction.drug2) {
-            alert('Please select a patient and both medications to check for therapeutic duplication.');
-            return;
-          }
-
-          this.loading = true;
-          try {
-            const medications = [this.interaction.drug1, this.interaction.drug2];
-            const response = await window.pharmacistApi.clinical.checkTherapeuticDuplication(
-              this.selectedPatient.id,
-              medications
-            );
-            
-            if (response.data.duplicationFound) {
-              this.interaction.result = {
-                type: 'warning',
-                icon: 'warning',
-                title: 'Therapeutic Duplication Detected',
-                content: this.formatDuplicationResult(response.data),
-                severityScore: response.data.severityScore,
-                severityLevel: response.data.severityLevel
-              };
-            } else {
-              this.interaction.result = {
-                type: 'success',
-                icon: 'check_circle',
-                title: 'No Therapeutic Duplication',
-                content: 'No therapeutic duplication detected between these medications.'
-              };
-            }
-          } catch (error) {
-            console.error('Failed to check therapeutic duplication:', error);
-            this.interaction.result = {
-              type: 'warning',
-              icon: 'error',
-              title: 'Error',
-              content: 'Failed to check therapeutic duplication. Please try again.'
-            };
-          } finally {
-            this.loading = false;
-          }
-        },
-
-        // Elderly appropriateness checker
-        async checkElderlyAppropriateness() {
-          if (!this.dosage.medication || !this.dosage.age) {
-            alert('Please select a medication and enter patient age.');
-            return;
-          }
-
-          this.loading = true;
-          try {
-            const response = await window.pharmacistApi.clinical.checkElderlyAppropriateness(
-              this.dosage.medication,
-              parseInt(this.dosage.age)
-            );
-            
-            if (response.data.inappropriate) {
-              this.dosage.elderlyWarning = response.data.recommendation;
-            } else {
-              this.dosage.elderlyWarning = 'This medication is appropriate for elderly patients.';
-            }
-          } catch (error) {
-            console.error('Failed to check elderly appropriateness:', error);
-            this.dosage.elderlyWarning = 'Failed to check elderly appropriateness. Please consult Beers Criteria manually.';
-          } finally {
-            this.loading = false;
-          }
-        },
-
-        // Export functions
-        hasClinicalData() {
-          return this.interaction.result || this.dosage.result || this.allergy.result || this.alternative.result;
-        },
-
-        async generateReport(format) {
-          if (!this.hasClinicalData()) {
-            alert('No clinical data available to export.');
-            return;
-          }
-
-          this.loading = true;
-          try {
-            const reportData = {
-              patient: this.selectedPatient,
-              interactions: this.interaction.result,
-              dosage: this.dosage.result,
-              allergies: this.allergy.result,
-              alternatives: this.alternative.result,
-              timestamp: new Date().toISOString(),
-              pharmacist: window.pharmacistApi.userId
-            };
-
-            const response = await window.pharmacistApi.clinical.generateClinicalReport(reportData);
-            
-            if (format === 'pdf') {
-              const exportResponse = await window.pharmacistApi.clinical.exportClinicalReport(response.data.reportId, 'pdf');
-              // Download PDF
-              window.open(exportResponse.data.downloadUrl, '_blank');
-            } else if (format === 'print') {
-              window.print();
-            } else if (format === 'email') {
-              // Implement email functionality
-              alert('Report would be emailed to the healthcare provider.');
-            }
-          } catch (error) {
-            console.error('Failed to generate report:', error);
-            alert('Failed to generate report. Please try again.');
-          } finally {
-            this.loading = false;
-          }
-        },
-
+        // Drug Interaction Checker
         async checkInteractions() {
           if (!this.interaction.drug1 || !this.interaction.drug2) {
-            this.interaction.result = {
-              type: 'warning',
-              icon: 'warning',
-              title: 'Warning',
-              content: 'Please select both medications to check for interactions.'
-            };
+            this.showToast('Please select both medications', 'warning');
+            return;
+          }
+
+          if (!this.isAuthenticated && !this.isDemoMode) {
+            this.showToast('Login required to check drug interactions', 'auth-required');
             return;
           }
 
           this.loading = true;
           try {
-            const response = await window.pharmacistApi.clinical.checkDrugInteractions(
-              this.interaction.drug1,
-              this.interaction.drug2
-            );
+            if (this.isAuthenticated && !this.isDemoMode) {
+              // Real backend API call
+              const response = await this.apiClient.clinical.checkDrugInteractions(
+                this.interaction.drug1, 
+                this.interaction.drug2
+              );
+              
+              // Get severity scoring
+              const severityResponse = await this.apiClient.clinical.getInteractionSeverity(
+                this.interaction.drug1, 
+                this.interaction.drug2
+              );
+              
+              this.interaction.result = this.formatInteractionResult(response.data, severityResponse.data);
+              
+              // Save clinical decision
+              await this.saveClinicalDecision('drug_interaction', {
+                drug1: this.interaction.drug1,
+                drug2: this.interaction.drug2,
+                result: response.data,
+                severity: severityResponse.data
+              });
+              
+            } else {
+              // Demo mode: simulate with localStorage
+              this.simulateInteractionCheck();
+            }
             
-            // Get severity scoring
-            const severityResponse = await window.pharmacistApi.clinical.getInteractionSeverity(
-              this.interaction.drug1,
-              this.interaction.drug2
-            );
-            
-            this.interaction.result = {
-              type: response.data.severity === 'high' ? 'warning' : 'success',
-              icon: response.data.severity === 'high' ? 'warning' : 'check_circle',
-              title: response.data.severity === 'high' ? 'Interaction Detected' : 'No Significant Interactions',
-              content: this.formatInteractionResult(response.data),
-              severityScore: severityResponse.data.score,
-              severityLevel: severityResponse.data.level,
-              recommendations: response.data.recommendations || []
-            };
-
-            // Save clinical decision
-            await this.saveClinicalDecision('drug_interaction', {
-              drug1: this.interaction.drug1,
-              drug2: this.interaction.drug2,
-              result: response.data,
-              severity: severityResponse.data
-            });
+            this.showToast('Interaction check completed', 'success');
           } catch (error) {
             console.error('Failed to check interactions:', error);
-            this.interaction.result = {
-              type: 'warning',
-              icon: 'error',
-              title: 'Error',
-              content: 'Failed to check drug interactions. Please try again.'
-            };
+            this.showToast('Failed to check interactions', 'error');
+            this.interaction.result = 'Error occurred while checking interactions.';
           } finally {
             this.loading = false;
           }
         },
 
+        simulateInteractionCheck() {
+          // Demo mode: check localStorage for saved interactions or simulate
+          const drug1Name = this.medications.find(m => m.id === this.interaction.drug1)?.name || 'Drug 1';
+          const drug2Name = this.medications.find(m => m.id === this.interaction.drug2)?.name || 'Drug 2';
+          
+          this.interaction.result = `Demo Mode: No real interaction data available for ${drug1Name} and ${drug2Name}. Login for real clinical data.`;
+          
+          // Save to demo storage
+          const demoInteractions = JSON.parse(localStorage.getItem('demo_interactions') || '[]');
+          demoInteractions.push({
+            drug1: this.interaction.drug1,
+            drug2: this.interaction.drug2,
+            result: this.interaction.result,
+            timestamp: new Date().toISOString()
+          });
+          localStorage.setItem('demo_interactions', JSON.stringify(demoInteractions));
+        },
+
+        // Dosage Calculator
         async calculateDosage() {
           if (!this.dosage.medication || !this.dosage.weight || !this.dosage.age) {
-            this.dosage.result = 'Please fill in all required fields to calculate dosage.';
+            this.showToast('Please fill in all required fields', 'warning');
+            return;
+          }
+
+          if (!this.isAuthenticated && !this.isDemoMode) {
+            this.showToast('Login required to calculate dosage', 'auth-required');
             return;
           }
 
           this.loading = true;
-          this.dosage.renalAdjustment = null;
-          this.dosage.hepaticAdjustment = null;
-          this.dosage.pregnancyWarning = null;
-          this.dosage.elderlyWarning = null;
-
           try {
-            let response;
-            
-            // Check for renal adjustments if creatinine provided
-            if (this.dosage.creatinine && this.selectedPatient) {
-              const renalResponse = await window.pharmacistApi.clinical.calculateRenalDose(
+            if (this.isAuthenticated && !this.isDemoMode) {
+              // Real backend API call
+              const response = await this.apiClient.clinical.calculateDosage(
                 this.dosage.medication,
-                parseFloat(this.dosage.creatinine),
                 parseFloat(this.dosage.weight),
-                parseInt(this.dosage.age),
-                this.selectedPatient.gender || 'unknown'
-              );
-              
-              if (renalResponse.data.adjustmentRequired) {
-                this.dosage.renalAdjustment = renalResponse.data.recommendation;
-              }
-            }
-
-            // Check for hepatic adjustments if Child-Pugh provided
-            if (this.dosage.childPugh) {
-              const hepaticResponse = await window.pharmacistApi.clinical.calculateHepaticDose(
-                this.dosage.medication,
-                this.dosage.childPugh
-              );
-              
-              if (hepaticResponse.data.adjustmentRequired) {
-                this.dosage.hepaticAdjustment = hepaticResponse.data.recommendation;
-              }
-            }
-
-            // Check pregnancy safety if trimester provided
-            if (this.dosage.trimester) {
-              const pregnancyResponse = await window.pharmacistApi.clinical.checkPregnancySafety(
-                this.dosage.medication,
-                this.dosage.trimester
-              );
-              
-              if (pregnancyResponse.data.category !== 'A') {
-                this.dosage.pregnancyWarning = pregnancyResponse.data.warning;
-              }
-            }
-
-            // Calculate base dosage
-            response = await window.pharmacistApi.clinical.calculateDosage(
-              this.dosage.medication,
-              parseFloat(this.dosage.weight),
-              parseInt(this.dosage.age),
-              this.dosage.patientId || null
-            );
-            
-            this.dosage.result = response.data.dosageRecommendation;
-
-            // Check elderly appropriateness for patients 65+
-            if (this.dosage.age >= 65) {
-              const elderlyResponse = await window.pharmacistApi.clinical.checkElderlyAppropriateness(
-                this.dosage.medication,
                 parseInt(this.dosage.age)
               );
               
-              if (elderlyResponse.data.inappropriate) {
-                this.dosage.elderlyWarning = elderlyResponse.data.recommendation;
-              }
+              this.dosage.result = response.data.dosageRecommendation;
+              
+              // Save clinical decision
+              await this.saveClinicalDecision('dosage_calculation', {
+                medication: this.dosage.medication,
+                weight: this.dosage.weight,
+                age: this.dosage.age,
+                result: response.data
+              });
+              
+            } else {
+              // Demo mode: simulate
+              this.simulateDosageCalculation();
             }
-
-            // Save clinical decision
-            await this.saveClinicalDecision('dosage_calculation', {
-              medication: this.dosage.medication,
-              weight: this.dosage.weight,
-              age: this.dosage.age,
-              patientId: this.dosage.patientId,
-              creatinine: this.dosage.creatinine,
-              childPugh: this.dosage.childPugh,
-              trimester: this.dosage.trimester,
-              result: response.data,
-              adjustments: {
-                renal: this.dosage.renalAdjustment,
-                hepatic: this.dosage.hepaticAdjustment,
-                pregnancy: this.dosage.pregnancyWarning,
-                elderly: this.dosage.elderlyWarning
-              }
-            });
+            
+            this.showToast('Dosage calculation completed', 'success');
           } catch (error) {
             console.error('Failed to calculate dosage:', error);
-            this.dosage.result = 'Failed to calculate dosage. Please try again.';
+            this.showToast('Failed to calculate dosage', 'error');
+            this.dosage.result = 'Error occurred while calculating dosage.';
           } finally {
             this.loading = false;
           }
         },
 
+        simulateDosageCalculation() {
+          // Demo mode: basic calculation
+          const medicationName = this.medications.find(m => m.id === this.dosage.medication)?.name || 'Medication';
+          const weight = parseFloat(this.dosage.weight);
+          
+          this.dosage.result = `Demo Mode: Basic dosage calculation for ${medicationName} (${weight}kg). Login for accurate clinical dosing.`;
+          
+          // Save to demo storage
+          const demoDosages = JSON.parse(localStorage.getItem('demo_dosages') || '[]');
+          demoDosages.push({
+            medication: this.dosage.medication,
+            weight: this.dosage.weight,
+            age: this.dosage.age,
+            result: this.dosage.result,
+            timestamp: new Date().toISOString()
+          });
+          localStorage.setItem('demo_dosages', JSON.stringify(demoDosages));
+        },
+
+        // Allergy Checker
         async checkAllergies() {
-          if (!this.allergy.medication) {
-            this.allergy.result = {
-              type: 'warning',
-              icon: 'warning',
-              title: 'Warning',
-              content: 'Please select a medication to check for allergies.'
-            };
+          if (!this.allergy.patientId || !this.allergy.medication) {
+            this.showToast('Please enter patient ID and select medication', 'warning');
+            return;
+          }
+
+          if (!this.isAuthenticated && !this.isDemoMode) {
+            this.showToast('Login required to check allergies', 'auth-required');
             return;
           }
 
           this.loading = true;
           try {
-            let response;
-            if (this.allergy.patientId) {
-              // Use patient profile if patient ID is provided
-              response = await window.pharmacistApi.clinical.checkAllergies(
+            if (this.isAuthenticated && !this.isDemoMode) {
+              // Real backend API call
+              const response = await this.apiClient.clinical.checkAllergies(
                 this.allergy.patientId,
                 this.allergy.medication
               );
+              
+              this.allergy.result = this.formatAllergyResult(response.data);
+              
+              // Save clinical decision
+              await this.saveClinicalDecision('allergy_check', {
+                patientId: this.allergy.patientId,
+                medication: this.allergy.medication,
+                result: response.data
+              });
+              
             } else {
-              // Use manual allergy entry
-              response = await window.pharmacistApi.clinical.checkAllergies(
-                null,
-                this.allergy.medication,
-                this.allergy.allergies
-              );
+              // Demo mode: simulate
+              this.simulateAllergyCheck();
             }
             
-            this.allergy.result = {
-              type: response.data.allergyDetected ? 'warning' : 'success',
-              icon: response.data.allergyDetected ? 'error' : 'check_circle',
-              title: response.data.allergyDetected ? 'Allergy Alert' : 'No Allergy Concerns',
-              content: this.formatAllergyResult(response.data)
-            };
-
-            // Save clinical decision
-            await this.saveClinicalDecision('allergy_check', {
-              patientId: this.allergy.patientId,
-              allergies: this.allergy.allergies,
-              medication: this.allergy.medication,
-              result: response.data
-            });
+            this.showToast('Allergy check completed', 'success');
           } catch (error) {
             console.error('Failed to check allergies:', error);
-            this.allergy.result = {
-              type: 'warning',
-              icon: 'error',
-              title: 'Error',
-              content: 'Failed to check allergies. Please try again.'
-            };
+            this.showToast('Failed to check allergies', 'error');
+            this.allergy.result = 'Error occurred while checking allergies.';
           } finally {
             this.loading = false;
           }
         },
 
-        async findAlternatives() {
-          if (!this.alternative.medication || !this.alternative.reason) {
-            this.alternative.result = 'Please select both medication and reason for alternative.';
-            return;
-          }
-
-          this.loading = true;
-          try {
-            const response = await window.pharmacistApi.clinical.findAlternatives(
-              this.alternative.medication,
-              this.alternative.reason,
-              this.alternative.patientId || null
-            );
-            
-            this.alternative.result = this.formatAlternativesResult(response.data);
-
-            // Save clinical decision
-            await this.saveClinicalDecision('alternative_search', {
-              medication: this.alternative.medication,
-              reason: this.alternative.reason,
-              patientId: this.alternative.patientId,
-              result: response.data
-            });
-          } catch (error) {
-            console.error('Failed to find alternatives:', error);
-            this.alternative.result = 'Failed to find alternatives. Please try again.';
-          } finally {
-            this.loading = false;
-          }
+        simulateAllergyCheck() {
+          // Demo mode: basic allergy check
+          const medicationName = this.medications.find(m => m.id === this.allergy.medication)?.name || 'Medication';
+          
+          this.allergy.result = `Demo Mode: No real allergy data available for patient ${this.allergy.patientId} and ${medicationName}. Login for actual allergy screening.`;
+          
+          // Save to demo storage
+          const demoAllergies = JSON.parse(localStorage.getItem('demo_allergies') || '[]');
+          demoAllergies.push({
+            patientId: this.allergy.patientId,
+            medication: this.allergy.medication,
+            result: this.allergy.result,
+            timestamp: new Date().toISOString()
+          });
+          localStorage.setItem('demo_allergies', JSON.stringify(demoAllergies));
         },
 
+        // Save clinical decision (backend only)
         async saveClinicalDecision(type, data) {
-          try {
-            await window.pharmacistApi.clinical.saveClinicalDecision({
-              type,
-              data,
-              timestamp: new Date().toISOString(),
-              userId: window.pharmacistApi.userId
-            });
-          } catch (error) {
-            console.error('Failed to save clinical decision:', error);
-            // Don't show error to user as this is background operation
+          if (this.isAuthenticated && !this.isDemoMode) {
+            try {
+              await this.apiClient.clinical.saveClinicalDecision({
+                type,
+                data,
+                timestamp: new Date().toISOString(),
+                userId: this.apiClient.userId
+              });
+            } catch (error) {
+              console.error('Failed to save clinical decision:', error);
+              // Don't show error to user as this is background operation
+            }
           }
         },
 
-        formatInteractionResult(data) {
+        // Format results
+        formatInteractionResult(data, severityData) {
           if (data.severity === 'high') {
-            return `<div class="alert-item high">
-              <span class="material-symbols-rounded alert-icon">error</span>
-              <div class="alert-content">
-                <div class="alert-title">${data.interactionType}</div>
-                <div class="alert-description">${data.description}</div>
-              </div>
+            return `<div style="color: #ef4444; font-weight: 600;">
+              ⚠️ ${data.interactionType || 'High Risk Interaction'}
+            </div>
+            <div style="margin-top: 0.5rem;">${data.description || 'Significant interaction detected'}</div>
+            <div style="margin-top: 0.5rem; font-size: 0.75rem;">
+              Severity Score: ${severityData.score || 'N/A'} (${severityData.level || 'Unknown'})
             </div>`;
           }
           return data.description || 'No clinically significant interactions detected.';
@@ -1900,81 +1492,77 @@
 
         formatAllergyResult(data) {
           if (data.allergyDetected) {
-            return `<div class="alert-item ${data.severity}">
-              <span class="material-symbols-rounded alert-icon">${data.severity === 'high' ? 'error' : 'warning'}</span>
-              <div class="alert-content">
-                <div class="alert-title">${data.allergyType}</div>
-                <div class="alert-description">${data.description}</div>
-              </div>
-            </div>`;
+            return `<div style="color: #ef4444; font-weight: 600;">
+              ⚠️ Allergy Alert
+            </div>
+            <div style="margin-top: 0.5rem;">${data.allergyType || 'Allergy detected'}</div>
+            <div style="margin-top: 0.5rem;">${data.description || 'Patient has known allergy'}</div>`;
           }
           return 'No known allergies detected for this medication.';
         },
 
-        formatAlternativesResult(data) {
-          if (!data.alternatives || data.alternatives.length === 0) {
-            return 'No alternatives found for this medication.';
-          }
-
-          return data.alternatives.map(alt => `
-            <div class="alert-item low">
-              <span class="material-symbols-rounded alert-icon">info</span>
-              <div class="alert-content">
-                <div class="alert-title">${alt.name}</div>
-                <div class="alert-description">
-                  <strong>Class:</strong> ${alt.class}<br>
-                  <strong>Dosage:</strong> ${alt.dosage}<br>
-                  <strong>Notes:</strong> ${alt.notes}
-                </div>
-              </div>
-            </div>
-          `).join('');
+        // Toast notification system
+        showToast(message, type = 'info') {
+          const toast = document.createElement('div');
+          toast.className = `toast toast-${type}`;
+          toast.textContent = message;
+          
+          document.body.appendChild(toast);
+          
+          // Trigger animation
+          setTimeout(() => toast.classList.add('show'), 100);
+          
+          // Remove toast after 4 seconds
+          setTimeout(() => {
+            toast.classList.remove('show');
+            setTimeout(() => {
+              if (toast.parentNode) {
+                toast.parentNode.removeChild(toast);
+              }
+            }, 300);
+          }, 4000);
         },
 
-        formatDuplicationResult(data) {
-          return `<div class="alert-item medium">
-            <span class="material-symbols-rounded alert-icon">warning</span>
-            <div class="alert-content">
-              <div class="alert-title">Therapeutic Duplication</div>
-              <div class="alert-description">
-                <strong>Therapeutic Class:</strong> ${data.therapeuticClass}<br>
-                <strong>Risk Level:</strong> ${data.riskLevel}<br>
-                <strong>Recommendation:</strong> ${data.recommendation}
-              </div>
-            </div>
-          </div>`;
+        // Demo banner management
+        closeDemoBanner() {
+          this.demoBannerClosed = true;
+          localStorage.setItem('demoBannerClosed', 'true');
         },
 
-        logout() {
-          if (window.pharmacistApi) {
-            window.pharmacistApi.clearAuth();
+        // Redirect to login
+        redirectToLogin() {
+          this.showToast('Redirecting to login...', 'info');
+          setTimeout(() => {
+            window.location.href = '/public/admin-signin.html';
+          }, 1500);
+        },
+
+        // Logout function
+        handleLogout() {
+          if (confirm('Are you sure you want to logout?')) {
+            if (this.isAuthenticated && !this.isDemoMode) {
+              // Clear backend auth
+              this.apiClient.clearAuth();
+            }
+            
+            // Clear demo data
+            if (this.isDemoMode) {
+              localStorage.removeItem('demo_medications');
+              localStorage.removeItem('demo_patients');
+              localStorage.removeItem('demo_selected_patient');
+              localStorage.removeItem('demo_interactions');
+              localStorage.removeItem('demo_dosages');
+              localStorage.removeItem('demo_allergies');
+            }
+            
+            this.showToast('Logging out...', 'info');
+            setTimeout(() => {
+              window.location.href = 'home.html';
+            }, 1500);
           }
-          window.location.href = '/public/admin-signin.html';
         }
       }
     }
-    
-    // Global function to force close modal - can be called from console
-    window.forceCloseModal = function() {
-      const modals = document.querySelectorAll('.modal-overlay');
-      modals.forEach(modal => {
-        modal.style.display = 'none';
-        modal.style.opacity = '0';
-        modal.style.visibility = 'hidden';
-        modal.style.pointerEvents = 'none';
-        modal.classList.remove('show');
-      });
-      
-      // Also try to close via Alpine.js if available
-      if (window.Alpine) {
-        const alpineData = window.Alpine.$data(document.querySelector('[x-data]'));
-        if (alpineData && alpineData.closeDrugModal) {
-          alpineData.closeDrugModal();
-        }
-      }
-      
-      console.log('Modal force closed via global function');
-    };
   </script>
 </body>
 </html>

@@ -93,7 +93,10 @@ class UmiDataManager {
 
   // API methods
   async saveToAPI(data) {
-    const response = await fetch(this.apiEndpoint, {
+    const tenantId = this.getTenantId();
+    const url = tenantId ? `${this.apiEndpoint}?tenantId=${tenantId}` : this.apiEndpoint;
+    
+    const response = await fetch(url, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
@@ -111,7 +114,10 @@ class UmiDataManager {
   }
 
   async loadFromAPI() {
-    const response = await fetch(`${this.apiEndpoint}?portal=${this.portalType}&limit=100`, {
+    const tenantId = this.getTenantId();
+    const url = tenantId ? `${this.apiEndpoint}?tenantId=${tenantId}&limit=100` : `${this.apiEndpoint}?limit=100`;
+    
+    const response = await fetch(url, {
       method: 'GET',
       headers: {
         'Authorization': `Bearer ${this.getAuthToken()}`,
@@ -138,7 +144,10 @@ class UmiDataManager {
 
     if (this.isOnline) {
       try {
-        const response = await fetch(`${this.apiEndpoint}/${id}`, {
+        const tenantId = this.getTenantId();
+        const url = tenantId ? `${this.apiEndpoint}/${id}?tenantId=${tenantId}` : `${this.apiEndpoint}/${id}`;
+        
+        const response = await fetch(url, {
           method: 'PUT',
           headers: {
             'Content-Type': 'application/json',
@@ -173,7 +182,10 @@ class UmiDataManager {
 
     if (this.isOnline) {
       try {
-        const response = await fetch(`${this.apiEndpoint}/${id}`, {
+        const tenantId = this.getTenantId();
+        const url = tenantId ? `${this.apiEndpoint}/${id}?tenantId=${tenantId}` : `${this.apiEndpoint}/${id}`;
+        
+        const response = await fetch(url, {
           method: 'DELETE',
           headers: {
             'Authorization': `Bearer ${this.getAuthToken()}`,
@@ -328,6 +340,19 @@ class UmiDataManager {
     return localStorage.getItem('umi_auth_token') || 
            sessionStorage.getItem('umi_auth_token') || 
            '';
+  }
+
+  getTenantId() {
+    try {
+      const userStr = localStorage.getItem('umi_currentUser') || localStorage.getItem('umi_current_user');
+      if (userStr && userStr !== 'undefined' && userStr !== 'null') {
+        const user = JSON.parse(userStr);
+        return user.tenantId || null;
+      }
+    } catch (error) {
+      console.error('Failed to get tenant ID:', error);
+    }
+    return null;
   }
 
   getDeviceId() {

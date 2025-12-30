@@ -21,6 +21,7 @@ app.UseCors(policy => policy.AllowAnyOrigin().AllowAnyMethod().AllowAnyHeader())
 // Get in-memory databases
 var usersDb = app.Services.GetRequiredService<Dictionary<string, object>>();
 var tenantsDb = new Dictionary<string, object>();
+var inventoryDb = new Dictionary<string, object>();
 
 // Basic registration endpoint with database saving
 app.MapPost("/api/v1/auth/register", async (HttpRequest request) =>
@@ -394,24 +395,323 @@ app.MapGet("/api/auth/check-pharmacy-name/{pharmacyName}", (string pharmacyName)
     });
 });
 
-// Admin products endpoint - return sample products
+// Admin products endpoint - return empty array (no sample data)
 app.MapGet("/admin/products", () =>
 {
-    var products = new[] {
-        new { id = 1, name = "Paracetamol 500mg", price = 25.50m, stock = 150, category = "medication" },
-        new { id = 2, name = "Amoxicillin 250mg", price = 85.00m, stock = 80, category = "medication" },
-        new { id = 3, name = "Vitamin C 1000mg", price = 45.75m, stock = 200, category = "supplements" },
-        new { id = 4, name = "Face Masks", price = 15.00m, stock = 500, category = "medical" },
-        new { id = 5, name = "Ibuprofen 400mg", price = 35.00m, stock = 120, category = "medication" },
-        new { id = 6, name = "Hand Sanitizer", price = 20.00m, stock = 300, category = "medical" },
-        new { id = 7, name = "Vitamin D3", price = 55.00m, stock = 100, category = "supplements" },
-        new { id = 8, name = "Blood Pressure Monitor", price = 450.00m, stock = 25, category = "medical" }
-    };
+    var products = new object[0]; // Empty array - no sample data
     
     return Results.Ok(new {
         success = true,
         data = products,
         total = products.Length
+    });
+});
+
+// ==================== INVENTORY ENDPOINTS ====================
+
+// Get all inventory items
+app.MapGet("/api/v1/inventory", (Dictionary<string, object> inventoryDb) =>
+{
+    var inventory = inventoryDb.Values.ToList();
+    return Results.Ok(new {
+        success = true,
+        data = inventory,
+        total = inventory.Count
+    });
+});
+
+// Get inventory item by ID
+app.MapGet("/api/v1/inventory/{id}", (string id, Dictionary<string, object> inventoryDb) =>
+{
+    if (!inventoryDb.ContainsKey(id))
+    {
+        return Results.NotFound(new { 
+            success = false, 
+            message = "Inventory item not found" 
+        });
+    }
+
+    return Results.Ok(new {
+        success = true,
+        data = inventoryDb[id]
+    });
+});
+
+// Create new inventory item
+app.MapPost("/api/v1/inventory", async (HttpRequest request, Dictionary<string, object> inventoryDb) =>
+{
+    try
+    {
+        var itemData = await request.ReadFromJsonAsync<Dictionary<string, object>>();
+        if (itemData == null)
+        {
+            return Results.BadRequest(new { 
+                success = false, 
+                message = "Invalid inventory data" 
+            });
+        }
+
+        var itemId = Guid.NewGuid().ToString();
+        var newItem = new {
+            id = itemId,
+            genericName = itemData.ContainsKey("genericName") ? itemData["genericName"] : "",
+            brandName = itemData.ContainsKey("brandName") ? itemData["brandName"] : "",
+            description = itemData.ContainsKey("description") ? itemData["description"] : "",
+            ndcBarcode = itemData.ContainsKey("ndcBarcode") ? itemData["ndcBarcode"] : "",
+            strength = itemData.ContainsKey("strength") ? itemData["strength"] : "",
+            form = itemData.ContainsKey("form") ? itemData["form"] : "",
+            supplier = itemData.ContainsKey("supplier") ? itemData["supplier"] : "",
+            batchNumber = itemData.ContainsKey("batchNumber") ? itemData["batchNumber"] : "",
+            licenseNumber = itemData.ContainsKey("licenseNumber") ? itemData["licenseNumber"] : "",
+            zambiaRegNumber = itemData.ContainsKey("zambiaRegNumber") ? itemData["zambiaRegNumber"] : "",
+            manufactureDate = itemData.ContainsKey("manufactureDate") ? itemData["manufactureDate"] : "",
+            expiryDate = itemData.ContainsKey("expiryDate") ? itemData["expiryDate"] : "",
+            stockQuantity = itemData.ContainsKey("stockQuantity") ? itemData["stockQuantity"] : 0,
+            packingType = itemData.ContainsKey("packingType") ? itemData["packingType"] : "",
+            location = itemData.ContainsKey("location") ? itemData["location"] : "",
+            storageConditions = itemData.ContainsKey("storageConditions") ? itemData["storageConditions"] : "",
+            unitCost = itemData.ContainsKey("unitCost") ? itemData["unitCost"] : 0,
+            unitPrice = itemData.ContainsKey("unitPrice") ? itemData["unitPrice"] : 0,
+            totalValue = itemData.ContainsKey("totalValue") ? itemData["totalValue"] : 0,
+            currency = itemData.ContainsKey("currency") ? itemData["currency"] : "ZMW",
+            minStockLevel = itemData.ContainsKey("minStockLevel") ? itemData["minStockLevel"] : 0,
+            maxStockLevel = itemData.ContainsKey("maxStockLevel") ? itemData["maxStockLevel"] : 0,
+            reorderQuantity = itemData.ContainsKey("reorderQuantity") ? itemData["reorderQuantity"] : 0,
+            leadTime = itemData.ContainsKey("leadTime") ? itemData["leadTime"] : 0,
+            stockStatus = "in-stock",
+            createdAt = DateTime.UtcNow,
+            updatedAt = DateTime.UtcNow
+        };
+
+        inventoryDb[itemId] = newItem;
+
+        return Results.Ok(new {
+            success = true,
+            data = newItem,
+            message = "Inventory item created successfully"
+        });
+    }
+    catch (Exception ex)
+    {
+        return Results.BadRequest(new { 
+            success = false, 
+            message = $"Error creating inventory item: {ex.Message}" 
+        });
+    }
+});
+
+// Update inventory item
+app.MapPut("/api/v1/inventory/{id}", async (string id, HttpRequest request, Dictionary<string, object> inventoryDb) =>
+{
+    try
+    {
+        if (!inventoryDb.ContainsKey(id))
+        {
+            return Results.NotFound(new { 
+                success = false, 
+                message = "Inventory item not found" 
+            });
+        }
+
+        var itemData = await request.ReadFromJsonAsync<Dictionary<string, object>>();
+        if (itemData == null)
+        {
+            return Results.BadRequest(new { 
+                success = false, 
+                message = "Invalid inventory data" 
+            });
+        }
+
+        var existingItem = inventoryDb[id];
+        var updatedItem = new {
+            id = id,
+            genericName = itemData.ContainsKey("genericName") ? itemData["genericName"] : existingItem.GetType().GetProperty("genericName")?.GetValue(existingItem),
+            brandName = itemData.ContainsKey("brandName") ? itemData["brandName"] : existingItem.GetType().GetProperty("brandName")?.GetValue(existingItem),
+            description = itemData.ContainsKey("description") ? itemData["description"] : existingItem.GetType().GetProperty("description")?.GetValue(existingItem),
+            ndcBarcode = itemData.ContainsKey("ndcBarcode") ? itemData["ndcBarcode"] : existingItem.GetType().GetProperty("ndcBarcode")?.GetValue(existingItem),
+            strength = itemData.ContainsKey("strength") ? itemData["strength"] : existingItem.GetType().GetProperty("strength")?.GetValue(existingItem),
+            form = itemData.ContainsKey("form") ? itemData["form"] : existingItem.GetType().GetProperty("form")?.GetValue(existingItem),
+            supplier = itemData.ContainsKey("supplier") ? itemData["supplier"] : existingItem.GetType().GetProperty("supplier")?.GetValue(existingItem),
+            batchNumber = itemData.ContainsKey("batchNumber") ? itemData["batchNumber"] : existingItem.GetType().GetProperty("batchNumber")?.GetValue(existingItem),
+            licenseNumber = itemData.ContainsKey("licenseNumber") ? itemData["licenseNumber"] : existingItem.GetType().GetProperty("licenseNumber")?.GetValue(existingItem),
+            zambiaRegNumber = itemData.ContainsKey("zambiaRegNumber") ? itemData["zambiaRegNumber"] : existingItem.GetType().GetProperty("zambiaRegNumber")?.GetValue(existingItem),
+            manufactureDate = itemData.ContainsKey("manufactureDate") ? itemData["manufactureDate"] : existingItem.GetType().GetProperty("manufactureDate")?.GetValue(existingItem),
+            expiryDate = itemData.ContainsKey("expiryDate") ? itemData["expiryDate"] : existingItem.GetType().GetProperty("expiryDate")?.GetValue(existingItem),
+            stockQuantity = itemData.ContainsKey("stockQuantity") ? itemData["stockQuantity"] : existingItem.GetType().GetProperty("stockQuantity")?.GetValue(existingItem),
+            packingType = itemData.ContainsKey("packingType") ? itemData["packingType"] : existingItem.GetType().GetProperty("packingType")?.GetValue(existingItem),
+            location = itemData.ContainsKey("location") ? itemData["location"] : existingItem.GetType().GetProperty("location")?.GetValue(existingItem),
+            storageConditions = itemData.ContainsKey("storageConditions") ? itemData["storageConditions"] : existingItem.GetType().GetProperty("storageConditions")?.GetValue(existingItem),
+            unitCost = itemData.ContainsKey("unitCost") ? itemData["unitCost"] : existingItem.GetType().GetProperty("unitCost")?.GetValue(existingItem),
+            unitPrice = itemData.ContainsKey("unitPrice") ? itemData["unitPrice"] : existingItem.GetType().GetProperty("unitPrice")?.GetValue(existingItem),
+            totalValue = itemData.ContainsKey("totalValue") ? itemData["totalValue"] : existingItem.GetType().GetProperty("totalValue")?.GetValue(existingItem),
+            currency = itemData.ContainsKey("currency") ? itemData["currency"] : existingItem.GetType().GetProperty("currency")?.GetValue(existingItem),
+            minStockLevel = itemData.ContainsKey("minStockLevel") ? itemData["minStockLevel"] : existingItem.GetType().GetProperty("minStockLevel")?.GetValue(existingItem),
+            maxStockLevel = itemData.ContainsKey("maxStockLevel") ? itemData["maxStockLevel"] : existingItem.GetType().GetProperty("maxStockLevel")?.GetValue(existingItem),
+            reorderQuantity = itemData.ContainsKey("reorderQuantity") ? itemData["reorderQuantity"] : existingItem.GetType().GetProperty("reorderQuantity")?.GetValue(existingItem),
+            leadTime = itemData.ContainsKey("leadTime") ? itemData["leadTime"] : existingItem.GetType().GetProperty("leadTime")?.GetValue(existingItem),
+            stockStatus = itemData.ContainsKey("stockStatus") ? itemData["stockStatus"] : existingItem.GetType().GetProperty("stockStatus")?.GetValue(existingItem),
+            createdAt = existingItem.GetType().GetProperty("createdAt")?.GetValue(existingItem),
+            updatedAt = DateTime.UtcNow
+        };
+
+        inventoryDb[id] = updatedItem;
+
+        return Results.Ok(new {
+            success = true,
+            data = updatedItem,
+            message = "Inventory item updated successfully"
+        });
+    }
+    catch (Exception ex)
+    {
+        return Results.BadRequest(new { 
+            success = false, 
+            message = $"Error updating inventory item: {ex.Message}" 
+        });
+    }
+});
+
+// Delete inventory item
+app.MapDelete("/api/v1/inventory/{id}", (string id, Dictionary<string, object> inventoryDb) =>
+{
+    if (!inventoryDb.ContainsKey(id))
+    {
+        return Results.NotFound(new { 
+            success = false, 
+            message = "Inventory item not found" 
+        });
+    }
+
+    inventoryDb.Remove(id);
+
+    return Results.Ok(new {
+        success = true,
+        message = "Inventory item deleted successfully"
+    });
+});
+
+// Dispense inventory item (reduce stock)
+app.MapPost("/api/v1/inventory/{id}/dispense", async (string id, HttpRequest request, Dictionary<string, object> inventoryDb) =>
+{
+    try
+    {
+        if (!inventoryDb.ContainsKey(id))
+        {
+            return Results.NotFound(new { 
+                success = false, 
+                message = "Inventory item not found" 
+            });
+        }
+
+        var dispenseData = await request.ReadFromJsonAsync<Dictionary<string, object>>();
+        if (dispenseData == null || !dispenseData.ContainsKey("quantity"))
+        {
+            return Results.BadRequest(new { 
+                success = false, 
+                message = "Quantity is required" 
+            });
+        }
+
+        var existingItem = inventoryDb[id];
+        var currentStock = Convert.ToInt32(existingItem.GetType().GetProperty("stockQuantity")?.GetValue(existingItem) ?? 0);
+        var minStockLevel = Convert.ToInt32(existingItem.GetType().GetProperty("minStockLevel")?.GetValue(existingItem) ?? 0);
+        var quantity = Convert.ToInt32(dispenseData["quantity"]);
+
+        if (quantity > currentStock)
+        {
+            return Results.BadRequest(new { 
+                success = false, 
+                message = "Insufficient stock available" 
+            });
+        }
+
+        var newStockQuantity = currentStock - quantity;
+        var newStockStatus = newStockQuantity <= 0 ? "out-of-stock" : 
+                           newStockQuantity <= minStockLevel ? "low-stock" : "in-stock";
+
+        var updatedItem = new {
+            id = id,
+            genericName = existingItem.GetType().GetProperty("genericName")?.GetValue(existingItem),
+            brandName = existingItem.GetType().GetProperty("brandName")?.GetValue(existingItem),
+            description = existingItem.GetType().GetProperty("description")?.GetValue(existingItem),
+            ndcBarcode = existingItem.GetType().GetProperty("ndcBarcode")?.GetValue(existingItem),
+            strength = existingItem.GetType().GetProperty("strength")?.GetValue(existingItem),
+            form = existingItem.GetType().GetProperty("form")?.GetValue(existingItem),
+            supplier = existingItem.GetType().GetProperty("supplier")?.GetValue(existingItem),
+            batchNumber = existingItem.GetType().GetProperty("batchNumber")?.GetValue(existingItem),
+            licenseNumber = existingItem.GetType().GetProperty("licenseNumber")?.GetValue(existingItem),
+            zambiaRegNumber = existingItem.GetType().GetProperty("zambiaRegNumber")?.GetValue(existingItem),
+            manufactureDate = existingItem.GetType().GetProperty("manufactureDate")?.GetValue(existingItem),
+            expiryDate = existingItem.GetType().GetProperty("expiryDate")?.GetValue(existingItem),
+            stockQuantity = newStockQuantity,
+            packingType = existingItem.GetType().GetProperty("packingType")?.GetValue(existingItem),
+            location = existingItem.GetType().GetProperty("location")?.GetValue(existingItem),
+            storageConditions = existingItem.GetType().GetProperty("storageConditions")?.GetValue(existingItem),
+            unitCost = existingItem.GetType().GetProperty("unitCost")?.GetValue(existingItem),
+            unitPrice = existingItem.GetType().GetProperty("unitPrice")?.GetValue(existingItem),
+            totalValue = existingItem.GetType().GetProperty("totalValue")?.GetValue(existingItem),
+            currency = existingItem.GetType().GetProperty("currency")?.GetValue(existingItem),
+            minStockLevel = minStockLevel,
+            maxStockLevel = existingItem.GetType().GetProperty("maxStockLevel")?.GetValue(existingItem),
+            reorderQuantity = existingItem.GetType().GetProperty("reorderQuantity")?.GetValue(existingItem),
+            leadTime = existingItem.GetType().GetProperty("leadTime")?.GetValue(existingItem),
+            stockStatus = newStockStatus,
+            createdAt = existingItem.GetType().GetProperty("createdAt")?.GetValue(existingItem),
+            updatedAt = DateTime.UtcNow
+        };
+
+        inventoryDb[id] = updatedItem;
+
+        return Results.Ok(new {
+            success = true,
+            data = updatedItem,
+            message = $"Dispensed {quantity} units successfully"
+        });
+    }
+    catch (Exception ex)
+    {
+        return Results.BadRequest(new { 
+            success = false, 
+            message = $"Error dispensing inventory: {ex.Message}" 
+        });
+    }
+});
+
+// Get low stock items
+app.MapGet("/api/v1/inventory/low-stock", (Dictionary<string, object> inventoryDb) =>
+{
+    var lowStockItems = inventoryDb.Values.Where(item => {
+        var stockQuantity = Convert.ToInt32(item.GetType().GetProperty("stockQuantity")?.GetValue(item) ?? 0);
+        var minStockLevel = Convert.ToInt32(item.GetType().GetProperty("minStockLevel")?.GetValue(item) ?? 0);
+        return stockQuantity > 0 && stockQuantity <= minStockLevel;
+    }).ToList();
+
+    return Results.Ok(new {
+        success = true,
+        data = lowStockItems,
+        total = lowStockItems.Count
+    });
+});
+
+// Get expiring items
+app.MapGet("/api/v1/inventory/expiring", (Dictionary<string, object> inventoryDb) =>
+{
+    var expiringItems = inventoryDb.Values.Where(item => {
+        var expiryDateStr = item.GetType().GetProperty("expiryDate")?.GetValue(item)?.ToString();
+        if (string.IsNullOrEmpty(expiryDateStr)) return false;
+        
+        if (DateTime.TryParse(expiryDateStr, out DateTime expiryDate))
+        {
+            var daysUntilExpiry = (expiryDate - DateTime.UtcNow).Days;
+            return daysUntilExpiry <= 30 && daysUntilExpiry > 0;
+        }
+        return false;
+    }).ToList();
+
+    return Results.Ok(new {
+        success = true,
+        data = expiringItems,
+        total = expiringItems.Count
     });
 });
 
