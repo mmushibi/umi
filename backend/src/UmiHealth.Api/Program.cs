@@ -10,6 +10,9 @@ using UmiHealth.Api.Middleware;
 using UmiHealth.Infrastructure;
 using UmiHealth.Application;
 using UmiHealth.Api.Services;
+using UmiHealth.Api.Hubs;
+using UmiHealth.Core.Interfaces;
+using UmiHealth.Application.Services;
 using Microsoft.AspNetCore.Mvc.ApiExplorer;
 using Microsoft.AspNetCore.Mvc;
 using Swashbuckle.AspNetCore.SwaggerGen;
@@ -19,6 +22,9 @@ var builder = WebApplication.CreateBuilder(args);
 // Add services to the container
 builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
+
+// Add SignalR
+builder.Services.AddSignalR();
 
 // Configure Swagger/OpenAPI
 builder.Services.AddSwaggerGen(c =>
@@ -49,6 +55,10 @@ if (app.Environment.IsDevelopment())
 app.UseHttpsRedirection();
 app.UseCors("AllowAll");
 app.UseAuthorization();
+
+// Configure SignalR hubs
+app.MapHub<PharmacyHub>("/pharmacyHub");
+
 app.MapControllers();
 
 app.Run();

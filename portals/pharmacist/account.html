@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en" x-data="accountSystem()">
+<html lang="en" x-data="accountSystem()" x-init="init()">
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
@@ -9,6 +9,7 @@
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@100;400;500;600;700&family=Varela+Round&family=Nunito:wght@400;600;700&display=swap" rel="stylesheet">
   <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Rounded:wght@300;400;500;600;700&display=swap" rel="stylesheet">
   <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="stylesheet" href="css/pharmacist-styles.css">
   <style>
     :root {
       --color-primary: #000000;
@@ -692,10 +693,6 @@
       </div>
     </div>
 
-    <div class="pharmacy-info">
-      <div class="pharmacy-name" x-text="pharmacyInfo.name"></div>
-      <div class="pharmacy-location" x-text="pharmacyInfo.location"></div>
-    </div>
 
     <nav class="nav-menu">
       <a href="home.html" class="nav-item">
@@ -718,7 +715,27 @@
         <span class="material-symbols-rounded nav-icon">payments</span>
         <span>Payments</span>
       </a>
-      <a href="account.html" class="nav-item active">
+      <a href="suppliers.html" class="nav-item">
+        <span class="material-symbols-rounded nav-icon">local_shipping</span>
+        <span>Suppliers</span>
+      </a>
+      <a href="clinical.html" class="nav-item">
+        <span class="material-symbols-rounded nav-icon">medical_services</span>
+        <span>Clinical Support</span>
+      </a>
+      <a href="compliance.html" class="nav-item">
+        <span class="material-symbols-rounded nav-icon">gavel</span>
+        <span>Compliance</span>
+      </a>
+      <a href="reports.html" class="nav-item">
+        <span class="material-symbols-rounded nav-icon">analytics</span>
+        <span>Reports</span>
+      </a>
+      <a href="help.html" class="nav-item">
+        <span class="material-symbols-rounded nav-icon">help</span>
+        <span>Help & Training</span>
+      </a>
+      <a href="account.html" class="nav-item">
         <span class="material-symbols-rounded nav-icon">settings</span>
         <span>Account</span>
       </a>
@@ -780,18 +797,21 @@
               <a href="#" class="settings-nav-link" :class="activeSection === 'preferences' ? 'active' : ''" @click="setActiveSection('preferences')">
                 <span class="material-symbols-rounded settings-nav-icon">tune</span>
                 <span>System Preferences</span>
+                <span class="beta-badge-small">BETA</span>
               </a>
             </li>
             <li class="settings-nav-item">
               <a href="#" class="settings-nav-link" :class="activeSection === 'permissions' ? 'active' : ''" @click="setActiveSection('permissions')">
                 <span class="material-symbols-rounded settings-nav-icon">admin_panel_settings</span>
                 <span>Role & Permissions</span>
+                <span class="beta-badge-small">BETA</span>
               </a>
             </li>
             <li class="settings-nav-item">
               <a href="#" class="settings-nav-link" :class="activeSection === 'integrations' ? 'active' : ''" @click="setActiveSection('integrations')">
                 <span class="material-symbols-rounded settings-nav-icon">integration_instructions</span>
                 <span>Integrations</span>
+                <span class="beta-badge-small">BETA</span>
               </a>
             </li>
           </ul>
@@ -807,7 +827,7 @@
                 <div class="profile-name" x-text="userInfo.name"></div>
                 <div class="profile-email" x-text="userInfo.email"></div>
                 <span class="profile-role">
-                  <span class="material-symbols-rounded" style="font-size: 0.75rem;">person</span>
+                  <span class="material-symbols-rounded icon-small">person</span>
                   <span x-text="userInfo.role"></span>
                 </span>
               </div>
@@ -897,7 +917,7 @@
                   <div class="security-title">Two-Factor Authentication</div>
                   <div class="security-description">Add an extra layer of security to your account</div>
                 </div>
-                <div class="toggle-switch" :class="security.twoFactorEnabled ? 'active' : ''" @click="security.twoFactorEnabled = !security.twoFactorEnabled">
+                <div class="toggle-switch" :class="security.twoFactorEnabled ? 'active' : ''" @click="toggle2FA">
                   <div class="toggle-slider"></div>
                 </div>
               </div>
@@ -915,15 +935,7 @@
                   <div class="security-title">Login Sessions</div>
                   <div class="security-description">Manage your active login sessions across devices</div>
                 </div>
-                <button class="btn btn-secondary">View Sessions</button>
-              </div>
-
-              <div class="security-item">
-                <div class="security-info">
-                  <div class="security-title">API Access</div>
-                  <div class="security-description">Manage your API access keys for system integrations</div>
-                </div>
-                <button class="btn btn-secondary">Manage Keys</button>
+                <button class="btn btn-secondary" @click="viewSessions">View Sessions</button>
               </div>
             </div>
 
@@ -968,7 +980,135 @@
                 </div>
               </div>
             </div>
-          </div>
+
+            <!-- Sessions Modal -->
+            <div x-show="showSessionsModal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50" @click.self="showSessionsModal = false">
+              <div class="bg-white rounded-lg p-6 max-w-4xl w-full mx-4 max-h-[80vh] overflow-y-auto">
+                <div class="flex justify-between items-center mb-6">
+                  <h3 class="text-xl font-semibold">Active Login Sessions</h3>
+                  <button @click="showSessionsModal = false" class="text-gray-400 hover:text-gray-600">
+                    <span class="material-symbols-rounded text-2xl">close</span>
+                  </button>
+                </div>
+                
+                <div class="space-y-4">
+                  <template x-for="session in sessions" :key="session.id">
+                    <div class="border rounded-lg p-4">
+                      <div class="flex justify-between items-start">
+                        <div class="flex-1">
+                          <div class="flex items-center gap-3 mb-2">
+                            <span class="material-symbols-rounded text-blue-600" x-text="session.deviceType === 'mobile' ? 'smartphone' : 'computer'"></span>
+                            <div>
+                              <div class="font-semibold" x-text="session.deviceName"></div>
+                              <div class="text-sm text-gray-600" x-text="`${session.browser} on ${session.os}`"></div>
+                            </div>
+                          </div>
+                          
+                          <div class="grid grid-cols-2 gap-4 text-sm">
+                            <div>
+                              <span class="text-gray-500">IP Address:</span>
+                              <span class="font-medium" x-text="session.ipAddress"></span>
+                            </div>
+                            <div>
+                              <span class="text-gray-500">Location:</span>
+                              <span class="font-medium" x-text="session.location"></span>
+                            </div>
+                            <div>
+                              <span class="text-gray-500">Last Active:</span>
+                              <span class="font-medium" x-text="new Date(session.lastActive).toLocaleString()"></span>
+                            </div>
+                            <div>
+                              <span class="text-gray-500">Status:</span>
+                              <span class="inline-flex items-center gap-1">
+                                <span class="w-2 h-2 rounded-full" :class="session.isActive ? 'bg-green-500' : 'bg-gray-400'"></span>
+                                <span class="font-medium" x-text="session.isActive ? 'Active' : 'Inactive'"></span>
+                              </span>
+                            </div>
+                          </div>
+                        </div>
+                        
+                        <div class="flex flex-col gap-2">
+                          <span x-show="session.isCurrent" class="text-xs bg-green-100 text-green-800 px-2 py-1 rounded-full text-center font-medium">Current Session</span>
+                          <button x-show="!session.isCurrent" @click="revokeSession(session.id)" class="btn btn-secondary text-sm">
+                            <span class="material-symbols-rounded text-sm">logout</span>
+                            Revoke
+                          </button>
+                        </div>
+                      </div>
+                    </div>
+                  </template>
+                  
+                  <div x-show="sessions.length === 0" class="text-center py-8 text-gray-500">
+                    No active sessions found
+                  </div>
+                </div>
+                
+                <div class="flex justify-end gap-3 mt-6 pt-4 border-t">
+                  <button @click="showSessionsModal = false" class="btn btn-secondary">Close</button>
+                  <button @click="viewSessions" class="btn btn-primary">
+                    <span class="material-symbols-rounded">refresh</span>
+                    Refresh
+                  </button>
+                </div>
+              </div>
+            </div>
+
+            <!-- 2FA Setup Modal -->
+            <div x-show="show2FAModal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50" @click.self="show2FAModal = false">
+              <div class="bg-white rounded-lg p-6 max-w-2xl w-full mx-4">
+                <div class="flex justify-between items-center mb-6">
+                  <h3 class="text-xl font-semibold">Setup Two-Factor Authentication</h3>
+                  <button @click="show2FAModal = false" class="text-gray-400 hover:text-gray-600">
+                    <span class="material-symbols-rounded text-2xl">close</span>
+                  </button>
+                </div>
+                
+                <div class="space-y-6">
+                  <div class="bg-blue-50 border border-blue-200 rounded-lg p-4">
+                    <h4 class="font-semibold text-blue-900 mb-3">Step 1: Scan QR Code</h4>
+                    <p class="text-sm text-blue-700 mb-4">Use your authenticator app to scan this QR code:</p>
+                    <div class="flex justify-center mb-4">
+                      <div class="w-48 h-48 bg-white p-4 rounded-lg border-2 border-gray-300" id="qr-code-placeholder">
+                        <!-- QR code would be generated here -->
+                        <div class="w-full h-full flex items-center justify-center text-gray-400">
+                          <span class="material-symbols-rounded text-4xl">qr_code_2</span>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                  
+                  <div class="bg-amber-50 border border-amber-200 rounded-lg p-4">
+                    <h4 class="font-semibold text-amber-900 mb-3">Step 2: Enter Verification Code</h4>
+                    <p class="text-sm text-amber-700 mb-4">Enter the 6-digit code from your authenticator app:</p>
+                    <input type="text" 
+                           x-model="twoFactorCode" 
+                           maxlength="6" 
+                           placeholder="000000"
+                           class="form-input text-center text-2xl tracking-widest letter-spacing-2 otp-input">
+                  </div>
+                  
+                  <div class="bg-red-50 border border-red-200 rounded-lg p-4">
+                    <h4 class="font-semibold text-red-900 mb-3">Step 3: Save Backup Codes</h4>
+                    <p class="text-sm text-red-700 mb-3">Save these backup codes in a secure location. You can use them to access your account if you lose your device:</p>
+                    <div class="grid grid-cols-2 gap-2 text-xs font-mono">
+                      <template x-for="(code, index) in twoFactorBackupCodes" :key="index">
+                        <div class="bg-white border rounded p-2 text-center">
+                          <span x-text="code"></span>
+                        </div>
+                      </template>
+                    </div>
+                  </div>
+                </div>
+                
+                <div class="flex justify-end gap-3 mt-6 pt-4 border-t">
+                  <button @click="show2FAModal = false" class="btn btn-secondary">Cancel</button>
+                  <button @click="confirm2FA(twoFactorCode)" class="btn btn-primary">
+                    <span class="material-symbols-rounded">verified</span>
+                    Enable 2FA
+                  </button>
+                </div>
+              </div>
+            </div>
 
           <!-- Notifications Section -->
           <div x-show="activeSection === 'notifications'">
@@ -1060,7 +1200,7 @@
           <!-- System Preferences Section -->
           <div x-show="activeSection === 'preferences'">
             <div class="settings-section">
-              <h2 class="section-title">System Preferences</h2>
+              <h2 class="section-title">System Preferences <span class="beta-badge">BETA</span></h2>
               <p class="section-description">Customize your user interface and workflow settings.</p>
               
               <h3 class="section-title-sub">Display Settings</h3>
@@ -1070,7 +1210,7 @@
                   <div class="notification-title">Theme</div>
                   <div class="notification-description">Choose your preferred color theme</div>
                 </div>
-                <select class="form-input" x-model="preferences.theme" style="width: 150px;">
+                <select class="form-input form-input-small" x-model="preferences.theme" title="Theme selection">
                   <option value="light">Light</option>
                   <option value="dark">Dark</option>
                   <option value="auto">Auto</option>
@@ -1082,7 +1222,7 @@
                   <div class="notification-title">Language</div>
                   <div class="notification-description">Select your preferred language</div>
                 </div>
-                <select class="form-input" x-model="preferences.language" style="width: 150px;">
+                <select class="form-input form-input-small" x-model="preferences.language" title="Language selection">
                   <option value="en">English</option>
                   <option value="bem">Bemba</option>
                   <option value="nyo">Nyanja</option>
@@ -1094,7 +1234,7 @@
                   <div class="notification-title">Time Zone</div>
                   <div class="notification-description">Set your local time zone</div>
                 </div>
-                <select class="form-input" x-model="preferences.timezone" style="width: 150px;">
+                <select class="form-input form-input-small" x-model="preferences.timezone" title="Timezone selection">
                   <option value="CAT">Central Africa Time (CAT)</option>
                   <option value="UTC">UTC</option>
                 </select>
@@ -1107,7 +1247,7 @@
                   <div class="notification-title">Default Dashboard</div>
                   <div class="notification-description">Choose your default landing page</div>
                 </div>
-                <select class="form-input" x-model="preferences.defaultDashboard" style="width: 150px;">
+                <select class="form-input form-input-small" x-model="preferences.defaultDashboard" title="Default dashboard selection">
                   <option value="prescriptions">Prescriptions</option>
                   <option value="inventory">Inventory</option>
                   <option value="patients">Patients</option>
@@ -1141,7 +1281,7 @@
                   <div class="notification-title">Default Date Range</div>
                   <div class="notification-description">Set default date range for reports</div>
                 </div>
-                <select class="form-input" x-model="preferences.defaultDateRange" style="width: 150px;">
+                <select class="form-input form-input-small" x-model="preferences.defaultDateRange" title="Default date range selection">
                   <option value="today">Today</option>
                   <option value="week">This Week</option>
                   <option value="month">This Month</option>
@@ -1154,7 +1294,7 @@
                   <div class="notification-title">Export Format</div>
                   <div class="notification-description">Default format for data exports</div>
                 </div>
-                <select class="form-input" x-model="preferences.exportFormat" style="width: 150px;">
+                <select class="form-input form-input-small" x-model="preferences.exportFormat" title="Export format selection">
                   <option value="pdf">PDF</option>
                   <option value="excel">Excel</option>
                   <option value="csv">CSV</option>
@@ -1173,7 +1313,7 @@
           <!-- Role & Permissions Section -->
           <div x-show="activeSection === 'permissions'">
             <div class="settings-section">
-              <h2 class="section-title">Role and Permissions Overview</h2>
+              <h2 class="section-title">Role and Permissions Overview <span class="beta-badge">BETA</span></h2>
               <p class="section-description">View your current access rights and permissions within the pharmacy management system.</p>
               
               <div class="security-item">
@@ -1288,8 +1428,8 @@
                 <span class="security-status disabled">Restricted</span>
               </div>
 
-              <div class="settings-section" style="background: #f8fafc; border-left: 4px solid #3b82f6;">
-                <p style="color: #64748b; font-size: 0.875rem;">
+              <div class="settings-section info-section">
+                <p class="info-text">
                   <strong>Note:</strong> Some permissions may be restricted based on your pharmacy's access policies. Contact your system administrator for permission changes or role modifications.
                 </p>
               </div>
@@ -1299,7 +1439,7 @@
           <!-- Integration Management Section -->
           <div x-show="activeSection === 'integrations'">
             <div class="settings-section">
-              <h2 class="section-title">Integration Management</h2>
+              <h2 class="section-title">Integration Management <span class="beta-badge">BETA</span></h2>
               <p class="section-description">Manage external healthcare system integrations to improve care coordination and patient safety.</p>
               
               <h3 class="section-title-sub">Electronic Health Records (EHR)</h3>
@@ -1319,7 +1459,7 @@
                   <div class="notification-title">EHR Provider</div>
                   <div class="notification-description">Select your EHR system provider</div>
                 </div>
-                <select class="form-input" x-model="integrations.ehrProvider" style="width: 150px;">
+                <select class="form-input form-input-small" x-model="integrations.ehrProvider" title="EHR provider selection">
                   <option value="">None</option>
                   <option value="epic">Epic</option>
                   <option value="cerner">Cerner</option>
@@ -1406,6 +1546,12 @@
         },
         showUsernameChange: false,
         showPasswordChange: false,
+        showSessionsModal: false,
+        show2FAModal: false,
+        twoFactorSecret: '',
+        twoFactorBackupCodes: [],
+        twoFactorCode: '',
+        sessions: [],
         notifications: {
           email: false,
           push: false,
@@ -1439,25 +1585,146 @@
           webhookEnabled: false
         },
 
-        saveProfile() {
-          console.log('Saving profile:', this.profile);
-          alert('Profile updated successfully!');
+        // Initialize data from backend
+        init() {
+          console.log('Account system initializing...');
+          this.loadUserData();
         },
 
-        updateUsername() {
+        async loadUserData() {
+          try {
+            const token = localStorage.getItem('authToken');
+            if (!token) {
+              console.log('No auth token found - please login to access account settings');
+              // Redirect to login page or show login modal
+              window.location.href = '/login.html';
+              return;
+            }
+
+            // Load profile data
+            const profileResponse = await fetch('/api/pharmacist/profile', {
+              headers: {
+                'Authorization': `Bearer ${token}`
+              }
+            });
+            
+            if (profileResponse.ok) {
+              const profile = await profileResponse.json();
+              this.profile = profile;
+              this.userInfo.name = `${profile.firstName} ${profile.lastName}`;
+              this.userInfo.email = profile.email;
+              this.userInfo.initials = `${profile.firstName[0]}${profile.lastName[0]}`;
+            } else if (profileResponse.status === 401) {
+              console.log('Unauthorized - redirecting to login');
+              window.location.href = '/login.html';
+              return;
+            }
+
+            // Load security data
+            const securityResponse = await fetch('/api/pharmacist/security', {
+              headers: {
+                'Authorization': `Bearer ${token}`
+              }
+            });
+            
+            if (securityResponse.ok) {
+              const security = await securityResponse.json();
+              this.security = { ...this.security, ...security };
+            }
+
+            // Load notifications data
+            const notificationsResponse = await fetch('/api/pharmacist/notifications', {
+              headers: {
+                'Authorization': `Bearer ${token}`
+              }
+            });
+            
+            if (notificationsResponse.ok) {
+              const notifications = await notificationsResponse.json();
+              this.notifications = { ...this.notifications, ...notifications };
+            }
+
+            // Load preferences data
+            const preferencesResponse = await fetch('/api/pharmacist/preferences', {
+              headers: {
+                'Authorization': `Bearer ${token}`
+              }
+            });
+            
+            if (preferencesResponse.ok) {
+              const preferences = await preferencesResponse.json();
+              this.preferences = { ...this.preferences, ...preferences };
+            }
+
+            console.log('User data loaded successfully from backend');
+          } catch (error) {
+            console.error('Error loading user data:', error);
+            alert('Failed to load account data. Please check your internet connection and try again.');
+          }
+        },
+
+        async saveProfile() {
+          try {
+            const response = await fetch('/api/pharmacist/profile', {
+              method: 'PUT',
+              headers: {
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${localStorage.getItem('authToken')}`
+              },
+              body: JSON.stringify(this.profile)
+            });
+            
+            if (response.ok) {
+              // Update userInfo display
+              this.userInfo.name = `${this.profile.firstName} ${this.profile.lastName}`;
+              this.userInfo.email = this.profile.email;
+              this.userInfo.initials = `${this.profile.firstName[0]}${this.profile.lastName[0]}`;
+              
+              alert('Profile updated successfully!');
+            } else {
+              alert('Failed to update profile. Please try again.');
+            }
+          } catch (error) {
+            console.error('Error saving profile:', error);
+            alert('An error occurred while updating your profile.');
+          }
+        },
+
+        async updateUsername() {
           if (!this.security.newUsername || !this.security.confirmPassword) {
             alert('Please fill in all fields');
             return;
           }
-          console.log('Updating username:', this.security.newUsername);
-          this.security.username = this.security.newUsername;
-          this.security.newUsername = '';
-          this.security.confirmPassword = '';
-          this.showUsernameChange = false;
-          alert('Username updated successfully!');
+          
+          try {
+            const response = await fetch('/api/pharmacist/username', {
+              method: 'PUT',
+              headers: {
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${localStorage.getItem('authToken')}`
+              },
+              body: JSON.stringify({
+                newUsername: this.security.newUsername,
+                password: this.security.confirmPassword
+              })
+            });
+            
+            if (response.ok) {
+              this.security.username = this.security.newUsername;
+              this.security.newUsername = '';
+              this.security.confirmPassword = '';
+              this.showUsernameChange = false;
+              alert('Username updated successfully!');
+            } else {
+              alert('Failed to update username. Please check your current password.');
+            }
+          } catch (error) {
+            console.error('Error updating username:', error);
+            alert('An error occurred while updating your username.');
+          }
         },
 
-        updatePassword() {
+        async updatePassword() {
           if (!this.security.currentPassword || !this.security.newPassword || !this.security.confirmNewPassword) {
             alert('Please fill in all fields');
             return;
@@ -1466,22 +1733,77 @@
             alert('New passwords do not match');
             return;
           }
-          console.log('Updating password');
-          this.security.currentPassword = '';
-          this.security.newPassword = '';
-          this.security.confirmNewPassword = '';
-          this.showPasswordChange = false;
-          alert('Password updated successfully!');
+          
+          try {
+            const response = await fetch('/api/pharmacist/password', {
+              method: 'PUT',
+              headers: {
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${localStorage.getItem('authToken')}`
+              },
+              body: JSON.stringify({
+                currentPassword: this.security.currentPassword,
+                newPassword: this.security.newPassword
+              })
+            });
+            
+            if (response.ok) {
+              this.security.currentPassword = '';
+              this.security.newPassword = '';
+              this.security.confirmNewPassword = '';
+              this.showPasswordChange = false;
+              alert('Password updated successfully!');
+            } else {
+              alert('Failed to update password. Please check your current password.');
+            }
+          } catch (error) {
+            console.error('Error updating password:', error);
+            alert('An error occurred while updating your password.');
+          }
         },
 
-        saveNotifications() {
-          console.log('Saving notifications:', this.notifications);
-          alert('Notification preferences saved!');
+        async saveNotifications() {
+          try {
+            const response = await fetch('/api/pharmacist/notifications', {
+              method: 'PUT',
+              headers: {
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${localStorage.getItem('authToken')}`
+              },
+              body: JSON.stringify(this.notifications)
+            });
+            
+            if (response.ok) {
+              alert('Notification preferences saved successfully!');
+            } else {
+              alert('Failed to save notification preferences. Please try again.');
+            }
+          } catch (error) {
+            console.error('Error saving notifications:', error);
+            alert('An error occurred while saving notification preferences.');
+          }
         },
 
-        savePreferences() {
-          console.log('Saving preferences:', this.preferences);
-          alert('System preferences saved successfully!');
+        async savePreferences() {
+          try {
+            const response = await fetch('/api/pharmacist/preferences', {
+              method: 'PUT',
+              headers: {
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${localStorage.getItem('authToken')}`
+              },
+              body: JSON.stringify(this.preferences)
+            });
+            
+            if (response.ok) {
+              alert('System preferences saved successfully!');
+            } else {
+              alert('Failed to save system preferences. Please try again.');
+            }
+          } catch (error) {
+            console.error('Error saving preferences:', error);
+            alert('An error occurred while saving system preferences.');
+          }
         },
 
         testIntegrations() {
@@ -1489,12 +1811,158 @@
           alert('Testing integration connections... This may take a few moments.');
         },
 
-        saveIntegrations() {
-          console.log('Saving integrations:', this.integrations);
-          alert('Integration settings saved successfully!');
+        async saveIntegrations() {
+          try {
+            const response = await fetch('/api/pharmacist/integrations', {
+              method: 'PUT',
+              headers: {
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${localStorage.getItem('authToken')}`
+              },
+              body: JSON.stringify(this.integrations)
+            });
+            
+            if (response.ok) {
+              alert('Integration settings saved successfully!');
+            } else {
+              alert('Failed to save integration settings. Please try again.');
+            }
+          } catch (error) {
+            console.error('Error saving integrations:', error);
+            alert('An error occurred while saving integration settings.');
+          }
+        },
+
+        async toggle2FA() {
+          if (!this.security.twoFactorEnabled) {
+            // Enable 2FA - show setup modal
+            await this.setup2FA();
+          } else {
+            // Disable 2FA - direct API call
+            try {
+              const response = await fetch('/api/pharmacist/2fa', {
+                method: 'PUT',
+                headers: {
+                  'Content-Type': 'application/json',
+                  'Authorization': `Bearer ${localStorage.getItem('authToken')}`
+                },
+                body: JSON.stringify({
+                  enabled: false
+                })
+              });
+              
+              if (response.ok) {
+                this.security.twoFactorEnabled = false;
+                this.twoFactorSecret = '';
+                this.twoFactorBackupCodes = [];
+                alert('Two-factor authentication disabled successfully!');
+              } else {
+                alert('Failed to disable 2FA. Please try again.');
+              }
+            } catch (error) {
+              console.error('Error disabling 2FA:', error);
+              alert('An error occurred while disabling 2FA.');
+            }
+          }
+        },
+
+        async setup2FA() {
+          try {
+            const response = await fetch('/api/pharmacist/2fa/setup', {
+              method: 'POST',
+              headers: {
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${localStorage.getItem('authToken')}`
+              }
+            });
+            
+            if (response.ok) {
+              const data = await response.json();
+              this.twoFactorSecret = data.secret;
+              this.twoFactorBackupCodes = data.backupCodes;
+              this.show2FAModal = true;
+            } else {
+              alert('Failed to setup 2FA. Please try again.');
+            }
+          } catch (error) {
+            console.error('Error setting up 2FA:', error);
+            alert('An error occurred while setting up 2FA.');
+          }
+        },
+
+        async confirm2FA(code) {
+          try {
+            const response = await fetch('/api/pharmacist/2fa/confirm', {
+              method: 'POST',
+              headers: {
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${localStorage.getItem('authToken')}`
+              },
+              body: JSON.stringify({
+                code: code
+              })
+            });
+            
+            if (response.ok) {
+              this.security.twoFactorEnabled = true;
+              this.show2FAModal = false;
+              this.twoFactorSecret = '';
+              this.twoFactorBackupCodes = [];
+              alert('Two-factor authentication enabled successfully!');
+            } else {
+              alert('Invalid verification code. Please try again.');
+            }
+          } catch (error) {
+            console.error('Error confirming 2FA:', error);
+            alert('An error occurred while confirming 2FA.');
+          }
+        },
+
+        async viewSessions() {
+          try {
+            const response = await fetch('/api/pharmacist/sessions', {
+              method: 'GET',
+              headers: {
+                'Authorization': `Bearer ${localStorage.getItem('authToken')}`
+              }
+            });
+            
+            if (response.ok) {
+              this.sessions = await response.json();
+              this.showSessionsModal = true;
+            } else {
+              alert('Failed to retrieve sessions.');
+            }
+          } catch (error) {
+            console.error('Error fetching sessions:', error);
+            alert('An error occurred while retrieving sessions.');
+          }
+        },
+
+        async revokeSession(sessionId) {
+          try {
+            const response = await fetch(`/api/pharmacist/sessions/${sessionId}`, {
+              method: 'DELETE',
+              headers: {
+                'Authorization': `Bearer ${localStorage.getItem('authToken')}`
+              }
+            });
+            
+            if (response.ok) {
+              this.sessions = this.sessions.filter(s => s.id !== sessionId);
+              alert('Session revoked successfully!');
+            } else {
+              alert('Failed to revoke session.');
+            }
+          } catch (error) {
+            console.error('Error revoking session:', error);
+            alert('An error occurred while revoking session.');
+          }
         },
 
         setActiveSection(section) {
+          console.log('Setting active section to:', section);
+          console.log('Current notifications data:', this.notifications);
           this.activeSection = section;
           localStorage.setItem('activeSection', section);
         },
@@ -1508,11 +1976,8 @@
   </script>
 
   <!-- Include API and Data Sync Services -->
-  <script src="../shared/js/data-sync.js"></script>
-  <script src="../shared/js/role-based-access.js"></script>
-  <script src="../admin/js/admin-api.js"></script>
-  <script src="js/pharmacist-api.js"></script>
-
+  <!-- Note: External JS files removed to prevent 404 errors -->
+  
   <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
 </body>
 </html>

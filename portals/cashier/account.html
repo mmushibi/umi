@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en" x-data="accountSystem()">
+<html lang="en" x-data="accountSystem()" x-init="init()">
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
@@ -1437,6 +1437,83 @@
         },
         sessions: [],
 
+        // Initialize data from backend
+        init() {
+          console.log('Cashier account system initializing...');
+          this.loadUserData();
+        },
+
+        async loadUserData() {
+          try {
+            const token = localStorage.getItem('authToken');
+            if (!token) {
+              console.log('No auth token found - please login to access account settings');
+              window.location.href = '/login.html';
+              return;
+            }
+
+            // Load profile data
+            const profileResponse = await fetch('/api/cashier/profile', {
+              headers: {
+                'Authorization': `Bearer ${token}`
+              }
+            });
+            
+            if (profileResponse.ok) {
+              const profile = await profileResponse.json();
+              this.profile = profile;
+              this.userInfo.name = `${profile.firstName} ${profile.lastName}`;
+              this.userInfo.email = profile.email;
+              this.userInfo.initials = `${profile.firstName[0]}${profile.lastName[0]}`;
+            } else if (profileResponse.status === 401) {
+              console.log('Unauthorized - redirecting to login');
+              window.location.href = '/login.html';
+              return;
+            }
+
+            // Load notifications data
+            const notificationsResponse = await fetch('/api/cashier/notifications', {
+              headers: {
+                'Authorization': `Bearer ${token}`
+              }
+            });
+            
+            if (notificationsResponse.ok) {
+              const notifications = await notificationsResponse.json();
+              this.notifications = { ...this.notifications, ...notifications };
+            }
+
+            // Load security data
+            const securityResponse = await fetch('/api/cashier/security', {
+              headers: {
+                'Authorization': `Bearer ${token}`
+              }
+            });
+            
+            if (securityResponse.ok) {
+              const security = await securityResponse.json();
+              this.twoFactorEnabled = security.twoFactorEnabled || false;
+              this.passwordInfo.lastChanged = security.passwordLastChanged || '';
+            }
+
+            // Load sessions data
+            const sessionsResponse = await fetch('/api/cashier/sessions', {
+              headers: {
+                'Authorization': `Bearer ${token}`
+              }
+            });
+            
+            if (sessionsResponse.ok) {
+              this.sessions = await sessionsResponse.json();
+            }
+
+            console.log('Cashier data loaded successfully from backend');
+          } catch (error) {
+            console.error('Error loading cashier data:', error);
+            alert('Failed to load account data. Please check your internet connection and try again.');
+          }
+        },
+
         async loadAccountData() {
           try {
             // Load user profile
@@ -1526,50 +1603,50 @@
         
         async saveProfile() {
           try {
-            const response = await window.cashierAPI.updateProfile(this.profile);
-            
-            // Update userInfo display
-            this.userInfo.name = `${this.profile.firstName} ${this.profile.lastName}`.trim() || 'Cashier';
-            this.userInfo.email = this.profile.email;
-            this.userInfo.initials = this.getInitials(this.profile.firstName, this.profile.lastName);
-            
-            // Show success message
-            this.showNotification('Profile updated successfully!', 'success');
-            
-            // Notify tenant admin and operations about the change
-            await window.cashierAPI.notifyUserChange({
-                type: 'profile_update',
-                userId: response.userId,
-                tenantId: response.tenantId,
-                changes: this.profile
+            const response = await fetch('/api/cashier/profile', {
+              method: 'PUT',
+              headers: {
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${localStorage.getItem('authToken')}`
+              },
+              body: JSON.stringify(this.profile)
             });
             
+            if (response.ok) {
+              // Update userInfo display
+              this.userInfo.name = `${this.profile.firstName} ${this.profile.lastName}`;
+              this.userInfo.email = this.profile.email;
+              this.userInfo.initials = `${this.profile.firstName[0]}${this.profile.lastName[0]}`;
+              
+              alert('Profile updated successfully!');
+            } else {
+              alert('Failed to update profile. Please try again.');
+            }
           } catch (error) {
             console.error('Error saving profile:', error);
-            window.cashierAPI.handleError(error, 'saveProfile');
-            this.showNotification('Failed to update profile. Please try again.', 'error');
+            alert('An error occurred while updating your profile.');
           }
         },
         
         async saveNotifications() {
           try {
-            const response = await window.cashierAPI.updateNotificationSettings(this.notifications);
-            
-            // Show success message
-            this.showNotification('Notification preferences saved successfully!', 'success');
-            
-            // Notify tenant admin about notification preference changes
-            await window.cashierAPI.notifyUserChange({
-                type: 'notification_settings_update',
-                userId: response.userId,
-                tenantId: response.tenantId,
-                changes: this.notifications
+            const response = await fetch('/api/cashier/notifications', {
+              method: 'PUT',
+              headers: {
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${localStorage.getItem('authToken')}`
+              },
+              body: JSON.stringify(this.notifications)
             });
             
+            if (response.ok) {
+              alert('Notification preferences saved successfully!');
+            } else {
+              alert('Failed to save notification preferences. Please try again.');
+            }
           } catch (error) {
             console.error('Error saving notifications:', error);
-            window.cashierAPI.handleError(error, 'saveNotifications');
-            this.showNotification('Failed to save notification preferences. Please try again.', 'error');
+            alert('An error occurred while saving notification preferences.');
           }
         },
         
@@ -1618,52 +1695,47 @@
         async changePassword() {
           try {
             if (!this.passwordForm.current || !this.passwordForm.new || !this.passwordForm.confirm) {
-              this.showNotification('Please fill in all password fields', 'error');
+              alert('Please fill in all password fields');
               return;
             }
             
             if (this.passwordForm.new !== this.passwordForm.confirm) {
-              this.showNotification('New passwords do not match!', 'error');
+              alert('New passwords do not match!');
               return;
             }
             
             if (this.passwordForm.new.length < 8) {
-              this.showNotification('Password must be at least 8 characters long!', 'error');
+              alert('Password must be at least 8 characters long!');
               return;
             }
             
-            const response = await window.cashierAPI.changePassword({
-              currentPassword: this.passwordForm.current,
-              newPassword: this.passwordForm.new,
-              confirmPassword: this.passwordForm.confirm
+            const response = await fetch('/api/cashier/password', {
+              method: 'PUT',
+              headers: {
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${localStorage.getItem('authToken')}`
+              },
+              body: JSON.stringify({
+                currentPassword: this.passwordForm.current,
+                newPassword: this.passwordForm.new
+              })
             });
             
-            // Clear form and close modal
-            this.passwordForm = { current: '', new: '', confirm: '' };
-            this.showPasswordModal = false;
-            
-            // Update password info from API response
-            if (response.lastChanged) {
-              this.passwordInfo.lastChanged = response.lastChanged;
-            } else {
-              // Format current date if not provided by API
+            if (response.ok) {
+              // Clear form and close modal
+              this.passwordForm = { current: '', new: '', confirm: '' };
+              this.showPasswordModal = false;
+              
+              // Update password info
               this.passwordInfo.lastChanged = new Date().toLocaleDateString();
+              
+              alert('Password changed successfully!');
+            } else {
+              alert('Failed to change password. Please check your current password and try again.');
             }
-            
-            this.showNotification('Password changed successfully!', 'success');
-            
-            // Notify tenant admin about password change
-            await window.cashierAPI.notifyUserChange({
-                type: 'password_change',
-                userId: response.userId,
-                tenantId: response.tenantId,
-                timestamp: new Date().toISOString()
-            });
-            
           } catch (error) {
             console.error('Error changing password:', error);
-            window.cashierAPI.handleError(error, 'changePassword');
-            this.showNotification('Failed to change password. Please check your current password and try again.', 'error');
+            alert('An error occurred while changing your password.');
           }
         },
         

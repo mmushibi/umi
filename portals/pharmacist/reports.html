@@ -165,6 +165,15 @@
       font-family: 'Inter', sans-serif;
     }
 
+    .mobile-page-title {
+      display: none;
+      font-size: 1.125rem;
+      font-weight: 600;
+      color: var(--color-text-primary);
+      margin: 0 1rem;
+      font-family: 'Inter', sans-serif;
+    }
+
     .mobile-menu-toggle {
       display: none;
       background: none;
@@ -556,6 +565,10 @@
       }
 
       .mobile-menu-toggle {
+        display: block;
+      }
+
+      .mobile-page-title {
         display: block;
       }
 
@@ -1289,6 +1302,26 @@
         <span class="material-symbols-rounded nav-icon">payments</span>
         <span>Payments</span>
       </a>
+      <a href="suppliers.html" class="nav-item">
+        <span class="material-symbols-rounded nav-icon">local_shipping</span>
+        <span>Suppliers</span>
+      </a>
+      <a href="clinical.html" class="nav-item">
+        <span class="material-symbols-rounded nav-icon">medical_services</span>
+        <span>Clinical Support</span>
+      </a>
+      <a href="compliance.html" class="nav-item">
+        <span class="material-symbols-rounded nav-icon">gavel</span>
+        <span>Compliance</span>
+      </a>
+      <a href="reports.html" class="nav-item">
+        <span class="material-symbols-rounded nav-icon">analytics</span>
+        <span>Reports</span>
+      </a>
+      <a href="help.html" class="nav-item">
+        <span class="material-symbols-rounded nav-icon">help</span>
+        <span>Help & Training</span>
+      </a>
       <a href="account.html" class="nav-item">
         <span class="material-symbols-rounded nav-icon">settings</span>
         <span>Account</span>
@@ -1312,37 +1345,12 @@
           <span class="material-symbols-rounded">menu</span>
         </button>
         
+        <h2 class="mobile-page-title" x-text="pageTitle">Reports & Analytics</h2>
+        
         <div class="page-title-section">
           <h1 class="page-title">Reports & Analytics</h1>
         </div>
         
-        <div class="search-bar" x-data="{ searchOpen: false, query: '' }">
-          <span class="material-symbols-rounded search-icon">search</span>
-          <input 
-            type="text" 
-            class="search-input" 
-            placeholder="Search reports by type, date, or keyword..."
-            x-model="query"
-            @focus="searchOpen = true"
-            @input="searchOpen = true"
-            @blur="setTimeout(() => searchOpen = false, 200)"
-          >
-          
-          <div class="search-suggestions" :class="searchOpen && query.length > 0 ? 'show' : ''">
-            <template x-for="suggestion in filteredSuggestions" :key="suggestion.id">
-              <div class="suggestion-item" @click="selectSuggestion(suggestion)">
-                <div class="suggestion-icon">
-                  <span class="material-symbols-rounded" x-text="suggestion.icon"></span>
-                </div>
-                <div class="suggestion-content">
-                  <div class="suggestion-title" x-text="suggestion.title"></div>
-                  <div class="suggestion-description" x-text="suggestion.description"></div>
-                </div>
-                <div class="suggestion-type" x-text="suggestion.type"></div>
-              </div>
-            </template>
-          </div>
-        </div>
       </div>
 
       <div class="header-right">
@@ -1354,28 +1362,28 @@
     <section class="content-area">
       <div class="content-header">
         <div>
-          <span>Transform data into actionable business insights</span>
+          <span x-text="contentDescription">Transform data into actionable business insights</span>
         </div>
         <div class="quick-stats">
           <button class="stat-button" data-stat="total-revenue">
             <span class="material-symbols-rounded">payments</span>
-            <span>Total Revenue</span>
-            <strong id="totalRevenueCount" x-text="formatCurrency(totalRevenue)"></strong>
+            <span>Revenue</span>
+            <strong id="totalRevenueCount" x-text="formatCurrency(totalRevenue)">ZMW 0</strong>
           </button>
           <button class="stat-button" data-stat="total-transactions">
             <span class="material-symbols-rounded">receipt_long</span>
             <span>Transactions</span>
-            <strong id="totalTransactionsCount" x-text="totalTransactions"></strong>
+            <strong id="totalTransactionsCount" x-text="totalTransactions">0</strong>
           </button>
           <button class="stat-button" data-stat="growth-rate">
             <span class="material-symbols-rounded">trending_up</span>
-            <span>Growth Rate</span>
-            <strong id="growthRateCount">15%</strong>
+            <span>Growth</span>
+            <strong id="growthRateCount" x-text="growthRate">0%</strong>
           </button>
           <button class="stat-button" data-stat="top-products">
             <span class="material-symbols-rounded">star</span>
-            <span>Top Products</span>
-            <strong id="topProductsCount" x-text="topProducts.length"></strong>
+            <span>Products</span>
+            <strong id="topProductsCount" x-text="topProducts.length">0</strong>
           </button>
         </div>
         <button class="add-product-btn" id="generateReportButton" type="button" data-permission="generate_reports" @click="openGenerateReportModal()">
@@ -1519,28 +1527,28 @@
               <span class="metric-icon material-symbols-rounded">inventory</span>
               <div class="metric-info">
                 <span class="metric-label">Total Stock Value</span>
-                <span class="metric-value" x-text="formatCurrency(125430)"></span>
+                <span class="metric-value" data-metric="totalStockValue" x-text="formatCurrency(0)">ZMW 0</span>
               </div>
             </div>
             <div class="metric-card">
               <span class="metric-icon material-symbols-rounded">trending_down</span>
               <div class="metric-info">
                 <span class="metric-label">Low Stock Items</span>
-                <span class="metric-value">23</span>
+                <span class="metric-value" data-metric="lowStockItems">0</span>
               </div>
             </div>
             <div class="metric-card">
               <span class="metric-icon material-symbols-rounded">warning</span>
               <div class="metric-info">
                 <span class="metric-label">Expiring Soon</span>
-                <span class="metric-value">8</span>
+                <span class="metric-value" data-metric="expiringSoon">0</span>
               </div>
             </div>
             <div class="metric-card">
               <span class="metric-icon material-symbols-rounded">speed</span>
               <div class="metric-info">
                 <span class="metric-label">Turnover Rate</span>
-                <span class="metric-value">4.2x</span>
+                <span class="metric-value" data-metric="turnoverRate">0x</span>
               </div>
             </div>
           </div>
@@ -1566,19 +1574,19 @@
           <div class="customer-insights">
             <div class="insight-item">
               <span class="insight-label">Total Customers</span>
-              <span class="insight-value" x-text="totalPatients.toLocaleString()"></span>
+              <span class="insight-value" data-insight="totalCustomers" x-text="totalPatients.toLocaleString()">0</span>
             </div>
             <div class="insight-item">
               <span class="insight-label">New This Month</span>
-              <span class="insight-value">+86</span>
+              <span class="insight-value" data-insight="newThisMonth">0</span>
             </div>
             <div class="insight-item">
               <span class="insight-label">Repeat Customers</span>
-              <span class="insight-value">68%</span>
+              <span class="insight-value" data-insight="repeatCustomers">0%</span>
             </div>
             <div class="insight-item">
               <span class="insight-label">Avg. Purchase Value</span>
-              <span class="insight-value" x-text="formatCurrency(145.60)"></span>
+              <span class="insight-value" data-insight="avgPurchaseValue" x-text="formatCurrency(0)">ZMW 0</span>
             </div>
           </div>
         </article>
@@ -1730,19 +1738,32 @@
         showGenerateReportModal: false,
         
         tenantInfo: {
-          name: 'Umi Health',
-          location: 'Lusaka, Zambia'
+          name: '',
+          location: ''
         },
         userInfo: {
-          name: 'Umi Health',
-          role: 'Admin',
-          initials: 'UH'
+          name: '',
+          role: '',
+          initials: ''
         },
+        pageTitle: 'Reports & Analytics',
+        contentDescription: 'Transform data into actionable business insights',
+        growthRate: '0%',
         
         topProducts: [],
         reports: [],
         loading: false,
         error: null,
+        revenueData: {},
+        categoryData: {},
+        patientData: {},
+        inventoryMetrics: {},
+        revenueChart: null,
+        categoryChart: null,
+        paymentChart: null,
+        visitsChart: null,
+        paymentData: {},
+        prescriptionStats: {},
         newReport: {
           name: '',
           type: '',
@@ -1753,43 +1774,226 @@
           description: ''
         },
 
-        async loadDashboardData() {
+        async loadCrossPageData() {
           this.loading = true;
           this.error = null;
           try {
-            // Load dashboard stats
-            const statsResponse = await window.pharmacistApi.dashboard.getStats();
-            const stats = statsResponse.data || {};
+            // Fetch comprehensive data from all pages
+            const comprehensiveData = await window.pharmacistApi.crossPageData.getComprehensiveData();
             
-            // Load top products (would need to be implemented in API)
-            // For now using inventory data as proxy
-            const inventoryResponse = await window.pharmacistApi.inventory.getProducts();
-            const products = inventoryResponse.data || [];
+            // Process inventory data for reports
+            this.processInventoryData(comprehensiveData.inventory);
             
-            this.topProducts = products.slice(0, 10).map(product => ({
-              name: product.name,
-              sales: Math.floor(Math.random() * 100) + 10,
-              revenue: product.price * (Math.floor(Math.random() * 100) + 10)
-            }));
+            // Process prescriptions data for reports
+            this.processPrescriptionsData(comprehensiveData.prescriptions);
+            
+            // Process patients data for reports
+            this.processPatientsData(comprehensiveData.patients);
+            
+            // Process payments data for reports
+            this.processPaymentsData(comprehensiveData.payments);
+            
+            // Update charts with cross-page data
+            this.updateChartsWithCrossPageData(comprehensiveData);
             
           } catch (error) {
-            console.error('Failed to load dashboard data:', error);
-            this.error = 'Failed to load dashboard data';
+            console.error('Failed to load cross-page data:', error);
+            this.error = 'Failed to load cross-page data';
           } finally {
             this.loading = false;
           }
+        },
+
+        processInventoryData(inventoryData) {
+          // Update inventory metrics
+          this.inventoryMetrics = {
+            totalStockValue: inventoryData.products.reduce((total, product) => total + (product.stockValue || 0), 0),
+            lowStockItems: inventoryData.lowStock.length,
+            expiringSoon: inventoryData.products.filter(p => p.expiryDate && new Date(p.expiryDate) <= new Date(Date.now() + 30 * 24 * 60 * 60 * 1000)).length,
+            turnoverRate: this.calculateTurnoverRate(inventoryData.products)
+          };
+          
+          // Update top products from inventory
+          this.topProducts = inventoryData.products
+            .sort((a, b) => (b.salesCount || 0) - (a.salesCount || 0))
+            .slice(0, 10)
+            .map(product => ({
+              name: product.name,
+              sales: product.salesCount || 0,
+              revenue: product.revenue || 0
+            }));
+        },
+
+        processPrescriptionsData(prescriptionsData) {
+          // Process prescriptions for analytics
+          this.prescriptionStats = {
+            total: prescriptionsData.prescriptions.length,
+            pending: prescriptionsData.pending.length,
+            expired: prescriptionsData.expired.length,
+            processed: prescriptionsData.prescriptions.filter(p => p.status === 'processed').length
+          };
+        },
+
+        processPatientsData(patientsData) {
+          // Process patient data for analytics
+          const now = new Date();
+          const thisMonth = now.getMonth();
+          const thisYear = now.getFullYear();
+          
+          this.patientData = {
+            totalPatients: patientsData.patients.length,
+            newThisMonth: patientsData.patients.filter(p => {
+              const created = new Date(p.createdAt);
+              return created.getMonth() === thisMonth && created.getFullYear() === thisYear;
+            }).length,
+            repeatCustomers: this.calculateRepeatCustomers(patientsData.patients),
+            avgPurchaseValue: this.calculateAvgPurchaseValue(patientsData.patients)
+          };
+        },
+
+        processPaymentsData(paymentsData) {
+          // Process payment data for analytics
+          this.paymentData = {
+            totalRevenue: paymentsData.summary.totalRevenue || 0,
+            totalTransactions: paymentsData.payments.length,
+            paymentMethods: this.groupPaymentsByMethod(paymentsData.payments),
+            avgTransactionValue: paymentsData.summary.avgTransactionValue || 0
+          };
+          
+          // Update revenue data for charts
+          this.revenueData = {
+            totalRevenue: paymentsData.summary.totalRevenue || 0,
+            totalTransactions: paymentsData.payments.length,
+            labels: this.generateDateLabels(),
+            values: this.generateRevenueValues(paymentsData.payments)
+          };
+        },
+
+        updateChartsWithCrossPageData(comprehensiveData) {
+          // Update category chart with inventory categories
+          if (comprehensiveData.inventory.categories) {
+            this.categoryData = {
+              labels: comprehensiveData.inventory.categories.map(c => c.name),
+              values: comprehensiveData.inventory.categories.map(c => c.productCount || 0)
+            };
+            this.updateCategoryChart();
+          }
+          
+          // Update revenue chart
+          this.updateRevenueChart();
+          
+          // Update inventory metrics display
+          this.updateInventoryMetrics();
+          
+          // Update customer insights display
+          this.updateCustomerInsights();
+        },
+
+        // Helper methods for data processing
+        calculateTurnoverRate(products) {
+          const totalProducts = products.length;
+          const soldProducts = products.filter(p => p.salesCount > 0).length;
+          return totalProducts > 0 ? (soldProducts / totalProducts).toFixed(1) + 'x' : '0x';
+        },
+
+        calculateRepeatCustomers(patients) {
+          const totalPatients = patients.length;
+          const repeatPatients = patients.filter(p => (p.visitCount || 0) > 1).length;
+          return totalPatients > 0 ? Math.round((repeatPatients / totalPatients) * 100) + '%' : '0%';
+        },
+
+        calculateAvgPurchaseValue(patients) {
+          const totalSpent = patients.reduce((total, patient) => total + (patient.totalSpent || 0), 0);
+          const patientCount = patients.length;
+          return patientCount > 0 ? totalSpent / patientCount : 0;
+        },
+
+        groupPaymentsByMethod(payments) {
+          return payments.reduce((groups, payment) => {
+            const method = payment.method || 'unknown';
+            groups[method] = (groups[method] || 0) + 1;
+            return groups;
+          }, {});
+        },
+
+        generateDateLabels() {
+          const labels = [];
+          const days = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
+          for (let i = 6; i >= 0; i--) {
+            const date = new Date();
+            date.setDate(date.getDate() - i);
+            labels.push(days[date.getDay()]);
+          }
+          return labels;
+        },
+
+        generateRevenueValues(payments) {
+          const values = [0, 0, 0, 0, 0, 0, 0];
+          const today = new Date();
+          
+          payments.forEach(payment => {
+            if (payment.createdAt) {
+              const paymentDate = new Date(payment.createdAt);
+              const daysDiff = Math.floor((today - paymentDate) / (1000 * 60 * 60 * 24));
+              
+              if (daysDiff < 7) {
+                values[6 - daysDiff] += payment.amount || 0;
+              }
+            }
+          });
+          
+          return values;
+        },
+
+        async loadUserInfo() {
+          try {
+            // Load user info from localStorage or API
+            const user = JSON.parse(localStorage.getItem('umi_currentUser') || '{}');
+            this.userInfo = {
+              name: user.name || 'Pharmacist',
+              role: user.role || 'Pharmacist',
+              initials: this.getInitials(user.name || 'Pharmacist')
+            };
+            
+            // Load tenant info
+            this.tenantInfo = {
+              name: user.tenantName || 'Umi Health',
+              location: user.location || 'Zambia'
+            };
+            
+          } catch (error) {
+            console.error('Failed to load user info:', error);
+            // Set default values
+            this.userInfo = {
+              name: 'Pharmacist',
+              role: 'Pharmacist',
+              initials: 'P'
+            };
+            this.tenantInfo = {
+              name: 'Umi Health',
+              location: 'Zambia'
+            };
+          }
+        },
+
+        getInitials(name) {
+          return name.split(' ').map(word => word[0]).join('').toUpperCase().slice(0, 2);
         },
 
         async loadReports() {
           this.loading = true;
           this.error = null;
           try {
-            // This would need to be implemented in the API
-            // For now, using empty array as placeholder
-            this.reports = [];
+            const response = await window.pharmacistApi.reports.getReports({
+              period: this.reportPeriod,
+              type: this.reportType,
+              location: this.reportLocation
+            });
+            this.reports = response.data || [];
           } catch (error) {
             console.error('Failed to load reports:', error);
             this.error = 'Failed to load reports';
+            this.reports = [];
           } finally {
             this.loading = false;
           }
@@ -1797,16 +2001,10 @@
 
         async generateReport(reportData) {
           try {
-            // This would need to be implemented in the API
-            const report = {
-              id: Date.now(),
-              name: reportData.name,
-              type: reportData.type,
-              period: `${this.formatDate(reportData.startDate)} - ${this.formatDate(reportData.endDate)}`,
-              status: 'Completed',
-              date: this.formatDate(new Date())
-            };
-
+            const response = await window.pharmacistApi.reports.generateReport(reportData);
+            const report = response.data;
+            
+            // Add to reports list
             this.reports.unshift(report);
             return report;
           } catch (error) {
@@ -1817,9 +2015,8 @@
 
         async refreshRevenueChart() {
           try {
-            // This would load revenue data from API
-            console.log('Refreshing revenue chart with API data...');
-            await this.loadDashboardData();
+            await this.loadCrossPageData();
+            this.updateRevenueChart();
           } catch (error) {
             console.error('Failed to refresh revenue chart:', error);
             alert('Failed to refresh revenue chart');
@@ -1828,9 +2025,8 @@
 
         async refreshCategoryChart() {
           try {
-            // This would load category data from API
-            console.log('Refreshing category chart with API data...');
-            await this.loadDashboardData();
+            await this.loadCrossPageData();
+            this.updateCategoryChart();
           } catch (error) {
             console.error('Failed to refresh category chart:', error);
             alert('Failed to refresh category chart');
@@ -1839,7 +2035,7 @@
 
         async refreshTopProducts() {
           try {
-            await this.loadDashboardData();
+            await this.loadCrossPageData();
           } catch (error) {
             console.error('Failed to refresh top products:', error);
             alert('Failed to refresh top products');
@@ -1848,11 +2044,8 @@
 
         async refreshInventoryMetrics() {
           try {
-            const response = await window.pharmacistApi.inventory.getLowStock();
-            const lowStock = response.data || [];
-            
-            // Update inventory metrics in the UI
-            console.log('Inventory metrics refreshed:', lowStock);
+            await this.loadCrossPageData();
+            this.updateInventoryMetrics();
           } catch (error) {
             console.error('Failed to refresh inventory metrics:', error);
             alert('Failed to refresh inventory metrics');
@@ -1861,9 +2054,8 @@
 
         async refreshCustomerInsights() {
           try {
-            // This would load customer data from API
-            console.log('Refreshing customer insights with API data...');
-            await this.loadDashboardData();
+            await this.loadCrossPageData();
+            this.updateCustomerInsights();
           } catch (error) {
             console.error('Failed to refresh customer insights:', error);
             alert('Failed to refresh customer insights');
@@ -1872,8 +2064,16 @@
 
         async exportReport(reportId, format) {
           try {
-            // This would trigger API to generate and download report
-            console.log(`Exporting report ${reportId} as ${format}...`);
+            const response = await window.pharmacistApi.reports.downloadReport(reportId, format);
+            
+            // Create download link if file data is returned
+            if (response.data && response.data.fileUrl) {
+              const link = document.createElement('a');
+              link.href = response.data.fileUrl;
+              link.download = response.data.fileName || `report-${reportId}.${format}`;
+              link.click();
+            }
+            
             alert(`Report exported successfully as ${format.toUpperCase()}!`);
           } catch (error) {
             console.error('Failed to export report:', error);
@@ -1882,19 +2082,19 @@
         },
 
         get totalRevenue() {
-          return this.topProducts.reduce((total, product) => total + product.revenue, 0);
+          return this.revenueData.totalRevenue || this.paymentData?.totalRevenue || 0;
         },
 
         get totalTransactions() {
-          return Math.floor(Math.random() * 500) + 1000;
+          return this.revenueData.totalTransactions || this.paymentData?.totalTransactions || 0;
         },
 
         get totalPatients() {
-          return Math.floor(Math.random() * 200) + 400;
+          return this.patientData.totalPatients || 0;
         },
 
         get totalPrescriptions() {
-          return Math.floor(Math.random() * 100) + 250;
+          return this.prescriptionStats?.total || 0;
         },
 
         get filteredReports() {
@@ -2053,7 +2253,7 @@
 
         handleReportAction(action, button) {
           const row = button.closest('tr');
-          const reportId = parseInt(row.querySelector('[data-column="date"]').textContent);
+          const reportId = row.querySelector('[data-column="date"]').textContent;
           
           switch(action) {
             case 'view':
@@ -2092,9 +2292,24 @@
           // Implement refresh logic
         },
 
-        exportInventoryReport() {
-          console.log('Exporting inventory report...');
-          alert('Inventory report exported successfully!');
+        async exportInventoryReport() {
+          try {
+            const response = await window.pharmacistApi.reports.exportAnalytics('inventory', 'pdf', {
+              period: this.reportPeriod
+            });
+            
+            if (response.data && response.data.fileUrl) {
+              const link = document.createElement('a');
+              link.href = response.data.fileUrl;
+              link.download = response.data.fileName || 'inventory-report.pdf';
+              link.click();
+            }
+            
+            alert('Inventory report exported successfully!');
+          } catch (error) {
+            console.error('Failed to export inventory report:', error);
+            alert('Failed to export inventory report');
+          }
         },
 
         refreshCustomerInsights() {
@@ -2102,29 +2317,98 @@
           // Implement refresh logic
         },
 
-        exportCustomerInsights() {
-          console.log('Exporting customer insights...');
-          alert('Customer insights exported successfully!');
+        async exportCustomerInsights() {
+          try {
+            const response = await window.pharmacistApi.reports.exportAnalytics('patient', 'pdf', {
+              period: this.reportPeriod
+            });
+            
+            if (response.data && response.data.fileUrl) {
+              const link = document.createElement('a');
+              link.href = response.data.fileUrl;
+              link.download = response.data.fileName || 'customer-insights.pdf';
+              link.click();
+            }
+            
+            alert('Customer insights exported successfully!');
+          } catch (error) {
+            console.error('Failed to export customer insights:', error);
+            alert('Failed to export customer insights');
+          }
         },
 
-        exportChart(chartType) {
-          console.log(`Exporting ${chartType} chart...`);
-          alert(`${chartType} chart exported successfully!`);
+        async exportChart(chartType) {
+          try {
+            const response = await window.pharmacistApi.reports.exportAnalytics(chartType, 'png', {
+              period: this.reportPeriod
+            });
+            
+            if (response.data && response.data.fileUrl) {
+              const link = document.createElement('a');
+              link.href = response.data.fileUrl;
+              link.download = response.data.fileName || `${chartType}-chart.png`;
+              link.click();
+            }
+            
+            alert(`${chartType} chart exported successfully!`);
+          } catch (error) {
+            console.error(`Failed to export ${chartType} chart:`, error);
+            alert(`Failed to export ${chartType} chart`);
+          }
         },
 
-        viewReport(reportId) {
-          console.log('Viewing report:', reportId);
-          alert('Opening report viewer...');
+        async viewReport(reportId) {
+          try {
+            const response = await window.pharmacistApi.reports.getReport(reportId);
+            const report = response.data;
+            
+            // Open report in new window or modal
+            if (report && report.viewUrl) {
+              window.open(report.viewUrl, '_blank');
+            } else {
+              alert('Report viewer not available');
+            }
+          } catch (error) {
+            console.error('Failed to view report:', error);
+            alert('Failed to open report');
+          }
         },
 
-        downloadReport(reportId) {
-          console.log('Downloading report:', reportId);
-          alert('Report downloaded successfully!');
+        async downloadReport(reportId) {
+          try {
+            const response = await window.pharmacistApi.reports.downloadReport(reportId, 'pdf');
+            
+            if (response.data && response.data.fileUrl) {
+              const link = document.createElement('a');
+              link.href = response.data.fileUrl;
+              link.download = response.data.fileName || `report-${reportId}.pdf`;
+              link.click();
+            }
+            
+            alert('Report downloaded successfully!');
+          } catch (error) {
+            console.error('Failed to download report:', error);
+            alert('Failed to download report');
+          }
         },
 
-        shareReport(reportId) {
-          console.log('Sharing report:', reportId);
-          alert('Report share link copied to clipboard!');
+        async shareReport(reportId) {
+          try {
+            const response = await window.pharmacistApi.reports.shareReport(reportId, {
+              shareMethod: 'link'
+            });
+            
+            if (response.data && response.data.shareUrl) {
+              // Copy to clipboard
+              navigator.clipboard.writeText(response.data.shareUrl);
+              alert('Report share link copied to clipboard!');
+            } else {
+              alert('Failed to generate share link');
+            }
+          } catch (error) {
+            console.error('Failed to share report:', error);
+            alert('Failed to share report');
+          }
         },
 
         loadSampleTopProducts() {
@@ -2138,22 +2422,38 @@
         },
 
         init() {
-          this.loadDashboardData();
+          this.loadUserInfo();
+          this.loadCrossPageData();
           this.loadReports();
           this.initCharts();
           this.setupEventListeners();
         },
 
         initCharts() {
-          // Revenue Chart
-          const revenueCtx = document.getElementById('revenueChart').getContext('2d');
-          new Chart(revenueCtx, {
+          // Initialize charts with empty data - will be populated by API calls
+          this.revenueChart = null;
+          this.categoryChart = null;
+          this.paymentChart = null;
+          this.visitsChart = null;
+          
+          // Create chart instances with empty data
+          this.createRevenueChart();
+          this.createCategoryChart();
+          this.createPaymentChart();
+          this.createVisitsChart();
+        },
+
+        createRevenueChart() {
+          const ctx = document.getElementById('revenueChart');
+          if (!ctx) return;
+          
+          this.revenueChart = new Chart(ctx.getContext('2d'), {
             type: 'line',
             data: {
-              labels: ['Week 1', 'Week 2', 'Week 3', 'Week 4'],
+              labels: [],
               datasets: [{
                 label: 'Revenue',
-                data: [12000, 15000, 13500, 18000],
+                data: [],
                 borderColor: 'rgb(0, 0, 0)',
                 backgroundColor: 'rgba(0, 0, 0, 0.1)',
                 tension: 0.4
@@ -2179,15 +2479,18 @@
               }
             }
           });
+        },
 
-          // Category Chart
-          const categoryCtx = document.getElementById('categoryChart').getContext('2d');
-          new Chart(categoryCtx, {
+        createCategoryChart() {
+          const ctx = document.getElementById('categoryChart');
+          if (!ctx) return;
+          
+          this.categoryChart = new Chart(ctx.getContext('2d'), {
             type: 'doughnut',
             data: {
-              labels: ['Medication', 'Supplements', 'Medical Supplies'],
+              labels: [],
               datasets: [{
-                data: [45, 30, 25],
+                data: [],
                 backgroundColor: [
                   'rgba(0, 0, 0, 0.8)',
                   'rgba(107, 114, 128, 0.8)',
@@ -2205,16 +2508,19 @@
               }
             }
           });
+        },
 
-          // Payment Chart
-          const paymentCtx = document.getElementById('paymentChart').getContext('2d');
-          new Chart(paymentCtx, {
+        createPaymentChart() {
+          const ctx = document.getElementById('paymentChart');
+          if (!ctx) return;
+          
+          this.paymentChart = new Chart(ctx.getContext('2d'), {
             type: 'bar',
             data: {
-              labels: ['Cash', 'Card', 'Mobile', 'Insurance'],
+              labels: [],
               datasets: [{
                 label: 'Transactions',
-                data: [120, 95, 80, 35],
+                data: [],
                 backgroundColor: 'rgba(0, 0, 0, 0.6)'
               }]
             },
@@ -2233,16 +2539,19 @@
               }
             }
           });
+        },
 
-          // Visits Chart
-          const visitsCtx = document.getElementById('visitsChart').getContext('2d');
-          new Chart(visitsCtx, {
+        createVisitsChart() {
+          const ctx = document.getElementById('visitsChart');
+          if (!ctx) return;
+          
+          this.visitsChart = new Chart(ctx.getContext('2d'), {
             type: 'bar',
             data: {
-              labels: ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'],
+              labels: [],
               datasets: [{
                 label: 'Patient Visits',
-                data: [45, 52, 48, 58, 62, 35, 28],
+                data: [],
                 backgroundColor: 'rgba(34, 197, 94, 0.6)'
               }]
             },
@@ -2259,6 +2568,66 @@
                   beginAtZero: true
                 }
               }
+            }
+          });
+        },
+
+        updateRevenueChart() {
+          if (!this.revenueChart || !this.revenueData) return;
+          
+          this.revenueChart.data.labels = this.revenueData.labels || [];
+          this.revenueChart.data.datasets[0].data = this.revenueData.values || [];
+          this.revenueChart.update();
+        },
+
+        updateCategoryChart() {
+          if (!this.categoryChart || !this.categoryData) return;
+          
+          this.categoryChart.data.labels = this.categoryData.labels || [];
+          this.categoryChart.data.datasets[0].data = this.categoryData.values || [];
+          this.categoryChart.update();
+        },
+
+        updateInventoryMetrics() {
+          if (!this.inventoryMetrics) return;
+          
+          // Update UI elements with real data
+          const elements = {
+            totalStockValue: this.inventoryMetrics.totalStockValue || 0,
+            lowStockItems: this.inventoryMetrics.lowStockItems || 0,
+            expiringSoon: this.inventoryMetrics.expiringSoon || 0,
+            turnoverRate: this.inventoryMetrics.turnoverRate || '0x'
+          };
+          
+          // Update DOM elements if they exist
+          Object.keys(elements).forEach(key => {
+            const element = document.querySelector(`[data-metric="${key}"]`);
+            if (element) {
+              element.textContent = typeof elements[key] === 'number' && key !== 'turnoverRate' 
+                ? this.formatCurrency(elements[key])
+                : elements[key];
+            }
+          });
+        },
+
+        updateCustomerInsights() {
+          if (!this.patientData) return;
+          
+          // Update UI elements with real data
+          const insights = {
+            totalCustomers: this.patientData.totalPatients || 0,
+            newThisMonth: this.patientData.newThisMonth || 0,
+            repeatCustomers: this.patientData.repeatCustomers || 0,
+            avgPurchaseValue: this.patientData.avgPurchaseValue || 0
+          };
+          
+          // Update DOM elements if they exist
+          Object.keys(insights).forEach(key => {
+            const element = document.querySelector(`[data-insight="${key}"]`);
+            if (element) {
+              element.textContent = typeof insights[key] === 'number' && key !== 'repeatCustomers'
+                ? this.formatCurrency(insights[key])
+                : insights[key];
             }
           });
         }

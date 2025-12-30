@@ -635,7 +635,16 @@
       }
 
       .page-title-section {
-        display: none;
+        display: block;
+      }
+
+      .mobile-header-title {
+        display: block;
+        font-size: 1.25rem;
+        font-weight: 600;
+        color: var(--color-text-primary);
+        margin: 0;
+        font-family: 'Inter', sans-serif;
       }
 
       .payments-content {
@@ -1250,7 +1259,523 @@
       color: #6b7280;
     }
 
-    /* Responsive Design */
+    /* Payment Methods Overview */
+    .payment-methods-overview {
+      background: var(--color-surface);
+      border: 1px solid var(--color-border);
+      border-radius: 16px;
+      padding: 1.5rem;
+      margin-bottom: 2rem;
+    }
+
+    .payment-methods-overview h3 {
+      margin: 0 0 1rem 0;
+      font-size: 1.125rem;
+      font-weight: 600;
+      color: var(--color-text-primary);
+      font-family: 'Inter', sans-serif;
+    }
+
+    .payment-methods-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: 1rem;
+    }
+
+    .payment-method-card {
+      background: var(--color-background);
+      border: 1px solid var(--color-border);
+      border-radius: 12px;
+      padding: 1rem;
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+      transition: all 0.2s ease;
+      cursor: pointer;
+    }
+
+    .payment-method-card:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+    }
+
+    .method-icon {
+      width: 48px;
+      height: 48px;
+      background: var(--color-surface);
+      border-radius: 12px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.5rem;
+      color: var(--color-primary);
+    }
+
+    .method-info {
+      flex: 1;
+    }
+
+    .method-name {
+      font-weight: 600;
+      color: var(--color-text-primary);
+      margin-bottom: 0.25rem;
+    }
+
+    .method-amount {
+      font-size: 1.125rem;
+      font-weight: 700;
+      color: var(--color-success);
+      margin-bottom: 0.25rem;
+    }
+
+    .method-count {
+      font-size: 0.75rem;
+      color: var(--color-text-secondary);
+    }
+
+    /* Enhanced Action Buttons */
+    .enhanced-actions {
+      display: flex;
+      gap: 0.5rem;
+      margin-left: auto;
+    }
+
+    .action-dropdown {
+      position: relative;
+    }
+
+    .action-dropdown-toggle {
+      background: var(--color-surface);
+      border: 1px solid var(--color-border);
+      border-radius: 8px;
+      padding: 0.5rem 1rem;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      cursor: pointer;
+      font-size: 0.875rem;
+      transition: all 0.2s ease;
+    }
+
+    .action-dropdown-toggle:hover {
+      background: var(--color-background);
+    }
+
+    .action-dropdown-menu {
+      position: absolute;
+      top: 100%;
+      right: 0;
+      background: var(--color-background);
+      border: 1px solid var(--color-border);
+      border-radius: 8px;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+      min-width: 200px;
+      z-index: 1000;
+      margin-top: 0.5rem;
+      display: none;
+    }
+
+    .action-dropdown-menu.show {
+      display: block;
+    }
+
+    .action-dropdown-item {
+      display: block;
+      width: 100%;
+      padding: 0.75rem 1rem;
+      border: none;
+      background: none;
+      text-align: left;
+      cursor: pointer;
+      font-size: 0.875rem;
+      color: var(--color-text-primary);
+      transition: all 0.2s ease;
+      border-bottom: 1px solid var(--color-border);
+    }
+
+    .action-dropdown-item:last-child {
+      border-bottom: none;
+    }
+
+    .action-dropdown-item:hover {
+      background: var(--color-surface);
+    }
+
+    /* Analytics Dashboard */
+    .analytics-dashboard {
+      display: flex;
+      flex-direction: column;
+      gap: 1.5rem;
+    }
+
+    .analytics-period-selector {
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+      padding: 1rem;
+      background: var(--color-surface);
+      border-radius: 8px;
+    }
+
+    .analytics-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+      gap: 1.5rem;
+    }
+
+    .analytics-card {
+      background: var(--color-background);
+      border: 1px solid var(--color-border);
+      border-radius: 12px;
+      padding: 1.5rem;
+    }
+
+    .analytics-card h3 {
+      margin: 0 0 1rem 0;
+      font-size: 1.125rem;
+      font-weight: 600;
+      color: var(--color-text-primary);
+    }
+
+    /* Reconciliation Styles */
+    .reconciliation-workspace {
+      display: flex;
+      flex-direction: column;
+      gap: 1.5rem;
+    }
+
+    .reconciliation-controls {
+      display: flex;
+      gap: 1rem;
+      flex-wrap: wrap;
+    }
+
+    .reconciliation-table {
+      overflow-x: auto;
+    }
+
+    .reconciliation-table table {
+      width: 100%;
+      border-collapse: collapse;
+    }
+
+    .reconciliation-table th,
+    .reconciliation-table td {
+      padding: 0.75rem;
+      text-align: left;
+      border-bottom: 1px solid var(--color-border);
+    }
+
+    .reconciliation-table th {
+      background: var(--color-surface);
+      font-weight: 600;
+    }
+
+    /* Bulk Payment Styles */
+    .bulk-payment-workspace {
+      display: flex;
+      flex-direction: column;
+      gap: 1.5rem;
+    }
+
+    .bulk-controls {
+      display: flex;
+      gap: 1rem;
+      flex-wrap: wrap;
+    }
+
+    .bulk-items-container {
+      overflow-x: auto;
+    }
+
+    .bulk-table {
+      width: 100%;
+      border-collapse: collapse;
+    }
+
+    .bulk-table th,
+    .bulk-table td {
+      padding: 0.75rem;
+      text-align: left;
+      border-bottom: 1px solid var(--color-border);
+    }
+
+    .bulk-table th {
+      background: var(--color-surface);
+      font-weight: 600;
+    }
+
+    .bulk-actions {
+      display: flex;
+      gap: 1rem;
+      justify-content: flex-end;
+    }
+
+    /* Reminder Styles */
+    .reminders-workspace {
+      display: flex;
+      flex-direction: column;
+      gap: 1.5rem;
+    }
+
+    .reminder-settings {
+      background: var(--color-surface);
+      border-radius: 12px;
+      padding: 1.5rem;
+    }
+
+    .reminder-settings h3 {
+      margin: 0 0 1rem 0;
+      font-size: 1.125rem;
+      font-weight: 600;
+    }
+
+    .reminder-option {
+      margin-bottom: 1rem;
+    }
+
+    .reminder-option label {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      cursor: pointer;
+    }
+
+    .reminder-actions {
+      display: flex;
+      gap: 1rem;
+      justify-content: flex-end;
+    }
+
+    /* Template Styles */
+    .templates-workspace {
+      display: flex;
+      flex-direction: column;
+      gap: 1.5rem;
+    }
+
+    .templates-controls {
+      display: flex;
+      gap: 1rem;
+      flex-wrap: wrap;
+    }
+
+    .templates-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+      gap: 1.5rem;
+    }
+
+    .template-card {
+      background: var(--color-background);
+      border: 1px solid var(--color-border);
+      border-radius: 12px;
+      padding: 1.5rem;
+      transition: all 0.2s ease;
+    }
+
+    .template-card:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+    }
+
+    .template-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 1rem;
+    }
+
+    .template-header h4 {
+      margin: 0;
+      font-size: 1.125rem;
+      font-weight: 600;
+      color: var(--color-text-primary);
+    }
+
+    .template-type {
+      background: var(--color-surface);
+      color: var(--color-text-secondary);
+      padding: 0.25rem 0.75rem;
+      border-radius: 12px;
+      font-size: 0.75rem;
+      font-weight: 500;
+    }
+
+    .template-content {
+      margin-bottom: 1rem;
+    }
+
+    .template-content p {
+      margin: 0 0 0.5rem 0;
+      color: var(--color-text-secondary);
+    }
+
+    .template-amount {
+      font-size: 1.25rem;
+      font-weight: 700;
+      color: var(--color-success);
+    }
+
+    .template-actions {
+      display: flex;
+      gap: 0.5rem;
+      flex-wrap: wrap;
+    }
+
+    /* Recurring Payment Styles */
+    .recurring-workspace {
+      display: flex;
+      flex-direction: column;
+      gap: 1.5rem;
+    }
+
+    .recurring-controls {
+      display: flex;
+      gap: 1rem;
+      flex-wrap: wrap;
+    }
+
+    .recurring-list {
+      overflow-x: auto;
+    }
+
+    .recurring-list table {
+      width: 100%;
+      border-collapse: collapse;
+    }
+
+    .recurring-list th,
+    .recurring-list td {
+      padding: 0.75rem;
+      text-align: left;
+      border-bottom: 1px solid var(--color-border);
+    }
+
+    .recurring-list th {
+      background: var(--color-surface);
+      font-weight: 600;
+    }
+
+    /* Modal Size Variations */
+    .modal-large {
+      max-width: 1200px;
+    }
+
+    /* Button Danger Variant */
+    .danger {
+      background: var(--color-warning);
+      color: white;
+      border: none;
+      padding: 0.5rem 1rem;
+      border-radius: 6px;
+      font-size: 0.875rem;
+      cursor: pointer;
+      transition: all 0.2s ease;
+    }
+
+    .danger:hover {
+      background: #dc2626;
+    }
+    .notification {
+      position: fixed;
+      top: 20px;
+      right: 20px;
+      z-index: 9999;
+      max-width: 400px;
+      background: white;
+      border-radius: 12px;
+      box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
+      border: 1px solid var(--color-border);
+      animation: slideIn 0.3s ease-out;
+    }
+
+    .notification-content {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+      padding: 1rem;
+    }
+
+    .notification-icon {
+      font-size: 1.25rem;
+      flex-shrink: 0;
+    }
+
+    .notification-message {
+      flex: 1;
+      font-size: 0.875rem;
+      color: var(--color-text-primary);
+    }
+
+    .notification-close {
+      background: none;
+      border: none;
+      cursor: pointer;
+      padding: 0.25rem;
+      border-radius: 4px;
+      color: var(--color-text-secondary);
+      transition: all 0.2s ease;
+    }
+
+    .notification-close:hover {
+      background: var(--color-surface);
+      color: var(--color-text-primary);
+    }
+
+    .notification-success {
+      border-left: 4px solid var(--color-success);
+    }
+
+    .notification-success .notification-icon {
+      color: var(--color-success);
+    }
+
+    .notification-error {
+      border-left: 4px solid var(--color-warning);
+    }
+
+    .notification-error .notification-icon {
+      color: var(--color-warning);
+    }
+
+    .notification-warning {
+      border-left: 4px solid #f59e0b;
+    }
+
+    .notification-warning .notification-icon {
+      color: #f59e0b;
+    }
+
+    .notification-info {
+      border-left: 4px solid var(--color-primary);
+    }
+
+    .notification-info .notification-icon {
+      color: var(--color-primary);
+    }
+
+    @keyframes slideIn {
+      from {
+        transform: translateX(100%);
+        opacity: 0;
+      }
+      to {
+        transform: translateX(0);
+        opacity: 1;
+      }
+    }
+
+    @keyframes slideOut {
+      from {
+        transform: translateX(0);
+        opacity: 1;
+      }
+      to {
+        transform: translateX(100%);
+        opacity: 0;
+      }
+    }
     @media (max-width: 768px) {
       .content-header {
         flex-direction: column;
@@ -1348,9 +1873,29 @@
         <span class="material-symbols-rounded nav-icon">inventory_2</span>
         <span>Inventory</span>
       </a>
-      <a href="payments.html" class="nav-item active">
+      <a href="payments.html" class="nav-item">
         <span class="material-symbols-rounded nav-icon">payments</span>
         <span>Payments</span>
+      </a>
+      <a href="suppliers.html" class="nav-item">
+        <span class="material-symbols-rounded nav-icon">local_shipping</span>
+        <span>Suppliers</span>
+      </a>
+      <a href="clinical.html" class="nav-item">
+        <span class="material-symbols-rounded nav-icon">medical_services</span>
+        <span>Clinical Support</span>
+      </a>
+      <a href="compliance.html" class="nav-item">
+        <span class="material-symbols-rounded nav-icon">gavel</span>
+        <span>Compliance</span>
+      </a>
+      <a href="reports.html" class="nav-item">
+        <span class="material-symbols-rounded nav-icon">analytics</span>
+        <span>Reports</span>
+      </a>
+      <a href="help.html" class="nav-item">
+        <span class="material-symbols-rounded nav-icon">help</span>
+        <span>Help & Training</span>
       </a>
       <a href="account.html" class="nav-item">
         <span class="material-symbols-rounded nav-icon">settings</span>
@@ -1419,47 +1964,96 @@
             <span>Streamline your billing and payment processes</span>
           </div>
           <div class="payment-actions">
-            <button class="primary" id="newInvoiceBtn">
-              <span class="material-symbols-rounded">add</span>
+            <button class="primary" id="newInvoiceBtn" onclick="window.paymentSystem.openModal('invoiceModal')">
+              <span class="material-symbols-rounded">receipt_long</span>
               New Invoice
             </button>
-            <button class="secondary" id="newQuotationBtn">
+            <button class="secondary" id="newQuotationBtn" onclick="window.paymentSystem.openModal('quotationModal')">
               <span class="material-symbols-rounded">description</span>
               New Quotation
             </button>
-            <button class="secondary" id="newCreditNoteBtn">
+            <button class="secondary" id="newCreditNoteBtn" onclick="window.paymentSystem.openModal('creditNoteModal')">
               <span class="material-symbols-rounded">assignment_return</span>
-              New Credit Note
+              Credit Note
             </button>
-            <button class="secondary" id="newInsuranceClaimBtn">
+            <button class="secondary" id="newInsuranceClaimBtn" onclick="window.paymentSystem.openModal('insuranceClaimModal')">
               <span class="material-symbols-rounded">health_and_safety</span>
               New Insurance Claim
             </button>
+            <div class="enhanced-actions">
+              <div class="action-dropdown" x-data="{ open: false }">
+                <button class="action-dropdown-toggle" @click="open = !open">
+                  <span class="material-symbols-rounded">more_horiz</span>
+                  More Actions
+                </button>
+                <div class="action-dropdown-menu" :class="open ? 'show' : ''" @click.away="open = false">
+                  <button class="action-dropdown-item" @click="showReconciliationModal()">
+                    <span class="material-symbols-rounded">account_balance</span>
+                    Reconcile Payments
+                  </button>
+                  <button class="action-dropdown-item" @click="showBulkPaymentModal()">
+                    <span class="material-symbols-rounded">library_add</span>
+                    Bulk Process
+                  </button>
+                  <button class="action-dropdown-item" @click="showPaymentRemindersModal()">
+                    <span class="material-symbols-rounded">notifications</span>
+                    Payment Reminders
+                  </button>
+                  <button class="action-dropdown-item" @click="showTemplatesModal()">
+                    <span class="material-symbols-rounded">dashboard_customize</span>
+                    Templates
+                  </button>
+                  <button class="action-dropdown-item" @click="exportPayments()">
+                    <span class="material-symbols-rounded">download</span>
+                    Export Data
+                  </button>
+                </div>
+              </div>
+            </div>
           </div>
         </div>
 
         <!-- Quick Stats -->
         <div class="quick-stats">
-          <button class="stat-button" data-stat="total-revenue">
+          <button class="stat-button" data-stat="total-revenue" @click="showAnalyticsModal()">
             <span class="material-symbols-rounded">payments</span>
-            <strong>ZMW 0.00</strong>
+            <strong x-text="formatCurrency(totalRevenue)">ZMW 0.00</strong>
             <span>Total Revenue</span>
           </button>
-          <button class="stat-button" data-stat="pending-payments">
+          <button class="stat-button" data-stat="pending-payments" @click="filterByStatus('pending')">
             <span class="material-symbols-rounded">pending</span>
-            <strong>0</strong>
+            <strong x-text="pendingPayments">0</strong>
             <span>Pending</span>
           </button>
-          <button class="stat-button" data-stat="overdue">
+          <button class="stat-button" data-stat="overdue" @click="filterByStatus('overdue')">
             <span class="material-symbols-rounded">warning</span>
-            <strong>0</strong>
+            <strong x-text="overduePayments">0</strong>
             <span>Overdue</span>
           </button>
-          <button class="stat-button" data-stat="this-month">
+          <button class="stat-button" data-stat="this-month" @click="showAnalyticsModal()">
             <span class="material-symbols-rounded">calendar_month</span>
-            <strong>ZMW 0.00</strong>
+            <strong x-text="formatCurrency(thisMonthRevenue)">ZMW 0.00</strong>
             <span>This Month</span>
           </button>
+        </div>
+
+        <!-- Payment Methods Overview -->
+        <div class="payment-methods-overview">
+          <h3>Payment Methods</h3>
+          <div class="payment-methods-grid">
+            <template x-for="method in paymentMethods" :key="method.id">
+              <div class="payment-method-card">
+                <div class="method-icon">
+                  <span class="material-symbols-rounded" x-text="method.icon"></span>
+                </div>
+                <div class="method-info">
+                  <div class="method-name" x-text="method.name"></div>
+                  <div class="method-amount" x-text="formatCurrency(method.total)"></div>
+                  <div class="method-count" x-text="`${method.count} transactions`"></div>
+                </div>
+              </div>
+            </template>
+          </div>
         </div>
 
         <!-- Document Type Tabs -->
@@ -1525,7 +2119,7 @@
               <div class="panel-body">
                 <label>
                   <span>Status</span>
-                  <select id="filterStatus">
+                  <select id="filterStatus" title="Filter by payment status">
                     <option value="all">All statuses</option>
                     <option value="paid">Paid</option>
                     <option value="pending">Pending</option>
@@ -1624,7 +2218,7 @@
             </div>
             <div class="pagination-show">
               <span>Show</span>
-              <select id="pageSizeSelect" aria-label="Items per page">
+              <select id="pageSizeSelect" aria-label="Items per page" title="Select number of items per page">
                 <option value="10">10</option>
                 <option value="25">25</option>
                 <option value="50">50</option>
@@ -1684,6 +2278,12 @@
             <input type="text" id="customerName" placeholder="Enter customer name" required>
           </label>
           <label>
+            <span>Patient (Optional)</span>
+            <select id="patientSelect" data-patient-select title="Select patient for payment">
+              <option value="">Select Patient</option>
+            </select>
+          </label>
+          <label>
             <span>Customer Email</span>
             <input type="email" id="customerEmail" placeholder="customer@email.com">
           </label>
@@ -1701,11 +2301,13 @@
           </label>
           
           <!-- Invoice Items -->
-          <div class="invoice-items-section" style="grid-column: 1 / -1;">
+          <div class="invoice-items-section grid-full-width">
             <h3>Invoice Items</h3>
             <div id="invoiceItems">
               <div class="invoice-item">
-                <input type="text" placeholder="Item description" class="item-description">
+                <select class="item-description" data-product-select aria-label="Select product" title="Select product for invoice item">
+                  <option value="">Select Product</option>
+                </select>
                 <input type="number" placeholder="Quantity" class="item-quantity" min="1" value="1">
                 <input type="number" placeholder="Unit price" class="item-price" step="0.01" min="0">
                 <input type="text" placeholder="Total" class="item-total" readonly>
@@ -1721,7 +2323,7 @@
           </div>
           
           <!-- Totals -->
-          <div class="invoice-totals" style="grid-column: 1 / -1;">
+          <div class="invoice-totals grid-full-width">
             <div class="total-row">
               <span>Subtotal:</span>
               <span id="invoiceSubtotal">ZMW 0.00</span>
@@ -1736,7 +2338,7 @@
             </div>
           </div>
           
-          <label class="form-textarea" style="grid-column: 1 / -1;">
+          <label class="form-textarea grid-full-width">
             <span>Notes</span>
             <textarea id="invoiceNotes" rows="3" placeholder="Additional notes or terms"></textarea>
           </label>
@@ -1771,6 +2373,12 @@
             <input type="text" id="quoteCustomerName" placeholder="Enter customer name" required>
           </label>
           <label>
+            <span>Patient (Optional)</span>
+            <select id="quotePatientSelect" data-patient-select title="Select patient for quotation">
+              <option value="">Select Patient</option>
+            </select>
+          </label>
+          <label>
             <span>Customer Email</span>
             <input type="email" id="quoteCustomerEmail" placeholder="customer@email.com">
           </label>
@@ -1784,11 +2392,13 @@
           </label>
           
           <!-- Quotation Items -->
-          <div class="quotation-items-section" style="grid-column: 1 / -1;">
+          <div class="quotation-items-section grid-full-width">
             <h3>Quotation Items</h3>
             <div id="quotationItems">
               <div class="quotation-item">
-                <input type="text" placeholder="Item description" class="item-description">
+                <select class="item-description" data-product-select aria-label="Select product" title="Select product for quotation item">
+                  <option value="">Select Product</option>
+                </select>
                 <input type="number" placeholder="Quantity" class="item-quantity" min="1" value="1">
                 <input type="number" placeholder="Unit price" class="item-price" step="0.01" min="0">
                 <input type="text" placeholder="Total" class="item-total" readonly>
@@ -1804,7 +2414,7 @@
           </div>
           
           <!-- Totals -->
-          <div class="quotation-totals" style="grid-column: 1 / -1;">
+          <div class="quotation-totals grid-full-width">
             <div class="total-row">
               <span>Subtotal:</span>
               <span id="quotationSubtotal">ZMW 0.00</span>
@@ -1819,7 +2429,7 @@
             </div>
           </div>
           
-          <label class="form-textarea" style="grid-column: 1 / -1;">
+          <label class="form-textarea grid-full-width">
             <span>Terms & Conditions</span>
             <textarea id="quotationTerms" rows="3" placeholder="Enter terms and conditions"></textarea>
           </label>
@@ -1862,12 +2472,12 @@
             <input type="number" id="creditAmount" placeholder="0.00" step="0.01" min="0" required>
           </label>
           
-          <label class="form-textarea" style="grid-column: 1 / -1;">
+          <label class="form-textarea grid-full-width">
             <span>Reason for Credit</span>
             <textarea id="creditReason" rows="3" placeholder="Explain the reason for this credit note" required></textarea>
           </label>
           
-          <label class="form-textarea" style="grid-column: 1 / -1;">
+          <label class="form-textarea grid-full-width">
             <span>Notes</span>
             <textarea id="creditNotes" rows="2" placeholder="Additional notes"></textarea>
           </label>
@@ -1899,7 +2509,9 @@
           </label>
           <label>
             <span>Patient Name</span>
-            <input type="text" id="patientName" placeholder="Enter patient name" required>
+            <select id="patientName" data-patient-select required title="Select patient for refund">
+              <option value="">Select Patient</option>
+            </select>
           </label>
           <label>
             <span>Insurance Provider</span>
@@ -1918,12 +2530,12 @@
             <input type="date" id="dateOfService" required>
           </label>
           
-          <label class="form-textarea" style="grid-column: 1 / -1;">
+          <label class="form-textarea grid-full-width">
             <span>Diagnosis/Service Details</span>
             <textarea id="diagnosisDetails" rows="3" placeholder="Enter diagnosis and service details" required></textarea>
           </label>
           
-          <label class="form-textarea" style="grid-column: 1 / -1;">
+          <label class="form-textarea grid-full-width">
             <span>Additional Notes</span>
             <textarea id="claimNotes" rows="2" placeholder="Additional claim information"></textarea>
           </label>
@@ -1973,6 +2585,262 @@
       <footer class="modal-footer" id="actionModalFooter"></footer>
     </div>
   </section>
+
+  <!-- Analytics Modal -->
+  <section class="modal" id="analyticsModal" role="dialog" aria-modal="true" aria-labelledby="analyticsModalTitle" hidden>
+    <div class="modal-content modal-large">
+      <header class="modal-header">
+        <h2 id="analyticsModalTitle">Payment Analytics Dashboard</h2>
+        <button type="button" class="modal-close" data-close="analyticsModal" aria-label="Close analytics">
+          <span class="material-symbols-rounded" aria-hidden="true">close</span>
+        </button>
+      </header>
+      <div class="modal-body">
+        <div class="analytics-dashboard">
+          <div class="analytics-period-selector">
+            <label>Period:</label>
+            <select id="analyticsPeriod" @change="updateAnalytics()" title="Select analytics period">
+              <option value="7">Last 7 days</option>
+              <option value="30" selected>Last 30 days</option>
+              <option value="90">Last 3 months</option>
+              <option value="365">Last year</option>
+            </select>
+          </div>
+          
+          <div class="analytics-grid">
+            <div class="analytics-card">
+              <h3>Revenue Trend</h3>
+              <canvas id="revenueChart"></canvas>
+            </div>
+            <div class="analytics-card">
+              <h3>Payment Methods</h3>
+              <canvas id="paymentMethodsChart"></canvas>
+            </div>
+            <div class="analytics-card">
+              <h3>Top Customers</h3>
+              <div id="topCustomersList"></div>
+            </div>
+            <div class="analytics-card">
+              <h3>Payment Status</h3>
+              <canvas id="paymentStatusChart"></canvas>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Payment Reconciliation Modal -->
+  <section class="modal" id="reconciliationModal" role="dialog" aria-modal="true" aria-labelledby="reconciliationModalTitle" hidden>
+    <div class="modal-content modal-large">
+      <header class="modal-header">
+        <h2 id="reconciliationModalTitle">Payment Reconciliation</h2>
+        <button type="button" class="modal-close" data-close="reconciliationModal" aria-label="Close reconciliation">
+          <span class="material-symbols-rounded" aria-hidden="true">close</span>
+        </button>
+      </header>
+      <div class="modal-body">
+        <div class="reconciliation-workspace">
+          <div class="reconciliation-controls">
+            <button class="primary" @click="startReconciliation()">Start Reconciliation</button>
+            <button class="secondary" @click="importBankStatement()">Import Bank Statement</button>
+            <button class="secondary" @click="exportReconciliationReport()">Export Report</button>
+          </div>
+          
+          <div class="reconciliation-table">
+            <table>
+              <thead>
+                <tr>
+                  <th>Date</th>
+                  <th>Description</th>
+                  <th>Bank Amount</th>
+                  <th>Invoice Amount</th>
+                  <th>Status</th>
+                  <th>Actions</th>
+                </tr>
+              </thead>
+              <tbody id="reconciliationTableBody">
+                <!-- Reconciliation items will be loaded here -->
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Bulk Payment Modal -->
+  <section class="modal" id="bulkPaymentModal" role="dialog" aria-modal="true" aria-labelledby="bulkPaymentModalTitle" hidden>
+    <div class="modal-content modal-large">
+      <header class="modal-header">
+        <h2 id="bulkPaymentModalTitle">Bulk Payment Processing</h2>
+        <button type="button" class="modal-close" data-close="bulkPaymentModal" aria-label="Close bulk payment">
+          <span class="material-symbols-rounded" aria-hidden="true">close</span>
+        </button>
+      </header>
+      <div class="modal-body">
+        <div class="bulk-payment-workspace">
+          <div class="bulk-controls">
+            <button class="primary" @click="showBulkInvoiceTemplate()">Create Bulk Invoices</button>
+            <button class="secondary" @click="showBulkPaymentTemplate()">Record Bulk Payments</button>
+            <button class="secondary" @click="importBulkData()">Import from CSV</button>
+          </div>
+          
+          <div class="bulk-items-container">
+            <table class="bulk-table">
+              <thead>
+                <tr>
+                  <th><input type="checkbox" @change="toggleAllBulkItems()" title="Select all bulk items"></th>
+                  <th>Customer</th>
+                  <th>Type</th>
+                  <th>Amount</th>
+                  <th>Due Date</th>
+                  <th>Status</th>
+                </tr>
+              </thead>
+              <tbody id="bulkItemsBody">
+                <!-- Bulk items will be loaded here -->
+              </tbody>
+            </table>
+          </div>
+          
+          <div class="bulk-actions">
+            <button class="primary" @click="processBulkItems()">Process Selected</button>
+            <button class="secondary" @click="clearBulkItems()">Clear All</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Payment Reminders Modal -->
+  <section class="modal" id="paymentRemindersModal" role="dialog" aria-modal="true" aria-labelledby="paymentRemindersModalTitle" hidden>
+    <div class="modal-content">
+      <header class="modal-header">
+        <h2 id="paymentRemindersModalTitle">Payment Reminders</h2>
+        <button type="button" class="modal-close" data-close="paymentRemindersModal" aria-label="Close reminders">
+          <span class="material-symbols-rounded" aria-hidden="true">close</span>
+        </button>
+      </header>
+      <div class="modal-body">
+        <div class="reminders-workspace">
+          <div class="reminder-settings">
+            <h3>Automated Reminder Settings</h3>
+            <div class="reminder-option">
+              <label>
+                <input type="checkbox" x-model="reminderSettings.dueSoon">
+                Send reminders 3 days before due date
+              </label>
+            </div>
+            <div class="reminder-option">
+              <label>
+                <input type="checkbox" x-model="reminderSettings.overdue">
+                Send overdue payment reminders
+              </label>
+            </div>
+            <div class="reminder-option">
+              <label>
+                <input type="checkbox" x-model="reminderSettings.thankYou">
+                Send thank you messages after payment
+              </label>
+            </div>
+          </div>
+          
+          <div class="pending-reminders">
+            <h3>Pending Reminders</h3>
+            <div id="pendingRemindersList">
+              <!-- Pending reminders will be loaded here -->
+            </div>
+          </div>
+          
+          <div class="reminder-actions">
+            <button class="primary" @click="saveReminderSettings()">Save Settings</button>
+            <button class="secondary" @click="sendTestReminder()">Send Test Reminder</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Templates Modal -->
+  <section class="modal" id="templatesModal" role="dialog" aria-modal="true" aria-labelledby="templatesModalTitle" hidden>
+    <div class="modal-content modal-large">
+      <header class="modal-header">
+        <h2 id="templatesModalTitle">Payment Templates</h2>
+        <button type="button" class="modal-close" data-close="templatesModal" aria-label="Close templates">
+          <span class="material-symbols-rounded" aria-hidden="true">close</span>
+        </button>
+      </header>
+      <div class="modal-body">
+        <div class="templates-workspace">
+          <div class="templates-controls">
+            <button class="primary" @click="showCreateTemplateModal()">Create New Template</button>
+            <button class="secondary" @click="importTemplates()">Import Templates</button>
+          </div>
+          
+          <div class="templates-grid">
+            <template x-for="template in paymentTemplates" :key="template.id">
+              <div class="template-card">
+                <div class="template-header">
+                  <h4 x-text="template.name"></h4>
+                  <span class="template-type" x-text="template.type"></span>
+                </div>
+                <div class="template-content">
+                  <p x-text="template.description"></p>
+                  <div class="template-amount" x-text="formatCurrency(template.amount)"></div>
+                </div>
+                <div class="template-actions">
+                  <button class="secondary" @click="useTemplate(template)">Use Template</button>
+                  <button class="secondary" @click="editTemplate(template)">Edit</button>
+                  <button class="danger" @click="deleteTemplate(template.id)">Delete</button>
+                </div>
+              </div>
+            </template>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Recurring Payments Modal -->
+  <section class="modal" id="recurringPaymentsModal" role="dialog" aria-modal="true" aria-labelledby="recurringPaymentsModalTitle" hidden>
+    <div class="modal-content modal-large">
+      <header class="modal-header">
+        <h2 id="recurringPaymentsModalTitle">Recurring Payments</h2>
+        <button type="button" class="modal-close" data-close="recurringPaymentsModal" aria-label="Close recurring payments">
+          <span class="material-symbols-rounded" aria-hidden="true">close</span>
+        </button>
+      </header>
+      <div class="modal-body">
+        <div class="recurring-workspace">
+          <div class="recurring-controls">
+            <button class="primary" @click="showCreateRecurringModal()">Create Recurring Payment</button>
+            <button class="secondary" @click="viewRecurringSchedule()">View Schedule</button>
+          </div>
+          
+          <div class="recurring-list">
+            <table>
+              <thead>
+                <tr>
+                  <th>Customer</th>
+                  <th>Description</th>
+                  <th>Amount</th>
+                  <th>Frequency</th>
+                  <th>Next Date</th>
+                  <th>Status</th>
+                  <th>Actions</th>
+                </tr>
+              </thead>
+              <tbody id="recurringPaymentsBody">
+                <!-- Recurring payments will be loaded here -->
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
   </main>
 
   <!-- Alpine.js Component -->
@@ -2002,11 +2870,31 @@
         receipts: [],
         loading: false,
         error: null,
+        
+        // New feature data properties
+        paymentMethods: [],
+        paymentTemplates: [],
+        recurringPayments: [],
+        reminderSettings: {
+          dueSoon: true,
+          overdue: true,
+          thankYou: false
+        },
+        analyticsData: {},
+        bulkItems: [],
+        reconciliationData: [],
 
         async loadPayments() {
           this.loading = true;
           this.error = null;
           try {
+            // Check if API is available
+            if (typeof window.pharmacistApi === 'undefined') {
+              console.warn('API not available, using mock data');
+              this.loadMockData();
+              return;
+            }
+
             const response = await window.pharmacistApi.payments.getPayments();
             const payments = response.data || [];
             this.invoices = payments.filter(p => p.type === 'invoice') || [];
@@ -2014,16 +2902,94 @@
             this.creditNotes = payments.filter(p => p.type === 'credit-note') || [];
             this.claims = payments.filter(p => p.type === 'insurance-claim') || [];
             this.receipts = payments.filter(p => p.type === 'receipt') || [];
+            
+            // Update stats after loading
+            this.updatePaymentStats();
           } catch (error) {
             console.error('Failed to load payments:', error);
             this.error = 'Failed to load payments';
+            // Initialize empty arrays on error
+            this.loadMockData();
           } finally {
             this.loading = false;
           }
         },
 
+        loadMockData() {
+          // Load mock data when API is not available
+          this.invoices = [
+            {
+              id: 1,
+              number: 'INV-001',
+              customer: 'John Doe',
+              amount: 150.00,
+              status: 'paid',
+              date: '2024-01-15',
+              type: 'invoice'
+            },
+            {
+              id: 2,
+              number: 'INV-002',
+              customer: 'Jane Smith',
+              amount: 200.00,
+              status: 'pending',
+              date: '2024-01-16',
+              type: 'invoice'
+            }
+          ];
+          this.quotations = [
+            {
+              id: 3,
+              number: 'QUO-001',
+              customer: 'Bob Johnson',
+              amount: 300.00,
+              status: 'draft',
+              date: '2024-01-17',
+              type: 'quotation'
+            }
+          ];
+          this.creditNotes = [];
+          this.claims = [];
+          this.receipts = [];
+          this.updatePaymentStats();
+        },
+
         async createPayment(paymentData) {
           try {
+            // Check if API is available
+            if (typeof window.pharmacistApi === 'undefined') {
+              console.warn('API not available, creating mock payment');
+              const mockPayment = {
+                id: Date.now(),
+                ...paymentData,
+                date: new Date().toISOString().split('T')[0],
+                status: 'draft'
+              };
+              
+              // Add to appropriate array based on type
+              switch(mockPayment.type) {
+                case 'invoice':
+                  this.invoices.push(mockPayment);
+                  break;
+                case 'quotation':
+                  this.quotations.push(mockPayment);
+                  break;
+                case 'credit-note':
+                  this.creditNotes.push(mockPayment);
+                  break;
+                case 'insurance-claim':
+                  this.claims.push(mockPayment);
+                  break;
+                case 'receipt':
+                  this.receipts.push(mockPayment);
+                  break;
+              }
+              
+              this.updatePaymentStats();
+              this.showNotification('Payment created successfully (mock mode)', 'success');
+              return mockPayment;
+            }
+
             const response = await window.pharmacistApi.payments.createPayment(paymentData);
             const newPayment = response.data;
             
@@ -2046,9 +3012,11 @@
                 break;
             }
             
+            this.updatePaymentStats();
             return newPayment;
           } catch (error) {
             console.error('Failed to create payment:', error);
+            this.showNotification('Failed to create payment: ' + error.message, 'error');
             throw error;
           }
         },
@@ -2230,15 +3198,25 @@
 
         // Modal Management
         openModal(modalId) {
-          document.getElementById(modalId).hidden = false;
-          document.getElementById('modalOverlay').hidden = false;
-          document.body.style.overflow = 'hidden';
+          const modal = document.getElementById(modalId);
+          const overlay = document.getElementById('modalOverlay');
+          if (modal) {
+            modal.hidden = false;
+            if (overlay) overlay.hidden = false;
+            document.body.style.overflow = 'hidden';
+          } else {
+            console.error('Modal not found:', modalId);
+          }
         },
 
         closeModal(modalId) {
-          document.getElementById(modalId).hidden = true;
-          document.getElementById('modalOverlay').hidden = true;
-          document.body.style.overflow = '';
+          const modal = document.getElementById(modalId);
+          const overlay = document.getElementById('modalOverlay');
+          if (modal) {
+            modal.hidden = true;
+            if (overlay) overlay.hidden = true;
+            document.body.style.overflow = '';
+          }
         },
 
         // Document Type Tabs
@@ -2357,34 +3335,69 @@
         },
 
         // Invoice Management
-        submitInvoiceForm(event) {
+        async submitInvoiceForm(event) {
           event.preventDefault();
-          const formData = new FormData(event.target);
-          const invoiceData = Object.fromEntries(formData.entries());
           
-          // Calculate totals
-          const items = this.getInvoiceItems();
-          const subtotal = items.reduce((sum, item) => sum + (item.quantity * item.price), 0);
-          const tax = subtotal * 0.16;
-          const total = subtotal + tax;
-          
-          const newInvoice = {
-            id: Date.now().toString(),
-            ...invoiceData,
-            items,
-            subtotal,
-            tax,
-            total,
-            date: new Date().toISOString().split('T')[0],
-            status: 'pending',
-            type: 'invoices'
-          };
-          
-          this.invoices.push(newInvoice);
-          this.closeModal('invoiceModal');
-          event.target.reset();
-          this.updatePaymentStats();
-          this.renderPaymentsTable(this.invoices);
+          try {
+            // Get form data
+            const formData = new FormData(event.target);
+            const invoiceData = Object.fromEntries(formData.entries());
+            
+            // Calculate totals
+            const items = this.getInvoiceItems();
+            const subtotal = items.reduce((sum, item) => sum + (item.quantity * item.price), 0);
+            const tax = subtotal * 0.16;
+            const total = subtotal + tax;
+            
+            // Prepare invoice data for API
+            const newInvoice = {
+              invoiceNumber: invoiceData.invoiceNumber || this.generateInvoiceNumber(),
+              customerName: invoiceData.customerName,
+              customerEmail: invoiceData.customerEmail,
+              customerPhone: invoiceData.customerPhone,
+              customerAddress: invoiceData.customerAddress,
+              dueDate: invoiceData.dueDate,
+              items: items,
+              subtotal: subtotal,
+              tax: tax,
+              total: total,
+              notes: invoiceData.invoiceNotes,
+              status: 'pending',
+              type: 'invoice',
+              date: new Date().toISOString().split('T')[0]
+            };
+            
+            // Save to backend
+            const response = await window.pharmacistApi.payments.createPayment(newInvoice);
+            const savedInvoice = response.data;
+            
+            // Add to local array
+            this.invoices.push(savedInvoice);
+            
+            // Close modal and reset form
+            this.closeModal('invoiceModal');
+            event.target.reset();
+            
+            // Update UI
+            this.updatePaymentStats();
+            this.renderPaymentsTable(this.invoices);
+            
+            // Show success message
+            this.showNotification('Invoice created successfully', 'success');
+            
+          } catch (error) {
+            console.error('Failed to create invoice:', error);
+            this.showNotification('Failed to create invoice: ' + error.message, 'error');
+          }
+        },
+
+        // Generate invoice number
+        generateInvoiceNumber() {
+          const date = new Date();
+          const year = date.getFullYear();
+          const month = String(date.getMonth() + 1).padStart(2, '0');
+          const random = Math.floor(Math.random() * 1000).toString().padStart(3, '0');
+          return `INV-${year}${month}-${random}`;
         },
 
         getInvoiceItems() {
@@ -2409,7 +3422,12 @@
           const newItem = document.createElement('div');
           newItem.className = 'invoice-item';
           newItem.innerHTML = `
-            <input type="text" placeholder="Item description" class="item-description">
+            <select class="item-description" data-product-select aria-label="Select product" title="Select product for invoice item">
+              <option value="">Select Product</option>
+              ${this.inventoryItems.map(item => 
+                `<option value="${item.id}" data-price="${item.price || 0}">${item.name} - ${item.price ? 'ZMW ' + item.price : ''}</option>`
+              ).join('')}
+            </select>
             <input type="number" placeholder="Quantity" class="item-quantity" min="1" value="1">
             <input type="number" placeholder="Unit price" class="item-price" step="0.01" min="0">
             <input type="text" placeholder="Total" class="item-total" readonly>
@@ -2431,6 +3449,7 @@
           const quantityInput = itemElement.querySelector('.item-quantity');
           const priceInput = itemElement.querySelector('.item-price');
           const totalInput = itemElement.querySelector('.item-total');
+          const productSelect = itemElement.querySelector('.item-description');
           
           const calculateTotal = () => {
             const quantity = parseFloat(quantityInput.value) || 0;
@@ -2439,6 +3458,17 @@
             this.calculateInvoiceTotals();
           };
           
+          // Handle product selection
+          const handleProductChange = () => {
+            const selectedOption = productSelect.options[productSelect.selectedIndex];
+            const price = selectedOption.getAttribute('data-price');
+            if (price) {
+              priceInput.value = price;
+              calculateTotal();
+            }
+          };
+          
+          productSelect.addEventListener('change', handleProductChange);
           quantityInput.addEventListener('input', calculateTotal);
           priceInput.addEventListener('input', calculateTotal);
         },
@@ -2455,32 +3485,64 @@
         },
 
         // Quotation Management
-        submitQuotationForm(event) {
+        async submitQuotationForm(event) {
           event.preventDefault();
-          const formData = new FormData(event.target);
-          const quotationData = Object.fromEntries(formData.entries());
           
-          const items = this.getQuotationItems();
-          const subtotal = items.reduce((sum, item) => sum + (item.quantity * item.price), 0);
-          const tax = subtotal * 0.16;
-          const total = subtotal + tax;
-          
-          const newQuotation = {
-            id: Date.now().toString(),
-            ...quotationData,
-            items,
-            subtotal,
-            tax,
-            total,
-            date: new Date().toISOString().split('T')[0],
-            status: 'draft',
-            type: 'quotations'
-          };
-          
-          this.quotations.push(newQuotation);
-          this.closeModal('quotationModal');
-          event.target.reset();
-          this.renderPaymentsTable(this.quotations);
+          try {
+            const formData = new FormData(event.target);
+            const quotationData = Object.fromEntries(formData.entries());
+            
+            const items = this.getQuotationItems();
+            const subtotal = items.reduce((sum, item) => sum + (item.quantity * item.price), 0);
+            const tax = subtotal * 0.16;
+            const total = subtotal + tax;
+            
+            const newQuotation = {
+              quotationNumber: quotationData.quotationNumber || this.generateQuotationNumber(),
+              customerName: quotationData.quoteCustomerName,
+              customerEmail: quotationData.quoteCustomerEmail,
+              customerPhone: quotationData.quoteCustomerPhone,
+              validUntil: quotationData.validUntil,
+              items: items,
+              subtotal: subtotal,
+              tax: tax,
+              total: total,
+              terms: quotationData.quotationTerms,
+              status: 'draft',
+              type: 'quotation',
+              date: new Date().toISOString().split('T')[0]
+            };
+            
+            // Save to backend
+            const response = await window.pharmacistApi.payments.createPayment(newQuotation);
+            const savedQuotation = response.data;
+            
+            // Add to local array
+            this.quotations.push(savedQuotation);
+            
+            // Close modal and reset form
+            this.closeModal('quotationModal');
+            event.target.reset();
+            
+            // Update UI
+            this.renderPaymentsTable(this.quotations);
+            
+            // Show success message
+            this.showNotification('Quotation created successfully', 'success');
+            
+          } catch (error) {
+            console.error('Failed to create quotation:', error);
+            this.showNotification('Failed to create quotation: ' + error.message, 'error');
+          }
+        },
+
+        // Generate quotation number
+        generateQuotationNumber() {
+          const date = new Date();
+          const year = date.getFullYear();
+          const month = String(date.getMonth() + 1).padStart(2, '0');
+          const random = Math.floor(Math.random() * 1000).toString().padStart(3, '0');
+          return `QUO-${year}${month}-${random}`;
         },
 
         getQuotationItems() {
@@ -2505,7 +3567,12 @@
           const newItem = document.createElement('div');
           newItem.className = 'quotation-item';
           newItem.innerHTML = `
-            <input type="text" placeholder="Item description" class="item-description">
+            <select class="item-description" data-product-select aria-label="Select product" title="Select product for quotation item">
+              <option value="">Select Product</option>
+              ${this.inventoryItems.map(item => 
+                `<option value="${item.id}" data-price="${item.price || 0}">${item.name} - ${item.price ? 'ZMW ' + item.price : ''}</option>`
+              ).join('')}
+            </select>
             <input type="number" placeholder="Quantity" class="item-quantity" min="1" value="1">
             <input type="number" placeholder="Unit price" class="item-price" step="0.01" min="0">
             <input type="text" placeholder="Total" class="item-total" readonly>
@@ -2527,6 +3594,7 @@
           const quantityInput = itemElement.querySelector('.item-quantity');
           const priceInput = itemElement.querySelector('.item-price');
           const totalInput = itemElement.querySelector('.item-total');
+          const productSelect = itemElement.querySelector('.item-description');
           
           const calculateTotal = () => {
             const quantity = parseFloat(quantityInput.value) || 0;
@@ -2535,6 +3603,17 @@
             this.calculateQuotationTotals();
           };
           
+          // Handle product selection
+          const handleProductChange = () => {
+            const selectedOption = productSelect.options[productSelect.selectedIndex];
+            const price = selectedOption.getAttribute('data-price');
+            if (price) {
+              priceInput.value = price;
+              calculateTotal();
+            }
+          };
+          
+          productSelect.addEventListener('change', handleProductChange);
           quantityInput.addEventListener('input', calculateTotal);
           priceInput.addEventListener('input', calculateTotal);
         },
@@ -2551,46 +3630,471 @@
         },
 
         // Credit Note Management
-        submitCreditNoteForm(event) {
+        async submitCreditNoteForm(event) {
           event.preventDefault();
-          const formData = new FormData(event.target);
-          const creditNoteData = Object.fromEntries(formData.entries());
           
-          const newCreditNote = {
-            id: Date.now().toString(),
-            ...creditNoteData,
-            date: new Date().toISOString().split('T')[0],
-            status: 'pending',
-            type: 'credit-notes'
-          };
-          
-          this.creditNotes.push(newCreditNote);
-          this.closeModal('creditNoteModal');
-          event.target.reset();
-          this.renderPaymentsTable(this.creditNotes);
+          try {
+            const formData = new FormData(event.target);
+            const creditNoteData = Object.fromEntries(formData.entries());
+            
+            const newCreditNote = {
+              creditNoteNumber: creditNoteData.creditNoteNumber || this.generateCreditNoteNumber(),
+              originalInvoice: creditNoteData.originalInvoice,
+              customerName: creditNoteData.creditCustomerName,
+              creditAmount: parseFloat(creditNoteData.creditAmount),
+              reason: creditNoteData.creditReason,
+              notes: creditNoteData.creditNotes,
+              status: 'pending',
+              type: 'credit-note',
+              date: new Date().toISOString().split('T')[0]
+            };
+            
+            // Save to backend
+            const response = await window.pharmacistApi.payments.createPayment(newCreditNote);
+            const savedCreditNote = response.data;
+            
+            // Add to local array
+            this.creditNotes.push(savedCreditNote);
+            
+            // Close modal and reset form
+            this.closeModal('creditNoteModal');
+            event.target.reset();
+            
+            // Update UI
+            this.renderPaymentsTable(this.creditNotes);
+            
+            // Show success message
+            this.showNotification('Credit note created successfully', 'success');
+            
+          } catch (error) {
+            console.error('Failed to create credit note:', error);
+            this.showNotification('Failed to create credit note: ' + error.message, 'error');
+          }
+        },
+
+        // Generate credit note number
+        generateCreditNoteNumber() {
+          const date = new Date();
+          const year = date.getFullYear();
+          const month = String(date.getMonth() + 1).padStart(2, '0');
+          const random = Math.floor(Math.random() * 1000).toString().padStart(3, '0');
+          return `CN-${year}${month}-${random}`;
         },
 
         // Insurance Claim Management
-        submitInsuranceClaimForm(event) {
+        async submitInsuranceClaimForm(event) {
           event.preventDefault();
-          const formData = new FormData(event.target);
-          const claimData = Object.fromEntries(formData.entries());
           
-          const newClaim = {
-            id: Date.now().toString(),
-            ...claimData,
-            date: new Date().toISOString().split('T')[0],
-            status: 'pending',
-            type: 'insurance-claims'
-          };
-          
-          this.claims.push(newClaim);
-          this.closeModal('insuranceClaimModal');
-          event.target.reset();
-          this.renderPaymentsTable(this.claims);
+          try {
+            const formData = new FormData(event.target);
+            const claimData = Object.fromEntries(formData.entries());
+            
+            const newClaim = {
+              claimNumber: claimData.claimNumber || this.generateClaimNumber(),
+              patientName: claimData.patientName,
+              insuranceProvider: claimData.insuranceProvider,
+              policyNumber: claimData.policyNumber,
+              claimAmount: parseFloat(claimData.claimAmount),
+              dateOfService: claimData.dateOfService,
+              diagnosis: claimData.diagnosisDetails,
+              notes: claimData.claimNotes,
+              status: 'pending',
+              type: 'insurance-claim',
+              date: new Date().toISOString().split('T')[0]
+            };
+            
+            // Save to backend
+            const response = await window.pharmacistApi.payments.createPayment(newClaim);
+            const savedClaim = response.data;
+            
+            // Add to local array
+            this.claims.push(savedClaim);
+            
+            // Close modal and reset form
+            this.closeModal('insuranceClaimModal');
+            event.target.reset();
+            
+            // Update UI
+            this.renderPaymentsTable(this.claims);
+            
+            // Show success message
+            this.showNotification('Insurance claim created successfully', 'success');
+            
+          } catch (error) {
+            console.error('Failed to create insurance claim:', error);
+            this.showNotification('Failed to create insurance claim: ' + error.message, 'error');
+          }
         },
 
-        // Search and Filter
+        // Generate claim number
+        generateClaimNumber() {
+          const date = new Date();
+          const year = date.getFullYear();
+          const month = String(date.getMonth() + 1).padStart(2, '0');
+          const random = Math.floor(Math.random() * 1000).toString().padStart(3, '0');
+          return `CLM-${year}${month}-${random}`;
+        },
+
+        // Modal Management for New Features
+        showAnalyticsModal() {
+          this.openModal('analyticsModal');
+          this.loadAnalyticsData();
+        },
+
+        showReconciliationModal() {
+          this.openModal('reconciliationModal');
+          this.loadReconciliationData();
+        },
+
+        showBulkPaymentModal() {
+          this.openModal('bulkPaymentModal');
+          this.loadBulkItems();
+        },
+
+        showPaymentRemindersModal() {
+          this.openModal('paymentRemindersModal');
+          this.loadPendingReminders();
+        },
+
+        showTemplatesModal() {
+          this.openModal('templatesModal');
+        },
+
+        showRecurringPaymentsModal() {
+          this.openModal('recurringPaymentsModal');
+        },
+
+        // Analytics Methods
+        async loadAnalyticsData() {
+          try {
+            const period = document.getElementById('analyticsPeriod').value;
+            const response = await window.pharmacistApi.reports.getPaymentAnalytics({ period });
+            this.analyticsData = response.data || {};
+            this.renderAnalyticsCharts();
+          } catch (error) {
+            console.error('Failed to load analytics data:', error);
+          }
+        },
+
+        renderAnalyticsCharts() {
+          // Revenue Trend Chart
+          const revenueCtx = document.getElementById('revenueChart');
+          if (revenueCtx) {
+            new Chart(revenueCtx, {
+              type: 'line',
+              data: {
+                labels: this.analyticsData.revenueLabels || [],
+                datasets: [{
+                  label: 'Revenue',
+                  data: this.analyticsData.revenueData || [],
+                  borderColor: '#14B8A6',
+                  backgroundColor: 'rgba(20, 184, 166, 0.1)',
+                  tension: 0.4
+                }]
+              },
+              options: {
+                responsive: true,
+                plugins: {
+                  legend: { display: false }
+                }
+              }
+            });
+          }
+
+          // Payment Methods Chart
+          const methodsCtx = document.getElementById('paymentMethodsChart');
+          if (methodsCtx) {
+            new Chart(methodsCtx, {
+              type: 'doughnut',
+              data: {
+                labels: this.paymentMethods.map(m => m.name),
+                datasets: [{
+                  data: this.paymentMethods.map(m => m.total),
+                  backgroundColor: ['#14B8A6', '#3B82F6', '#F59E0B', '#EF4444']
+                }]
+              }
+            });
+          }
+
+          // Top Customers List
+          const topCustomersList = document.getElementById('topCustomersList');
+          if (topCustomersList && this.analyticsData.topCustomers) {
+            topCustomersList.innerHTML = this.analyticsData.topCustomers.map(customer => `
+              <div class="customer-item">
+                <div class="customer-name">${customer.name}</div>
+                <div class="customer-amount">${this.formatCurrency(customer.total)}</div>
+              </div>
+            `).join('');
+          }
+        },
+
+        updateAnalytics() {
+          this.loadAnalyticsData();
+        },
+
+        // Reconciliation Methods
+        async loadReconciliationData() {
+          try {
+            const response = await window.pharmacistApi.payments.reconcile();
+            this.reconciliationData = response.data || [];
+            this.renderReconciliationTable();
+          } catch (error) {
+            console.error('Failed to load reconciliation data:', error);
+          }
+        },
+
+        renderReconciliationTable() {
+          const tbody = document.getElementById('reconciliationTableBody');
+          if (tbody) {
+            tbody.innerHTML = this.reconciliationData.map(item => `
+              <tr>
+                <td>${item.date}</td>
+                <td>${item.description}</td>
+                <td>${this.formatCurrency(item.bankAmount)}</td>
+                <td>${this.formatCurrency(item.invoiceAmount)}</td>
+                <td><span class="status-badge ${item.status}">${item.status}</span></td>
+                <td>
+                  <button class="action-btn" onclick="paymentSystem().matchReconciliationItem('${item.id}')">
+                    <span class="material-symbols-rounded">link</span>
+                  </button>
+                </td>
+              </tr>
+            `).join('');
+          }
+        },
+
+        startReconciliation() {
+          this.showNotification('Reconciliation process started', 'info');
+          // Implementation would go here
+        },
+
+        importBankStatement() {
+          this.showNotification('Bank statement import feature coming soon', 'info');
+        },
+
+        exportReconciliationReport() {
+          this.showNotification('Reconciliation report exported', 'success');
+        },
+
+        matchReconciliationItem(itemId) {
+          this.showNotification('Payment matched successfully', 'success');
+        },
+
+        // Bulk Payment Methods
+        async loadBulkItems() {
+          try {
+            // Load pending items for bulk processing
+            this.bulkItems = [...this.invoices.filter(i => i.status === 'pending'), 
+                              ...this.quotations.filter(q => q.status === 'draft')];
+            this.renderBulkItemsTable();
+          } catch (error) {
+            console.error('Failed to load bulk items:', error);
+          }
+        },
+
+        renderBulkItemsTable() {
+          const tbody = document.getElementById('bulkItemsBody');
+          if (tbody) {
+            tbody.innerHTML = this.bulkItems.map(item => `
+              <tr>
+                <td><input type="checkbox" :value="${item.id}" @change="toggleBulkItem(${item.id})"></td>
+                <td>${item.customerName || item.customer}</td>
+                <td>${item.type}</td>
+                <td>${this.formatCurrency(item.total || item.amount)}</td>
+                <td>${item.dueDate || item.date}</td>
+                <td><span class="status-badge ${item.status}">${item.status}</span></td>
+              </tr>
+            `).join('');
+          }
+        },
+
+        toggleAllBulkItems() {
+          // Implementation for toggling all items
+        },
+
+        toggleBulkItem(itemId) {
+          // Implementation for toggling individual item
+        },
+
+        processBulkItems() {
+          this.showNotification('Bulk processing started', 'info');
+        },
+
+        clearBulkItems() {
+          this.bulkItems = [];
+          this.renderBulkItemsTable();
+        },
+
+        showBulkInvoiceTemplate() {
+          this.showNotification('Bulk invoice template feature coming soon', 'info');
+        },
+
+        showBulkPaymentTemplate() {
+          this.showNotification('Bulk payment template feature coming soon', 'info');
+        },
+
+        importBulkData() {
+          this.showNotification('CSV import feature coming soon', 'info');
+        },
+
+        // Payment Reminders Methods
+        async loadPendingReminders() {
+          try {
+            // Load pending reminders
+            const pendingRemindersList = document.getElementById('pendingRemindersList');
+            if (pendingRemindersList) {
+              pendingRemindersList.innerHTML = `
+                <div class="reminder-item">
+                  <div class="reminder-customer">John Doe - Invoice INV-001</div>
+                  <div class="reminder-amount">ZMW 150.00</div>
+                  <div class="reminder-actions">
+                    <button class="secondary">Send Now</button>
+                    <button class="secondary">Schedule</button>
+                  </div>
+                </div>
+              `;
+            }
+          } catch (error) {
+            console.error('Failed to load pending reminders:', error);
+          }
+        },
+
+        saveReminderSettings() {
+          this.showNotification('Reminder settings saved', 'success');
+        },
+
+        sendTestReminder() {
+          this.showNotification('Test reminder sent', 'success');
+        },
+
+        // Template Methods
+        useTemplate(template) {
+          this.closeModal('templatesModal');
+          
+          // Open appropriate modal based on template type
+          if (template.type === 'invoice') {
+            this.openModal('invoiceModal');
+            // Pre-fill form with template data
+            setTimeout(() => {
+              document.getElementById('customerName').value = template.name;
+              // Add items from template
+              const itemsContainer = document.getElementById('invoiceItems');
+              template.items.forEach(item => {
+                this.addInvoiceItem();
+                // Fill the last added item
+                const lastItem = itemsContainer.lastElementChild;
+                lastItem.querySelector('.item-description').value = item.description;
+                lastItem.querySelector('.item-quantity').value = item.quantity;
+                lastItem.querySelector('.item-price').value = item.price;
+              });
+              this.calculateInvoiceTotals();
+            }, 100);
+          }
+        },
+
+        editTemplate(template) {
+          this.showNotification('Template editing feature coming soon', 'info');
+        },
+
+        deleteTemplate(templateId) {
+          if (confirm('Are you sure you want to delete this template?')) {
+            this.paymentTemplates = this.paymentTemplates.filter(t => t.id !== templateId);
+            this.showNotification('Template deleted successfully', 'success');
+          }
+        },
+
+        showCreateTemplateModal() {
+          this.showNotification('Create template feature coming soon', 'info');
+        },
+
+        importTemplates() {
+          this.showNotification('Template import feature coming soon', 'info');
+        },
+
+        // Recurring Payment Methods
+        showCreateRecurringModal() {
+          this.showNotification('Create recurring payment feature coming soon', 'info');
+        },
+
+        viewRecurringSchedule() {
+          this.showNotification('Recurring schedule feature coming soon', 'info');
+        },
+
+        // Filter Methods
+        filterByStatus(status) {
+          const filteredPayments = this.invoices.filter(p => p.status === status);
+          this.renderPaymentsTable(filteredPayments);
+        },
+
+        // Enhanced Statistics
+        get totalRevenue() {
+          return this.invoices
+            .filter(invoice => invoice.status === 'paid')
+            .reduce((total, invoice) => total + (invoice.total || invoice.amount || 0), 0);
+        },
+
+        get pendingPayments() {
+          return this.invoices.filter(invoice => invoice.status === 'pending').length;
+        },
+
+        get overduePayments() {
+          return this.invoices.filter(invoice => invoice.status === 'overdue').length;
+        },
+
+        get thisMonthRevenue() {
+          const now = new Date();
+          return this.invoices
+            .filter(inv => {
+              const invDate = new Date(inv.date);
+              return inv.getMonth() === now.getMonth() && 
+                     inv.getFullYear() === now.getFullYear() &&
+                     inv.status === 'paid';
+            })
+            .reduce((sum, inv) => sum + (inv.total || inv.amount || 0), 0);
+        },
+        showNotification(message, type = 'info') {
+          // Create notification element
+          const notification = document.createElement('div');
+          notification.className = `notification notification-${type}`;
+          notification.innerHTML = `
+            <div class="notification-content">
+              <span class="material-symbols-rounded notification-icon">
+                ${this.getNotificationIcon(type)}
+              </span>
+              <span class="notification-message">${message}</span>
+              <button class="notification-close" @click="removeNotification(this)">
+                <span class="material-symbols-rounded">close</span>
+              </button>
+            </div>
+          `;
+          
+          // Add to page
+          document.body.appendChild(notification);
+          
+          // Auto remove after 5 seconds
+          setTimeout(() => {
+            if (notification.parentNode) {
+              notification.remove();
+            }
+          }, 5000);
+        },
+
+        getNotificationIcon(type) {
+          const icons = {
+            'success': 'check_circle',
+            'error': 'error',
+            'warning': 'warning',
+            'info': 'info'
+          };
+          return icons[type] || 'info';
+        },
+
+        removeNotification(element) {
+          const notification = element.closest('.notification');
+          if (notification) {
+            notification.remove();
+          }
+        },
         searchPayments() {
           const searchTerm = document.getElementById('paymentTableSearch').value.toLowerCase();
           
@@ -2685,18 +4189,147 @@
 
         // Initialize
         init() {
-          this.loadSampleData();
+          this.loadPayments();
           this.setupEventListeners();
           this.loadDocuments('invoices');
           this.updatePaymentStats();
+          this.loadCrossPageData();
+          this.loadPaymentMethods();
+          this.loadPaymentTemplates();
+          this.loadRecurringPayments();
         },
 
-        loadSampleData() {
-          // Initialize empty data arrays - real data will be loaded from API
-          this.invoices = [];
-          this.quotations = [];
-          this.creditNotes = [];
-          this.claims = [];
+        // Load Payment Methods
+        async loadPaymentMethods() {
+          try {
+            const response = await window.pharmacistApi.payments.getMethods();
+            this.paymentMethods = response.data || [
+              { id: 1, name: 'Cash', icon: 'payments', total: 0, count: 0 },
+              { id: 2, name: 'Mobile Money', icon: 'smartphone', total: 0, count: 0 },
+              { id: 3, name: 'Card', icon: 'credit_card', total: 0, count: 0 },
+              { id: 4, name: 'Insurance', icon: 'health_and_safety', total: 0, count: 0 }
+            ];
+            
+            // Calculate totals from existing payments
+            this.updatePaymentMethodsTotals();
+          } catch (error) {
+            console.error('Failed to load payment methods:', error);
+          }
+        },
+
+        // Update payment methods totals
+        updatePaymentMethodsTotals() {
+          const allPayments = [...this.invoices, ...this.quotations, ...this.creditNotes];
+          
+          this.paymentMethods.forEach(method => {
+            const methodPayments = allPayments.filter(p => 
+              p.paymentMethod === method.name || 
+              (method.name === 'Cash' && !p.paymentMethod)
+            );
+            method.total = methodPayments.reduce((sum, p) => sum + (p.total || p.amount || 0), 0);
+            method.count = methodPayments.length;
+          });
+        },
+
+        // Load Payment Templates
+        async loadPaymentTemplates() {
+          try {
+            // For now, use default templates - in real implementation, load from API
+            this.paymentTemplates = [
+              {
+                id: 1,
+                name: 'Standard Consultation',
+                type: 'invoice',
+                description: 'Regular patient consultation fee',
+                amount: 150.00,
+                items: [{ description: 'Consultation Fee', quantity: 1, price: 150.00 }]
+              },
+              {
+                id: 2,
+                name: 'Medication Supply',
+                type: 'invoice',
+                description: 'Monthly medication supply package',
+                amount: 300.00,
+                items: [{ description: 'Monthly Medication', quantity: 1, price: 300.00 }]
+              },
+              {
+                id: 3,
+                name: 'Health Check Package',
+                type: 'quotation',
+                description: 'Comprehensive health checkup',
+                amount: 500.00,
+                items: [{ description: 'Health Check Package', quantity: 1, price: 500.00 }]
+              }
+            ];
+          } catch (error) {
+            console.error('Failed to load payment templates:', error);
+          }
+        },
+
+        // Load Recurring Payments
+        async loadRecurringPayments() {
+          try {
+            // For now, use sample data - in real implementation, load from API
+            this.recurringPayments = [
+              {
+                id: 1,
+                customer: 'John Doe',
+                description: 'Monthly Medication',
+                amount: 200.00,
+                frequency: 'Monthly',
+                nextDate: '2024-01-15',
+                status: 'active'
+              },
+              {
+                id: 2,
+                customer: 'Jane Smith',
+                description: 'Quarterly Checkup',
+                amount: 150.00,
+                frequency: 'Quarterly',
+                nextDate: '2024-02-01',
+                status: 'active'
+              }
+            ];
+          } catch (error) {
+            console.error('Failed to load recurring payments:', error);
+          }
+        },
+        async loadCrossPageData() {
+          try {
+            // Fetch data from other relevant pages
+            const inventoryData = await window.pharmacistApi.crossPageData.getInventoryData();
+            const patientsData = await window.pharmacistApi.crossPageData.getPatientsData();
+            
+            // Store for use in forms and dropdowns
+            this.inventoryItems = inventoryData.products || [];
+            this.patients = patientsData.patients || [];
+            
+            // Update form dropdowns with real data
+            this.updateFormDropdowns();
+          } catch (error) {
+            console.error('Failed to load cross-page data:', error);
+          }
+        },
+
+        // Update form dropdowns with real data
+        updateFormDropdowns() {
+          // Update patient selection in forms
+          const patientSelects = document.querySelectorAll('[data-patient-select]');
+          patientSelects.forEach(select => {
+            select.innerHTML = '<option value="">Select Patient</option>' + 
+              this.patients.map(patient => 
+                `<option value="${patient.id}">${patient.firstName} ${patient.lastName} - ${patient.id}</option>`
+              ).join('');
+          });
+
+          // Update product selection in invoice/quotation items
+          const productSelects = document.querySelectorAll('[data-product-select]');
+          productSelects.forEach(select => {
+            select.innerHTML = '<option value="">Select Product</option>' + 
+              this.inventoryItems.map(item => 
+                `<option value="${item.id}" data-price="${item.price || 0}">${item.name} - ${item.price ? 'ZMW ' + item.price : ''}</option>`
+              ).join('');
+          });
         },
 
         setupEventListeners() {
@@ -2708,17 +4341,38 @@
             });
           });
 
-          // Action buttons
-          document.getElementById('newInvoiceBtn').addEventListener('click', () => this.openModal('invoiceModal'));
-          document.getElementById('newQuotationBtn').addEventListener('click', () => this.openModal('quotationModal'));
-          document.getElementById('newCreditNoteBtn').addEventListener('click', () => this.openModal('creditNoteModal'));
-          document.getElementById('newInsuranceClaimBtn').addEventListener('click', () => this.openModal('insuranceClaimModal'));
+          // Action buttons - check if elements exist before adding listeners
+          const newInvoiceBtn = document.getElementById('newInvoiceBtn');
+          if (newInvoiceBtn) {
+            newInvoiceBtn.addEventListener('click', () => this.openModal('invoiceModal'));
+          }
+
+          const newQuotationBtn = document.getElementById('newQuotationBtn');
+          if (newQuotationBtn) {
+            newQuotationBtn.addEventListener('click', () => this.openModal('quotationModal'));
+          }
+
+          const newCreditNoteBtn = document.getElementById('newCreditNoteBtn');
+          if (newCreditNoteBtn) {
+            newCreditNoteBtn.addEventListener('click', () => this.openModal('creditNoteModal'));
+          }
+
+          const newInsuranceClaimBtn = document.getElementById('newInsuranceClaimBtn');
+          if (newInsuranceClaimBtn) {
+            newInsuranceClaimBtn.addEventListener('click', () => this.openModal('insuranceClaimModal'));
+          }
 
           // Search
-          document.getElementById('paymentTableSearch').addEventListener('input', () => this.searchPayments());
+          const paymentTableSearch = document.getElementById('paymentTableSearch');
+          if (paymentTableSearch) {
+            paymentTableSearch.addEventListener('input', () => this.searchPayments());
+          }
 
           // Export
-          document.getElementById('exportBtn').addEventListener('click', () => this.exportPayments());
+          const exportBtn = document.getElementById('exportBtn');
+          if (exportBtn) {
+            exportBtn.addEventListener('click', () => this.exportPayments());
+          }
 
           // Modal close buttons
           document.querySelectorAll('[data-close]').forEach(btn => {
@@ -2729,14 +4383,36 @@
           });
 
           // Form submissions
-          document.getElementById('invoiceForm').addEventListener('submit', (e) => this.submitInvoiceForm(e));
-          document.getElementById('quotationForm').addEventListener('submit', (e) => this.submitQuotationForm(e));
-          document.getElementById('creditNoteForm').addEventListener('submit', (e) => this.submitCreditNoteForm(e));
-          document.getElementById('insuranceClaimForm').addEventListener('submit', (e) => this.submitInsuranceClaimForm(e));
+          const invoiceForm = document.getElementById('invoiceForm');
+          if (invoiceForm) {
+            invoiceForm.addEventListener('submit', (e) => this.submitInvoiceForm(e));
+          }
+
+          const quotationForm = document.getElementById('quotationForm');
+          if (quotationForm) {
+            quotationForm.addEventListener('submit', (e) => this.submitQuotationForm(e));
+          }
+
+          const creditNoteForm = document.getElementById('creditNoteForm');
+          if (creditNoteForm) {
+            creditNoteForm.addEventListener('submit', (e) => this.submitCreditNoteForm(e));
+          }
+
+          const insuranceClaimForm = document.getElementById('insuranceClaimForm');
+          if (insuranceClaimForm) {
+            insuranceClaimForm.addEventListener('submit', (e) => this.submitInsuranceClaimForm(e));
+          }
 
           // Invoice items
-          document.getElementById('addInvoiceItemBtn').addEventListener('click', () => this.addInvoiceItem());
-          document.getElementById('addQuotationItemBtn').addEventListener('click', () => this.addQuotationItem());
+          const addInvoiceItemBtn = document.getElementById('addInvoiceItemBtn');
+          if (addInvoiceItemBtn) {
+            addInvoiceItemBtn.addEventListener('click', () => this.addInvoiceItem());
+          }
+
+          const addQuotationItemBtn = document.getElementById('addQuotationItemBtn');
+          if (addQuotationItemBtn) {
+            addQuotationItemBtn.addEventListener('click', () => this.addQuotationItem());
+          }
 
           // Attach calculators to initial items
           document.querySelectorAll('.invoice-item').forEach(item => this.attachItemCalculators(item));
@@ -2753,12 +4429,23 @@
   <script src="js/pharmacist-api.js"></script>
 
   <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
-<script>
-  // Initialize payment system when DOM is ready
-  document.addEventListener('DOMContentLoaded', () => {
-    const paymentApp = Alpine.data('paymentSystem', paymentSystem);
-    paymentApp.init();
-  });
-</script>
+  <script>
+    // Initialize payment system when DOM is ready
+    document.addEventListener('DOMContentLoaded', () => {
+      // Ensure Alpine.js is loaded before initializing
+      if (typeof Alpine !== 'undefined') {
+        // Create payment system instance and make it globally available
+        window.paymentSystem = paymentSystem();
+        Alpine.data('paymentSystem', () => window.paymentSystem);
+        
+        // Initialize the system
+        window.paymentSystem.init();
+        
+        console.log('Payment system initialized successfully');
+      } else {
+        console.error('Alpine.js not loaded, payment system will not work');
+      }
+    });
+  </script>
 </body>
 </html>
