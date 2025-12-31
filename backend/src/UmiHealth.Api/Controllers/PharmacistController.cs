@@ -12,8 +12,8 @@ namespace UmiHealth.Api.Controllers
 {
     public class StatusUpdateRequest
     {
-        public string NewStatus { get; set; }
-        public string Reason { get; set; }
+        public string NewStatus { get; set; } = string.Empty;
+        public string Reason { get; set; } = string.Empty;
     }
 
     [ApiController]
@@ -52,37 +52,45 @@ namespace UmiHealth.Api.Controllers
                     return Forbid();
                 }
 
-                var tasks = new[]
-                {
-                    GetPrescriptionStatsAsync(tenantId, branchId),
-                    GetPendingOrdersAsync(tenantId, branchId),
-                    GetInventoryStatsAsync(tenantId, branchId),
-                    GetPatientsServedAsync(tenantId, branchId),
-                    GetTotalPrescriptionsAsync(tenantId, branchId),
-                    GetFilledTodayAsync(tenantId, branchId),
-                    GetExpiringSoonAsync(tenantId, branchId),
-                    GetRevenueStatsAsync(tenantId, branchId),
-                    GetRecentActivityAsync(tenantId, branchId),
-                    GetAlertsAsync(tenantId, branchId)
-                };
+                var todayPrescriptionsTask = GetPrescriptionStatsAsync(tenantId, branchId);
+                var pendingOrdersTask = GetPendingOrdersAsync(tenantId, branchId);
+                var inventoryStatsTask = GetInventoryStatsAsync(tenantId, branchId);
+                var patientsServedTask = GetPatientsServedAsync(tenantId, branchId);
+                var totalPrescriptionsTask = GetTotalPrescriptionsAsync(tenantId, branchId);
+                var filledTodayTask = GetFilledTodayAsync(tenantId, branchId);
+                var expiringSoonTask = GetExpiringSoonAsync(tenantId, branchId);
+                var revenueStatsTask = GetRevenueStatsAsync(tenantId, branchId);
+                var recentActivityTask = GetRecentActivityAsync(tenantId, branchId);
+                var alertsTask = GetAlertsAsync(tenantId, branchId);
 
-                var results = await Task.WhenAll(tasks);
+                await Task.WhenAll(
+                    todayPrescriptionsTask,
+                    pendingOrdersTask,
+                    inventoryStatsTask,
+                    patientsServedTask,
+                    totalPrescriptionsTask,
+                    filledTodayTask,
+                    expiringSoonTask,
+                    revenueStatsTask,
+                    recentActivityTask,
+                    alertsTask
+                );
 
                 var dashboard = new
                 {
                     Stats = new
                     {
-                        TodayPrescriptions = results[0],
-                        PendingOrders = results[1],
-                        LowStockItems = results[2],
-                        PatientsServed = results[3],
-                        TotalPrescriptions = results[4],
-                        FilledToday = results[5],
-                        ExpiringSoon = results[6],
-                        RevenueToday = results[7]
+                        TodayPrescriptions = await todayPrescriptionsTask,
+                        PendingOrders = await pendingOrdersTask,
+                        LowStockItems = await inventoryStatsTask,
+                        PatientsServed = await patientsServedTask,
+                        TotalPrescriptions = await totalPrescriptionsTask,
+                        FilledToday = await filledTodayTask,
+                        ExpiringSoon = await expiringSoonTask,
+                        RevenueToday = await revenueStatsTask
                     },
-                    RecentActivity = results[8],
-                    Alerts = results[9],
+                    RecentActivity = await recentActivityTask,
+                    Alerts = await alertsTask,
                     LastUpdated = DateTime.UtcNow
                 };
 
@@ -225,11 +233,15 @@ namespace UmiHealth.Api.Controllers
             var today = DateTime.Today;
             var endOfDay = today.AddDays(1);
             
-            var prescriptions = await _prescriptionService.GetPrescriptionsAsync(tenantId, new PrescriptionFilter
-            {
-                StartDate = today,
-                EndDate = endOfDay
-            });
+            var prescriptions = await _prescriptionService.GetPrescriptionsAsync(tenantId, new PrescriptionFilter(
+                null, // PatientId
+                null, // DoctorId
+                today, // StartDate
+                endOfDay, // EndDate
+                null, // Status
+                null, // PrescriptionNumber
+                null // PatientName
+            ));
             
             // Filter by branch if prescriptions have branch information
             return prescriptions.Count();
@@ -238,10 +250,15 @@ namespace UmiHealth.Api.Controllers
         private async Task<int> GetPendingOrdersAsync(Guid tenantId, Guid branchId)
         {
             // Get pending prescriptions that need to be filled
-            var pendingPrescriptions = await _prescriptionService.GetPrescriptionsAsync(tenantId, new PrescriptionFilter
-            {
-                Status = "pending"
-            });
+            var pendingPrescriptions = await _prescriptionService.GetPrescriptionsAsync(tenantId, new PrescriptionFilter(
+                null, // PatientId
+                null, // DoctorId
+                null, // StartDate
+                null, // EndDate
+                "pending", // Status
+                null, // PrescriptionNumber
+                null // PatientName
+            ));
             
             return pendingPrescriptions.Count();
         }
@@ -256,10 +273,15 @@ namespace UmiHealth.Api.Controllers
         {
             // Get patients served in the last 7 days
             var weekAgo = DateTime.Today.AddDays(-7);
-            var prescriptions = await _prescriptionService.GetPrescriptionsAsync(tenantId, new PrescriptionFilter
-            {
-                StartDate = weekAgo
-            });
+            var prescriptions = await _prescriptionService.GetPrescriptionsAsync(tenantId, new PrescriptionFilter(
+                null, // PatientId
+                null, // DoctorId
+                weekAgo, // StartDate
+                null, // EndDate
+                null, // Status
+                null, // PrescriptionNumber
+                null // PatientName
+            ));
             
             // Count unique patients
             return prescriptions.Select(p => p.PatientId).Distinct().Count();
@@ -276,12 +298,15 @@ namespace UmiHealth.Api.Controllers
             var today = DateTime.Today;
             var endOfDay = today.AddDays(1);
             
-            var prescriptions = await _prescriptionService.GetPrescriptionsAsync(tenantId, new PrescriptionFilter
-            {
-                StartDate = today,
-                EndDate = endOfDay,
-                Status = "filled"
-            });
+            var prescriptions = await _prescriptionService.GetPrescriptionsAsync(tenantId, new PrescriptionFilter(
+                null, // PatientId
+                null, // DoctorId
+                today, // StartDate
+                endOfDay, // EndDate
+                "filled", // Status
+                null, // PrescriptionNumber
+                null // PatientName
+            ));
             
             return prescriptions.Count();
         }
@@ -309,10 +334,15 @@ namespace UmiHealth.Api.Controllers
                 var activities = new List<object>();
                 
                 // Get recent prescriptions
-                var recentPrescriptions = await _prescriptionService.GetPrescriptionsAsync(tenantId, new PrescriptionFilter
-                {
-                    StartDate = DateTime.Today.AddDays(-1)
-                });
+                var recentPrescriptions = await _prescriptionService.GetPrescriptionsAsync(tenantId, new PrescriptionFilter(
+                    null, // PatientId
+                    null, // DoctorId
+                    DateTime.Today.AddDays(-1), // StartDate
+                    null, // EndDate
+                    null, // Status
+                    null, // PrescriptionNumber
+                    null // PatientName
+                ));
 
                 foreach (var prescription in recentPrescriptions.Take(5))
                 {
@@ -391,10 +421,15 @@ namespace UmiHealth.Api.Controllers
                 }
 
                 // Check for pending prescriptions
-                var pendingPrescriptions = await _prescriptionService.GetPrescriptionsAsync(tenantId, new PrescriptionFilter
-                {
-                    Status = "pending"
-                });
+                var pendingPrescriptions = await _prescriptionService.GetPrescriptionsAsync(tenantId, new PrescriptionFilter(
+                    null, // PatientId
+                    null, // DoctorId
+                    null, // StartDate
+                    null, // EndDate
+                    "pending", // Status
+                    null, // PrescriptionNumber
+                    null // PatientName
+                ));
 
                 if (pendingPrescriptions.Count() > 10)
                 {
@@ -435,15 +470,15 @@ namespace UmiHealth.Api.Controllers
                 {
                     id = p.Id.ToString(),
                     patientName = $"{p.Patient?.FirstName} {p.Patient?.LastName}",
-                    patientDOB = p.Patient?.DateOfBirth?.ToString("yyyy-MM-dd"),
-                    patientPhone = p.Patient?.PhoneNumber,
+                    patientDOB = p.Patient?.DateOfBirth.ToString("yyyy-MM-dd"),
+                    patientPhone = p.Patient?.Phone,
                     allergies = p.Patient?.Allergies,
                     date = p.CreatedAt.ToString("yyyy-MM-dd"),
                     status = p.Status?.ToLower() ?? "unknown",
-                    priority = p.Priority?.ToLower() ?? "medium",
-                    insuranceStatus = p.InsuranceStatus?.ToLower() ?? "pending",
+                    priority = "medium",
+                    insuranceStatus = "pending",
                     inventoryStatus = "in-stock", // Would come from inventory service
-                    medSync = p.IsMedSync,
+                    medSync = false,
                     riskFactors = new string[0], // Would come from clinical service
                     workflow = new
                     {
@@ -453,26 +488,26 @@ namespace UmiHealth.Api.Controllers
                         dispensed = p.Status == "dispensed"
                     },
                     cdsAlerts = new object[0], // Would come from clinical decision support
-                    insuranceProvider = p.InsuranceProvider,
-                    memberId = p.InsuranceMemberId,
-                    copay = p.Copay?.ToString("F2"),
-                    authRequired = p.RequiresPriorAuthorization,
-                    medications = p.Medications?.Select(m => new
+                    insuranceProvider = p.Patient?.InsuranceProvider,
+                    memberId = p.Patient?.InsuranceNumber,
+                    copay = "0.00", // Would come from insurance service
+                    authRequired = false, // Would come from insurance service
+                    medications = p.Items?.Select(m => new
                     {
-                        name = m.ProductName,
-                        dosage = m.DosageInstructions,
+                        name = m.Product?.Name ?? "Unknown",
+                        dosage = m.Dosage,
                         quantity = m.Quantity.ToString(),
-                        daysSupply = m.DaysSupply.ToString(),
-                        instructions = m.SpecialInstructions,
-                        refills = m.RefillsRemaining.ToString(),
-                        ndc = m.NdcCode,
+                        daysSupply = $"{m.Duration} {m.DurationUnit}",
+                        instructions = m.Instructions,
+                        refills = "0", // Would come from prescription service
+                        ndc = m.Product?.NdcCode ?? "",
                         inventoryStatus = "in-stock", // Would come from inventory service
                         stockCount = 100 // Would come from inventory service
-                    }) ?? new object[0],
-                    prescriber = $"{p.Prescriber?.FirstName} {p.Prescriber?.LastName}",
-                    prescriberLicense = p.Prescriber?.LicenseNumber,
-                    prescriberDEA = p.Prescriber?.DeaNumber,
-                    prescriberPhone = p.Prescriber?.PhoneNumber
+                    }).Cast<object>().ToList() ?? new List<object>(),
+                    prescriber = $"{p.Doctor?.FirstName} {p.Doctor?.LastName}",
+                    prescriberLicense = "", // Would come from doctor profile
+                    prescriberDEA = "", // Would come from doctor profile
+                    prescriberPhone = p.Doctor?.Phone
                 });
 
                 return Ok(new { prescriptions = response });

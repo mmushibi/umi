@@ -46,9 +46,8 @@ builder.Services.AddCors(options =>
 
 // Add Infrastructure and Application layers
 builder.Services.AddInfrastructure(builder.Configuration);
-builder.Services.AddApplication();
 
-// Register services
+// Register application services
 builder.Services.AddScoped<IPatientService, PatientService>();
 
 var app = builder.Build();
