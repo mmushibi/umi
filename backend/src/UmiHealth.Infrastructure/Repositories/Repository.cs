@@ -85,9 +85,9 @@ namespace UmiHealth.Infrastructure.Repositories
             return await _dbSet.CountAsync(cancellationToken);
         }
 
-        public virtual async Task<int> CountAsync(Expression<Func<T, bool>> predicate, CancellationToken cancellationToken = default)
+        public virtual async Task<int> CountAsync(Expression<Func<T, bool>>? predicate, CancellationToken cancellationToken = default)
         {
-            return await _dbSet.CountAsync(predicate, cancellationToken);
+            return predicate == null ? await _dbSet.CountAsync(cancellationToken) : await _dbSet.CountAsync(predicate, cancellationToken);
         }
 
         public virtual async Task<bool> ExistsAsync(Expression<Func<T, bool>> predicate, CancellationToken cancellationToken = default)
@@ -169,9 +169,9 @@ namespace UmiHealth.Infrastructure.Repositories
             return await _dbSet.CountAsync(cancellationToken);
         }
 
-        public virtual async Task<int> CountAsync(Expression<Func<T, bool>> predicate, CancellationToken cancellationToken = default)
+        public virtual async Task<int> CountAsync(Expression<Func<T, bool>>? predicate, CancellationToken cancellationToken = default)
         {
-            return await _dbSet.CountAsync(predicate, cancellationToken);
+            return predicate == null ? await _dbSet.CountAsync(cancellationToken) : await _dbSet.CountAsync(predicate, cancellationToken);
         }
 
         public virtual async Task<bool> ExistsAsync(Expression<Func<T, bool>> predicate, CancellationToken cancellationToken = default)

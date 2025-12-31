@@ -109,7 +109,7 @@ namespace UmiHealth.Infrastructure.Data
 
         private void ConfigurePatient(ModelBuilder modelBuilder)
         {
-            modelBuilder.Entity<Patient>(entity =>
+            modelBuilder.Entity<UmiHealth.Domain.Entities.Patient>(entity =>
             {
                 entity.ToTable("tenant_patients");
                 entity.HasKey(e => e.Id);
@@ -132,17 +132,26 @@ namespace UmiHealth.Infrastructure.Data
                 entity.Property(e => e.Email)
                     .HasMaxLength(100);
 
-                entity.Property(e => e.EmergencyContact)
-                    .HasColumnType("jsonb");
+                entity.Property(e => e.EmergencyContactName)
+                    .HasMaxLength(100);
 
-                entity.Property(e => e.MedicalHistory)
-                    .HasColumnType("jsonb");
+                entity.Property(e => e.EmergencyContactPhone)
+                    .HasMaxLength(20);
+
+                entity.Property(e => e.EmergencyContactRelationship)
+                    .HasMaxLength(50);
 
                 entity.Property(e => e.Allergies)
                     .HasColumnType("jsonb");
 
-                entity.Property(e => e.InsuranceInfo)
+                entity.Property(e => e.ChronicConditions)
                     .HasColumnType("jsonb");
+
+                entity.Property(e => e.InsuranceProvider)
+                    .HasMaxLength(100);
+
+                entity.Property(e => e.InsurancePolicyNumber)
+                    .HasMaxLength(50);
 
                 entity.Property(e => e.Status)
                     .HasMaxLength(20)

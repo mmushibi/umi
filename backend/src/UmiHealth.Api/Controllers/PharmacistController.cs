@@ -4,6 +4,8 @@ using Microsoft.AspNetCore.SignalR;
 using UmiHealth.Api.Hubs;
 using UmiHealth.Core.Interfaces;
 using UmiHealth.Application.Services;
+using CoreIPharmacyService = UmiHealth.Core.Interfaces.IPharmacyService;
+using AppIPharmacyService = UmiHealth.Application.Services.IPharmacyService;
 using System.Linq;
 
 namespace UmiHealth.Api.Controllers
@@ -20,14 +22,14 @@ namespace UmiHealth.Api.Controllers
     public class PharmacistController : ControllerBase
     {
         private readonly IPrescriptionService _prescriptionService;
-        private readonly IPharmacyService _pharmacyService;
+        private readonly CoreIPharmacyService _pharmacyService;
         private readonly IDataSyncService _dataSyncService;
         private readonly IHubContext<PharmacyHub> _hubContext;
         private readonly ILogger<PharmacistController> _logger;
 
         public PharmacistController(
             IPrescriptionService prescriptionService,
-            IPharmacyService pharmacyService,
+            CoreIPharmacyService pharmacyService,
             IDataSyncService dataSyncService,
             IHubContext<PharmacyHub> hubContext,
             ILogger<PharmacistController> logger)

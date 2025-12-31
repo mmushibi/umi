@@ -20,7 +20,7 @@ namespace UmiHealth.Infrastructure.MultiTenant
         public async Task InvokeAsync(HttpContext context, ITenantProvider tenantProvider)
         {
             // Extract tenant from subdomain or header
-            var tenantId = ExtractTenantId(context);
+            var tenantId = GetTenantIdentifier(context);
             
             if (!string.IsNullOrEmpty(tenantId))
             {
@@ -30,12 +30,11 @@ namespace UmiHealth.Infrastructure.MultiTenant
             await _next(context);
         }
 
-        private string ExtractTenantId(HttpContext context)
+        private string? GetTenantIdentifier(HttpContext context)
         {
-            // Try to get tenant from subdomain first
+            // Try subdomain first
             var host = context.Request.Host.Host;
             var subdomain = GetSubdomain(host);
-            
             if (!string.IsNullOrEmpty(subdomain))
             {
                 return subdomain;
@@ -56,7 +55,7 @@ namespace UmiHealth.Infrastructure.MultiTenant
             return null;
         }
 
-        private string GetSubdomain(string host)
+        private string? GetSubdomain(string host)
         {
             if (string.IsNullOrEmpty(host))
                 return null;

@@ -26,10 +26,12 @@ public class Patient : TenantEntity
     public string InsuranceProvider { get; set; } = string.Empty;
     public string InsurancePolicyNumber { get; set; } = string.Empty;
     public string PatientNumber { get; set; } = string.Empty;
-    public string Phone { get; set; } = string.Empty;
-    public string EmergencyContact { get; set; } = string.Empty;
-    public string MedicalHistory { get; set; } = string.Empty;
-    public string InsuranceInfo { get; set; } = string.Empty;
+    
+    // Computed properties for backward compatibility
+    public string Phone => PhoneNumber;
+    public string EmergencyContact => $"{EmergencyContactName} ({EmergencyContactRelationship}) - {EmergencyContactPhone}";
+    public string MedicalHistory => $"{Allergies}; {ChronicConditions}";
+    public string InsuranceInfo => $"{InsuranceProvider} - {InsurancePolicyNumber}";
     public string Status { get; set; } = "active";
     public bool IsActive { get; set; } = true;
     

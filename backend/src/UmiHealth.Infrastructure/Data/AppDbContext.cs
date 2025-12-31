@@ -67,7 +67,7 @@ public class AppDbContext : DbContext
             entity.Property(e => e.UserName).IsRequired().HasMaxLength(200);
             entity.Property(e => e.FirstName).IsRequired().HasMaxLength(100);
             entity.Property(e => e.LastName).IsRequired().HasMaxLength(100);
-            entity.Property(e => e.PhoneNumber).HasMaxLength(50);
+            entity.Property(e => e.Phone).HasMaxLength(50);
             entity.HasIndex(e => e.Email).IsUnique();
             entity.HasOne(e => e.Tenant).WithMany(t => t.Users).HasForeignKey(e => e.TenantId);
             entity.HasOne(e => e.Branch).WithMany(b => b.Users).HasForeignKey(e => e.BranchId);
@@ -120,7 +120,7 @@ public class AppDbContext : DbContext
             entity.Property(e => e.FirstName).IsRequired().HasMaxLength(100);
             entity.Property(e => e.LastName).IsRequired().HasMaxLength(100);
             entity.Property(e => e.Email).HasMaxLength(200);
-            entity.Property(e => e.PhoneNumber).HasMaxLength(50);
+            entity.Property(e => e.Phone).HasMaxLength(50);
             entity.HasOne(e => e.Tenant).WithMany().HasForeignKey(e => e.TenantId);
         });
 

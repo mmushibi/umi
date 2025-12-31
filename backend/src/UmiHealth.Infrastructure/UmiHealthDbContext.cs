@@ -127,7 +127,7 @@ namespace UmiHealth.Infrastructure
                 entity.Property(e => e.FirstName).IsRequired().HasMaxLength(100);
                 entity.Property(e => e.LastName).IsRequired().HasMaxLength(100);
                 entity.Property(e => e.Email).IsRequired().HasMaxLength(255);
-                entity.Property(e => e.PhoneNumber).IsRequired().HasMaxLength(50);
+                entity.Property(e => e.Phone).IsRequired().HasMaxLength(50);
                 entity.Property(e => e.UserName).IsRequired().HasMaxLength(100);
                 entity.HasOne(e => e.Tenant).WithMany(t => t.Users).HasForeignKey(e => e.TenantId);
                 entity.HasOne(e => e.Branch).WithMany(b => b.Users).HasForeignKey(e => e.BranchId);
@@ -236,12 +236,12 @@ namespace UmiHealth.Infrastructure
                 entity.Property(e => e.Id).HasDefaultValueSql("uuid_generate_v4()");
                 entity.Property(e => e.FirstName).IsRequired().HasMaxLength(100);
                 entity.Property(e => e.LastName).IsRequired().HasMaxLength(100);
-                entity.Property(e => e.PhoneNumber).IsRequired().HasMaxLength(50);
+                entity.Property(e => e.Phone).IsRequired().HasMaxLength(50);
                 entity.Property(e => e.Email).HasMaxLength(255);
                 entity.Property(e => e.NationalId).HasMaxLength(50);
                 entity.HasOne(e => e.Tenant).WithMany(t => t.Patients).HasForeignKey(e => e.TenantId);
                 entity.HasIndex(e => e.TenantId);
-                entity.HasIndex(e => e.PhoneNumber);
+                entity.HasIndex(e => e.Phone);
                 entity.HasIndex(e => e.IsActive);
             });
         }

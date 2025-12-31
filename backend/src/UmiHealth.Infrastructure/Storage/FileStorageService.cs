@@ -6,11 +6,11 @@ namespace UmiHealth.Infrastructure.Storage
 {
     public interface IFileStorageService
     {
-        Task<string> UploadFileAsync(string containerName, string fileName, Stream fileStream, string contentType = null);
+        Task<string> UploadFileAsync(string containerName, string fileName, Stream fileStream, string? contentType = null);
         Task<Stream> DownloadFileAsync(string containerName, string fileName);
         Task<bool> DeleteFileAsync(string containerName, string fileName);
         Task<bool> FileExistsAsync(string containerName, string fileName);
-        Task<IEnumerable<string>> ListFilesAsync(string containerName, string prefix = null);
+        Task<IEnumerable<string>> ListFilesAsync(string containerName, string? prefix = null);
         Task<string> GetFileUrlAsync(string containerName, string fileName, TimeSpan? expiry = null);
         Task<string> GetPresignedUrlAsync(string containerName, string fileName, TimeSpan expiry);
     }
@@ -30,7 +30,7 @@ namespace UmiHealth.Infrastructure.Storage
             Directory.CreateDirectory(_baseStoragePath);
         }
 
-        public async Task<string> UploadFileAsync(string containerName, string fileName, Stream fileStream, string contentType = null)
+        public async Task<string> UploadFileAsync(string containerName, string fileName, Stream fileStream, string? contentType = null)
         {
             try
             {
@@ -108,7 +108,7 @@ namespace UmiHealth.Infrastructure.Storage
             }
         }
 
-        public async Task<IEnumerable<string>> ListFilesAsync(string containerName, string prefix = null)
+        public async Task<IEnumerable<string>> ListFilesAsync(string containerName, string? prefix = null)
         {
             try
             {
@@ -160,8 +160,8 @@ namespace UmiHealth.Infrastructure.Storage
 
     public class FileStorageOptions
     {
-        public string BasePath { get; set; }
-        public string BaseUrl { get; set; }
+        public string BasePath { get; set; } = string.Empty;
+        public string BaseUrl { get; set; } = string.Empty;
         public int MaxFileSizeMB { get; set; } = 10;
         public string[] AllowedExtensions { get; set; } = { ".jpg", ".jpeg", ".png", ".gif", ".pdf", ".doc", ".docx", ".txt" };
     }

@@ -4,15 +4,16 @@ using UmiHealth.Core.Entities;
 using UmiHealth.Infrastructure.Data;
 using Microsoft.EntityFrameworkCore;
 using System.Linq.Expressions;
+using UmiHealth.Persistence.Data;
 
 namespace UmiHealth.Application.Services;
 
 public class PatientService : IPatientService
 {
-    private readonly ApplicationDbContext _context;
+    private readonly AppDbContext _context;
     private readonly ILogger<PatientService> _logger;
 
-    public PatientService(ApplicationDbContext context, ILogger<PatientService> logger)
+    public PatientService(AppDbContext context, ILogger<PatientService> logger)
     {
         _context = context;
         _logger = logger;
@@ -107,7 +108,7 @@ public class PatientService : IPatientService
             var existingPatient = await _context.Patients
                 .FirstOrDefaultAsync(p => 
                     p.TenantId == tenantId && 
-                    (p.Email == request.Email || p.Phone == request.Phone), 
+                    (p.Email == request.Email || p.Phone == request.PhoneNumber), 
                     cancellationToken);
 
             if (existingPatient != null)
@@ -116,7 +117,7 @@ public class PatientService : IPatientService
                 {
                     throw new InvalidOperationException("A patient with this email already exists");
                 }
-                if (existingPatient.Phone == request.Phone)
+                if (existingPatient.Phone == request.PhoneNumber)
                 {
                     throw new InvalidOperationException("A patient with this phone number already exists");
                 }
@@ -132,7 +133,7 @@ public class PatientService : IPatientService
                 NationalId = request.NationalId,
                 PassportNumber = request.PassportNumber,
                 Email = request.Email,
-                Phone = request.Phone,
+                Phone = request.PhoneNumber,
                 AlternativePhone = request.AlternativePhone,
                 Address = request.Address,
                 City = request.City,
@@ -181,7 +182,7 @@ public class PatientService : IPatientService
                 .FirstOrDefaultAsync(p => 
                     p.TenantId == tenantId && 
                     p.Id != patientId &&
-                    (p.Email == request.Email || p.Phone == request.Phone), 
+                    (p.Email == request.Email || p.Phone == request.PhoneNumber), 
                     cancellationToken);
 
             if (existingPatient != null)
@@ -190,7 +191,7 @@ public class PatientService : IPatientService
                 {
                     throw new InvalidOperationException("A patient with this email already exists");
                 }
-                if (existingPatient.Phone == request.Phone)
+                if (existingPatient.Phone == request.PhoneNumber)
                 {
                     throw new InvalidOperationException("A patient with this phone number already exists");
                 }
@@ -202,7 +203,7 @@ public class PatientService : IPatientService
             patient.NationalId = request.NationalId;
             patient.PassportNumber = request.PassportNumber;
             patient.Email = request.Email;
-            patient.Phone = request.Phone;
+            patient.Phone = request.PhoneNumber;
             patient.AlternativePhone = request.AlternativePhone;
             patient.Address = request.Address;
             patient.City = request.City;
@@ -291,29 +292,27 @@ public class PatientService : IPatientService
             // Get prescriptions
             var prescriptions = await _context.Prescriptions
                 .Where(p => p.PatientId == patientId && p.TenantId == tenantId)
-                .Select(p => new PrescriptionSummary
-                {
-                    Id = p.Id,
-                    PrescriptionNumber = p.PrescriptionNumber,
-                    PrescriptionDate = p.CreatedAt,
-                    DoctorName = p.Prescriber != null ? $"{p.Prescriber.FirstName} {p.Prescriber.LastName}" : "Unknown",
-                    Status = p.Status,
-                    MedicationCount = _context.PrescriptionItems.Count(pi => pi.PrescriptionId == p.Id)
-                })
+                .Select(p => new PrescriptionSummary(
+                    p.Id,
+                    p.PrescriptionNumber,
+                    p.PrescriptionDate,
+                    "Doctor", // Placeholder - would need to join with User table
+                    p.Status,
+                    _context.PrescriptionItems.Count(pi => pi.PrescriptionId == p.Id)
+                ))
                 .ToListAsync(cancellationToken);
 
             // Get sales
             var sales = await _context.Sales
                 .Where(s => s.PatientId == patientId && s.TenantId == tenantId)
-                .Select(s => new SaleSummary
-                {
-                    Id = s.Id,
-                    SaleNumber = s.SaleNumber,
-                    SaleDate = s.CreatedAt,
-                    TotalAmount = s.TotalAmount,
-                    Status = s.Status,
-                    ItemCount = _context.SaleItems.Count(si => si.SaleId == s.Id)
-                })
+                .Select(s => new SaleSummary(
+                    s.Id,
+                    s.SaleNumber,
+                    s.CreatedAt,
+                    s.TotalAmount,
+                    s.Status,
+                    _context.SaleItems.Count(si => si.SaleId == s.Id)
+                ))
                 .ToListAsync(cancellationToken);
 
             // Parse allergies and conditions
@@ -321,45 +320,41 @@ public class PatientService : IPatientService
             if (!string.IsNullOrWhiteSpace(patient.Allergies))
             {
                 var allergyList = patient.Allergies.Split(',', StringSplitOptions.RemoveEmptyEntries);
-                allergies = allergyList.Select(allergy => new AllergyInfo
-                {
-                    Allergy = allergy.Trim(),
-                    Severity = "Unknown",
-                    RecordedAt = patient.CreatedAt
-                }).ToList();
+                allergies = allergyList.Select(allergy => new AllergyInfo(
+                    allergy.Trim(),
+                    "Unknown",
+                    patient.CreatedAt
+                )).ToList();
             }
 
             var conditions = new List<ConditionInfo>();
             if (!string.IsNullOrWhiteSpace(patient.ChronicConditions))
             {
                 var conditionList = patient.ChronicConditions.Split(',', StringSplitOptions.RemoveEmptyEntries);
-                conditions = conditionList.Select(condition => new ConditionInfo
-                {
-                    Condition = condition.Trim(),
-                    DiagnosisDate = patient.CreatedAt,
-                    Status = "Active"
-                }).ToList();
+                conditions = conditionList.Select(condition => new ConditionInfo(
+                    condition.Trim(),
+                    patient.CreatedAt.ToString("yyyy-MM-dd"),
+                    "Active"
+                )).ToList();
             }
 
-            var patientInfo = new PatientInfo
-            {
-                FirstName = patient.FirstName,
-                LastName = patient.LastName,
-                DateOfBirth = patient.DateOfBirth,
-                Gender = patient.Gender,
-                Email = patient.Email,
-                PhoneNumber = patient.Phone
-            };
+            var patientInfo = new PatientInfo(
+                patient.FirstName,
+                patient.LastName,
+                patient.DateOfBirth,
+                patient.Gender,
+                patient.Email,
+                patient.Phone
+            );
 
-            return new PatientHistory
-            {
-                PatientId = patientId,
-                Patient = patientInfo,
-                Prescriptions = prescriptions,
-                Sales = sales,
-                Allergies = allergies,
-                ChronicConditions = conditions
-            };
+            return new PatientHistory(
+                patientId,
+                patientInfo,
+                prescriptions,
+                sales,
+                allergies,
+                conditions
+            );
         }
         catch (Exception ex)
         {
