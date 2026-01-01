@@ -1,0 +1,3485 @@
+<!DOCTYPE html>
+<html lang="en" x-data="adminDashboard()">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Admin Dashboard - Umi Health Information Systems</title>
+  <link rel="icon" href="../../logo.png" type="image/png">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@100;400;500;600;700&family=Varela+Round&family=Nunito:wght@400;600;700&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Rounded:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <script src="js/admin-api.js"></script>
+  <style>
+    :root {
+      --color-primary: #000000;
+      --color-accent: #14B8A6;
+      --color-success: #22c55e;
+      --color-warning: #ef4444;
+      --color-text-primary: #000000;
+      --color-text-secondary: #6b7280;
+      --color-text-muted: #9ca3af;
+      --color-background: #ffffff;
+      --color-surface: #f9fafb;
+      --color-border: #e5e7eb;
+      --font-primary: 'Inter', sans-serif;
+      --sidebar-width: 280px;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      background: var(--color-background);
+      color: var(--color-text-primary);
+      font-family: 'Nunito', 'Varela Round', sans-serif;
+      font-size: 13px;
+      line-height: 1.4;
+      overflow-x: hidden;
+    }
+
+    /* Sidebar Styles */
+    .sidebar {
+      position: fixed;
+      left: 0;
+      top: 0;
+      width: var(--sidebar-width);
+      height: 100vh;
+      background: var(--color-text-primary);
+      color: var(--color-accent);
+      z-index: 1000;
+      transition: transform 0.3s ease;
+      display: flex;
+      flex-direction: column;
+      overflow-y: auto;
+      overflow-x: hidden;
+    }
+
+    .sidebar-header {
+      padding: 1.5rem;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+    }
+
+    .logo-section {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+    }
+
+    .logo-icon {
+      width: 32px;
+      height: 32px;
+      background: rgba(255, 255, 255, 0.2);
+      border-radius: 8px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.2rem;
+    }
+
+    .logo-text {
+      font-size: 1rem;
+      font-weight: 600;
+      font-family: 'Inter', sans-serif;
+    }
+
+
+    .nav-menu {
+      padding: 1rem 0;
+      flex: 1;
+      overflow-y: auto;
+    }
+
+    .nav-item {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+      padding: 0.75rem 1.25rem;
+      color: rgba(255, 255, 255, 0.8);
+      text-decoration: none;
+      transition: all 0.2s ease;
+      cursor: pointer;
+      font-size: 0.8rem;
+      font-weight: 500;
+    }
+
+    .nav-item:hover {
+      background: rgba(255, 255, 255, 0.1);
+      color: var(--color-accent);
+    }
+
+    .nav-item.active {
+      background: rgba(255, 255, 255, 0.15);
+      color: var(--color-accent);
+      border-left: 3px solid var(--color-accent);
+    }
+
+    .nav-icon {
+      font-size: 1rem;
+    }
+
+    /* Main Content Area */
+    .main-content {
+      margin-left: var(--sidebar-width);
+      min-height: 100vh;
+      transition: margin-left 0.3s ease;
+    }
+
+    /* Header Styles */
+    .header {
+      background: white;
+      border-bottom: 1px solid #e2e8f0;
+      padding: 1rem 2rem;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      position: sticky;
+      top: 0;
+      z-index: 100;
+    }
+
+    .header-left {
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+    }
+
+    .page-title-section {
+      margin-right: 2rem;
+    }
+
+    .page-title-section .page-title {
+      font-size: 1.25rem;
+      font-weight: 600;
+      color: var(--color-text-primary);
+      margin: 0;
+      font-family: 'Inter', sans-serif;
+    }
+
+    .mobile-menu-toggle {
+      display: none;
+      background: none;
+      border: none;
+      font-size: 1.25rem;
+      color: var(--color-text-secondary);
+      cursor: pointer;
+    }
+
+    .search-bar {
+      position: relative;
+      width: 400px;
+    }
+
+    .search-input {
+      width: 100%;
+      padding: 0.5rem 0.875rem 0.5rem 2.25rem;
+      border: 1px solid var(--color-border);
+      border-radius: 12px;
+      font-size: 0.75rem;
+      transition: all 0.3s ease;
+    }
+
+    .search-input:focus {
+      outline: none;
+      border-color: var(--color-primary);
+      box-shadow: 0 0 0 4px rgba(0, 0, 0, 0.1);
+    }
+
+    .search-icon {
+      position: absolute;
+      left: 0.75rem;
+      top: 50%;
+      transform: translateY(-50%);
+      color: var(--color-text-muted);
+      font-size: 1.125rem;
+    }
+
+    .header-right {
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+    }
+
+    .create-button {
+      background: var(--color-primary);
+      color: var(--color-accent);
+      border: none;
+      padding: 0.625rem 1.25rem;
+      border-radius: 10px;
+      font-size: 0.875rem;
+      font-weight: 600;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      transition: all 0.3s ease;
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+    }
+
+    .create-button:hover {
+      background: var(--color-text-secondary);
+      transform: translateY(-2px);
+      box-shadow: 0 8px 24px rgba(0, 0, 0, 0.2);
+    }
+
+    .notification-button {
+      position: relative;
+      background: none;
+      border: none;
+      font-size: 1.25rem;
+      color: var(--color-text-secondary);
+      cursor: pointer;
+      padding: 0.5rem;
+      border-radius: 10px;
+      transition: all 0.3s ease;
+    }
+
+    .notification-button:hover {
+      background: var(--color-surface);
+      color: var(--color-text-primary);
+    }
+
+    .notification-badge {
+      position: absolute;
+      top: 0.25rem;
+      right: 0.25rem;
+      width: 8px;
+      height: 8px;
+      background: var(--color-warning);
+      border-radius: 50%;
+    }
+
+    .user-profile {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+      padding: 0.5rem;
+      border-radius: 10px;
+      cursor: pointer;
+      transition: all 0.3s ease;
+    }
+
+    .user-profile:hover {
+      background: var(--color-surface);
+    }
+
+    .user-avatar {
+      width: 36px;
+      height: 36px;
+      background: var(--color-text-primary);
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: var(--color-accent);
+      font-weight: 600;
+      font-size: 0.875rem;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+    }
+
+    .user-info {
+      display: flex;
+      flex-direction: column;
+    }
+
+    .user-name {
+      font-size: 0.875rem;
+      font-weight: 600;
+      color: var(--color-text-primary);
+    }
+
+    .user-role {
+      font-size: 0.75rem;
+      color: var(--color-text-secondary);
+    }
+
+    /* Dashboard Content */
+    .dashboard-content {
+      padding: 1.25rem;
+    }
+
+    .page-title {
+      font-size: 1.875rem;
+      font-weight: 700;
+      color: var(--color-text-primary);
+      margin-bottom: 0.5rem;
+      font-family: 'Inter', sans-serif;
+    }
+
+    .page-subtitle {
+      color: var(--color-text-secondary);
+      font-size: 0.875rem;
+      margin-bottom: 2rem;
+    }
+
+    /* Stats Grid */
+    .stats-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+      gap: 1.5rem;
+      margin-bottom: 2rem;
+    }
+
+    .stat-card {
+      background: var(--color-background);
+      border-radius: 10px;
+      padding: 0.875rem;
+      border: 1px solid var(--color-border);
+      transition: all 0.3s ease;
+      box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04);
+    }
+
+    .stat-card:hover {
+      transform: translateY(-4px);
+      box-shadow: 0 8px 24px rgba(0, 0, 0, 0.12);
+    }
+
+    .stat-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 1rem;
+    }
+
+    .stat-icon {
+      width: 48px;
+      height: 48px;
+      border-radius: 16px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.5rem;
+    }
+
+    .stat-icon.primary {
+      background: rgba(0, 0, 0, 0.1);
+      color: var(--color-primary);
+    }
+
+    .stat-icon.success {
+      background: rgba(34, 197, 94, 0.1);
+      color: var(--color-success);
+    }
+
+    .stat-icon.warning {
+      background: rgba(239, 68, 68, 0.1);
+      color: var(--color-warning);
+    }
+
+    .stat-value {
+      font-size: 2rem;
+      font-weight: 700;
+      color: var(--color-text-primary);
+      margin-bottom: 0.25rem;
+      font-family: 'Inter', sans-serif;
+    }
+
+    .stat-label {
+      color: var(--color-text-secondary);
+      font-size: 0.875rem;
+      margin-bottom: 0.5rem;
+    }
+
+    .stat-change {
+      font-size: 0.75rem;
+      font-weight: 600;
+      display: flex;
+      align-items: center;
+      gap: 0.25rem;
+    }
+
+    .stat-change.positive {
+      color: var(--color-success);
+    }
+
+    .stat-change.negative {
+      color: var(--color-warning);
+    }
+
+    /* Widget Grid */
+    .widget-grid {
+      display: grid;
+      grid-template-columns: 2fr 1fr;
+      gap: 1.5rem;
+      margin-bottom: 2rem;
+    }
+
+    .widget {
+      background: var(--color-background);
+      border-radius: 10px;
+      border: 1px solid var(--color-border);
+      overflow: hidden;
+      transition: all 0.3s ease;
+      box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04);
+    }
+
+    .widget:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 8px 24px rgba(0, 0, 0, 0.12);
+    }
+
+    .widget-title {
+      font-size: 1.125rem;
+      font-weight: 600;
+      color: var(--color-text-primary);
+      font-family: 'Inter', sans-serif;
+    }
+
+    .widget-action {
+      color: var(--color-text-secondary);
+      text-decoration: none;
+      font-size: 0.875rem;
+      font-weight: 500;
+      transition: all 0.2s ease;
+    }
+
+    .widget-action:hover {
+      color: var(--color-primary);
+    }
+
+    .widget-content {
+      padding: 1.5rem;
+    }
+
+    /* Patient List */
+    .patient-list {
+      display: flex;
+      flex-direction: column;
+      gap: 1rem;
+    }
+
+    .patient-item {
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+      padding: 0.875rem;
+      border-radius: 10px;
+      transition: all 0.3s ease;
+    }
+
+    .patient-item:hover {
+      background: var(--color-surface);
+      transform: translateX(4px);
+    }
+
+    .patient-avatar {
+      width: 40px;
+      height: 40px;
+      border-radius: 50%;
+      background: var(--color-text-primary);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: var(--color-accent);
+      font-weight: 600;
+      font-size: 0.875rem;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+    }
+
+    .patient-info {
+      flex: 1;
+    }
+
+    .patient-name {
+      font-weight: 600;
+      color: var(--color-text-primary);
+      margin-bottom: 0.125rem;
+    }
+
+    .patient-email {
+      font-size: 0.75rem;
+      color: var(--color-text-secondary);
+    }
+
+    .patient-date {
+      font-size: 0.75rem;
+      color: var(--color-text-muted);
+    }
+
+    /* Product Grid */
+    .product-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: 1rem;
+    }
+
+    .product-card {
+      border: 1px solid #e2e8f0;
+      border-radius: 10px;
+      padding: 0.875rem;
+      text-align: center;
+      transition: all 0.3s ease;
+      box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04);
+    }
+
+    .product-card:hover {
+      border-color: var(--color-primary-blue);
+      transform: translateY(-4px);
+      box-shadow: 0 8px 24px rgba(0, 0, 0, 0.12);
+    }
+
+    .product-icon {
+      width: 48px;
+      height: 48px;
+      background: #f8fafc;
+      border-radius: 16px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin: 0 auto 0.75rem;
+      font-size: 1.5rem;
+      color: #64748b;
+      transition: all 0.3s ease;
+    }
+
+    .product-card:hover .product-icon {
+      background: var(--color-subtle-blue);
+      color: var(--color-primary-blue);
+    }
+
+    .product-name {
+      font-weight: 600;
+      color: #1e293b;
+      margin-bottom: 0.25rem;
+      font-size: 0.875rem;
+    }
+
+    .product-stock {
+      font-size: 0.75rem;
+      color: #64748b;
+    }
+
+    .stock-low {
+      color: #ef4444;
+      font-weight: 600;
+    }
+
+    /* Popular Products */
+    .popular-product-item {
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+      padding: 0.75rem 0;
+      border-bottom: 1px solid #f1f5f9;
+    }
+
+    .popular-product-item:last-child {
+      border-bottom: none;
+    }
+
+    .popular-product-rank {
+      width: 24px;
+      height: 24px;
+      background: #f1f5f9;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 0.75rem;
+      font-weight: 600;
+      color: #64748b;
+    }
+
+    .popular-product-info {
+      flex: 1;
+    }
+
+    .popular-product-name {
+      font-weight: 600;
+      color: #1e293b;
+      font-size: 0.875rem;
+    }
+
+    .popular-product-sales {
+      font-size: 0.75rem;
+      color: #64748b;
+    }
+
+    .popular-product-revenue {
+      text-align: right;
+    }
+
+    .revenue-amount {
+      font-weight: 600;
+      color: #1e293b;
+    }
+
+    .revenue-label {
+      font-size: 0.75rem;
+      color: #64748b;
+    }
+
+    .dropdown-toggle-icon {
+      color: var(--color-text-secondary);
+    }
+
+    .stat-change .material-symbols-rounded {
+      font-size: 1rem;
+    }
+
+    /* Responsive Design */
+    .comment-item {
+      padding: 1rem 0;
+      border-bottom: 1px solid #f1f5f9;
+    }
+
+    .comment-item:last-child {
+      border-bottom: none;
+    }
+
+    .comment-header {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+      margin-bottom: 0.5rem;
+    }
+
+    .comment-avatar {
+      width: 32px;
+      height: 32px;
+      border-radius: 50%;
+      background: linear-gradient(135deg, #000000, rgb(0, 0, 0));
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: white;
+      font-weight: 600;
+      font-size: 0.75rem;
+    }
+
+    .comment-meta {
+      flex: 1;
+    }
+
+    .comment-author {
+      font-weight: 600;
+      color: #1e293b;
+      font-size: 0.875rem;
+    }
+
+    .comment-time {
+      font-size: 0.75rem;
+      color: #64748b;
+    }
+
+    .comment-text {
+      color: #475569;
+      font-size: 0.875rem;
+      line-height: 1.5;
+    }
+
+    /* Dropdown Styles */
+    .dropdown {
+      position: relative;
+    }
+
+    .dropdown-menu {
+      position: absolute;
+      top: 100%;
+      right: 0;
+      background: white;
+      border-radius: 16px;
+      border: 1px solid #e2e8f0;
+      box-shadow: 0 8px 24px rgba(0, 0, 0, 0.12);
+      min-width: 280px;
+      z-index: 1000;
+      opacity: 0;
+      visibility: hidden;
+      transform: translateY(-10px);
+      transition: all 0.3s ease;
+    }
+
+    .dropdown-menu.show {
+      opacity: 1;
+      visibility: visible;
+      transform: translateY(0);
+    }
+
+    .dropdown-header {
+      padding: 1rem 1.25rem;
+      border-bottom: 1px solid #e2e8f0;
+      font-weight: 600;
+      color: #1e293b;
+      font-size: 0.875rem;
+    }
+
+    .dropdown-item {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+      padding: 0.75rem 1.25rem;
+      color: #475569;
+      text-decoration: none;
+      transition: all 0.2s ease;
+      font-size: 0.875rem;
+    }
+
+    .dropdown-item:hover {
+      background: #f8fafc;
+      color: #1e293b;
+    }
+
+    .dropdown-item-icon {
+      font-size: 1.125rem;
+      color: #64748b;
+    }
+
+    .dropdown-divider {
+      height: 1px;
+      background: #e2e8f0;
+      margin: 0.5rem 0;
+    }
+
+    /* Create Modal */
+    .modal-overlay {
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background: rgba(0, 0, 0, 0.5);
+      -webkit-backdrop-filter: blur(4px);
+      backdrop-filter: blur(4px);
+      z-index: 2000;
+      opacity: 0;
+      visibility: hidden;
+      transition: all 0.3s ease;
+    }
+
+    .modal-overlay.show {
+      opacity: 1;
+      visibility: visible;
+    }
+
+    .modal {
+      position: fixed;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%) scale(0.9);
+      background: white;
+      border-radius: 10px;
+      padding: 1.25rem;
+      max-width: 500px;
+      width: 90%;
+      z-index: 2001;
+      opacity: 0;
+      visibility: hidden;
+      transition: all 0.3s ease;
+      box-shadow: 0 20px 40px rgba(0, 0, 0, 0.2);
+    }
+
+    .modal-overlay.show .modal {
+      opacity: 1;
+      visibility: visible;
+      transform: translate(-50%, -50%) scale(1);
+    }
+
+    .modal-header {
+      margin-bottom: 1.5rem;
+    }
+
+    .modal-title {
+      font-size: 1.5rem;
+      font-weight: 700;
+      color: #1e293b;
+      margin-bottom: 0.5rem;
+    }
+
+    .modal-subtitle {
+      color: #64748b;
+      font-size: 0.875rem;
+    }
+
+    .modal-options {
+      display: grid;
+      gap: 1rem;
+      margin-bottom: 1.5rem;
+    }
+
+    .modal-option {
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+      padding: 1rem;
+      border: 1px solid #e2e8f0;
+      border-radius: 16px;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      text-decoration: none;
+      color: inherit;
+    }
+
+    .modal-option:hover {
+      border-color: var(--color-primary-blue);
+      background: #f8fafc;
+      transform: translateY(-2px);
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+    }
+
+    .modal-option-icon {
+      width: 48px;
+      height: 48px;
+      background: #f8fafc;
+      border-radius: 12px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.5rem;
+      color: var(--color-primary-blue);
+    }
+
+    .modal-option-content {
+      flex: 1;
+    }
+
+    .modal-option-title {
+      font-weight: 600;
+      color: #1e293b;
+      margin-bottom: 0.25rem;
+    }
+
+    .modal-option-description {
+      font-size: 0.75rem;
+      color: #64748b;
+    }
+
+    .modal-actions {
+      display: flex;
+      gap: 1rem;
+      justify-content: flex-end;
+    }
+
+    .modal-button {
+      padding: 0.625rem 1.25rem;
+      border-radius: 12px;
+      font-size: 0.875rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      border: none;
+    }
+
+    .modal-button-primary {
+      background: var(--color-primary-blue);
+      color: white;
+    }
+
+    .modal-button-primary:hover {
+      background: #1d4ed8;
+    }
+
+    .modal-button-secondary {
+      background: #f1f5f9;
+      color: #64748b;
+    }
+
+    .modal-button-secondary:hover {
+      background: #e2e8f0;
+    }
+
+    /* Search Suggestions */
+    .search-suggestions {
+      position: absolute;
+      top: 100%;
+      left: 0;
+      right: 0;
+      background: white;
+      border-radius: 16px;
+      border: 1px solid #e2e8f0;
+      box-shadow: 0 8px 24px rgba(0, 0, 0, 0.12);
+      max-height: 300px;
+      overflow-y: auto;
+      z-index: 999;
+      opacity: 0;
+      visibility: hidden;
+      transform: translateY(-10px);
+      transition: all 0.3s ease;
+    }
+
+    .search-suggestions.show {
+      opacity: 1;
+      visibility: visible;
+      transform: translateY(8px);
+    }
+
+    .suggestion-item {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+      padding: 0.75rem 1rem;
+      cursor: pointer;
+      transition: all 0.2s ease;
+    }
+
+    .suggestion-item:hover {
+      background: #f8fafc;
+    }
+
+    .suggestion-icon {
+      width: 32px;
+      height: 32px;
+      background: #f1f5f9;
+      border-radius: 8px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1rem;
+      color: #64748b;
+    }
+
+    .suggestion-content {
+      flex: 1;
+    }
+
+    .suggestion-title {
+      font-weight: 500;
+      color: #1e293b;
+      font-size: 0.875rem;
+    }
+
+    .suggestion-description {
+      font-size: 0.75rem;
+      color: #64748b;
+    }
+
+    .suggestion-type {
+      font-size: 0.75rem;
+      color: #94a3b8;
+      text-transform: uppercase;
+      font-weight: 600;
+    }
+
+    .notification-time {
+      font-size: 0.75rem;
+      color: #94a3b8;
+    }
+    
+    /* Connection Status Styles */
+    .connection-status {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      padding: 0.5rem 1rem;
+      background: var(--color-surface);
+      border-radius: 8px;
+      font-size: 0.875rem;
+    }
+    
+        
+    @keyframes pulse {
+      0% {
+        box-shadow: 0 0 0 0 rgba(239, 68, 68, 0.4);
+      }
+      70% {
+        box-shadow: 0 0 0 8px rgba(239, 68, 68, 0);
+      }
+      100% {
+        box-shadow: 0 0 0 0 rgba(239, 68, 68, 0);
+      }
+    }
+    
+    .connection-text {
+      font-weight: 600;
+    }
+    
+    .last-sync {
+      font-size: 0.75rem;
+      color: var(--color-text-muted);
+    }
+    
+    .error-notification {
+      padding: 0.75rem 1rem;
+      background: rgba(239, 68, 68, 0.1);
+      border: 1px solid rgba(239, 68, 68, 0.2);
+      border-radius: 8px;
+      margin-bottom: 0.5rem;
+    }
+    
+        
+        @media (max-width: 1024px) {
+      .widget-grid {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    .logout-section {
+      padding: 1rem;
+      border-top: 1px solid rgba(255, 255, 255, 0.1);
+      margin-top: auto;
+    }
+
+    .logout-button {
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+      padding: 0.875rem 1.5rem;
+      color: rgba(255, 255, 255, 0.8);
+      text-decoration: none;
+      transition: all 0.2s ease;
+      cursor: pointer;
+      font-size: 0.9rem;
+      font-weight: 500;
+      width: 100%;
+      border: none;
+      background: transparent;
+      text-align: left;
+    }
+
+    .logout-button:hover {
+      background: rgba(239, 68, 68, 0.1);
+      color: var(--color-warning);
+    }
+
+    .logout-icon {
+      font-size: 1.25rem;
+    }
+
+    @media (max-width: 768px) {
+      .sidebar {
+        transform: translateX(-100%);
+      }
+
+      .sidebar.open {
+        transform: translateX(0);
+      }
+
+      .main-content {
+        margin-left: 0;
+      }
+
+      .mobile-menu-toggle {
+        display: block;
+      }
+
+      .page-title-section {
+        display: block;
+        flex: 1;
+        margin-right: 0;
+      }
+
+      .page-title-section .page-title {
+        font-size: 1.125rem;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+      }
+
+      .header-left {
+        flex-direction: row;
+        align-items: center;
+        gap: 0.5rem;
+        width: 100%;
+      }
+
+      .search-bar {
+        flex: 0 0 auto;
+        width: auto;
+        min-width: 150px;
+      }
+
+      .user-info {
+        display: none;
+      }
+
+      .stats-grid {
+        grid-template-columns: 1fr;
+      }
+
+      .dashboard-content {
+        padding: 1rem;
+      }
+    }
+
+    /* Home Dashboard Styles */
+    .content-area {
+      padding: 2rem;
+      max-width: 1400px;
+      margin: 0 auto;
+    }
+
+    .content-header {
+      margin-bottom: 2rem;
+    }
+
+    .content-header p {
+      font-size: 1.125rem;
+      color: var(--color-text-secondary);
+      margin: 0;
+    }
+
+    .overview-row {
+      display: grid;
+      grid-template-columns: 2fr 1fr;
+      gap: 2rem;
+      margin-bottom: 2rem;
+    }
+
+    /* Quick Stats */
+    .quick-stats {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: 1rem;
+    }
+
+    .quick-stat-card {
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+      padding: 1.5rem;
+      background: var(--color-background);
+      border: 1px solid var(--color-border);
+      border-radius: 12px;
+      transition: all 0.2s ease;
+    }
+
+    .quick-stat-card:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+    }
+
+    .quick-stat-card.warning {
+      border-color: var(--color-warning);
+      background: rgba(239, 68, 68, 0.05);
+    }
+
+    .quick-stat-card.danger {
+      border-color: #dc2626;
+      background: rgba(220, 38, 38, 0.05);
+    }
+
+    .quick-stat-card.info {
+      border-color: #3b82f6;
+      background: rgba(59, 130, 246, 0.05);
+    }
+
+    .stat-icon {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      width: 48px;
+      height: 48px;
+      background: var(--color-surface);
+      border-radius: 12px;
+      color: var(--color-primary);
+    }
+
+    .stat-icon .material-symbols-rounded {
+      font-size: 1.5rem;
+    }
+
+    .stat-body {
+      flex: 1;
+    }
+
+    .stat-body h3 {
+      font-size: 0.875rem;
+      font-weight: 600;
+      color: var(--color-text-secondary);
+      margin: 0 0 0.25rem 0;
+    }
+
+    .stat-body strong {
+      font-size: 1.5rem;
+      font-weight: 700;
+      color: var(--color-text-primary);
+      display: block;
+      margin-bottom: 0.25rem;
+    }
+
+    .stat-meta {
+      font-size: 0.75rem;
+      color: var(--color-text-muted);
+    }
+
+    /* Quick Actions */
+    .quick-actions-grid {
+      background: var(--color-background);
+      border: 1px solid var(--color-border);
+      border-radius: 12px;
+      padding: 1.5rem;
+    }
+
+    .quick-actions-grid header {
+      margin-bottom: 1.5rem;
+    }
+
+    .quick-actions-grid h2 {
+      font-size: 1.125rem;
+      font-weight: 600;
+      color: var(--color-text-primary);
+      margin: 0 0 0.5rem 0;
+    }
+
+    .quick-actions-grid p {
+      font-size: 0.875rem;
+      color: var(--color-text-secondary);
+      margin: 0;
+    }
+
+    .quick-actions-row {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 1rem;
+    }
+
+    .quick-action-icon {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 0.5rem;
+      padding: 1.5rem;
+      background: var(--color-surface);
+      border: 1px solid var(--color-border);
+      border-radius: 12px;
+      cursor: pointer;
+      transition: all 0.2s ease;
+    }
+
+    .quick-action-icon:hover {
+      background: var(--color-primary);
+      color: var(--color-accent);
+      transform: translateY(-2px);
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+    }
+
+    .quick-action-icon .material-symbols-rounded {
+      font-size: 1.75rem;
+    }
+
+    /* Primary Metrics */
+    .primary-metrics {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+      gap: 1rem;
+      margin-bottom: 2rem;
+    }
+
+    .metric-card {
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+      padding: 1.5rem;
+      background: var(--color-background);
+      border: 1px solid var(--color-border);
+      border-radius: 12px;
+      transition: all 0.2s ease;
+    }
+
+    .metric-card:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+    }
+
+    .metric-icon {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      width: 48px;
+      height: 48px;
+      background: var(--color-primary);
+      color: var(--color-accent);
+      border-radius: 12px;
+      font-size: 1.5rem;
+    }
+
+    .metric-body {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      gap: 0.25rem;
+    }
+
+    .metric-label {
+      font-size: 0.875rem;
+      color: var(--color-text-secondary);
+    }
+
+    .metric-value {
+      font-size: 1.25rem;
+      font-weight: 700;
+      color: var(--color-text-primary);
+    }
+
+    .metric-trend {
+      font-size: 0.75rem;
+      color: var(--color-text-muted);
+    }
+
+    /* Dashboard Grid */
+    .dashboard-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+      gap: 1.5rem;
+      margin-bottom: 2rem;
+    }
+
+    .secondary-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 1.5rem;
+    }
+
+    .secondary-grid .full-width {
+      grid-column: 1 / -1;
+    }
+
+    /* Widget Styles */
+    .widget {
+      background: var(--color-background);
+      border: 1px solid var(--color-border);
+      border-radius: 12px;
+      overflow: hidden;
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
+    }
+
+    .widget-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 1.5rem;
+      border-bottom: 1px solid var(--color-border);
+    }
+
+    .widget-title {
+      font-size: 1.125rem;
+      font-weight: 600;
+      color: var(--color-text-primary);
+      margin: 0 0 0.25rem 0;
+    }
+
+    .widget-subtitle {
+      font-size: 0.875rem;
+      color: var(--color-text-secondary);
+      margin: 0;
+    }
+
+    .icon-button {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      width: 36px;
+      height: 36px;
+      background: transparent;
+      border: none;
+      border-radius: 6px;
+      cursor: pointer;
+      transition: background-color 0.2s ease;
+    }
+
+    .icon-button:hover {
+      background: var(--color-surface);
+    }
+
+    .widget-menu {
+      position: absolute;
+      top: 100%;
+      right: 0;
+      background: var(--color-background);
+      border: 1px solid var(--color-border);
+      border-radius: 8px;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+      z-index: 1000;
+      min-width: 150px;
+    }
+
+    .widget-menu button {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      width: 100%;
+      padding: 0.75rem 1rem;
+      background: transparent;
+      border: none;
+      text-align: left;
+      cursor: pointer;
+      font-size: 0.875rem;
+      color: var(--color-text-primary);
+    }
+
+    .widget-menu button:hover {
+      background: var(--color-surface);
+    }
+
+    /* Prescription Queue */
+    .queue-summary {
+      padding: 1rem 1.5rem;
+      background: var(--color-surface);
+      border-bottom: 1px solid var(--color-border);
+    }
+
+    .queue-breakdown {
+      padding: 1.5rem;
+    }
+
+    /* Critical Inventory */
+    .alert-list {
+      list-style: none;
+      padding: 1.5rem;
+      margin: 0;
+    }
+
+    .alert-list li {
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+      padding: 0.75rem 0;
+      border-bottom: 1px solid var(--color-border);
+    }
+
+    .alert-list li:last-child {
+      border-bottom: none;
+    }
+
+    .widget-footer {
+      padding: 1rem 1.5rem;
+      border-top: 1px solid var(--color-border);
+    }
+
+    .link-button {
+      background: transparent;
+      border: none;
+      color: var(--color-primary);
+      font-weight: 600;
+      cursor: pointer;
+      transition: color 0.2s ease;
+    }
+
+    .link-button:hover {
+      color: var(--color-text-primary);
+    }
+
+    /* Sales Performance */
+    .highlight-metrics {
+      padding: 1.5rem;
+    }
+
+    /* Staffing Roster */
+    .staff-list {
+      list-style: none;
+      padding: 1.5rem;
+      margin: 0;
+    }
+
+    .staff-list li {
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+      padding: 0.75rem 0;
+      border-bottom: 1px solid var(--color-border);
+    }
+
+    .staff-list li:last-child {
+      border-bottom: none;
+    }
+
+    /* Recent Activity */
+    .activity-feed {
+      padding: 1.5rem;
+    }
+
+    .activity-item {
+      display: flex;
+      align-items: start;
+      gap: 1rem;
+      padding: 0.75rem 0;
+      border-bottom: 1px solid var(--color-border);
+    }
+
+    .activity-item:last-child {
+      border-bottom: none;
+    }
+
+    /* Recent Sales */
+    .recent-sales-table {
+      padding: 1.5rem;
+    }
+
+    .sales-table-header {
+      display: grid;
+      grid-template-columns: 1fr 2fr 1fr;
+      gap: 1rem;
+      padding: 0.75rem 0;
+      border-bottom: 1px solid var(--color-border);
+      font-weight: 600;
+      font-size: 0.875rem;
+      color: var(--color-text-secondary);
+    }
+
+    .sales-table-body {
+      display: flex;
+      flex-direction: column;
+    }
+
+    .sales-row {
+      display: grid;
+      grid-template-columns: 1fr 2fr 1fr;
+      gap: 1rem;
+      padding: 0.75rem 0;
+      border-bottom: 1px solid var(--color-border);
+    }
+
+    .sales-row:last-child {
+      border-bottom: none;
+    }
+
+    /* Transactions */
+    .transactions-filter {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 1rem 1.5rem;
+      border-bottom: 1px solid var(--color-border);
+    }
+
+    .period-filter {
+      padding: 0.5rem 1rem;
+      border: 1px solid var(--color-border);
+      border-radius: 6px;
+      background: var(--color-background);
+      color: var(--color-text-primary);
+    }
+
+    .filter-actions {
+      display: flex;
+      gap: 0.5rem;
+    }
+
+    .filter-actions button {
+      padding: 0.5rem 1rem;
+      border: 1px solid var(--color-border);
+      border-radius: 6px;
+      background: var(--color-background);
+      color: var(--color-text-primary);
+      cursor: pointer;
+      transition: all 0.2s ease;
+    }
+
+    .filter-actions button:hover {
+      background: var(--color-surface);
+    }
+
+    .filter-actions button.primary {
+      background: var(--color-primary);
+      color: var(--color-accent);
+      border-color: var(--color-primary);
+    }
+
+    .table-scroll {
+      overflow-x: auto;
+    }
+
+    .product-table {
+      width: 100%;
+      border-collapse: collapse;
+    }
+
+    .product-table th {
+      background: var(--color-surface);
+      padding: 1rem;
+      text-align: left;
+      font-weight: 600;
+      font-size: 0.875rem;
+      color: var(--color-text-primary);
+      border-bottom: 1px solid var(--color-border);
+    }
+
+    .product-table td {
+      padding: 1rem;
+      border-bottom: 1px solid var(--color-border);
+      font-size: 0.875rem;
+    }
+
+    .product-table tr:hover {
+      background: var(--color-surface);
+    }
+
+    .portal-badge {
+      display: inline-block;
+      padding: 0.25rem 0.75rem;
+      border-radius: 12px;
+      font-size: 0.75rem;
+      font-weight: 600;
+      background: var(--color-surface);
+      color: var(--color-text-primary);
+    }
+
+    .status-badge {
+      display: inline-block;
+      padding: 0.25rem 0.75rem;
+      border-radius: 12px;
+      font-size: 0.75rem;
+      font-weight: 600;
+    }
+
+    .status-badge.completed {
+      background: rgba(34, 197, 94, 0.1);
+      color: var(--color-success);
+    }
+
+    .status-badge.pending {
+      background: rgba(251, 191, 36, 0.1);
+      color: #f59e0b;
+    }
+
+    .status-badge.cancelled {
+      background: rgba(239, 68, 68, 0.1);
+      color: var(--color-warning);
+    }
+
+    /* Modal Styles */
+    .overlay {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(0, 0, 0, 0.5);
+      z-index: 1000;
+    }
+
+    .modal {
+      position: fixed;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      background: var(--color-background);
+      border-radius: 12px;
+      max-width: 600px;
+      width: 90%;
+      max-height: 90vh;
+      overflow-y: auto;
+      box-shadow: 0 20px 40px rgba(0, 0, 0, 0.2);
+      z-index: 1001;
+    }
+
+    .modal[hidden] {
+      display: none;
+    }
+
+    .modal-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 1.5rem;
+      border-bottom: 1px solid var(--color-border);
+    }
+
+    .modal-header h2 {
+      font-size: 1.25rem;
+      font-weight: 600;
+      color: var(--color-text-primary);
+      margin: 0;
+    }
+
+    .modal-close {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      width: 32px;
+      height: 32px;
+      background: transparent;
+      border: none;
+      border-radius: 6px;
+      cursor: pointer;
+    }
+
+    .modal-close:hover {
+      background: var(--color-surface);
+    }
+
+    .modal-body {
+      padding: 1.5rem;
+    }
+
+    .form-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+      gap: 1rem;
+      margin-bottom: 1.5rem;
+    }
+
+    .form-grid label {
+      display: flex;
+      flex-direction: column;
+      gap: 0.5rem;
+    }
+
+    .form-grid label span {
+      font-size: 0.875rem;
+      font-weight: 600;
+      color: var(--color-text-primary);
+    }
+
+    .form-grid input,
+    .form-grid select {
+      padding: 0.75rem;
+      border: 1px solid var(--color-border);
+      border-radius: 6px;
+      background: var(--color-background);
+      color: var(--color-text-primary);
+      font-size: 0.875rem;
+    }
+
+    .form-textarea {
+      display: flex;
+      flex-direction: column;
+      gap: 0.5rem;
+    }
+
+    .form-textarea span {
+      font-size: 0.875rem;
+      font-weight: 600;
+      color: var(--color-text-primary);
+    }
+
+    .form-textarea textarea {
+      padding: 0.75rem;
+      border: 1px solid var(--color-border);
+      border-radius: 6px;
+      background: var(--color-background);
+      color: var(--color-text-primary);
+      font-size: 0.875rem;
+      resize: vertical;
+    }
+
+    .modal-footer {
+      display: flex;
+      justify-content: flex-end;
+      gap: 1rem;
+      padding: 1.5rem;
+      border-top: 1px solid var(--color-border);
+    }
+
+    .modal-footer button {
+      padding: 0.75rem 1.5rem;
+      border: none;
+      border-radius: 6px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.2s ease;
+    }
+
+    .modal-footer button.secondary {
+      background: var(--color-surface);
+      color: var(--color-text-primary);
+      border: 1px solid var(--color-border);
+    }
+
+    .modal-footer button.primary {
+      background: var(--color-primary);
+      color: var(--color-accent);
+    }
+
+    .modal-footer button:hover {
+      transform: translateY(-1px);
+    }
+
+    /* Responsive Design */
+    @media (max-width: 1024px) {
+      .overview-row {
+        grid-template-columns: 1fr;
+      }
+
+      .dashboard-grid {
+        grid-template-columns: 1fr;
+      }
+
+      .secondary-grid {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    @media (max-width: 768px) {
+      .content-area {
+        padding: 1rem;
+      }
+
+      .quick-stats {
+        grid-template-columns: 1fr;
+      }
+
+      .quick-actions-row {
+        grid-template-columns: repeat(2, 1fr);
+      }
+
+      .primary-metrics {
+        grid-template-columns: 1fr;
+      }
+
+      .transactions-filter {
+        flex-direction: column;
+        gap: 1rem;
+        align-items: stretch;
+      }
+
+      .filter-actions {
+        justify-content: stretch;
+      }
+
+      .filter-actions button {
+        flex: 1;
+      }
+    }
+  </style>
+</head>
+<body>
+  <!-- Sidebar -->
+  <aside class="sidebar" :class="sidebarOpen ? 'open' : ''">
+    <div class="sidebar-header">
+      <div class="logo-section">
+        <div class="logo-icon">
+          <span class="material-symbols-rounded">medication</span>
+        </div>
+        <div class="logo-text">Umi Health</div>
+      </div>
+    </div>
+
+    <nav class="nav-menu">
+      <a href="home.html" class="nav-item active">
+        <span class="material-symbols-rounded nav-icon">home</span>
+        <span>Home</span>
+      </a>
+      <a href="point-of-sale.html" class="nav-item">
+        <span class="material-symbols-rounded nav-icon">point_of_sale</span>
+        <span>Point of Sale</span>
+      </a>
+      <a href="inventory.html" class="nav-item">
+        <span class="material-symbols-rounded nav-icon">inventory_2</span>
+        <span>Inventory</span>
+      </a>
+      <a href="prescriptions.html" class="nav-item">
+        <span class="material-symbols-rounded nav-icon">prescriptions</span>
+        <span>Prescriptions</span>
+      </a>
+      <a href="patients.html" class="nav-item">
+        <span class="material-symbols-rounded nav-icon">people</span>
+        <span>Patients</span>
+      </a>
+      <a href="sales.html" class="nav-item">
+        <span class="material-symbols-rounded nav-icon">receipt_long</span>
+        <span>Sales</span>
+      </a>
+      <a href="payments.html" class="nav-item">
+        <span class="material-symbols-rounded nav-icon">payments</span>
+        <span>Payments</span>
+      </a>
+      <a href="reports.html" class="nav-item">
+        <span class="material-symbols-rounded nav-icon">analytics</span>
+        <span>Reports</span>
+      </a>
+      <a href="user-management.html" class="nav-item">
+        <span class="material-symbols-rounded nav-icon">admin_panel_settings</span>
+        <span>User Management</span>
+      </a>
+      <!-- Branch navigation - always visible for all users -->
+      <a href="branches.html" class="nav-item">
+        <span class="material-symbols-rounded nav-icon">business</span>
+        <span>Branches</span>
+      </a>
+      <a href="account.html" class="nav-item">
+        <span class="material-symbols-rounded nav-icon">settings</span>
+        <span>Account</span>
+      </a>
+    </nav>
+    
+    <div class="logout-section">
+      <button class="logout-button" @click="logout()">
+        <span class="material-symbols-rounded logout-icon">logout</span>
+        <span>Logout</span>
+      </button>
+    </div>
+  </aside>
+
+  <!-- Main Content -->
+  <main class="main-content">
+    <!-- Header -->
+    <header class="header">
+      <div class="header-left">
+        <button class="mobile-menu-toggle" @click="sidebarOpen = !sidebarOpen">
+          <span class="material-symbols-rounded">menu</span>
+        </button>
+        
+        <div class="page-title-section">
+          <h1 class="page-title">Home Overview</h1>
+        </div>
+      </div>
+
+      <div class="header-right">
+                
+        <!-- Error Notification -->
+        <div class="error-notification" x-show="error" x-transition>
+          <div class="flex items-center gap-2 text-red-600">
+            <span class="material-symbols-rounded">error</span>
+            <span x-text="error"></span>
+            <button @click="error = null" class="ml-2">
+              <span class="material-symbols-rounded">close</span>
+            </button>
+          </div>
+        </div>
+        
+              </div>
+    </header>
+
+    <!-- Home Content -->
+    <div class="dashboard-content">
+      <section class="content-area">
+        <div class="content-header">
+          <div>
+            <p>Unified view of prescriptions, inventory health, sales velocity, and staffing coverage.</p>
+          </div>
+        </div>
+
+        <div class="overview-row">
+          <section class="quick-stats" aria-label="Inventory snapshot">
+            <article class="quick-stat-card" data-stat="inventory-total">
+              <div class="stat-icon" aria-hidden="true">
+                <span class="material-symbols-rounded">inventory_2</span>
+              </div>
+              <div class="stat-body">
+                <h3>Total Products</h3>
+                <strong id="totalProductsCount" x-text="dashboardStats.totalUsers"></strong>
+                <span class="stat-meta" id="totalProductsMeta" x-show="lastSyncTime" x-text="'Updated ' + formatTimeAgo(lastSyncTime)"></span>
+              </div>
+            </article>
+            <article class="quick-stat-card warning" data-stat="inventory-low">
+              <div class="stat-icon" aria-hidden="true">
+                <span class="material-symbols-rounded">warning</span>
+              </div>
+              <div class="stat-body">
+                <h3>Low Stock</h3>
+                <strong id="lowStockCount" x-text="dashboardStats.lowStockItems"></strong>
+                <span class="stat-meta" id="lowStockMeta" x-show="dashboardStats.lowStockItems > 0">Needs reorder</span>
+                <span class="stat-meta" id="lowStockMeta" x-show="dashboardStats.lowStockItems === 0">No items low in stock</span>
+              </div>
+            </article>
+            <article class="quick-stat-card danger" data-stat="inventory-out">
+              <div class="stat-icon" aria-hidden="true">
+                <span class="material-symbols-rounded">cancel</span>
+              </div>
+              <div class="stat-body">
+                <h3>Out of Stock</h3>
+                <strong id="outOfStockCount" x-text="dashboardStats.outOfStockItems"></strong>
+                <span class="stat-meta" id="outOfStockMeta" x-show="dashboardStats.outOfStockItems > 0">Immediate action</span>
+                <span class="stat-meta" id="outOfStockMeta" x-show="dashboardStats.outOfStockItems === 0">No items out of stock</span>
+              </div>
+            </article>
+            <article class="quick-stat-card info" data-stat="inventory-expiring">
+              <div class="stat-icon" aria-hidden="true">
+                <span class="material-symbols-rounded">event_upcoming</span>
+              </div>
+              <div class="stat-body">
+                <h3>Expiring Soon</h3>
+                <strong id="expiringCount" x-text="dashboardStats.expiringItems"></strong>
+                <span class="stat-meta" id="expiringMeta" x-show="dashboardStats.expiringItems > 0">Within 30 days</span>
+                <span class="stat-meta" id="expiringMeta" x-show="dashboardStats.expiringItems === 0">No items expiring soon</span>
+              </div>
+            </article>
+          </section>
+
+          <section class="quick-actions-grid" aria-label="Quick actions">
+            <header>
+              <h2>Quick Actions</h2>
+              <p>Launch common workflows without leaving the dashboard.</p>
+            </header>
+            <div class="quick-actions-row">
+              <button class="quick-action-icon" data-action="new-sale" aria-label="New Sale" @click="handleQuickAction('new-sale')">
+                <span class="material-symbols-rounded">point_of_sale</span>
+              </button>
+              <button class="quick-action-icon" data-action="add-customer" aria-label="Add Customer" @click="handleQuickAction('add-customer')">
+                <span class="material-symbols-rounded">person_add</span>
+              </button>
+              <button class="quick-action-icon" data-action="add-inventory" aria-label="Add Inventory" @click="handleQuickAction('add-inventory')">
+                <span class="material-symbols-rounded">add_shopping_cart</span>
+              </button>
+              <button class="quick-action-icon" data-action="new-prescription" aria-label="New Prescription" @click="handleQuickAction('new-prescription')">
+                <span class="material-symbols-rounded">medical_services</span>
+              </button>
+            </div>
+          </section>
+        </div>
+
+        <div class="primary-metrics" aria-label="High level pharmacy metrics">
+          <article class="metric-card" data-metric="daily-sales">
+            <span class="metric-icon material-symbols-rounded" aria-hidden="true">payments</span>
+            <div class="metric-body">
+              <span class="metric-label">Today's Sales</span>
+              <strong class="metric-value" id="metricDailySales" x-text="formatCurrency(todaySales)"></strong>
+              <span class="metric-trend" id="metricDailySalesTrend" x-text="salesTrend"></span>
+            </div>
+          </article>
+          <article class="metric-card" data-metric="prescriptions-filled">
+            <span class="metric-icon material-symbols-rounded" aria-hidden="true">pill</span>
+            <div class="metric-body">
+              <span class="metric-label">Prescriptions Filled</span>
+              <strong class="metric-value" id="metricPrescriptionsFilled" x-text="prescriptionsFilled"></strong>
+              <span class="metric-trend" id="metricPrescriptionsTrend" x-show="prescriptionsFilled > 0">Processing</span>
+              <span class="metric-trend" id="metricPrescriptionsTrend" x-show="prescriptionsFilled === 0">No prescriptions</span>
+            </div>
+          </article>
+          <article class="metric-card" data-metric="wait-time">
+            <span class="metric-icon material-symbols-rounded" aria-hidden="true">schedule</span>
+            <div class="metric-body">
+              <span class="metric-label">Avg Wait Time</span>
+              <strong class="metric-value" id="metricAverageWait" x-text="averageWaitTime + ' min'"></strong>
+              <span class="metric-trend" id="metricWaitTrend" x-show="averageWaitTime > 0">Average wait time</span>
+              <span class="metric-trend" id="metricWaitTrend" x-show="averageWaitTime === 0">No data available</span>
+            </div>
+          </article>
+          <article class="metric-card" data-metric="inventory-health">
+            <span class="metric-icon material-symbols-rounded" aria-hidden="true">inventory_2</span>
+            <div class="metric-body">
+              <span class="metric-label">Inventory Health</span>
+              <strong class="metric-value" id="metricInventoryHealth" x-text="inventoryHealth + '%'"></strong>
+              <span class="metric-trend" id="metricInventoryTrend" x-show="inventoryHealth > 0">Inventory status</span>
+              <span class="metric-trend" id="metricInventoryTrend" x-show="inventoryHealth === 0">No data available</span>
+            </div>
+          </article>
+        </div>
+
+        <div class="dashboard-grid">
+          <article class="widget prescription-queue">
+            <header class="widget-header">
+              <div>
+                <h3 class="widget-title">Prescription Queue</h3>
+                <p class="widget-subtitle">Monitor throughput across every dispensing stage</p>
+              </div>
+              <button class="icon-button" type="button" data-menu="queue" aria-haspopup="true" aria-expanded="false" aria-controls="queueMenu" aria-label="Prescription queue menu">
+                <span class="material-symbols-rounded" aria-hidden="true">more_horiz</span>
+              </button>
+              <div class="widget-menu" id="queueMenu" hidden>
+                <button type="button" data-action="view-queue"><span class="material-symbols-rounded" aria-hidden="true">timeline</span>View full queue</button>
+              </div>
+            </header>
+            <div class="queue-summary" id="queueSummary">
+              <div x-show="!prescriptionQueue.length && !loading" class="text-gray-500 text-center py-4">
+                <span class="material-symbols-rounded">inbox</span>
+                <p>No prescription queue data available</p>
+                <p class="text-sm">Connect to server to see real-time data</p>
+              </div>
+            </div>
+            <div class="queue-breakdown" id="queueBreakdown" role="list"></div>
+          </article>
+
+          <article class="widget critical-inventory">
+            <header class="widget-header">
+              <div>
+                <h3 class="widget-title">Critical Inventory Alerts</h3>
+                <p class="widget-subtitle">Items approaching reorder or expiry thresholds</p>
+              </div>
+            </header>
+            <ul class="alert-list" id="criticalInventoryList" role="list">
+              <li x-show="!criticalInventory.length && !loading" class="text-gray-500 text-center py-4">
+                <span class="material-symbols-rounded">check_circle</span>
+                <p>No critical inventory alerts</p>
+                <p class="text-sm" x-show="connectionStatus !== 'connected'">Connect to server to see real-time alerts</p>
+              </li>
+            </ul>
+            <footer class="widget-footer">
+              <button class="link-button" type="button" data-action="open-inventory" @click="handleQuickAction('open-inventory')">Open inventory workspace</button>
+            </footer>
+          </article>
+
+          <article class="widget sales-performance">
+            <header class="widget-header">
+              <div>
+                <h3 class="widget-title">Sales &amp; Performance</h3>
+                <p class="widget-subtitle">KPIs compared to the 7-day rolling average</p>
+              </div>
+            </header>
+            <div class="highlight-metrics" id="salesPerformanceHighlights">
+              <div x-show="!salesPerformance.length && !loading" class="text-gray-500 text-center py-4">
+                <span class="material-symbols-rounded">trending_up</span>
+                <p>No sales performance data available</p>
+                <p class="text-sm" x-show="connectionStatus !== 'connected'">Connect to server to see real-time metrics</p>
+              </div>
+            </div>
+            <footer class="widget-footer">
+              <button class="link-button" type="button" data-action="open-reports" @click="handleQuickAction('open-reports')">View detailed reports</button>
+            </footer>
+          </article>
+
+          <article class="widget staffing-roster">
+            <header class="widget-header">
+              <div>
+                <h3 class="widget-title">Staffing &amp; Coverage</h3>
+                <p class="widget-subtitle">Who's on duty and any staffing gaps</p>
+              </div>
+            </header>
+            <ul class="staff-list" id="staffRoster" role="list">
+              <li x-show="!staffRoster.length && !loading" class="text-gray-500 text-center py-4">
+                <span class="material-symbols-rounded">people</span>
+                <p>No staff roster data available</p>
+                <p class="text-sm" x-show="connectionStatus !== 'connected'">Connect to server to see real-time staffing information</p>
+              </li>
+            </ul>
+            <footer class="widget-footer">
+              <button class="link-button" type="button" data-action="manage-schedule" @click="handleQuickAction('manage-schedule')">Manage schedule</button>
+            </footer>
+          </article>
+        </div>
+
+        <div class="secondary-grid">
+          <article class="widget recent-activity">
+            <header class="widget-header">
+              <div>
+                <h3 class="widget-title">Recent Activity</h3>
+                <p class="widget-subtitle">Team actions and key system events</p>
+              </div>
+            </header>
+            <div class="activity-feed" id="recentActivityList" role="list">
+              <div x-show="!recentActivity.length && !loading" class="text-gray-500 text-center py-4" role="listitem">
+                <span class="material-symbols-rounded">history</span>
+                <p>No recent activity</p>
+                <p class="text-sm" x-show="connectionStatus !== 'connected'">Connect to server to see real-time activity</p>
+              </div>
+            </div>
+          </article>
+
+          <article class="widget recent-sales">
+            <header class="widget-header">
+              <div>
+                <h3 class="widget-title">Recent Sales</h3>
+                <p class="widget-subtitle">Latest prescriptions processed today</p>
+              </div>
+              <button class="icon-button" type="button" data-menu="recent-sales" aria-haspopup="true" aria-expanded="false" aria-controls="recentSalesMenu" aria-label="Recent sales menu">
+                <span class="material-symbols-rounded" aria-hidden="true">more_horiz</span>
+              </button>
+              <div class="widget-menu" id="recentSalesMenu" hidden>
+                <button type="button" data-action="view-all-sales"><span class="material-symbols-rounded" aria-hidden="true">list</span>Full sales list</button>
+                <button type="button" data-action="download-sales"><span class="material-symbols-rounded" aria-hidden="true">download</span>Export</button>
+              </div>
+            </header>
+            <div class="recent-sales-table" role="table" aria-label="Recent pharmacy sales">
+              <div class="sales-table-header" role="row">
+                <span role="columnheader">Time</span>
+                <span role="columnheader">Patient / Item</span>
+                <span role="columnheader">Amount</span>
+              </div>
+              <div class="sales-table-body" id="recentSalesList" role="rowgroup">
+                <div x-show="!recentSales.length && !loading" class="text-gray-500 text-center py-4" role="row">
+                  <div role="cell" colspan="3">
+                    <span class="material-symbols-rounded">receipt_long</span>
+                    <p>No recent sales data available</p>
+                    <p class="text-sm" x-show="connectionStatus !== 'connected'">Connect to server to see real-time sales</p>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </article>
+
+          <!-- Recent Transactions from All Portals -->
+          <article class="widget recent-transactions full-width">
+            <header class="widget-header">
+              <div>
+                <h3 class="widget-title">All Portal Transactions</h3>
+                <p class="widget-subtitle">Transactions from Cashier, Pharmacist, and Admin portals</p>
+              </div>
+              <button class="icon-button" type="button" data-menu="all-transactions" aria-haspopup="true"
+                aria-expanded="false" aria-controls="allTransactionsMenu" aria-label="All transactions menu">
+                <span class="material-symbols-rounded" aria-hidden="true">more_horiz</span>
+              </button>
+              <div class="widget-menu" id="allTransactionsMenu" hidden>
+                <button type="button" data-action="refresh-all-transactions"><span class="material-symbols-rounded"
+                    aria-hidden="true">refresh</span>Refresh list</button>
+                <button type="button" data-action="view-all-transactions"><span class="material-symbols-rounded"
+                    aria-hidden="true">list</span>View all transactions</button>
+                <button type="button" data-action="generate-all-report"><span class="material-symbols-rounded"
+                    aria-hidden="true">download</span>Generate Report</button>
+              </div>
+            </header>
+            <div class="transactions-filter">
+              <select id="adminPeriodFilter" class="period-filter" title="Filter transactions by time period" aria-label="Filter transactions by time period" x-model="transactionPeriod">
+                <option value="today">Today</option>
+                <option value="yesterday">Yesterday</option>
+                <option value="this-week">This Week</option>
+                <option value="all">All Time</option>
+              </select>
+              <div class="filter-actions">
+                <button class="secondary" id="adminPrintReportBtn" @click="printTransactionReport">Print Report</button>
+                <button class="primary" id="adminGenerateReportBtn" @click="generateTransactionReport">Download PDF</button>
+              </div>
+            </div>
+            <div class="table-scroll">
+              <table class="product-table" aria-label="All portal transactions table">
+                <thead>
+                  <tr>
+                    <th scope="col">Time</th>
+                    <th scope="col">Receipt</th>
+                    <th scope="col">Customer</th>
+                    <th scope="col">Items</th>
+                    <th scope="col">Payment</th>
+                    <th scope="col">Amount</th>
+                    <th scope="col">Portal</th>
+                    <th scope="col">Status</th>
+                  </tr>
+                </thead>
+                <tbody id="adminTransactionsList">
+                  <template x-for="transaction in filteredTransactions" :key="transaction.id">
+                    <tr>
+                      <td x-text="transaction.time"></td>
+                      <td x-text="transaction.receipt"></td>
+                      <td x-text="transaction.customer"></td>
+                      <td x-text="transaction.items"></td>
+                      <td x-text="transaction.payment"></td>
+                      <td x-text="formatCurrency(transaction.amount)"></td>
+                      <td><span class="portal-badge" x-text="transaction.portal"></span></td>
+                      <td><span class="status-badge" :class="transaction.status.toLowerCase()" x-text="transaction.status"></span></td>
+                    </tr>
+                  </template>
+                </tbody>
+              </table>
+            </div>
+          </article>
+        </div>
+      </section>
+    </div>
+
+    <div class="overlay" id="modalOverlay" hidden></div>
+
+    <section class="modal" id="productModal" role="dialog" aria-modal="true" aria-labelledby="productModalTitle"
+      hidden>
+      <div class="modal-content">
+        <header class="modal-header">
+          <h2 id="productModalTitle">Add Product</h2>
+          <button type="button" class="modal-close" data-close="productModal" aria-label="Close add product form">
+            <span class="material-symbols-rounded" aria-hidden="true">close</span>
+          </button>
+        </header>
+        <form id="productForm" class="modal-body" @submit.prevent="submitProductForm">
+          <div class="form-grid">
+            <label>
+              <span>Brand Name</span>
+              <input type="text" id="formProductName" name="productName" required x-model="newProduct.brandName">
+            </label>
+            <label>
+              <span>Generic Name</span>
+              <input type="text" id="formGenericName" name="genericName" required x-model="newProduct.genericName">
+            </label>
+            <label>
+              <span>Category</span>
+              <select id="formCategory" name="category" required x-model="newProduct.category">
+                <option value="">Select category</option>
+                <option value="Antibiotics">Antibiotics</option>
+                <option value="Analgesics">Analgesics</option>
+                <option value="Antimalarials">Antimalarials</option>
+                <option value="Antihypertensives">Antihypertensives</option>
+                <option value="Diabetes">Diabetes</option>
+                <option value="Vitamins & Supplements">Vitamins & Supplements</option>
+                <option value="OTC">OTC</option>
+                <option value="Community Health">Community Health</option>
+                <option value="Endocrinology">Endocrinology</option>
+              </select>
+            </label>
+            <label>
+              <span>Manufacture Date</span>
+              <input type="date" id="formManufactureDate" name="manufactureDate" required x-model="newProduct.manufactureDate">
+            </label>
+            <label>
+              <span>Batch Number</span>
+              <input type="text" id="formBatchNumber" name="batchNumber" required x-model="newProduct.batchNumber">
+            </label>
+            <label>
+              <span>License Number</span>
+              <input type="text" id="formLicenseNumber" name="licenseNumber" required x-model="newProduct.licenseNumber">
+            </label>
+            <label>
+              <span>Zambia REG Number</span>
+              <input type="text" id="formZambiaRegNumber" name="zambiaRegNumber" required x-model="newProduct.zambiaRegNumber">
+            </label>
+            <label>
+              <span>Packing Type</span>
+              <select id="formPackingType" name="packingType" required x-model="newProduct.packingType">
+                <option value="">Select packing type</option>
+                <option value="Box">Box</option>
+                <option value="Blister">Blister</option>
+                <option value="Bottle">Bottle</option>
+                <option value="Tube">Tube</option>
+                <option value="Sachet">Sachet</option>
+                <option value="Vial">Vial</option>
+                <option value="Ampoule">Ampoule</option>
+              </select>
+            </label>
+            <label>
+              <span>Cost Price (ZMW)</span>
+              <input type="number" id="formCostPrice" name="costPrice" min="0" step="0.01" required x-model="newProduct.costPrice">
+            </label>
+            <label>
+              <span>Selling Price (ZMW)</span>
+              <input type="number" id="formSellingPrice" name="sellingPrice" min="0" step="0.01" required x-model="newProduct.sellingPrice">
+            </label>
+            <label>
+              <span>Stock Quantity</span>
+              <input type="number" id="formStock" name="stockQuantity" min="0" required x-model="newProduct.stockQuantity">
+            </label>
+            <label>
+              <span>Expiry Date</span>
+              <input type="date" id="formExpiry" name="expiryDate" required x-model="newProduct.expiryDate">
+            </label>
+          </div>
+          <label class="form-textarea">
+            <span>Description</span>
+            <textarea id="formDescription" name="description" rows="3"
+              placeholder="Add optional notes about the product" x-model="newProduct.description"></textarea>
+          </label>
+        </form>
+        <footer class="modal-footer">
+          <button type="button" class="secondary" @click="showProductModal = false">Cancel</button>
+          <button type="submit" form="productForm" class="primary">Save &amp; Continue</button>
+        </footer>
+      </div>
+    </section>
+
+    <section class="modal" id="actionModal" role="dialog" aria-modal="true" aria-labelledby="actionModalTitle"
+      hidden>
+      <div class="modal-content">
+        <header class="modal-header">
+          <h2 id="actionModalTitle">Product Details</h2>
+          <button type="button" class="modal-close" data-close="actionModal" aria-label="Close dialog">
+            <span class="material-symbols-rounded" aria-hidden="true">close</span>
+          </button>
+        </header>
+        <div class="modal-body" id="actionModalBody"></div>
+        <footer class="modal-footer" id="actionModalFooter"></footer>
+      </div>
+    </section>
+
+      <!-- Create Modal -->
+      <div class="modal-overlay" :class="showCreateModal ? 'show' : ''" @click="showCreateModal = false">
+        <div class="modal" @click.stop>
+          <div class="modal-header">
+            <h2 class="modal-title">Create New</h2>
+            <p class="modal-subtitle">What would you like to create today?</p>
+          </div>
+          
+          <div class="modal-options">
+            <a href="#" class="modal-option" @click="navigateToCreate('sale')">
+              <div class="modal-option-icon">
+                <span class="material-symbols-rounded">point_of_sale</span>
+              </div>
+              <div class="modal-option-content">
+                <div class="modal-option-title">New Sale</div>
+                <div class="modal-option-description">Process a new sales transaction</div>
+              </div>
+            </a>
+            
+            <a href="#" class="modal-option" @click="navigateToCreate('patient')">
+              <div class="modal-option-icon">
+                <span class="material-symbols-rounded">person_add</span>
+              </div>
+              <div class="modal-option-content">
+                <div class="modal-option-title">New Patient</div>
+                <div class="modal-option-description">Register a new patient/customer</div>
+              </div>
+            </a>
+            
+            <a href="#" class="modal-option" @click="navigateToCreate('inventory')">
+              <div class="modal-option-icon">
+                <span class="material-symbols-rounded">inventory_2</span>
+              </div>
+              <div class="modal-option-content">
+                <div class="modal-option-title">Add Inventory</div>
+                <div class="modal-option-description">Add new products to inventory</div>
+              </div>
+            </a>
+            
+            <a href="#" class="modal-option" @click="navigateToCreate('prescription')">
+              <div class="modal-option-icon">
+                <span class="material-symbols-rounded">prescriptions</span>
+              </div>
+              <div class="modal-option-content">
+                <div class="modal-option-title">New Prescription</div>
+                <div class="modal-option-description">Create a new prescription</div>
+              </div>
+            </a>
+          </div>
+          
+          <div class="modal-actions">
+            <button class="modal-button modal-button-secondary" @click="showCreateModal = false">
+              Cancel
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </main>
+
+  <!-- Alpine.js Component -->
+  <script>
+    function adminDashboard() {
+      return {
+        // Data state
+        dashboardStats: {
+          totalUsers: 0,
+          activeUsers: 0,
+          totalBranches: 0,
+          activeBranches: 0,
+          totalSales: 0,
+          todaySales: 0,
+          pendingPrescriptions: 0,
+          lowStockItems: 0
+        },
+        recentActivity: [],
+        systemHealth: 'good',
+        loading: false,
+        error: null,
+        
+        // Connection status
+        connectionStatus: 'disconnected', // 'connected', 'disconnected', 'error', 'connecting'
+        lastSyncTime: null,
+        apiReachable: false,
+        
+        // WebSocket connection
+        websocket: null,
+        reconnectAttempts: 0,
+        maxReconnectAttempts: 5,
+        reconnectInterval: null,
+        
+        // Initialize data sync
+        dataSync: null,
+        
+        // UI state
+        sidebarOpen: false,
+        showCreateModal: false,
+        showProductModal: false,
+        searchQuery: '',
+        transactionPeriod: 'today',
+        
+        // Dashboard metrics
+        totalProducts: 0,
+        lowStockItems: 0,
+        outOfStockItems: 0,
+        expiringItems: 0,
+        todaySales: 0,
+        salesTrend: '0%',
+        prescriptionsFilled: 0,
+        averageWaitTime: 0,
+        inventoryHealth: 0,
+        
+        // Data arrays - synced with shared data system
+        transactions: [],
+        recentSales: [],
+        criticalInventory: [],
+        prescriptionQueue: [],
+        staffRoster: [],
+        recentActivity: [],
+        salesPerformance: [],
+        
+        // User and pharmacy info - will be loaded from API
+        pharmacyInfo: {
+          name: '',
+          location: ''
+        },
+        userInfo: {
+          name: '',
+          role: '',
+          initials: ''
+        },
+        
+        searchSuggestions: [],
+        
+        newProduct: {
+          brandName: '',
+          genericName: '',
+          category: '',
+          manufactureDate: '',
+          batchNumber: '',
+          licenseNumber: '',
+          zambiaRegNumber: '',
+          packingType: '',
+          costPrice: '',
+          sellingPrice: '',
+          stockQuantity: '',
+          expiryDate: '',
+          description: ''
+        },
+        
+        init() {
+          this.loadPharmacyInfo();
+          this.initializeDataSync();
+          this.checkApiConnection();
+          this.initializeWebSocket();
+          this.renderDashboardContent();
+          this.setupEventListeners();
+          
+          // Set up periodic updates only if WebSocket is not available
+          this.startPeriodicUpdates();
+          
+          console.log('Admin dashboard initialized with real-time data integration');
+        },
+        
+        loadPharmacyInfo() {
+          // Load pharmacy information from localStorage or API
+          try {
+            const savedPharmacy = localStorage.getItem('pharmacyInfo');
+            if (savedPharmacy) {
+              this.pharmacyInfo = JSON.parse(savedPharmacy);
+            }
+            
+            const savedUser = localStorage.getItem('userInfo');
+            if (savedUser) {
+              this.userInfo = JSON.parse(savedUser);
+            }
+            
+            // Load user info from token if available
+            const token = localStorage.getItem('umi_access_token');
+            if (token && !this.userInfo.name) {
+              // Parse JWT token to get user info (simplified)
+              try {
+                const payload = JSON.parse(atob(token.split('.')[1]));
+                this.userInfo = {
+                  name: payload.name || payload.email || 'Admin',
+                  role: payload.role || 'Admin',
+                  initials: (payload.name || 'Admin').split(' ').map(n => n[0]).join('').toUpperCase().slice(0, 2)
+                };
+              } catch (e) {
+                console.warn('Could not parse user token:', e);
+              }
+            }
+          } catch (error) {
+            console.error('Failed to load pharmacy info:', error);
+          }
+        },
+        
+        initializeDataSync() {
+          // Initialize data sync with admin permissions
+          this.dataSync = new DataSync('admin');
+          this.dataSync.initialize();
+        },
+        
+        async loadDashboardData() {
+          if (!this.apiReachable) {
+            this.connectionStatus = 'error';
+            this.error = 'API server is not reachable. Please check your connection.';
+            return;
+          }
+          
+          this.loading = true;
+          this.error = null;
+          
+          try {
+            // Load dashboard stats
+            const stats = await window.adminAPI.getDashboardStats();
+            this.dashboardStats = { ...this.dashboardStats, ...stats };
+            
+            // Load recent activity
+            const activity = await window.adminAPI.getRecentActivity();
+            this.recentActivity = activity || [];
+            
+            // Load system health
+            const health = await window.adminAPI.getSystemHealth();
+            this.systemHealth = health.status || 'good';
+            
+            // Update connection status and sync time
+            this.connectionStatus = 'connected';
+            this.lastSyncTime = new Date();
+            
+            // Sync with data sync
+            if (this.dataSync) {
+              this.dataSync.set('dashboardStats', this.dashboardStats);
+              this.dataSync.set('recentActivity', this.recentActivity);
+            }
+            
+          } catch (error) {
+            console.error('Failed to load dashboard data:', error);
+            this.connectionStatus = 'error';
+            this.error = this.getErrorMessage(error);
+          } finally {
+            this.loading = false;
+          }
+        },
+        
+        // Check API connection status
+        async checkApiConnection() {
+          this.connectionStatus = 'connecting';
+          
+          try {
+            // Simple health check to the API
+            const response = await fetch(`${window.adminAPI.baseURL}/admin/system/health`, {
+              method: 'GET',
+              headers: {
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${window.adminAPI.token}`,
+                'X-Tenant-ID': window.adminAPI.tenantId
+              },
+              timeout: 5000
+            });
+            
+            if (response.ok) {
+              this.apiReachable = true;
+              this.connectionStatus = 'connected';
+              this.lastSyncTime = new Date();
+            } else {
+              throw new Error(`Server responded with ${response.status}`);
+            }
+          } catch (error) {
+            this.apiReachable = false;
+            this.connectionStatus = 'error';
+            console.error('API connection check failed:', error);
+          }
+        },
+        
+        // Initialize WebSocket connection
+        initializeWebSocket() {
+          if (!window.WebSocket) {
+            console.warn('WebSocket not supported in this browser');
+            return;
+          }
+          
+          try {
+            const wsProtocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
+            const wsUrl = `${wsProtocol}//${window.location.hostname}:5000/ws/admin`;
+            
+            this.websocket = new WebSocket(wsUrl);
+            
+            this.websocket.onopen = () => {
+              console.log('WebSocket connected');
+              this.connectionStatus = 'connected';
+              this.reconnectAttempts = 0;
+              
+              // Clear any existing reconnect interval
+              if (this.reconnectInterval) {
+                clearInterval(this.reconnectInterval);
+                this.reconnectInterval = null;
+              }
+            };
+            
+            this.websocket.onmessage = (event) => {
+              try {
+                const data = JSON.parse(event.data);
+                this.handleWebSocketMessage(data);
+              } catch (error) {
+                console.error('Failed to parse WebSocket message:', error);
+              }
+            };
+            
+            this.websocket.onclose = () => {
+              console.log('WebSocket disconnected');
+              this.connectionStatus = 'disconnected';
+              this.websocket = null;
+              
+              // Attempt to reconnect
+              this.attemptWebSocketReconnect();
+            };
+            
+            this.websocket.onerror = (error) => {
+              console.error('WebSocket error:', error);
+              this.connectionStatus = 'error';
+            };
+            
+          } catch (error) {
+            console.error('Failed to initialize WebSocket:', error);
+            this.connectionStatus = 'error';
+          }
+        },
+        
+        // Handle WebSocket messages
+        handleWebSocketMessage(data) {
+          switch (data.type) {
+            case 'dashboard_update':
+              this.dashboardStats = { ...this.dashboardStats, ...data.payload.stats };
+              if (data.payload.activity) {
+                this.recentActivity = data.payload.activity;
+              }
+              this.lastSyncTime = new Date();
+              break;
+              
+            case 'system_health':
+              this.systemHealth = data.payload.status;
+              break;
+              
+            case 'new_transaction':
+              // Add new transaction to the list
+              if (this.recentActivity) {
+                this.recentActivity.unshift({
+                  action: 'New transaction processed',
+                  details: `Transaction #${data.payload.id} - ${data.payload.amount}`,
+                  user: data.payload.user,
+                  time: this.formatTimeAgo(new Date())
+                });
+                // Keep only last 10 activities
+                this.recentActivity = this.recentActivity.slice(0, 10);
+              }
+              break;
+              
+            case 'inventory_alert':
+              // Handle inventory alerts
+              if (data.payload.type === 'low_stock') {
+                this.dashboardStats.lowStockItems = data.payload.count;
+              }
+              break;
+              
+            default:
+              console.log('Unknown WebSocket message type:', data.type);
+          }
+        },
+        
+        // Attempt to reconnect WebSocket
+        attemptWebSocketReconnect() {
+          if (this.reconnectAttempts >= this.maxReconnectAttempts) {
+            console.log('Max reconnection attempts reached');
+            return;
+          }
+          
+          this.reconnectAttempts++;
+          const delay = Math.min(1000 * Math.pow(2, this.reconnectAttempts), 30000); // Exponential backoff
+          
+          console.log(`Attempting to reconnect in ${delay}ms (attempt ${this.reconnectAttempts})`);
+          
+          setTimeout(() => {
+            this.initializeWebSocket();
+          }, delay);
+        },
+        
+        // Start periodic updates (fallback when WebSocket is not available)
+        startPeriodicUpdates() {
+          // Only use polling if WebSocket is not connected
+          const updateInterval = () => {
+            if (!this.websocket || this.websocket.readyState !== WebSocket.OPEN) {
+              this.loadDashboardData();
+            }
+          };
+          
+          setInterval(updateInterval, 30000); // Update every 30 seconds
+        },
+        
+        // Get user-friendly error messages
+        getErrorMessage(error) {
+          if (error.name === 'TypeError' && error.message.includes('fetch')) {
+            return 'Unable to connect to the server. Please check your internet connection.';
+          }
+          if (error.message.includes('401')) {
+            return 'Authentication failed. Please log in again.';
+          }
+          if (error.message.includes('403')) {
+            return 'You do not have permission to access this data.';
+          }
+          if (error.message.includes('500')) {
+            return 'Server error. Please try again later.';
+          }
+          return error.message || 'An unexpected error occurred.';
+        },
+        
+        // Format time ago
+        formatTimeAgo(date) {
+          const now = new Date();
+          const diff = now - date;
+          const minutes = Math.floor(diff / 60000);
+          const hours = Math.floor(diff / 3600000);
+          const days = Math.floor(diff / 86400000);
+          
+          if (minutes < 1) return 'Just now';
+          if (minutes < 60) return `${minutes} minute${minutes > 1 ? 's' : ''} ago`;
+          if (hours < 24) return `${hours} hour${hours > 1 ? 's' : ''} ago`;
+          return `${days} day${days > 1 ? 's' : ''} ago`;
+        },
+        
+        // Get connection status color
+        getConnectionStatusColor() {
+          const colors = {
+            'connected': 'text-green-600',
+            'connecting': 'text-yellow-600',
+            'disconnected': 'text-gray-600',
+            'error': 'text-red-600'
+          };
+          return colors[this.connectionStatus] || 'text-gray-600';
+        },
+        
+        // Get connection status text
+        getConnectionStatusText() {
+          const texts = {
+            'connected': 'Connected',
+            'connecting': 'Connecting...',
+            'disconnected': 'Disconnected',
+            'error': 'Connection Error'
+          };
+          return texts[this.connectionStatus] || 'Unknown';
+        },
+        
+        async refreshDashboard() {
+          await this.loadDashboardData();
+        },
+        
+        // Widget actions with backend integration
+        async handleWidgetAction(action) {
+          try {
+            switch (action) {
+              case 'view-queue':
+                await this.viewPrescriptionQueue();
+                break;
+              case 'view-all-sales':
+                await this.viewAllSales();
+                break;
+              case 'download-sales':
+                await this.downloadSalesReport();
+                break;
+              case 'refresh-all-transactions':
+                await this.refreshTransactions();
+                break;
+              case 'view-all-transactions':
+                await this.viewAllTransactions();
+                break;
+              case 'generate-all-report':
+                await this.generateTransactionReport();
+                break;
+              default:
+                console.log('Unknown widget action:', action);
+            }
+          } catch (error) {
+            console.error('Widget action failed:', error);
+            this.error = error.message || 'Action failed';
+          }
+        },
+        
+        async viewPrescriptionQueue() {
+          try {
+            // Navigate to prescriptions page with queue filter
+            window.location.href = 'prescriptions.html?filter=queue';
+          } catch (error) {
+            console.error('Navigation failed:', error);
+          }
+        },
+        
+        async viewAllSales() {
+          try {
+            // Navigate to sales page
+            window.location.href = 'sales.html';
+          } catch (error) {
+            console.error('Navigation failed:', error);
+          }
+        },
+        
+        async downloadSalesReport() {
+          try {
+            const reportData = {
+              type: 'sales',
+              dateRange: 'month',
+              format: 'excel'
+            };
+            
+            const blob = await window.adminAPI.generateSalesReport(reportData);
+            const url = window.URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `sales-report-${new Date().toISOString().split('T')[0]}.xlsx`;
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            window.URL.revokeObjectURL(url);
+            
+            // Show success message
+            this.showSuccessMessage('Sales report downloaded successfully!');
+          } catch (error) {
+            console.error('Download failed:', error);
+            this.error = error.message || 'Failed to download report';
+          }
+        },
+        
+        async refreshTransactions() {
+          try {
+            // Refresh transaction data
+            await this.loadDashboardData();
+            this.showSuccessMessage('Transaction data refreshed!');
+          } catch (error) {
+            console.error('Refresh failed:', error);
+            this.error = error.message || 'Failed to refresh data';
+          }
+        },
+        
+        async viewAllTransactions() {
+          try {
+            // Navigate to transactions page
+            window.location.href = 'sales.html?tab=transactions';
+          } catch (error) {
+            console.error('Navigation failed:', error);
+          }
+        },
+        
+        async generateTransactionReport() {
+          try {
+            const reportData = {
+              type: 'transactions',
+              dateRange: 'month',
+              format: 'pdf'
+            };
+            
+            const blob = await window.adminAPI.generateReport('transactions', reportData);
+            const url = window.URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `transaction-report-${new Date().toISOString().split('T')[0]}.pdf`;
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            window.URL.revokeObjectURL(url);
+            
+            this.showSuccessMessage('Transaction report generated successfully!');
+          } catch (error) {
+            console.error('Report generation failed:', error);
+            this.error = error.message || 'Failed to generate report';
+          }
+        },
+        
+        showSuccessMessage(message) {
+          // Create success toast
+          const toast = document.createElement('div');
+          toast.className = 'fixed top-4 right-4 bg-green-500 text-white px-6 py-3 rounded-lg shadow-lg z-50 transition-all duration-300';
+          toast.textContent = message;
+          document.body.appendChild(toast);
+          
+          // Auto remove after 3 seconds
+          setTimeout(() => {
+            toast.remove();
+          }, 3000);
+        },
+        
+        setupEventListeners() {
+          // Widget action buttons
+          document.querySelectorAll('[data-action]').forEach(button => {
+            button.addEventListener('click', (e) => {
+              e.stopPropagation();
+              const action = button.getAttribute('data-action');
+              this.handleWidgetAction(action);
+            });
+          });
+        },
+        
+        // Format numbers for display
+        formatNumber(num) {
+          return new Intl.NumberFormat('en-ZM', {
+            style: 'currency',
+            currency: 'ZMW'
+          }).format(num || 0);
+        },
+        
+        // Format dates for display
+        formatDate(dateString) {
+          return new Date(dateString).toLocaleDateString('en-ZM', {
+            year: 'numeric',
+            month: 'short',
+            day: 'numeric'
+          });
+        },
+        
+        // Get status color
+        getStatusColor(status) {
+          const colors = {
+            'good': 'text-green-600',
+            'warning': 'text-yellow-600',
+            'error': 'text-red-600',
+            'unknown': 'text-gray-600'
+          };
+          return colors[status] || 'text-gray-600';
+        },
+
+        logout() {
+          if (confirm('Are you sure you want to logout?')) {
+            window.location.href = 'index.html';
+          }
+        },
+
+        canManageBranches() {
+          const subscription = JSON.parse(localStorage.getItem('umi_subscription') || '{}');
+          const planType = subscription.planType || 'Care';
+          
+          const tierConfig = {
+            'Care': { maxBranches: 1 },
+            'Care Plus': { maxBranches: 3 },
+            'Care Pro': { maxBranches: 10 }
+          };
+          
+          return tierConfig[planType] ? tierConfig[planType].maxBranches > 1 : false;
+        },
+        
+        // Missing methods that Alpine.js is trying to access
+        get filteredSuggestions() {
+          if (!this.searchQuery || this.searchQuery.length < 2) return [];
+          return this.searchSuggestions.filter(suggestion => 
+            suggestion.title.toLowerCase().includes(this.searchQuery.toLowerCase()) ||
+            suggestion.description.toLowerCase().includes(this.searchQuery.toLowerCase())
+          );
+        },
+        
+        get filteredTransactions() {
+          return this.transactions.filter(transaction => {
+            if (this.transactionPeriod === 'today') {
+              return transaction.period === 'today';
+            } else if (this.transactionPeriod === 'yesterday') {
+              return transaction.period === 'yesterday';
+            } else if (this.transactionPeriod === 'this-week') {
+              return transaction.period === 'this-week';
+            }
+            return true;
+          });
+        },
+        
+        selectSuggestion(suggestion) {
+          console.log('Selected:', suggestion);
+          this.searchQuery = suggestion.title;
+        },
+        
+        navigateToCreate(type) {
+          const pages = {
+            'sale': 'point-of-sale.html',
+            'patient': 'patients.html',
+            'inventory': 'inventory.html',
+            'prescription': 'prescriptions.html'
+          };
+          
+          if (pages[type]) {
+            window.location.href = pages[type];
+          } else {
+            console.error(`Unknown page type: ${type}`);
+          }
+          
+          this.showCreateModal = false;
+        },
+        
+        handleQuickAction(action) {
+          switch(action) {
+            case 'new-sale':
+              window.location.href = 'point-of-sale.html';
+              break;
+            case 'add-customer':
+              window.location.href = 'patients.html';
+              break;
+            case 'add-inventory':
+            case 'reorder':
+            case 'restock':
+              window.location.href = 'inventory.html';
+              break;
+            case 'new-prescription':
+              window.location.href = 'prescriptions.html';
+              break;
+            case 'open-inventory':
+              window.location.href = 'inventory.html';
+              break;
+            case 'open-reports':
+              window.location.href = 'reports.html';
+              break;
+            case 'manage-schedule':
+              window.location.href = 'user-management.html';
+              break;
+            default:
+              console.log('Unknown action:', action);
+          }
+        },
+        
+        submitProductForm() {
+          if (!this.newProduct.brandName || !this.newProduct.genericName || !this.newProduct.category) {
+            alert('Please fill in all required fields');
+            return;
+          }
+          
+          console.log('Adding product:', this.newProduct);
+          alert('Product added successfully!');
+          this.showProductModal = false;
+          this.resetProductForm();
+        },
+        
+        resetProductForm() {
+          this.newProduct = {
+            brandName: '',
+            genericName: '',
+            category: '',
+            manufactureDate: '',
+            batchNumber: '',
+            licenseNumber: '',
+            zambiaRegNumber: '',
+            packingType: '',
+            costPrice: '',
+            sellingPrice: '',
+            stockQuantity: '',
+            expiryDate: '',
+            description: ''
+          };
+        },
+        
+        printTransactionReport() {
+          try {
+            // Create a printable version of the transaction report
+            const printContent = this.generatePrintableReport();
+            
+            // Create a new window for printing
+            const printWindow = window.open('', '_blank');
+            if (!printWindow) {
+              alert('Please allow popups for this website to print reports');
+              return;
+            }
+            
+            const htmlContent = 
+              '<!DOCTYPE html>' +
+              '<html>' +
+              '<head>' +
+                '<title>Transaction Report - ' + new Date().toLocaleDateString() + '</title>' +
+                '<style>' +
+                  'body { font-family: Arial, sans-serif; margin: 20px; }' +
+                  'h1 { color: #000; border-bottom: 2px solid #000; padding-bottom: 10px; }' +
+                  '.header { text-align: center; margin-bottom: 30px; }' +
+                  '.date { color: #666; margin-bottom: 20px; }' +
+                  '.no-data { text-align: center; padding: 40px; color: #666; font-size: 16px; }' +
+                  'table { width: 100%; border-collapse: collapse; margin-top: 20px; }' +
+                  'th, td { border: 1px solid #ddd; padding: 8px; text-align: left; }' +
+                  'th { background-color: #f2f2f2; font-weight: bold; }' +
+                  '.summary { margin-top: 20px; padding: 10px; background-color: #f9f9f9; border-left: 4px solid #000; }' +
+                  '.footer { margin-top: 30px; text-align: center; color: #666; font-size: 12px; }' +
+                  '@media print { body { margin: 10px; }' +
+                '</style>' +
+              '</head>' +
+              '<body>' +
+                printContent +
+              '</body>' +
+              '</html>';
+            
+            printWindow.document.write(htmlContent);
+            printWindow.document.close();
+            printWindow.focus();
+            
+            // Wait for content to load, then print
+            setTimeout(() => {
+              printWindow.print();
+              printWindow.close();
+            }, 500);
+          } catch (error) {
+            console.error('Print failed:', error);
+            alert('Failed to generate print report. Please check your browser settings.');
+          }
+        },
+        
+        async generateTransactionReport() {
+          try {
+            this.loading = true;
+            
+            // Prepare report data
+            const reportData = {
+              type: 'transactions',
+              dateRange: this.transactionPeriod,
+              format: 'pdf',
+              includeSummary: true,
+              transactions: this.filteredTransactions
+            };
+            
+            // Try to generate PDF via API first
+            if (this.apiReachable && window.adminAPI) {
+              try {
+                const blob = await window.adminAPI.generateReport('transactions', reportData);
+                this.downloadBlob(blob, 'transaction-report-' + new Date().toISOString().split('T')[0] + '.pdf');
+                this.showSuccessMessage('PDF report generated successfully!');
+                return;
+              } catch (apiError) {
+                console.warn('API PDF generation failed, falling back to client-side generation:', apiError);
+              }
+            }
+            
+            // Fallback to client-side PDF generation
+            this.generateClientPDF(reportData);
+            
+          } catch (error) {
+            console.error('Report generation failed:', error);
+            this.error = 'Failed to generate report. Please try again.';
+          } finally {
+            this.loading = false;
+          }
+        },
+        
+        generatePrintableReport() {
+          const currentDate = new Date().toLocaleDateString();
+          const transactions = this.filteredTransactions || [];
+          const totalAmount = transactions.reduce((sum, t) => sum + (t.amount || 0), 0);
+          
+          // If no transactions, show a message
+          if (transactions.length === 0) {
+            return 
+              '<div class="header">' +
+                '<h1>Transaction Report</h1>' +
+                '<div class="date">Generated on: ' + currentDate + '</div>' +
+                '<div class="date">Period: ' + this.getTransactionPeriodText() + '</div>' +
+              '</div>' +
+              
+              '<div class="no-data">' +
+                '<h3>No Transaction Data Available</h3>' +
+                '<p>There are no transactions recorded for the selected period.</p>' +
+                '<p>Period: ' + this.getTransactionPeriodText() + '</p>' +
+                '<p>Please check back later or adjust the time period filter.</p>' +
+              '</div>' +
+              
+              '<div class="summary">' +
+                '<strong>Summary:</strong><br>' +
+                'Total Transactions: 0<br>' +
+                'Total Amount: ' + this.formatCurrency(0) + '<br>' +
+                'Connection Status: ' + (this.getConnectionStatusText ? this.getConnectionStatusText() : 'Unknown') +
+              '</div>' +
+              
+              '<div class="footer">' +
+                'Umi Health Pharmacy Management System<br>' +
+                'Report generated by Admin Portal' +
+              '</div>';
+          }
+          
+          // Generate transaction rows
+          const transactionRows = transactions.map(t => 
+            '<tr>' +
+              '<td>' + (t.time || 'N/A') + '</td>' +
+              '<td>' + (t.receipt || 'N/A') + '</td>' +
+              '<td>' + (t.customer || 'N/A') + '</td>' +
+              '<td>' + (t.items || 'N/A') + '</td>' +
+              '<td>' + (t.payment || 'N/A') + '</td>' +
+              '<td style="text-align: right">' + this.formatCurrency(t.amount || 0) + '</td>' +
+              '<td>' + (t.portal || 'N/A') + '</td>' +
+              '<td>' + (t.status || 'N/A') + '</td>' +
+            '</tr>'
+          ).join('');
+          
+          return 
+            '<div class="header">' +
+              '<h1>Transaction Report</h1>' +
+              '<div class="date">Generated on: ' + currentDate + '</div>' +
+              '<div class="date">Period: ' + this.getTransactionPeriodText() + '</div>' +
+            '</div>' +
+            
+            '<table>' +
+              '<thead>' +
+                '<tr>' +
+                  '<th>Time</th>' +
+                  '<th>Receipt</th>' +
+                  '<th>Customer</th>' +
+                  '<th>Items</th>' +
+                  '<th>Payment</th>' +
+                  '<th>Amount</th>' +
+                  '<th>Portal</th>' +
+                  '<th>Status</th>' +
+                '</tr>' +
+              '</thead>' +
+              '<tbody>' +
+                transactionRows +
+              '</tbody>' +
+            '</table>' +
+            
+            '<div class="summary">' +
+              '<strong>Summary:</strong><br>' +
+              'Total Transactions: ' + transactions.length + '<br>' +
+              'Total Amount: ' + this.formatCurrency(totalAmount) + '<br>' +
+              'Connection Status: ' + (this.getConnectionStatusText ? this.getConnectionStatusText() : 'Unknown') +
+            '</div>' +
+            
+            '<div class="footer">' +
+              'Umi Health Pharmacy Management System<br>' +
+              'Report generated by Admin Portal' +
+            '</div>';
+        },
+        
+        generateClientPDF(reportData) {
+          try {
+            // Simple client-side PDF generation using print dialog as fallback
+            const printContent = this.generatePrintableReport();
+            
+            // Create a new window and format for PDF
+            const pdfWindow = window.open('', '_blank', 'width=800,height=600');
+            if (!pdfWindow) {
+              alert('Please allow popups for this website to generate PDF reports');
+              return;
+            }
+            
+            const htmlContent = 
+              '<!DOCTYPE html>' +
+              '<html>' +
+              '<head>' +
+                '<title>Transaction Report - PDF</title>' +
+                '<style>' +
+                  'body { font-family: Arial, sans-serif; margin: 20px; }' +
+                  'h1 { color: #000; text-align: center; }' +
+                  '.no-data { text-align: center; padding: 40px; color: #666; font-size: 16px; }' +
+                  'table { width: 100%; border-collapse: collapse; margin: 20px 0; }' +
+                  'th, td { border: 1px solid #333; padding: 8px; text-align: left; }' +
+                  'th { background-color: #f0f0f0; font-weight: bold; }' +
+                  '.summary { margin: 20px 0; padding: 15px; border: 2px solid #000; }' +
+                  '@media print { body { margin: 10px; }' +
+                '</style>' +
+              '</head>' +
+              '<body>' +
+                printContent +
+                '<script>' +
+                  '// Auto-trigger print dialog for PDF save' +
+                  'window.onload = function() {' +
+                    'setTimeout(function() {' +
+                      'window.print();' +
+                    '}, 500);' +
+                  '};' +
+                '<\\/script>' +
+              '</body>' +
+              '</html>';
+            
+            pdfWindow.document.write(htmlContent);
+            pdfWindow.document.close();
+            this.showSuccessMessage('Report opened in new window. Use browser print to save as PDF.');
+          } catch (error) {
+            console.error('PDF generation failed:', error);
+            alert('Failed to generate PDF report. Please check your browser settings.');
+          }
+        },
+        
+        downloadBlob(blob, filename) {
+          const url = window.URL.createObjectURL(blob);
+          const a = document.createElement('a');
+          a.href = url;
+          a.download = filename;
+          document.body.appendChild(a);
+          a.click();
+          document.body.removeChild(a);
+          window.URL.revokeObjectURL(url);
+        },
+        
+        getTransactionPeriodText() {
+          const periods = {
+            'today': 'Today',
+            'yesterday': 'Yesterday', 
+            'this-week': 'This Week',
+            'all': 'All Time'
+          };
+          return periods[this.transactionPeriod] || 'Custom';
+        },
+        
+        formatCurrency(amount) {
+          return new Intl.NumberFormat('en-ZM', {
+            style: 'currency',
+            currency: 'ZMW'
+          }).format(amount);
+        },
+        
+        getConnectionStatusColor() {
+          const colors = {
+            'connected': 'text-green-600',
+            'connecting': 'text-yellow-600',
+            'disconnected': 'text-gray-600',
+            'error': 'text-red-600'
+          };
+          return colors[this.connectionStatus] || 'text-gray-600';
+        },
+        
+        getConnectionStatusText() {
+          const texts = {
+            'connected': 'Connected',
+            'connecting': 'Connecting...',
+            'disconnected': 'Disconnected',
+            'error': 'Connection Error'
+          };
+          return texts[this.connectionStatus] || 'Unknown';
+        },
+        
+        formatTimeAgo(date) {
+          const now = new Date();
+          const diff = now - date;
+          const minutes = Math.floor(diff / 60000);
+          const hours = Math.floor(diff / 3600000);
+          const days = Math.floor(diff / 86400000);
+          
+          if (minutes < 1) return 'Just now';
+          if (minutes < 60) return minutes + ' minute' + (minutes > 1 ? 's' : '') + ' ago';
+          if (hours < 24) return hours + ' hour' + (hours > 1 ? 's' : '') + ' ago';
+          return days + ' day' + (days > 1 ? 's' : '') + ' ago';
+        },
+        
+        showSuccessMessage(message) {
+          // Create success toast
+          const toast = document.createElement('div');
+          toast.className = 'fixed top-4 right-4 bg-green-500 text-white px-6 py-3 rounded-lg shadow-lg z-50 transition-all duration-300';
+          toast.textContent = message;
+          document.body.appendChild(toast);
+          
+          // Auto remove after 3 seconds
+          setTimeout(() => {
+            toast.remove();
+          }, 3000);
+        },
+        
+        setupEventListeners() {
+          // Widget action buttons
+          document.querySelectorAll('[data-action]').forEach(button => {
+            button.addEventListener('click', (e) => {
+              e.stopPropagation();
+              const action = button.getAttribute('data-action');
+              this.handleWidgetAction(action);
+            });
+          });
+        },
+        
+        handleWidgetAction(action) {
+          console.log('Widget action:', action);
+          // Handle widget-specific actions
+          switch(action) {
+            case 'view-queue':
+              window.location.href = 'prescriptions.html';
+              break;
+            case 'open-inventory':
+              window.location.href = 'inventory.html';
+              break;
+            case 'open-reports':
+              window.location.href = 'reports.html';
+              break;
+            case 'manage-schedule':
+              window.location.href = 'user-management.html';
+              break;
+            default:
+              console.log('Unknown widget action:', action);
+          }
+        },
+        
+        renderDashboardContent() {
+          // Render dashboard content - placeholders for now
+          console.log('Rendering dashboard content');
+        },
+        
+        startPeriodicUpdates() {
+          // Set up periodic updates
+          setInterval(() => {
+            if (!this.websocket || this.websocket.readyState !== WebSocket.OPEN) {
+              this.loadDashboardData();
+            }
+          }, 30000);
+        },
+        
+        initializeDataSync() {
+          // Initialize data sync if available
+          try {
+            if (typeof DataSync !== 'undefined') {
+              this.dataSync = new DataSync('admin');
+              this.dataSync.initialize();
+            }
+          } catch (error) {
+            console.warn('DataSync not available:', error);
+          }
+        },
+        
+        checkApiConnection() {
+          // Check API connection
+          this.connectionStatus = 'disconnected';
+          this.apiReachable = false;
+        },
+        
+        initializeWebSocket() {
+          // Initialize WebSocket if available
+          try {
+            if (window.WebSocket) {
+              console.log('WebSocket available but not connecting');
+            }
+          } catch (error) {
+            console.warn('WebSocket not available:', error);
+          }
+        },
+        
+        loadDashboardData() {
+          // Load dashboard data
+          console.log('Loading dashboard data...');
+        }
+      }
+    }
+  </script>
+
+  <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
+</body>
+</html>

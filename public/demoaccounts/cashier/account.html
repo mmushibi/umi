@@ -1,0 +1,1957 @@
+<!DOCTYPE html>
+<html lang="en" x-data="accountSystem()" x-init="init()">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Account Settings - Umi Health Information Systems</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@100;400;500;600;700&family=Varela+Round&family=Nunito:wght@400;600;700&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Rounded:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <script src="https://cdn.tailwindcss.com"></script>
+  <style>
+    :root {
+      --color-primary: #000000;
+      --color-accent: #14B8A6;
+      --color-success: #22c55e;
+      --color-warning: #ef4444;
+      --color-text-primary: #000000;
+      --color-text-secondary: #6b7280;
+      --color-text-muted: #9ca3af;
+      --color-background: #ffffff;
+      --color-surface: #f9fafb;
+      --color-border: #e5e7eb;
+      --font-primary: 'Inter', sans-serif;
+      --sidebar-width: 280px;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      background: var(--color-background);
+      color: var(--color-text-primary);
+      font-family: 'Nunito', 'Varela Round', sans-serif;
+      font-size: 13px;
+      line-height: 1.4;
+      overflow-x: hidden;
+    }
+
+    /* Sidebar Styles */
+    .sidebar {
+      position: fixed;
+      left: 0;
+      top: 0;
+      width: var(--sidebar-width);
+      height: 100vh;
+      background: var(--color-text-primary);
+      color: var(--color-accent);
+      z-index: 1000;
+      transition: transform 0.3s ease;
+      display: flex;
+      flex-direction: column;
+      overflow-y: auto;
+      overflow-x: hidden;
+    }
+
+    .sidebar-header {
+      padding: 1.5rem;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+    }
+
+    .logo-section {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+    }
+
+    .logo-icon {
+      width: 32px;
+      height: 32px;
+      background: rgba(255, 255, 255, 0.2);
+      border-radius: 8px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.2rem;
+    }
+
+    .logo-text {
+      font-size: 1rem;
+      font-weight: 600;
+      font-family: 'Inter', sans-serif;
+    }
+
+    .pharmacy-info {
+      padding: 1rem 1.5rem;
+      background: rgba(255, 255, 255, 0.1);
+      margin: 1rem 1.5rem;
+      border-radius: 12px;
+      font-size: 0.85rem;
+    }
+
+    .pharmacy-name {
+      font-weight: 600;
+      margin-bottom: 0.25rem;
+    }
+
+    .pharmacy-location {
+      opacity: 0.8;
+      font-size: 0.75rem;
+    }
+
+    .nav-menu {
+      padding: 1rem 0;
+      flex: 1;
+      overflow-y: auto;
+    }
+
+    .nav-item {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+      padding: 0.75rem 1.25rem;
+      color: rgba(255, 255, 255, 0.8);
+      text-decoration: none;
+      transition: all 0.2s ease;
+      cursor: pointer;
+      font-size: 0.8rem;
+      font-weight: 500;
+    }
+
+    .nav-item:hover {
+      background: rgba(255, 255, 255, 0.1);
+      color: var(--color-accent);
+    }
+
+    .nav-item.active {
+      background: rgba(255, 255, 255, 0.15);
+      color: var(--color-accent);
+      border-left: 3px solid var(--color-accent);
+    }
+
+    .nav-icon {
+      font-size: 1rem;
+    }
+
+    /* Main Content Area */
+    .main-content {
+      margin-left: var(--sidebar-width);
+      min-height: 100vh;
+      transition: margin-left 0.3s ease;
+    }
+
+    /* Header Styles */
+    .header {
+      background: white;
+      border-bottom: 1px solid #e2e8f0;
+      padding: 1rem 2rem;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      position: sticky;
+      top: 0;
+      z-index: 100;
+    }
+
+    .header-left {
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+    }
+
+    .page-title-section {
+      margin-right: 2rem;
+    }
+
+    .page-title-section .page-title {
+      font-size: 1.5rem;
+      font-weight: 700;
+      color: var(--color-text-primary);
+      margin: 0;
+      font-family: 'Inter', sans-serif;
+    }
+
+    .mobile-menu-toggle {
+      display: none;
+      background: none;
+      border: none;
+      font-size: 1.5rem;
+      color: var(--color-text-secondary);
+      cursor: pointer;
+    }
+
+    .header-right {
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+    }
+
+    .user-profile {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+      padding: 0.5rem;
+      border-radius: 16px;
+      cursor: pointer;
+      transition: all 0.3s ease;
+    }
+
+    .user-profile:hover {
+      background: var(--color-surface);
+    }
+
+    .user-avatar {
+      width: 36px;
+      height: 36px;
+      background: var(--color-text-primary);
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: var(--color-accent);
+      font-weight: 600;
+      font-size: 0.875rem;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+    }
+
+    .user-info {
+      display: flex;
+      flex-direction: column;
+    }
+
+    .user-name {
+      font-size: 0.875rem;
+      font-weight: 600;
+      color: var(--color-text-primary);
+    }
+
+    .user-role {
+      font-size: 0.75rem;
+      color: var(--color-text-secondary);
+    }
+
+    /* Account Content */
+    .account-content {
+      padding: 2rem;
+      max-width: 1200px;
+      margin: 0 auto;
+    }
+
+    /* Settings Grid */
+    .settings-grid {
+      display: grid;
+      grid-template-columns: 300px 1fr;
+      gap: 2rem;
+    }
+
+    /* Settings Navigation */
+    .settings-nav {
+      background: var(--color-background);
+      border-radius: 20px;
+      border: 1px solid var(--color-border);
+      padding: 1.5rem;
+      height: fit-content;
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
+    }
+
+    .settings-nav-title {
+      font-size: 1.125rem;
+      font-weight: 600;
+      color: var(--color-text-primary);
+      margin-bottom: 1.5rem;
+      font-family: 'Inter', sans-serif;
+    }
+
+    .settings-nav-list {
+      list-style: none;
+    }
+
+    .settings-nav-item {
+      margin-bottom: 0.5rem;
+    }
+
+    .settings-nav-link {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+      padding: 0.75rem 1rem;
+      border-radius: 12px;
+      text-decoration: none;
+      color: var(--color-text-secondary);
+      font-size: 0.875rem;
+      font-weight: 500;
+      transition: all 0.2s ease;
+    }
+
+    .settings-nav-link:hover {
+      background: var(--color-surface);
+      color: var(--color-text-primary);
+    }
+
+    .settings-nav-link.active {
+      background: var(--color-primary);
+      color: var(--color-accent);
+    }
+
+    .settings-nav-icon {
+      font-size: 1.125rem;
+    }
+
+    /* Settings Content */
+    .settings-content {
+      background: var(--color-background);
+      border-radius: 20px;
+      border: 1px solid var(--color-border);
+      padding: 2rem;
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
+    }
+
+    .settings-section {
+      margin-bottom: 2rem;
+    }
+
+    .settings-section:last-child {
+      margin-bottom: 0;
+    }
+
+    .section-title {
+      font-size: 1.25rem;
+      font-weight: 600;
+      color: var(--color-text-primary);
+      margin-bottom: 1.5rem;
+      font-family: 'Inter', sans-serif;
+    }
+
+    .section-description {
+      color: var(--color-text-secondary);
+      font-size: 0.875rem;
+      margin-bottom: 1.5rem;
+    }
+
+    /* Form Styles */
+    .form-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+      gap: 1.5rem;
+    }
+
+    .form-group {
+      display: flex;
+      flex-direction: column;
+    }
+
+    .form-group.full-width {
+      grid-column: 1 / -1;
+    }
+
+    .profile-icon {
+      font-size: 0.75rem;
+    }
+
+    .form-label {
+      font-weight: 500;
+      color: var(--color-text-primary);
+      margin-bottom: 0.5rem;
+      font-size: 0.875rem;
+    }
+
+    .form-input {
+      padding: 0.75rem 1rem;
+      border: 1px solid var(--color-border);
+      border-radius: 12px;
+      font-size: 0.875rem;
+      transition: all 0.3s ease;
+      background: var(--color-background);
+    }
+
+    .form-input:focus {
+      outline: none;
+      border-color: var(--color-primary);
+      box-shadow: 0 0 0 4px rgba(0, 0, 0, 0.1);
+    }
+
+    .form-textarea {
+      resize: vertical;
+      min-height: 100px;
+    }
+
+    .section-title-sub {
+      font-size: 1.125rem;
+      font-weight: 600;
+      color: var(--color-text-primary);
+      margin: 2rem 0 1.5rem 0;
+      font-family: 'Inter', sans-serif;
+    }
+
+    /* Profile Section */
+    .profile-section {
+      display: flex;
+      align-items: center;
+      gap: 2rem;
+      padding: 2rem;
+      background: var(--color-surface);
+      border-radius: 16px;
+      margin-bottom: 2rem;
+    }
+
+    .profile-avatar-large {
+      width: 100px;
+      height: 100px;
+      background: var(--color-text-primary);
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: var(--color-accent);
+      font-weight: 600;
+      font-size: 2rem;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+    }
+
+    .profile-info {
+      flex: 1;
+    }
+
+    .profile-name {
+      font-size: 1.5rem;
+      font-weight: 700;
+      color: var(--color-text-primary);
+      margin-bottom: 0.25rem;
+      font-family: 'Inter', sans-serif;
+    }
+
+    .profile-email {
+      color: var(--color-text-secondary);
+      font-size: 0.875rem;
+      margin-bottom: 0.5rem;
+    }
+
+    .profile-role {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.25rem;
+      padding: 0.25rem 0.75rem;
+      border-radius: 12px;
+      font-size: 0.75rem;
+      font-weight: 600;
+      background: rgba(0, 0, 0, 0.1);
+      color: var(--color-text-secondary);
+    }
+
+    /* Button Styles */
+    .button-group {
+      display: flex;
+      gap: 1rem;
+      justify-content: flex-end;
+      margin-top: 2rem;
+    }
+
+    .btn {
+      padding: 0.75rem 1.5rem;
+      border-radius: 12px;
+      font-size: 0.875rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      border: none;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+
+    .btn-primary {
+      background: var(--color-primary);
+      color: var(--color-accent);
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+    }
+
+    .btn-primary:hover {
+      background: var(--color-text-secondary);
+      transform: translateY(-2px);
+      box-shadow: 0 8px 24px rgba(0, 0, 0, 0.2);
+    }
+
+    .btn-secondary {
+      background: var(--color-surface);
+      color: var(--color-text-secondary);
+      border: 1px solid var(--color-border);
+    }
+
+    .btn-secondary:hover {
+      background: var(--color-border);
+    }
+
+    .btn-danger {
+      background: var(--color-warning);
+      color: var(--color-accent);
+      box-shadow: 0 2px 8px rgba(239, 68, 68, 0.2);
+    }
+
+    .btn-danger:hover {
+      background: #dc2626;
+      transform: translateY(-2px);
+      box-shadow: 0 8px 24px rgba(239, 68, 68, 0.3);
+    }
+
+    /* Security Section */
+    .security-item {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 1rem;
+      background: var(--color-surface);
+      border-radius: 12px;
+      margin-bottom: 1rem;
+    }
+
+    .security-info {
+      flex: 1;
+    }
+
+    .security-title {
+      font-weight: 600;
+      color: var(--color-text-primary);
+      margin-bottom: 0.25rem;
+    }
+
+    .security-description {
+      font-size: 0.875rem;
+      color: var(--color-text-secondary);
+    }
+
+    .security-status {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.25rem;
+      padding: 0.25rem 0.75rem;
+      border-radius: 12px;
+      font-size: 0.75rem;
+      font-weight: 600;
+    }
+
+    .security-status.enabled {
+      background: rgba(34, 197, 94, 0.1);
+      color: var(--color-success);
+    }
+
+    .security-status.disabled {
+      background: rgba(239, 68, 68, 0.1);
+      color: var(--color-warning);
+    }
+
+    /* Notification Settings */
+    .notification-item {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 1rem 0;
+      border-bottom: 1px solid var(--color-border);
+    }
+
+    .notification-item:last-child {
+      border-bottom: none;
+    }
+
+    .notification-info {
+      flex: 1;
+    }
+
+    .notification-title {
+      font-weight: 600;
+      color: var(--color-text-primary);
+      margin-bottom: 0.25rem;
+    }
+
+    .notification-description {
+      font-size: 0.875rem;
+      color: var(--color-text-secondary);
+    }
+
+    /* Toggle Switch */
+    .toggle-switch {
+      position: relative;
+      width: 48px;
+      height: 24px;
+      background: var(--color-border);
+      border-radius: 12px;
+      cursor: pointer;
+      transition: background 0.3s ease;
+    }
+
+    .toggle-switch.active {
+      background: var(--color-success);
+    }
+
+    .toggle-slider {
+      position: absolute;
+      top: 2px;
+      left: 2px;
+      width: 20px;
+      height: 20px;
+      background: var(--color-accent);
+      border-radius: 50%;
+      transition: transform 0.3s ease;
+    }
+
+    .toggle-switch.active .toggle-slider {
+      transform: translateX(24px);
+    }
+
+    .logout-section {
+      padding: 1rem;
+      border-top: 1px solid rgba(255, 255, 255, 0.1);
+      margin-top: auto;
+    }
+
+    .logout-button {
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+      padding: 0.875rem 1.5rem;
+      color: rgba(255, 255, 255, 0.8);
+      text-decoration: none;
+      transition: all 0.2s ease;
+      cursor: pointer;
+      font-size: 0.9rem;
+      font-weight: 500;
+      width: 100%;
+      border: none;
+      background: transparent;
+      text-align: left;
+    }
+
+    .logout-button:hover {
+      background: rgba(239, 68, 68, 0.1);
+      color: var(--color-warning);
+    }
+
+    .logout-icon {
+      font-size: 1.25rem;
+    }
+
+    /* Modal Styles */
+    .modal-overlay {
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background: rgba(0, 0, 0, 0.5);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      z-index: 1000;
+    }
+
+    .modal-content {
+      background: white;
+      border-radius: 16px;
+      max-width: 500px;
+      width: 90%;
+      max-height: 90vh;
+      overflow-y: auto;
+      box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+    }
+
+    .modal-large {
+      max-width: 700px;
+    }
+
+    .modal-header {
+      padding: 1.5rem;
+      border-bottom: 1px solid var(--color-border);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .modal-header h3 {
+      font-size: 1.25rem;
+      font-weight: 600;
+      color: var(--color-text-primary);
+      margin: 0;
+    }
+
+    .modal-close {
+      background: none;
+      border: none;
+      font-size: 1.5rem;
+      color: var(--color-text-secondary);
+      cursor: pointer;
+      padding: 0.5rem;
+      border-radius: 8px;
+      transition: all 0.2s ease;
+    }
+
+    .modal-close:hover {
+      background: var(--color-surface);
+      color: var(--color-text-primary);
+    }
+
+    .modal-body {
+      padding: 1.5rem;
+    }
+
+    .modal-footer {
+      padding: 1.5rem;
+      border-top: 1px solid var(--color-border);
+      display: flex;
+      gap: 1rem;
+      justify-content: flex-end;
+    }
+
+    /* Sessions Styles */
+    .sessions-list {
+      max-height: 400px;
+      overflow-y: auto;
+    }
+
+    .session-item {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 1rem;
+      border: 1px solid var(--color-border);
+      border-radius: 12px;
+      margin-bottom: 1rem;
+    }
+
+    .session-info {
+      flex: 1;
+    }
+
+    .session-device {
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+      margin-bottom: 0.5rem;
+    }
+
+    .session-device .material-symbols-rounded {
+      font-size: 1.5rem;
+      color: var(--color-text-secondary);
+    }
+
+    .session-name {
+      font-weight: 600;
+      color: var(--color-text-primary);
+      margin-bottom: 0.25rem;
+    }
+
+    .session-details {
+      font-size: 0.875rem;
+      color: var(--color-text-secondary);
+    }
+
+    .session-status {
+      font-size: 0.75rem;
+      font-weight: 500;
+      padding: 0.25rem 0.75rem;
+      border-radius: 12px;
+    }
+
+    .session-status.current {
+      background: rgba(34, 197, 94, 0.1);
+      color: var(--color-success);
+    }
+
+    .session-actions {
+      margin-left: 1rem;
+    }
+
+    .btn-sm {
+      padding: 0.5rem 1rem;
+      font-size: 0.75rem;
+    }
+
+    /* Two Factor Styles */
+    .qr-code-placeholder {
+      display: flex;
+      justify-content: center;
+      margin: 2rem 0;
+    }
+
+    .qr-code {
+      width: 200px;
+      height: 200px;
+      border: 2px solid var(--color-border);
+      border-radius: 12px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: var(--color-surface);
+    }
+
+    .qr-code .material-symbols-rounded {
+      font-size: 4rem;
+      color: var(--color-text-secondary);
+    }
+
+    .security-toggle {
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+    }
+
+    /* Radio Button Styles */
+    .radio-group {
+      display: flex;
+      flex-direction: column;
+      gap: 1rem;
+    }
+
+    .radio-option {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+      padding: 1rem;
+      border: 1px solid var(--color-border);
+      border-radius: 12px;
+      cursor: pointer;
+      transition: all 0.2s ease;
+    }
+
+    .radio-option:hover {
+      background: var(--color-surface);
+      border-color: var(--color-primary);
+    }
+
+    .radio-option input[type="radio"] {
+      display: none;
+    }
+
+    .radio-checkmark {
+      width: 20px;
+      height: 20px;
+      border: 2px solid var(--color-border);
+      border-radius: 50%;
+      position: relative;
+      transition: all 0.2s ease;
+    }
+
+    .radio-option input[type="radio"]:checked + .radio-checkmark {
+      border-color: var(--color-primary);
+      background: var(--color-primary);
+    }
+
+    .radio-option input[type="radio"]:checked + .radio-checkmark::after {
+      content: '';
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      width: 8px;
+      height: 8px;
+      background: white;
+      border-radius: 50%;
+    }
+
+    .radio-option span {
+      font-weight: 500;
+      color: var(--color-text-primary);
+    }
+
+    .radio-option small {
+      color: var(--color-text-secondary);
+      font-size: 0.75rem;
+      margin-left: auto;
+    }
+
+    .form-help {
+      font-size: 0.75rem;
+      color: var(--color-text-secondary);
+      margin-top: 0.25rem;
+    }
+
+    /* Loading States */
+    .loading-state {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: 3rem;
+      text-align: center;
+    }
+
+    .loading-spinner {
+      width: 40px;
+      height: 40px;
+      border: 4px solid var(--color-border);
+      border-top: 4px solid var(--color-primary);
+      border-radius: 50%;
+      animation: spin 1s linear infinite;
+      margin-bottom: 1rem;
+    }
+
+    @keyframes spin {
+      0% { transform: rotate(0deg); }
+      100% { transform: rotate(360deg); }
+    }
+
+    .loading-state p {
+      color: var(--color-text-secondary);
+      font-size: 0.875rem;
+      margin: 0;
+    }
+
+    @media (max-width: 768px) {
+      .sidebar {
+        transform: translateX(-100%);
+      }
+
+      .sidebar.open {
+        transform: translateX(0);
+      }
+
+      .main-content {
+        margin-left: 0;
+      }
+
+      .mobile-menu-toggle {
+        display: block;
+      }
+
+      .page-title-section {
+        display: none;
+      }
+
+      .account-content {
+        padding: 1rem;
+      }
+
+      .settings-grid {
+        grid-template-columns: 1fr;
+      }
+
+      .settings-nav {
+        order: 2;
+      }
+
+      .settings-content {
+        order: 1;
+      }
+
+      .profile-section {
+        flex-direction: column;
+        text-align: center;
+      }
+
+      .form-grid {
+        grid-template-columns: 1fr;
+      }
+
+      .button-group {
+        flex-direction: column;
+      }
+    }
+  </style>
+</head>
+<body>
+  <!-- Sidebar -->
+  <aside class="sidebar" :class="sidebarOpen ? 'open' : ''">
+    <div class="sidebar-header">
+      <div class="logo-section">
+        <div class="logo-icon">
+          <span class="material-symbols-rounded">medication</span>
+        </div>
+        <div class="logo-text">Umi Health</div>
+      </div>
+    </div>
+
+
+    <nav class="nav-menu">
+      <a href="home.html" class="nav-item">
+        <span class="material-symbols-rounded nav-icon">home</span>
+        <span>Home</span>
+      </a>
+      <a href="point-of-sale.html" class="nav-item">
+        <span class="material-symbols-rounded nav-icon">point_of_sale</span>
+        <span>Point of Sale</span>
+      </a>
+      <a href="patients.html" class="nav-item">
+        <span class="material-symbols-rounded nav-icon">people</span>
+        <span>Patients</span>
+      </a>
+      <a href="sales.html" class="nav-item">
+        <span class="material-symbols-rounded nav-icon">receipt_long</span>
+        <span>Sales</span>
+      </a>
+      <a href="payments.html" class="nav-item">
+        <span class="material-symbols-rounded nav-icon">payments</span>
+        <span>Payments</span>
+      </a>
+      <a href="inventory-quick.html" class="nav-item">
+        <span class="material-symbols-rounded nav-icon">inventory</span>
+        <span>Inventory</span>
+      </a>
+      <a href="queue-management.html" class="nav-item">
+        <span class="material-symbols-rounded nav-icon">queue</span>
+        <span>Queue</span>
+      </a>
+      <a href="shift-management.html" class="nav-item">
+        <span class="material-symbols-rounded nav-icon">schedule</span>
+        <span>Shift Management</span>
+      </a>
+      <a href="reports.html" class="nav-item">
+        <span class="material-symbols-rounded nav-icon">summarize</span>
+        <span>Reports</span>
+      </a>
+      <a href="help.html" class="nav-item">
+        <span class="material-symbols-rounded nav-icon">help</span>
+        <span>Help & Training</span>
+      </a>
+      <a href="account.html" class="nav-item active">
+        <span class="material-symbols-rounded nav-icon">settings</span>
+        <span>Account</span>
+      </a>
+    </nav>
+    
+    <div class="logout-section">
+      <button class="logout-button" @click="logout()">
+        <span class="material-symbols-rounded logout-icon">logout</span>
+        <span>Logout</span>
+      </button>
+    </div>
+  </aside>
+
+  <!-- Main Content -->
+  <main class="main-content">
+    <!-- Header -->
+    <header class="header">
+      <div class="header-left">
+        <button class="mobile-menu-toggle" @click="sidebarOpen = !sidebarOpen">
+          <span class="material-symbols-rounded">menu</span>
+        </button>
+        
+        <div class="page-title-section">
+          <h1 class="page-title">Account Settings</h1>
+        </div>
+        
+      </div>
+
+      <div class="header-right">
+        <!-- Header elements removed per request -->
+      </div>
+    </header>
+
+    <!-- Account Content -->
+    <div class="account-content">
+      <div class="settings-grid">
+        <!-- Settings Navigation -->
+        <div class="settings-nav">
+          <h3 class="settings-nav-title">Settings</h3>
+          <ul class="settings-nav-list">
+            <li class="settings-nav-item">
+              <a href="#" class="settings-nav-link" :class="activeSection === 'profile' ? 'active' : ''" @click="setActiveSection('profile')">
+                <span class="material-symbols-rounded settings-nav-icon">person</span>
+                <span>Profile</span>
+              </a>
+            </li>
+            <li class="settings-nav-item">
+              <a href="#" class="settings-nav-link" :class="activeSection === 'security' ? 'active' : ''" @click="setActiveSection('security')">
+                <span class="material-symbols-rounded settings-nav-icon">security</span>
+                <span>Security</span>
+              </a>
+            </li>
+            <li class="settings-nav-item">
+              <a href="#" class="settings-nav-link" :class="activeSection === 'notifications' ? 'active' : ''" @click="setActiveSection('notifications')">
+                <span class="material-symbols-rounded settings-nav-icon">notifications</span>
+                <span>Notifications</span>
+              </a>
+            </li>
+          </ul>
+        </div>
+
+        <!-- Settings Content -->
+        <div class="settings-content">
+          <!-- Profile Section -->
+          <div x-show="activeSection === 'profile'">
+            <!-- Profile Loading State -->
+            <div x-show="loading.profile" class="loading-state">
+              <div class="loading-spinner"></div>
+              <p>Loading profile information...</p>
+            </div>
+            
+            <!-- Profile Content -->
+            <div x-show="!loading.profile">
+              <div class="profile-section">
+                <div class="profile-avatar-large" x-text="userInfo.initials"></div>
+                <div class="profile-info">
+                  <div class="profile-name" x-text="userInfo.name"></div>
+                  <div class="profile-email" x-text="userInfo.email"></div>
+                  <span class="profile-role">
+                    <span class="material-symbols-rounded profile-icon">person</span>
+                    <span x-text="userInfo.role"></span>
+                  </span>
+                </div>
+              </div>
+
+            <div class="settings-section">
+              <h2 class="section-title">Personal Information</h2>
+              <p class="section-description">Update your personal information and contact details.</p>
+              
+              <div class="form-grid">
+                <div class="form-group">
+                  <label class="form-label" for="firstName">First Name</label>
+                  <input type="text" id="firstName" class="form-input" x-model="profile.firstName" placeholder="Enter first name">
+                </div>
+                <div class="form-group">
+                  <label class="form-label" for="lastName">Last Name</label>
+                  <input type="text" id="lastName" class="form-input" x-model="profile.lastName" placeholder="Enter last name">
+                </div>
+                <div class="form-group">
+                  <label class="form-label" for="email">Email Address</label>
+                  <input type="email" id="email" class="form-input" x-model="profile.email" placeholder="Enter email address">
+                </div>
+                <div class="form-group">
+                  <label class="form-label" for="phone">Phone Number</label>
+                  <input type="tel" id="phone" class="form-input" x-model="profile.phone" placeholder="Enter phone number">
+                </div>
+                <div class="form-group full-width">
+                  <label class="form-label" for="bio">Bio</label>
+                  <textarea id="bio" class="form-input form-textarea" x-model="profile.bio" placeholder="Enter your bio"></textarea>
+                </div>
+              </div>
+
+              <div class="button-group">
+                <button class="btn btn-secondary" @click="resetProfile">Cancel</button>
+                <button class="btn btn-primary" @click="saveProfile">
+                  <span class="material-symbols-rounded">save</span>
+                  <span>Save Changes</span>
+                </button>
+              </div>
+            </div>
+          </div>
+
+          <!-- Security Section -->
+          <div x-show="activeSection === 'security'">
+            <!-- Security Loading State -->
+            <div x-show="loading.security" class="loading-state">
+              <div class="loading-spinner"></div>
+              <p>Loading security settings...</p>
+            </div>
+            
+            <!-- Security Content -->
+            <div x-show="!loading.security">
+              <div class="settings-section">
+                <h2 class="section-title">Security Settings</h2>
+                <p class="section-description">Manage your password and security preferences.</p>
+                
+                <!-- Change Password -->
+                <div class="security-item">
+                  <div class="security-info">
+                    <div class="security-title">Password</div>
+                    <div class="security-description" x-text="passwordInfo.lastChanged || 'Loading...'"></div>
+                </div>
+                <button class="btn btn-secondary" @click="showPasswordModal = true">Change Password</button>
+              </div>
+
+              <!-- Two-Factor Authentication -->
+              <div class="security-item">
+                <div class="security-info">
+                  <div class="security-title">Two-Factor Authentication</div>
+                  <div class="security-description">Add an extra layer of security to your account</div>
+                </div>
+                <div class="security-toggle">
+                  <div class="toggle-switch" :class="twoFactorEnabled ? 'active' : ''" @click="toggleTwoFactor">
+                    <div class="toggle-slider"></div>
+                  </div>
+                  <span class="security-status" :class="twoFactorEnabled ? 'enabled' : 'disabled'" x-text="twoFactorEnabled ? 'Enabled' : 'Disabled'"></span>
+                </div>
+              </div>
+
+              <!-- Login Sessions -->
+              <div class="security-item">
+                <div class="security-info">
+                  <div class="security-title">Login Sessions</div>
+                  <div class="security-description">Manage your active login sessions</div>
+                </div>
+                <button class="btn btn-secondary" @click="showSessionsModal = true">View Sessions</button>
+              </div>
+            </div>
+          </div>
+          </div>
+
+          <!-- Notifications Section -->
+          <div x-show="activeSection === 'notifications'">
+            <!-- Notifications Loading State -->
+            <div x-show="loading.notifications" class="loading-state">
+              <div class="loading-spinner"></div>
+              <p>Loading notification preferences...</p>
+            </div>
+            
+            <!-- Notifications Content -->
+            <div x-show="!loading.notifications">
+              <div class="settings-section">
+                <h2 class="section-title">Notification Preferences</h2>
+                <p class="section-description">Choose how you want to be notified about important updates.</p>
+              
+              <div class="notification-item">
+                <div class="notification-info">
+                  <div class="notification-title">Email Notifications</div>
+                  <div class="notification-description">Receive notifications via email</div>
+                </div>
+                <div class="toggle-switch" :class="notifications.email ? 'active' : ''" @click="notifications.email = !notifications.email">
+                  <div class="toggle-slider"></div>
+                </div>
+              </div>
+
+              <div class="notification-item">
+                <div class="notification-info">
+                  <div class="notification-title">Push Notifications</div>
+                  <div class="notification-description">Receive browser push notifications</div>
+                </div>
+                <div class="toggle-switch" :class="notifications.push ? 'active' : ''" @click="notifications.push = !notifications.push">
+                  <div class="toggle-slider"></div>
+                </div>
+              </div>
+
+              <div class="notification-item">
+                <div class="notification-info">
+                  <div class="notification-title">Sales Alerts</div>
+                  <div class="notification-description">Get notified about new sales transactions</div>
+                </div>
+                <div class="toggle-switch" :class="notifications.sales ? 'active' : ''" @click="notifications.sales = !notifications.sales">
+                  <div class="toggle-slider"></div>
+                </div>
+              </div>
+
+              <div class="notification-item">
+                <div class="notification-info">
+                  <div class="notification-title">Inventory Alerts</div>
+                  <div class="notification-description">Get notified about low stock levels</div>
+                </div>
+                <div class="toggle-switch" :class="notifications.inventory ? 'active' : ''" @click="notifications.inventory = !notifications.inventory">
+                  <div class="toggle-slider"></div>
+                </div>
+              </div>
+
+              <div class="notification-item">
+                <div class="notification-info">
+                  <div class="notification-title">Prescription Alerts</div>
+                  <div class="notification-description">Get notified about new prescriptions</div>
+                </div>
+                <div class="toggle-switch" :class="notifications.prescriptions ? 'active' : ''" @click="notifications.prescriptions = !notifications.prescriptions">
+                  <div class="toggle-slider"></div>
+                </div>
+              </div>
+
+              <div class="button-group">
+                <button class="btn btn-primary" @click="saveNotifications">
+                  <span class="material-symbols-rounded">save</span>
+                  <span>Save Preferences</span>
+                </button>
+              </div>
+            </div>
+          </div>
+
+        </div>
+      </div>
+    </div>
+
+    <!-- Password Change Modal -->
+    <div x-show="showPasswordModal" class="modal-overlay" @click.self="showPasswordModal = false">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h3>Change Password</h3>
+          <button class="modal-close" @click="showPasswordModal = false">
+            <span class="material-symbols-rounded">close</span>
+          </button>
+        </div>
+        <div class="modal-body">
+          <div class="form-group">
+            <label class="form-label" for="currentPassword">Current Password</label>
+            <input type="password" id="currentPassword" class="form-input" x-model="passwordForm.current" placeholder="Enter current password">
+          </div>
+          <div class="form-group">
+            <label class="form-label" for="newPassword">New Password</label>
+            <input type="password" id="newPassword" class="form-input" x-model="passwordForm.new" placeholder="Enter new password">
+          </div>
+          <div class="form-group">
+            <label class="form-label" for="confirmPassword">Confirm New Password</label>
+            <input type="password" id="confirmPassword" class="form-input" x-model="passwordForm.confirm" placeholder="Confirm new password">
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button class="btn btn-secondary" @click="showPasswordModal = false">Cancel</button>
+          <button class="btn btn-primary" @click="changePassword">Change Password</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Sessions Modal -->
+    <div x-show="showSessionsModal" class="modal-overlay" @click.self="showSessionsModal = false">
+      <div class="modal-content modal-large">
+        <div class="modal-header">
+          <h3>Active Login Sessions</h3>
+          <button class="modal-close" @click="showSessionsModal = false">
+            <span class="material-symbols-rounded">close</span>
+          </button>
+        </div>
+        <div class="modal-body">
+          <div class="sessions-list">
+            <template x-for="session in sessions" :key="session.id">
+              <div class="session-item">
+                <div class="session-info">
+                  <div class="session-device">
+                    <span class="material-symbols-rounded" x-text="session.deviceIcon"></span>
+                    <div>
+                      <div class="session-name" x-text="session.deviceName"></div>
+                      <div class="session-details" x-text="`${session.browser} • ${session.location}`"></div>
+                    </div>
+                  </div>
+                  <div class="session-time">
+                    <div class="session-status" :class="session.current ? 'current' : ''" x-text="session.current ? 'Current session' : 'Last active ' + session.lastActive"></div>
+                  </div>
+                </div>
+                <div class="session-actions" x-show="!session.current">
+                  <button class="btn btn-danger btn-sm" @click="revokeSession(session.id)">Revoke</button>
+                </div>
+              </div>
+            </template>
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button class="btn btn-secondary" @click="showSessionsModal = false">Close</button>
+          <button class="btn btn-danger" @click="revokeAllSessions">Revoke All Other Sessions</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Two Factor Setup Modal -->
+    <div x-show="showTwoFactorModal" class="modal-overlay" @click.self="showTwoFactorModal = false">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h3 x-text="twoFactorEnabled ? 'Disable Two-Factor Authentication' : 'Enable Two-Factor Authentication'"></h3>
+          <button class="modal-close" @click="showTwoFactorModal = false">
+            <span class="material-symbols-rounded">close</span>
+          </button>
+        </div>
+        <div class="modal-body">
+          <div x-show="!twoFactorEnabled">
+            <p>Choose how you want to receive verification codes:</p>
+            
+            <div class="form-group">
+              <label class="form-label">Verification Method</label>
+              <div class="radio-group">
+                <label class="radio-option">
+                  <input type="radio" name="twoFactorMethod" value="email" x-model="twoFactorForm.method" @change="onTwoFactorMethodChange" checked>
+                  <span class="radio-checkmark"></span>
+                  <span>Email</span>
+                  <small x-text="`Send codes to ${profile.email}`"></small>
+                </label>
+                <label class="radio-option">
+                  <input type="radio" name="twoFactorMethod" value="phone" x-model="twoFactorForm.method" @change="onTwoFactorMethodChange">
+                  <span class="radio-checkmark"></span>
+                  <span>SMS</span>
+                  <small x-text="`Send codes to ${profile.phone}`"></small>
+                </label>
+              </div>
+            </div>
+            
+            <div class="form-group">
+              <label class="form-label" for="verificationCode">Verification Code</label>
+              <input type="text" id="verificationCode" class="form-input" x-model="twoFactorForm.code" placeholder="Enter 6-digit code" maxlength="6" @input="twoFactorForm.code = twoFactorForm.code.replace(/[^0-9]/g, '')">
+              <small class="form-help">Check your email or phone for the verification code</small>
+            </div>
+            
+            <div class="form-group">
+              <button class="btn btn-secondary btn-sm" @click="sendVerificationCode" :disabled="twoFactorForm.cooldown > 0">
+                <span x-show="twoFactorForm.cooldown === 0">Resend Code</span>
+                <span x-show="twoFactorForm.cooldown > 0" x-text="`Resend in ${twoFactorForm.cooldown}s`"></span>
+              </button>
+            </div>
+          </div>
+          
+          <div x-show="twoFactorEnabled">
+            <p>Are you sure you want to disable two-factor authentication? This will make your account less secure.</p>
+            <div class="form-group">
+              <label class="form-label" for="confirmPassword">Enter your password to confirm</label>
+              <input type="password" id="confirmPassword" class="form-input" x-model="twoFactorForm.password" placeholder="Enter password">
+            </div>
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button class="btn btn-secondary" @click="showTwoFactorModal = false">Cancel</button>
+          <button class="btn btn-primary" @click="confirmTwoFactor" x-text="twoFactorEnabled ? 'Disable 2FA' : 'Enable 2FA'"></button>
+        </div>
+      </div>
+    </div>
+  </main>
+
+  <!-- Alpine.js Component -->
+  <script>
+    function accountSystem() {
+      return {
+        sidebarOpen: false,
+        activeSection: localStorage.getItem('activeSection') || 'profile',
+        userInfo: {
+          name: '',
+          role: 'Cashier',
+          initials: '',
+          email: ''
+        },
+        profile: {
+          firstName: '',
+          lastName: '',
+          email: '',
+          phone: '',
+          bio: ''
+        },
+        notifications: {
+          email: false,
+          push: false,
+          sales: false,
+          inventory: false,
+          prescriptions: false
+        },
+        
+        // Loading states
+        loading: {
+          profile: true,
+          notifications: true,
+          security: true
+        },
+        
+        // Security related data
+        showPasswordModal: false,
+        showSessionsModal: false,
+        showTwoFactorModal: false,
+        twoFactorEnabled: false,
+        passwordInfo: {
+          lastChanged: ''
+        },
+        passwordForm: {
+          current: '',
+          new: '',
+          confirm: ''
+        },
+        twoFactorForm: {
+          method: 'email',
+          code: '',
+          password: '',
+          cooldown: 0
+        },
+        sessions: [],
+
+        // Initialize data from backend
+        init() {
+          console.log('Cashier account system initializing...');
+          this.loadUserData();
+        },
+
+        async loadUserData() {
+          try {
+            const token = localStorage.getItem('authToken');
+            if (!token) {
+              console.log('No auth token found - please login to access account settings');
+              window.location.href = '/login.html';
+              return;
+            }
+
+            // Load profile data
+            const profileResponse = await fetch('/api/cashier/profile', {
+              headers: {
+                'Authorization': `Bearer ${token}`
+              }
+            });
+            
+            if (profileResponse.ok) {
+              const profile = await profileResponse.json();
+              this.profile = profile;
+              this.userInfo.name = `${profile.firstName} ${profile.lastName}`;
+              this.userInfo.email = profile.email;
+              this.userInfo.initials = `${profile.firstName[0]}${profile.lastName[0]}`;
+            } else if (profileResponse.status === 401) {
+              console.log('Unauthorized - redirecting to login');
+              window.location.href = '/login.html';
+              return;
+            }
+
+            // Load notifications data
+            const notificationsResponse = await fetch('/api/cashier/notifications', {
+              headers: {
+                'Authorization': `Bearer ${token}`
+              }
+            });
+            
+            if (notificationsResponse.ok) {
+              const notifications = await notificationsResponse.json();
+              this.notifications = { ...this.notifications, ...notifications };
+            }
+
+            // Load security data
+            const securityResponse = await fetch('/api/cashier/security', {
+              headers: {
+                'Authorization': `Bearer ${token}`
+              }
+            });
+            
+            if (securityResponse.ok) {
+              const security = await securityResponse.json();
+              this.twoFactorEnabled = security.twoFactorEnabled || false;
+              this.passwordInfo.lastChanged = security.passwordLastChanged || '';
+            }
+
+            // Load sessions data
+            const sessionsResponse = await fetch('/api/cashier/sessions', {
+              headers: {
+                'Authorization': `Bearer ${token}`
+              }
+            });
+            
+            if (sessionsResponse.ok) {
+              this.sessions = await sessionsResponse.json();
+            }
+
+            console.log('Cashier data loaded successfully from backend');
+          } catch (error) {
+            console.error('Error loading cashier data:', error);
+            alert('Failed to load account data. Please check your internet connection and try again.');
+          }
+        },
+
+        async loadAccountData() {
+          try {
+            // Load user profile
+            this.loading.profile = true;
+            const profile = await window.cashierAPI.getUserProfile();
+            this.updateProfile(profile);
+            this.loading.profile = false;
+            
+            // Load notification settings
+            this.loading.notifications = true;
+            const notificationSettings = await window.cashierAPI.getNotificationSettings();
+            this.updateNotifications(notificationSettings);
+            this.loading.notifications = false;
+            
+            // Load security data
+            this.loading.security = true;
+            await this.loadSecurityData();
+            this.loading.security = false;
+            
+          } catch (error) {
+            console.error('Error loading account data:', error);
+            window.cashierAPI.handleError(error, 'loadAccountData');
+            // Reset loading states on error
+            this.loading.profile = false;
+            this.loading.notifications = false;
+            this.loading.security = false;
+          }
+        },
+        
+        async loadSecurityData() {
+          try {
+            // Load password info
+            const passwordInfo = await window.cashierAPI.getPasswordInfo();
+            this.passwordInfo = passwordInfo;
+            
+            // Load 2FA status
+            const twoFactorStatus = await window.cashierAPI.getTwoFactorStatus();
+            this.twoFactorEnabled = twoFactorStatus.enabled;
+            
+            // Load sessions
+            const sessions = await window.cashierAPI.getLoginSessions();
+            this.sessions = sessions;
+            
+          } catch (error) {
+            console.error('Error loading security data:', error);
+            // Don't show error to user for security data loading
+          }
+        },
+        
+        updateProfile(profile) {
+          this.profile = {
+            firstName: profile.firstName || '',
+            lastName: profile.lastName || '',
+            email: profile.email || '',
+            phone: profile.phone || '',
+            bio: profile.bio || ''
+          };
+          
+          this.userInfo = {
+            ...this.userInfo,
+            name: `${profile.firstName || ''} ${profile.lastName || ''}`.trim() || 'Cashier',
+            email: profile.email || '',
+            initials: this.getInitials(profile.firstName, profile.lastName)
+          };
+        },
+        
+        getInitials(firstName, lastName) {
+          const first = firstName ? firstName.charAt(0).toUpperCase() : '';
+          const last = lastName ? lastName.charAt(0).toUpperCase() : '';
+          return (first + last) || 'C';
+        },
+        
+        updateNotifications(settings) {
+          this.notifications = {
+            email: settings.email !== undefined ? settings.email : false,
+            push: settings.push !== undefined ? settings.push : false,
+            sales: settings.sales !== undefined ? settings.sales : false,
+            inventory: settings.inventory !== undefined ? settings.inventory : false,
+            prescriptions: settings.prescriptions !== undefined ? settings.prescriptions : false
+          };
+        },
+        
+        resetProfile() {
+          // Reload profile data from API to reset form
+          this.loadAccountData();
+        },
+        
+        async saveProfile() {
+          try {
+            const response = await fetch('/api/cashier/profile', {
+              method: 'PUT',
+              headers: {
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${localStorage.getItem('authToken')}`
+              },
+              body: JSON.stringify(this.profile)
+            });
+            
+            if (response.ok) {
+              // Update userInfo display
+              this.userInfo.name = `${this.profile.firstName} ${this.profile.lastName}`;
+              this.userInfo.email = this.profile.email;
+              this.userInfo.initials = `${this.profile.firstName[0]}${this.profile.lastName[0]}`;
+              
+              alert('Profile updated successfully!');
+            } else {
+              alert('Failed to update profile. Please try again.');
+            }
+          } catch (error) {
+            console.error('Error saving profile:', error);
+            alert('An error occurred while updating your profile.');
+          }
+        },
+        
+        async saveNotifications() {
+          try {
+            const response = await fetch('/api/cashier/notifications', {
+              method: 'PUT',
+              headers: {
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${localStorage.getItem('authToken')}`
+              },
+              body: JSON.stringify(this.notifications)
+            });
+            
+            if (response.ok) {
+              alert('Notification preferences saved successfully!');
+            } else {
+              alert('Failed to save notification preferences. Please try again.');
+            }
+          } catch (error) {
+            console.error('Error saving notifications:', error);
+            alert('An error occurred while saving notification preferences.');
+          }
+        },
+        
+        setActiveSection(section) {
+          this.activeSection = section;
+          localStorage.setItem('activeSection', section);
+        },
+        
+        showNotification(message, type = 'info') {
+          // Create notification element
+          const notification = document.createElement('div');
+          notification.className = `notification notification-${type}`;
+          notification.textContent = message;
+          notification.style.cssText = `
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            padding: 1rem 1.5rem;
+            border-radius: 8px;
+            color: white;
+            font-weight: 500;
+            z-index: 10000;
+            transform: translateX(100%);
+            transition: transform 0.3s ease;
+            ${type === 'success' ? 'background: #22c55e;' : ''}
+            ${type === 'error' ? 'background: #ef4444;' : ''}
+            ${type === 'info' ? 'background: #3b82f6;' : ''}
+          `;
+          
+          document.body.appendChild(notification);
+          
+          // Slide in
+          setTimeout(() => {
+            notification.style.transform = 'translateX(0)';
+          }, 100);
+          
+          // Remove after 3 seconds
+          setTimeout(() => {
+            notification.style.transform = 'translateX(100%)';
+            setTimeout(() => {
+              document.body.removeChild(notification);
+            }, 300);
+          }, 3000);
+        },
+        
+        async changePassword() {
+          try {
+            if (!this.passwordForm.current || !this.passwordForm.new || !this.passwordForm.confirm) {
+              alert('Please fill in all password fields');
+              return;
+            }
+            
+            if (this.passwordForm.new !== this.passwordForm.confirm) {
+              alert('New passwords do not match!');
+              return;
+            }
+            
+            if (this.passwordForm.new.length < 8) {
+              alert('Password must be at least 8 characters long!');
+              return;
+            }
+            
+            const response = await fetch('/api/cashier/password', {
+              method: 'PUT',
+              headers: {
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${localStorage.getItem('authToken')}`
+              },
+              body: JSON.stringify({
+                currentPassword: this.passwordForm.current,
+                newPassword: this.passwordForm.new
+              })
+            });
+            
+            if (response.ok) {
+              // Clear form and close modal
+              this.passwordForm = { current: '', new: '', confirm: '' };
+              this.showPasswordModal = false;
+              
+              // Update password info
+              this.passwordInfo.lastChanged = new Date().toLocaleDateString();
+              
+              alert('Password changed successfully!');
+            } else {
+              alert('Failed to change password. Please check your current password and try again.');
+            }
+          } catch (error) {
+            console.error('Error changing password:', error);
+            alert('An error occurred while changing your password.');
+          }
+        },
+        
+        async toggleTwoFactor() {
+          // Check if user has valid contact info for 2FA
+          if (!this.twoFactorEnabled && !this.profile.email && !this.profile.phone) {
+            this.showNotification('Please add an email address or phone number to your profile before enabling 2FA', 'error');
+            return;
+          }
+          
+          this.showTwoFactorModal = true;
+          this.twoFactorForm = { method: 'email', code: '', password: '', cooldown: 0 };
+          
+          // Auto-send verification code when opening modal for enabling 2FA
+          if (!this.twoFactorEnabled) {
+            await this.sendVerificationCode();
+          }
+        },
+        
+        async onTwoFactorMethodChange() {
+          // Reset code and cooldown when method changes
+          this.twoFactorForm.code = '';
+          this.twoFactorForm.cooldown = 0;
+          
+          // Auto-send new code for new method
+          if (!this.twoFactorEnabled) {
+            await this.sendVerificationCode();
+          }
+        },
+        
+        async sendVerificationCode() {
+          try {
+            if (this.twoFactorForm.cooldown > 0) {
+              return; // Don't send if cooldown is active
+            }
+            
+            const method = this.twoFactorForm.method;
+            const destination = method === 'email' ? this.profile.email : this.profile.phone;
+            
+            if (!destination) {
+              this.showNotification(`Please add your ${method} address in your profile first`, 'error');
+              return;
+            }
+            
+            await window.cashierAPI.sendTwoFactorCode({
+              method: method,
+              destination: destination
+            });
+            
+            // Start cooldown timer (60 seconds)
+            this.twoFactorForm.cooldown = 60;
+            const cooldownInterval = setInterval(() => {
+              this.twoFactorForm.cooldown--;
+              if (this.twoFactorForm.cooldown <= 0) {
+                clearInterval(cooldownInterval);
+              }
+            }, 1000);
+            
+            this.showNotification(`Verification code sent to ${destination}`, 'success');
+            
+          } catch (error) {
+            console.error('Error sending verification code:', error);
+            window.cashierAPI.handleError(error, 'sendVerificationCode');
+            this.showNotification('Failed to send verification code. Please try again.', 'error');
+          }
+        },
+        
+        async confirmTwoFactor() {
+          try {
+            if (this.twoFactorEnabled) {
+              // Disable 2FA
+              if (!this.twoFactorForm.password) {
+                this.showNotification('Please enter your password to disable 2FA', 'error');
+                return;
+              }
+              
+              await window.cashierAPI.disableTwoFactor({
+                password: this.twoFactorForm.password
+              });
+              
+              this.twoFactorEnabled = false;
+              this.showNotification('Two-factor authentication disabled', 'success');
+              
+            } else {
+              // Enable 2FA
+              if (!this.twoFactorForm.code || this.twoFactorForm.code.length !== 6) {
+                this.showNotification('Please enter a valid 6-digit verification code', 'error');
+                return;
+              }
+              
+              const method = this.twoFactorForm.method;
+              const destination = method === 'email' ? this.profile.email : this.profile.phone;
+              
+              await window.cashierAPI.enableTwoFactor({
+                method: method,
+                destination: destination,
+                code: this.twoFactorForm.code
+              });
+              
+              this.twoFactorEnabled = true;
+              this.showNotification(`Two-factor authentication enabled via ${method}`, 'success');
+            }
+            
+            this.showTwoFactorModal = false;
+            this.twoFactorForm = { method: 'email', code: '', password: '', cooldown: 0 };
+            
+            // Notify tenant admin about 2FA change
+            await window.cashierAPI.notifyUserChange({
+                type: '2fa_change',
+                userId: window.cashierAPI.getUserId(),
+                tenantId: window.cashierAPI.getTenantId(),
+                enabled: this.twoFactorEnabled,
+                method: this.twoFactorEnabled ? method : null,
+                timestamp: new Date().toISOString()
+            });
+            
+          } catch (error) {
+            console.error('Error toggling 2FA:', error);
+            window.cashierAPI.handleError(error, 'confirmTwoFactor');
+            this.showNotification('Failed to update two-factor authentication. Please try again.', 'error');
+          }
+        },
+        
+        async revokeSession(sessionId) {
+          try {
+            await window.cashierAPI.revokeSession(sessionId);
+            
+            // Remove session from list
+            this.sessions = this.sessions.filter(s => s.id !== sessionId);
+            
+            this.showNotification('Session revoked successfully', 'success');
+            
+            // Notify about session revocation
+            await window.cashierAPI.notifyUserChange({
+                type: 'session_revoked',
+                sessionId: sessionId,
+                userId: window.cashierAPI.getUserId(),
+                tenantId: window.cashierAPI.getTenantId(),
+                timestamp: new Date().toISOString()
+            });
+            
+          } catch (error) {
+            console.error('Error revoking session:', error);
+            window.cashierAPI.handleError(error, 'revokeSession');
+            this.showNotification('Failed to revoke session. Please try again.', 'error');
+          }
+        },
+        
+        async revokeAllSessions() {
+          try {
+            await window.cashierAPI.revokeAllSessions();
+            
+            // Reload sessions to show only current session
+            await this.loadSecurityData();
+            
+            this.showNotification('All other sessions revoked successfully', 'success');
+            
+            // Notify about mass session revocation
+            await window.cashierAPI.notifyUserChange({
+                type: 'all_sessions_revoked',
+                userId: window.cashierAPI.getUserId(),
+                tenantId: window.cashierAPI.getTenantId(),
+                timestamp: new Date().toISOString()
+            });
+            
+          } catch (error) {
+            console.error('Error revoking all sessions:', error);
+            window.cashierAPI.handleError(error, 'revokeAllSessions');
+            this.showNotification('Failed to revoke sessions. Please try again.', 'error');
+          }
+        },
+        
+        logout() {
+          // Clear local storage
+          localStorage.removeItem('activeSection');
+          
+          // Call logout API
+          window.cashierAPI.logout()
+            .then(() => {
+              // Redirect to login page
+              window.location.href = '../public/admin-signin.html';
+            })
+            .catch(error => {
+              console.error('Logout error:', error);
+              // Still redirect even if API call fails
+              window.location.href = '../public/admin-signin.html';
+            });
+        }
+      }
+    }
+  </script>
+
+  <!-- Include API and Data Sync Services -->
+  <script src="../shared/js/data-sync.js"></script>
+  <script src="../shared/js/role-based-access.js"></script>
+  <script src="../admin/js/admin-api.js"></script>
+  <script src="js/cashier-api.js"></script>
+
+  <script>
+  // Initialize account system when DOM is ready
+  document.addEventListener('DOMContentLoaded', () => {
+    const accountApp = Alpine.data('accountSystem', accountSystem);
+    // Load account data after Alpine is initialized
+    setTimeout(() => {
+      accountApp.loadAccountData();
+    }, 100);
+  });
+  
+  // Save active section before page unload
+  window.addEventListener('beforeunload', () => {
+    const activeSection = localStorage.getItem('activeSection') || 'profile';
+    localStorage.setItem('activeSection', activeSection);
+  });
+</script>
+
+  <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
+</body>
+</html>

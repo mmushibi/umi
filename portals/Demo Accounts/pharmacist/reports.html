@@ -1,0 +1,2643 @@
+<!DOCTYPE html>
+<html lang="en" x-data="reportsSystem()">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Reports - Umi Health Information Systems</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@100;400;500;600;700&family=Varela+Round&family=Nunito:wght@400;600;700&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Rounded:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <style>
+    :root {
+      --color-primary: #000000;
+      --color-accent: #14B8A6;
+      --color-success: #22c55e;
+      --color-warning: #ef4444;
+      --color-text-primary: #000000;
+      --color-text-secondary: #6b7280;
+      --color-text-muted: #9ca3af;
+      --color-background: #ffffff;
+      --color-surface: #f9fafb;
+      --color-border: #e5e7eb;
+      --font-primary: 'Inter', sans-serif;
+      --sidebar-width: 280px;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      background: var(--color-background);
+      color: var(--color-text-primary);
+      font-family: 'Nunito', 'Varela Round', sans-serif;
+      font-size: 13px;
+      line-height: 1.4;
+      overflow-x: hidden;
+    }
+
+    /* Sidebar Styles */
+    .sidebar {
+      position: fixed;
+      left: 0;
+      top: 0;
+      width: var(--sidebar-width);
+      height: 100vh;
+      background: var(--color-text-primary);
+      color: var(--color-accent);
+      z-index: 1000;
+      transition: transform 0.3s ease;
+      display: flex;
+      flex-direction: column;
+      overflow-y: auto;
+      overflow-x: hidden;
+    }
+
+    .sidebar-header {
+      padding: 1.5rem;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+    }
+
+    .logo-section {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+    }
+
+    .logo-icon {
+      width: 32px;
+      height: 32px;
+      background: rgba(255, 255, 255, 0.2);
+      border-radius: 8px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.2rem;
+    }
+
+    .logo-icon img {
+      width: 32px;
+      height: 32px;
+      border-radius: 8px;
+      object-fit: contain;
+    }
+
+    .logo-text {
+      font-size: 1rem;
+      font-weight: 600;
+      font-family: 'Inter', sans-serif;
+    }
+
+
+    .nav-menu {
+      padding: 1rem 0;
+      flex: 1;
+      overflow-y: auto;
+    }
+
+    .nav-item {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+      padding: 0.75rem 1.25rem;
+      color: rgba(255, 255, 255, 0.8);
+      text-decoration: none;
+      transition: all 0.2s ease;
+      cursor: pointer;
+      font-size: 0.8rem;
+      font-weight: 500;
+    }
+
+    .nav-item:hover {
+      background: rgba(255, 255, 255, 0.1);
+      color: var(--color-accent);
+    }
+
+    .nav-item.active {
+      background: rgba(255, 255, 255, 0.15);
+      color: var(--color-accent);
+      border-left: 3px solid var(--color-accent);
+    }
+
+    .nav-icon {
+      font-size: 1rem;
+    }
+
+    /* Main Content Area */
+    .main-content {
+      margin-left: var(--sidebar-width);
+      min-height: 100vh;
+      transition: margin-left 0.3s ease;
+    }
+
+    /* Header Styles */
+    .header {
+      background: white;
+      border-bottom: 1px solid #e2e8f0;
+      padding: 1rem 2rem;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      position: sticky;
+      top: 0;
+      z-index: 100;
+    }
+
+    .header-left {
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+    }
+
+    .page-title-section {
+      margin-right: 2rem;
+    }
+
+    .page-title-section .page-title {
+      font-size: 1.5rem;
+      font-weight: 700;
+      color: var(--color-text-primary);
+      margin: 0;
+      font-family: 'Inter', sans-serif;
+    }
+
+    .mobile-page-title {
+      display: none;
+      font-size: 1.125rem;
+      font-weight: 600;
+      color: var(--color-text-primary);
+      margin: 0 1rem;
+      font-family: 'Inter', sans-serif;
+    }
+
+    .mobile-menu-toggle {
+      display: none;
+      background: none;
+      border: none;
+      font-size: 1.5rem;
+      color: var(--color-text-secondary);
+      cursor: pointer;
+    }
+
+    .header-right {
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+    }
+
+    .export-button {
+      background: var(--color-primary);
+      color: var(--color-accent);
+      border: none;
+      padding: 0.625rem 1.25rem;
+      border-radius: 16px;
+      font-size: 0.875rem;
+      font-weight: 600;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      transition: all 0.3s ease;
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+    }
+
+    .export-button:hover {
+      background: var(--color-text-secondary);
+      transform: translateY(-2px);
+      box-shadow: 0 8px 24px rgba(0, 0, 0, 0.2);
+    }
+
+    .user-profile {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+      padding: 0.5rem;
+      border-radius: 16px;
+      cursor: pointer;
+      transition: all 0.3s ease;
+    }
+
+    .user-profile:hover {
+      background: var(--color-surface);
+    }
+
+    .user-avatar {
+      width: 36px;
+      height: 36px;
+      background: var(--color-text-primary);
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: var(--color-accent);
+      font-weight: 600;
+      font-size: 0.875rem;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+    }
+
+    .user-info {
+      display: flex;
+      flex-direction: column;
+    }
+
+    .user-name {
+      font-size: 0.875rem;
+      font-weight: 600;
+      color: var(--color-text-primary);
+    }
+
+    .user-role {
+      font-size: 0.75rem;
+      color: var(--color-text-secondary);
+    }
+
+    /* Reports Content */
+    .reports-content {
+      padding: 2rem;
+    }
+
+    /* Date Range Selector */
+    .date-range-selector {
+      background: var(--color-background);
+      border-radius: 20px;
+      border: 1px solid var(--color-border);
+      padding: 1.5rem;
+      margin-bottom: 2rem;
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
+    }
+
+    .date-range-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 1rem;
+    }
+
+    .date-range-title {
+      font-size: 1.125rem;
+      font-weight: 600;
+      color: var(--color-text-primary);
+      font-family: 'Inter', sans-serif;
+    }
+
+    .date-range-options {
+      display: flex;
+      gap: 0.5rem;
+    }
+
+    .date-range-btn {
+      padding: 0.5rem 1rem;
+      border: 1px solid var(--color-border);
+      background: var(--color-background);
+      border-radius: 8px;
+      cursor: pointer;
+      font-size: 0.875rem;
+      font-weight: 500;
+      transition: all 0.2s ease;
+    }
+
+    .date-range-btn:hover {
+      background: var(--color-surface);
+    }
+
+    .date-range-btn.active {
+      background: var(--color-primary);
+      color: var(--color-accent);
+      border-color: var(--color-primary);
+    }
+
+    .custom-date-range {
+      display: flex;
+      gap: 1rem;
+      align-items: center;
+    }
+
+    .date-input {
+      padding: 0.5rem 1rem;
+      border: 1px solid var(--color-border);
+      border-radius: 8px;
+      font-size: 0.875rem;
+    }
+
+    /* Charts Grid */
+    .charts-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(400px, 1fr));
+      gap: 1.5rem;
+      margin-bottom: 2rem;
+    }
+
+    .chart-card {
+      background: var(--color-background);
+      border-radius: 20px;
+      border: 1px solid var(--color-border);
+      padding: 1.5rem;
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
+    }
+
+    .chart-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 1.5rem;
+    }
+
+    .chart-title {
+      font-size: 1.125rem;
+      font-weight: 600;
+      color: var(--color-text-primary);
+      font-family: 'Inter', sans-serif;
+    }
+
+    .chart-container {
+      position: relative;
+      height: 300px;
+    }
+
+    /* Summary Cards */
+    .summary-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+      gap: 1.5rem;
+      margin-bottom: 2rem;
+    }
+
+    .summary-card {
+      background: var(--color-background);
+      border-radius: 20px;
+      padding: 1.5rem;
+      border: 1px solid var(--color-border);
+      transition: all 0.3s ease;
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
+    }
+
+    .summary-card:hover {
+      transform: translateY(-4px);
+      box-shadow: 0 8px 24px rgba(0, 0, 0, 0.12);
+    }
+
+    .summary-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 1rem;
+    }
+
+    .summary-icon {
+      width: 48px;
+      height: 48px;
+      border-radius: 16px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.5rem;
+    }
+
+    .summary-icon.primary {
+      background: rgba(0, 0, 0, 0.1);
+      color: var(--color-primary);
+    }
+
+    .summary-icon.success {
+      background: rgba(34, 197, 94, 0.1);
+      color: var(--color-success);
+    }
+
+    .summary-icon.warning {
+      background: rgba(239, 68, 68, 0.1);
+      color: var(--color-warning);
+    }
+
+    .summary-value {
+      font-size: 2rem;
+      font-weight: 700;
+      color: var(--color-text-primary);
+      margin-bottom: 0.25rem;
+      font-family: 'Inter', sans-serif;
+    }
+
+    .summary-label {
+      color: var(--color-text-secondary);
+      font-size: 0.875rem;
+      margin-bottom: 0.5rem;
+    }
+
+    .summary-change {
+      font-size: 0.75rem;
+      font-weight: 600;
+      display: flex;
+      align-items: center;
+      gap: 0.25rem;
+    }
+
+    .summary-change.positive {
+      color: var(--color-success);
+    }
+
+    .summary-change.negative {
+      color: var(--color-warning);
+    }
+
+    /* Report Tables */
+    .report-section {
+      background: var(--color-background);
+      border-radius: 20px;
+      border: 1px solid var(--color-border);
+      overflow: hidden;
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
+      margin-bottom: 2rem;
+    }
+
+    .section-header {
+      padding: 1.5rem;
+      border-bottom: 1px solid var(--color-border);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .section-title {
+      font-size: 1.125rem;
+      font-weight: 600;
+      color: var(--color-text-primary);
+      font-family: 'Inter', sans-serif;
+    }
+
+    .table-container {
+      overflow-x: auto;
+    }
+
+    .report-table {
+      width: 100%;
+      border-collapse: collapse;
+    }
+
+    .report-table th {
+      background: var(--color-surface);
+      padding: 1rem;
+      text-align: left;
+      font-weight: 600;
+      font-size: 0.875rem;
+      color: var(--color-text-primary);
+      border-bottom: 1px solid var(--color-border);
+    }
+
+    .report-table td {
+      padding: 1rem;
+      border-bottom: 1px solid var(--color-border);
+      font-size: 0.875rem;
+    }
+
+    .report-table tr:hover {
+      background: var(--color-surface);
+    }
+
+    .product-name {
+      font-weight: 600;
+      color: var(--color-text-primary);
+    }
+
+    .amount {
+      font-weight: 700;
+      color: var(--color-success);
+    }
+
+    .percentage {
+      font-weight: 600;
+      color: var(--color-text-secondary);
+    }
+
+    .percentage.positive {
+      color: var(--color-success);
+    }
+
+    .percentage.negative {
+      color: var(--color-warning);
+    }
+
+    .logout-section {
+      padding: 1rem;
+      border-top: 1px solid rgba(255, 255, 255, 0.1);
+      margin-top: auto;
+    }
+
+    .logout-button {
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+      padding: 0.875rem 1.5rem;
+      color: rgba(255, 255, 255, 0.8);
+      text-decoration: none;
+      transition: all 0.2s ease;
+      cursor: pointer;
+      font-size: 0.9rem;
+      font-weight: 500;
+      width: 100%;
+      border: none;
+      background: transparent;
+      text-align: left;
+    }
+
+    .logout-button:hover {
+      background: rgba(239, 68, 68, 0.1);
+      color: var(--color-warning);
+    }
+
+    .logout-icon {
+      font-size: 1.25rem;
+    }
+
+    @media (max-width: 768px) {
+      .sidebar {
+        transform: translateX(-100%);
+      }
+
+      .sidebar.open {
+        transform: translateX(0);
+      }
+
+      .main-content {
+        margin-left: 0;
+      }
+
+      .mobile-menu-toggle {
+        display: block;
+      }
+
+      .mobile-page-title {
+        display: block;
+      }
+
+      .page-title-section {
+        display: none;
+      }
+
+      .reports-content {
+        padding: 1rem;
+      }
+
+      .charts-grid {
+        grid-template-columns: 1fr;
+      }
+
+      .summary-grid {
+        grid-template-columns: 1fr;
+      }
+
+      .date-range-options {
+        flex-wrap: wrap;
+      }
+
+      .custom-date-range {
+        flex-direction: column;
+        align-items: stretch;
+      }
+
+      .table-container {
+        font-size: 0.75rem;
+      }
+
+      .report-table th,
+      .report-table td {
+        padding: 0.5rem;
+      }
+    }
+
+    /* Reports Content Styles */
+    .content-area {
+      padding: 2rem;
+      max-width: 1400px;
+      margin: 0 auto;
+    }
+
+    .content-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 2rem;
+      flex-wrap: wrap;
+      gap: 1rem;
+    }
+
+    .content-header > div:first-child span {
+      font-size: 1.25rem;
+      font-weight: 600;
+      color: var(--color-text-secondary);
+    }
+
+    .quick-stats {
+      display: flex;
+      gap: 1rem;
+      flex-wrap: wrap;
+    }
+
+    .stat-button {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding: 1rem;
+      background: var(--color-background);
+      border: 1px solid var(--color-border);
+      border-radius: 12px;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      min-width: 120px;
+    }
+
+    .stat-button:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+    }
+
+    .stat-button .material-symbols-rounded {
+      font-size: 1.5rem;
+      margin-bottom: 0.5rem;
+      color: var(--color-primary);
+    }
+
+    .stat-button span {
+      font-size: 0.875rem;
+      color: var(--color-text-secondary);
+      margin-bottom: 0.25rem;
+    }
+
+    .stat-button strong {
+      font-size: 1.25rem;
+      font-weight: 700;
+      color: var(--color-text-primary);
+    }
+
+    .add-product-btn {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      padding: 0.75rem 1.5rem;
+      background: var(--color-primary);
+      color: var(--color-accent);
+      border: none;
+      border-radius: 8px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.2s ease;
+    }
+
+    .add-product-btn:hover {
+      background: #333;
+      transform: translateY(-1px);
+    }
+
+    /* Report Filters */
+    .report-filters {
+      background: var(--color-background);
+      border: 1px solid var(--color-border);
+      border-radius: 12px;
+      padding: 1.5rem;
+      margin-bottom: 2rem;
+    }
+
+    .filter-group {
+      display: flex;
+      gap: 1rem;
+      flex-wrap: wrap;
+    }
+
+    .filter-group label {
+      display: flex;
+      flex-direction: column;
+      gap: 0.5rem;
+      min-width: 200px;
+    }
+
+    .filter-group label span {
+      font-size: 0.875rem;
+      font-weight: 600;
+      color: var(--color-text-primary);
+    }
+
+    .filter-group select {
+      padding: 0.75rem;
+      border: 1px solid var(--color-border);
+      border-radius: 6px;
+      background: var(--color-background);
+      color: var(--color-text-primary);
+      font-size: 0.875rem;
+    }
+
+    /* Widgets */
+    .widgets-row {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(400px, 1fr));
+      gap: 1.5rem;
+      margin-bottom: 2rem;
+    }
+
+    .widget {
+      background: var(--color-background);
+      border: 1px solid var(--color-border);
+      border-radius: 12px;
+      overflow: hidden;
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
+    }
+
+    .widget-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 1.5rem;
+      border-bottom: 1px solid var(--color-border);
+    }
+
+    .widget-title {
+      font-size: 1.125rem;
+      font-weight: 600;
+      color: var(--color-text-primary);
+      margin-bottom: 0.25rem;
+    }
+
+    .widget-subtitle {
+      font-size: 0.875rem;
+      color: var(--color-text-secondary);
+    }
+
+    .icon-button {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      width: 36px;
+      height: 36px;
+      background: transparent;
+      border: none;
+      border-radius: 6px;
+      cursor: pointer;
+      transition: background-color 0.2s ease;
+    }
+
+    .icon-button:hover {
+      background: var(--color-surface);
+    }
+
+    .widget-menu {
+      position: absolute;
+      top: 100%;
+      right: 0;
+      background: var(--color-background);
+      border: 1px solid var(--color-border);
+      border-radius: 8px;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+      z-index: 1000;
+      min-width: 150px;
+    }
+
+    .widget-menu button {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      width: 100%;
+      padding: 0.75rem 1rem;
+      background: transparent;
+      border: none;
+      text-align: left;
+      cursor: pointer;
+      font-size: 0.875rem;
+      color: var(--color-text-primary);
+    }
+
+    .widget-menu button:hover {
+      background: var(--color-surface);
+    }
+
+    .chart-container {
+      padding: 1.5rem;
+      height: 300px;
+      position: relative;
+    }
+
+    /* Top Products List */
+    .top-products-list {
+      padding: 1.5rem;
+    }
+
+    .product-performance-item {
+      display: grid;
+      grid-template-columns: 40px 1fr auto auto;
+      align-items: center;
+      gap: 1rem;
+      padding: 0.75rem 0;
+      border-bottom: 1px solid var(--color-border);
+    }
+
+    .product-performance-item:last-child {
+      border-bottom: none;
+    }
+
+    .product-rank {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      width: 32px;
+      height: 32px;
+      background: var(--color-primary);
+      color: var(--color-accent);
+      border-radius: 50%;
+      font-weight: 600;
+      font-size: 0.875rem;
+    }
+
+    .product-name {
+      font-weight: 600;
+      color: var(--color-text-primary);
+    }
+
+    .product-sales {
+      font-size: 0.875rem;
+      color: var(--color-text-secondary);
+    }
+
+    .product-revenue {
+      font-weight: 700;
+      color: var(--color-success);
+    }
+
+    /* Inventory Metrics */
+    .inventory-metrics {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+      gap: 1rem;
+      padding: 1.5rem;
+    }
+
+    .metric-card {
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+      padding: 1rem;
+      background: var(--color-surface);
+      border-radius: 8px;
+    }
+
+    .metric-icon {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      width: 40px;
+      height: 40px;
+      background: var(--color-primary);
+      color: var(--color-accent);
+      border-radius: 8px;
+    }
+
+    .metric-info {
+      display: flex;
+      flex-direction: column;
+      gap: 0.25rem;
+    }
+
+    .metric-label {
+      font-size: 0.75rem;
+      color: var(--color-text-secondary);
+    }
+
+    .metric-value {
+      font-size: 1rem;
+      font-weight: 600;
+      color: var(--color-text-primary);
+    }
+
+    /* Customer Insights */
+    .customer-insights {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+      gap: 1rem;
+      padding: 1.5rem;
+    }
+
+    .insight-item {
+      display: flex;
+      flex-direction: column;
+      gap: 0.5rem;
+      padding: 1rem;
+      background: var(--color-surface);
+      border-radius: 8px;
+    }
+
+    .insight-label {
+      font-size: 0.875rem;
+      color: var(--color-text-secondary);
+    }
+
+    .insight-value {
+      font-size: 1.25rem;
+      font-weight: 700;
+      color: var(--color-text-primary);
+    }
+
+    /* Report List Container */
+    .report-list-container {
+      background: var(--color-background);
+      border: 1px solid var(--color-border);
+      border-radius: 12px;
+      overflow: hidden;
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
+    }
+
+    .report-list-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 1.5rem;
+      border-bottom: 1px solid var(--color-border);
+    }
+
+    .report-list-header h2 {
+      font-size: 1.25rem;
+      font-weight: 600;
+      color: var(--color-text-primary);
+      margin-bottom: 0.25rem;
+    }
+
+    .report-list-header span {
+      font-size: 0.875rem;
+      color: var(--color-text-secondary);
+    }
+
+    .table-controls {
+      padding: 1rem 1.5rem;
+      border-bottom: 1px solid var(--color-border);
+    }
+
+    .control-group {
+      display: flex;
+      gap: 1rem;
+      align-items: center;
+    }
+
+    .table-search {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      padding: 0.75rem 1rem;
+      background: var(--color-surface);
+      border: 1px solid var(--color-border);
+      border-radius: 8px;
+      flex: 1;
+      max-width: 400px;
+    }
+
+    .table-search input {
+      flex: 1;
+      border: none;
+      background: transparent;
+      outline: none;
+      font-size: 0.875rem;
+      color: var(--color-text-primary);
+    }
+
+    .table-search input::placeholder {
+      color: var(--color-text-muted);
+    }
+
+    .table-scroll {
+      overflow-x: auto;
+    }
+
+    .product-table {
+      width: 100%;
+      border-collapse: collapse;
+    }
+
+    .product-table th {
+      background: var(--color-surface);
+      padding: 1rem;
+      text-align: left;
+      font-weight: 600;
+      font-size: 0.875rem;
+      color: var(--color-text-primary);
+      border-bottom: 1px solid var(--color-border);
+    }
+
+    .product-table td {
+      padding: 1rem;
+      border-bottom: 1px solid var(--color-border);
+      font-size: 0.875rem;
+    }
+
+    .product-table tr:hover {
+      background: var(--color-surface);
+    }
+
+    .status-badge {
+      display: inline-block;
+      padding: 0.25rem 0.75rem;
+      border-radius: 12px;
+      font-size: 0.75rem;
+      font-weight: 600;
+    }
+
+    .status-badge.in-stock {
+      background: rgba(34, 197, 94, 0.1);
+      color: var(--color-success);
+    }
+
+    .actions {
+      display: flex;
+      gap: 0.5rem;
+    }
+
+    .action-button {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      width: 32px;
+      height: 32px;
+      background: transparent;
+      border: 1px solid var(--color-border);
+      border-radius: 6px;
+      cursor: pointer;
+      transition: all 0.2s ease;
+    }
+
+    .action-button:hover {
+      background: var(--color-surface);
+    }
+
+    /* Modal Styles */
+    .modal {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(0, 0, 0, 0.5);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      z-index: 1000;
+    }
+
+    .modal.hidden {
+      display: none;
+    }
+
+    .modal-content {
+      background: var(--color-background);
+      border-radius: 12px;
+      max-width: 600px;
+      width: 90%;
+      max-height: 90vh;
+      overflow-y: auto;
+      box-shadow: 0 20px 40px rgba(0, 0, 0, 0.2);
+    }
+
+    .modal-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 1.5rem;
+      border-bottom: 1px solid var(--color-border);
+    }
+
+    .modal-header h2 {
+      font-size: 1.25rem;
+      font-weight: 600;
+      color: var(--color-text-primary);
+    }
+
+    .modal-close {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      width: 32px;
+      height: 32px;
+      background: transparent;
+      border: none;
+      border-radius: 6px;
+      cursor: pointer;
+    }
+
+    .modal-close:hover {
+      background: var(--color-surface);
+    }
+
+    .modal-body {
+      padding: 1.5rem;
+    }
+
+    .form-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+      gap: 1rem;
+      margin-bottom: 1.5rem;
+    }
+
+    .form-grid label {
+      display: flex;
+      flex-direction: column;
+      gap: 0.5rem;
+    }
+
+    .form-grid label span {
+      font-size: 0.875rem;
+      font-weight: 600;
+      color: var(--color-text-primary);
+    }
+
+    .form-grid input,
+    .form-grid select {
+      padding: 0.75rem;
+      border: 1px solid var(--color-border);
+      border-radius: 6px;
+      background: var(--color-background);
+      color: var(--color-text-primary);
+      font-size: 0.875rem;
+    }
+
+    .form-textarea {
+      display: flex;
+      flex-direction: column;
+      gap: 0.5rem;
+    }
+
+    .form-textarea span {
+      font-size: 0.875rem;
+      font-weight: 600;
+      color: var(--color-text-primary);
+    }
+
+    .form-textarea textarea {
+      padding: 0.75rem;
+      border: 1px solid var(--color-border);
+      border-radius: 6px;
+      background: var(--color-background);
+      color: var(--color-text-primary);
+      font-size: 0.875rem;
+      resize: vertical;
+    }
+
+    .modal-footer {
+      display: flex;
+      justify-content: flex-end;
+      gap: 1rem;
+      padding: 1.5rem;
+      border-top: 1px solid var(--color-border);
+    }
+
+    .modal-footer button {
+      padding: 0.75rem 1.5rem;
+      border: none;
+      border-radius: 6px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.2s ease;
+    }
+
+    .modal-footer button.secondary {
+      background: var(--color-surface);
+      color: var(--color-text-primary);
+      border: 1px solid var(--color-border);
+    }
+
+    .modal-footer button.primary {
+      background: var(--color-primary);
+      color: var(--color-accent);
+    }
+
+    .modal-footer button:hover {
+      transform: translateY(-1px);
+    }
+
+    /* Responsive Design */
+    @media (max-width: 768px) {
+      .content-area {
+        padding: 1rem;
+      }
+
+      .content-header {
+        flex-direction: column;
+        align-items: stretch;
+      }
+
+      .quick-stats {
+        justify-content: center;
+      }
+
+      .widgets-row {
+        grid-template-columns: 1fr;
+      }
+
+      .inventory-metrics,
+      .customer-insights {
+        grid-template-columns: repeat(2, 1fr);
+      }
+
+      .product-performance-item {
+        grid-template-columns: 30px 1fr;
+        gap: 0.5rem;
+      }
+
+      .product-sales,
+      .product-revenue {
+        display: none;
+      }
+
+      .report-list-header {
+        flex-direction: column;
+        align-items: stretch;
+        gap: 1rem;
+      }
+
+      .control-group {
+        flex-direction: column;
+      }
+
+      .table-search {
+        max-width: none;
+      }
+
+      .modal-content {
+        width: 95%;
+        margin: 1rem;
+      }
+
+      .form-grid {
+        grid-template-columns: 1fr;
+      }
+    }
+  </style>
+</head>
+<body>
+  <!-- Sidebar -->
+  <aside class="sidebar" :class="sidebarOpen ? 'open' : ''">
+    <div class="sidebar-header">
+      <div class="logo-section">
+        <div class="logo-icon">
+          <img src="../../umi.png" alt="Umi Health Logo">
+        </div>
+        <div class="logo-text">Umi Health</div>
+      </div>
+    </div>
+
+
+    <nav class="nav-menu">
+      <a href="home.html" class="nav-item">
+        <span class="material-symbols-rounded nav-icon">home</span>
+        <span>Home</span>
+      </a>
+      <a href="patients.html" class="nav-item">
+        <span class="material-symbols-rounded nav-icon">people</span>
+        <span>Patients</span>
+      </a>
+      <a href="prescriptions.html" class="nav-item">
+        <span class="material-symbols-rounded nav-icon">prescriptions</span>
+        <span>Prescriptions</span>
+      </a>
+      <a href="inventory.html" class="nav-item">
+        <span class="material-symbols-rounded nav-icon">inventory</span>
+        <span>Inventory</span>
+      </a>
+      <a href="clinical.html" class="nav-item">
+        <span class="material-symbols-rounded nav-icon">medical_services</span>
+        <span>Clinical</span>
+      </a>
+      <a href="compliance.html" class="nav-item">
+        <span class="material-symbols-rounded nav-icon">verified</span>
+        <span>Compliance</span>
+      </a>
+      <a href="reports.html" class="nav-item active">
+        <span class="material-symbols-rounded nav-icon">analytics</span>
+        <span>Reports</span>
+      </a>
+      <a href="suppliers.html" class="nav-item">
+        <span class="material-symbols-rounded nav-icon">local_shipping</span>
+        <span>Suppliers</span>
+      </a>
+      <a href="help.html" class="nav-item">
+        <span class="material-symbols-rounded nav-icon">help</span>
+        <span>Help & Training</span>
+      </a>
+      <a href="account.html" class="nav-item">
+        <span class="material-symbols-rounded nav-icon">person</span>
+        <span>Account</span>
+      </a>
+    </nav>
+    
+    <div class="logout-section">
+      <button class="logout-button" @click="logout()">
+        <span class="material-symbols-rounded logout-icon">logout</span>
+        <span>Logout</span>
+      </button>
+    </div>
+  </aside>
+
+  <!-- Main Content -->
+  <main class="main-content">
+    <!-- Header -->
+    <header class="header">
+      <div class="header-left">
+        <button class="mobile-menu-toggle" @click="sidebarOpen = !sidebarOpen">
+          <span class="material-symbols-rounded">menu</span>
+        </button>
+        
+        <h2 class="mobile-page-title" x-text="pageTitle">Reports & Analytics</h2>
+        
+        <div class="page-title-section">
+          <h1 class="page-title">Reports & Analytics</h1>
+        </div>
+        
+      </div>
+
+      <div class="header-right">
+        <!-- Header elements removed per request -->
+      </div>
+    </header>
+
+    <!-- Reports Content -->
+    <section class="content-area">
+      <div class="content-header">
+        <div>
+          <span x-text="contentDescription">Transform data into actionable business insights</span>
+        </div>
+        <div class="quick-stats">
+          <button class="stat-button" data-stat="total-revenue">
+            <span class="material-symbols-rounded">payments</span>
+            <span>Revenue</span>
+            <strong id="totalRevenueCount" x-text="formatCurrency(totalRevenue)">ZMW 0</strong>
+          </button>
+          <button class="stat-button" data-stat="total-transactions">
+            <span class="material-symbols-rounded">receipt_long</span>
+            <span>Transactions</span>
+            <strong id="totalTransactionsCount" x-text="totalTransactions">0</strong>
+          </button>
+          <button class="stat-button" data-stat="growth-rate">
+            <span class="material-symbols-rounded">trending_up</span>
+            <span>Growth</span>
+            <strong id="growthRateCount" x-text="growthRate">0%</strong>
+          </button>
+          <button class="stat-button" data-stat="top-products">
+            <span class="material-symbols-rounded">star</span>
+            <span>Products</span>
+            <strong id="topProductsCount" x-text="topProducts.length">0</strong>
+          </button>
+        </div>
+        <button class="add-product-btn" id="generateReportButton" type="button" data-permission="generate_reports" @click="openGenerateReportModal()">
+          <span class="material-symbols-rounded">download</span>
+          Generate Report
+        </button>
+      </div>
+
+      <div class="report-filters">
+        <div class="filter-group">
+          <label>
+            <span>Report Period</span>
+            <select id="reportPeriod" x-model="reportPeriod">
+              <option value="today">Today</option>
+              <option value="week" selected>This Week</option>
+              <option value="month">This Month</option>
+              <option value="quarter">This Quarter</option>
+              <option value="year">This Year</option>
+              <option value="custom">Custom Range</option>
+            </select>
+          </label>
+          <label>
+            <span>Report Type</span>
+            <select id="reportType" x-model="reportType">
+              <option value="all" selected>All Reports</option>
+              <option value="sales">Sales Reports</option>
+              <option value="inventory">Inventory Reports</option>
+              <option value="financial">Financial Reports</option>
+              <option value="patient">Patient Reports</option>
+            </select>
+          </label>
+          <label>
+            <span>Location</span>
+            <select id="reportLocation" x-model="reportLocation">
+              <option value="all" selected>All Locations</option>
+              <option value="lusaka">Lusaka</option>
+              <option value="copperbelt">Copperbelt</option>
+              <option value="central">Central</option>
+              <option value="eastern">Eastern</option>
+              <option value="southern">Southern</option>
+            </select>
+          </label>
+        </div>
+      </div>
+
+      <div class="widgets-row">
+        <article class="widget">
+          <header class="widget-header">
+            <div>
+              <h3 class="widget-title">Revenue Overview</h3>
+              <p class="widget-subtitle">Income trends for the selected period</p>
+            </div>
+            <button class="icon-button" type="button" data-menu="revenue" aria-haspopup="true"
+              aria-expanded="false" aria-controls="revenueMenu" aria-label="Revenue menu">
+              <span class="material-symbols-rounded" aria-hidden="true">more_horiz</span>
+            </button>
+            <div class="widget-menu" id="revenueMenu" hidden>
+              <button type="button" data-action="refresh-revenue"><span class="material-symbols-rounded"
+                  aria-hidden="true">refresh</span>Refresh data</button>
+              <button type="button" data-action="export-revenue"><span class="material-symbols-rounded"
+                  aria-hidden="true">download</span>Export chart</button>
+            </div>
+          </header>
+          <div class="chart-container">
+            <canvas id="revenueChart" aria-label="Revenue trends over time"></canvas>
+          </div>
+        </article>
+
+        <article class="widget">
+          <header class="widget-header">
+            <div>
+              <h3 class="widget-title">Sales by Category</h3>
+              <p class="widget-subtitle">Product category performance breakdown</p>
+            </div>
+            <button class="icon-button" type="button" data-menu="category" aria-haspopup="true"
+              aria-expanded="false" aria-controls="categoryMenu" aria-label="Category menu">
+              <span class="material-symbols-rounded" aria-hidden="true">more_horiz</span>
+            </button>
+            <div class="widget-menu" id="categoryMenu" hidden>
+              <button type="button" data-action="refresh-category"><span class="material-symbols-rounded"
+                  aria-hidden="true">refresh</span>Refresh chart</button>
+              <button type="button" data-action="export-category"><span class="material-symbols-rounded"
+                  aria-hidden="true">download</span>Export data</button>
+            </div>
+          </header>
+          <div class="chart-container">
+            <canvas id="categoryChart" aria-label="Sales by product category"></canvas>
+          </div>
+        </article>
+
+        <article class="widget">
+          <header class="widget-header">
+            <div>
+              <h3 class="widget-title">Top Performing Products</h3>
+              <p class="widget-subtitle">Best-selling products by revenue</p>
+            </div>
+            <button class="icon-button" type="button" data-menu="top-products" aria-haspopup="true"
+              aria-expanded="false" aria-controls="topProductsMenu" aria-label="Top products menu">
+              <span class="material-symbols-rounded" aria-hidden="true">more_horiz</span>
+            </button>
+            <div class="widget-menu" id="topProductsMenu" hidden>
+              <button type="button" data-action="refresh-top-products"><span class="material-symbols-rounded"
+                  aria-hidden="true">refresh</span>Refresh list</button>
+              <button type="button" data-action="view-all-products"><span class="material-symbols-rounded"
+                  aria-hidden="true">list</span>View all products</button>
+            </div>
+          </header>
+          <div class="top-products-list" id="topProductsList">
+            <template x-for="(product, index) in topProducts" :key="index">
+              <div class="product-performance-item">
+                <span class="product-rank" x-text="index + 1"></span>
+                <span class="product-name" x-text="product.name"></span>
+                <span class="product-sales" x-text="product.sales + ' units'"></span>
+                <span class="product-revenue" x-text="formatCurrency(product.revenue)"></span>
+              </div>
+            </template>
+          </div>
+        </article>
+      </div>
+
+      <div class="widgets-row">
+        <article class="widget">
+          <header class="widget-header">
+            <div>
+              <h3 class="widget-title">Inventory Performance</h3>
+              <p class="widget-subtitle">Stock levels and movement analysis</p>
+            </div>
+            <button class="icon-button" type="button" data-menu="inventory" aria-haspopup="true"
+              aria-expanded="false" aria-controls="inventoryMenu" aria-label="Inventory menu">
+              <span class="material-symbols-rounded" aria-hidden="true">more_horiz</span>
+            </button>
+            <div class="widget-menu" id="inventoryMenu" hidden>
+              <button type="button" data-action="refresh-inventory"><span class="material-symbols-rounded"
+                  aria-hidden="true">refresh</span>Refresh data</button>
+              <button type="button" data-action="export-inventory"><span class="material-symbols-rounded"
+                  aria-hidden="true">download</span>Export report</button>
+            </div>
+          </header>
+          <div class="inventory-metrics">
+            <div class="metric-card">
+              <span class="metric-icon material-symbols-rounded">inventory</span>
+              <div class="metric-info">
+                <span class="metric-label">Total Stock Value</span>
+                <span class="metric-value" data-metric="totalStockValue" x-text="formatCurrency(0)">ZMW 0</span>
+              </div>
+            </div>
+            <div class="metric-card">
+              <span class="metric-icon material-symbols-rounded">trending_down</span>
+              <div class="metric-info">
+                <span class="metric-label">Low Stock Items</span>
+                <span class="metric-value" data-metric="lowStockItems">0</span>
+              </div>
+            </div>
+            <div class="metric-card">
+              <span class="metric-icon material-symbols-rounded">warning</span>
+              <div class="metric-info">
+                <span class="metric-label">Expiring Soon</span>
+                <span class="metric-value" data-metric="expiringSoon">0</span>
+              </div>
+            </div>
+            <div class="metric-card">
+              <span class="metric-icon material-symbols-rounded">speed</span>
+              <div class="metric-info">
+                <span class="metric-label">Turnover Rate</span>
+                <span class="metric-value" data-metric="turnoverRate">0x</span>
+              </div>
+            </div>
+          </div>
+        </article>
+
+        <article class="widget">
+          <header class="widget-header">
+            <div>
+              <h3 class="widget-title">Patient Analytics</h3>
+              <p class="widget-subtitle">Patient behavior and demographics</p>
+            </div>
+            <button class="icon-button" type="button" data-menu="patient" aria-haspopup="true"
+              aria-expanded="false" aria-controls="customerMenu" aria-label="Customer menu">
+              <span class="material-symbols-rounded" aria-hidden="true">more_horiz</span>
+            </button>
+            <div class="widget-menu" id="customerMenu" hidden>
+              <button type="button" data-action="refresh-customer"><span class="material-symbols-rounded"
+                  aria-hidden="true">refresh</span>Refresh data</button>
+              <button type="button" data-action="export-customer"><span class="material-symbols-rounded"
+                  aria-hidden="true">download</span>Export insights</button>
+            </div>
+          </header>
+          <div class="customer-insights">
+            <div class="insight-item">
+              <span class="insight-label">Total Customers</span>
+              <span class="insight-value" data-insight="totalCustomers" x-text="totalPatients.toLocaleString()">0</span>
+            </div>
+            <div class="insight-item">
+              <span class="insight-label">New This Month</span>
+              <span class="insight-value" data-insight="newThisMonth">0</span>
+            </div>
+            <div class="insight-item">
+              <span class="insight-label">Repeat Customers</span>
+              <span class="insight-value" data-insight="repeatCustomers">0%</span>
+            </div>
+            <div class="insight-item">
+              <span class="insight-label">Avg. Purchase Value</span>
+              <span class="insight-value" data-insight="avgPurchaseValue" x-text="formatCurrency(0)">ZMW 0</span>
+            </div>
+          </div>
+        </article>
+      </div>
+
+      <article class="report-list-container">
+        <header class="report-list-header">
+          <div>
+            <h2>Generated Reports</h2>
+            <span>Access and download your previously generated reports</span>
+          </div>
+          <button class="add-product-btn" id="scheduleReportButton" type="button">
+            <span class="material-symbols-rounded">schedule</span>
+            Schedule Report
+          </button>
+        </header>
+
+        <div class="table-controls">
+          <div class="control-group">
+            <label class="table-search">
+              <span class="material-symbols-rounded" aria-hidden="true">search</span>
+              <input id="reportSearchInput" type="search" placeholder="Search reports by name or type"
+                autocomplete="off" x-model="searchQuery">
+            </label>
+            <button class="icon-button" id="reportFilterToggle" type="button" aria-haspopup="true" aria-expanded="false"
+              aria-controls="reportFilterPanel" title="Filters">
+              <span class="material-symbols-rounded" aria-hidden="true">filter_list</span>
+            </button>
+          </div>
+        </div>
+
+        <div class="table-scroll">
+          <table class="product-table" id="reportTable" aria-live="polite">
+            <thead>
+              <tr>
+                <th scope="col" data-column="date">Date Generated</th>
+                <th scope="col" data-column="name">Report Name</th>
+                <th scope="col" data-column="type">Type</th>
+                <th scope="col" data-column="period">Period</th>
+                <th scope="col" data-column="status">Status</th>
+                <th scope="col" data-column="actions">Actions</th>
+              </tr>
+            </thead>
+            <tbody id="reportTableBody">
+              <template x-for="report in filteredReports" :key="report.id">
+                <tr>
+                  <td data-column="date" x-text="report.date"></td>
+                  <td data-column="name" x-text="report.name"></td>
+                  <td data-column="type" x-text="report.type"></td>
+                  <td data-column="period" x-text="report.period"></td>
+                  <td data-column="status">
+                    <span class="status-badge in-stock" x-text="report.status"></span>
+                  </td>
+                  <td data-column="actions">
+                    <div class="actions">
+                      <button type="button" class="action-button" data-action="view" title="View report">
+                        <span class="material-symbols-rounded" aria-hidden="true">visibility</span>
+                      </button>
+                      <button type="button" class="action-button" data-action="download" title="Download">
+                        <span class="material-symbols-rounded" aria-hidden="true">download</span>
+                      </button>
+                      <button type="button" class="action-button" data-action="share" title="Share">
+                        <span class="material-symbols-rounded" aria-hidden="true">share</span>
+                      </button>
+                    </div>
+                  </td>
+                </tr>
+              </template>
+            </tbody>
+          </table>
+        </div>
+      </article>
+    </section>
+  </main>
+
+  <div class="overlay" id="modalOverlay" hidden></div>
+
+  <section class="modal" id="generateReportModal" role="dialog" aria-modal="true" aria-labelledby="generateReportModalTitle"
+    :class="showGenerateReportModal ? '' : 'hidden'">
+    <div class="modal-content">
+      <header class="modal-header">
+        <h2 id="generateReportModalTitle">Generate New Report</h2>
+        <button type="button" class="modal-close" @click="showGenerateReportModal = false" aria-label="Close generate report form">
+          <span class="material-symbols-rounded" aria-hidden="true">close</span>
+        </button>
+      </header>
+      <form id="generateReportForm" class="modal-body" @submit.prevent="submitGenerateReport">
+        <div class="form-grid">
+          <label>
+            <span>Report Name</span>
+            <input type="text" id="formReportName" name="reportName" required placeholder="Enter report name" x-model="newReport.name">
+          </label>
+          <label>
+            <span>Report Type</span>
+            <select id="formReportType" name="reportType" required x-model="newReport.type">
+              <option value="">Select report type</option>
+              <option value="sales">Sales Report</option>
+              <option value="inventory">Inventory Report</option>
+              <option value="financial">Financial Report</option>
+              <option value="customer">Customer Report</option>
+            </select>
+          </label>
+          <label>
+            <span>Start Date</span>
+            <input type="date" id="formStartDate" name="startDate" required x-model="newReport.startDate">
+          </label>
+          <label>
+            <span>End Date</span>
+            <input type="date" id="formEndDate" name="endDate" required x-model="newReport.endDate">
+          </label>
+          <label>
+            <span>Format</span>
+            <select id="formFormat" name="format" required x-model="newReport.format">
+              <option value="pdf">PDF</option>
+              <option value="excel">Excel</option>
+              <option value="csv">CSV</option>
+            </select>
+          </label>
+          <label>
+            <span>Email Report</span>
+            <select id="formEmail" name="email" x-model="newReport.email">
+              <option value="no">No</option>
+              <option value="yes">Yes</option>
+            </select>
+          </label>
+        </div>
+        <label class="form-textarea">
+          <span>Description</span>
+          <textarea id="formDescription" name="description" rows="3"
+            placeholder="Add optional notes about this report" x-model="newReport.description"></textarea>
+        </label>
+      </form>
+      <footer class="modal-footer">
+        <button type="button" class="secondary" @click="showGenerateReportModal = false">Cancel</button>
+        <button type="submit" form="generateReportForm" class="primary">Generate Report</button>
+      </footer>
+    </div>
+  </section>
+
+  <!-- Alpine.js Component -->
+  <script>
+    function reportsSystem() {
+      return {
+        sidebarOpen: false,
+        searchQuery: '',
+        reportPeriod: 'week',
+        reportType: 'all',
+        reportLocation: 'all',
+        showGenerateReportModal: false,
+        
+        tenantInfo: {
+          name: '',
+          location: ''
+        },
+        userInfo: {
+          name: '',
+          role: '',
+          initials: ''
+        },
+        pageTitle: 'Reports & Analytics',
+        contentDescription: 'Transform data into actionable business insights',
+        growthRate: '0%',
+        
+        topProducts: [],
+        reports: [],
+        loading: false,
+        error: null,
+        revenueData: {},
+        categoryData: {},
+        patientData: {},
+        inventoryMetrics: {},
+        revenueChart: null,
+        categoryChart: null,
+        paymentChart: null,
+        visitsChart: null,
+        paymentData: {},
+        prescriptionStats: {},
+        newReport: {
+          name: '',
+          type: '',
+          startDate: '',
+          endDate: '',
+          format: 'pdf',
+          email: 'no',
+          description: ''
+        },
+
+        async loadCrossPageData() {
+          this.loading = true;
+          this.error = null;
+          try {
+            // Fetch comprehensive data from all pages
+            const comprehensiveData = await window.pharmacistApi.crossPageData.getComprehensiveData();
+            
+            // Process inventory data for reports
+            this.processInventoryData(comprehensiveData.inventory);
+            
+            // Process prescriptions data for reports
+            this.processPrescriptionsData(comprehensiveData.prescriptions);
+            
+            // Process patients data for reports
+            this.processPatientsData(comprehensiveData.patients);
+            
+            // Process payments data for reports
+            this.processPaymentsData(comprehensiveData.payments);
+            
+            // Update charts with cross-page data
+            this.updateChartsWithCrossPageData(comprehensiveData);
+            
+          } catch (error) {
+            console.error('Failed to load cross-page data:', error);
+            this.error = 'Failed to load cross-page data';
+          } finally {
+            this.loading = false;
+          }
+        },
+
+        processInventoryData(inventoryData) {
+          // Update inventory metrics
+          this.inventoryMetrics = {
+            totalStockValue: inventoryData.products.reduce((total, product) => total + (product.stockValue || 0), 0),
+            lowStockItems: inventoryData.lowStock.length,
+            expiringSoon: inventoryData.products.filter(p => p.expiryDate && new Date(p.expiryDate) <= new Date(Date.now() + 30 * 24 * 60 * 60 * 1000)).length,
+            turnoverRate: this.calculateTurnoverRate(inventoryData.products)
+          };
+          
+          // Update top products from inventory
+          this.topProducts = inventoryData.products
+            .sort((a, b) => (b.salesCount || 0) - (a.salesCount || 0))
+            .slice(0, 10)
+            .map(product => ({
+              name: product.name,
+              sales: product.salesCount || 0,
+              revenue: product.revenue || 0
+            }));
+        },
+
+        processPrescriptionsData(prescriptionsData) {
+          // Process prescriptions for analytics
+          this.prescriptionStats = {
+            total: prescriptionsData.prescriptions.length,
+            pending: prescriptionsData.pending.length,
+            expired: prescriptionsData.expired.length,
+            processed: prescriptionsData.prescriptions.filter(p => p.status === 'processed').length
+          };
+        },
+
+        processPatientsData(patientsData) {
+          // Process patient data for analytics
+          const now = new Date();
+          const thisMonth = now.getMonth();
+          const thisYear = now.getFullYear();
+          
+          this.patientData = {
+            totalPatients: patientsData.patients.length,
+            newThisMonth: patientsData.patients.filter(p => {
+              const created = new Date(p.createdAt);
+              return created.getMonth() === thisMonth && created.getFullYear() === thisYear;
+            }).length,
+            repeatCustomers: this.calculateRepeatCustomers(patientsData.patients),
+            avgPurchaseValue: this.calculateAvgPurchaseValue(patientsData.patients)
+          };
+        },
+
+        processPaymentsData(paymentsData) {
+          // Process payment data for analytics
+          this.paymentData = {
+            totalRevenue: paymentsData.summary.totalRevenue || 0,
+            totalTransactions: paymentsData.payments.length,
+            paymentMethods: this.groupPaymentsByMethod(paymentsData.payments),
+            avgTransactionValue: paymentsData.summary.avgTransactionValue || 0
+          };
+          
+          // Update revenue data for charts
+          this.revenueData = {
+            totalRevenue: paymentsData.summary.totalRevenue || 0,
+            totalTransactions: paymentsData.payments.length,
+            labels: this.generateDateLabels(),
+            values: this.generateRevenueValues(paymentsData.payments)
+          };
+        },
+
+        updateChartsWithCrossPageData(comprehensiveData) {
+          // Update category chart with inventory categories
+          if (comprehensiveData.inventory.categories) {
+            this.categoryData = {
+              labels: comprehensiveData.inventory.categories.map(c => c.name),
+              values: comprehensiveData.inventory.categories.map(c => c.productCount || 0)
+            };
+            this.updateCategoryChart();
+          }
+          
+          // Update revenue chart
+          this.updateRevenueChart();
+          
+          // Update inventory metrics display
+          this.updateInventoryMetrics();
+          
+          // Update customer insights display
+          this.updateCustomerInsights();
+        },
+
+        // Helper methods for data processing
+        calculateTurnoverRate(products) {
+          const totalProducts = products.length;
+          const soldProducts = products.filter(p => p.salesCount > 0).length;
+          return totalProducts > 0 ? (soldProducts / totalProducts).toFixed(1) + 'x' : '0x';
+        },
+
+        calculateRepeatCustomers(patients) {
+          const totalPatients = patients.length;
+          const repeatPatients = patients.filter(p => (p.visitCount || 0) > 1).length;
+          return totalPatients > 0 ? Math.round((repeatPatients / totalPatients) * 100) + '%' : '0%';
+        },
+
+        calculateAvgPurchaseValue(patients) {
+          const totalSpent = patients.reduce((total, patient) => total + (patient.totalSpent || 0), 0);
+          const patientCount = patients.length;
+          return patientCount > 0 ? totalSpent / patientCount : 0;
+        },
+
+        groupPaymentsByMethod(payments) {
+          return payments.reduce((groups, payment) => {
+            const method = payment.method || 'unknown';
+            groups[method] = (groups[method] || 0) + 1;
+            return groups;
+          }, {});
+        },
+
+        generateDateLabels() {
+          const labels = [];
+          const days = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
+          for (let i = 6; i >= 0; i--) {
+            const date = new Date();
+            date.setDate(date.getDate() - i);
+            labels.push(days[date.getDay()]);
+          }
+          return labels;
+        },
+
+        generateRevenueValues(payments) {
+          const values = [0, 0, 0, 0, 0, 0, 0];
+          const today = new Date();
+          
+          payments.forEach(payment => {
+            if (payment.createdAt) {
+              const paymentDate = new Date(payment.createdAt);
+              const daysDiff = Math.floor((today - paymentDate) / (1000 * 60 * 60 * 24));
+              
+              if (daysDiff < 7) {
+                values[6 - daysDiff] += payment.amount || 0;
+              }
+            }
+          });
+          
+          return values;
+        },
+
+        async loadUserInfo() {
+          try {
+            // Load user info from localStorage or API
+            const user = JSON.parse(localStorage.getItem('umi_currentUser') || '{}');
+            this.userInfo = {
+              name: user.name || 'Pharmacist',
+              role: user.role || 'Pharmacist',
+              initials: this.getInitials(user.name || 'Pharmacist')
+            };
+            
+            // Load tenant info
+            this.tenantInfo = {
+              name: user.tenantName || 'Umi Health',
+              location: user.location || 'Zambia'
+            };
+            
+          } catch (error) {
+            console.error('Failed to load user info:', error);
+            // Set default values
+            this.userInfo = {
+              name: 'Pharmacist',
+              role: 'Pharmacist',
+              initials: 'P'
+            };
+            this.tenantInfo = {
+              name: 'Umi Health',
+              location: 'Zambia'
+            };
+          }
+        },
+
+        getInitials(name) {
+          return name.split(' ').map(word => word[0]).join('').toUpperCase().slice(0, 2);
+        },
+
+        async loadReports() {
+          this.loading = true;
+          this.error = null;
+          try {
+            const response = await window.pharmacistApi.reports.getReports({
+              period: this.reportPeriod,
+              type: this.reportType,
+              location: this.reportLocation
+            });
+            this.reports = response.data || [];
+          } catch (error) {
+            console.error('Failed to load reports:', error);
+            this.error = 'Failed to load reports';
+            this.reports = [];
+          } finally {
+            this.loading = false;
+          }
+        },
+
+        async generateReport(reportData) {
+          try {
+            const response = await window.pharmacistApi.reports.generateReport(reportData);
+            const report = response.data;
+            
+            // Add to reports list
+            this.reports.unshift(report);
+            return report;
+          } catch (error) {
+            console.error('Failed to generate report:', error);
+            throw error;
+          }
+        },
+
+        async refreshRevenueChart() {
+          try {
+            await this.loadCrossPageData();
+            this.updateRevenueChart();
+          } catch (error) {
+            console.error('Failed to refresh revenue chart:', error);
+            alert('Failed to refresh revenue chart');
+          }
+        },
+
+        async refreshCategoryChart() {
+          try {
+            await this.loadCrossPageData();
+            this.updateCategoryChart();
+          } catch (error) {
+            console.error('Failed to refresh category chart:', error);
+            alert('Failed to refresh category chart');
+          }
+        },
+
+        async refreshTopProducts() {
+          try {
+            await this.loadCrossPageData();
+          } catch (error) {
+            console.error('Failed to refresh top products:', error);
+            alert('Failed to refresh top products');
+          }
+        },
+
+        async refreshInventoryMetrics() {
+          try {
+            await this.loadCrossPageData();
+            this.updateInventoryMetrics();
+          } catch (error) {
+            console.error('Failed to refresh inventory metrics:', error);
+            alert('Failed to refresh inventory metrics');
+          }
+        },
+
+        async refreshCustomerInsights() {
+          try {
+            await this.loadCrossPageData();
+            this.updateCustomerInsights();
+          } catch (error) {
+            console.error('Failed to refresh customer insights:', error);
+            alert('Failed to refresh customer insights');
+          }
+        },
+
+        async exportReport(reportId, format) {
+          try {
+            const response = await window.pharmacistApi.reports.downloadReport(reportId, format);
+            
+            // Create download link if file data is returned
+            if (response.data && response.data.fileUrl) {
+              const link = document.createElement('a');
+              link.href = response.data.fileUrl;
+              link.download = response.data.fileName || `report-${reportId}.${format}`;
+              link.click();
+            }
+            
+            alert(`Report exported successfully as ${format.toUpperCase()}!`);
+          } catch (error) {
+            console.error('Failed to export report:', error);
+            alert('Failed to export report');
+          }
+        },
+
+        get totalRevenue() {
+          return this.revenueData.totalRevenue || this.paymentData?.totalRevenue || 0;
+        },
+
+        get totalTransactions() {
+          return this.revenueData.totalTransactions || this.paymentData?.totalTransactions || 0;
+        },
+
+        get totalPatients() {
+          return this.patientData.totalPatients || 0;
+        },
+
+        get totalPrescriptions() {
+          return this.prescriptionStats?.total || 0;
+        },
+
+        get filteredReports() {
+          return this.reports.filter(report => {
+            const matchesSearch = report.name.toLowerCase().includes(this.searchQuery.toLowerCase()) ||
+                                report.type.toLowerCase().includes(this.searchQuery.toLowerCase());
+            const matchesType = this.reportType === 'all' || report.type.toLowerCase() === this.reportType.toLowerCase();
+            return matchesSearch && matchesType;
+          });
+        },
+
+        openGenerateReportModal() {
+          this.showGenerateReportModal = true;
+          this.resetNewReport();
+        },
+
+        resetNewReport() {
+          this.newReport = {
+            name: '',
+            type: '',
+            startDate: '',
+            endDate: '',
+            format: 'pdf',
+            email: 'no',
+            description: ''
+          };
+        },
+
+        submitGenerateReport() {
+          if (!this.newReport.name || !this.newReport.type || !this.newReport.startDate || !this.newReport.endDate) {
+            alert('Please fill in all required fields');
+            return;
+          }
+
+          this.generateReport(this.newReport)
+            .then(() => {
+              this.showGenerateReportModal = false;
+              this.resetNewReport();
+              alert('Report generated successfully!');
+            })
+            .catch(error => {
+              console.error('Failed to generate report:', error);
+              alert('Failed to generate report');
+            });
+        },
+
+        exportReport() {
+          console.log('Exporting report...');
+          alert('Report exported successfully!');
+        },
+
+        formatCurrency(amount) {
+          return new Intl.NumberFormat('en-ZM', {
+            style: 'currency',
+            currency: 'ZMW'
+          }).format(amount);
+        },
+
+        formatDate(date) {
+          return new Date(date).toLocaleDateString('en-ZM', {
+            year: 'numeric',
+            month: 'short',
+            day: 'numeric'
+          });
+        },
+
+        logout() {
+          if (confirm('Are you sure you want to logout?')) {
+            window.location.href = 'index.html';
+          }
+        },
+
+        setupEventListeners() {
+          // Widget menu toggles
+          document.querySelectorAll('[data-menu]').forEach(button => {
+            button.addEventListener('click', (e) => {
+              e.stopPropagation();
+              const menuId = button.getAttribute('aria-controls');
+              const menu = document.getElementById(menuId);
+              
+              // Close all other menus
+              document.querySelectorAll('.widget-menu').forEach(m => {
+                if (m !== menu) m.hidden = true;
+              });
+              
+              menu.hidden = !menu.hidden;
+              button.setAttribute('aria-expanded', !menu.hidden);
+            });
+          });
+
+          // Close menus when clicking outside
+          document.addEventListener('click', () => {
+            document.querySelectorAll('.widget-menu').forEach(menu => {
+              menu.hidden = true;
+            });
+            document.querySelectorAll('[data-menu]').forEach(button => {
+              button.setAttribute('aria-expanded', 'false');
+            });
+          });
+
+          // Widget action buttons
+          document.querySelectorAll('[data-action]').forEach(button => {
+            button.addEventListener('click', (e) => {
+              e.stopPropagation();
+              const action = button.getAttribute('data-action');
+              this.handleWidgetAction(action);
+            });
+          });
+
+          // Report action buttons
+          document.querySelectorAll('[data-action]').forEach(button => {
+            button.addEventListener('click', (e) => {
+              if (button.closest('.actions')) {
+                e.stopPropagation();
+                const action = button.getAttribute('data-action');
+                this.handleReportAction(action, button);
+              }
+            });
+          });
+        },
+
+        handleWidgetAction(action) {
+          switch(action) {
+            case 'refresh-revenue':
+              this.refreshRevenueChart();
+              break;
+            case 'export-revenue':
+              this.exportChart('revenue');
+              break;
+            case 'refresh-category':
+              this.refreshCategoryChart();
+              break;
+            case 'export-category':
+              this.exportChart('category');
+              break;
+            case 'refresh-top-products':
+              this.refreshTopProducts();
+              break;
+            case 'view-all-products':
+              this.viewAllProducts();
+              break;
+            case 'refresh-inventory':
+              this.refreshInventoryMetrics();
+              break;
+            case 'export-inventory':
+              this.exportInventoryReport();
+              break;
+            case 'refresh-customer':
+              this.refreshCustomerInsights();
+              break;
+            case 'export-customer':
+              this.exportCustomerInsights();
+              break;
+          }
+        },
+
+        handleReportAction(action, button) {
+          const row = button.closest('tr');
+          const reportId = row.querySelector('[data-column="date"]').textContent;
+          
+          switch(action) {
+            case 'view':
+              this.viewReport(reportId);
+              break;
+            case 'download':
+              this.downloadReport(reportId);
+              break;
+            case 'share':
+              this.shareReport(reportId);
+              break;
+          }
+        },
+
+        refreshRevenueChart() {
+          console.log('Refreshing revenue chart...');
+          // Implement refresh logic
+        },
+
+        refreshCategoryChart() {
+          console.log('Refreshing category chart...');
+          // Implement refresh logic
+        },
+
+        refreshTopProducts() {
+          this.loadSampleTopProducts();
+        },
+
+        viewAllProducts() {
+          console.log('Viewing all products...');
+          // Implement navigation to products page
+        },
+
+        refreshInventoryMetrics() {
+          console.log('Refreshing inventory metrics...');
+          // Implement refresh logic
+        },
+
+        async exportInventoryReport() {
+          try {
+            const response = await window.pharmacistApi.reports.exportAnalytics('inventory', 'pdf', {
+              period: this.reportPeriod
+            });
+            
+            if (response.data && response.data.fileUrl) {
+              const link = document.createElement('a');
+              link.href = response.data.fileUrl;
+              link.download = response.data.fileName || 'inventory-report.pdf';
+              link.click();
+            }
+            
+            alert('Inventory report exported successfully!');
+          } catch (error) {
+            console.error('Failed to export inventory report:', error);
+            alert('Failed to export inventory report');
+          }
+        },
+
+        refreshCustomerInsights() {
+          console.log('Refreshing customer insights...');
+          // Implement refresh logic
+        },
+
+        async exportCustomerInsights() {
+          try {
+            const response = await window.pharmacistApi.reports.exportAnalytics('patient', 'pdf', {
+              period: this.reportPeriod
+            });
+            
+            if (response.data && response.data.fileUrl) {
+              const link = document.createElement('a');
+              link.href = response.data.fileUrl;
+              link.download = response.data.fileName || 'customer-insights.pdf';
+              link.click();
+            }
+            
+            alert('Customer insights exported successfully!');
+          } catch (error) {
+            console.error('Failed to export customer insights:', error);
+            alert('Failed to export customer insights');
+          }
+        },
+
+        async exportChart(chartType) {
+          try {
+            const response = await window.pharmacistApi.reports.exportAnalytics(chartType, 'png', {
+              period: this.reportPeriod
+            });
+            
+            if (response.data && response.data.fileUrl) {
+              const link = document.createElement('a');
+              link.href = response.data.fileUrl;
+              link.download = response.data.fileName || `${chartType}-chart.png`;
+              link.click();
+            }
+            
+            alert(`${chartType} chart exported successfully!`);
+          } catch (error) {
+            console.error(`Failed to export ${chartType} chart:`, error);
+            alert(`Failed to export ${chartType} chart`);
+          }
+        },
+
+        async viewReport(reportId) {
+          try {
+            const response = await window.pharmacistApi.reports.getReport(reportId);
+            const report = response.data;
+            
+            // Open report in new window or modal
+            if (report && report.viewUrl) {
+              window.open(report.viewUrl, '_blank');
+            } else {
+              alert('Report viewer not available');
+            }
+          } catch (error) {
+            console.error('Failed to view report:', error);
+            alert('Failed to open report');
+          }
+        },
+
+        async downloadReport(reportId) {
+          try {
+            const response = await window.pharmacistApi.reports.downloadReport(reportId, 'pdf');
+            
+            if (response.data && response.data.fileUrl) {
+              const link = document.createElement('a');
+              link.href = response.data.fileUrl;
+              link.download = response.data.fileName || `report-${reportId}.pdf`;
+              link.click();
+            }
+            
+            alert('Report downloaded successfully!');
+          } catch (error) {
+            console.error('Failed to download report:', error);
+            alert('Failed to download report');
+          }
+        },
+
+        async shareReport(reportId) {
+          try {
+            const response = await window.pharmacistApi.reports.shareReport(reportId, {
+              shareMethod: 'link'
+            });
+            
+            if (response.data && response.data.shareUrl) {
+              // Copy to clipboard
+              navigator.clipboard.writeText(response.data.shareUrl);
+              alert('Report share link copied to clipboard!');
+            } else {
+              alert('Failed to generate share link');
+            }
+          } catch (error) {
+            console.error('Failed to share report:', error);
+            alert('Failed to share report');
+          }
+        },
+
+        loadSampleTopProducts() {
+          // Initialize empty top products array - real data will be loaded from API
+          this.topProducts = [];
+        },
+
+        loadSampleReports() {
+          // Initialize empty reports array - real data will be loaded from API
+          this.reports = [];
+        },
+
+        init() {
+          this.loadUserInfo();
+          this.loadCrossPageData();
+          this.loadReports();
+          this.initCharts();
+          this.setupEventListeners();
+        },
+
+        initCharts() {
+          // Initialize charts with empty data - will be populated by API calls
+          this.revenueChart = null;
+          this.categoryChart = null;
+          this.paymentChart = null;
+          this.visitsChart = null;
+          
+          // Create chart instances with empty data
+          this.createRevenueChart();
+          this.createCategoryChart();
+          this.createPaymentChart();
+          this.createVisitsChart();
+        },
+
+        createRevenueChart() {
+          const ctx = document.getElementById('revenueChart');
+          if (!ctx) return;
+          
+          this.revenueChart = new Chart(ctx.getContext('2d'), {
+            type: 'line',
+            data: {
+              labels: [],
+              datasets: [{
+                label: 'Revenue',
+                data: [],
+                borderColor: 'rgb(0, 0, 0)',
+                backgroundColor: 'rgba(0, 0, 0, 0.1)',
+                tension: 0.4
+              }]
+            },
+            options: {
+              responsive: true,
+              maintainAspectRatio: false,
+              plugins: {
+                legend: {
+                  display: false
+                }
+              },
+              scales: {
+                y: {
+                  beginAtZero: true,
+                  ticks: {
+                    callback: function(value) {
+                      return 'ZMW ' + value.toLocaleString();
+                    }
+                  }
+                }
+              }
+            }
+          });
+        },
+
+        createCategoryChart() {
+          const ctx = document.getElementById('categoryChart');
+          if (!ctx) return;
+          
+          this.categoryChart = new Chart(ctx.getContext('2d'), {
+            type: 'doughnut',
+            data: {
+              labels: [],
+              datasets: [{
+                data: [],
+                backgroundColor: [
+                  'rgba(0, 0, 0, 0.8)',
+                  'rgba(107, 114, 128, 0.8)',
+                  'rgba(156, 163, 175, 0.8)'
+                ]
+              }]
+            },
+            options: {
+              responsive: true,
+              maintainAspectRatio: false,
+              plugins: {
+                legend: {
+                  position: 'bottom'
+                }
+              }
+            }
+          });
+        },
+
+        createPaymentChart() {
+          const ctx = document.getElementById('paymentChart');
+          if (!ctx) return;
+          
+          this.paymentChart = new Chart(ctx.getContext('2d'), {
+            type: 'bar',
+            data: {
+              labels: [],
+              datasets: [{
+                label: 'Transactions',
+                data: [],
+                backgroundColor: 'rgba(0, 0, 0, 0.6)'
+              }]
+            },
+            options: {
+              responsive: true,
+              maintainAspectRatio: false,
+              plugins: {
+                legend: {
+                  display: false
+                }
+              },
+              scales: {
+                y: {
+                  beginAtZero: true
+                }
+              }
+            }
+          });
+        },
+
+        createVisitsChart() {
+          const ctx = document.getElementById('visitsChart');
+          if (!ctx) return;
+          
+          this.visitsChart = new Chart(ctx.getContext('2d'), {
+            type: 'bar',
+            data: {
+              labels: [],
+              datasets: [{
+                label: 'Patient Visits',
+                data: [],
+                backgroundColor: 'rgba(34, 197, 94, 0.6)'
+              }]
+            },
+            options: {
+              responsive: true,
+              maintainAspectRatio: false,
+              plugins: {
+                legend: {
+                  display: false
+                }
+              },
+              scales: {
+                y: {
+                  beginAtZero: true
+                }
+              }
+            }
+          });
+        },
+
+        updateRevenueChart() {
+          if (!this.revenueChart || !this.revenueData) return;
+          
+          this.revenueChart.data.labels = this.revenueData.labels || [];
+          this.revenueChart.data.datasets[0].data = this.revenueData.values || [];
+          this.revenueChart.update();
+        },
+
+        updateCategoryChart() {
+          if (!this.categoryChart || !this.categoryData) return;
+          
+          this.categoryChart.data.labels = this.categoryData.labels || [];
+          this.categoryChart.data.datasets[0].data = this.categoryData.values || [];
+          this.categoryChart.update();
+        },
+
+        updateInventoryMetrics() {
+          if (!this.inventoryMetrics) return;
+          
+          // Update UI elements with real data
+          const elements = {
+            totalStockValue: this.inventoryMetrics.totalStockValue || 0,
+            lowStockItems: this.inventoryMetrics.lowStockItems || 0,
+            expiringSoon: this.inventoryMetrics.expiringSoon || 0,
+            turnoverRate: this.inventoryMetrics.turnoverRate || '0x'
+          };
+          
+          // Update DOM elements if they exist
+          Object.keys(elements).forEach(key => {
+            const element = document.querySelector(`[data-metric="${key}"]`);
+            if (element) {
+              element.textContent = typeof elements[key] === 'number' && key !== 'turnoverRate' 
+                ? this.formatCurrency(elements[key])
+                : elements[key];
+            }
+          });
+        },
+
+        updateCustomerInsights() {
+          if (!this.patientData) return;
+          
+          // Update UI elements with real data
+          const insights = {
+            totalCustomers: this.patientData.totalPatients || 0,
+            newThisMonth: this.patientData.newThisMonth || 0,
+            repeatCustomers: this.patientData.repeatCustomers || 0,
+            avgPurchaseValue: this.patientData.avgPurchaseValue || 0
+          };
+          
+          // Update DOM elements if they exist
+          Object.keys(insights).forEach(key => {
+            const element = document.querySelector(`[data-insight="${key}"]`);
+            if (element) {
+              element.textContent = typeof insights[key] === 'number' && key !== 'repeatCustomers'
+                ? this.formatCurrency(insights[key])
+                : insights[key];
+            }
+          });
+        }
+      }
+    }
+  </script>
+
+  <!-- Include API and Data Sync Services -->
+  <script src="../shared/js/data-sync.js"></script>
+  <script src="../shared/js/role-based-access.js"></script>
+  <script src="../admin/js/admin-api.js"></script>
+  <script src="js/pharmacist-api.js"></script>
+
+  <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
+</body>
+</html>

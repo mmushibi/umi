@@ -1,0 +1,1568 @@
+<!DOCTYPE html>
+<html lang="en" x-data="clinicalSystem()" x-init="init()">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Clinical Decision Support - Umi Health Information Systems</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@100;400;500;600;700&family=Varela+Round&family=Nunito:wght@400;600;700&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Rounded:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://unpkg.com/alpinejs@3.x.x/dist/cdn.min.js" defer></script>
+  <link rel="stylesheet" href="css/pharmacist-styles.css">
+  <script src="../js/api-client.js"></script>
+  <script src="js/pharmacist-api.js"></script>
+  <style>
+    :root {
+      --color-primary: #000000;
+      --color-accent: #14B8A6;
+      --color-success: #22c55e;
+      --color-warning: #ef4444;
+      --color-text-primary: #000000;
+      --color-text-secondary: #6b7280;
+      --color-text-muted: #9ca3af;
+      --color-background: #ffffff;
+      --color-surface: #f9fafb;
+      --color-border: #e5e7eb;
+      --font-primary: 'Inter', sans-serif;
+      --sidebar-width: 280px;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      background: var(--color-background);
+      color: var(--color-text-primary);
+      font-family: 'Nunito', 'Varela Round', sans-serif;
+      font-size: 13px;
+      line-height: 1.4;
+      overflow-x: hidden;
+    }
+
+    /* Sidebar Styles */
+    .sidebar {
+      position: fixed;
+      left: 0;
+      top: 0;
+      width: var(--sidebar-width);
+      height: 100vh;
+      background: var(--color-text-primary);
+      color: var(--color-accent);
+      z-index: 1000;
+      transition: transform 0.3s ease;
+      display: flex;
+      flex-direction: column;
+      overflow-y: auto;
+      overflow-x: hidden;
+    }
+
+    .sidebar-header {
+      padding: 1.5rem;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+    }
+
+    .logo-section {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+    }
+
+    .logo-icon {
+      width: 32px;
+      height: 32px;
+      background: rgba(255, 255, 255, 0.2);
+      border-radius: 8px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.2rem;
+    }
+
+    .logo-text {
+      font-size: 1rem;
+      font-weight: 600;
+      font-family: 'Inter', sans-serif;
+    }
+
+    .nav-menu {
+      padding: 1rem 0;
+      flex: 1;
+      overflow-y: auto;
+    }
+
+    .nav-item {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+      padding: 0.75rem 1.25rem;
+      color: rgba(255, 255, 255, 0.8);
+      text-decoration: none;
+      transition: all 0.2s ease;
+      cursor: pointer;
+      font-size: 0.8rem;
+      font-weight: 500;
+    }
+
+    .nav-item:hover {
+      background: rgba(255, 255, 255, 0.1);
+      color: var(--color-accent);
+    }
+
+    .nav-item.active {
+      background: rgba(255, 255, 255, 0.15);
+      color: var(--color-accent);
+      border-left: 3px solid var(--color-accent);
+    }
+
+    .nav-icon {
+      font-size: 1rem;
+    }
+
+    /* Main Content Area */
+    .main-content {
+      margin-left: var(--sidebar-width);
+      min-height: 100vh;
+      transition: margin-left 0.3s ease;
+    }
+
+    /* Header Styles */
+    .header {
+      background: white;
+      border-bottom: 1px solid #e2e8f0;
+      padding: 1rem 2rem;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      position: sticky;
+      top: 0;
+      z-index: 100;
+    }
+
+    .header-left {
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+    }
+
+    .page-title {
+      font-size: 1.25rem;
+      font-weight: 600;
+      color: var(--color-text-primary);
+      margin: 0;
+      font-family: 'Inter', sans-serif;
+    }
+
+    .mobile-menu-toggle {
+      display: none;
+      background: none;
+      border: none;
+      font-size: 1.25rem;
+      color: var(--color-text-secondary);
+      cursor: pointer;
+    }
+
+    .mobile-title {
+      display: none;
+      font-size: 1rem;
+      font-weight: 600;
+      color: var(--color-text-primary);
+      font-family: 'Inter', sans-serif;
+    }
+
+    /* Clinical Content */
+    .clinical-content {
+      padding: 1.25rem;
+      max-width: 1400px;
+      margin: 0 auto;
+      font-size: 13px;
+    }
+
+    /* Notification Styles */
+    .notification {
+      position: fixed;
+      top: 20px;
+      right: 20px;
+      padding: 1rem 1.5rem;
+      border-radius: 8px;
+      color: white;
+      font-weight: 500;
+      z-index: 10000;
+      opacity: 0;
+      transform: translateX(100%);
+      transition: all 0.3s ease;
+      max-width: 400px;
+    }
+
+    .notification.show {
+      opacity: 1;
+      transform: translateX(0);
+    }
+
+    .notification-success {
+      background: var(--color-success);
+    }
+
+    .notification-error {
+      background: var(--color-warning);
+    }
+
+    .notification-warning {
+      background: #f59e0b;
+    }
+
+    .notification-info {
+      background: var(--color-primary);
+    }
+
+    /* Demo Indicator */
+    .demo-indicator {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      padding: 0.5rem 1rem;
+      background: var(--color-warning);
+      color: white;
+      border-radius: 20px;
+      font-size: 0.75rem;
+      font-weight: 600;
+      margin-right: 1rem;
+    }
+
+    /* Sync Indicator */
+    .sync-indicator {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      padding: 0.5rem 1rem;
+      background: var(--color-success);
+      color: white;
+      border-radius: 20px;
+      font-size: 0.75rem;
+      font-weight: 600;
+      margin-right: 1rem;
+      animation: pulse 2s infinite;
+    }
+
+    @keyframes pulse {
+      0% { opacity: 1; }
+      50% { opacity: 0.7; }
+      100% { opacity: 1; }
+    }
+
+    /* Logout Section */
+    .logout-section {
+      padding: 1rem;
+      border-top: 1px solid rgba(255, 255, 255, 0.1);
+      margin-top: auto;
+    }
+
+    .logout-button {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+      padding: 0.75rem 1.25rem;
+      color: rgba(255, 255, 255, 0.8);
+      text-decoration: none;
+      transition: all 0.2s ease;
+      cursor: pointer;
+      font-size: 0.8rem;
+      font-weight: 500;
+      width: 100%;
+      border: none;
+      background: transparent;
+      text-align: left;
+    }
+
+    .logout-button:hover {
+      background: rgba(239, 68, 68, 0.1);
+      color: var(--color-warning);
+    }
+
+    /* Toast Notification Styles */
+    .toast {
+      position: fixed;
+      top: 20px;
+      right: 20px;
+      padding: 1rem 1.5rem;
+      border-radius: 8px;
+      color: white;
+      font-weight: 500;
+      z-index: 10000;
+      opacity: 0;
+      transform: translateX(100%);
+      transition: all 0.3s ease;
+      max-width: 400px;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+    }
+
+    .toast.show {
+      opacity: 1;
+      transform: translateX(0);
+    }
+
+    .toast-success {
+      background: var(--color-success);
+    }
+
+    .toast-error {
+      background: var(--color-warning);
+    }
+
+    .toast-warning {
+      background: #f59e0b;
+    }
+
+    .toast-info {
+      background: var(--color-primary);
+    }
+
+    .toast-demo {
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    }
+
+    .toast-auth-required {
+      background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+    }
+
+    /* Demo Mode Banner */
+    .demo-banner {
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      background: linear-gradient(90deg, #667eea 0%, #764ba2 100%);
+      color: white;
+      padding: 0.5rem 1rem;
+      text-align: center;
+      font-size: 0.875rem;
+      font-weight: 500;
+      z-index: 10001;
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+    }
+
+    .demo-banner .close-btn {
+      position: absolute;
+      right: 1rem;
+      top: 50%;
+      transform: translateY(-50%);
+      background: none;
+      border: none;
+      color: white;
+      font-size: 1.25rem;
+      cursor: pointer;
+      opacity: 0.8;
+      transition: opacity 0.2s;
+    }
+
+    .demo-banner .close-btn:hover {
+      opacity: 1;
+    }
+
+    .demo-mode-indicator {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.5rem;
+      padding: 0.25rem 0.75rem;
+      background: rgba(102, 126, 234, 0.1);
+      color: #667eea;
+      border-radius: 20px;
+      font-size: 0.75rem;
+      font-weight: 600;
+      margin-left: 0.5rem;
+    }
+
+    .auth-required-overlay {
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background: rgba(0, 0, 0, 0.8);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: white;
+      font-size: 0.875rem;
+      font-weight: 500;
+      border-radius: 8px;
+      opacity: 0;
+      visibility: hidden;
+      transition: all 0.3s ease;
+      z-index: 10;
+    }
+
+    .auth-required-overlay.show {
+      opacity: 1;
+      visibility: visible;
+    }
+
+    .auth-required-content {
+      text-align: center;
+      padding: 2rem;
+    }
+
+    .auth-required-content .material-symbols-rounded {
+      font-size: 2rem;
+      margin-bottom: 1rem;
+      color: #f093fb;
+    }
+
+    .login-prompt-btn {
+      margin-top: 1rem;
+      padding: 0.5rem 1rem;
+      background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+      color: white;
+      border: none;
+      border-radius: 6px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: transform 0.2s;
+    }
+
+    .login-prompt-btn:hover {
+      transform: translateY(-1px);
+    }
+
+    /* Responsive Design */
+    @media (max-width: 768px) {
+      .sidebar {
+        transform: translateX(-100%);
+      }
+
+      .sidebar.open {
+        transform: translateX(0);
+      }
+
+      .main-content {
+        margin-left: 0;
+      }
+
+      .mobile-menu-toggle {
+        display: block;
+      }
+
+      .mobile-title {
+        display: block;
+      }
+
+      .page-title {
+        display: none;
+      }
+
+      .clinical-content {
+        padding: 1rem;
+      }
+    }
+
+    /* Clinical Specific Styles */
+    .section-title {
+      font-size: 1.125rem;
+      font-weight: 600;
+      color: var(--color-text-primary);
+      margin-bottom: 1rem;
+      font-family: 'Inter', sans-serif;
+    }
+
+    .subsection-title {
+      font-size: 1rem;
+      font-weight: 600;
+      color: var(--color-text-primary);
+      margin-bottom: 0.75rem;
+      font-family: 'Inter', sans-serif;
+    }
+
+    /* Patient Search Styles */
+    .patient-search-section {
+      background: var(--color-surface);
+      border-radius: 12px;
+      padding: 1rem;
+      margin-bottom: 1.5rem;
+      border: 1px solid var(--color-border);
+    }
+
+    .patient-search-input {
+      position: relative;
+    }
+
+    .patient-search-results {
+      position: absolute;
+      top: 100%;
+      left: 0;
+      right: 0;
+      background: white;
+      border: 1px solid var(--color-border);
+      border-radius: 8px;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+      max-height: 300px;
+      overflow-y: auto;
+      z-index: 1000;
+    }
+
+    .patient-result-item {
+      padding: 0.75rem 1rem;
+      border-bottom: 1px solid var(--color-border);
+      cursor: pointer;
+      transition: background 0.2s ease;
+    }
+
+    .patient-result-item:hover {
+      background: var(--color-surface);
+    }
+
+    .patient-result-item:last-child {
+      border-bottom: none;
+    }
+
+    .patient-name {
+      font-weight: 600;
+      color: var(--color-text-primary);
+      font-size: 0.875rem;
+    }
+
+    .patient-details {
+      font-size: 0.75rem;
+      color: var(--color-text-secondary);
+      margin-top: 0.25rem;
+    }
+
+    .selected-patient {
+      background: rgba(34, 197, 94, 0.1);
+      border: 1px solid var(--color-success);
+      border-radius: 8px;
+      padding: 1rem;
+      margin-top: 1rem;
+    }
+
+    .patient-info-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+    }
+
+    /* Clinical Tools Grid */
+    .clinical-tools-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+      gap: 1.5rem;
+      margin-top: 1.5rem;
+    }
+
+    .clinical-tool-card {
+      background: white;
+      border-radius: 12px;
+      border: 1px solid var(--color-border);
+      overflow: hidden;
+      transition: all 0.3s ease;
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
+    }
+
+    .clinical-tool-card:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 8px 24px rgba(0, 0, 0, 0.12);
+    }
+
+    .tool-header {
+      padding: 1.25rem;
+      border-bottom: 1px solid var(--color-border);
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+    }
+
+    .tool-icon {
+      width: 48px;
+      height: 48px;
+      border-radius: 12px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.5rem;
+    }
+
+    .tool-icon.interaction {
+      background: rgba(239, 68, 68, 0.1);
+      color: var(--color-warning);
+    }
+
+    .tool-icon.dosage {
+      background: rgba(34, 197, 94, 0.1);
+      color: var(--color-success);
+    }
+
+    .tool-icon.allergy {
+      background: rgba(245, 158, 11, 0.1);
+      color: #f59e0b;
+    }
+
+    .tool-title {
+      flex: 1;
+    }
+
+    .tool-name {
+      font-size: 1.125rem;
+      font-weight: 600;
+      color: var(--color-text-primary);
+      margin-bottom: 0.25rem;
+      font-family: 'Inter', sans-serif;
+    }
+
+    .tool-description {
+      font-size: 0.875rem;
+      color: var(--color-text-secondary);
+    }
+
+    .tool-content {
+      padding: 1.25rem;
+    }
+
+    /* Form Styles */
+    .form-row {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 1rem;
+    }
+
+    .form-group {
+      margin-bottom: 1rem;
+    }
+
+    .form-label {
+      display: block;
+      font-weight: 500;
+      color: var(--color-text-primary);
+      margin-bottom: 0.5rem;
+      font-size: 0.875rem;
+    }
+
+    .form-input {
+      width: 100%;
+      padding: 0.5rem 0.75rem;
+      border: 1px solid var(--color-border);
+      border-radius: 8px;
+      font-size: 0.875rem;
+      transition: all 0.3s ease;
+      background: var(--color-background);
+    }
+
+    .form-input:focus {
+      outline: none;
+      border-color: var(--color-primary);
+      box-shadow: 0 0 0 3px rgba(0, 0, 0, 0.1);
+    }
+
+    .form-select {
+      width: 100%;
+      padding: 0.5rem 0.75rem;
+      border: 1px solid var(--color-border);
+      border-radius: 8px;
+      font-size: 0.875rem;
+      transition: all 0.3s ease;
+      background: var(--color-background);
+    }
+
+    .form-select:focus {
+      outline: none;
+      border-color: var(--color-primary);
+      box-shadow: 0 0 0 3px rgba(0, 0, 0, 0.1);
+    }
+
+    /* Button Styles */
+    .btn {
+      padding: 0.625rem 1.25rem;
+      border-radius: 8px;
+      font-size: 0.875rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      border: none;
+      display: inline-flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+
+    .btn-primary {
+      background: var(--color-primary);
+      color: var(--color-accent);
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+    }
+
+    .btn-primary:hover {
+      background: #333;
+      transform: translateY(-1px);
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+    }
+
+    .btn-secondary {
+      background: var(--color-surface);
+      color: var(--color-text-secondary);
+      border: 1px solid var(--color-border);
+    }
+
+    .btn-secondary:hover {
+      background: var(--color-border);
+    }
+
+    .btn-small {
+      padding: 0.375rem 0.75rem;
+      font-size: 0.75rem;
+    }
+
+    /* Result Container */
+    .result-container {
+      margin-top: 1rem;
+      padding: 1rem;
+      border-radius: 8px;
+      border: 1px solid var(--color-border);
+      background: var(--color-surface);
+    }
+
+    .result-content {
+      font-size: 0.875rem;
+      color: var(--color-text-secondary);
+      line-height: 1.5;
+    }
+
+    /* Responsive for Clinical Tools */
+    @media (max-width: 1024px) {
+      .clinical-tools-grid {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    @media (max-width: 768px) {
+      .form-row {
+        grid-template-columns: 1fr;
+      }
+
+      .clinical-tools-grid {
+        gap: 1rem;
+      }
+
+      .tool-header {
+        padding: 1rem;
+      }
+
+      .tool-content {
+        padding: 1rem;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div x-show="!isAuthenticated" class="demo-banner" x-transition>
+    <span>🔒 Authentication Required: Please login to access clinical decision support tools</span>
+    <button class="close-btn" @click="window.location.href='/public/signin.html'">
+      sign in
+    </button>
+  </div>
+
+  <!-- Sidebar -->
+  <aside class="sidebar" :class="sidebarOpen ? 'open' : ''">
+    <div class="sidebar-header">
+      <div class="logo-section">
+        <div class="logo-icon">
+          <span class="material-symbols-rounded">medication</span>
+        </div>
+        <div class="logo-text">Umi Health</div>
+      </div>
+    </div>
+
+    <nav class="nav-menu">
+      <a href="home.html" class="nav-item">
+        <span class="material-symbols-rounded nav-icon">home</span>
+        <span>Home</span>
+      </a>
+      <a href="patients.html" class="nav-item">
+        <span class="material-symbols-rounded nav-icon">people</span>
+        <span>Patients</span>
+      </a>
+      <a href="prescriptions.html" class="nav-item">
+        <span class="material-symbols-rounded nav-icon">prescriptions</span>
+        <span>Prescriptions</span>
+      </a>
+      <a href="inventory.html" class="nav-item">
+        <span class="material-symbols-rounded nav-icon">inventory</span>
+        <span>Inventory</span>
+      </a>
+      <a href="clinical.html" class="nav-item active">
+        <span class="material-symbols-rounded nav-icon">medical_services</span>
+        <span>Clinical</span>
+      </a>
+      <a href="compliance.html" class="nav-item">
+        <span class="material-symbols-rounded nav-icon">verified</span>
+        <span>Compliance</span>
+      </a>
+      <a href="reports.html" class="nav-item">
+        <span class="material-symbols-rounded nav-icon">analytics</span>
+        <span>Reports</span>
+      </a>
+      <a href="suppliers.html" class="nav-item">
+        <span class="material-symbols-rounded nav-icon">local_shipping</span>
+        <span>Suppliers</span>
+      </a>
+      <a href="help.html" class="nav-item">
+        <span class="material-symbols-rounded nav-icon">help</span>
+        <span>Help & Training</span>
+      </a>
+      <a href="account.html" class="nav-item">
+        <span class="material-symbols-rounded nav-icon">person</span>
+        <span>Account</span>
+      </a>
+    </nav>
+
+    <div class="logout-section">
+      <button class="logout-button" @click="handleLogout()">
+        <span class="material-symbols-rounded">logout</span>
+        <span>Logout</span>
+      </button>
+    </div>
+  </aside>
+
+  <!-- Main Content -->
+  <main class="main-content">
+    <!-- Header -->
+    <header class="header">
+      <div class="header-left">
+        <button class="mobile-menu-toggle" @click="sidebarOpen = !sidebarOpen">
+          <span class="material-symbols-rounded">menu</span>
+        </button>
+        <h1 class="page-title">Clinical Decision Support</h1>
+        <span class="mobile-title">Clinical</span>
+      </div>
+      <div class="header-right">
+        <div x-show="!isAuthenticated" class="auth-required-indicator px-3 py-1 bg-yellow-100 text-yellow-800 rounded-full text-sm font-medium mr-2">
+          🔒 Login Required
+        </div>
+        <div style="display: flex; gap: 0.5rem;">
+          <!-- Header actions will be added here -->
+        </div>
+      </div>
+    </header>
+
+    <!-- Clinical Content -->
+    <div class="clinical-content">
+      <!-- Patient Search Section -->
+      <div class="patient-search-section">
+        <h2 class="section-title">Patient Selection</h2>
+        <div class="patient-search-input">
+          <input 
+            type="text" 
+            class="form-input" 
+            x-model="patientSearchQuery"
+            @input="searchPatients"
+            @focus="showPatientResults = true"
+            @blur="setTimeout(() => showPatientResults = false, 200)"
+            placeholder="Search patients by name, ID, or date of birth..."
+          >
+          <div x-show="showPatientResults && patientSearchResults.length > 0" class="patient-search-results">
+            <template x-for="patient in patientSearchResults" :key="patient.id">
+              <div class="patient-result-item" @click="selectPatient(patient)">
+                <div class="patient-name" x-text="`${patient.firstName} ${patient.lastName}`"></div>
+                <div class="patient-details">
+                  ID: <span x-text="patient.id"></span> | 
+                  DOB: <span x-text="patient.dateOfBirth"></span> | 
+                  Age: <span x-text="patient.age"></span>
+                </div>
+              </div>
+            </template>
+          </div>
+        </div>
+        
+        <div x-show="selectedPatient" class="selected-patient">
+          <h3 class="subsection-title">Selected Patient</h3>
+          <div class="patient-info-header">
+            <div>
+              <strong x-text="`${selectedPatient.firstName} ${selectedPatient.lastName}`"></strong><br>
+              <span class="patient-details">
+                ID: <span x-text="selectedPatient.id"></span> | 
+                Age: <span x-text="selectedPatient.age"></span> | 
+                Gender: <span x-text="selectedPatient.gender"></span>
+              </span>
+            </div>
+            <button class="btn btn-secondary btn-small" @click="clearPatient()">Clear</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Clinical Tools Grid -->
+      <div class="clinical-tools-grid">
+        <!-- Drug Interaction Checker -->
+        <div class="clinical-tool-card">
+          <div class="tool-header">
+            <div class="tool-icon interaction">
+              <span class="material-symbols-rounded">warning</span>
+            </div>
+            <div class="tool-title">
+              <div class="tool-name">Drug Interaction Checker</div>
+              <div class="tool-description">Check for potential drug interactions</div>
+            </div>
+          </div>
+          <div class="tool-content">
+            <form @submit.prevent="checkInteractions">
+              <div class="form-row">
+                <div class="form-group">
+                  <label class="form-label">Drug 1</label>
+                  <select class="form-select" x-model="interaction.drug1" :disabled="!isAuthenticated">
+                    <option value="">Select drug...</option>
+                    <template x-for="drug in medications" :key="drug.id">
+                      <option :value="drug.id" x-text="drug.name"></option>
+                    </template>
+                  </select>
+                </div>
+                <div class="form-group">
+                  <label class="form-label">Drug 2</label>
+                  <select class="form-select" x-model="interaction.drug2" :disabled="!isAuthenticated">
+                    <option value="">Select drug...</option>
+                    <template x-for="drug in medications" :key="drug.id">
+                      <option :value="drug.id" x-text="drug.name"></option>
+                    </template>
+                  </select>
+                </div>
+              </div>
+              <button type="submit" class="btn btn-primary" :disabled="loading || !isAuthenticated" @click="!isAuthenticated ? authManager.requireAuth('drug interaction checker') : null">
+                <span class="material-symbols-rounded" x-show="!loading">search</span>
+                <span x-text="loading ? 'Checking...' : 'Check Interactions'"></span>
+              </button>
+            </form>
+            <div x-show="interaction.result" class="result-container">
+              <div class="result-content" x-html="interaction.result"></div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Dosage Calculator -->
+        <div class="clinical-tool-card" style="position: relative;">
+          <div class="auth-required-overlay" :class="{ 'show': !isAuthenticated && !isDemoMode }">
+            <div class="auth-required-content">
+              <span class="material-symbols-rounded">lock</span>
+              <div>Login Required</div>
+              <div style="font-size: 0.75rem; opacity: 0.8; margin-top: 0.5rem;">
+                Please login to access dosage calculator
+              </div>
+              <button class="login-prompt-btn" @click="redirectToLogin()">
+                Login Now
+              </button>
+            </div>
+          </div>
+          <div class="tool-header">
+            <div class="tool-icon dosage">
+              <span class="material-symbols-rounded">calculate</span>
+            </div>
+            <div class="tool-title">
+              <div class="tool-name">Dosage Calculator</div>
+              <div class="tool-description">Calculate appropriate medication dosages</div>
+            </div>
+          </div>
+          <div class="tool-content">
+            <form @submit.prevent="calculateDosage">
+              <div class="form-group">
+                <label class="form-label">Medication</label>
+                <select class="form-select" x-model="dosage.medication" :disabled="!isAuthenticated && !isDemoMode">
+                  <option value="">Select medication...</option>
+                  <template x-for="drug in medications" :key="drug.id">
+                    <option :value="drug.id" x-text="drug.name"></option>
+                  </template>
+                </select>
+              </div>
+              <div class="form-row">
+                <div class="form-group">
+                  <label class="form-label">Weight (kg)</label>
+                  <input type="number" class="form-input" x-model="dosage.weight" placeholder="Enter weight" :disabled="!isAuthenticated && !isDemoMode">
+                </div>
+                <div class="form-group">
+                  <label class="form-label">Age</label>
+                  <input type="number" class="form-input" x-model="dosage.age" placeholder="Enter age" :disabled="!isAuthenticated && !isDemoMode">
+                </div>
+              </div>
+              <button type="submit" class="btn btn-primary" :disabled="loading || (!isAuthenticated && !isDemoMode)">
+                <span class="material-symbols-rounded" x-show="!loading">calculate</span>
+                <span x-text="loading ? 'Calculating...' : 'Calculate Dosage'"></span>
+              </button>
+            </form>
+            <div x-show="dosage.result" class="result-container">
+              <div class="result-content" x-text="dosage.result"></div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Allergy Checker -->
+        <div class="clinical-tool-card" style="position: relative;">
+          <div class="auth-required-overlay" :class="{ 'show': !isAuthenticated && !isDemoMode }">
+            <div class="auth-required-content">
+              <span class="material-symbols-rounded">lock</span>
+              <div>Login Required</div>
+              <div style="font-size: 0.75rem; opacity: 0.8; margin-top: 0.5rem;">
+                Please login to access allergy checker
+              </div>
+              <button class="login-prompt-btn" @click="redirectToLogin()">
+                Login Now
+              </button>
+            </div>
+          </div>
+          <div class="tool-header">
+            <div class="tool-icon allergy">
+              <span class="material-symbols-rounded">health_and_safety</span>
+            </div>
+            <div class="tool-title">
+              <div class="tool-name">Allergy Checker</div>
+              <div class="tool-description">Check for patient allergies and contraindications</div>
+            </div>
+          </div>
+          <div class="tool-content">
+            <form @submit.prevent="checkAllergies">
+              <div class="form-group">
+                <label class="form-label">Patient ID</label>
+                <input type="text" class="form-input" x-model="allergy.patientId" placeholder="Enter patient ID" :disabled="!isAuthenticated && !isDemoMode">
+              </div>
+              <div class="form-group">
+                <label class="form-label">Medication</label>
+                <select class="form-select" x-model="allergy.medication" :disabled="!isAuthenticated && !isDemoMode">
+                  <option value="">Select medication...</option>
+                  <template x-for="drug in medications" :key="drug.id">
+                    <option :value="drug.id" x-text="drug.name"></option>
+                  </template>
+                </select>
+              </div>
+              <button type="submit" class="btn btn-primary" :disabled="loading || (!isAuthenticated && !isDemoMode)">
+                <span class="material-symbols-rounded" x-show="!loading">search</span>
+                <span x-text="loading ? 'Checking...' : 'Check Allergies'"></span>
+              </button>
+            </form>
+            <div x-show="allergy.result" class="result-container">
+              <div class="result-content" x-html="allergy.result"></div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </main>
+
+  <script>
+    function clinicalSystem() {
+      return {
+        sidebarOpen: false,
+        loading: false,
+        isAuthenticated: false,
+        isDemoMode: true,
+        showRealTimeIndicator: false,
+        demoBannerClosed: false,
+        medications: [],
+        selectedPatient: null,
+        patientSearchQuery: '',
+        patientSearchResults: [],
+        showPatientResults: false,
+        
+        // Drug Interaction Data
+        interaction: {
+          drug1: '',
+          drug2: '',
+          result: null
+        },
+        
+        // Dosage Calculator Data
+        dosage: {
+          medication: '',
+          weight: '',
+          age: '',
+          result: null
+        },
+        
+        // Allergy Checker Data
+        allergy: {
+          patientId: '',
+          medication: '',
+          result: null
+        },
+
+        // Initialize API client
+        apiClient: null,
+
+        async init() {
+          // Initialize API client
+          this.apiClient = new PharmacistApi();
+          
+          // Check authentication status
+          this.checkAuthenticationStatus();
+          
+          // Load initial data
+          await this.loadInitialData();
+          
+          // Set up real-time sync indicator for authenticated users
+          if (this.isAuthenticated && !this.isDemoMode) {
+            this.setupRealTimeSync();
+          }
+          
+          // Load demo banner preference
+          this.demoBannerClosed = localStorage.getItem('demoBannerClosed') === 'true';
+        },
+
+        checkAuthenticationStatus() {
+          // Check if user is authenticated
+          this.isAuthenticated = !!(this.apiClient.token && this.apiClient.userId && this.apiClient.tenantId);
+          
+          // Determine if we're in demo mode
+          this.isDemoMode = !this.isAuthenticated;
+          
+          console.log('Authentication status:', {
+            isAuthenticated: this.isAuthenticated,
+            isDemoMode: this.isDemoMode,
+            hasToken: !!this.apiClient.token,
+            userId: this.apiClient.userId,
+            tenantId: this.apiClient.tenantId
+          });
+        },
+
+        setupRealTimeSync() {
+          // Set up periodic sync indicator for authenticated users
+          setInterval(() => {
+            if (this.isAuthenticated && !this.isDemoMode) {
+              this.showRealTimeIndicator = true;
+              setTimeout(() => {
+                this.showRealTimeIndicator = false;
+              }, 2000);
+            }
+          }, 30000);
+        },
+
+        async loadInitialData() {
+          try {
+            if (this.isAuthenticated && !this.isDemoMode) {
+              // Load real data from backend
+              await this.loadMedicationsFromBackend();
+            } else {
+              // Demo mode: load from localStorage or use empty array
+              this.loadDemoData();
+            }
+          } catch (error) {
+            console.error('Failed to load initial data:', error);
+            this.showToast('Failed to load medications', 'error');
+            
+            // Fallback to demo mode
+            this.isDemoMode = true;
+            this.loadDemoData();
+          }
+        },
+
+        async loadMedicationsFromBackend() {
+          try {
+            const response = await this.apiClient.clinical.getMedications();
+            this.medications = response.data || [];
+            console.log('Loaded medications from backend:', this.medications.length);
+          } catch (error) {
+            console.error('Failed to load medications from backend:', error);
+            throw error;
+          }
+        },
+
+        loadDemoData() {
+          // Try to load from localStorage first
+          const savedMedications = localStorage.getItem('demo_medications');
+          if (savedMedications) {
+            try {
+              this.medications = JSON.parse(savedMedications);
+              console.log('Loaded medications from localStorage:', this.medications.length);
+              return;
+            } catch (error) {
+              console.error('Failed to parse saved medications:', error);
+            }
+          }
+          
+          // Start with empty array - no sample data
+          this.medications = [];
+          this.saveDemoData();
+          
+          // Show demo toast
+          this.showToast('Demo Mode: No medications available. Add medications through inventory.', 'demo');
+        },
+
+        saveDemoData() {
+          if (this.isDemoMode) {
+            localStorage.setItem('demo_medications', JSON.stringify(this.medications));
+          }
+        },
+
+        // Patient search and selection
+        async searchPatients() {
+          if (this.patientSearchQuery.length < 2) {
+            this.patientSearchResults = [];
+            return;
+          }
+
+          try {
+            if (this.isAuthenticated && !this.isDemoMode) {
+              // Real backend search
+              const response = await this.apiClient.clinical.searchPatients(this.patientSearchQuery, 10);
+              this.patientSearchResults = response.data || [];
+            } else {
+              // Demo mode: search localStorage or return empty
+              this.searchDemoPatients();
+            }
+          } catch (error) {
+            console.error('Failed to search patients:', error);
+            this.showToast('Failed to search patients', 'error');
+            this.patientSearchResults = [];
+          }
+        },
+
+        searchDemoPatients() {
+          // Demo mode: search from localStorage or return empty
+          const savedPatients = localStorage.getItem('demo_patients');
+          let patients = [];
+          
+          if (savedPatients) {
+            try {
+              patients = JSON.parse(savedPatients);
+            } catch (error) {
+              console.error('Failed to parse saved patients:', error);
+            }
+          }
+          
+          this.patientSearchResults = patients.filter(patient => 
+            patient.firstName.toLowerCase().includes(this.patientSearchQuery.toLowerCase()) ||
+            patient.lastName.toLowerCase().includes(this.patientSearchQuery.toLowerCase()) ||
+            patient.id.toLowerCase().includes(this.patientSearchQuery.toLowerCase())
+          );
+          
+          if (this.patientSearchResults.length === 0) {
+            this.showToast('Demo Mode: No patients found. Add patients through the Patients page.', 'demo');
+          }
+        },
+
+        selectPatient(patient) {
+          this.selectedPatient = patient;
+          this.patientSearchQuery = '';
+          this.patientSearchResults = [];
+          this.showPatientResults = false;
+          
+          // Auto-fill patient ID in forms
+          this.allergy.patientId = patient.id;
+          
+          this.showToast(`Selected patient: ${patient.firstName} ${patient.lastName}`, 'success');
+          
+          // Save to demo storage
+          if (this.isDemoMode) {
+            localStorage.setItem('demo_selected_patient', JSON.stringify(patient));
+          }
+        },
+
+        clearPatient() {
+          this.selectedPatient = null;
+          this.allergy.patientId = '';
+          
+          if (this.isDemoMode) {
+            localStorage.removeItem('demo_selected_patient');
+          }
+          
+          this.showToast('Patient selection cleared', 'info');
+        },
+
+        // Drug Interaction Checker
+        async checkInteractions() {
+          if (!this.interaction.drug1 || !this.interaction.drug2) {
+            this.showToast('Please select both medications', 'warning');
+            return;
+          }
+
+          if (!this.isAuthenticated && !this.isDemoMode) {
+            this.showToast('Login required to check drug interactions', 'auth-required');
+            return;
+          }
+
+          this.loading = true;
+          try {
+            if (this.isAuthenticated && !this.isDemoMode) {
+              // Real backend API call
+              const response = await this.apiClient.clinical.checkDrugInteractions(
+                this.interaction.drug1, 
+                this.interaction.drug2
+              );
+              
+              // Get severity scoring
+              const severityResponse = await this.apiClient.clinical.getInteractionSeverity(
+                this.interaction.drug1, 
+                this.interaction.drug2
+              );
+              
+              this.interaction.result = this.formatInteractionResult(response.data, severityResponse.data);
+              
+              // Save clinical decision
+              await this.saveClinicalDecision('drug_interaction', {
+                drug1: this.interaction.drug1,
+                drug2: this.interaction.drug2,
+                result: response.data,
+                severity: severityResponse.data
+              });
+              
+            } else {
+              // Demo mode: simulate with localStorage
+              this.simulateInteractionCheck();
+            }
+            
+            this.showToast('Interaction check completed', 'success');
+          } catch (error) {
+            console.error('Failed to check interactions:', error);
+            this.showToast('Failed to check interactions', 'error');
+            this.interaction.result = 'Error occurred while checking interactions.';
+          } finally {
+            this.loading = false;
+          }
+        },
+
+        simulateInteractionCheck() {
+          // Demo mode: check localStorage for saved interactions or simulate
+          const drug1Name = this.medications.find(m => m.id === this.interaction.drug1)?.name || 'Drug 1';
+          const drug2Name = this.medications.find(m => m.id === this.interaction.drug2)?.name || 'Drug 2';
+          
+          this.interaction.result = `Demo Mode: No real interaction data available for ${drug1Name} and ${drug2Name}. Login for real clinical data.`;
+          
+          // Save to demo storage
+          const demoInteractions = JSON.parse(localStorage.getItem('demo_interactions') || '[]');
+          demoInteractions.push({
+            drug1: this.interaction.drug1,
+            drug2: this.interaction.drug2,
+            result: this.interaction.result,
+            timestamp: new Date().toISOString()
+          });
+          localStorage.setItem('demo_interactions', JSON.stringify(demoInteractions));
+        },
+
+        // Dosage Calculator
+        async calculateDosage() {
+          if (!this.dosage.medication || !this.dosage.weight || !this.dosage.age) {
+            this.showToast('Please fill in all required fields', 'warning');
+            return;
+          }
+
+          if (!this.isAuthenticated && !this.isDemoMode) {
+            this.showToast('Login required to calculate dosage', 'auth-required');
+            return;
+          }
+
+          this.loading = true;
+          try {
+            if (this.isAuthenticated && !this.isDemoMode) {
+              // Real backend API call
+              const response = await this.apiClient.clinical.calculateDosage(
+                this.dosage.medication,
+                parseFloat(this.dosage.weight),
+                parseInt(this.dosage.age)
+              );
+              
+              this.dosage.result = response.data.dosageRecommendation;
+              
+              // Save clinical decision
+              await this.saveClinicalDecision('dosage_calculation', {
+                medication: this.dosage.medication,
+                weight: this.dosage.weight,
+                age: this.dosage.age,
+                result: response.data
+              });
+              
+            } else {
+              // Demo mode: simulate
+              this.simulateDosageCalculation();
+            }
+            
+            this.showToast('Dosage calculation completed', 'success');
+          } catch (error) {
+            console.error('Failed to calculate dosage:', error);
+            this.showToast('Failed to calculate dosage', 'error');
+            this.dosage.result = 'Error occurred while calculating dosage.';
+          } finally {
+            this.loading = false;
+          }
+        },
+
+        simulateDosageCalculation() {
+          // Demo mode: basic calculation
+          const medicationName = this.medications.find(m => m.id === this.dosage.medication)?.name || 'Medication';
+          const weight = parseFloat(this.dosage.weight);
+          
+          this.dosage.result = `Demo Mode: Basic dosage calculation for ${medicationName} (${weight}kg). Login for accurate clinical dosing.`;
+          
+          // Save to demo storage
+          const demoDosages = JSON.parse(localStorage.getItem('demo_dosages') || '[]');
+          demoDosages.push({
+            medication: this.dosage.medication,
+            weight: this.dosage.weight,
+            age: this.dosage.age,
+            result: this.dosage.result,
+            timestamp: new Date().toISOString()
+          });
+          localStorage.setItem('demo_dosages', JSON.stringify(demoDosages));
+        },
+
+        // Allergy Checker
+        async checkAllergies() {
+          if (!this.allergy.patientId || !this.allergy.medication) {
+            this.showToast('Please enter patient ID and select medication', 'warning');
+            return;
+          }
+
+          if (!this.isAuthenticated && !this.isDemoMode) {
+            this.showToast('Login required to check allergies', 'auth-required');
+            return;
+          }
+
+          this.loading = true;
+          try {
+            if (this.isAuthenticated && !this.isDemoMode) {
+              // Real backend API call
+              const response = await this.apiClient.clinical.checkAllergies(
+                this.allergy.patientId,
+                this.allergy.medication
+              );
+              
+              this.allergy.result = this.formatAllergyResult(response.data);
+              
+              // Save clinical decision
+              await this.saveClinicalDecision('allergy_check', {
+                patientId: this.allergy.patientId,
+                medication: this.allergy.medication,
+                result: response.data
+              });
+              
+            } else {
+              // Demo mode: simulate
+              this.simulateAllergyCheck();
+            }
+            
+            this.showToast('Allergy check completed', 'success');
+          } catch (error) {
+            console.error('Failed to check allergies:', error);
+            this.showToast('Failed to check allergies', 'error');
+            this.allergy.result = 'Error occurred while checking allergies.';
+          } finally {
+            this.loading = false;
+          }
+        },
+
+        simulateAllergyCheck() {
+          // Demo mode: basic allergy check
+          const medicationName = this.medications.find(m => m.id === this.allergy.medication)?.name || 'Medication';
+          
+          this.allergy.result = `Demo Mode: No real allergy data available for patient ${this.allergy.patientId} and ${medicationName}. Login for actual allergy screening.`;
+          
+          // Save to demo storage
+          const demoAllergies = JSON.parse(localStorage.getItem('demo_allergies') || '[]');
+          demoAllergies.push({
+            patientId: this.allergy.patientId,
+            medication: this.allergy.medication,
+            result: this.allergy.result,
+            timestamp: new Date().toISOString()
+          });
+          localStorage.setItem('demo_allergies', JSON.stringify(demoAllergies));
+        },
+
+        // Save clinical decision (backend only)
+        async saveClinicalDecision(type, data) {
+          if (this.isAuthenticated && !this.isDemoMode) {
+            try {
+              await this.apiClient.clinical.saveClinicalDecision({
+                type,
+                data,
+                timestamp: new Date().toISOString(),
+                userId: this.apiClient.userId
+              });
+            } catch (error) {
+              console.error('Failed to save clinical decision:', error);
+              // Don't show error to user as this is background operation
+            }
+          }
+        },
+
+        // Format results
+        formatInteractionResult(data, severityData) {
+          if (data.severity === 'high') {
+            return `<div style="color: #ef4444; font-weight: 600;">
+              ⚠️ ${data.interactionType || 'High Risk Interaction'}
+            </div>
+            <div style="margin-top: 0.5rem;">${data.description || 'Significant interaction detected'}</div>
+            <div style="margin-top: 0.5rem; font-size: 0.75rem;">
+              Severity Score: ${severityData.score || 'N/A'} (${severityData.level || 'Unknown'})
+            </div>`;
+          }
+          return data.description || 'No clinically significant interactions detected.';
+        },
+
+        formatAllergyResult(data) {
+          if (data.allergyDetected) {
+            return `<div style="color: #ef4444; font-weight: 600;">
+              ⚠️ Allergy Alert
+            </div>
+            <div style="margin-top: 0.5rem;">${data.allergyType || 'Allergy detected'}</div>
+            <div style="margin-top: 0.5rem;">${data.description || 'Patient has known allergy'}</div>`;
+          }
+          return 'No known allergies detected for this medication.';
+        },
+
+        // Toast notification system
+        showToast(message, type = 'info') {
+          const toast = document.createElement('div');
+          toast.className = `toast toast-${type}`;
+          toast.textContent = message;
+          
+          document.body.appendChild(toast);
+          
+          // Trigger animation
+          setTimeout(() => toast.classList.add('show'), 100);
+          
+          // Remove toast after 4 seconds
+          setTimeout(() => {
+            toast.classList.remove('show');
+            setTimeout(() => {
+              if (toast.parentNode) {
+                toast.parentNode.removeChild(toast);
+              }
+            }, 300);
+          }, 4000);
+        },
+
+        // Demo banner management
+        closeDemoBanner() {
+          this.demoBannerClosed = true;
+          localStorage.setItem('demoBannerClosed', 'true');
+        },
+
+        // Redirect to login
+        redirectToLogin() {
+          this.showToast('Redirecting to login...', 'info');
+          setTimeout(() => {
+            window.location.href = '/public/admin-signin.html';
+          }, 1500);
+        },
+
+        // Logout function
+        handleLogout() {
+          if (confirm('Are you sure you want to logout?')) {
+            if (this.isAuthenticated && !this.isDemoMode) {
+              // Clear backend auth
+              this.apiClient.clearAuth();
+            }
+            
+            // Clear demo data
+            if (this.isDemoMode) {
+              localStorage.removeItem('demo_medications');
+              localStorage.removeItem('demo_patients');
+              localStorage.removeItem('demo_selected_patient');
+              localStorage.removeItem('demo_interactions');
+              localStorage.removeItem('demo_dosages');
+              localStorage.removeItem('demo_allergies');
+            }
+            
+            this.showToast('Logging out...', 'info');
+            setTimeout(() => {
+              window.location.href = 'home.html';
+            }, 1500);
+          }
+        }
+      }
+    }
+  </script>
+</body>
+</html>

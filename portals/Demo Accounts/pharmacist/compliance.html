@@ -1,0 +1,1013 @@
+<!DOCTYPE html>
+<html lang="en" x-data="complianceSystem()">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Compliance - Umi Health Information Systems</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@100;400;500;600;700&family=Varela+Round&family=Nunito:wght@400;600;700&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Rounded:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <script src="https://cdn.tailwindcss.com"></script>
+  <style>
+    :root {
+      --color-primary: #000000;
+      --color-accent: #14B8A6;
+      --color-success: #22c55e;
+      --color-warning: #ef4444;
+      --color-info: #3b82f6;
+      --color-text-primary: #000000;
+      --color-text-secondary: #6b7280;
+      --color-text-muted: #9ca3af;
+      --color-background: #ffffff;
+      --color-surface: #f9fafb;
+      --color-border: #e5e7eb;
+      --font-primary: 'Inter', sans-serif;
+      --sidebar-width: 280px;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      background: var(--color-background);
+      color: var(--color-text-primary);
+      font-family: 'Nunito', 'Varela Round', sans-serif;
+      font-size: 13px;
+      line-height: 1.4;
+      overflow-x: hidden;
+    }
+
+    /* Sidebar Styles */
+    .sidebar {
+      position: fixed;
+      left: 0;
+      top: 0;
+      width: var(--sidebar-width);
+      height: 100vh;
+      background: var(--color-text-primary);
+      color: var(--color-accent);
+      z-index: 1000;
+      transition: transform 0.3s ease;
+      display: flex;
+      flex-direction: column;
+      overflow-y: auto;
+      overflow-x: hidden;
+    }
+
+    .sidebar-header {
+      padding: 1.5rem;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+    }
+
+    .logo-section {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+    }
+
+    .logo-icon {
+      width: 32px;
+      height: 32px;
+      background: rgba(255, 255, 255, 0.2);
+      border-radius: 8px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.2rem;
+    }
+
+    .logo-text {
+      font-size: 1rem;
+      font-weight: 600;
+      font-family: 'Inter', sans-serif;
+    }
+
+    .pharmacy-info {
+      padding: 1rem 1.5rem;
+      background: rgba(255, 255, 255, 0.1);
+      margin: 1rem 1.5rem;
+      border-radius: 12px;
+      font-size: 0.85rem;
+    }
+
+    .pharmacy-name {
+      font-weight: 600;
+      margin-bottom: 0.25rem;
+    }
+
+    .pharmacy-location {
+      opacity: 0.8;
+      font-size: 0.75rem;
+    }
+
+    .nav-menu {
+      padding: 1rem 0;
+      flex: 1;
+      overflow-y: auto;
+    }
+
+    .nav-item {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+      padding: 0.75rem 1.25rem;
+      color: rgba(255, 255, 255, 0.8);
+      text-decoration: none;
+      transition: all 0.2s ease;
+      cursor: pointer;
+      font-size: 0.8rem;
+      font-weight: 500;
+    }
+
+    .nav-item:hover {
+      background: rgba(255, 255, 255, 0.1);
+      color: var(--color-accent);
+    }
+
+    .nav-item.active {
+      background: rgba(255, 255, 255, 0.15);
+      color: var(--color-accent);
+      border-left: 3px solid var(--color-accent);
+    }
+
+    .nav-icon {
+      font-size: 1rem;
+    }
+
+    /* Main Content Area */
+    .main-content {
+      margin-left: var(--sidebar-width);
+      min-height: 100vh;
+      transition: margin-left 0.3s ease;
+    }
+
+    /* Header Styles */
+    .header {
+      background: white;
+      border-bottom: 1px solid #e2e8f0;
+      padding: 1rem 2rem;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      position: sticky;
+      top: 0;
+      z-index: 100;
+    }
+
+    .header-left {
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+    }
+
+    .header-right {
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+    }
+
+    .loading-message {
+      text-align: center;
+      padding: 2rem;
+      color: var(--color-text-secondary);
+    }
+
+    .run-check-btn {
+      margin-left: 1rem;
+    }
+
+    .page-title-section {
+      margin-right: 2rem;
+    }
+
+    .page-title-section .page-title {
+      font-size: 1.5rem;
+      font-weight: 700;
+      color: var(--color-text-primary);
+      margin: 0;
+      font-family: 'Inter', sans-serif;
+    }
+
+    .mobile-page-title {
+      display: none;
+      font-size: 1.25rem;
+      font-weight: 600;
+      color: var(--color-text-primary);
+      font-family: 'Inter', sans-serif;
+    }
+
+    .mobile-menu-toggle {
+      display: none;
+      background: none;
+      border: none;
+      font-size: 1.5rem;
+      color: var(--color-text-secondary);
+      cursor: pointer;
+    }
+
+    /* Content Styles */
+    .content {
+      padding: 2rem;
+    }
+
+    /* Compliance Grid */
+    .compliance-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+      gap: 1.5rem;
+      margin-bottom: 2rem;
+    }
+
+    .compliance-card {
+      background: var(--color-background);
+      border-radius: 20px;
+      border: 1px solid var(--color-border);
+      padding: 1.5rem;
+      transition: all 0.3s ease;
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
+    }
+
+    .compliance-card:hover {
+      transform: translateY(-4px);
+      box-shadow: 0 8px 24px rgba(0, 0, 0, 0.12);
+    }
+
+    .compliance-header {
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+      margin-bottom: 1rem;
+    }
+
+    .compliance-icon {
+      width: 48px;
+      height: 48px;
+      border-radius: 16px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.5rem;
+    }
+
+    .compliance-icon.license {
+      background: rgba(59, 130, 246, 0.1);
+      color: var(--color-info);
+    }
+
+    .compliance-icon.audit {
+      background: rgba(34, 197, 94, 0.1);
+      color: var(--color-success);
+    }
+
+    .compliance-icon.training {
+      background: rgba(245, 158, 11, 0.1);
+      color: #f59e0b;
+    }
+
+    .compliance-icon.documentation {
+      background: rgba(139, 92, 246, 0.1);
+      color: #8b5cf6;
+    }
+
+    .compliance-title {
+      flex: 1;
+    }
+
+    .compliance-name {
+      font-size: 1.125rem;
+      font-weight: 600;
+      color: var(--color-text-primary);
+      margin-bottom: 0.25rem;
+      font-family: 'Inter', sans-serif;
+    }
+
+    .compliance-description {
+      font-size: 0.875rem;
+      color: var(--color-text-secondary);
+    }
+
+    .compliance-status {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.25rem;
+      padding: 0.25rem 0.75rem;
+      border-radius: 12px;
+      font-size: 0.75rem;
+      font-weight: 600;
+    }
+
+    .compliance-status.compliant {
+      background: rgba(34, 197, 94, 0.1);
+      color: var(--color-success);
+    }
+
+    .compliance-status.warning {
+      background: rgba(245, 158, 11, 0.1);
+      color: #f59e0b;
+    }
+
+    .compliance-status.non-compliant {
+      background: rgba(239, 68, 68, 0.1);
+      color: var(--color-warning);
+    }
+
+    .compliance-content {
+      color: var(--color-text-secondary);
+      font-size: 0.875rem;
+      line-height: 1.5;
+    }
+
+    .compliance-list {
+      list-style: none;
+      margin-top: 1rem;
+    }
+
+    .compliance-list li {
+      display: flex;
+      align-items: flex-start;
+      gap: 0.5rem;
+      padding: 0.5rem 0;
+      border-bottom: 1px solid var(--color-border);
+    }
+
+    .compliance-list li:last-child {
+      border-bottom: none;
+    }
+
+    .compliance-list .material-symbols-rounded {
+      font-size: 1rem;
+      margin-top: 0.125rem;
+    }
+
+    /* Audit Trail Table */
+    .audit-table {
+      background: var(--color-background);
+      border-radius: 20px;
+      border: 1px solid var(--color-border);
+      overflow: hidden;
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
+    }
+
+    .table-header {
+      padding: 1.5rem;
+      border-bottom: 1px solid var(--color-border);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .table-title {
+      font-size: 1.125rem;
+      font-weight: 600;
+      color: var(--color-text-primary);
+      font-family: 'Inter', sans-serif;
+    }
+
+    .table-actions {
+      display: flex;
+      gap: 1rem;
+    }
+
+    .filter-button {
+      background: var(--color-surface);
+      border: 1px solid var(--color-border);
+      padding: 0.5rem 1rem;
+      border-radius: 12px;
+      font-size: 0.875rem;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      transition: all 0.2s ease;
+    }
+
+    .filter-button:hover {
+      background: var(--color-border);
+    }
+
+    .table-container {
+      overflow-x: auto;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+    }
+
+    th {
+      text-align: left;
+      padding: 1rem 1.5rem;
+      font-size: 0.75rem;
+      font-weight: 600;
+      color: var(--color-text-secondary);
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      border-bottom: 1px solid var(--color-border);
+    }
+
+    td {
+      padding: 1rem 1.5rem;
+      border-bottom: 1px solid var(--color-border);
+    }
+
+    tr:hover {
+      background: var(--color-surface);
+    }
+
+    .action-type {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.25rem;
+      padding: 0.25rem 0.75rem;
+      border-radius: 12px;
+      font-size: 0.75rem;
+      font-weight: 600;
+    }
+
+    .action-type.create {
+      background: rgba(34, 197, 94, 0.1);
+      color: var(--color-success);
+    }
+
+    .action-type.update {
+      background: rgba(59, 130, 246, 0.1);
+      color: var(--color-info);
+    }
+
+    .action-type.delete {
+      background: rgba(239, 68, 68, 0.1);
+      color: var(--color-warning);
+    }
+
+    .action-type.view {
+      background: rgba(107, 114, 128, 0.1);
+      color: var(--color-text-secondary);
+    }
+
+    /* Button Styles */
+    .btn {
+      padding: 0.75rem 1.5rem;
+      border-radius: 12px;
+      font-size: 0.875rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      border: none;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+
+    .btn-primary {
+      background: var(--color-primary);
+      color: var(--color-accent);
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+    }
+
+    .btn-primary:hover {
+      background: var(--color-text-secondary);
+      transform: translateY(-2px);
+      box-shadow: 0 8px 24px rgba(0, 0, 0, 0.2);
+    }
+
+    .btn-secondary {
+      background: var(--color-surface);
+      color: var(--color-text-secondary);
+      border: 1px solid var(--color-border);
+    }
+
+    .btn-secondary:hover {
+      background: var(--color-border);
+    }
+
+    .logout-section {
+      padding: 1rem;
+      border-top: 1px solid rgba(255, 255, 255, 0.1);
+      margin-top: auto;
+    }
+
+    .logout-button {
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+      padding: 0.875rem 1.5rem;
+      color: rgba(255, 255, 255, 0.8);
+      text-decoration: none;
+      transition: all 0.2s ease;
+      cursor: pointer;
+      font-size: 0.9rem;
+      font-weight: 500;
+      width: 100%;
+      border: none;
+      background: transparent;
+      text-align: left;
+    }
+
+    .logout-button:hover {
+      background: rgba(239, 68, 68, 0.1);
+      color: var(--color-warning);
+    }
+
+    .logout-icon {
+      font-size: 1.25rem;
+    }
+
+    @media (max-width: 768px) {
+      .sidebar {
+        transform: translateX(-100%);
+      }
+
+      .sidebar.open {
+        transform: translateX(0);
+      }
+
+      .main-content {
+        margin-left: 0;
+      }
+
+      .mobile-menu-toggle {
+        display: block;
+      }
+
+      .mobile-page-title {
+        display: block;
+      }
+
+      .page-title-section {
+        display: none;
+      }
+
+      .compliance-grid {
+        grid-template-columns: 1fr;
+      }
+
+      .content {
+        padding: 1rem;
+      }
+    }
+  </style>
+</head>
+<body x-data="complianceSystem()" x-init="init()">
+  <!-- Sidebar -->
+  <aside class="sidebar" :class="sidebarOpen ? 'open' : ''">
+    <div class="sidebar-header">
+      <div class="logo-section">
+        <div class="logo-icon">
+          <span class="material-symbols-rounded">medication</span>
+        </div>
+        <div class="logo-text">Umi Health</div>
+      </div>
+    </div>
+
+
+    <nav class="nav-menu">
+      <a href="home.html" class="nav-item">
+        <span class="material-symbols-rounded nav-icon">home</span>
+        <span>Home</span>
+      </a>
+      <a href="patients.html" class="nav-item">
+        <span class="material-symbols-rounded nav-icon">people</span>
+        <span>Patients</span>
+      </a>
+      <a href="prescriptions.html" class="nav-item">
+        <span class="material-symbols-rounded nav-icon">prescriptions</span>
+        <span>Prescriptions</span>
+      </a>
+      <a href="inventory.html" class="nav-item">
+        <span class="material-symbols-rounded nav-icon">inventory</span>
+        <span>Inventory</span>
+      </a>
+      <a href="clinical.html" class="nav-item">
+        <span class="material-symbols-rounded nav-icon">medical_services</span>
+        <span>Clinical</span>
+      </a>
+      <a href="compliance.html" class="nav-item active">
+        <span class="material-symbols-rounded nav-icon">verified</span>
+        <span>Compliance</span>
+      </a>
+      <a href="reports.html" class="nav-item">
+        <span class="material-symbols-rounded nav-icon">analytics</span>
+        <span>Reports</span>
+      </a>
+      <a href="suppliers.html" class="nav-item">
+        <span class="material-symbols-rounded nav-icon">local_shipping</span>
+        <span>Suppliers</span>
+      </a>
+      <a href="help.html" class="nav-item">
+        <span class="material-symbols-rounded nav-icon">help</span>
+        <span>Help & Training</span>
+      </a>
+      <a href="account.html" class="nav-item">
+        <span class="material-symbols-rounded nav-icon">person</span>
+        <span>Account</span>
+      </a>
+    </nav>
+    
+    <div class="logout-section">
+      <button class="logout-button" @click="logout()">
+        <span class="material-symbols-rounded logout-icon">logout</span>
+        <span>Logout</span>
+      </button>
+    </div>
+  </aside>
+
+  <!-- Main Content -->
+  <main class="main-content">
+    <!-- Header -->
+    <header class="header">
+      <div class="header-left">
+        <button class="mobile-menu-toggle" @click="sidebarOpen = !sidebarOpen">
+          <span class="material-symbols-rounded">menu</span>
+        </button>
+        
+        <div class="page-title-section">
+          <h1 class="page-title">Compliance Management</h1>
+        </div>
+        
+        <div class="mobile-page-title">Compliance</div>
+      </div>
+      <div class="header-right">
+        <button class="btn btn-secondary" @click="refreshData()" :disabled="loading">
+          <span class="material-symbols-rounded" x-show="!loading">refresh</span>
+          <span class="material-symbols-rounded" x-show="loading">progress_activity</span>
+          <span x-text="loading ? 'Loading...' : 'Refresh'"></span>
+        </button>
+        <button class="btn btn-primary run-check-btn" @click="runComplianceCheck()">
+          <span class="material-symbols-rounded">gavel</span>
+          <span>Run Check</span>
+        </button>
+      </div>
+    </header>
+
+    <!-- Content -->
+    <div class="content">
+      <!-- Compliance Grid -->
+      <div class="compliance-grid">
+        <!-- License Management -->
+        <div class="compliance-card" x-show="licenseData">
+          <div class="compliance-header">
+            <div class="compliance-icon license">
+              <span class="material-symbols-rounded">verified_user</span>
+            </div>
+            <div class="compliance-title">
+              <div class="compliance-name">License Management</div>
+              <div class="compliance-description">Professional licenses and certifications</div>
+            </div>
+            <span class="compliance-status" :class="licenseData.status" x-text="licenseData.statusText"></span>
+          </div>
+          <div class="compliance-content">
+            <ul class="compliance-list">
+              <template x-for="license in licenseData.licenses" :key="license.id">
+                <li>
+                  <span class="material-symbols-rounded" :style="`color: ${license.statusColor}`" x-text="license.statusIcon"></span>
+                  <span x-text="license.description"></span>
+                </li>
+              </template>
+            </ul>
+          </div>
+        </div>
+
+        <!-- Audit Trail -->
+        <div class="compliance-card" x-show="auditData">
+          <div class="compliance-header">
+            <div class="compliance-icon audit">
+              <span class="material-symbols-rounded">history</span>
+            </div>
+            <div class="compliance-title">
+              <div class="compliance-name">Audit Trail</div>
+              <div class="compliance-description">System access and activity logs</div>
+            </div>
+            <span class="compliance-status" :class="auditData.status" x-text="auditData.statusText"></span>
+          </div>
+          <div class="compliance-content">
+            <ul class="compliance-list">
+              <template x-for="item in auditData.items" :key="item.id">
+                <li>
+                  <span class="material-symbols-rounded" :style="`color: ${item.statusColor}`" x-text="item.statusIcon"></span>
+                  <span x-text="item.description"></span>
+                </li>
+              </template>
+            </ul>
+          </div>
+        </div>
+
+        <!-- Training Records -->
+        <div class="compliance-card" x-show="trainingData">
+          <div class="compliance-header">
+            <div class="compliance-icon training">
+              <span class="material-symbols-rounded">school</span>
+            </div>
+            <div class="compliance-title">
+              <div class="compliance-name">Training Records</div>
+              <div class="compliance-description">Staff training and certifications</div>
+            </div>
+            <span class="compliance-status" :class="trainingData.status" x-text="trainingData.statusText"></span>
+          </div>
+          <div class="compliance-content">
+            <ul class="compliance-list">
+              <template x-for="training in trainingData.trainings" :key="training.id">
+                <li>
+                  <span class="material-symbols-rounded" :style="`color: ${training.statusColor}`" x-text="training.statusIcon"></span>
+                  <span x-text="training.description"></span>
+                </li>
+              </template>
+            </ul>
+          </div>
+        </div>
+
+        <!-- Documentation -->
+        <div class="compliance-card" x-show="documentationData">
+          <div class="compliance-header">
+            <div class="compliance-icon documentation">
+              <span class="material-symbols-rounded">description</span>
+            </div>
+            <div class="compliance-title">
+              <div class="compliance-name">Regulatory Documentation</div>
+              <div class="compliance-description">Required regulatory documents</div>
+            </div>
+            <span class="compliance-status" :class="documentationData.status" x-text="documentationData.statusText"></span>
+          </div>
+          <div class="compliance-content">
+            <ul class="compliance-list">
+              <template x-for="doc in documentationData.documents" :key="doc.id">
+                <li>
+                  <span class="material-symbols-rounded" :style="`color: ${doc.statusColor}`" x-text="doc.statusIcon"></span>
+                  <span x-text="doc.description"></span>
+                </li>
+              </template>
+            </ul>
+          </div>
+        </div>
+      </div>
+
+      <!-- Audit Trail Table -->
+      <div class="audit-table">
+        <div class="table-header">
+          <h2 class="table-title">Recent Audit Trail</h2>
+          <div class="table-actions">
+            <button class="filter-button" @click="openFilterModal()">
+              <span class="material-symbols-rounded">filter_list</span>
+              <span>Filter</span>
+            </button>
+            <button class="btn btn-primary" @click="exportAuditTrail()">
+              <span class="material-symbols-rounded">download</span>
+              <span>Export</span>
+            </button>
+          </div>
+        </div>
+
+        <div class="table-container">
+          <table>
+            <thead>
+              <tr>
+                <th>Date/Time</th>
+                <th>User</th>
+                <th>Action</th>
+                <th>Module</th>
+                <th>Details</th>
+                <th>IP Address</th>
+              </tr>
+            </thead>
+            <tbody>
+              <template x-for="audit in auditTrail" :key="audit.id">
+                <tr>
+                  <td x-text="audit.datetime"></td>
+                  <td x-text="audit.user"></td>
+                  <td>
+                    <span class="action-type" :class="audit.action.toLowerCase()" x-text="audit.action"></span>
+                  </td>
+                  <td x-text="audit.module"></td>
+                  <td x-text="audit.details"></td>
+                  <td x-text="audit.ipAddress"></td>
+                </tr>
+              </template>
+              <tr x-show="auditTrail.length === 0">
+                <td colspan="6" class="loading-message">
+                  Loading audit trail data...
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  </main>
+
+  <script src="js/pharmacist-api.js"></script>
+  <script>
+    function complianceSystem() {
+      return {
+        sidebarOpen: false,
+        loading: true,
+        pharmacyInfo: {},
+        licenseData: null,
+        auditData: null,
+        trainingData: null,
+        documentationData: null,
+        auditTrail: [],
+        crossPageData: {},
+
+        async init() {
+          await this.loadPharmacyInfo();
+          await this.loadComplianceData();
+          await this.loadCrossPageData();
+          this.loading = false;
+        },
+
+        async loadPharmacyInfo() {
+          try {
+            const profileData = await window.pharmacistApi.account.getProfile();
+            const tenantData = await window.pharmacistApi.account.getTenantSettings();
+            this.pharmacyInfo = {
+              name: tenantData.data?.pharmacyName || 'Umi Health Pharmacy',
+              location: tenantData.data?.location || 'Main Branch'
+            };
+          } catch (error) {
+            console.error('Failed to load pharmacy info:', error);
+            this.pharmacyInfo = {
+              name: 'Umi Health Pharmacy',
+              location: 'Main Branch'
+            };
+          }
+        },
+
+        async loadComplianceData() {
+          try {
+            // Load compliance overview
+            const overview = await window.pharmacistApi.compliance.getComplianceOverview();
+            
+            // Load licenses
+            const licenses = await window.pharmacistApi.compliance.getLicenses();
+            this.licenseData = {
+              status: this.getComplianceStatus(licenses.data?.status),
+              statusText: licenses.data?.statusText || 'Active',
+              licenses: licenses.data?.licenses || []
+            };
+
+            // Load audit trail summary
+            const auditSummary = await window.pharmacistApi.compliance.getAuditTrail({ limit: 5 });
+            this.auditData = {
+              status: 'compliant',
+              statusText: 'Monitored',
+              items: auditSummary.data?.items || []
+            };
+
+            // Load training records
+            const training = await window.pharmacistApi.compliance.getTrainingRecords();
+            this.trainingData = {
+              status: this.getComplianceStatus(training.data?.status),
+              statusText: training.data?.statusText || 'Current',
+              trainings: training.data?.trainings || []
+            };
+
+            // Load documentation
+            const documentation = await window.pharmacistApi.compliance.getDocumentation();
+            this.documentationData = {
+              status: this.getComplianceStatus(documentation.data?.status),
+              statusText: documentation.data?.statusText || 'Complete',
+              documents: documentation.data?.documents || []
+            };
+
+            // Load full audit trail for table
+            await this.loadAuditTrail();
+
+          } catch (error) {
+            console.error('Failed to load compliance data:', error);
+            this.setDefaultData();
+          }
+        },
+
+        async loadAuditTrail() {
+          try {
+            const auditData = await window.pharmacistApi.compliance.getAuditTrail({ limit: 50 });
+            this.auditTrail = auditData.data?.auditTrail || [];
+          } catch (error) {
+            console.error('Failed to load audit trail:', error);
+            this.auditTrail = [];
+          }
+        },
+
+        async openFilterModal() {
+          try {
+            console.log('Opening filter modal...');
+            // TODO: Implement filter modal
+            alert('Filter functionality will be implemented soon.');
+          } catch (error) {
+            console.error('Failed to open filter modal:', error);
+          }
+        },
+
+        async exportAuditTrail() {
+          try {
+            console.log('Exporting audit trail...');
+            const exportData = await window.pharmacistApi.compliance.exportAuditTrail({
+              format: 'csv',
+              dateRange: 'last30days'
+            });
+            
+            // Create download link
+            const blob = new Blob([exportData.data], { type: 'text/csv' });
+            const url = window.URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `audit-trail-${new Date().toISOString().split('T')[0]}.csv`;
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            window.URL.revokeObjectURL(url);
+            
+            console.log('Audit trail exported successfully');
+          } catch (error) {
+            console.error('Failed to export audit trail:', error);
+            alert('Failed to export audit trail. Please try again.');
+          }
+        },
+
+        async refreshData() {
+          this.loading = true;
+          await this.loadComplianceData();
+          await this.loadCrossPageData();
+          this.loading = false;
+        },
+
+        async runComplianceCheck() {
+          try {
+            console.log('Running compliance check...');
+            await window.pharmacistApi.compliance.runComplianceCheck();
+            alert('Compliance check completed successfully!');
+            await this.refreshData();
+          } catch (error) {
+            console.error('Failed to run compliance check:', error);
+            alert('Failed to run compliance check. Please try again.');
+          }
+        },
+
+        getComplianceStatus(status) {
+          const statusMap = {
+            'compliant': 'compliant',
+            'warning': 'warning',
+            'non_compliant': 'non-compliant',
+            'active': 'compliant',
+            'due': 'warning',
+            'expired': 'non-compliant'
+          };
+          return statusMap[status] || 'compliant';
+        },
+
+        setDefaultData() {
+          // Set default empty data structures
+          this.licenseData = {
+            status: 'compliant',
+            statusText: 'Loading...',
+            licenses: []
+          };
+          this.auditData = {
+            status: 'compliant',
+            statusText: 'Loading...',
+            items: []
+          };
+          this.trainingData = {
+            status: 'warning',
+            statusText: 'Loading...',
+            trainings: []
+          };
+          this.documentationData = {
+            status: 'compliant',
+            statusText: 'Loading...',
+            documents: []
+          };
+        },
+
+        async loadCrossPageData() {
+          try {
+            // Fetch data from other pages for comprehensive compliance view
+            const inventoryData = await window.pharmacistApi.crossPageData.getInventoryData();
+            const prescriptionsData = await window.pharmacistApi.crossPageData.getPrescriptionsData();
+            const patientsData = await window.pharmacistApi.crossPageData.getPatientsData();
+            
+            this.crossPageData = {
+              inventory: inventoryData,
+              prescriptions: prescriptionsData,
+              patients: patientsData,
+              timestamp: new Date().toISOString()
+            };
+          } catch (error) {
+            console.error('Failed to load cross-page data:', error);
+            this.crossPageData = {};
+          }
+        },
+
+        logout() {
+          localStorage.removeItem('authToken');
+          localStorage.removeItem('umi_currentUser');
+          window.location.href = '../public/admin-signin.html';
+        }
+      }
+    }
+  </script>
+</body>
+</html>

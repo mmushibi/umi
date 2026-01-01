@@ -1,0 +1,906 @@
+<!DOCTYPE html>
+<html lang="en" x-data="helpSystem()">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Help & Training - Umi Health Information Systems</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@100;400;500;600;700&family=Varela+Round&family=Nunito:wght@400;600;700&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Rounded:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <script src="https://cdn.tailwindcss.com"></script>
+  <style>
+    :root {
+      --color-primary: #000000;
+      --color-accent: #14B8A6;
+      --color-success: #22c55e;
+      --color-warning: #ef4444;
+      --color-text-primary: #000000;
+      --color-text-secondary: #6b7280;
+      --color-text-muted: #9ca3af;
+      --color-background: #ffffff;
+      --color-surface: #f9fafb;
+      --color-border: #e5e7eb;
+      --font-primary: 'Inter', sans-serif;
+      --sidebar-width: 280px;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      background: var(--color-background);
+      color: var(--color-text-primary);
+      font-family: 'Nunito', 'Varela Round', sans-serif;
+      line-height: 1.5;
+      overflow-x: hidden;
+    }
+
+    .sidebar {
+      position: fixed;
+      left: 0;
+      top: 0;
+      width: var(--sidebar-width);
+      height: 100vh;
+      background: var(--color-text-primary);
+      color: var(--color-accent);
+      z-index: 1000;
+      transition: transform 0.3s ease;
+      display: flex;
+      flex-direction: column;
+      overflow-y: auto;
+      overflow-x: hidden;
+    }
+
+    .sidebar-header {
+      padding: 1.5rem;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+    }
+
+    .logo-section {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+    }
+
+    .logo-icon {
+      width: 40px;
+      height: 40px;
+      background: rgba(255, 255, 255, 0.2);
+      border-radius: 10px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.5rem;
+    }
+
+    .logo-text {
+      font-size: 1.25rem;
+      font-weight: 700;
+      font-family: 'Inter', sans-serif;
+    }
+
+    .nav-menu {
+      padding: 1rem 0;
+      flex: 1;
+      overflow-y: auto;
+    }
+
+    .nav-item {
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+      padding: 0.875rem 1.5rem;
+      color: rgba(255, 255, 255, 0.8);
+      text-decoration: none;
+      transition: all 0.2s ease;
+      cursor: pointer;
+      font-size: 0.9rem;
+      font-weight: 500;
+    }
+
+    .nav-item:hover {
+      background: rgba(255, 255, 255, 0.1);
+      color: var(--color-accent);
+    }
+
+    .nav-item.active {
+      background: rgba(255, 255, 255, 0.15);
+      color: var(--color-accent);
+      border-left: 3px solid var(--color-accent);
+    }
+
+    .nav-icon {
+      font-size: 1.25rem;
+    }
+
+    .main-content {
+      margin-left: var(--sidebar-width);
+      min-height: 100vh;
+      transition: margin-left 0.3s ease;
+    }
+
+    .header {
+      background: white;
+      border-bottom: 1px solid #e2e8f0;
+      padding: 1rem 2rem;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      position: sticky;
+      top: 0;
+      z-index: 100;
+    }
+
+    .header-left {
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+    }
+
+    .page-title-section {
+      margin-right: 2rem;
+    }
+
+    .page-title-section .page-title {
+      font-size: 1.5rem;
+      font-weight: 700;
+      color: var(--color-text-primary);
+      margin: 0;
+      font-family: 'Inter', sans-serif;
+    }
+
+    .mobile-menu-toggle {
+      display: none;
+      background: none;
+      border: none;
+      font-size: 1.5rem;
+      color: var(--color-text-secondary);
+      cursor: pointer;
+    }
+
+    .header-right {
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+    }
+
+    .user-profile {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+      padding: 0.5rem;
+      border-radius: 16px;
+      cursor: pointer;
+      transition: all 0.3s ease;
+    }
+
+    .user-profile:hover {
+      background: var(--color-surface);
+    }
+
+    .user-avatar {
+      width: 36px;
+      height: 36px;
+      background: var(--color-text-primary);
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: var(--color-accent);
+      font-weight: 600;
+      font-size: 0.875rem;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+    }
+
+    .user-info {
+      display: flex;
+      flex-direction: column;
+    }
+
+    .user-name {
+      font-size: 0.875rem;
+      font-weight: 600;
+      color: var(--color-text-primary);
+    }
+
+    .user-role {
+      font-size: 0.75rem;
+      color: var(--color-text-secondary);
+    }
+
+    .help-content {
+      padding: 2rem;
+      max-width: 1200px;
+      margin: 0 auto;
+    }
+
+    .help-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+      gap: 2rem;
+      margin-bottom: 3rem;
+    }
+
+    .help-card {
+      background: var(--color-background);
+      border-radius: 20px;
+      border: 1px solid var(--color-border);
+      padding: 2rem;
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
+      transition: all 0.3s ease;
+      cursor: pointer;
+    }
+
+    .help-card:hover {
+      transform: translateY(-4px);
+      box-shadow: 0 12px 24px rgba(0, 0, 0, 0.1);
+    }
+
+    .help-icon {
+      width: 60px;
+      height: 60px;
+      background: rgba(0, 0, 0, 0.1);
+      border-radius: 15px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 2rem;
+      color: var(--color-text-primary);
+      margin-bottom: 1.5rem;
+    }
+
+    .help-title {
+      font-size: 1.25rem;
+      font-weight: 600;
+      color: var(--color-text-primary);
+      margin-bottom: 1rem;
+      font-family: 'Inter', sans-serif;
+    }
+
+    .help-description {
+      color: var(--color-text-secondary);
+      font-size: 0.875rem;
+      line-height: 1.6;
+      margin-bottom: 1.5rem;
+    }
+
+    .help-link {
+      color: var(--color-primary);
+      font-weight: 600;
+      text-decoration: none;
+      display: inline-flex;
+      align-items: center;
+      gap: 0.5rem;
+      transition: all 0.2s ease;
+    }
+
+    .help-link:hover {
+      gap: 0.75rem;
+    }
+
+    .search-section {
+      background: var(--color-background);
+      border-radius: 20px;
+      border: 1px solid var(--color-border);
+      padding: 2rem;
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
+      margin-bottom: 3rem;
+    }
+
+    .search-title {
+      font-size: 1.5rem;
+      font-weight: 600;
+      color: var(--color-text-primary);
+      margin-bottom: 1rem;
+      font-family: 'Inter', sans-serif;
+    }
+
+    .search-description {
+      color: var(--color-text-secondary);
+      font-size: 0.875rem;
+      margin-bottom: 1.5rem;
+    }
+
+    .search-box {
+      position: relative;
+      max-width: 600px;
+    }
+
+    .search-input {
+      width: 100%;
+      padding: 1rem 3rem 1rem 1rem;
+      border: 1px solid var(--color-border);
+      border-radius: 12px;
+      font-size: 1rem;
+      transition: all 0.3s ease;
+      background: var(--color-background);
+    }
+
+    .search-input:focus {
+      outline: none;
+      border-color: var(--color-primary);
+      box-shadow: 0 0 0 4px rgba(0, 0, 0, 0.1);
+    }
+
+    .search-btn {
+      position: absolute;
+      right: 0.5rem;
+      top: 50%;
+      transform: translateY(-50%);
+      background: var(--color-primary);
+      color: var(--color-accent);
+      border: none;
+      border-radius: 8px;
+      padding: 0.75rem;
+      cursor: pointer;
+      transition: all 0.2s ease;
+    }
+
+    .search-btn:hover {
+      background: var(--color-text-secondary);
+    }
+
+    .faq-section {
+      background: var(--color-background);
+      border-radius: 20px;
+      border: 1px solid var(--color-border);
+      padding: 2rem;
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
+      margin-bottom: 3rem;
+    }
+
+    .section-title {
+      font-size: 1.5rem;
+      font-weight: 600;
+      color: var(--color-text-primary);
+      margin-bottom: 2rem;
+      font-family: 'Inter', sans-serif;
+    }
+
+    .faq-item {
+      border-bottom: 1px solid var(--color-border);
+      padding: 1.5rem 0;
+    }
+
+    .faq-item:last-child {
+      border-bottom: none;
+    }
+
+    .faq-question {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      cursor: pointer;
+      font-weight: 600;
+      color: var(--color-text-primary);
+      font-size: 1rem;
+      transition: all 0.2s ease;
+    }
+
+    .faq-question:hover {
+      color: var(--color-primary);
+    }
+
+    .faq-icon {
+      transition: transform 0.3s ease;
+    }
+
+    .faq-item.open .faq-icon {
+      transform: rotate(180deg);
+    }
+
+    .faq-answer {
+      max-height: 0;
+      overflow: hidden;
+      transition: max-height 0.3s ease;
+      color: var(--color-text-secondary);
+      line-height: 1.6;
+    }
+
+    .faq-item.open .faq-answer {
+      max-height: 500px;
+      padding-top: 1rem;
+    }
+
+    .contact-section {
+      background: var(--color-background);
+      border-radius: 20px;
+      border: 1px solid var(--color-border);
+      padding: 2rem;
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
+    }
+
+    .contact-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+      gap: 2rem;
+    }
+
+    .contact-item {
+      text-align: center;
+    }
+
+    .contact-icon {
+      width: 50px;
+      height: 50px;
+      background: rgba(0, 0, 0, 0.1);
+      border-radius: 12px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.5rem;
+      color: var(--color-text-primary);
+      margin: 0 auto 1rem;
+    }
+
+    .contact-title {
+      font-weight: 600;
+      color: var(--color-text-primary);
+      margin-bottom: 0.5rem;
+    }
+
+    .contact-info {
+      color: var(--color-text-secondary);
+      font-size: 0.875rem;
+    }
+
+    .logout-section {
+      padding: 1rem;
+      border-top: 1px solid rgba(255, 255, 255, 0.1);
+      margin-top: auto;
+    }
+
+    .logout-button {
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+      padding: 0.875rem 1.5rem;
+      color: rgba(255, 255, 255, 0.8);
+      text-decoration: none;
+      transition: all 0.2s ease;
+      cursor: pointer;
+      font-size: 0.9rem;
+      font-weight: 500;
+      width: 100%;
+      border: none;
+      background: transparent;
+      text-align: left;
+    }
+
+    .logout-button:hover {
+      background: rgba(239, 68, 68, 0.1);
+      color: var(--color-warning);
+    }
+
+    .logout-icon {
+      font-size: 1.25rem;
+    }
+
+    @media (max-width: 768px) {
+      .sidebar {
+        transform: translateX(-100%);
+      }
+
+      .sidebar.open {
+        transform: translateX(0);
+      }
+
+      .main-content {
+        margin-left: 0;
+      }
+
+      .mobile-menu-toggle {
+        display: block;
+      }
+
+      .page-title-section {
+        display: none;
+      }
+
+      .help-content {
+        padding: 1rem;
+      }
+
+      .help-grid {
+        grid-template-columns: 1fr;
+      }
+
+      .contact-grid {
+        grid-template-columns: 1fr;
+      }
+    }
+  </style>
+</head>
+<body>
+  <!-- Sidebar -->
+  <aside class="sidebar" :class="sidebarOpen ? 'open' : ''">
+    <div class="sidebar-header">
+      <div class="logo-section">
+        <div class="logo-icon">
+          <span class="material-symbols-rounded">medication</span>
+        </div>
+        <div class="logo-text">Umi Health</div>
+      </div>
+    </div>
+
+    <nav class="nav-menu">
+      <a href="home.html" class="nav-item">
+        <span class="material-symbols-rounded nav-icon">home</span>
+        <span>Home</span>
+      </a>
+      <a href="point-of-sale.html" class="nav-item">
+        <span class="material-symbols-rounded nav-icon">point_of_sale</span>
+        <span>Point of Sale</span>
+      </a>
+      <a href="patients.html" class="nav-item">
+        <span class="material-symbols-rounded nav-icon">people</span>
+        <span>Patients</span>
+      </a>
+      <a href="sales.html" class="nav-item">
+        <span class="material-symbols-rounded nav-icon">receipt_long</span>
+        <span>Sales</span>
+      </a>
+      <a href="payments.html" class="nav-item">
+        <span class="material-symbols-rounded nav-icon">payments</span>
+        <span>Payments</span>
+      </a>
+      <a href="inventory-quick.html" class="nav-item">
+        <span class="material-symbols-rounded nav-icon">inventory</span>
+        <span>Inventory</span>
+      </a>
+      <a href="queue-management.html" class="nav-item">
+        <span class="material-symbols-rounded nav-icon">queue</span>
+        <span>Queue</span>
+      </a>
+      <a href="shift-management.html" class="nav-item">
+        <span class="material-symbols-rounded nav-icon">schedule</span>
+        <span>Shift Management</span>
+      </a>
+      <a href="reports.html" class="nav-item">
+        <span class="material-symbols-rounded nav-icon">summarize</span>
+        <span>Reports</span>
+      </a>
+      <a href="help-training.html" class="nav-item active">
+        <span class="material-symbols-rounded nav-icon">help</span>
+        <span>Help & Training</span>
+      </a>
+      <a href="account.html" class="nav-item">
+        <span class="material-symbols-rounded nav-icon">settings</span>
+        <span>Account</span>
+      </a>
+    </nav>
+    
+    <div class="logout-section">
+      <button class="logout-button" @click="logout()">
+        <span class="material-symbols-rounded logout-icon">logout</span>
+        <span>Logout</span>
+      </button>
+    </div>
+  </aside>
+
+  <!-- Main Content -->
+  <main class="main-content">
+    <!-- Header -->
+    <header class="header">
+      <div class="header-left">
+        <button class="mobile-menu-toggle" @click="sidebarOpen = !sidebarOpen">
+          <span class="material-symbols-rounded">menu</span>
+        </button>
+        
+        <div class="page-title-section">
+          <h1 class="page-title">Help & Training</h1>
+        </div>
+      </div>
+
+      <div class="header-right">
+        <div class="user-profile">
+          <div class="user-avatar" x-text="userInfo.initials"></div>
+          <div class="user-info">
+            <div class="user-name" x-text="userInfo.name"></div>
+            <div class="user-role" x-text="userInfo.role"></div>
+          </div>
+        </div>
+      </div>
+    </header>
+
+    <!-- Help Content -->
+    <div class="help-content">
+      <!-- Search Section -->
+      <div class="search-section">
+        <h2 class="search-title">How can we help you?</h2>
+        <p class="search-description">Search for help articles, tutorials, and frequently asked questions.</p>
+        <div class="search-box">
+          <input type="text" class="search-input" x-model="searchQuery" placeholder="Search for help..." @keyup.enter="searchHelp">
+          <button class="search-btn" @click="searchHelp">
+            <span class="material-symbols-rounded">search</span>
+          </button>
+        </div>
+      </div>
+
+      <!-- Help Categories -->
+      <div class="help-grid">
+        <div class="help-card" @click="navigateToHelp('getting-started')">
+          <div class="help-icon">
+            <span class="material-symbols-rounded">rocket_launch</span>
+          </div>
+          <h3 class="help-title">Getting Started</h3>
+          <p class="help-description">Learn the basics of Umi Health Pharmacy System, from setup to your first transaction.</p>
+          <a href="#" class="help-link">
+            Learn More
+            <span class="material-symbols-rounded">arrow_forward</span>
+          </a>
+        </div>
+
+        <div class="help-card" @click="navigateToHelp('point-of-sale')">
+          <div class="help-icon">
+            <span class="material-symbols-rounded">point_of_sale</span>
+          </div>
+          <h3 class="help-title">Point of Sale</h3>
+          <p class="help-description">Master the POS system, process payments, and manage customer transactions efficiently.</p>
+          <a href="#" class="help-link">
+            Learn More
+            <span class="material-symbols-rounded">arrow_forward</span>
+          </a>
+        </div>
+
+        <div class="help-card" @click="navigateToHelp('inventory')">
+          <div class="help-icon">
+            <span class="material-symbols-rounded">inventory</span>
+          </div>
+          <h3 class="help-title">Inventory Management</h3>
+          <p class="help-description">Track stock levels, manage medicines, and handle reordering with ease.</p>
+          <a href="#" class="help-link">
+            Learn More
+            <span class="material-symbols-rounded">arrow_forward</span>
+          </a>
+        </div>
+
+        <div class="help-card" @click="navigateToHelp('patients')">
+          <div class="help-icon">
+            <span class="material-symbols-rounded">people</span>
+          </div>
+          <h3 class="help-title">Patient Management</h3>
+          <p class="help-description">Create and manage patient records, prescriptions, and visit history.</p>
+          <a href="#" class="help-link">
+            Learn More
+            <span class="material-symbols-rounded">arrow_forward</span>
+          </a>
+        </div>
+
+        <div class="help-card" @click="navigateToHelp('reports')">
+          <div class="help-icon">
+            <span class="material-symbols-rounded">summarize</span>
+          </div>
+          <h3 class="help-title">Reports & Analytics</h3>
+          <p class="help-description">Generate reports, analyze sales data, and track business performance.</p>
+          <a href="#" class="help-link">
+            Learn More
+            <span class="material-symbols-rounded">arrow_forward</span>
+          </a>
+        </div>
+
+        <div class="help-card" @click="navigateToHelp('troubleshooting')">
+          <div class="help-icon">
+            <span class="material-symbols-rounded">build</span>
+          </div>
+          <h3 class="help-title">Troubleshooting</h3>
+          <p class="help-description">Find solutions to common issues and technical problems.</p>
+          <a href="#" class="help-link">
+            Learn More
+            <span class="material-symbols-rounded">arrow_forward</span>
+          </a>
+        </div>
+      </div>
+
+      <!-- FAQ Section -->
+      <div class="faq-section">
+        <h2 class="section-title">Frequently Asked Questions</h2>
+        
+        <template x-for="faq in faqs" :key="faq.id">
+          <div class="faq-item" :class="faq.open ? 'open' : ''">
+            <div class="faq-question" @click="toggleFaq(faq.id)">
+              <span x-text="faq.question"></span>
+              <span class="material-symbols-rounded faq-icon">expand_more</span>
+            </div>
+            <div class="faq-answer" x-text="faq.answer"></div>
+          </div>
+        </template>
+      </div>
+
+      <!-- Contact Section -->
+      <div class="contact-section">
+        <h2 class="section-title">Need More Help?</h2>
+        <div class="contact-grid">
+          <div class="contact-item">
+            <div class="contact-icon">
+              <span class="material-symbols-rounded">phone</span>
+            </div>
+            <h3 class="contact-title">Phone Support</h3>
+            <p class="contact-info">+1 (555) 123-4567<br>Mon-Fri, 9AM-6PM EST</p>
+          </div>
+
+          <div class="contact-item">
+            <div class="contact-icon">
+              <span class="material-symbols-rounded">email</span>
+            </div>
+            <h3 class="contact-title">Email Support</h3>
+            <p class="contact-info">support@umihealth.com<br>24-48 hour response time</p>
+          </div>
+
+          <div class="contact-item">
+            <div class="contact-icon">
+              <span class="material-symbols-rounded">chat</span>
+            </div>
+            <h3 class="contact-title">Live Chat</h3>
+            <p class="contact-info">Available Mon-Fri<br>9AM-6PM EST</p>
+          </div>
+
+          <div class="contact-item">
+            <div class="contact-icon">
+              <span class="material-symbols-rounded">video_library</span>
+            </div>
+            <h3 class="contact-title">Video Tutorials</h3>
+            <p class="contact-info">Watch step-by-step guides<br>and training videos</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </main>
+
+  <!-- Alpine.js Component -->
+  <script>
+    function helpSystem() {
+      return {
+        sidebarOpen: false,
+        userInfo: {
+          name: '',
+          role: 'Cashier',
+          initials: ''
+        },
+        searchQuery: '',
+        faqs: [
+          {
+            id: 1,
+            question: 'How do I process a sale?',
+            answer: 'To process a sale, go to the Point of Sale page, scan or enter the medicine details, add patient information, select payment method, and complete the transaction.',
+            open: false
+          },
+          {
+            id: 2,
+            question: 'How do I check inventory levels?',
+            answer: 'Navigate to the Inventory page to view current stock levels. You can search for specific medicines and see which items need reordering.',
+            open: false
+          },
+          {
+            id: 3,
+            question: 'How do I add a new patient?',
+            answer: 'Go to the Patients page and click "Add New Patient". Fill in the required information including name, contact details, and medical history.',
+            open: false
+          },
+          {
+            id: 4,
+            question: 'How do I generate reports?',
+            answer: 'Navigate to the Reports page, select the report type and date range, then click "Generate Report". You can export reports in various formats.',
+            open: false
+          },
+          {
+            id: 5,
+            question: 'What should I do if the system is slow?',
+            answer: 'Try clearing your browser cache, checking your internet connection, or restarting the application. If issues persist, contact IT support.',
+            open: false
+          }
+        ],
+
+        async init() {
+          await this.loadUserInfo();
+        },
+
+        async loadUserInfo() {
+          try {
+            const profile = await window.cashierAPI.getUserProfile();
+            this.userInfo = {
+              name: `${profile.firstName || ''} ${profile.lastName || ''}`.trim() || 'Cashier',
+              role: 'Cashier',
+              initials: this.getInitials(profile.firstName, profile.lastName)
+            };
+          } catch (error) {
+            console.error('Error loading user info:', error);
+            this.userInfo = {
+              name: 'Cashier',
+              role: 'Cashier',
+              initials: 'C'
+            };
+          }
+        },
+
+        getInitials(firstName, lastName) {
+          const first = firstName ? firstName.charAt(0).toUpperCase() : '';
+          const last = lastName ? lastName.charAt(0).toUpperCase() : '';
+          return (first + last) || 'C';
+        },
+
+        searchHelp() {
+          if (this.searchQuery.trim()) {
+            this.showNotification(`Searching for: ${this.searchQuery}`, 'info');
+          }
+        },
+
+        navigateToHelp(category) {
+          this.showNotification(`Opening ${category} help section`, 'info');
+        },
+
+        toggleFaq(id) {
+          const faq = this.faqs.find(f => f.id === id);
+          if (faq) {
+            faq.open = !faq.open;
+          }
+        },
+
+        showNotification(message, type = 'info') {
+          const notification = document.createElement('div');
+          notification.className = `notification notification-${type}`;
+          notification.textContent = message;
+          notification.style.cssText = `
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            padding: 1rem 1.5rem;
+            border-radius: 8px;
+            color: white;
+            font-weight: 500;
+            z-index: 10000;
+            transform: translateX(100%);
+            transition: transform 0.3s ease;
+            ${type === 'success' ? 'background: #22c55e;' : ''}
+            ${type === 'error' ? 'background: #ef4444;' : ''}
+            ${type === 'info' ? 'background: #3b82f6;' : ''}
+          `;
+          
+          document.body.appendChild(notification);
+          
+          setTimeout(() => {
+            notification.style.transform = 'translateX(0)';
+          }, 100);
+          
+          setTimeout(() => {
+            notification.style.transform = 'translateX(100%)';
+            setTimeout(() => {
+              document.body.removeChild(notification);
+            }, 300);
+          }, 3000);
+        },
+
+        logout() {
+          window.cashierAPI.logout()
+            .then(() => {
+              window.location.href = '../public/admin-signin.html';
+            })
+            .catch(error => {
+              console.error('Logout error:', error);
+              window.location.href = '../public/admin-signin.html';
+            });
+        }
+      }
+    }
+  </script>
+
+  <!-- Include API and Data Sync Services -->
+  <script src="../shared/js/data-sync.js"></script>
+  <script src="../shared/js/role-based-access.js"></script>
+  <script src="../admin/js/admin-api.js"></script>
+  <script src="js/cashier-api.js"></script>
+
+  <script>
+  document.addEventListener('DOMContentLoaded', () => {
+    const helpApp = Alpine.data('helpSystem', helpSystem);
+    helpApp.init();
+  });
+</script>
+
+  <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
+</body>
+</html>

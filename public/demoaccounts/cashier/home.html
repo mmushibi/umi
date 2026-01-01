@@ -1,0 +1,1226 @@
+<!DOCTYPE html>
+<html lang="en" x-data="homeDashboard()">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Dashboard - Umi Health Information Systems</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@100;400;500;600;700&family=Varela+Round&family=Nunito:wght@400;600;700&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Rounded:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <script src="https://cdn.tailwindcss.com"></script>
+  <style>
+    :root {
+      --color-primary: #000000;
+      --color-accent: #14B8A6;
+      --color-success: #22c55e;
+      --color-warning: #ef4444;
+      --color-text-primary: #000000;
+      --color-text-secondary: #6b7280;
+      --color-text-muted: #9ca3af;
+      --color-background: #ffffff;
+      --color-surface: #f9fafb;
+      --color-border: #e5e7eb;
+      --font-primary: 'Inter', sans-serif;
+      --sidebar-width: 280px;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      background: var(--color-background);
+      color: var(--color-text-primary);
+      font-family: 'Nunito', 'Varela Round', sans-serif;
+      font-size: 13px;
+      line-height: 1.4;
+      overflow-x: hidden;
+    }
+
+    /* Sidebar Styles */
+    .sidebar {
+      position: fixed;
+      left: 0;
+      top: 0;
+      width: var(--sidebar-width);
+      height: 100vh;
+      background: var(--color-text-primary);
+      color: var(--color-accent);
+      z-index: 1000;
+      transition: transform 0.3s ease;
+      display: flex;
+      flex-direction: column;
+      overflow-y: auto;
+      overflow-x: hidden;
+    }
+
+    .sidebar-header {
+      padding: 1.5rem;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+    }
+
+    .logo-section {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+    }
+
+    .logo-icon {
+      width: 32px;
+      height: 32px;
+      background: rgba(255, 255, 255, 0.2);
+      border-radius: 8px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.2rem;
+    }
+
+    .logo-text {
+      font-size: 1rem;
+      font-weight: 600;
+      font-family: 'Inter', sans-serif;
+    }
+
+    .pharmacy-info {
+      padding: 0.75rem 1rem;
+      background: rgba(255, 255, 255, 0.1);
+      margin: 0.75rem 1rem;
+      border-radius: 8px;
+      font-size: 0.75rem;
+    }
+
+    .pharmacy-name {
+      font-weight: 600;
+      margin-bottom: 0.25rem;
+    }
+
+    .pharmacy-location {
+      opacity: 0.8;
+      font-size: 0.625rem;
+    }
+
+    .nav-menu {
+      padding: 1rem 0;
+      flex: 1;
+      overflow-y: auto;
+    }
+
+    .nav-item {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+      padding: 0.75rem 1.25rem;
+      color: rgba(255, 255, 255, 0.8);
+      text-decoration: none;
+      transition: all 0.2s ease;
+      cursor: pointer;
+      font-size: 0.8rem;
+      font-weight: 500;
+    }
+
+    .nav-item:hover {
+      background: rgba(255, 255, 255, 0.1);
+      color: var(--color-accent);
+    }
+
+    .nav-item.active {
+      background: rgba(255, 255, 255, 0.15);
+      color: var(--color-accent);
+      border-left: 3px solid var(--color-accent);
+    }
+
+    .nav-icon {
+      font-size: 1rem;
+    }
+
+    /* Main Content Area */
+    .main-content {
+      margin-left: var(--sidebar-width);
+      min-height: 100vh;
+      transition: margin-left 0.3s ease;
+    }
+
+    /* Header Styles */
+    .header {
+      background: white;
+      border-bottom: 1px solid #e2e8f0;
+      padding: 1rem 2rem;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      position: sticky;
+      top: 0;
+      z-index: 100;
+    }
+
+    .header-left {
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+    }
+
+    .page-title-section {
+      margin-right: 2rem;
+    }
+
+    .page-title-section .page-title {
+      font-size: 1.25rem;
+      font-weight: 600;
+      color: var(--color-text-primary);
+      margin: 0;
+      font-family: 'Inter', sans-serif;
+    }
+
+    .mobile-menu-toggle {
+      display: none;
+      background: none;
+      border: none;
+      font-size: 1.25rem;
+      color: var(--color-text-secondary);
+      cursor: pointer;
+    }
+
+    .header-right {
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+    }
+
+    .user-profile {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      padding: 0.375rem;
+      border-radius: 12px;
+      cursor: pointer;
+      transition: all 0.3s ease;
+    }
+
+    .user-profile:hover {
+      background: var(--color-surface);
+    }
+
+    .user-avatar {
+      width: 36px;
+      height: 36px;
+      background: var(--color-text-primary);
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: var(--color-accent);
+      font-weight: 600;
+      font-size: 0.875rem;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+    }
+
+    .user-info {
+      display: flex;
+      flex-direction: column;
+    }
+
+    .user-name {
+      font-size: 0.875rem;
+      font-weight: 600;
+      color: var(--color-text-primary);
+    }
+
+    .user-role {
+      font-size: 0.75rem;
+      color: var(--color-text-secondary);
+    }
+
+    /* Dashboard Content */
+    .dashboard-content {
+      padding: 1.25rem;
+      max-width: 1400px;
+      margin: 0 auto;
+    }
+
+    /* Welcome Section */
+    .welcome-section {
+      background: linear-gradient(135deg, var(--color-primary) 0%, #1a1a1a 100%);
+      color: var(--color-accent);
+      border-radius: 20px;
+      padding: 2rem;
+      margin-bottom: 2rem;
+      box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+    }
+
+    .welcome-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 1rem;
+    }
+
+    .welcome-title {
+      font-size: 2rem;
+      font-weight: 700;
+      font-family: 'Inter', sans-serif;
+      margin-bottom: 0.5rem;
+    }
+
+    .welcome-subtitle {
+      opacity: 0.9;
+      font-size: 1rem;
+    }
+
+    .welcome-date {
+      text-align: right;
+      font-size: 0.875rem;
+      opacity: 0.8;
+    }
+
+    /* Stats Grid */
+    .stats-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+      gap: 1.5rem;
+      margin-bottom: 2rem;
+    }
+
+    .stat-card {
+      background: var(--color-background);
+      border: 1px solid var(--color-border);
+      border-radius: 10px;
+      padding: 0.875rem;
+      box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04);
+      transition: all 0.3s ease;
+    }
+
+    .stat-card:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 8px 24px rgba(0, 0, 0, 0.1);
+    }
+
+    .stat-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 1rem;
+    }
+
+    .stat-icon {
+      width: 48px;
+      height: 48px;
+      border-radius: 12px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.5rem;
+    }
+
+    .stat-icon.sales {
+      background: rgba(34, 197, 94, 0.1);
+      color: var(--color-success);
+    }
+
+    .stat-icon.patients {
+      background: rgba(20, 184, 166, 0.1);
+      color: var(--color-accent);
+    }
+
+    .stat-icon.revenue {
+      background: rgba(59, 130, 246, 0.1);
+      color: #3b82f6;
+    }
+
+    .stat-icon.prescriptions {
+      background: rgba(168, 85, 247, 0.1);
+      color: #a855f7;
+    }
+
+    .stat-value {
+      font-size: 2rem;
+      font-weight: 700;
+      font-family: 'Inter', sans-serif;
+      color: var(--color-text-primary);
+      margin-bottom: 0.25rem;
+    }
+
+    .stat-label {
+      color: var(--color-text-secondary);
+      font-size: 0.875rem;
+      font-weight: 500;
+    }
+
+    .stat-change {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.25rem;
+      font-size: 0.75rem;
+      font-weight: 600;
+      padding: 0.25rem 0.5rem;
+      border-radius: 8px;
+    }
+
+    .stat-change.positive {
+      background: rgba(34, 197, 94, 0.1);
+      color: var(--color-success);
+    }
+
+    .stat-change.negative {
+      background: rgba(239, 68, 68, 0.1);
+      color: var(--color-warning);
+    }
+
+    /* Quick Actions */
+    .quick-actions {
+      background: var(--color-background);
+      border: 1px solid var(--color-border);
+      border-radius: 10px;
+      padding: 0.875rem;
+      margin-bottom: 2rem;
+      box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04);
+    }
+
+    .section-title {
+      font-size: 1.25rem;
+      font-weight: 600;
+      color: var(--color-text-primary);
+      margin-bottom: 1.5rem;
+      font-family: 'Inter', sans-serif;
+    }
+
+    .actions-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: 1rem;
+    }
+
+    .action-button {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 0.75rem;
+      padding: 1.5rem;
+      background: var(--color-surface);
+      border: 1px solid var(--color-border);
+      border-radius: 12px;
+      text-decoration: none;
+      color: var(--color-text-primary);
+      transition: all 0.3s ease;
+      cursor: pointer;
+    }
+
+    .action-button:hover {
+      background: var(--color-primary);
+      color: var(--color-accent);
+      transform: translateY(-2px);
+      box-shadow: 0 8px 24px rgba(0, 0, 0, 0.1);
+    }
+
+    .action-icon {
+      width: 56px;
+      height: 56px;
+      background: var(--color-primary);
+      color: var(--color-accent);
+      border-radius: 12px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.75rem;
+      transition: all 0.3s ease;
+    }
+
+    .action-button:hover .action-icon {
+      background: var(--color-accent);
+      color: var(--color-primary);
+    }
+
+    .action-label {
+      font-weight: 600;
+      text-align: center;
+      font-size: 0.875rem;
+    }
+
+    /* Recent Activity */
+    .recent-activity {
+      background: var(--color-background);
+      border: 1px solid var(--color-border);
+      border-radius: 10px;
+      padding: 0.875rem;
+      box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04);
+    }
+
+    .activity-list {
+      max-height: 400px;
+      overflow-y: auto;
+    }
+
+    .activity-item {
+      display: flex;
+      align-items: start;
+      gap: 1rem;
+      padding: 1rem 0;
+      border-bottom: 1px solid var(--color-border);
+    }
+
+    .activity-item:last-child {
+      border-bottom: none;
+    }
+
+    .activity-icon {
+      width: 40px;
+      height: 40px;
+      border-radius: 10px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.25rem;
+      flex-shrink: 0;
+    }
+
+    .activity-icon.sale {
+      background: rgba(34, 197, 94, 0.1);
+      color: var(--color-success);
+    }
+
+    .activity-icon.patient {
+      background: rgba(20, 184, 166, 0.1);
+      color: var(--color-accent);
+    }
+
+    .activity-icon.payment {
+      background: rgba(59, 130, 246, 0.1);
+      color: #3b82f6;
+    }
+
+    .activity-icon.inventory {
+      background: rgba(245, 158, 11, 0.1);
+      color: #f59e0b;
+    }
+
+    .activity-content {
+      flex: 1;
+    }
+
+    .activity-title {
+      font-weight: 600;
+      color: var(--color-text-primary);
+      margin-bottom: 0.25rem;
+    }
+
+    .activity-description {
+      font-size: 0.875rem;
+      color: var(--color-text-secondary);
+      margin-bottom: 0.25rem;
+    }
+
+    .activity-time {
+      font-size: 0.75rem;
+      color: var(--color-text-muted);
+    }
+
+    /* Two Column Layout */
+    .dashboard-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 2rem;
+    }
+
+    /* Button Styles */
+    .btn {
+      padding: 0.75rem 1.5rem;
+      border-radius: 10px;
+      font-size: 0.875rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      border: none;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      text-decoration: none;
+    }
+
+    .btn-small {
+      padding: 0.25rem 0.5rem;
+      border-radius: 8px;
+      font-size: 0.625rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      border: none;
+      display: flex;
+      align-items: center;
+      gap: 0.25rem;
+      text-decoration: none;
+    }
+
+    .btn-primary {
+      background: var(--color-primary);
+      color: var(--color-accent);
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+    }
+
+    .btn-primary:hover {
+      background: var(--color-text-secondary);
+      transform: translateY(-2px);
+      box-shadow: 0 8px 24px rgba(0, 0, 0, 0.2);
+    }
+
+    .logout-section {
+      padding: 1rem;
+      border-top: 1px solid rgba(255, 255, 255, 0.1);
+      margin-top: auto;
+    }
+
+    .logout-button {
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+      padding: 0.875rem 1.5rem;
+      color: rgba(255, 255, 255, 0.8);
+      text-decoration: none;
+      transition: all 0.2s ease;
+      cursor: pointer;
+      font-size: 0.9rem;
+      font-weight: 500;
+      width: 100%;
+      border: none;
+      background: transparent;
+      text-align: left;
+    }
+
+    .logout-button:hover {
+      background: rgba(239, 68, 68, 0.1);
+      color: var(--color-warning);
+    }
+
+    .logout-icon {
+      font-size: 1.25rem;
+    }
+
+    /* Loading States */
+    .loading-state {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: 3rem;
+      text-align: center;
+    }
+
+    .loading-spinner {
+      width: 40px;
+      height: 40px;
+      border: 4px solid var(--color-border);
+      border-top: 4px solid var(--color-primary);
+      border-radius: 50%;
+      animation: spin 1s linear infinite;
+      margin-bottom: 1rem;
+    }
+
+    @keyframes spin {
+      0% { transform: rotate(0deg); }
+      100% { transform: rotate(360deg); }
+    }
+
+    .loading-state p {
+      color: var(--color-text-secondary);
+      font-size: 0.875rem;
+      margin: 0;
+    }
+
+    @media (max-width: 768px) {
+      .sidebar {
+        transform: translateX(-100%);
+      }
+
+      .sidebar.open {
+        transform: translateX(0);
+      }
+
+      .main-content {
+        margin-left: 0;
+      }
+
+      .mobile-menu-toggle {
+        display: block;
+      }
+
+      .page-title-section {
+        display: none;
+      }
+
+      .dashboard-content {
+        padding: 1rem;
+      }
+
+      .stats-grid {
+        grid-template-columns: 1fr;
+      }
+
+      .dashboard-grid {
+        grid-template-columns: 1fr;
+      }
+
+      .actions-grid {
+        grid-template-columns: 1fr;
+      }
+
+      .welcome-header {
+        flex-direction: column;
+        text-align: center;
+        gap: 1rem;
+      }
+
+      .welcome-date {
+        text-align: center;
+      }
+    }
+  </style>
+</head>
+<body>
+  <!-- Sidebar -->
+  <aside class="sidebar" :class="sidebarOpen ? 'open' : ''">
+    <div class="sidebar-header">
+      <div class="logo-section">
+        <div class="logo-icon">
+          <span class="material-symbols-rounded">medication</span>
+        </div>
+        <div class="logo-text">Umi Health</div>
+      </div>
+    </div>
+
+    <nav class="nav-menu">
+      <a href="home.html" class="nav-item active">
+        <span class="material-symbols-rounded nav-icon">home</span>
+        <span>Home</span>
+      </a>
+      <a href="point-of-sale.html" class="nav-item">
+        <span class="material-symbols-rounded nav-icon">point_of_sale</span>
+        <span>Point of Sale</span>
+      </a>
+      <a href="patients.html" class="nav-item">
+        <span class="material-symbols-rounded nav-icon">people</span>
+        <span>Patients</span>
+      </a>
+      <a href="sales.html" class="nav-item">
+        <span class="material-symbols-rounded nav-icon">receipt_long</span>
+        <span>Sales</span>
+      </a>
+      <a href="payments.html" class="nav-item">
+        <span class="material-symbols-rounded nav-icon">payments</span>
+        <span>Payments</span>
+      </a>
+      <a href="inventory-quick.html" class="nav-item">
+        <span class="material-symbols-rounded nav-icon">inventory</span>
+        <span>Inventory</span>
+      </a>
+      <a href="queue-management.html" class="nav-item">
+        <span class="material-symbols-rounded nav-icon">queue</span>
+        <span>Queue</span>
+      </a>
+      <a href="shift-management.html" class="nav-item">
+        <span class="material-symbols-rounded nav-icon">schedule</span>
+        <span>Shift Management</span>
+      </a>
+      <a href="reports.html" class="nav-item">
+        <span class="material-symbols-rounded nav-icon">summarize</span>
+        <span>Reports</span>
+      </a>
+      <a href="help.html" class="nav-item">
+        <span class="material-symbols-rounded nav-icon">help</span>
+        <span>Help & Training</span>
+      </a>
+      <a href="account.html" class="nav-item">
+        <span class="material-symbols-rounded nav-icon">settings</span>
+        <span>Account</span>
+      </a>
+    </nav>
+    
+    <div class="logout-section">
+      <button class="logout-button" @click="logout()">
+        <span class="material-symbols-rounded logout-icon">logout</span>
+        <span>Logout</span>
+      </button>
+    </div>
+  </aside>
+
+  <!-- Main Content -->
+  <main class="main-content">
+    <!-- Header -->
+    <header class="header">
+      <div class="header-left">
+        <button class="mobile-menu-toggle" @click="sidebarOpen = !sidebarOpen">
+          <span class="material-symbols-rounded">menu</span>
+        </button>
+        
+        <div class="page-title-section">
+          <h1 class="page-title">Dashboard</h1>
+        </div>
+      </div>
+
+      <div class="header-right">
+        <!-- Header elements removed per request -->
+      </div>
+    </header>
+
+    <!-- Dashboard Content -->
+    <div class="dashboard-content">
+      <!-- Welcome Section -->
+      <div class="welcome-section">
+        <div class="welcome-header">
+          <div>
+            <div class="welcome-title" x-text="'Welcome back, ' + firstName + '!'"></div>
+            <div class="welcome-subtitle">Here's what's happening at your pharmacy today</div>
+          </div>
+          <div class="welcome-date" x-text="currentDateTime"></div>
+        </div>
+      </div>
+
+      <!-- Error State -->
+      <div x-show="error" class="loading-state">
+        <div style="color: var(--color-warning); font-size: 3rem; margin-bottom: 1rem;">
+          <span class="material-symbols-rounded">error</span>
+        </div>
+        <p x-text="error"></p>
+        <button class="btn btn-primary" @click="loadDashboardData()" style="margin-top: 1rem;">
+          <span class="material-symbols-rounded">refresh</span>
+          <span>Retry</span>
+        </button>
+      </div>
+
+      <!-- Loading State -->
+      <div x-show="loading && !error" class="loading-state">
+        <div class="loading-spinner"></div>
+        <p>Loading dashboard data...</p>
+      </div>
+
+      <!-- Dashboard Content -->
+      <div x-show="!loading && !error">
+        <!-- Stats Grid -->
+        <div class="stats-grid">
+          <div class="stat-card">
+            <div class="stat-header">
+              <div>
+                <div class="stat-value" x-text="stats.todaySales"></div>
+                <div class="stat-label">Today's Sales</div>
+              </div>
+              <div class="stat-icon sales">
+                <span class="material-symbols-rounded">shopping_cart</span>
+              </div>
+            </div>
+            <div class="stat-change positive">
+              <span class="material-symbols-rounded">trending_up</span>
+              <span x-text="stats.salesChange + '% from yesterday'"></span>
+            </div>
+          </div>
+
+          <div class="stat-card">
+            <div class="stat-header">
+              <div>
+                <div class="stat-value" x-text="stats.patientsServed"></div>
+                <div class="stat-label">Patients Served</div>
+              </div>
+              <div class="stat-icon patients">
+                <span class="material-symbols-rounded">people</span>
+              </div>
+            </div>
+            <div class="stat-change positive">
+              <span class="material-symbols-rounded">trending_up</span>
+              <span x-text="stats.patientsChange + '% from yesterday'"></span>
+            </div>
+          </div>
+
+          <div class="stat-card">
+            <div class="stat-header">
+              <div>
+                <div class="stat-value" x-text="'ZMW ' + stats.todayRevenue.toFixed(2)"></div>
+                <div class="stat-label">Today's Revenue</div>
+              </div>
+              <div class="stat-icon revenue">
+                <span class="material-symbols-rounded">payments</span>
+              </div>
+            </div>
+            <div class="stat-change positive">
+              <span class="material-symbols-rounded">trending_up</span>
+              <span x-text="stats.revenueChange + '% from yesterday'"></span>
+            </div>
+          </div>
+
+          <div class="stat-card">
+            <div class="stat-header">
+              <div>
+                <div class="stat-value" x-text="stats.prescriptions"></div>
+                <div class="stat-label">Prescriptions</div>
+              </div>
+              <div class="stat-icon prescriptions">
+                <span class="material-symbols-rounded">medication</span>
+              </div>
+            </div>
+            <div class="stat-change negative">
+              <span class="material-symbols-rounded">trending_down</span>
+              <span x-text="stats.prescriptionsChange + '% from yesterday'"></span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Quick Actions -->
+        <div class="quick-actions">
+          <h2 class="section-title">Quick Actions</h2>
+          <div class="actions-grid">
+            <a href="point-of-sale.html" class="action-button">
+              <div class="action-icon">
+                <span class="material-symbols-rounded">point_of_sale</span>
+              </div>
+              <div class="action-label">New Sale</div>
+            </a>
+            <a href="patients.html" class="action-button">
+              <div class="action-icon">
+                <span class="material-symbols-rounded">person_add</span>
+              </div>
+              <div class="action-label">Add Patient</div>
+            </a>
+            <a href="inventory-quick.html" class="action-button">
+              <div class="action-icon">
+                <span class="material-symbols-rounded">inventory</span>
+              </div>
+              <div class="action-label">Check Inventory</div>
+            </a>
+            <a href="payments.html" class="action-button">
+              <div class="action-icon">
+                <span class="material-symbols-rounded">receipt_long</span>
+              </div>
+              <div class="action-label">Process Payment</div>
+            </a>
+          </div>
+        </div>
+
+        <!-- Dashboard Grid -->
+        <div class="dashboard-grid">
+          <!-- Recent Activity -->
+          <div class="recent-activity">
+            <h2 class="section-title">Recent Activity</h2>
+            <div class="activity-list">
+              <template x-for="activity in recentActivities" :key="activity.id">
+                <div class="activity-item">
+                  <div class="activity-icon" :class="activity.type">
+                    <span class="material-symbols-rounded" x-text="activity.icon"></span>
+                  </div>
+                  <div class="activity-content">
+                    <div class="activity-title" x-text="activity.title"></div>
+                    <div class="activity-description" x-text="activity.description"></div>
+                    <div class="activity-time" x-text="activity.time"></div>
+                  </div>
+                </div>
+              </template>
+              
+              <!-- Empty state -->
+              <div x-show="recentActivities.length === 0" class="loading-state">
+                <div style="color: var(--color-text-muted); font-size: 2rem; margin-bottom: 1rem;">
+                  <span class="material-symbols-rounded">history</span>
+                </div>
+                <p>No recent activity</p>
+              </div>
+            </div>
+          </div>
+
+          <!-- Queue Status -->
+          <div class="recent-activity">
+            <h2 class="section-title">Queue Status</h2>
+            <div class="activity-list">
+              <div class="activity-item">
+                <div class="activity-icon patient">
+                  <span class="material-symbols-rounded">groups</span>
+                </div>
+                <div class="activity-content">
+                  <div class="activity-title">Patients Waiting</div>
+                  <div class="activity-description" x-text="queueStatus.waiting + ' patients in queue'"></div>
+                  <div class="activity-time">Average wait: <span x-text="queueStatus.averageWaitTime"></span></div>
+                </div>
+              </div>
+              <div class="activity-item">
+                <div class="activity-icon sale">
+                  <span class="material-symbols-rounded">local_pharmacy</span>
+                </div>
+                <div class="activity-content">
+                  <div class="activity-title">Prescriptions Pending</div>
+                  <div class="activity-description" x-text="queueStatus.prescriptionsPending + ' prescriptions to fill'"></div>
+                  <div class="activity-time">Next pickup in <span x-text="queueStatus.nextPickup"></span></div>
+                </div>
+              </div>
+              <div class="activity-item">
+                <div class="activity-icon payment">
+                  <span class="material-symbols-rounded">payments</span>
+                </div>
+                <div class="activity-content">
+                  <div class="activity-title">Payment Processing</div>
+                  <div class="activity-description" x-text="queueStatus.paymentsProcessing + ' payments being processed'"></div>
+                  <div class="activity-time">Last payment: <span x-text="queueStatus.lastPayment"></span></div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </main>
+
+  <script src="../shared/js/cashier-data-sync.js"></script>
+  <script src="js/cashier-api.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js" defer></script>
+  <script>
+    function homeDashboard() {
+      return {
+        sidebarOpen: false,
+        loading: true,
+        error: null,
+        api: null,
+        userName: '',
+        firstName: '',
+        userInitials: '',
+        currentDateTime: '',
+        stats: {
+          todaySales: 0,
+          salesChange: 0,
+          patientsServed: 0,
+          patientsChange: 0,
+          todayRevenue: 0,
+          revenueChange: 0,
+          prescriptions: 0,
+          prescriptionsChange: 0
+        },
+        recentActivities: [],
+        queueStatus: {
+          waiting: 0,
+          averageWaitTime: '',
+          prescriptionsPending: 0,
+          nextPickup: '',
+          paymentsProcessing: 0,
+          lastPayment: ''
+        },
+
+        init() {
+          this.api = new CashierAPI();
+          this.updateDateTime();
+          setInterval(() => this.updateDateTime(), 60000);
+          this.loadUserData();
+          this.loadDashboardData();
+          // Set up auto-refresh every 30 seconds
+          setInterval(() => this.loadDashboardData(), 30000);
+        },
+
+        async loadUserData() {
+          try {
+            const userProfile = await this.api.getUserProfile();
+            if (userProfile && userProfile.data) {
+              const user = userProfile.data;
+              this.userName = `${user.firstName || ''} ${user.lastName || ''}`.trim() || 'User';
+              this.firstName = user.firstName || 'User';
+              this.userInitials = this.getInitials(this.userName);
+            }
+          } catch (error) {
+            console.error('Failed to load user data:', error);
+            this.userName = 'Cashier';
+            this.firstName = 'Cashier';
+            this.userInitials = 'C';
+          }
+        },
+
+        getInitials(name) {
+          return name
+            .split(' ')
+            .map(word => word.charAt(0).toUpperCase())
+            .join('')
+            .substring(0, 2);
+        },
+
+        updateDateTime() {
+          const now = new Date();
+          const options = { 
+            weekday: 'long', 
+            year: 'numeric', 
+            month: 'long', 
+            day: 'numeric',
+            hour: '2-digit',
+            minute: '2-digit'
+          };
+          this.currentDateTime = now.toLocaleDateString('en-US', options);
+        },
+
+        async loadDashboardData() {
+          try {
+            this.loading = true;
+            this.error = null;
+
+            // Load all dashboard data in parallel
+            const [statsResponse, salesResponse, queueResponse, patientsResponse] = await Promise.all([
+              this.api.getSalesStats(),
+              this.api.getRecentSales(5),
+              this.api.getQueueStats(),
+              this.api.getRecentPatients(3)
+            ]);
+
+            // Process stats data
+            if (statsResponse && statsResponse.data) {
+              this.processStatsData(statsResponse.data);
+            }
+
+            // Process recent activities from sales
+            if (salesResponse && salesResponse.data) {
+              this.processSalesData(salesResponse.data);
+            }
+
+            // Process queue status
+            if (queueResponse && queueResponse.data) {
+              this.processQueueData(queueResponse.data);
+            }
+
+            // Process patient data
+            if (patientsResponse && patientsResponse.data) {
+              this.processPatientData(patientsResponse.data);
+            }
+
+          } catch (error) {
+            console.error('Failed to load dashboard data:', error);
+            this.error = 'Failed to load dashboard data. Please try again.';
+            // Set default values on error
+            this.setDefaultValues();
+          } finally {
+            this.loading = false;
+          }
+        },
+
+        processStatsData(data) {
+          this.stats = {
+            todaySales: data.todaySales || 0,
+            salesChange: data.salesChange || 0,
+            patientsServed: data.patientsServed || 0,
+            patientsChange: data.patientsChange || 0,
+            todayRevenue: data.todayRevenue || 0,
+            revenueChange: data.revenueChange || 0,
+            prescriptions: data.prescriptions || 0,
+            prescriptionsChange: data.prescriptionsChange || 0
+          };
+        },
+
+        processSalesData(sales) {
+          const activities = [];
+          
+          if (Array.isArray(sales)) {
+            sales.slice(0, 5).forEach(sale => {
+              activities.push({
+                id: sale.id,
+                type: 'sale',
+                icon: 'shopping_cart',
+                title: 'New Sale Completed',
+                description: `Sale #${sale.id} - ${sale.patientName || 'Customer'}`,
+                time: this.formatTimeAgo(sale.createdAt)
+              });
+            });
+          }
+
+          // Add payment activities
+          if (sales && sales.data) {
+            sales.data.slice(0, 3).forEach(payment => {
+              if (payment.paymentMethod) {
+                activities.push({
+                  id: `payment-${payment.id}`,
+                  type: 'payment',
+                  icon: 'payments',
+                  title: 'Payment Processed',
+                  description: `${payment.paymentMethod} - ZMW ${(payment.amount || 0).toFixed(2)}`,
+                  time: this.formatTimeAgo(payment.createdAt)
+                });
+              }
+            });
+          }
+
+          this.recentActivities = activities;
+        },
+
+        processQueueData(queueData) {
+          this.queueStatus = {
+            waiting: queueData.waitingCount || 0,
+            averageWaitTime: queueData.averageWaitTime || '0 min',
+            prescriptionsPending: queueData.prescriptionsPending || 0,
+            nextPickup: queueData.nextPickupIn || 'N/A',
+            paymentsProcessing: queueData.paymentsProcessing || 0,
+            lastPayment: queueData.lastPayment ? this.formatTimeAgo(queueData.lastPayment) : 'N/A'
+          };
+        },
+
+        processPatientData(patients) {
+          if (Array.isArray(patients)) {
+            patients.slice(0, 3).forEach(patient => {
+              this.recentActivities.unshift({
+                id: `patient-${patient.id}`,
+                type: 'patient',
+                icon: 'person_add',
+                title: 'New Patient Registered',
+                description: `${patient.firstName} ${patient.lastName} - ID: #${patient.id}`,
+                time: this.formatTimeAgo(patient.createdAt)
+              });
+            });
+          }
+        },
+
+        formatTimeAgo(dateString) {
+          if (!dateString) return 'Unknown';
+          
+          const date = new Date(dateString);
+          const now = new Date();
+          const diffMs = now - date;
+          const diffMins = Math.floor(diffMs / 60000);
+          const diffHours = Math.floor(diffMins / 60);
+          const diffDays = Math.floor(diffHours / 24);
+
+          if (diffMins < 1) return 'Just now';
+          if (diffMins < 60) return `${diffMins} minute${diffMins > 1 ? 's' : ''} ago`;
+          if (diffHours < 24) return `${diffHours} hour${diffHours > 1 ? 's' : ''} ago`;
+          return `${diffDays} day${diffDays > 1 ? 's' : ''} ago`;
+        },
+
+        setDefaultValues() {
+          this.stats = {
+            todaySales: 0,
+            salesChange: 0,
+            patientsServed: 0,
+            patientsChange: 0,
+            todayRevenue: 0,
+            revenueChange: 0,
+            prescriptions: 0,
+            prescriptionsChange: 0
+          };
+
+          this.queueStatus = {
+            waiting: 0,
+            averageWaitTime: '0 min',
+            prescriptionsPending: 0,
+            nextPickup: 'N/A',
+            paymentsProcessing: 0,
+            lastPayment: 'N/A'
+          };
+
+          this.recentActivities = [];
+        },
+
+        async logout() {
+          try {
+            await this.api.logout();
+          } catch (error) {
+            console.error('Logout error:', error);
+          }
+          
+          // Clear local storage
+          localStorage.removeItem('umi_access_token');
+          localStorage.removeItem('umi_tenant_id');
+          localStorage.removeItem('umi_branch_id');
+          localStorage.removeItem('umi_user_id');
+          
+          // Redirect to login
+          window.location.href = '../index.html';
+        }
+      }
+    }
+  </script>
+</body>
+</html>
