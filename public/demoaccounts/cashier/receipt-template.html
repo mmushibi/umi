@@ -466,20 +466,19 @@
         window.receiptData = null;
         window.pharmacySettings = null;
         
-        // Load pharmacy settings from admin portal
-        async function loadPharmacySettings() {
-            try {
-                const response = await fetch('/api/pharmacy/settings');
-                if (response.ok) {
-                    window.pharmacySettings = await response.json();
-                    updatePharmacyInfo();
-                } else {
-                    console.warn('Could not load pharmacy settings, using defaults');
-                }
-            } catch (error) {
-                console.error('Failed to load pharmacy settings:', error);
-            }
-        }
+        // Initialize receipt template with mock data
+        document.addEventListener('DOMContentLoaded', () => {
+            // Mock pharmacy settings
+            window.pharmacySettings = {
+                name: 'Umi Health Pharmacy',
+                address: '123 Main Street, Lusaka, Zambia',
+                phone: '+260976123456',
+                email: 'info@umihealth.com',
+                taxId: 'TAX123456789'
+            };
+            updatePharmacyInfo();
+            console.log('Receipt template initialized with mock Zambian pharmacy settings');
+        });
         
         // Update pharmacy information in receipt
         function updatePharmacyInfo() {

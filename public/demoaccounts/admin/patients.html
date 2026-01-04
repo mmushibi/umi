@@ -1896,15 +1896,15 @@
         showAddModal: false,
         editingPatientId: null,
         loading: false,
-        // User and pharmacy info
+        // User and pharmacy info - Zambian mock data
         pharmacyInfo: {
-          name: 'Umi Health',
+          name: 'Banda Pharmacy Ltd',
           location: 'Lusaka, Zambia'
         },
         userInfo: {
-          name: 'Umi Health',
-          role: 'Admin',
-          initials: 'UH'
+          name: 'Chanda Banda',
+          role: 'Administrator',
+          initials: 'CB'
         },
         formatCurrency(amount) {
           return new Intl.NumberFormat('en-ZM', {
@@ -1931,7 +1931,56 @@
           
           return tierConfig[planType] ? tierConfig[planType].maxBranches > 1 : false;
         },
-        patients: [],
+        patients: [
+          {
+            id: 'P001',
+            patientId: 'PT-2024-001',
+            name: 'James Mwansa',
+            email: 'james.mwansa@email.com',
+            phone: '+260 977 123 456',
+            dateOfBirth: '1985-03-15',
+            gender: 'Male',
+            address: 'Plot 123, Chilanga Road, Lusaka',
+            city: 'Lusaka',
+            registrationDate: '2024-01-15',
+            status: 'active',
+            bloodType: 'O+',
+            allergies: 'Penicillin',
+            chronicConditions: 'Hypertension'
+          },
+          {
+            id: 'P002',
+            patientId: 'PT-2024-002',
+            name: 'Mary Phiri',
+            email: 'mary.phiri@email.com',
+            phone: '+260 966 234 567',
+            dateOfBirth: '1992-07-22',
+            gender: 'Female',
+            address: 'Plot 456, Kabulonga Road, Lusaka',
+            city: 'Lusaka',
+            registrationDate: '2024-02-20',
+            status: 'active',
+            bloodType: 'A+',
+            allergies: 'None',
+            chronicConditions: 'None'
+          },
+          {
+            id: 'P003',
+            patientId: 'PT-2024-003',
+            name: 'John Banda',
+            email: 'john.banda@email.com',
+            phone: '+260 955 345 678',
+            dateOfBirth: '1978-11-08',
+            gender: 'Male',
+            address: 'Plot 789, Great East Road, Lusaka',
+            city: 'Lusaka',
+            registrationDate: '2024-03-10',
+            status: 'inactive',
+            bloodType: 'B+',
+            allergies: 'Sulfa drugs',
+            chronicConditions: 'Diabetes Type 2'
+          }
+        ],
 
         get filteredPatients() {
           if (!this.searchQuery) return this.patients;
@@ -2265,20 +2314,8 @@
         },
 
         init() {
-          this.loadPharmacyInfo();
-          // Load patients from API on initialization
-          this.loadPatients();
-          this.updatePatientStats();
-          
-          // Auto-sync every 30 seconds
-          setInterval(() => {
-            this.syncData();
-          }, 30000);
-          
-          // Save to localStorage on any change
-          this.$watch('patients', () => {
-            this.savePatientsToStorage();
-          });
+          // Initialize with Zambian mock data - no backend calls
+          this.showSuccess('Patients loaded successfully with Zambian data');
         },
 
         // Load pharmacy info from localStorage
@@ -2764,6 +2801,15 @@
             const totalPages = Math.ceil(this.patients.length / this.itemsPerPage);
             if (this.currentPage < totalPages) this.goToPage(this.currentPage + 1);
           });
+        },
+
+        // Simple mock functions - no backend calls
+        showSuccess(message) {
+          console.log('SUCCESS:', message);
+        },
+
+        showError(message) {
+          console.log('ERROR:', message);
         }
       }
     }

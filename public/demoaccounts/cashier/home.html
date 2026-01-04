@@ -964,65 +964,177 @@
     </div>
   </main>
 
-  <script src="../shared/js/cashier-data-sync.js"></script>
-  <script src="js/cashier-api.js"></script>
-  <script src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js" defer></script>
   <script>
+    // Fake Zambian Mock Data
+    const zambianMockData = {
+      // Zambian names
+      firstNames: ['Chanda', 'Bwalya', 'Mulenga', 'Phiri', 'Banda', 'Tembo', 'Kunda', 'Mwansa', 'Chileshe', 'Musonda', 'Kaluba', 'Mwewa', 'Chikopa', 'Mwila', 'Sichone', 'Mubanga', 'Chanda', 'Kapasa', 'Mwamba', 'Chanda'],
+      lastNames: ['Bwalya', 'Phiri', 'Banda', 'Tembo', 'Kunda', 'Mwansa', 'Chileshe', 'Musonda', 'Kaluba', 'Mwewa', 'Chikopa', 'Mwila', 'Sichone', 'Mubanga', 'Kapasa', 'Mwamba', 'Chanda', 'Mulenga', 'Chanda', 'Phiri'],
+      
+      // Zambian locations
+      cities: ['Lusaka', 'Kitwe', 'Ndola', 'Livingstone', 'Kabwe', 'Chingola', 'Mufulira', 'Luanshya', 'Kasama', 'Chipata'],
+      areas: ['Kalingalinga', 'Chilenje', 'Matero', 'Kansenshi', 'Riverside', 'Hillcrest', 'Northmead', 'Longacres', 'Woodlands', 'Kamwala'],
+      
+      // Zambian phone numbers (MTN, Airtel, Zamtel)
+      phoneNumbers: ['+260976123456', '+260955234567', '+260965345678', '+260977456789', '+260967567890', '+260958678901', '+260968789012', '+260979890123'],
+      
+      // Products
+      products: [
+        { id: 1, name: 'Panadol Extra', price: 25.50, icon: 'medication', stock: 150 },
+        { id: 2, name: 'Artemether 80mg', price: 45.00, icon: 'medication', stock: 89 },
+        { id: 3, name: 'Amoxicillin 500mg', price: 85.75, icon: 'medication', stock: 120 },
+        { id: 4, name: 'Vitamin C 1000mg', price: 35.20, icon: 'medication', stock: 200 },
+        { id: 5, name: 'Paracetamol 500mg', price: 15.30, icon: 'medication', stock: 300 },
+        { id: 6, name: 'Ibuprofen 400mg', price: 28.90, icon: 'medication', stock: 95 },
+        { id: 7, name: 'Cough Syrup', price: 42.50, icon: 'medication', stock: 67 },
+        { id: 8, name: 'Antiseptic Solution', price: 55.00, icon: 'medication', stock: 45 },
+        { id: 9, name: 'Bandage Pack', price: 18.75, icon: 'medication', stock: 180 },
+        { id: 10, name: 'Thermometer', price: 125.00, icon: 'medication', stock: 30 },
+        { id: 11, name: 'Blood Pressure Monitor', price: 450.00, icon: 'medication', stock: 15 },
+        { id: 12, name: 'Glucometer', price: 280.50, icon: 'medication', stock: 25 }
+      ],
+      
+      // Patients
+      patients: [],
+      
+      // Sales
+      sales: [],
+      
+      // Generate random data
+      generateRandomName() {
+        const firstName = this.firstNames[Math.floor(Math.random() * this.firstNames.length)];
+        const lastName = this.lastNames[Math.floor(Math.random() * this.lastNames.length)];
+        return `${firstName} ${lastName}`;
+      },
+      
+      generateRandomPhone() {
+        return this.phoneNumbers[Math.floor(Math.random() * this.phoneNumbers.length)];
+      },
+      
+      generateRandomAddress() {
+        const city = this.cities[Math.floor(Math.random() * this.cities.length)];
+        const area = this.areas[Math.floor(Math.random() * this.areas.length)];
+        const streetNumber = Math.floor(Math.random() * 999) + 1;
+        return `${streetNumber} ${area} Road, ${area}, ${city}`;
+      },
+      
+      generatePatients(count = 50) {
+        const patients = [];
+        for (let i = 1; i <= count; i++) {
+          patients.push({
+            id: i,
+            name: this.generateRandomName(),
+            email: `patient${i}@example.com`,
+            phone: this.generateRandomPhone(),
+            address: this.generateRandomAddress(),
+            dateOfBirth: new Date(1960 + Math.floor(Math.random() * 40), Math.floor(Math.random() * 12), Math.floor(Math.random() * 28) + 1).toISOString().split('T')[0],
+            status: Math.random() > 0.2 ? 'active' : 'inactive',
+            lastVisit: new Date(Date.now() - Math.floor(Math.random() * 90) * 24 * 60 * 60 * 1000).toISOString().split('T')[0]
+          });
+        }
+        return patients;
+      },
+      
+      generateSales(count = 100) {
+        const sales = [];
+        const paymentMethods = ['cash', 'card', 'mobile', 'insurance'];
+        const statuses = ['completed', 'pending', 'cancelled', 'refunded'];
+        
+        for (let i = 1; i <= count; i++) {
+          const itemCount = Math.floor(Math.random() * 5) + 1;
+          const amount = Math.floor(Math.random() * 500) + 50;
+          const profit = Math.floor(amount * 0.3);
+          
+          sales.push({
+            id: i,
+            receiptNumber: `RCP${String(i).padStart(6, '0')}`,
+            customer: this.generateRandomName(),
+            date: new Date(Date.now() - Math.floor(Math.random() * 30) * 24 * 60 * 60 * 1000).toISOString().split('T')[0],
+            items: itemCount,
+            paymentMethod: paymentMethods[Math.floor(Math.random() * paymentMethods.length)],
+            status: statuses[Math.floor(Math.random() * statuses.length)],
+            amount: amount,
+            profit: profit,
+            cashier: this.generateRandomName()
+          });
+        }
+        return sales;
+      },
+      
+      init() {
+        this.patients = this.generatePatients(50);
+        this.sales = this.generateSales(100);
+      }
+    };
+
+    // Initialize mock data
+    zambianMockData.init();
+
     function homeDashboard() {
       return {
         sidebarOpen: false,
-        loading: true,
+        loading: false,
         error: null,
-        api: null,
-        userName: '',
-        firstName: '',
-        userInitials: '',
+        userName: 'Bwalya Chanda',
+        firstName: 'Bwalya',
+        userInitials: 'BC',
         currentDateTime: '',
         stats: {
-          todaySales: 0,
-          salesChange: 0,
-          patientsServed: 0,
-          patientsChange: 0,
-          todayRevenue: 0,
-          revenueChange: 0,
-          prescriptions: 0,
-          prescriptionsChange: 0
+          todaySales: 47,
+          salesChange: 12,
+          patientsServed: 23,
+          patientsChange: 8,
+          todayRevenue: 3456.78,
+          revenueChange: 15,
+          prescriptions: 18,
+          prescriptionsChange: -5
         },
-        recentActivities: [],
+        recentActivities: [
+          {
+            id: 1,
+            type: 'sale',
+            icon: 'shopping_cart',
+            title: 'New Sale Completed',
+            description: 'Chanda Bwalya purchased medications worth ZMW 245.50',
+            time: '2 minutes ago'
+          },
+          {
+            id: 2,
+            type: 'patient',
+            icon: 'person_add',
+            title: 'New Patient Registered',
+            description: 'Mulenga Phiri registered as a new patient',
+            time: '15 minutes ago'
+          },
+          {
+            id: 3,
+            type: 'payment',
+            icon: 'payments',
+            title: 'Payment Processed',
+            description: 'Mobile money payment of ZMW 150.00 received',
+            time: '1 hour ago'
+          },
+          {
+            id: 4,
+            type: 'inventory',
+            icon: 'inventory',
+            title: 'Stock Updated',
+            description: 'Panadol Extra stock updated to 150 units',
+            time: '2 hours ago'
+          }
+        ],
         queueStatus: {
-          waiting: 0,
-          averageWaitTime: '',
-          prescriptionsPending: 0,
-          nextPickup: '',
-          paymentsProcessing: 0,
-          lastPayment: ''
+          waiting: 8,
+          averageWaitTime: '15 minutes',
+          prescriptionsPending: 5,
+          nextPickup: '5 minutes',
+          paymentsProcessing: 3,
+          lastPayment: '2 minutes ago'
         },
 
         init() {
-          this.api = new CashierAPI();
           this.updateDateTime();
           setInterval(() => this.updateDateTime(), 60000);
-          this.loadUserData();
-          this.loadDashboardData();
-          // Set up auto-refresh every 30 seconds
-          setInterval(() => this.loadDashboardData(), 30000);
-        },
-
-        async loadUserData() {
-          try {
-            const userProfile = await this.api.getUserProfile();
-            if (userProfile && userProfile.data) {
-              const user = userProfile.data;
-              this.userName = `${user.firstName || ''} ${user.lastName || ''}`.trim() || 'User';
-              this.firstName = user.firstName || 'User';
-              this.userInitials = this.getInitials(this.userName);
-            }
-          } catch (error) {
-            console.error('Failed to load user data:', error);
-            this.userName = 'Cashier';
-            this.firstName = 'Cashier';
-            this.userInitials = 'C';
-          }
         },
 
         getInitials(name) {
@@ -1046,181 +1158,16 @@
           this.currentDateTime = now.toLocaleDateString('en-US', options);
         },
 
-        async loadDashboardData() {
-          try {
-            this.loading = true;
-            this.error = null;
-
-            // Load all dashboard data in parallel
-            const [statsResponse, salesResponse, queueResponse, patientsResponse] = await Promise.all([
-              this.api.getSalesStats(),
-              this.api.getRecentSales(5),
-              this.api.getQueueStats(),
-              this.api.getRecentPatients(3)
-            ]);
-
-            // Process stats data
-            if (statsResponse && statsResponse.data) {
-              this.processStatsData(statsResponse.data);
-            }
-
-            // Process recent activities from sales
-            if (salesResponse && salesResponse.data) {
-              this.processSalesData(salesResponse.data);
-            }
-
-            // Process queue status
-            if (queueResponse && queueResponse.data) {
-              this.processQueueData(queueResponse.data);
-            }
-
-            // Process patient data
-            if (patientsResponse && patientsResponse.data) {
-              this.processPatientData(patientsResponse.data);
-            }
-
-          } catch (error) {
-            console.error('Failed to load dashboard data:', error);
-            this.error = 'Failed to load dashboard data. Please try again.';
-            // Set default values on error
-            this.setDefaultValues();
-          } finally {
-            this.loading = false;
+        logout() {
+          console.log('Logout clicked');
+          // Simple redirect - no backend logic
+          if (confirm('Are you sure you want to logout?')) {
+            window.location.href = '../index.html';
           }
-        },
-
-        processStatsData(data) {
-          this.stats = {
-            todaySales: data.todaySales || 0,
-            salesChange: data.salesChange || 0,
-            patientsServed: data.patientsServed || 0,
-            patientsChange: data.patientsChange || 0,
-            todayRevenue: data.todayRevenue || 0,
-            revenueChange: data.revenueChange || 0,
-            prescriptions: data.prescriptions || 0,
-            prescriptionsChange: data.prescriptionsChange || 0
-          };
-        },
-
-        processSalesData(sales) {
-          const activities = [];
-          
-          if (Array.isArray(sales)) {
-            sales.slice(0, 5).forEach(sale => {
-              activities.push({
-                id: sale.id,
-                type: 'sale',
-                icon: 'shopping_cart',
-                title: 'New Sale Completed',
-                description: `Sale #${sale.id} - ${sale.patientName || 'Customer'}`,
-                time: this.formatTimeAgo(sale.createdAt)
-              });
-            });
-          }
-
-          // Add payment activities
-          if (sales && sales.data) {
-            sales.data.slice(0, 3).forEach(payment => {
-              if (payment.paymentMethod) {
-                activities.push({
-                  id: `payment-${payment.id}`,
-                  type: 'payment',
-                  icon: 'payments',
-                  title: 'Payment Processed',
-                  description: `${payment.paymentMethod} - ZMW ${(payment.amount || 0).toFixed(2)}`,
-                  time: this.formatTimeAgo(payment.createdAt)
-                });
-              }
-            });
-          }
-
-          this.recentActivities = activities;
-        },
-
-        processQueueData(queueData) {
-          this.queueStatus = {
-            waiting: queueData.waitingCount || 0,
-            averageWaitTime: queueData.averageWaitTime || '0 min',
-            prescriptionsPending: queueData.prescriptionsPending || 0,
-            nextPickup: queueData.nextPickupIn || 'N/A',
-            paymentsProcessing: queueData.paymentsProcessing || 0,
-            lastPayment: queueData.lastPayment ? this.formatTimeAgo(queueData.lastPayment) : 'N/A'
-          };
-        },
-
-        processPatientData(patients) {
-          if (Array.isArray(patients)) {
-            patients.slice(0, 3).forEach(patient => {
-              this.recentActivities.unshift({
-                id: `patient-${patient.id}`,
-                type: 'patient',
-                icon: 'person_add',
-                title: 'New Patient Registered',
-                description: `${patient.firstName} ${patient.lastName} - ID: #${patient.id}`,
-                time: this.formatTimeAgo(patient.createdAt)
-              });
-            });
-          }
-        },
-
-        formatTimeAgo(dateString) {
-          if (!dateString) return 'Unknown';
-          
-          const date = new Date(dateString);
-          const now = new Date();
-          const diffMs = now - date;
-          const diffMins = Math.floor(diffMs / 60000);
-          const diffHours = Math.floor(diffMins / 60);
-          const diffDays = Math.floor(diffHours / 24);
-
-          if (diffMins < 1) return 'Just now';
-          if (diffMins < 60) return `${diffMins} minute${diffMins > 1 ? 's' : ''} ago`;
-          if (diffHours < 24) return `${diffHours} hour${diffHours > 1 ? 's' : ''} ago`;
-          return `${diffDays} day${diffDays > 1 ? 's' : ''} ago`;
-        },
-
-        setDefaultValues() {
-          this.stats = {
-            todaySales: 0,
-            salesChange: 0,
-            patientsServed: 0,
-            patientsChange: 0,
-            todayRevenue: 0,
-            revenueChange: 0,
-            prescriptions: 0,
-            prescriptionsChange: 0
-          };
-
-          this.queueStatus = {
-            waiting: 0,
-            averageWaitTime: '0 min',
-            prescriptionsPending: 0,
-            nextPickup: 'N/A',
-            paymentsProcessing: 0,
-            lastPayment: 'N/A'
-          };
-
-          this.recentActivities = [];
-        },
-
-        async logout() {
-          try {
-            await this.api.logout();
-          } catch (error) {
-            console.error('Logout error:', error);
-          }
-          
-          // Clear local storage
-          localStorage.removeItem('umi_access_token');
-          localStorage.removeItem('umi_tenant_id');
-          localStorage.removeItem('umi_branch_id');
-          localStorage.removeItem('umi_user_id');
-          
-          // Redirect to login
-          window.location.href = '../index.html';
         }
-      }
+      };
     }
   </script>
+  <script src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js" defer></script>
 </body>
 </html>

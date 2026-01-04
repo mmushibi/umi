@@ -1025,6 +1025,49 @@
 
   <!-- Alpine.js Component -->
   <script>
+    // Fake Zambian Mock Data
+    const zambianMockData = {
+      firstNames: ['Chanda', 'Bwalya', 'Mulenga', 'Phiri', 'Banda', 'Tembo', 'Kunda', 'Mwansa', 'Chileshe', 'Musonda'],
+      lastNames: ['Bwalya', 'Phiri', 'Banda', 'Tembo', 'Kunda', 'Mwansa', 'Chileshe', 'Musonda', 'Kaluba', 'Mwewa'],
+      
+      generateSales(count = 100) {
+        const sales = [];
+        const paymentMethods = ['cash', 'card', 'mobile', 'insurance'];
+        const statuses = ['completed', 'pending', 'cancelled', 'refunded'];
+        
+        for (let i = 1; i <= count; i++) {
+          const itemCount = Math.floor(Math.random() * 5) + 1;
+          const amount = Math.floor(Math.random() * 500) + 50;
+          const profit = Math.floor(amount * 0.3);
+          
+          sales.push({
+            id: i,
+            receiptNumber: `RCP${String(i).padStart(6, '0')}`,
+            customer: `${this.firstNames[Math.floor(Math.random() * this.firstNames.length)]} ${this.lastNames[Math.floor(Math.random() * this.lastNames.length)]}`,
+            date: new Date(Date.now() - Math.floor(Math.random() * 30) * 24 * 60 * 60 * 1000).toISOString().split('T')[0],
+            items: itemCount,
+            paymentMethod: paymentMethods[Math.floor(Math.random() * paymentMethods.length)],
+            status: statuses[Math.floor(Math.random() * statuses.length)],
+            amount: amount,
+            profit: profit,
+            cashier: `${this.firstNames[Math.floor(Math.random() * this.firstNames.length)]} ${this.lastNames[Math.floor(Math.random() * this.lastNames.length)]}`
+          });
+        }
+        return sales;
+      },
+      
+      generateTopProducts() {
+        const products = [
+          { id: 1, name: 'Panadol Extra', sales: 45, revenue: 1147.50, stock: 150 },
+          { id: 2, name: 'Artemether 80mg', sales: 32, revenue: 1440.00, stock: 89 },
+          { id: 3, name: 'Amoxicillin 500mg', sales: 28, revenue: 2401.00, stock: 120 },
+          { id: 4, name: 'Vitamin C 1000mg', sales: 67, revenue: 2358.40, stock: 200 },
+          { id: 5, name: 'Paracetamol 500mg', sales: 89, revenue: 1361.70, stock: 300 }
+        ];
+        return products;
+      }
+    };
+
     function salesSystem() {
       return {
         sidebarOpen: false,
@@ -1042,19 +1085,9 @@
           end: ''
         },
         isLoading: false,
-        topProducts: [],
+        topProducts: zambianMockData.generateTopProducts(),
         notifications: [],
-        updateInterval: null,
-        tenantInfo: {
-          name: 'Umi Health',
-          location: 'Lusaka, Zambia'
-        },
-        userInfo: {
-          name: 'Umi Health',
-          role: 'Admin',
-          initials: 'UH'
-        },
-        sales: [],
+        sales: zambianMockData.generateSales(100),
 
         get filteredSales() {
           if (!this.searchQuery) return this.sales;
@@ -1087,82 +1120,9 @@
           return completedSales.reduce((total, sale) => total + sale.amount, 0) / completedSales.length;
         },
 
-        async loadSalesData() {
-          try {
-            // Load sales stats
-            const stats = await window.cashierAPI.getSalesStats();
-            this.updateSalesStats(stats);
-            
-            // Load sales list with pagination
-            const salesData = await window.cashierAPI.getSales({
-              page: this.currentPage,
-              pageSize: this.pageSize,
-              search: this.searchQuery,
-              status: this.selectedStatus,
-              startDate: this.dateRange.start,
-              endDate: this.dateRange.end
-            });
-            this.updateSalesList(salesData.sales || []);
-            this.totalPages = salesData.totalPages || 1;
-            this.totalItems = salesData.totalCount || 0;
-            
-            // Load revenue chart data
-            const revenueStats = await window.cashierAPI.getSalesRevenueStats(this.selectedPeriod);
-            this.updateRevenueChart(revenueStats);
-            
-            // Load payment methods stats
-            const paymentStats = await window.cashierAPI.getPaymentMethodsStats();
-            this.updatePaymentChart(paymentStats);
-            
-            // Load top products for insights
-            const topProducts = await window.cashierAPI.getPopularProducts(5);
-            this.updateTopProducts(topProducts);
-            
-          } catch (error) {
-            console.error('Error loading sales data:', error);
-            window.cashierAPI.handleError(error, 'loadSalesData');
-            this.showNotification('Failed to load sales data', 'error');
-          }
-        },
-        
-        updateSalesStats(stats) {
-          this.todayRevenue = stats.todayRevenue || 0;
-          this.totalTransactions = stats.completedSales || 0;
-          this.pendingTransactions = stats.pendingSales || 0;
-          this.averageSale = this.totalTransactions > 0 ? this.todayRevenue / this.totalTransactions : 0;
-        },
-        
-        updateSalesList(sales) {
-          this.sales = sales.map(sale => ({
-            id: sale.id,
-            receiptNumber: sale.saleNumber,
-            customer: sale.patientId ? `Patient #${sale.patientId}` : 'OTC Customer',
-            date: window.cashierAPI.formatDateTime(sale.saleDate),
-            items: sale.items ? sale.items.length : 0,
-            paymentMethod: sale.paymentMethod || 'cash',
-            status: sale.status || 'pending',
-            amount: sale.totalAmount,
-            profit: sale.profit || 0,
-            discount: sale.discount || 0,
-            cashier: sale.cashierName || 'Unknown',
-            branch: sale.branchName || 'Main Branch'
-          }));
-        },
-        
-        updateTopProducts(products) {
-          this.topProducts = products.map(product => ({
-            id: product.id,
-            name: product.name,
-            sales: product.totalSales || 0,
-            revenue: product.revenue || 0,
-            stock: product.currentStock || 0
-          }));
-        },
-        
-        // Enhanced filtering and pagination methods
+        // Simple mock methods - no backend needed
         applyFilters() {
           this.currentPage = 1;
-          this.loadSalesData();
         },
         
         clearFilters() {
@@ -1170,60 +1130,30 @@
           this.selectedStatus = '';
           this.dateRange = { start: '', end: '' };
           this.currentPage = 1;
-          this.loadSalesData();
         },
         
         goToPage(page) {
           if (page >= 1 && page <= this.totalPages) {
             this.currentPage = page;
-            this.loadSalesData();
           }
         },
         
         nextPage() {
           if (this.currentPage < this.totalPages) {
             this.currentPage++;
-            this.loadSalesData();
           }
         },
         
         prevPage() {
           if (this.currentPage > 1) {
             this.currentPage--;
-            this.loadSalesData();
           }
         },
         
-        // Export functionality
-        async exportSales(format = 'csv') {
-          try {
-            this.isLoading = true;
-            const blob = await window.cashierAPI.exportReport('sales', format, {
-              startDate: this.dateRange.start,
-              endDate: this.dateRange.end,
-              status: this.selectedStatus,
-              search: this.searchQuery
-            });
-            
-            const url = window.URL.createObjectURL(blob);
-            const a = document.createElement('a');
-            a.href = url;
-            a.download = `sales-report-${new Date().toISOString().split('T')[0]}.${format}`;
-            document.body.appendChild(a);
-            a.click();
-            document.body.removeChild(a);
-            window.URL.revokeObjectURL(url);
-            
-            this.showNotification(`Sales report exported as ${format.toUpperCase()}`, 'success');
-          } catch (error) {
-            console.error('Export error:', error);
-            this.showNotification('Failed to export sales report', 'error');
-          } finally {
-            this.isLoading = false;
-          }
+        exportSales(format = 'csv') {
+          alert(`Exporting sales as ${format.toUpperCase()} - this would download a file in a real application`);
         },
         
-        // Notification system
         showNotification(message, type = 'info') {
           const notification = {
             id: Date.now(),
@@ -1244,157 +1174,14 @@
           this.notifications = this.notifications.filter(n => n.id !== id);
         },
         
-        // Real-time updates
-        startRealTimeUpdates() {
-          // Set up WebSocket or polling for real-time updates
-          this.updateInterval = setInterval(() => {
-            this.loadSalesData();
-          }, 30000); // Update every 30 seconds
+        viewSale(sale) {
+          alert(`Sale Details:\nReceipt: ${sale.receiptNumber}\nCustomer: ${sale.customer}\nAmount: ZMW ${sale.amount.toFixed(2)}\nStatus: ${sale.status}`);
         },
         
-        stopRealTimeUpdates() {
-          if (this.updateInterval) {
-            clearInterval(this.updateInterval);
+        refundSale(sale) {
+          if (confirm(`Are you sure you want to refund sale ${sale.receiptNumber} for ZMW ${sale.amount.toFixed(2)}?`)) {
+            alert('Refund processed successfully');
           }
-        },
-        
-        updateRevenueChart(revenueStats) {
-          const ctx = document.getElementById('revenueChart').getContext('2d');
-          
-          // Ensure revenueStats is an array
-          const statsArray = Array.isArray(revenueStats) ? revenueStats : (revenueStats.data || []);
-          
-          // Prepare chart data
-          const labels = statsArray.map(stat => window.cashierAPI.formatDate(stat.date));
-          const data = statsArray.map(stat => stat.revenue);
-          
-          if (this.revenueChart) {
-            this.revenueChart.destroy();
-          }
-          
-          this.revenueChart = new Chart(ctx, {
-            type: 'line',
-            data: {
-              labels: labels,
-              datasets: [{
-                label: 'Revenue',
-                data: data,
-                borderColor: 'rgb(0, 0, 0)',
-                backgroundColor: 'rgba(0, 0, 0, 0.1)',
-                tension: 0.4
-              }]
-            },
-            options: {
-              responsive: true,
-              maintainAspectRatio: false,
-              plugins: {
-                legend: {
-                  display: false
-                }
-              },
-              scales: {
-                y: {
-                  beginAtZero: true,
-                  ticks: {
-                    callback: function(value) {
-                      return 'ZMW ' + value;
-                    }
-                  }
-                }
-              }
-            }
-          });
-        },
-        
-        updatePaymentChart(paymentStats) {
-          const ctx = document.getElementById('paymentChart').getContext('2d');
-          
-          // Ensure paymentStats is an array
-          const statsArray = Array.isArray(paymentStats) ? paymentStats : (paymentStats.data || []);
-          
-          // Prepare chart data
-          const labels = statsArray.map(stat => stat.method);
-          const data = statsArray.map(stat => stat.count);
-          
-          if (this.paymentChart) {
-            this.paymentChart.destroy();
-          }
-          
-          this.paymentChart = new Chart(ctx, {
-            type: 'doughnut',
-            data: {
-              labels: labels,
-              datasets: [{
-                data: data,
-                backgroundColor: [
-                  'rgba(0, 0, 0, 0.8)',
-                  'rgba(107, 114, 128, 0.8)',
-                  'rgba(156, 163, 175, 0.8)',
-                  'rgba(209, 213, 219, 0.8)'
-                ]
-              }]
-            },
-            options: {
-              responsive: true,
-              maintainAspectRatio: false,
-              plugins: {
-                legend: {
-                  position: 'bottom'
-                }
-              }
-            }
-          });
-        },
-        
-        async updateRevenueChart(period) {
-          try {
-            const revenueStats = await window.cashierAPI.getSalesRevenueStats(parseInt(period));
-            this.updateRevenueChart(revenueStats);
-          } catch (error) {
-            console.error('Error updating revenue chart:', error);
-            window.cashierAPI.handleError(error, 'updateRevenueChart');
-          }
-        },
-        
-        async viewSale(sale) {
-          try {
-            const saleDetails = await window.cashierAPI.getSaleDetails(sale.id);
-            console.log('Sale details:', saleDetails);
-            // Implement detailed view modal or navigation
-            alert(`Sale Details:\nReceipt: ${saleDetails.saleNumber}\nAmount: ${window.cashierAPI.formatCurrency(saleDetails.totalAmount)}\nStatus: ${saleDetails.status}`);
-          } catch (error) {
-            console.error('Error viewing sale:', error);
-            window.cashierAPI.handleError(error, 'viewSale');
-          }
-        },
-        
-        async refundSale(sale) {
-          if (!confirm(`Are you sure you want to refund sale ${sale.receiptNumber} for ${this.formatCurrency(sale.amount)}?`)) {
-            return;
-          }
-          
-          try {
-            this.isLoading = true;
-            const refundData = {
-              saleId: sale.id,
-              refundAmount: sale.amount,
-              reason: 'Customer refund',
-              processedBy: this.getUserId()
-            };
-            
-            const result = await window.cashierAPI.createRefund(refundData);
-            this.showNotification('Refund processed successfully', 'success');
-            this.loadSalesData(); // Refresh the data
-          } catch (error) {
-            console.error('Refund error:', error);
-            this.showNotification('Failed to process refund', 'error');
-          } finally {
-            this.isLoading = false;
-          }
-        },
-        
-        getUserId() {
-          return window.cashierAPI.getUserId() || 'current-user';
         },
 
         formatCurrency(amount) {
@@ -1406,19 +1193,12 @@
 
         logout() {
           if (confirm('Are you sure you want to logout?')) {
-            window.location.href = 'index.html';
+            window.location.href = '../index.html';
           }
         },
 
         init() {
-          // Initialize user info from API
-          this.loadUserInfo();
-          
-          // Load initial sales data
-          this.loadSalesData();
-          
-          // Start real-time updates
-          this.startRealTimeUpdates();
+          console.log('Sales system initialized with Zambian mock data');
           
           // Set up date range defaults (last 7 days)
           const endDate = new Date();
@@ -1428,37 +1208,12 @@
             start: startDate.toISOString().split('T')[0],
             end: endDate.toISOString().split('T')[0]
           };
-        },
-        
-        async loadUserInfo() {
-          try {
-            const userProfile = await window.cashierAPI.getUserProfile();
-            this.userInfo = {
-              name: userProfile.fullName || userProfile.email || 'Cashier',
-              role: userProfile.role || 'Cashier',
-              initials: (userProfile.fullName || userProfile.email || 'C').split(' ').map(n => n[0]).join('').toUpperCase().slice(0, 2)
-            };
-          } catch (error) {
-            console.error('Error loading user info:', error);
-            // Keep default values if API fails
-          }
-        },
-        
-        // Cleanup on page unload
-        destroy() {
-          this.stopRealTimeUpdates();
-        },
+        }
       }
     }
   </script>
 
-  <!-- Include API and Data Sync Services -->
-  <script src="../shared/js/data-sync.js"></script>
-  <script src="../shared/js/role-based-access.js"></script>
-  <script src="../admin/js/admin-api.js"></script>
-  <script src="js/cashier-api.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-
   <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
 </body>
 </html>

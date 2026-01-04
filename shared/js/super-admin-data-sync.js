@@ -6,8 +6,12 @@ class SuperAdminDataSync {
         this.intervals = {};
         this.cache = new Map();
         this.listeners = new Map();
+        this.isOnline = navigator.onLine;
+        this.offlineQueue = [];
         
         this.setupInterceptors();
+        this.setupOfflineListeners();
+        this.initializeOfflineStorage();
     }
 
     setupInterceptors() {
@@ -29,6 +33,13 @@ class SuperAdminDataSync {
     }
 
     async request(endpoint, options = {}) {
+        const cacheKey = `${endpoint}_${JSON.stringify(options)}`;
+        
+        // Check if we're offline
+        if (!this.isOnline) {
+            return this.handleOfflineRequest(endpoint, options, cacheKey);
+        }
+        
         try {
             const response = await fetch(`${this.baseURL}${endpoint}`, {
                 ...options,
@@ -44,9 +55,35 @@ class SuperAdminDataSync {
                 throw new Error(error.error || `HTTP ${response.status}`);
             }
 
-            return await response.json();
+            const data = await response.json();
+            
+            // Cache the successful response
+            this.setCache(cacheKey, data);
+            
+            // Store in offline storage
+            this.storeOfflineData(endpoint, data);
+            
+            return data;
         } catch (error) {
             console.error('API request failed:', error);
+            
+            // If online request fails, try to get cached/offline data
+            if (this.isOnline) {
+                const cachedData = this.getCache(cacheKey);
+                if (cachedData && this.isCacheValid(cacheKey)) {
+                    console.warn('Using cached data due to API failure:', error);
+                    this.notifyError('Using cached data - connection issues detected');
+                    return cachedData;
+                }
+                
+                const offlineData = this.getOfflineData(endpoint);
+                if (offlineData) {
+                    console.warn('Using offline data due to API failure:', error);
+                    this.notifyError('Using offline data - connection issues detected');
+                    return offlineData;
+                }
+            }
+            
             this.notifyError(error.message);
             throw error;
         }
@@ -653,6 +690,213 @@ class SuperAdminDataSync {
 
     isAuthenticated() {
         return !!this.token;
+    }
+
+    // Offline functionality
+    setupOfflineListeners() {
+        window.addEventListener('online', () => {
+            this.isOnline = true;
+            this.notifySuccess('Connection restored');
+            this.processOfflineQueue();
+        });
+
+        window.addEventListener('offline', () => {
+            this.isOnline = false;
+            this.notifyError('Connection lost - using offline mode');
+        });
+    }
+
+    initializeOfflineStorage() {
+        // Initialize offline storage if not exists
+        if (!localStorage.getItem('offlineData')) {
+            localStorage.setItem('offlineData', JSON.stringify({}));
+        }
+        if (!localStorage.getItem('offlineQueue')) {
+            localStorage.setItem('offlineQueue', JSON.stringify([]));
+        }
+    }
+
+    storeOfflineData(endpoint, data) {
+        try {
+            const offlineData = JSON.parse(localStorage.getItem('offlineData') || '{}');
+            offlineData[endpoint] = {
+                data,
+                timestamp: Date.now(),
+                endpoint
+            };
+            localStorage.setItem('offlineData', JSON.stringify(offlineData));
+        } catch (error) {
+            console.error('Failed to store offline data:', error);
+        }
+    }
+
+    getOfflineData(endpoint) {
+        try {
+            const offlineData = JSON.parse(localStorage.getItem('offlineData') || '{}');
+            const stored = offlineData[endpoint];
+            
+            if (stored && this.isOfflineDataValid(stored.timestamp)) {
+                return stored.data;
+            }
+            
+            return null;
+        } catch (error) {
+            console.error('Failed to get offline data:', error);
+            return null;
+        }
+    }
+
+    isOfflineDataValid(timestamp) {
+        // Consider offline data valid for 24 hours
+        const maxAge = 24 * 60 * 60 * 1000; // 24 hours in milliseconds
+        return Date.now() - timestamp < maxAge;
+    }
+
+    handleOfflineRequest(endpoint, options, cacheKey) {
+        console.log('Handling offline request for:', endpoint);
+        
+        // Try cache first
+        const cachedData = this.getCache(cacheKey);
+        if (cachedData && this.isCacheValid(cacheKey)) {
+            this.notifyError('Using cached data - offline mode');
+            return Promise.resolve(cachedData);
+        }
+        
+        // Try offline storage
+        const offlineData = this.getOfflineData(endpoint);
+        if (offlineData) {
+            this.notifyError('Using offline data - offline mode');
+            return Promise.resolve(offlineData);
+        }
+        
+        // Queue the request for when we're back online
+        if (options.method && options.method !== 'GET') {
+            this.queueOfflineRequest(endpoint, options);
+        }
+        
+        // Return mock data as last resort
+        return Promise.resolve(this.getMockData(endpoint));
+    }
+
+    queueOfflineRequest(endpoint, options) {
+        try {
+            const queue = JSON.parse(localStorage.getItem('offlineQueue') || '[]');
+            queue.push({
+                endpoint,
+                options,
+                timestamp: Date.now()
+            });
+            localStorage.setItem('offlineQueue', JSON.stringify(queue));
+        } catch (error) {
+            console.error('Failed to queue offline request:', error);
+        }
+    }
+
+    async processOfflineQueue() {
+        try {
+            const queue = JSON.parse(localStorage.getItem('offlineQueue') || '[]');
+            
+            for (const request of queue) {
+                try {
+                    await this.request(request.endpoint, request.options);
+                    console.log('Processed queued request:', request.endpoint);
+                } catch (error) {
+                    console.error('Failed to process queued request:', error);
+                }
+            }
+            
+            // Clear the queue
+            localStorage.setItem('offlineQueue', JSON.stringify([]));
+        } catch (error) {
+            console.error('Failed to process offline queue:', error);
+        }
+    }
+
+    getMockData(endpoint) {
+        // Provide fallback mock data for critical endpoints
+        const mockData = {
+            '/dashboard': {
+                totalTenants: 0,
+                activeTenants: 0,
+                totalUsers: 0,
+                activeUsers: 0,
+                totalTransactions: 0,
+                totalRevenue: 0,
+                criticalSecurityEvents: 0,
+                pendingReports: 0,
+                failedBackups: 0,
+                recentLogs: [],
+                recentSecurityEvents: []
+            },
+            '/health': {
+                status: 'offline',
+                services: {
+                    database: 'offline',
+                    cache: 'offline',
+                    messaging: 'offline'
+                },
+                timestamp: new Date().toISOString()
+            },
+            '/metrics': {
+                cpu: 0,
+                memory: 0,
+                disk: 0,
+                network: 0,
+                timestamp: new Date().toISOString()
+            }
+        };
+        
+        return mockData[endpoint] || null;
+    }
+
+    // Real-time sync with fallback
+    startAutoRefresh(endpoint, callback, interval = this.refreshInterval) {
+        const key = `refresh_${endpoint}`;
+        
+        // Clear existing interval for this endpoint
+        if (this.intervals[key]) {
+            clearInterval(this.intervals[key]);
+        }
+
+        // Set up new interval
+        this.intervals[key] = setInterval(async () => {
+            try {
+                const data = await this.request(endpoint);
+                callback(data);
+            } catch (error) {
+                console.error(`Auto refresh failed for ${endpoint}:`, error);
+                // Don't show error for auto-refresh failures to avoid spam
+            }
+        }, interval);
+
+        // Initial load
+        this.request(endpoint).then(callback).catch(error => {
+            console.error('Initial load failed:', error);
+        });
+    }
+
+    // Enhanced cache with offline support
+    clearCache(key) {
+        if (key) {
+            this.cache.delete(key);
+        } else {
+            this.cache.clear();
+        }
+        
+        // Also clear offline cache if requested
+        if (!key) {
+            localStorage.setItem('offlineData', JSON.stringify({}));
+        }
+    }
+
+    // Get connection status
+    getConnectionStatus() {
+        return {
+            isOnline: this.isOnline,
+            hasCachedData: this.cache.size > 0,
+            hasOfflineData: Object.keys(JSON.parse(localStorage.getItem('offlineData') || '{}')).length > 0,
+            queuedRequests: JSON.parse(localStorage.getItem('offlineQueue') || '[]').length
+        };
     }
 }
 

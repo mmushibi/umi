@@ -10,7 +10,11 @@
   <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Rounded:wght@300;400;500;600;700&display=swap" rel="stylesheet">
   <script src="https://cdn.tailwindcss.com"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/microsoft-signalr/7.0.5/signalr.min.js"></script>
+  <link rel="stylesheet" href="../shared/css/shared-styles.css">
   <link rel="stylesheet" href="css/pharmacist-styles.css">
+  <script src="../shared/js/data-sync.js"></script>
+  <script src="../shared/js/role-based-access.js"></script>
+  <script src="../shared/js/portal-data-sync.js"></script>
   <script src="js/auth-service.js"></script>
   <script src="js/auth-manager.js"></script>
   <script src="js/pharmacist-service.js"></script>
@@ -1088,7 +1092,7 @@
         async init() {
           try {
             // Check authentication
-            if (!window.pharmacistService.isAuthenticated()) {
+            if (!window.pharmacistDataSync.isAuthenticated()) {
               window.location.href = '../login.html';
               return;
             }
@@ -1098,6 +1102,20 @@
             
             // Load initial data
             await this.loadDashboardData();
+            
+            // Set up real-time updates using portal data sync
+            window.pharmacistDataSync.subscribe('/dashboard', (data) => {
+              this.updateDashboardData(data);
+            });
+            
+            // Set up event listeners
+            window.pharmacistDataSync.addEventListener('error', (message) => {
+              this.showError(message);
+            });
+            
+            window.pharmacistDataSync.addEventListener('success', (message) => {
+              this.showSuccess(message);
+            });
             
             // Set up real-time event listeners
             this.setupEventListeners();

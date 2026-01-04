@@ -9,9 +9,6 @@
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@100;400;500;600;700&family=Varela+Round&family=Nunito:wght@400;600;700&display=swap" rel="stylesheet">
   <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Rounded:wght@300;400;500;600;700&display=swap" rel="stylesheet">
   <script src="https://cdn.tailwindcss.com"></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/microsoft-signalr/7.0.5/signalr.min.js"></script>
-  <link rel="stylesheet" href="css/pharmacist-styles.css">
-  <script src="js/pharmacist-api.js"></script>
   <style>
     :root {
       --color-primary: #000000;
@@ -713,12 +710,6 @@
   </style>
 </head>
 <body>
-  <div x-show="!isAuthenticated" class="demo-banner" x-transition>
-    <span>🔒 Authentication Required: Please login to access pharmacist dashboard</span>
-    <button class="close-btn" @click="window.location.href='/public/signin.html'">
-      sign in
-    </button>
-  </div>
   <!-- Sidebar -->
   <aside class="sidebar" :class="sidebarOpen ? 'open' : ''">
     <div class="sidebar-header">
@@ -1057,221 +1048,110 @@
       return {
         sidebarOpen: false,
         showUserMenu: false,
-        loading: true,
+        loading: false,
         error: null,
         lastSyncTime: null,
+        isAuthenticated: true,
         userInfo: {
-          name: '',
-          firstName: '',
-          initials: 'U',
-          role: 'Pharmacist'
+          name: 'Dr. Chileshe Banda',
+          firstName: 'Chileshe',
+          initials: 'CB',
+          role: 'Pharmacist',
+          email: 'chileshe.banda@umipharma.zm'
         },
         pharmacyInfo: {
-          name: '',
-          address: ''
+          name: 'Umi Health Pharmacy - Lusaka',
+          location: 'Lusaka, Zambia',
+          license: 'ZAMB-PH-2024-0156'
         },
         stats: {
-          todayPrescriptions: 0,
-          pendingOrders: 0,
-          lowStockItems: 0,
-          patientsServed: 0,
-          totalPrescriptions: 0,
-          filledToday: 0,
-          expiringSoon: 0,
-          revenueToday: '$0'
+          todayPrescriptions: 47,
+          pendingOrders: 12,
+          lowStockItems: 8,
+          patientsServed: 156,
+          totalPrescriptions: 1247,
+          filledToday: 38,
+          expiringSoon: 5,
+          revenueToday: 'ZMW 8,450'
         },
-        recentActivity: [],
-        alerts: [],
-        
-        async init() {
-          try {
-            // Check authentication
-            if (!window.pharmacistService.isAuthenticated()) {
-              window.location.href = '../login.html';
-              return;
-            }
-
-            // Initialize SignalR for real-time updates
-            await this.initializeRealtime();
-            
-            // Load initial data
-            await this.loadDashboardData();
-            
-            // Set up real-time event listeners
-            this.setupEventListeners();
-            
-            // Set up periodic refresh
-            this.setupPeriodicRefresh();
-
-            // Set up click outside handler for mobile menu
-            this.setupClickOutsideHandler();
-            
-          } catch (error) {
-            console.error('Error initializing dashboard:', error);
-            this.error = 'Failed to load dashboard data';
-            this.loading = false;
+        recentActivity: [
+          {
+            id: 1,
+            type: 'success',
+            icon: 'check_circle',
+            title: 'Prescription Filled',
+            description: 'RX-2024-0147 for Sarah Mwale - Amoxicillin 500mg',
+            time: '5 minutes ago'
+          },
+          {
+            id: 2,
+            type: 'info',
+            icon: 'person',
+            title: 'New Patient Registered',
+            description: 'James Phiri - ID: P-2024-0892',
+            time: '15 minutes ago'
+          },
+          {
+            id: 3,
+            type: 'warning',
+            icon: 'warning',
+            title: 'Low Stock Alert',
+            description: 'Paracetamol 500mg - 15 units remaining',
+            time: '30 minutes ago'
+          },
+          {
+            id: 4,
+            type: 'success',
+            icon: 'payments',
+            title: 'Payment Received',
+            description: 'ZMW 450 from Mary Banda - Invoice INV-2024-0234',
+            time: '1 hour ago'
+          },
+          {
+            id: 5,
+            type: 'info',
+            icon: 'inventory',
+            title: 'Stock Updated',
+            description: 'New batch of ARVs received - 200 units',
+            time: '2 hours ago'
           }
-        },
-
-
-        async initializeRealtime() {
-          try {
-            await window.pharmacistService.initializeSignalR();
-          } catch (error) {
-            console.error('Error initializing real-time connection:', error);
-            // Continue without real-time updates
+        ],
+        alerts: [
+          {
+            id: 1,
+            type: 'warning',
+            icon: 'warning',
+            title: 'Expiry Alert',
+            description: 'Ciprofloxacin expires in 7 days'
+          },
+          {
+            id: 2,
+            type: 'info',
+            icon: 'info',
+            title: 'Regulatory Update',
+            description: 'New ZAMBRA guidelines for controlled substances'
           }
+        ],
+        init() {
+          this.loading = false;
+          this.lastSyncTime = new Date();
         },
-
-        setupEventListeners() {
-          // Listen for real-time updates
-          window.addEventListener('dashboardUpdated', (event) => {
-            console.log('Dashboard updated in real-time:', event.detail);
-            this.updateDashboardData(event.detail);
-          });
-
-          window.addEventListener('dataSynced', (event) => {
-            console.log('Data synced:', event.detail);
-            this.lastSyncTime = new Date();
-            // Refresh dashboard after sync
-            this.loadDashboardData();
-          });
-        },
-
-        setupPeriodicRefresh() {
-          // Refresh dashboard every 2 minutes
-          setInterval(() => {
-            if (!this.loading) {
-              this.loadDashboardData();
-            }
-          }, 120000);
-        },
-
-        async loadDashboardData() {
-          try {
-            this.loading = true;
-            this.error = null;
-
-            // Load data in parallel
-            const [dashboardData, userInfo, pharmacyInfo] = await Promise.all([
-              window.pharmacistService.getDashboardData(),
-              window.pharmacistService.getUserInfo(),
-              window.pharmacistService.getPharmacyInfo()
-            ]);
-
-            // Update user info
-            this.userInfo = {
-              name: userInfo.name || 'Unknown User',
-              firstName: userInfo.firstName || userInfo.name?.split(' ')[0] || 'User',
-              initials: window.pharmacistService.getUserInitials(userInfo.name),
-              role: userInfo.role || 'Pharmacist'
-            };
-
-            // Update pharmacy info
-            this.pharmacyInfo = {
-              name: pharmacyInfo.name || 'Umi Health Pharmacy',
-              address: pharmacyInfo.address || 'Main Branch'
-            };
-
-            // Update dashboard stats
-            if (dashboardData.stats) {
-              this.stats = {
-                todayPrescriptions: dashboardData.stats.todayPrescriptions || 0,
-                pendingOrders: dashboardData.stats.pendingOrders || 0,
-                lowStockItems: dashboardData.stats.lowStockItems || 0,
-                patientsServed: dashboardData.stats.patientsServed || 0,
-                totalPrescriptions: dashboardData.stats.totalPrescriptions || 0,
-                filledToday: dashboardData.stats.filledToday || 0,
-                expiringSoon: dashboardData.stats.expiringSoon || 0,
-                revenueToday: window.pharmacistService.formatCurrency(dashboardData.stats.revenueToday || 0, pharmacyInfo.currency)
-              };
-            }
-
-            // Update recent activity
-            this.recentActivity = dashboardData.recentActivity || [];
-
-            // Update alerts
-            this.alerts = dashboardData.alerts || [];
-
-            this.lastSyncTime = dashboardData.lastUpdated || new Date();
-            
-          } catch (error) {
-            console.error('Error loading dashboard data:', error);
-            this.error = error.message || 'Failed to load dashboard data';
-          } finally {
-            this.loading = false;
-          }
-        },
-
-        updateDashboardData(data) {
-          // Update specific data from real-time updates
-          if (data.stats) {
-            Object.assign(this.stats, data.stats);
-          }
-          if (data.recentActivity) {
-            this.recentActivity = data.recentActivity;
-          }
-          if (data.alerts) {
-            this.alerts = data.alerts;
-          }
-        },
-
-        async refreshData() {
-          try {
-            console.log('Refreshing dashboard data...');
-            await this.loadDashboardData();
-            console.log('Dashboard data refreshed successfully');
-          } catch (error) {
-            console.error('Error refreshing dashboard data:', error);
-            this.error = error.message || 'Failed to refresh dashboard data';
-          }
-        },
-
-        async triggerSync(entityType = null) {
-          try {
-            console.log('Triggering sync for:', entityType);
-            await window.pharmacistService.triggerSync(entityType);
-            console.log('Sync triggered successfully');
-            // Show success message
-            this.showSuccessMessage('Data sync triggered successfully');
-          } catch (error) {
-            console.error('Error triggering sync:', error);
-            this.error = 'Failed to trigger data sync';
-          }
-        },
-
-        showSuccessMessage(message) {
-          // Create a temporary success message
-          const successDiv = document.createElement('div');
-          successDiv.className = 'fixed top-4 right-4 bg-green-500 text-white px-4 py-2 rounded-lg shadow-lg z-50';
-          successDiv.textContent = message;
-          document.body.appendChild(successDiv);
-          
-          // Remove after 3 seconds
-          setTimeout(() => {
-            document.body.removeChild(successDiv);
-          }, 3000);
-        },
-
         getGreeting() {
           const hour = new Date().getHours();
           if (hour < 12) return 'Good morning';
           if (hour < 17) return 'Good afternoon';
           return 'Good evening';
         },
-
-        formatRelativeTime(date) {
-          return window.pharmacistService.formatRelativeTime(date);
+        toggleMobileMenu() {
+          this.sidebarOpen = !this.sidebarOpen;
         },
-        
         logout() {
           if (confirm('Are you sure you want to logout?')) {
-            window.pharmacistService.clearAuthData();
-            window.location.href = '../login.html';
+            window.location.href = '../signin.html';
           }
         }
       }
     }
-  </script>
+          </script>
 </body>
 </html>

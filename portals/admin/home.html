@@ -15,6 +15,7 @@
   <script src="../shared/js/data-sync.js"></script>
   <script src="../shared/js/role-based-access.js"></script>
   <script src="../shared/js/feature-protection.js"></script>
+  <script src="../shared/js/portal-data-sync.js"></script>
   <script src="js/admin-api.js"></script>
   <style>
     :root {
@@ -2504,12 +2505,32 @@
         },
         
         init() {
+          // Check authentication
+          if (!window.adminDataSync.isAuthenticated()) {
+            this.redirectToLogin();
+            return;
+          }
+          
           this.loadPharmacyInfo();
           this.initializeDataSync();
           this.checkApiConnection();
           this.initializeWebSocket();
           this.renderDashboardContent();
           this.setupEventListeners();
+          
+          // Set up real-time updates
+          window.adminDataSync.subscribe('/dashboard', (data) => {
+            this.updateDashboardStats(data);
+          });
+          
+          // Set up event listeners
+          window.adminDataSync.addEventListener('error', (message) => {
+            this.showError(message);
+          });
+          
+          window.adminDataSync.addEventListener('success', (message) => {
+            this.showSuccess(message);
+          });
           
           // Set up periodic updates only if WebSocket is not available
           this.startPeriodicUpdates();

@@ -2413,18 +2413,23 @@
   <script>
     function adminDashboard() {
       return {
-        // Data state
+        // Data state with Zambian mock data
         dashboardStats: {
-          totalUsers: 0,
-          activeUsers: 0,
-          totalBranches: 0,
-          activeBranches: 0,
-          totalSales: 0,
-          todaySales: 0,
-          pendingPrescriptions: 0,
-          lowStockItems: 0
+          totalUsers: 156,
+          activeUsers: 89,
+          totalBranches: 3,
+          activeBranches: 2,
+          totalSales: 284750,
+          todaySales: 8450,
+          pendingPrescriptions: 12,
+          lowStockItems: 8
         },
-        recentActivity: [],
+        recentActivity: [
+          { type: 'sale', user: 'Chanda Banda', action: 'Completed sale', amount: 'ZMW 450', time: '2 mins ago' },
+          { type: 'prescription', user: 'Dr. Musonda', action: 'Filled prescription', amount: 'ZMW 120', time: '15 mins ago' },
+          { type: 'inventory', user: 'Nurse Tembo', action: 'Updated stock', amount: 'Paracetamol x50', time: '1 hour ago' },
+          { type: 'user', user: 'Admin', action: 'New user registered', amount: 'Pharmacist Mwape', time: '2 hours ago' }
+        ],
         systemHealth: 'good',
         loading: false,
         error: null,
@@ -2470,15 +2475,15 @@
         recentActivity: [],
         salesPerformance: [],
         
-        // User and pharmacy info - will be loaded from API
+        // User and pharmacy info - Zambian mock data
         pharmacyInfo: {
-          name: '',
-          location: ''
+          name: 'Banda Pharmacy Ltd',
+          location: 'Lusaka, Zambia'
         },
         userInfo: {
-          name: '',
-          role: '',
-          initials: ''
+          name: 'Chanda Banda',
+          role: 'Administrator',
+          initials: 'CB'
         },
         
         searchSuggestions: [],
@@ -2500,50 +2505,24 @@
         },
         
         init() {
-          this.loadPharmacyInfo();
-          this.initializeDataSync();
-          this.checkApiConnection();
-          this.initializeWebSocket();
-          this.renderDashboardContent();
-          this.setupEventListeners();
-          
-          // Set up periodic updates only if WebSocket is not available
-          this.startPeriodicUpdates();
-          
-          console.log('Admin dashboard initialized with real-time data integration');
+          // Initialize with Zambian mock data - no backend calls
+          this.showSuccess('Dashboard loaded successfully with Zambian data');
         },
         
-        loadPharmacyInfo() {
-          // Load pharmacy information from localStorage or API
-          try {
-            const savedPharmacy = localStorage.getItem('pharmacyInfo');
-            if (savedPharmacy) {
-              this.pharmacyInfo = JSON.parse(savedPharmacy);
-            }
-            
-            const savedUser = localStorage.getItem('userInfo');
-            if (savedUser) {
-              this.userInfo = JSON.parse(savedUser);
-            }
-            
-            // Load user info from token if available
-            const token = localStorage.getItem('umi_access_token');
-            if (token && !this.userInfo.name) {
-              // Parse JWT token to get user info (simplified)
-              try {
-                const payload = JSON.parse(atob(token.split('.')[1]));
-                this.userInfo = {
-                  name: payload.name || payload.email || 'Admin',
-                  role: payload.role || 'Admin',
-                  initials: (payload.name || 'Admin').split(' ').map(n => n[0]).join('').toUpperCase().slice(0, 2)
-                };
-              } catch (e) {
-                console.warn('Could not parse user token:', e);
-              }
-            }
-          } catch (error) {
-            console.error('Failed to load pharmacy info:', error);
-          }
+        // Simple mock functions - no backend calls
+        logout() {
+          this.showSuccess('Logged out successfully!');
+          setTimeout(() => {
+            window.location.href = '../admin-signin.html';
+          }, 1000);
+        },
+
+        showSuccess(message) {
+          console.log('SUCCESS:', message);
+        },
+
+        showError(message) {
+          console.log('ERROR:', message);
         },
         
         initializeDataSync() {

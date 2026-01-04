@@ -6,7 +6,7 @@
   "compilationOptions": {},
   "targets": {
     ".NETCoreApp,Version=v8.0": {
-      "UmiHealth.API/1.0.0": {
+      "UmiHealth.Api/1.0.0": {
         "dependencies": {
           "AspNetCore.HealthChecks.NpgSql": "8.0.0",
           "AspNetCore.HealthChecks.Redis": "8.0.0",
@@ -26,7 +26,7 @@
           "UmiHealth.Shared": "1.0.0"
         },
         "runtime": {
-          "UmiHealth.API.dll": {}
+          "UmiHealth.Api.dll": {}
         }
       },
       "AspNetCore.HealthChecks.NpgSql/8.0.0": {
@@ -1828,7 +1828,7 @@
     }
   },
   "libraries": {
-    "UmiHealth.API/1.0.0": {
+    "UmiHealth.Api/1.0.0": {
       "type": "project",
       "serviceable": false,
       "sha512": ""

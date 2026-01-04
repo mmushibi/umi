@@ -3090,17 +3090,72 @@
         searchQuery: '',
         showFilterMenu: false,
         showAddModal: false,
-        // User and pharmacy info - will be populated dynamically
+        // User and pharmacy info - Zambian mock data
         pharmacyInfo: {
-          name: '',
-          location: ''
+          name: 'Banda Pharmacy Ltd',
+          location: 'Lusaka, Zambia'
         },
         userInfo: {
-          name: '',
-          role: '',
-          initials: ''
+          name: 'Chanda Banda',
+          role: 'Administrator',
+          initials: 'CB'
         },
-        products: [],
+        products: [
+          {
+            id: 1,
+            productCode: 'PAR-001',
+            brandName: 'Panadol',
+            genericName: 'Paracetamol',
+            strength: '500mg',
+            form: 'Tablets',
+            category: 'Analgesics',
+            stockQuantity: 150,
+            reorderLevel: 50,
+            costPrice: 2.50,
+            sellingPrice: 4.25,
+            supplier: 'PharmaCorp Ltd',
+            batchNumber: 'PAR202401',
+            expiryDate: '2025-12-31',
+            barcode: 'INV1234567890',
+            status: 'in-stock'
+          },
+          {
+            id: 2,
+            productCode: 'AMP-001',
+            brandName: 'Amoxil',
+            genericName: 'Amoxicillin',
+            strength: '250mg',
+            form: 'Capsules',
+            category: 'Antibiotics',
+            stockQuantity: 25,
+            reorderLevel: 30,
+            costPrice: 8.75,
+            sellingPrice: 15.50,
+            supplier: 'MedSupply Zambia',
+            batchNumber: 'AMP202402',
+            expiryDate: '2024-08-15',
+            barcode: 'INV1234567891',
+            status: 'low-stock'
+          },
+          {
+            id: 3,
+            productCode: 'IBU-001',
+            brandName: 'Brufen',
+            genericName: 'Ibuprofen',
+            strength: '400mg',
+            form: 'Tablets',
+            category: 'Analgesics',
+            stockQuantity: 0,
+            reorderLevel: 40,
+            costPrice: 3.20,
+            sellingPrice: 6.75,
+            supplier: 'HealthDist Solutions',
+            batchNumber: 'IBU202403',
+            expiryDate: '2024-10-20',
+            barcode: 'INV1234567892',
+            status: 'out-of-stock'
+          }
+        ],
         
         // Dashboard metrics
         totalProducts: 0,
@@ -3159,9 +3214,8 @@
         scannerContext: null, // 'product' or 'stocktake' or 'purchase'
         
         init() {
-          this.loadPharmacyInfo();
-          this.loadInventoryFromAPI();
-          this.setupEventListeners();
+          // Initialize with Zambian mock data - no backend calls
+          this.showSuccess('Inventory loaded successfully with Zambian data');
         },
 
         // Load pharmacy info from localStorage

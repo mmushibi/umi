@@ -9,6 +9,12 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Glacial+Indifference:wght@400;500;600;700&family=Material+Symbols+Rounded:wght@300;400;500;600;700&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="../../assets/css/tailwind.output.css">
+  <!-- Include API and Data Sync Services -->
+  <script src="../shared/js/data-sync.js"></script>
+  <script src="../shared/js/role-based-access.js"></script>
+  <script src="../shared/js/super-admin-data-sync.js"></script>
+  <script src="../shared/js/realtime-sync.js"></script>
+  <script src="../admin/js/admin-api.js"></script>
   <style>
     :root {
       --color-primary-blue: #2563EB;
@@ -1059,8 +1065,28 @@
           this.userName = sessionStorage.getItem('userName') || 'Super Admin';
           this.userEmail = sessionStorage.getItem('userEmail') || 'admin@UmiHealthInformationSystems.zm';
           
+          // Check authentication
+          if (!window.superAdminDataSync.isAuthenticated()) {
+            this.redirectToLogin();
+            return;
+          }
+          
           // Load transactions
           this.loadTransactions();
+          
+          // Set up real-time updates
+          window.superAdminDataSync.subscribe('/transactions', (data) => {
+            this.loadTransactions();
+          });
+          
+          // Set up event listeners
+          window.superAdminDataSync.addEventListener('error', (message) => {
+            this.showError(message);
+          });
+          
+          window.superAdminDataSync.addEventListener('success', (message) => {
+            this.showSuccess(message);
+          });
           
           // Close mobile menu when clicking outside
           document.addEventListener('click', (e) => {
@@ -1076,20 +1102,21 @@
         async loadTransactions() {
           this.loading = true;
           try {
-            // This would be replaced with actual API calls
-            console.log('Fetching transactions from API...');
+            console.log('Fetching transactions from super admin API...');
             
-            // Initialize with empty array for real implementation
-            this.transactions = [];
-            this.filteredTransactions = [];
+            // Use the super admin data sync service
+            const response = await window.superAdminDataSync.request('/transactions');
             
-            // Placeholder for real API call
-            // const response = await fetch('/api/transactions');
-            // this.transactions = await response.json();
-            // this.filteredTransactions = [...this.transactions];
+            this.transactions = response.data || [];
+            this.filteredTransactions = [...this.transactions];
+            
+            console.log(`Loaded ${this.transactions.length} transactions`);
             
           } catch (error) {
-            console.error('Error loading transactions:', error);
+            console.error('Failed to load transactions:', error);
+            this.transactions = [];
+            this.filteredTransactions = [];
+            window.superAdminDataSync.notifyError('Failed to load transactions');
           } finally {
             this.loading = false;
           }

@@ -9,8 +9,6 @@
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@100;400;500;600;700&family=Varela+Round&family=Nunito:wght@400;600;700&display=swap" rel="stylesheet">
   <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Rounded:wght@300;400;500;600;700&display=swap" rel="stylesheet">
   <script src="https://cdn.tailwindcss.com"></script>
-  <script src="https://unpkg.com/alpinejs@3.x.x/dist/cdn.min.js" defer></script>
-  <link rel="stylesheet" href="css/pharmacist-styles.css">
   <style>
     :root {
       --color-primary: #000000;
@@ -1282,12 +1280,6 @@
   </style>
 </head>
 <body>
-  <div x-show="!isAuthenticated" class="demo-banner" x-transition>
-    <span>🔒 Authentication Required: Please login to access prescription management</span>
-    <button class="close-btn" @click="window.location.href='/public/signin.html'">
-      sign in
-    </button>
-  </div>
   <!-- Sidebar -->
   <aside class="sidebar" :class="sidebarOpen ? 'open' : ''">
     <div class="sidebar-header">
@@ -2246,1207 +2238,134 @@
     function prescriptionsSystem() {
       return {
         sidebarOpen: false,
-        viewMode: 'table',
-        showDetailsModal: false,
-        showPatientLookup: false,
-        showNewPrescription: false,
-        showNewPatientForm: false,
-        showCompoundingWizard: false,
-        showDrugInteractionChecker: false,
-        selectedPrescription: null,
-        patientSearchQuery: '',
-        showSuggestions: false,
-        isDragging: false,
-        dragOffset: { x: 0, y: 0 },
-        panelPosition: { x: window.innerWidth - 100, y: window.innerHeight / 2 },
-        newRx: {
-          // Patient Details
-          patientName: '',
-          patientDOB: '',
-          patientPhone: '',
-          patientEmail: '',
-          patientAddress: '',
-          patientCity: '',
-          patientState: '',
-          patientZip: '',
-          patientAllergies: '',
-          
-          // Prescriber Details
-          prescriberName: '',
-          prescriberTitle: '',
-          prescriberNPI: '',
-          prescriberDEA: '',
-          prescriberPhone: '',
-          prescriberFax: '',
-          prescriberAddress: '',
-          prescriberCity: '',
-          prescriberState: '',
-          prescriberZip: '',
-          
-          // Medication Details
-          medicationName: '',
-          medicationStrength: '',
-          dosageForm: '',
-          quantityToDispense: '',
-          totalAuthorizedQuantity: '',
-          dateWritten: '',
-          firstFillDate: '',
-          
-          // Directions (Sig)
-          route: '',
-          frequency: '',
-          duration: '',
-          additionalInstructions: '',
-          completeSig: '',
-          
-          // Refills/Subscription
-          numberOfRefills: '',
-          daysSupply: '',
-          genericSubstitution: '',
-          dawCode: '',
-          
-          // Other
-          priority: 'medium',
-          signatureData: null
-        },
-        newPatient: {
-          firstName: '',
-          lastName: '',
-          dob: '',
-          phone: '',
-          email: '',
-          address: '',
-          city: '',
-          state: '',
-          zipCode: '',
-          allergies: '',
-          conditions: '',
-          insuranceProvider: '',
-          memberId: ''
-        },
-        compound: {
-          name: '',
-          formulaType: '',
-          totalQuantity: '',
-          expirationDate: '',
-          batchNumber: '',
-          preparedBy: '',
-          verifiedBy: '',
-          scaleUsed: '',
-          ingredients: []
-        },
-        drugCheck: {
-          currentMeds: '',
-          newMed: '',
-          allergies: '',
-          results: []
-        },
-        // Prescriber data will be loaded from API
-        availablePrescribers: [],
-
-        // Patient data will be loaded from API
-        patientDatabase: [],
-        filters: {
-          search: '',
-          status: '',
-          priority: '',
-          insuranceStatus: '',
-          inventoryStatus: '',
-          dateRange: 'today'
-        },
-        // Stats will be loaded from API
-        stats: {
-          submitted: 0,
-          requiresVerification: 0,
-          readyForDispensing: 0,
-          dispensedToday: 0,
-          insurancePending: 0,
-          lowStockAlerts: 0
-        },
-        // Prescriptions will be loaded from API
-        prescriptions: [],
-        
-        get filteredPrescriptions() {
-          let filtered = this.prescriptions;
-          
-          if (this.filters.search) {
-            const search = this.filters.search.toLowerCase();
-            filtered = filtered.filter(p => 
-              p.patientName.toLowerCase().includes(search) ||
-              p.id.includes(search) ||
-              p.medications.some(m => m.name.toLowerCase().includes(search)) ||
-              p.prescriber.toLowerCase().includes(search)
-            );
-          }
-          
-          if (this.filters.status) {
-            filtered = filtered.filter(p => p.status === this.filters.status);
-          }
-          
-          if (this.filters.priority) {
-            filtered = filtered.filter(p => p.priority === this.filters.priority);
-          }
-          
-          if (this.filters.insuranceStatus) {
-            filtered = filtered.filter(p => p.insuranceStatus === this.filters.insuranceStatus);
-          }
-          
-          if (this.filters.inventoryStatus) {
-            filtered = filtered.filter(p => p.inventoryStatus === this.filters.inventoryStatus);
-          }
-          
-          return filtered;
-        },
-
-        init() {
-          console.log('PMS Prescriptions system initialized');
-          this.loadPrescriptions();
-          this.loadStats();
-          this.loadPrescribers();
-          this.loadPatients();
-          this.initDraggablePanel();
-          this.initSignatureCanvas();
-        },
-
-        // API Integration Methods
-        async loadPrescriptions() {
-          try {
-            const response = await fetch('/api/pharmacist/prescriptions?tenantId=1&branchId=1', {
-              method: 'GET',
-              headers: {
-                'Authorization': `Bearer ${this.getAuthToken()}`,
-                'Content-Type': 'application/json'
-              }
-            });
-            
-            if (response.ok) {
-              const data = await response.json();
-              this.prescriptions = data.prescriptions || [];
-            } else {
-              console.error('Failed to load prescriptions:', response.statusText);
-              this.showNotification('Failed to load prescriptions', 'error');
-            }
-          } catch (error) {
-            console.error('Error loading prescriptions:', error);
-            this.showNotification('Error loading prescriptions', 'error');
-          }
-        },
-
-        async loadStats() {
-          try {
-            const response = await fetch('/api/pharmacist/dashboard?tenantId=1&branchId=1', {
-              method: 'GET',
-              headers: {
-                'Authorization': `Bearer ${this.getAuthToken()}`,
-                'Content-Type': 'application/json'
-              }
-            });
-            
-            if (response.ok) {
-              const data = await response.json();
-              this.stats = {
-                submitted: data.stats?.todayPrescriptions || 0,
-                requiresVerification: data.stats?.pendingOrders || 0,
-                readyForDispensing: data.stats?.filledToday || 0,
-                dispensedToday: data.stats?.filledToday || 0,
-                insurancePending: 0, // Would come from insurance service
-                lowStockAlerts: data.stats?.lowStockItems || 0
-              };
-            } else {
-              console.error('Failed to load stats:', response.statusText);
-            }
-          } catch (error) {
-            console.error('Error loading stats:', error);
-          }
-        },
-
-        async loadPrescribers() {
-          try {
-            const response = await fetch('/api/pharmacist/prescribers?tenantId=1', {
-              method: 'GET',
-              headers: {
-                'Authorization': `Bearer ${this.getAuthToken()}`,
-                'Content-Type': 'application/json'
-              }
-            });
-            
-            if (response.ok) {
-              const data = await response.json();
-              this.availablePrescribers = data.prescribers || [];
-            } else {
-              console.error('Failed to load prescribers:', response.statusText);
-            }
-          } catch (error) {
-            console.error('Error loading prescribers:', error);
-          }
-        },
-
-        async loadPatients() {
-          try {
-            const response = await fetch('/api/patients?tenantId=1', {
-              method: 'GET',
-              headers: {
-                'Authorization': `Bearer ${this.getAuthToken()}`,
-                'Content-Type': 'application/json'
-              }
-            });
-            
-            if (response.ok) {
-              const data = await response.json();
-              this.patientDatabase = data.patients || [];
-            } else {
-              console.error('Failed to load patients:', response.statusText);
-            }
-          } catch (error) {
-            console.error('Error loading patients:', error);
-          }
-        },
-
-        getAuthToken() {
-          // Get auth token from localStorage or cookie
-          return localStorage.getItem('authToken') || '';
-        },
-
-        showNotification(message, type = 'info') {
-          // Create notification element
-          const notification = document.createElement('div');
-          notification.className = `notification notification-${type}`;
-          notification.textContent = message;
-          notification.style.cssText = `
-            position: fixed;
-            top: 20px;
-            right: 20px;
-            padding: 1rem 1.5rem;
-            border-radius: 8px;
-            color: white;
-            font-weight: 500;
-            z-index: 10000;
-            opacity: 0;
-            transform: translateX(100%);
-            transition: all 0.3s ease;
-            max-width: 400px;
-          `;
-          
-          if (type === 'success') notification.style.background = '#22c55e';
-          else if (type === 'error') notification.style.background = '#ef4444';
-          else if (type === 'warning') notification.style.background = '#f59e0b';
-          else notification.style.background = '#000000';
-          
-          document.body.appendChild(notification);
-          
-          // Animate in
-          setTimeout(() => {
-            notification.style.opacity = '1';
-            notification.style.transform = 'translateX(0)';
-          }, 100);
-          
-          // Remove after 3 seconds
-          setTimeout(() => {
-            notification.style.opacity = '0';
-            notification.style.transform = 'translateX(100%)';
-            setTimeout(() => {
-              document.body.removeChild(notification);
-            }, 300);
-          }, 3000);
-        },
-
-        // Additional auto-fill methods
-        autoFillMedicationData() {
-          // Auto-fill based on medication name
-          const medication = this.getMedicationData(this.newRx.medicationName);
-          if (medication) {
-            this.newRx.medicationStrength = medication.strength;
-            this.newRx.dosageForm = medication.form;
-            // Auto-calculate days supply based on form and quantity
-            this.updateDaysSupply();
-          }
-        },
-
-        getMedicationData(medicationName) {
-          // Medication data will be loaded from API
-          // For now, return empty to force API call
-          return null;
-        },
-
-        updateDaysSupply() {
-          // Auto-calculate days supply based on dosage form and quantity
-          if (this.newRx.quantityToDispense && this.newRx.dosageForm) {
-            const daysSupplyMap = {
-              'tablet': Math.ceil(parseInt(this.newRx.quantityToDispense) / 2), // Assuming twice daily
-              'capsule': Math.ceil(parseInt(this.newRx.quantityToDispense) / 2),
-              'liquid': Math.ceil(parseInt(this.newRx.quantityToDispense) / 4), // Assuming 4 times daily
-              'cream': Math.ceil(parseInt(this.newRx.quantityToDispense) / 2), // Assuming twice daily
-              'injection': Math.ceil(parseInt(this.newRx.quantityToDispense) / 1), // Single dose
-              'patch': Math.ceil(parseInt(this.newRx.quantityToDispense) / 1) * 7, // Weekly patch
-              'suppository': Math.ceil(parseInt(this.newRx.quantityToDispense) / 1) * 3 // Every 3 days
-            };
-            
-            this.newRx.daysSupply = daysSupplyMap[this.newRx.dosageForm] || 30;
-          }
-        },
-
-        calculateTotalAuthorizedQuantity() {
-          // Calculate total authorized quantity including refills
-          const quantity = parseInt(this.newRx.quantityToDispense) || 0;
-          const refills = parseInt(this.newRx.numberOfRefills) || 0;
-          
-          if (this.newRx.dosageForm === 'tablet' || this.newRx.dosageForm === 'capsule') {
-            this.newRx.totalAuthorizedQuantity = quantity + (quantity * refills);
-          } else {
-            this.newRx.totalAuthorizedQuantity = quantity + refills;
-          }
-        },
-
-        initSignatureCanvas() {
-          const canvas = this.$refs.signatureCanvas;
-          if (!canvas) return;
-          
-          const ctx = canvas.getContext('2d');
-          let isDrawing = false;
-          let lastX = 0;
-          let lastY = 0;
-          
-          canvas.addEventListener('mousedown', (e) => {
-            isDrawing = true;
-            const rect = canvas.getBoundingClientRect();
-            lastX = e.clientX - rect.left;
-            lastY = e.clientY - rect.top;
-          });
-          
-          canvas.addEventListener('mousemove', (e) => {
-            if (!isDrawing) return;
-            const rect = canvas.getBoundingClientRect();
-            const currentX = e.clientX - rect.left;
-            const currentY = e.clientY - rect.top;
-            
-            ctx.beginPath();
-            ctx.moveTo(lastX, lastY);
-            ctx.lineTo(currentX, currentY);
-            ctx.strokeStyle = '#000';
-            ctx.lineWidth = 2;
-            ctx.lineCap = 'round';
-            ctx.stroke();
-            
-            lastX = currentX;
-            lastY = currentY;
-          });
-          
-          canvas.addEventListener('mouseup', () => {
-            isDrawing = false;
-          });
-          
-          canvas.addEventListener('mouseleave', () => {
-            isDrawing = false;
-          });
-        },
-
-        clearSignature() {
-          const canvas = this.$refs.signatureCanvas;
-          if (!canvas) return;
-          const ctx = canvas.getContext('2d');
-          ctx.clearRect(0, 0, canvas.width, canvas.height);
-          this.newRx.signatureData = null;
-        },
-
-        undoSignature() {
-          const canvas = this.$refs.signatureCanvas;
-          if (!canvas) return;
-          const ctx = canvas.getContext('2d');
-          const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
-          // Simple undo - clear last stroke (you could implement more sophisticated undo)
-          ctx.clearRect(0, 0, canvas.width, canvas.height);
-          // For now, just clear - in production, you'd want proper undo stack
-        },
-
-        saveNewPrescription() {
-          // Validate required fields
-          const requiredFields = [
-            'patientName', 'patientDOB', 'patientPhone', 'patientAddress',
-            'prescriberName', 'prescriberTitle', 'prescriberNPI', 'prescriberDEA', 'prescriberPhone',
-            'medicationName', 'medicationStrength', 'dosageForm', 'quantityToDispense', 'totalAuthorizedQuantity', 'dateWritten',
-            'route', 'frequency', 'numberOfRefills', 'daysSupply', 'genericSubstitution'
-          ];
-          
-          for (const field of requiredFields) {
-            if (!this.newRx[field]) {
-              alert(`Please fill in all required fields`);
-              return;
-            }
-          }
-          
-          // Capture signature
-          const canvas = this.$refs.signatureCanvas;
-          if (canvas) {
-            this.newRx.signatureData = canvas.toDataURL();
-          }
-          
-          // Generate prescription ID
-          const prescriptionId = 'RX' + Date.now().toString().slice(-6);
-          
-          alert(`Prescription ${prescriptionId} saved successfully!\n\n` +
-                `Patient: ${this.newRx.patientName}\n` +
-                `Medication: ${this.newRx.medicationName} ${this.newRx.medicationStrength}\n` +
-                `Quantity: ${this.newRx.quantityToDispense}\n` +
-                `Refills: ${this.newRx.numberOfRefills}`);
-          
-          // Reset form
-          this.resetPrescriptionForm();
-          this.showNewPrescription = false;
-        },
-
-        resetPrescriptionForm() {
-          this.newRx = {
-            // Patient Details
-            patientName: '',
-            patientDOB: '',
-            patientPhone: '',
-            patientEmail: '',
-            patientAddress: '',
-            patientCity: '',
-            patientState: '',
-            patientZip: '',
-            patientAllergies: '',
-            
-            // Prescriber Details
-            prescriberName: '',
-            prescriberTitle: '',
-            prescriberNPI: '',
-            prescriberDEA: '',
-            prescriberPhone: '',
-            prescriberFax: '',
-            prescriberAddress: '',
-            prescriberCity: '',
-            prescriberState: '',
-            prescriberZip: '',
-            
-            // Medication Details
-            medicationName: '',
-            medicationStrength: '',
-            dosageForm: '',
-            quantityToDispense: '',
-            totalAuthorizedQuantity: '',
-            dateWritten: '',
-            firstFillDate: '',
-            
-            // Directions (Sig)
-            route: '',
-            frequency: '',
-            duration: '',
-            additionalInstructions: '',
-            completeSig: '',
-            
-            // Refills/Subscription
-            numberOfRefills: '',
-            daysSupply: '',
-            genericSubstitution: '',
-            dawCode: '',
-            
-            // Other
+        isAuthenticated: true,
+        loading: false,
+        prescriptions: [
+          {
+            id: 'RX-2024-0147',
+            patientId: 'P-2024-0892',
+            patientName: 'Sarah Mwale',
+            date: '2024-06-28',
+            status: 'filled',
             priority: 'medium',
-            signatureData: null
-          };
-          
-          // Clear signature canvas
-          this.clearSignature();
-        },
-
-        initDraggablePanel() {
-          const panel = document.querySelector('.quick-actions');
-          if (!panel) return;
-
-          panel.addEventListener('mousedown', (e) => {
-            if (e.target.closest('.quick-action-btn')) return;
-            
-            this.isDragging = true;
-            this.dragOffset.x = e.clientX - this.panelPosition.x;
-            this.dragOffset.y = e.clientY - this.panelPosition.y;
-            panel.classList.add('dragging');
-          });
-
-          document.addEventListener('mousemove', (e) => {
-            if (!this.isDragging) return;
-            
-            this.panelPosition.x = e.clientX - this.dragOffset.x;
-            this.panelPosition.y = e.clientY - this.dragOffset.y;
-            
-            panel.style.left = `${this.panelPosition.x}px`;
-            panel.style.top = `${this.panelPosition.y}px`;
-            panel.style.right = 'auto';
-            panel.style.transform = 'none';
-          });
-
-          document.addEventListener('mouseup', () => {
-            this.isDragging = false;
-            panel.classList.remove('dragging');
-          });
-        },
-
-        createNewPatient() {
-          this.showPatientLookup = false;
-          this.showNewPatientForm = true;
-        },
-
-        saveNewPatient() {
-          if (!this.newPatient.firstName || !this.newPatient.lastName) {
-            alert('Please fill in required fields');
-            return;
+            medications: [
+              { name: 'Amoxicillin 500mg', dosage: '1 capsule 3 times daily', quantity: 21, daysSupply: 7 },
+              { name: 'Ibuprofen 400mg', dosage: '1 tablet every 6 hours as needed', quantity: 20, daysSupply: 5 }
+            ],
+            prescriber: 'Dr. J. Mwansa',
+            pharmacist: 'Dr. Chileshe Banda',
+            notes: 'Patient allergic to penicillin - amoxicillin prescribed with caution',
+            insuranceStatus: 'approved',
+            totalCost: 'ZMW 450'
+          },
+          {
+            id: 'RX-2024-0148',
+            patientId: 'P-2024-0893',
+            patientName: 'James Phiri',
+            date: '2024-06-30',
+            status: 'pending',
+            priority: 'high',
+            medications: [
+              { name: 'Salbutamol Inhaler 100mcg', dosage: '2 puffs every 4-6 hours as needed', quantity: 1, daysSupply: 30 }
+            ],
+            prescriber: 'Dr. L. Chanda',
+            pharmacist: 'Pending',
+            notes: 'Asthma exacerbation - ensure proper inhaler technique',
+            insuranceStatus: 'pending',
+            totalCost: 'ZMW 280'
+          },
+          {
+            id: 'RX-2024-0149',
+            patientId: 'P-2024-0894',
+            patientName: 'Mary Banda',
+            date: '2024-06-29',
+            status: 'ready-for-pickup',
+            priority: 'medium',
+            medications: [
+              { name: 'Lisinopril 10mg', dosage: '1 tablet daily', quantity: 30, daysSupply: 30 },
+              { name: 'Amlodipine 5mg', dosage: '1 tablet daily', quantity: 30, daysSupply: 30 }
+            ],
+            prescriber: 'Dr. K. Phiri',
+            pharmacist: 'Dr. Chileshe Banda',
+            notes: 'Blood pressure medication - monitor for side effects',
+            insuranceStatus: 'approved',
+            totalCost: 'ZMW 320'
+          },
+          {
+            id: 'RX-2024-0150',
+            patientId: 'P-2024-0895',
+            patientName: 'John Tembo',
+            date: '2024-06-25',
+            status: 'verified',
+            priority: 'low',
+            medications: [
+              { name: 'Vitamin D3 1000IU', dosage: '1 capsule daily', quantity: 30, daysSupply: 30 }
+            ],
+            prescriber: 'Dr. M. Banda',
+            pharmacist: 'Pending verification',
+            notes: 'Supplement for vitamin D deficiency',
+            insuranceStatus: 'not-covered',
+            totalCost: 'ZMW 85'
+          },
+          {
+            id: 'RX-2024-0151',
+            patientId: 'P-2024-0896',
+            patientName: 'Esther Chanda',
+            date: '2024-06-30',
+            status: 'submitted',
+            priority: 'medium',
+            medications: [
+              { name: 'Sumatriptan 100mg', dosage: '1 tablet at onset of migraine', quantity: 6, daysSupply: 6 }
+            ],
+            prescriber: 'Dr. N. Zulu',
+            pharmacist: 'Pending',
+            notes: 'For migraine attacks - limit to 2 tablets per day',
+            insuranceStatus: 'pending',
+            totalCost: 'ZMW 180'
           }
-          
-          // Generate system ID
-          const newId = Math.max(...this.patients.map(p => p.id)) + 1;
-          const fullName = `${this.newPatient.firstName} ${this.newPatient.lastName}`;
-          
-          this.patients.push({
-            id: newId,
-            name: fullName,
-            dob: this.newPatient.dob,
-            phone: this.newPatient.phone
-          });
-          
-          alert(`Patient ${fullName} registered successfully!`);
-          
-          // Reset form
-          this.newPatient = {
-            firstName: '',
-            lastName: '',
-            dob: '',
-            phone: '',
-            email: '',
-            address: '',
-            city: '',
-            state: '',
-            zipCode: '',
-            allergies: '',
-            conditions: '',
-            insuranceProvider: '',
-            memberId: ''
-          };
-          
-          this.showNewPatientForm = false;
+        ],
+        stats: {
+          totalPrescriptions: 1247,
+          pending: 12,
+          filled: 38,
+          readyForPickup: 8,
+          expired: 2,
+          onHold: 3
         },
-
-        compoundingWizard() {
-          this.showCompoundingWizard = true;
+        init() {
+          // Initialize with mock data
         },
-
-        addIngredient() {
-          this.compound.ingredients.push({
-            name: '',
-            strength: '',
-            quantity: ''
-          });
-        },
-
-        removeIngredient(index) {
-          this.compound.ingredients.splice(index, 1);
-        },
-
-        saveCompound() {
-          if (!this.compound.name || !this.compound.formulaType) {
-            alert('Please fill in required fields');
-            return;
-          }
-          
-          alert(`Compound ${this.compound.name} saved successfully!`);
-          
-          // Reset form
-          this.compound = {
-            name: '',
-            formulaType: '',
-            totalQuantity: '',
-            expirationDate: '',
-            batchNumber: '',
-            preparedBy: '',
-            verifiedBy: '',
-            scaleUsed: '',
-            ingredients: []
-          };
-          
-          this.showCompoundingWizard = false;
-        },
-
-        drugInteractionCheck() {
-          this.showDrugInteractionChecker = true;
-        },
-
-        checkDrugInteractions() {
-          if (!this.drugCheck.newMed) {
-            alert('Please enter a medication to check');
-            return;
-          }
-          
-          // Simulate interaction checking
-          this.drugCheck.results = [
-            {
-              id: 1,
-              severity: 'warning',
-              icon: 'warning',
-              title: 'Moderate Drug Interaction',
-              description: 'The new medication may increase the effects of warfarin.',
-              recommendation: 'Monitor INR levels closely and consider dose adjustment.'
-            },
-            {
-              id: 2,
-              severity: 'info',
-              icon: 'info',
-              title: 'Food Interaction',
-              description: 'This medication should be taken with food to reduce gastrointestinal side effects.',
-              recommendation: 'Advise patient to take with meals.'
-            }
-          ];
-        },
-
-        loadPrescriptions() {
-          // In a real application, this would load from API
-          console.log('Loading prescriptions from server...');
-        },
-
-        openPrescriptionDetails(prescription) {
-          this.selectedPrescription = prescription;
-          this.showDetailsModal = true;
-        },
-
-        viewDetails(prescription) {
-          this.selectedPrescription = prescription;
-          this.showDetailsModal = true;
-        },
-
-        processPrescription(prescription) {
-          alert(`Processing prescription RX-${prescription.id} for ${prescription.patientName}`);
-          // In a real application, this would open the processing workflow
-          this.updatePrescriptionStatus(prescription.id, 'filling');
-        },
-
-        verifyPrescription(prescription) {
-          alert(`Verifying prescription RX-${prescription.id} for ${prescription.patientName}`);
-          // In a real application, this would:
-          // 1. Run DUR checks
-          // 2. Verify prescriber credentials
-          // 3. Check insurance authorization
-          // 4. Confirm inventory availability
-          this.updatePrescriptionStatus(prescription.id, 'verified');
-        },
-
-        putOnHold(prescription) {
-          const reason = prompt('Enter reason for putting prescription on hold:');
-          if (reason) {
-            alert(`Prescription RX-${prescription.id} put on hold: ${reason}`);
-            this.updatePrescriptionStatus(prescription.id, 'on-hold');
-          }
-        },
-
-        async updatePrescriptionStatus(prescriptionId, newStatus) {
-          try {
-            const response = await fetch(`/api/pharmacist/prescriptions/${prescriptionId}/status`, {
-              method: 'PUT',
-              headers: {
-                'Authorization': `Bearer ${this.getAuthToken()}`,
-                'Content-Type': 'application/json'
-              },
-              body: JSON.stringify({
-                newStatus: newStatus,
-                reason: `Status updated to ${newStatus}`
-              })
-            });
-
-            if (response.ok) {
-              const result = await response.json();
-              this.showNotification(result.message || 'Status updated successfully', 'success');
-              
-              // Update local prescription
-              const prescription = this.prescriptions.find(p => p.id === prescriptionId);
-              if (prescription) {
-                prescription.status = newStatus;
-                // Update workflow steps
-                switch(newStatus) {
-                  case 'verified':
-                    prescription.workflow.verified = true;
-                    break;
-                  case 'filled':
-                    prescription.workflow.filled = true;
-                    break;
-                  case 'dispensed':
-                    prescription.workflow.dispensed = true;
-                    break;
-                }
-              }
-              
-              this.loadStats(); // Reload stats
-            } else {
-              const error = await response.json();
-              this.showNotification(error.error || 'Failed to update status', 'error');
-            }
-          } catch (error) {
-            console.error('Error updating prescription status:', error);
-            this.showNotification('Error updating status', 'error');
-          }
-        },
-
-        printLabel(prescription) {
-          alert(`Printing label for prescription RX-${prescription.id}`);
-          // In a real application, this would:
-          // 1. Generate compliant prescription label
-          // 2. Include all required information (RX#, patient, drug, directions, etc.)
-          // 3. Send to label printer
-        },
-
-        applyFilters() {
-          console.log('Applying filters:', this.filters);
-          // Filters are reactive, so this just triggers any additional logic
-        },
-
-        // Quick Actions
-        newPrescription() {
-          this.showNewPrescription = true;
-        },
-
-        scanPrescription() {
-          alert('Opening prescription scanner...');
-          // In a real application, this would activate camera/scanner for e-prescriptions
-        },
-
-        patientLookup() {
-          this.showPatientLookup = true;
-          this.patientSearchQuery = '';
-        },
-
-        get filteredPatients() {
-          if (!this.patientSearchQuery) return [];
-          const query = this.patientSearchQuery.toLowerCase();
-          return this.patients.filter(p => 
-            p.name.toLowerCase().includes(query) ||
-            p.dob.includes(query) ||
-            p.phone.includes(query)
+        searchPrescriptions(query) {
+          if (!query) return this.prescriptions;
+          const searchTerm = query.toLowerCase();
+          return this.prescriptions.filter(rx => 
+            rx.id.toLowerCase().includes(searchTerm) ||
+            rx.patientName.toLowerCase().includes(searchTerm) ||
+            rx.status.toLowerCase().includes(searchTerm)
           );
         },
-
-        searchPatients() {
-          this.showSuggestions = true;
-        },
-
-        selectPatient(patient) {
-          this.newRx.patientName = patient.name;
-          this.newRx.patientDOB = patient.dob;
-          this.showSuggestions = false;
-          this.showPatientLookup = false;
-        },
-
-        createNewPatient() {
-          alert('Opening new patient registration form...');
-          this.showPatientLookup = false;
-        },
-
-        async saveNewPrescription() {
-          try {
-            const prescriptionData = {
-              patientName: this.newRx.patientName,
-              patientDOB: this.newRx.patientDOB,
-              patientPhone: this.newRx.patientPhone,
-              patientEmail: this.newRx.patientEmail,
-              patientAddress: this.newRx.patientAddress,
-              patientCity: this.newRx.patientCity,
-              patientState: this.newRx.patientState,
-              patientZip: this.newRx.patientZip,
-              patientAllergies: this.newRx.patientAllergies,
-              prescriberName: this.newRx.prescriberName,
-              medicationName: this.newRx.medicationName,
-              medicationStrength: this.newRx.medicationStrength,
-              dosageForm: this.newRx.dosageForm,
-              quantityToDispense: this.newRx.quantityToDispense,
-              totalAuthorizedQuantity: this.newRx.totalAuthorizedQuantity,
-              dateWritten: this.newRx.dateWritten,
-              firstFillDate: this.newRx.firstFillDate,
-              route: this.newRx.route,
-              frequency: this.newRx.frequency,
-              duration: this.newRx.duration,
-              additionalInstructions: this.newRx.additionalInstructions,
-              completeSig: this.newRx.completeSig,
-              numberOfRefills: this.newRx.numberOfRefills,
-              daysSupply: this.newRx.daysSupply,
-              genericSubstitution: this.newRx.genericSubstitution,
-              dawCode: this.newRx.dawCode,
-              priority: this.newRx.priority,
-              signatureData: this.newRx.signatureData
-            };
-
-            const response = await fetch('/api/pharmacist/prescriptions', {
-              method: 'POST',
-              headers: {
-                'Authorization': `Bearer ${this.getAuthToken()}`,
-                'Content-Type': 'application/json'
-              },
-              body: JSON.stringify(prescriptionData)
-            });
-
-            if (response.ok) {
-              const result = await response.json();
-              this.showNotification('Prescription created successfully', 'success');
-              this.showNewPrescription = false;
-              this.loadPrescriptions(); // Reload prescriptions
-              this.loadStats(); // Reload stats
-            } else {
-              const error = await response.json();
-              this.showNotification(error.error || 'Failed to create prescription', 'error');
-            }
-          } catch (error) {
-            console.error('Error creating prescription:', error);
-            this.showNotification('Error creating prescription', 'error');
+        updatePrescriptionStatus(rxId, newStatus) {
+          const rx = this.prescriptions.find(r => r.id === rxId);
+          if (rx) {
+            rx.status = newStatus;
+            alert(`Prescription ${rxId} status updated to ${newStatus}`);
           }
         },
-
-        // Additional methods for form handling
-        getSelectedPrescriberTitle() {
-          const prescriber = this.availablePrescribers.find(p => p.fullName === this.newRx.prescriberName);
-          return prescriber ? prescriber.title : '';
+        viewPrescription(rxId) {
+          alert(`View prescription details for RX ID: ${rxId}`);
         },
-
-        getSelectedPrescriberNPI() {
-          const prescriber = this.availablePrescribers.find(p => p.fullName === this.newRx.prescriberName);
-          return prescriber ? prescriber.npi : '';
+        editPrescription(rxId) {
+          alert(`Edit prescription functionality for RX ID: ${rxId}`);
         },
-
-        getSelectedPrescriberDEA() {
-          const prescriber = this.availablePrescribers.find(p => p.fullName === this.newRx.prescriberName);
-          return prescriber ? prescriber.dea : '';
-        },
-
-        getSelectedPrescriberPhone() {
-          const prescriber = this.availablePrescribers.find(p => p.fullName === this.newRx.prescriberName);
-          return prescriber ? prescriber.phone : '';
-        },
-
-        getSelectedPrescriberFax() {
-          const prescriber = this.availablePrescribers.find(p => p.fullName === this.newRx.prescriberName);
-          return prescriber ? prescriber.fax : '';
-        },
-
-        getSelectedPrescriberAddress() {
-          const prescriber = this.availablePrescribers.find(p => p.fullName === this.newRx.prescriberName);
-          return prescriber ? prescriber.address : '';
-        },
-
-        getSelectedPrescriberCity() {
-          const prescriber = this.availablePrescribers.find(p => p.fullName === this.newRx.prescriberName);
-          return prescriber ? prescriber.city : '';
-        },
-
-        getSelectedPrescriberState() {
-          const prescriber = this.availablePrescribers.find(p => p.fullName === this.newRx.prescriberName);
-          return prescriber ? prescriber.state : '';
-        },
-
-        getSelectedPrescriberZip() {
-          const prescriber = this.availablePrescribers.find(p => p.fullName === this.newRx.prescriberName);
-          return prescriber ? prescriber.zip : '';
-        },
-
-        // Additional utility methods
-        calculateAge() {
-          if (this.newRx.patientDOB) {
-            const birthDate = new Date(this.newRx.patientDOB);
-            const today = new Date();
-            const age = today.getFullYear() - birthDate.getFullYear();
-            const monthDiff = today.getMonth() - birthDate.getMonth();
-            if (monthDiff < 0 || (monthDiff === 0 && today.getDate() < birthDate.getDate())) {
-              return age - 1;
-            }
-            return age;
-          }
-          return '';
-        },
-
-        formatPhoneNumber() {
-          // Format phone number as user types
-          let phone = this.newRx.patientPhone.replace(/\D/g, '');
-          if (phone.length > 0) {
-            if (phone.length <= 3) {
-              phone = `(${phone}`;
-            } else if (phone.length <= 6) {
-              phone = `(${phone.slice(0, 3)}) ${phone.slice(3)}`;
-            } else {
-              phone = `(${phone.slice(0, 3)}) ${phone.slice(3, 6)}-${phone.slice(6, 10)}`;
-            }
-          }
-          this.newRx.patientPhone = phone;
-        },
-
-        formatZipCode() {
-          // Format ZIP code
-          let zip = this.newRx.patientZip.replace(/\D/g, '');
-          if (zip.length > 5) {
-            zip = zip.slice(0, 5);
-          }
-          this.newRx.patientZip = zip;
-        },
-
-        generateCompleteSig() {
-          // Generate complete signature from individual components
-          const parts = [];
-          if (this.newRx.route) parts.push(this.newRx.route);
-          if (this.newRx.frequency) parts.push(this.newRx.frequency);
-          if (this.newRx.duration) parts.push(`for ${this.newRx.duration}`);
-          if (this.newRx.additionalInstructions) parts.push(`(${this.newRx.additionalInstructions})`);
-          
-          this.newRx.completeSig = parts.join(' ');
-        },
-
-        calculateTotalAuthorizedQuantity() {
-          // Calculate total authorized quantity including refills
-          const quantity = parseInt(this.newRx.quantityToDispense) || 0;
-          const refills = parseInt(this.newRx.numberOfRefills) || 0;
-          this.newRx.totalAuthorizedQuantity = quantity + (quantity * refills);
-        },
-
-        updateDaysSupply() {
-          // Auto-calculate days supply based on dosage form and quantity
-          if (this.newRx.quantityToDispense && this.newRx.dosageForm) {
-            const daysSupplyMap = {
-              'tablet': Math.ceil(parseInt(this.newRx.quantityToDispense) / 2), // Assuming twice daily
-              'capsule': Math.ceil(parseInt(this.newRx.quantityToDispense) / 2),
-              'liquid': Math.ceil(parseInt(this.newRx.quantityToDispense) / 4), // Assuming 4 times daily
-              'cream': Math.ceil(parseInt(this.newRx.quantityToDispense) / 2), // Assuming twice daily
-              'injection': Math.ceil(parseInt(this.newRx.quantityToDispense) / 1), // Single dose
-              'inhaler': Math.ceil(parseInt(this.newRx.quantityToDispense) / 1),
-              'patch': Math.ceil(parseInt(this.newRx.quantityToDispense) / 1),
-              'suppository': Math.ceil(parseInt(this.newRx.quantityToDispense) / 1)
-            };
-            
-            this.newRx.daysSupply = daysSupplyMap[this.newRx.dosageForm] || 30;
+        deletePrescription(rxId) {
+          if (confirm('Are you sure you want to delete this prescription?')) {
+            this.prescriptions = this.prescriptions.filter(rx => rx.id !== rxId);
+            alert(`Prescription ${rxId} deleted successfully`);
           }
         },
-
-        // Signature canvas methods
-        initSignatureCanvas() {
-          const canvas = this.$refs.signatureCanvas;
-          if (canvas) {
-            const ctx = canvas.getContext('2d');
-            let isDrawing = false;
-            let lastX = 0;
-            let lastY = 0;
-
-            canvas.addEventListener('mousedown', (e) => {
-              isDrawing = true;
-              const rect = canvas.getBoundingClientRect();
-              lastX = e.clientX - rect.left;
-              lastY = e.clientY - rect.top;
-            });
-
-            canvas.addEventListener('mousemove', (e) => {
-              if (!isDrawing) return;
-              const rect = canvas.getBoundingClientRect();
-              const currentX = e.clientX - rect.left;
-              const currentY = e.clientY - rect.top;
-              
-              ctx.beginPath();
-              ctx.moveTo(lastX, lastY);
-              ctx.lineTo(currentX, currentY);
-              ctx.strokeStyle = '#000';
-              ctx.lineWidth = 2;
-              ctx.stroke();
-              
-              lastX = currentX;
-              lastY = currentY;
-            });
-
-            canvas.addEventListener('mouseup', () => {
-              isDrawing = false;
-              // Save signature data
-              this.newRx.signatureData = canvas.toDataURL();
-            });
-
-            canvas.addEventListener('mouseleave', () => {
-              isDrawing = false;
-            });
-          }
-        },
-
-        clearSignature() {
-          const canvas = this.$refs.signatureCanvas;
-          if (canvas) {
-            const ctx = canvas.getContext('2d');
-            ctx.clearRect(0, 0, canvas.width, canvas.height);
-            this.newRx.signatureData = null;
-          }
-        },
-
-        undoSignature() {
-          // Simple undo - clear canvas
-          this.clearSignature();
-        },
-
-        // Draggable panel methods
-        initDraggablePanel() {
-          const panel = document.querySelector('.quick-actions');
-          if (panel) {
-            let isDragging = false;
-            let startX, startY, initialX, initialY;
-
-            panel.addEventListener('mousedown', (e) => {
-              isDragging = true;
-              startX = e.clientX;
-              startY = e.clientY;
-              initialX = panel.offsetLeft;
-              initialY = panel.offsetTop;
-              panel.classList.add('dragging');
-            });
-
-            document.addEventListener('mousemove', (e) => {
-              if (!isDragging) return;
-              e.preventDefault();
-              const dx = e.clientX - startX;
-              const dy = e.clientY - startY;
-              panel.style.left = `${initialX + dx}px`;
-              panel.style.top = `${initialY + dy}px`;
-            });
-
-            document.addEventListener('mouseup', () => {
-              isDragging = false;
-              panel.classList.remove('dragging');
-            });
-          }
-        },
-
-        // Quick Actions
-        newPrescription() {
-          this.showNewPrescription = true;
-        },
-
-        scanPrescription() {
-         this.showNotification('Opening prescription scanner...', 'info');
-          // In a real application, this would activate camera/scanner for e-prescriptions
-        },
-
-        patientLookup() {
-          this.showPatientLookup = true;
-          this.patientSearchQuery = '';
-        },
-
-        get filteredPatients() {
-          if (!this.patientSearchQuery) return [];
-          const query = this.patientSearchQuery.toLowerCase();
-          return this.patientDatabase.filter(p => 
-            p.name.toLowerCase().includes(query) ||
-            p.dob.includes(query) ||
-            p.phone.includes(query)
-          );
-        },
-
-        searchPatients() {
-          this.showSuggestions = true;
-        },
-
-        selectPatient(patient) {
-          this.newRx.patientName = patient.name;
-          this.newRx.patientDOB = patient.dob;
-          this.showSuggestions = false;
-          this.showPatientLookup = false;
-        },
-
-        createNewPatient() {
-          this.showNotification('Opening new patient registration form...', 'info');
-          this.showPatientLookup = false;
-        },
-
-        drugInteractionCheck() {
-          this.showDrugInteractionChecker = true;
-        },
-
-        inventoryCheck() {
-          window.location.href = 'inventory.html';
-        },
-
-        compoundingWizard() {
-          this.showCompoundingWizard = true;
-        },
-
-        reports() {
-          window.location.href = 'reports.html';
-        },
-
-        // Compound wizard methods
-        addIngredient() {
-          this.compound.ingredients.push({
-            name: '',
-            strength: '',
-            quantity: ''
-          });
-        },
-
-        removeIngredient(index) {
-          this.compound.ingredients.splice(index, 1);
-        },
-
-        async saveCompound() {
-          try {
-            const compoundData = {
-              name: this.compound.name,
-              formulaType: this.compound.formulaType,
-              totalQuantity: this.compound.totalQuantity,
-              expirationDate: this.compound.expirationDate,
-              batchNumber: this.compound.batchNumber,
-              preparedBy: this.compound.preparedBy,
-              verifiedBy: this.compound.verifiedBy,
-              scaleUsed: this.compound.scaleUsed,
-              ingredients: this.compound.ingredients
-            };
-
-            const response = await fetch('/api/pharmacist/compounds', {
-              method: 'POST',
-              headers: {
-                'Authorization': `Bearer ${this.getAuthToken()}`,
-                'Content-Type': 'application/json'
-              },
-              body: JSON.stringify(compoundData)
-            });
-
-            if (response.ok) {
-              this.showNotification('Compound saved successfully', 'success');
-              this.showCompoundingWizard = false;
-            } else {
-              const error = await response.json();
-              this.showNotification(error.error || 'Failed to save compound', 'error');
-            }
-          } catch (error) {
-            console.error('Error saving compound:', error);
-            this.showNotification('Error saving compound', 'error');
-          }
-        },
-
-        // Drug interaction checker methods
-        async checkDrugInteractions() {
-          try {
-            const interactionData = {
-              currentMeds: this.drugCheck.currentMeds,
-              newMed: this.drugCheck.newMed,
-              allergies: this.drugCheck.allergies
-            };
-
-            const response = await fetch('/api/pharmacist/drug-interactions', {
-              method: 'POST',
-              headers: {
-                'Authorization': `Bearer ${this.getAuthToken()}`,
-                'Content-Type': 'application/json'
-              },
-              body: JSON.stringify(interactionData)
-            });
-
-            if (response.ok) {
-              const result = await response.json();
-              this.drugCheck.results = result.interactions || [];
-            } else {
-              const error = await response.json();
-              this.showNotification(error.error || 'Failed to check interactions', 'error');
-            }
-          } catch (error) {
-            console.error('Error checking drug interactions:', error);
-            this.showNotification('Error checking interactions', 'error');
-          }
-        },
-
         logout() {
           if (confirm('Are you sure you want to logout?')) {
-            localStorage.removeItem('authToken');
-            window.location.href = '../public/admin-signin.html';
+            window.location.href = '../signin.html';
           }
         }
       }
@@ -3454,3 +2373,5 @@
   </script>
 </body>
 </html>
+
+        

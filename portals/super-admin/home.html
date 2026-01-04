@@ -13,8 +13,8 @@
   <script src="../shared/js/data-sync.js"></script>
   <script src="../shared/js/role-based-access.js"></script>
   <script src="../shared/js/super-admin-data-sync.js"></script>
+  <script src="../shared/js/realtime-sync.js"></script>
   <script src="../admin/js/admin-api.js"></script>
-  <script src="js/super-admin-api.js"></script>
   <style>
     :root {
       --color-primary-blue: #2563EB;
@@ -57,9 +57,11 @@
       background: rgba(255, 255, 255, 0.3);
     }
     /* Firefox scrollbar */
-    * {
-      scrollbar-width: thin;
-      scrollbar-color: rgba(255, 255, 255, 0.2) rgba(255, 255, 255, 0.05);
+    @supports (scrollbar-width: thin) {
+      * {
+        scrollbar-width: thin;
+        scrollbar-color: rgba(255, 255, 255, 0.2) rgba(255, 255, 255, 0.05);
+      }
     }
     .dashboard-container {
       display: flex;
@@ -957,50 +959,107 @@
         showSuggestions: false,
         suggestions: [],
         init() {
-          // Initialize with some sample suggestions
-          this.suggestions = [
-            {
-              id: 1,
-              title: 'MediCare Pharmacy',
-              description: 'Lusaka, Zambia',
-              type: 'pharmacy',
-              icon: 'store'
-            },
-            {
-              id: 2,
-              title: 'John Smith',
-              description: 'Pharmacist at HealthPlus',
-              type: 'user',
-              icon: 'person'
-            },
-            {
-              id: 3,
-              title: 'Transaction #12345',
-              description: 'KMW 2,500 - Completed',
-              type: 'transaction',
-              icon: 'receipt_long'
-            },
-            {
-              id: 4,
-              title: 'System Analytics',
-              description: 'View system performance metrics',
-              type: 'page',
-              icon: 'analytics'
-            }
-          ];
+          // Initialize search with real data
+          this.loadSearchSuggestions();
+        },
+        async loadSearchSuggestions() {
+          try {
+            // Load real data for search suggestions
+            const [pharmacies, users, transactions] = await Promise.all([
+              window.superAdminDataSync.request('/pharmacies?pageSize=5'),
+              window.superAdminDataSync.request('/users?pageSize=5'),
+              window.superAdminDataSync.request('/transactions?pageSize=5')
+            ]);
+            
+            this.suggestions = [
+              ...(pharmacies?.data || []).map(p => ({
+                id: p.id,
+                title: p.name,
+                description: p.location || 'Unknown location',
+                type: 'pharmacy',
+                icon: 'store'
+              })),
+              ...(users?.data || []).map(u => ({
+                id: u.id,
+                title: `${u.firstName} ${u.lastName}`,
+                description: u.role || 'User',
+                type: 'user',
+                icon: 'person'
+              })),
+              ...(transactions?.data || []).map(t => ({
+                id: t.id,
+                title: `Transaction #${t.id}`,
+                description: `${t.currency} ${t.amount} - ${t.status}`,
+                type: 'transaction',
+                icon: 'receipt_long'
+              })),
+              {
+                id: 'analytics',
+                title: 'System Analytics',
+                description: 'View system performance metrics',
+                type: 'page',
+                icon: 'analytics'
+              }
+            ];
+          } catch (error) {
+            console.error('Failed to load search suggestions:', error);
+            // Fallback to minimal suggestions
+            this.suggestions = [
+              {
+                id: 'analytics',
+                title: 'System Analytics',
+                description: 'View system performance metrics',
+                type: 'page',
+                icon: 'analytics'
+              }
+            ];
+          }
         },
         handleSearch() {
           if (this.query.length < 2) {
-            this.suggestions = [];
+            this.loadSearchSuggestions();
             return;
           }
-          // Simulate API call for search suggestions
-          console.log('Searching for:', this.query);
-          // Filter existing suggestions based on query
-          this.suggestions = this.suggestions.filter(s => 
-            s.title.toLowerCase().includes(this.query.toLowerCase()) ||
-            s.description.toLowerCase().includes(this.query.toLowerCase())
-          );
+          
+          // Real-time search with API
+          this.performRealTimeSearch(this.query);
+        },
+        
+        async performRealTimeSearch(query) {
+          try {
+            const results = await window.superAdminDataSync.request(`/search?q=${encodeURIComponent(query)}`);
+            
+            this.suggestions = [
+              ...(results.pharmacies || []).map(p => ({
+                id: p.id,
+                title: p.name,
+                description: p.location || 'Unknown location',
+                type: 'pharmacy',
+                icon: 'store'
+              })),
+              ...(results.users || []).map(u => ({
+                id: u.id,
+                title: `${u.firstName} ${u.lastName}`,
+                description: u.role || 'User',
+                type: 'user',
+                icon: 'person'
+              })),
+              ...(results.transactions || []).map(t => ({
+                id: t.id,
+                title: `Transaction #${t.id}`,
+                description: `${t.currency} ${t.amount} - ${t.status}`,
+                type: 'transaction',
+                icon: 'receipt_long'
+              }))
+            ];
+          } catch (error) {
+            console.error('Search failed:', error);
+            // Filter existing suggestions based on query
+            this.suggestions = this.suggestions.filter(s => 
+              s.title.toLowerCase().includes(query.toLowerCase()) ||
+              s.description.toLowerCase().includes(query.toLowerCase())
+            );
+          }
         },
         selectSuggestion(suggestion) {
           console.log('Selected suggestion:', suggestion);
@@ -1056,27 +1115,47 @@
           // Get user info from session
           this.userName = sessionStorage.getItem('userName') || 'Super Admin';
           this.userEmail = sessionStorage.getItem('userEmail') || 'admin@UmiHealthInformationSystems.zm';
+          
           // Check authentication
           if (!window.superAdminDataSync.isAuthenticated()) {
             this.redirectToLogin();
             return;
           }
+          
+          // Show connection status
+          this.updateConnectionStatus();
+          
           // Load dashboard data
           this.loadDashboardData();
           this.loadSystemWarnings();
+          
           // Set up auto-refresh
           window.superAdminDataSync.startAutoRefresh('/dashboard', (data) => {
             this.dashboardData = data;
             this.updateStats(data);
             this.updateRecentActivity(data);
           });
+          
           // Set up event listeners
           window.superAdminDataSync.addEventListener('error', (message) => {
             this.showError(message);
           });
+          
           window.superAdminDataSync.addEventListener('success', (message) => {
             this.showSuccess(message);
           });
+          
+          // Listen for connection changes
+          window.addEventListener('online', () => {
+            this.updateConnectionStatus();
+            this.showSuccess('Connection restored');
+          });
+          
+          window.addEventListener('offline', () => {
+            this.updateConnectionStatus();
+            this.showError('Connection lost - using offline mode');
+          });
+          
           // Close mobile menu when clicking outside
           document.addEventListener('click', (e) => {
             if (!e.target.closest('.sidebar') && !e.target.closest('.mobile-menu-toggle')) {
@@ -1100,33 +1179,61 @@
         },
         updateStats(data) {
           this.stats = {
-            totalTenants: data.totalTenants || 0,
-            activeTenants: data.activeTenants || 0,
-            totalUsers: data.totalUsers || 0,
-            activeUsers: data.activeUsers || 0,
-            totalTransactions: data.totalTransactions || 0,
-            totalRevenue: data.totalRevenue || 0,
-            criticalSecurityEvents: data.criticalSecurityEvents || 0,
-            pendingReports: data.pendingReports || 0,
-            failedBackups: data.failedBackups || 0
+            pharmacies: data.totalTenants || 0,
+            users: data.totalUsers || 0,
+            transactions: data.totalTransactions || 0,
+            revenue: data.totalRevenue || 0
           };
         },
         updateRecentActivity(data) {
-          this.recentActivity = [
-            ...data.recentLogs?.map(log => ({
+          const activityContainer = document.getElementById('activity-container');
+          
+          if (!data.recentLogs?.length && !data.recentSecurityEvents?.length) {
+            activityContainer.innerHTML = `
+              <div class="activity-item">
+                <div class="activity-icon">
+                  <span class="material-symbols-rounded">info</span>
+                </div>
+                <div class="activity-content">
+                  <div class="activity-title">No recent activity</div>
+                  <div class="activity-description">System is running normally</div>
+                </div>
+                <div class="activity-time">Just now</div>
+              </div>
+            `;
+            return;
+          }
+          
+          const activities = [
+            ...(data.recentLogs?.map(log => ({
               type: 'log',
               message: log.message,
               timestamp: log.createdAt,
-              severity: log.logLevel
-            })) || [],
-            ...data.recentSecurityEvents?.map(event => ({
+              severity: log.logLevel,
+              icon: this.getSeverityIcon(log.logLevel)
+            })) || []),
+            ...(data.recentSecurityEvents?.map(event => ({
               type: 'security',
               message: `${event.eventType}: ${event.action || 'Unknown action'}`,
               timestamp: event.createdAt,
-              severity: event.severity
-            })) || []
+              severity: event.severity,
+              icon: this.getSeverityIcon(event.severity)
+            })) || [])
           ].sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp))
            .slice(0, 10);
+          
+          activityContainer.innerHTML = activities.map(activity => `
+            <div class="activity-item">
+              <div class="activity-icon">
+                <span class="material-symbols-rounded">${activity.icon}</span>
+              </div>
+              <div class="activity-content">
+                <div class="activity-title">${activity.message}</div>
+                <div class="activity-description">${activity.type === 'security' ? 'Security Event' : 'System Log'}</div>
+              </div>
+              <div class="activity-time">${this.formatDateTime(activity.timestamp)}</div>
+            </div>
+          `).join('');
         },
         async loadSystemWarnings() {
           try {
@@ -1263,6 +1370,15 @@
             this.showError('Failed to check system health');
           }
         },
+        // Update connection status indicator
+        updateConnectionStatus() {
+          const status = window.superAdminDataSync.getConnectionStatus();
+          console.log('Connection status:', status);
+          
+          // You could update a UI indicator here if needed
+          // For example, show a green dot when online, orange when using cached data
+        },
+        
         // Cleanup
         destroy() {
           window.superAdminDataSync.stopAllAutoRefresh();

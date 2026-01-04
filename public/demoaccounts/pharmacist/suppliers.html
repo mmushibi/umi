@@ -1477,12 +1477,7 @@
               return { success: true };
             }
             return { data: null };
-        }
-      }
-    }
-
     function supplierSystem() {
-      const demoManager = new DemoModeManager();
       return {
         sidebarOpen: false,
         showCreateModal: false,
@@ -1499,592 +1494,140 @@
         loading: false,
         error: null,
         pharmacyInfo: {
-          name: '',
-          location: ''
+          name: 'Umi Health Pharmacy',
+          location: 'Lusaka, Zambia'
         },
         stats: {
-          totalSuppliers: 0,
-          activeSuppliers: 0,
-          pendingOrders: 0,
-          totalProducts: 0
+          totalSuppliers: 24,
+          activeSuppliers: 18,
+          pendingOrders: 7,
+          totalProducts: 1247
         },
-        suppliers: [],
+        suppliers: [
+          {
+            id: 'SUP-001',
+            name: 'Zambia Medical Supplies Ltd',
+            contactPerson: 'Mr. James Mulenga',
+            email: 'info@zamedicals.co.zm',
+            phone: '+260 211 234567',
+            address: 'Cairo Road, Lusaka',
+            status: 'active',
+            rating: 4.8,
+            totalOrders: 45,
+            lastOrderDate: '2024-06-25',
+            productRange: 'Pharmaceuticals, Medical Supplies',
+            paymentTerms: 'Net 30 days',
+            deliveryTime: '2-3 business days',
+            contractExpiry: '2025-12-31'
+          },
+          {
+            id: 'SUP-002',
+            name: 'PharmaCo Zambia',
+            contactPerson: 'Ms. Esther Banda',
+            email: 'orders@pharmacozm.com',
+            phone: '+260 977 123456',
+            address: 'Kabulonga Road, Lusaka',
+            status: 'active',
+            rating: 4.6,
+            totalOrders: 32,
+            lastOrderDate: '2024-06-28',
+            productRange: 'Generic Medications',
+            paymentTerms: 'Net 15 days',
+            deliveryTime: '1-2 business days',
+            contractExpiry: '2024-12-31'
+          },
+          {
+            id: 'SUP-003',
+            name: 'MediSupply Central Africa',
+            contactPerson: 'Dr. John Tembo',
+            email: 'supply@medisupply.ca',
+            phone: '+260 211 890123',
+            address: 'Great East Road, Lusaka',
+            status: 'pending',
+            rating: 4.2,
+            totalOrders: 18,
+            lastOrderDate: '2024-06-20',
+            productRange: 'Medical Equipment, Supplies',
+            paymentTerms: 'Net 45 days',
+            deliveryTime: '5-7 business days',
+            contractExpiry: '2024-09-30'
+          }
+        ],
         selectedSuppliers: [],
         currentSupplier: null,
-        orderHistory: [],
+        orderHistory: [
+          {
+            id: 'ORD-001',
+            supplierId: 'SUP-001',
+            supplierName: 'Zambia Medical Supplies Ltd',
+            orderDate: '2024-06-25',
+            expectedDelivery: '2024-06-28',
+            status: 'delivered',
+            totalAmount: 'ZMW 15,600',
+            items: [
+              { name: 'Amoxicillin 500mg', quantity: 1000, price: 'ZMW 45' },
+              { name: 'Paracetamol 500mg', quantity: 2000, price: 'ZMW 12' }
+            ]
+          },
+          {
+            id: 'ORD-002',
+            supplierId: 'SUP-002',
+            supplierName: 'PharmaCo Zambia',
+            orderDate: '2024-06-28',
+            expectedDelivery: '2024-06-30',
+            status: 'pending',
+            totalAmount: 'ZMW 8,900',
+            items: [
+              { name: 'Ibuprofen 400mg', quantity: 500, price: 'ZMW 35' },
+              { name: 'Lisinopril 10mg', quantity: 300, price: 'ZMW 65' }
+            ]
+          }
+        ],
         orderStats: {
-          totalOrders: 0,
-          completedOrders: 0,
-          pendingOrders: 0,
-          totalValue: '$0'
+          totalOrders: 156,
+          completedOrders: 142,
+          pendingOrders: 14,
+          totalValue: 'ZMW 245,680'
         },
         documents: {
-          contracts: [],
-          licenses: [],
+          contracts: [
+            {
+              id: 'DOC-001',
+              supplierId: 'SUP-001',
+              supplierName: 'Zambia Medical Supplies Ltd',
+              documentName: 'Supply Agreement 2024',
+              uploadDate: '2024-01-15',
+              expiryDate: '2025-01-14',
+              status: 'active'
+            }
+          ],
+          licenses: [
+            {
+              id: 'LIC-001',
+              supplierId: 'SUP-001',
+              supplierName: 'Zambia Medical Supplies Ltd',
+              documentName: 'Pharmacy License Certificate',
+              uploadDate: '2024-03-01',
+              expiryDate: '2025-02-28',
+              status: 'valid'
+            }
+          ],
           other: []
         },
         allDocuments: [],
         filters: {
           status: '',
           productRange: '',
-          rating: ''
+          rating: '',
+          paymentTerms: ''
         },
-        supplierForm: {
+        newSupplier: {
           name: '',
           contactPerson: '',
-          phone: '',
           email: '',
+          phone: '',
           address: '',
-          status: 'Active',
-          notes: '',
-          rating: 0
-        },
-        documentForm: {
-          name: '',
-          type: '',
-          file: null
-        },
-        bulkStatus: '',
-        
-        init() {
-          this.loadPharmacyInfo();
-          this.loadSuppliers();
-          this.loadStats();
-        },
-
-        async loadPharmacyInfo() {
-          try {
-            const user = JSON.parse(localStorage.getItem('umi_currentUser') || '{}');
-            this.pharmacyInfo = {
-              name: user.pharmacyName || 'Umi Health Pharmacy',
-              location: user.branchName || 'Main Branch'
-            };
-          } catch (error) {
-            console.error('Failed to load pharmacy info:', error);
-          }
-        },
-
-        async loadSuppliers() {
-          this.loading = true;
-          this.error = null;
-          try {
-            const response = await window.pharmacistApi.suppliers.getSuppliers();
-            this.suppliers = response.data || [];
-          } catch (error) {
-            console.error('Failed to load suppliers:', error);
-            this.error = 'Failed to load suppliers. Please try again.';
-          } finally {
-            this.loading = false;
-          }
-        },
-
-        async loadStats() {
-          try {
-            const response = await window.pharmacistApi.suppliers.getSupplierStats();
-            this.stats = response.data || {
-              totalSuppliers: 0,
-              activeSuppliers: 0,
-              pendingOrders: 0,
-              totalProducts: 0
-            };
-          } catch (error) {
-            console.error('Failed to load stats:', error);
-          }
-        },
-        
-        get filteredSuppliers() {
-          let filtered = this.suppliers;
-          
-          // Apply search
-          if (this.searchQuery) {
-            const query = this.searchQuery.toLowerCase();
-            filtered = filtered.filter(supplier => 
-              supplier.name?.toLowerCase().includes(query) ||
-              supplier.contactPerson?.toLowerCase().includes(query) ||
-              supplier.email?.toLowerCase().includes(query) ||
-              supplier.phone?.includes(query)
-            );
-          }
-          
-          // Apply filters
-          if (this.filters.status) {
-            filtered = filtered.filter(supplier => supplier.status === this.filters.status);
-          }
-          
-          if (this.filters.productRange) {
-            filtered = filtered.filter(supplier => {
-              const count = supplier.productCount || 0;
-              switch (this.filters.productRange) {
-                case '0-10': return count <= 10;
-                case '11-25': return count >= 11 && count <= 25;
-                case '26-50': return count >= 26 && count <= 50;
-                case '50+': return count > 50;
-                default: return true;
-              }
-            });
-          }
-          
-          if (this.filters.rating) {
-            filtered = filtered.filter(supplier => (supplier.rating || 0) >= parseInt(this.filters.rating));
-          }
-          
-          return filtered;
-        },
-
-        get allSelected() {
-          return this.selectedSuppliers.length === this.filteredSuppliers.length && this.filteredSuppliers.length > 0;
-        },
-
-        searchSuppliers() {
-          // Search functionality is handled by the computed property
-        },
-
-        async createSupplier() {
-          this.loading = true;
-          try {
-            if (demoManager.isDemoMode) {
-              const response = await demoManager.simulateApiCall('/suppliers', this.supplierForm, 'POST');
-              this.showCreateModal = false;
-              this.resetSupplierForm();
-              await this.loadSuppliers();
-              await this.loadStats();
-              demoManager.showToast('Supplier created successfully (Demo Mode)', 'success');
-            } else {
-              await window.pharmacistApi.suppliers.createSupplier(this.supplierForm);
-              this.showCreateModal = false;
-              this.resetSupplierForm();
-              await this.loadSuppliers();
-              await this.loadStats();
-              demoManager.showToast('Supplier created successfully', 'success');
-            }
-          } catch (error) {
-            console.error('Failed to create supplier:', error);
-            this.error = 'Failed to create supplier. Please try again.';
-            if (demoManager.isDemoMode) {
-              demoManager.showToast('Failed to create supplier', 'error');
-            } else {
-              demoManager.showToast('Failed to create supplier: Authentication required', 'error');
-            }
-          } finally {
-            this.loading = false;
-          }
-        },
-
-        async updateSupplier() {
-          this.loading = true;
-          try {
-            if (demoManager.isDemoMode) {
-              // Demo mode - simulate update
-              const supplierIndex = this.suppliers.findIndex(s => s.id === this.currentSupplier.id);
-              if (supplierIndex !== -1) {
-                this.suppliers[supplierIndex] = { ...this.suppliers[supplierIndex], ...this.supplierForm };
-                const demoData = demoManager.getDemoData();
-                demoData.suppliers = this.suppliers;
-                demoManager.saveDemoData(demoData);
-              }
-              this.showEditModal = false;
-              this.resetSupplierForm();
-              await this.loadSuppliers();
-              await this.loadStats();
-              demoManager.showToast('Supplier updated successfully (Demo Mode)', 'success');
-            } else {
-              await window.pharmacistApi.suppliers.updateSupplier(this.currentSupplier.id, this.supplierForm);
-              this.showEditModal = false;
-              this.resetSupplierForm();
-              await this.loadSuppliers();
-              await this.loadStats();
-              demoManager.showToast('Supplier updated successfully', 'success');
-            }
-          } catch (error) {
-            console.error('Failed to update supplier:', error);
-            this.error = 'Failed to update supplier. Please try again.';
-            if (demoManager.isDemoMode) {
-              demoManager.showToast('Failed to update supplier', 'error');
-            } else {
-              demoManager.showToast('Failed to update supplier: Authentication required', 'error');
-            }
-          } finally {
-            this.loading = false;
-          }
-        },
-
-        async deleteSupplier(supplier) {
-          if (confirm(`Are you sure you want to delete ${supplier.name}?`)) {
-            this.loading = true;
-            try {
-              if (demoManager.isDemoMode) {
-                await demoManager.simulateApiCall(`/suppliers/${supplier.id}`, null, 'DELETE');
-                await this.loadSuppliers();
-                await this.loadStats();
-                demoManager.showToast('Supplier deleted successfully (Demo Mode)', 'success');
-              } else {
-                await window.pharmacistApi.suppliers.deleteSupplier(supplier.id);
-                await this.loadSuppliers();
-                await this.loadStats();
-                demoManager.showToast('Supplier deleted successfully', 'success');
-              }
-            } catch (error) {
-              console.error('Failed to delete supplier:', error);
-              if (demoManager.isDemoMode) {
-                demoManager.showToast('Failed to delete supplier', 'error');
-              } else {
-                demoManager.showToast('Failed to delete supplier: Authentication required', 'error');
-              }
-            } finally {
-              this.loading = false;
-            }
-          }
-        },
-
-        editSupplier(supplier) {
-          this.currentSupplier = supplier;
-          this.supplierForm = {
-            name: supplier.name || '',
-            contactPerson: supplier.contactPerson || '',
-            phone: supplier.phone || '',
-            email: supplier.email || '',
-            address: supplier.address || '',
-            status: supplier.status || 'Active',
-            notes: supplier.notes || '',
-            rating: supplier.rating || 0
-          };
-          this.showEditModal = true;
-        },
-
-        viewSupplier(supplier) {
-          this.currentSupplier = supplier;
-          this.showViewModal = true;
-        },
-
-        async viewOrderHistory(supplier) {
-          this.currentSupplier = supplier;
-          this.loading = true;
-          try {
-            if (demoManager.isDemoMode) {
-              // Demo mode - show empty order history with notification
-              this.orderHistory = [];
-              this.orderStats = {
-                totalOrders: 0,
-                completedOrders: 0,
-                pendingOrders: 0,
-                totalValue: '$0'
-              };
-              this.showOrderHistoryModal = true;
-              demoManager.showToast('Order history requires authentication (Demo Mode)', 'warning');
-            } else {
-              // Real API call for authenticated users
-              const response = await window.pharmacistApi.suppliers.getSupplierOrders(supplier.id);
-              this.orderHistory = response.data?.orders || [];
-              this.orderStats = response.data?.stats || {
-                totalOrders: 0,
-                completedOrders: 0,
-                pendingOrders: 0,
-                totalValue: '$0'
-              };
-              this.showOrderHistoryModal = true;
-            }
-          } catch (error) {
-            console.error('Failed to load order history:', error);
-            demoManager.showToast('Failed to load order history: Authentication required', 'error');
-          } finally {
-            this.loading = false;
-          }
-        },
-
-        async viewDocuments(supplier) {
-          this.currentSupplier = supplier;
-          this.loading = true;
-          try {
-            if (demoManager.isDemoMode) {
-              // Demo mode - show empty documents with notification
-              this.documents = {
-                contracts: [],
-                licenses: [],
-                other: []
-              };
-              this.allDocuments = [];
-              this.showDocumentsModal = true;
-              demoManager.showToast('Document management requires authentication (Demo Mode)', 'warning');
-            } else {
-              // Real API call for authenticated users
-              const response = await window.pharmacistApi.suppliers.getSupplierDocuments(supplier.id);
-              this.documents = response.data || {
-                contracts: [],
-                licenses: [],
-                other: []
-              };
-              this.allDocuments = [...this.documents.contracts, ...this.documents.licenses, ...this.documents.other];
-              this.showDocumentsModal = true;
-            }
-          } catch (error) {
-            console.error('Failed to load documents:', error);
-            demoManager.showToast('Failed to load documents: Authentication required', 'error');
-          } finally {
-            this.loading = false;
-          }
-        },
-
-        getDocumentIcon(type) {
-          const icons = {
-            contract: 'description',
-            license: 'verified',
-            certificate: 'workspace_premium',
-            invoice: 'receipt',
-            other: 'folder'
-          };
-          return icons[type] || 'folder';
-        },
-
-        downloadDocument(doc) {
-          if (demoManager.isDemoMode) {
-            demoManager.showToast('Document download requires authentication', 'warning');
-            return;
-          }
-          
-          // Real document download for authenticated users
-          window.pharmacistApi.suppliers.downloadSupplierDocument(doc.id)
-            .then(() => {
-              demoManager.showToast(`Downloading ${doc.name}...`, 'info');
-            })
-            .catch(error => {
-              console.error('Failed to download document:', error);
-              demoManager.showToast('Failed to download document', 'error');
-            });
-        },
-
-        async deleteDocument(doc) {
-          if (demoManager.isDemoMode) {
-            demoManager.showToast('Document deletion requires authentication', 'warning');
-            return;
-          }
-          
-          if (confirm(`Delete ${doc.name}?`)) {
-            try {
-              await window.pharmacistApi.suppliers.deleteSupplierDocument(doc.id);
-              demoManager.showToast('Document deleted successfully', 'success');
-              await this.viewDocuments(this.currentSupplier); // Refresh documents
-            } catch (error) {
-              console.error('Failed to delete document:', error);
-              demoManager.showToast('Failed to delete document', 'error');
-            }
-          }
-        },
-
-        handleFileUpload(event) {
-          this.documentForm.file = event.target.files[0];
-        },
-
-        async uploadDocument() {
-          if (demoManager.isDemoMode) {
-            demoManager.showToast('Document upload requires authentication', 'warning');
-            return;
-          }
-          
-          this.loading = true;
-          try {
-            await window.pharmacistApi.suppliers.uploadSupplierDocument(this.currentSupplier.id, this.documentForm);
-            demoManager.showToast('Document uploaded successfully', 'success');
-            this.showUploadDocument = false;
-            this.documentForm = { name: '', type: '', file: null };
-            await this.viewDocuments(this.currentSupplier); // Refresh documents
-          } catch (error) {
-            console.error('Failed to upload document:', error);
-            demoManager.showToast('Failed to upload document', 'error');
-          } finally {
-            this.loading = false;
-          }
-        },
-
-        resetSupplierForm() {
-          this.supplierForm = {
-            name: '',
-            contactPerson: '',
-            phone: '',
-            email: '',
-            address: '',
-            status: 'Active',
-            notes: '',
-            rating: 0
-          };
-          this.currentSupplier = null;
-        },
-
-        // Bulk operations
-        toggleSelectAll() {
-          if (this.allSelected) {
-            this.selectedSuppliers = [];
-          } else {
-            this.selectedSuppliers = this.filteredSuppliers.map(s => s.id);
-          }
-        },
-
-        selectAllSuppliers() {
-          this.selectedSuppliers = this.filteredSuppliers.map(s => s.id);
-        },
-
-        clearSelection() {
-          this.selectedSuppliers = [];
-        },
-
-        async bulkDelete() {
-          if (demoManager.isDemoMode) {
-            demoManager.showToast('Bulk operations require authentication', 'warning');
-            return;
-          }
-          
-          if (confirm(`Delete ${this.selectedSuppliers.length} selected suppliers?`)) {
-            this.loading = true;
-            try {
-              for (const id of this.selectedSuppliers) {
-                await window.pharmacistApi.suppliers.deleteSupplier(id);
-              }
-              this.clearSelection();
-              await this.loadSuppliers();
-              await this.loadStats();
-              demoManager.showToast('Suppliers deleted successfully', 'success');
-            } catch (error) {
-              console.error('Failed to delete suppliers:', error);
-              demoManager.showToast('Failed to delete suppliers', 'error');
-            } finally {
-              this.loading = false;
-            }
-          }
-        },
-
-        async bulkExport() {
-          try {
-            const selectedData = this.suppliers.filter(s => this.selectedSuppliers.includes(s.id));
-            const csv = this.convertToCSV(selectedData);
-            this.downloadCSV(csv, 'suppliers_export.csv');
-            this.showNotification('Suppliers exported successfully', 'success');
-          } catch (error) {
-            console.error('Failed to export suppliers:', error);
-            this.showNotification('Failed to export suppliers', 'error');
-          }
-        },
-
-        bulkUpdateStatus() {
-          this.showBulkStatusModal = true;
-        },
-
-        async confirmBulkStatusUpdate() {
-          if (demoManager.isDemoMode) {
-            demoManager.showToast('Bulk status updates require authentication', 'warning');
-            return;
-          }
-          
-          this.loading = true;
-          try {
-            for (const id of this.selectedSuppliers) {
-              await window.pharmacistApi.suppliers.updateSupplierStatus(id, this.bulkStatus);
-            }
-            this.showBulkStatusModal = false;
-            this.bulkStatus = '';
-            this.clearSelection();
-            await this.loadSuppliers();
-            await this.loadStats();
-            demoManager.showToast('Supplier status updated successfully', 'success');
-          } catch (error) {
-            console.error('Failed to update supplier status:', error);
-            demoManager.showToast('Failed to update supplier status', 'error');
-          } finally {
-            this.loading = false;
-          }
-        },
-
-        // Filter operations
-        applyFilters() {
-          // Filters are applied via computed property
-          this.showNotification('Filters applied', 'info');
-        },
-
-        clearFilters() {
-          this.filters = {
-            status: '',
-            productRange: '',
-            rating: ''
-          };
-          this.showNotification('Filters cleared', 'info');
-        },
-
-        // Export operations
-        async exportSuppliers() {
-          try {
-            if (demoManager.isDemoMode) {
-              // Demo mode - export demo data
-              const selectedData = this.suppliers.filter(s => this.selectedSuppliers.includes(s.id));
-              const csv = this.convertToCSV(selectedData);
-              this.downloadCSV(csv, 'suppliers_export_demo.csv');
-              demoManager.showToast('Suppliers exported (Demo Mode)', 'success');
-            } else {
-              // Real API call for authenticated users
-              const response = await window.pharmacistApi.suppliers.exportSuppliers('csv');
-              const csv = response.data || this.convertToCSV(this.filteredSuppliers);
-              this.downloadCSV(csv, 'suppliers_export.csv');
-              demoManager.showToast('Suppliers exported successfully', 'success');
-            }
-          } catch (error) {
-            console.error('Failed to export suppliers:', error);
-            if (demoManager.isDemoMode) {
-              demoManager.showToast('Failed to export suppliers', 'error');
-            } else {
-              demoManager.showToast('Failed to export suppliers: Authentication required', 'error');
-            }
-          }
-        },
-
-        convertToCSV(data) {
-          const headers = ['Name', 'Contact Person', 'Phone', 'Email', 'Address', 'Status', 'Products', 'Rating'];
-          const rows = data.map(supplier => [
-            supplier.name || '',
-            supplier.contactPerson || '',
-            supplier.phone || '',
-            supplier.email || '',
-            supplier.address || '',
-            supplier.status || '',
-            supplier.productCount || 0,
-            supplier.rating || 0
-          ]);
-          
-          return [headers, ...rows].map(row => row.join(',')).join('\n');
-        },
-
-        downloadCSV(csv, filename) {
-          const blob = new Blob([csv], { type: 'text/csv' });
-          const url = window.URL.createObjectURL(blob);
-          const a = document.createElement('a');
-          a.href = url;
-          a.download = filename;
-          a.click();
-          window.URL.revokeObjectURL(url);
-        },
-
-        async updateSupplierStatus(supplier, status) {
-          try {
-            await window.pharmacistApi.suppliers.updateSupplierStatus(supplier.id, status);
-            await this.loadSuppliers();
-            await this.loadStats();
-            this.showNotification(`Supplier status updated to ${status}`, 'success');
-          } catch (error) {
-            console.error('Failed to update supplier status:', error);
-            this.showNotification('Failed to update supplier status', 'error');
-          }
-        },
-
-        showNotification(message, type = 'info') {
-          demoManager.showToast(message, type);
-        },
-
-        logout() {
-          localStorage.removeItem('authToken');
-          localStorage.removeItem('umi_currentUser');
-          window.location.href = '../public/admin-signin.html';
-        }
-      }
-    }
-  </script>
-  
-  <!-- Include Pharmacist API -->
-  <script src="js/pharmacist-api.js"></script>
-</body>
-</html>
+          productRange: '',
+          paymentTerms: '',
+          deliveryTime: '',
+          notes: ''

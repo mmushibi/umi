@@ -1225,12 +1225,6 @@
   </style>
 </head>
 <body>
-  <div x-show="!isAuthenticated" class="demo-banner" x-transition>
-    <span>🔒 Authentication Required: Please login to access patient management</span>
-    <button class="close-btn" @click="window.location.href='/public/signin.html'">
-      sign in
-    </button>
-  </div>
   <!-- Sidebar -->
   <aside class="sidebar" :class="sidebarOpen ? 'open' : ''">
     <div class="sidebar-header">
@@ -2072,752 +2066,149 @@
     function patientSystem() {
       return {
         sidebarOpen: false,
-        searchQuery: '',
-        showFilterMenu: false,
-        loading: false,
-        tenantInfo: {
-          name: 'Umi Health',
-          location: 'Lusaka, Zambia'
+        isAuthenticated: true,
+        patients: [
+          {
+            id: 'P-2024-0892',
+            firstName: 'Sarah',
+            lastName: 'Mwale',
+            dateOfBirth: '1985-03-15',
+            age: 39,
+            gender: 'Female',
+            phone: '+260 97 1234567',
+            email: 'sarah.mwale@email.com',
+            address: '453 Chilunda Road, Lusaka',
+            city: 'Lusaka',
+            province: 'Lusaka Province',
+            status: 'active',
+            registrationDate: '2024-01-15',
+            lastVisit: '2024-06-28',
+            allergies: ['Penicillin', 'Sulfa drugs'],
+            chronicConditions: ['Hypertension', 'Type 2 Diabetes'],
+            bloodGroup: 'O+',
+            nhisNumber: 'NHIS-2024-0892-001'
+          },
+          {
+            id: 'P-2024-0893',
+            firstName: 'James',
+            lastName: 'Phiri',
+            dateOfBirth: '1992-08-22',
+            age: 31,
+            gender: 'Male',
+            phone: '+260 96 2345678',
+            email: 'james.phiri@email.com',
+            address: '123 Kabulonga Road, Lusaka',
+            city: 'Lusaka',
+            province: 'Lusaka Province',
+            status: 'active',
+            registrationDate: '2024-02-20',
+            lastVisit: '2024-06-30',
+            allergies: [],
+            chronicConditions: ['Asthma'],
+            bloodGroup: 'A+',
+            nhisNumber: 'NHIS-2024-0893-002'
+          },
+          {
+            id: 'P-2024-0894',
+            firstName: 'Mary',
+            lastName: 'Banda',
+            dateOfBirth: '1978-11-10',
+            age: 45,
+            gender: 'Female',
+            phone: '+260 97 3456789',
+            email: 'mary.banda@email.com',
+            address: '789 Great East Road, Lusaka',
+            city: 'Lusaka',
+            province: 'Lusaka Province',
+            status: 'active',
+            registrationDate: '2024-01-10',
+            lastVisit: '2024-06-29',
+            allergies: ['Aspirin'],
+            chronicConditions: ['Arthritis', 'Hypertension'],
+            bloodGroup: 'B+',
+            nhisNumber: 'NHIS-2024-0894-003'
+          },
+          {
+            id: 'P-2024-0895',
+            firstName: 'John',
+            lastName: 'Tembo',
+            dateOfBirth: '2001-05-18',
+            age: 23,
+            gender: 'Male',
+            phone: '+260 95 4567890',
+            email: 'john.tembo@email.com',
+            address: '234 Kafue Road, Lusaka',
+            city: 'Lusaka',
+            province: 'Lusaka Province',
+            status: 'active',
+            registrationDate: '2024-03-05',
+            lastVisit: '2024-06-25',
+            allergies: [],
+            chronicConditions: [],
+            bloodGroup: 'AB+',
+            nhisNumber: 'NHIS-2024-0895-004'
+          },
+          {
+            id: 'P-2024-0896',
+            firstName: 'Esther',
+            lastName: 'Chanda',
+            dateOfBirth: '1988-07-30',
+            age: 35,
+            gender: 'Female',
+            phone: '+260 97 5678901',
+            email: 'esther.chanda@email.com',
+            address: '567 Mumbwa Road, Lusaka',
+            city: 'Lusaka',
+            province: 'Lusaka Province',
+            status: 'inactive',
+            registrationDate: '2024-01-25',
+            lastVisit: '2024-04-15',
+            allergies: ['Codeine'],
+            chronicConditions: ['Migraine'],
+            bloodGroup: 'O-',
+            nhisNumber: 'NHIS-2024-0896-005'
+          }
+        ],
+        stats: {
+          totalPatients: 1247,
+          activePatients: 1156,
+          newThisMonth: 47,
+          inactivePatients: 91
         },
-        userInfo: {
-          name: 'Umi Health',
-          role: 'Admin',
-          initials: 'UH'
+        init() {
+          // Initialize with mock data
         },
-        patients: [],
-        currentPage: 1,
-        itemsPerPage: 10,
-        searchOpen: false,
-        searchSuggestions: [],
-
-        get filteredSuggestions() {
-          if (!this.searchQuery || this.searchQuery.length < 2) return [];
-          
-          const query = this.searchQuery.toLowerCase();
-          return this.patients
-            .filter(patient => 
-              patient.firstName?.toLowerCase().includes(query) ||
-              patient.lastName?.toLowerCase().includes(query) ||
-              patient.email?.toLowerCase().includes(query) ||
-              patient.phone?.includes(query) ||
-              patient.patientNumber?.toLowerCase().includes(query)
-            )
-            .slice(0, 5)
-            .map(patient => ({
-              id: patient.id,
-              title: `${patient.firstName} ${patient.lastName}`,
-              description: `Patient ID: ${patient.patientNumber} | ${patient.email}`,
-              type: 'Patient',
-              icon: 'person'
-            }));
-        },
-
-        get filteredPatients() {
-          if (!this.searchQuery) return this.patients;
-          
+        searchPatients(query) {
+          if (!query) return this.patients;
+          const searchTerm = query.toLowerCase();
           return this.patients.filter(patient => 
-            patient.firstName?.toLowerCase().includes(this.searchQuery.toLowerCase()) ||
-            patient.lastName?.toLowerCase().includes(this.searchQuery.toLowerCase()) ||
-            patient.email?.toLowerCase().includes(this.searchQuery.toLowerCase()) ||
-            patient.phone?.includes(this.searchQuery)
+            patient.firstName.toLowerCase().includes(searchTerm) ||
+            patient.lastName.toLowerCase().includes(searchTerm) ||
+            patient.id.toLowerCase().includes(searchTerm) ||
+            patient.phone.includes(searchTerm)
           );
         },
-
-        get totalPatients() {
-          return this.patients.length;
+        addPatient() {
+          alert('Add patient functionality would open a form to register a new patient');
         },
-
-        get newPatients() {
-          const currentMonth = new Date().getMonth();
-          const currentYear = new Date().getFullYear();
-          
-          return this.patients.filter(patient => {
-            const regDate = new Date(patient.createdAt);
-            return regDate.getMonth() === currentMonth && regDate.getFullYear() === currentYear;
-          }).length;
+        editPatient(patientId) {
+          alert(`Edit patient functionality for patient ID: ${patientId}`);
         },
-
-        get activePatients() {
-          return this.patients.filter(p => p.isActive !== false).length;
-        },
-
-        async loadPatients() {
-          try {
-            this.loading = true;
-            this.patients = await patientDataManager.load();
-            console.log('Patients loaded:', this.patients.length);
-          } catch (error) {
-            console.error('Failed to load patients:', error);
-            this.showNotification('Failed to load patients', 'error');
-          } finally {
-            this.loading = false;
+        deletePatient(patientId) {
+          if (confirm('Are you sure you want to delete this patient record?')) {
+            alert(`Patient ${patientId} deleted successfully`);
           }
         },
-
-        async createPatient(patientData) {
-          try {
-            this.loading = true;
-            
-            // Check if we're in demo mode (no auth token)
-            const authToken = this.getAuthToken();
-            if (!authToken) {
-              // Show authentication required toast
-              this.showToast('Please login to create patients', 'warning');
-              return null;
-            }
-            // Real API call for authenticated users
-            const response = await window.pharmacistApi.patients.createPatient(patientData);
-            this.showNotification('Patient created successfully', 'success');
-            return response.data;
-          } catch (error) {
-            console.error('Failed to create patient:', error);
-            this.showNotification('Failed to create patient', 'error');
-            throw error;
-          } finally {
-            this.loading = false;
+        viewPatient(patientId) {
+          alert(`View patient details for patient ID: ${patientId}`);
+        },
+        logout() {
+          if (confirm('Are you sure you want to logout?')) {
+            window.location.href = '../signin.html';
           }
-        },
-
-        async updatePatient(id, patientData) {
-          try {
-            this.loading = true;
-            const updatedPatient = await patientDataManager.updateItem(id, patientData);
-            const index = this.patients.findIndex(p => p.id === id);
-            if (index !== -1) {
-              this.patients[index] = updatedPatient;
-            }
-            this.showNotification('Patient updated successfully', 'success');
-            return updatedPatient;
-          } catch (error) {
-            console.error('Failed to update patient:', error);
-            this.showNotification('Failed to update patient', 'error');
-            throw error;
-          } finally {
-            this.loading = false;
-          }
-        },
-
-        async deletePatient(patientId) {
-          if (!confirm('Are you sure you want to delete this patient record?')) {
-            return;
-          }
-
-          try {
-            this.loading = true;
-            
-            // Check if we're in demo mode (no auth token)
-            const authToken = this.getAuthToken();
-            if (!authToken) {
-              // Demo mode: Delete locally
-              this.patients = this.patients.filter(p => p.id !== patientId);
-              
-              // Save to localStorage
-              await patientDataManager.saveToLocalStorage(this.patients);
-              
-              this.showNotification('Patient deleted successfully (Demo Mode)', 'success');
-              return;
-            }
-            
-            // Authenticated mode: Use API
-            await patientDataManager.deleteItem(patientId);
-            this.patients = this.patients.filter(p => p.id !== patientId);
-            this.showNotification('Patient deleted successfully', 'success');
-          } catch (error) {
-            console.error('Failed to delete patient:', error);
-            this.showNotification('Failed to delete patient', 'error');
-          } finally {
-            this.loading = false;
-          }
-        },
-
-        // Search suggestion methods
-        selectSuggestion(suggestion) {
-          this.searchQuery = suggestion.title;
-          this.searchOpen = false;
-          // Navigate to patient or perform search
-          this.viewPatient({ id: suggestion.id, ...suggestion });
-        },
-
-        // Search Patients functionality
-        async searchPatients(query, limit = 10) {
-          try {
-            const tenantId = this.getTenantId();
-            const response = await fetch(`/api/v1/patients/search?tenantId=${tenantId}&query=${encodeURIComponent(query)}&limit=${limit}`, {
-              headers: {
-                'Authorization': `Bearer ${this.getAuthToken()}`
-              }
-            });
-
-            if (response.ok) {
-              const data = await response.json();
-              return data.data || [];
-            }
-          } catch (error) {
-            console.error('Failed to search patients:', error);
-          }
-          return [];
-        },
-
-        viewPatient(patient) {
-          console.log('View patient:', patient);
-          // Navigate to patient details or open modal
-          // For now, just show a notification
-          this.showNotification(`Viewing patient: ${patient.firstName || 'Unknown'} ${patient.lastName || ''}`, 'info');
-        },
-
-        editPatient(patient) {
-          // Populate form with patient data for editing
-          const form = document.getElementById('patientForm');
-          if (form) {
-            form.firstName.value = patient.firstName || '';
-            form.lastName.value = patient.lastName || '';
-            form.email.value = patient.email || '';
-            form.phone.value = patient.phone || '';
-            form.dateOfBirth.value = patient.dateOfBirth ? patient.dateOfBirth.split('T')[0] : '';
-            form.gender.value = patient.gender || '';
-            form.address.value = patient.address || '';
-            form.medicalAidNumber.value = patient.medicalAidNumber || '';
-            form.medicalAidProvider.value = patient.medicalAidProvider || '';
-            
-            // Store patient ID for update
-            form.dataset.patientId = patient.id;
-            
-            // Show modal
-            this.openModal('patientModal');
-          }
-        },
-
-        formatCurrency(amount) {
-          return new Intl.NumberFormat('en-ZM', {
-            style: 'currency',
-            currency: 'ZMW'
-          }).format(amount);
-        },
-
-        showNotification(message, type = 'info') {
-          // Create notification element
-          const notification = document.createElement('div');
-          notification.className = `notification notification-${type}`;
-          notification.textContent = message;
-          document.body.appendChild(notification);
-
-          // Animate in
-          setTimeout(() => {
-            notification.classList.add('show');
-          }, 100);
-
-          // Remove after 5 seconds
-          setTimeout(() => {
-            notification.classList.remove('show');
-            setTimeout(() => {
-              if (notification.parentNode) {
-                document.body.removeChild(notification);
-              }
-            }, 300);
-          }, 5000);
-        },
-
-        // Modal Management
-        openModal(modalId) {
-          document.getElementById(modalId).hidden = false;
-          document.getElementById('modalOverlay').hidden = false;
-          document.body.style.overflow = 'hidden';
-        },
-
-        closeModal(modalId) {
-          document.getElementById(modalId).hidden = true;
-          document.getElementById('modalOverlay').hidden = true;
-          document.body.style.overflow = '';
-        },
-
-        // Patient Form Management
-        submitPatientForm(event) {
-          event.preventDefault();
-          const form = event.target;
-          const formData = new FormData(form);
-          const patientId = form.dataset.patientId;
-          
-          const patientData = {
-            firstName: formData.get('firstName'),
-            lastName: formData.get('lastName'),
-            email: formData.get('email'),
-            phone: formData.get('phone'),
-            dateOfBirth: formData.get('dateOfBirth'),
-            gender: formData.get('gender'),
-            address: formData.get('address'),
-            city: formData.get('city'),
-            province: formData.get('province'),
-            postalCode: formData.get('postalCode'),
-            medicalAidNumber: formData.get('medicalAidNumber'),
-            medicalAidProvider: formData.get('medicalAidProvider'),
-            emergencyContactName: formData.get('emergencyContactName'),
-            emergencyContactPhone: formData.get('emergencyContactPhone'),
-            emergencyContactRelationship: formData.get('emergencyContactRelationship')
-          };
-          
-          try {
-            if (patientId) {
-              // Update existing patient
-              this.updatePatient(patientId, patientData);
-            } else {
-              // Create new patient
-              this.createPatient(patientData);
-            }
-            
-            this.closeModal('patientModal');
-            form.reset();
-            delete form.dataset.patientId;
-          } catch (error) {
-            console.error('Patient save error:', error);
-            alert('Failed to save patient. Please try again.');
-          }
-        },
-
-        // Setup event listeners for buttons
-        setupEventListeners() {
-          // Import Patients Button
-          const importBtn = document.getElementById('importPatientsBtn');
-          if (importBtn) {
-            importBtn.addEventListener('click', () => this.openImportModal());
-          }
-
-          // Add Patient Button
-          const addPatientBtn = document.getElementById('addPatientBtn');
-          if (addPatientBtn) {
-            addPatientBtn.addEventListener('click', () => this.openAddPatientModal());
-          }
-
-          // Export Patients Button
-          const exportBtn = document.getElementById('exportPatients');
-          if (exportBtn) {
-            exportBtn.addEventListener('click', () => this.exportPatients());
-          }
-
-          // Add Medical Record Button
-          const addMedicalBtn = document.getElementById('addMedicalRecordBtn');
-          if (addMedicalBtn) {
-            addMedicalBtn.addEventListener('click', () => this.openMedicalRecordModal());
-          }
-
-          // Download Template Button
-          const downloadTemplateBtn = document.getElementById('downloadTemplateBtn');
-          if (downloadTemplateBtn) {
-            downloadTemplateBtn.addEventListener('click', () => this.downloadCSVTemplate());
-          }
-
-          // CSV Import functionality
-          this.setupCSVImport();
-
-          // Modal close buttons
-          document.querySelectorAll('[data-close]').forEach(btn => {
-            btn.addEventListener('click', (e) => {
-              const modalId = e.target.closest('[data-close]').getAttribute('data-close');
-              this.closeModal(modalId);
-            });
-          });
-        },
-
-        // Add Patient functionality
-        openAddPatientModal() {
-          // Clear any existing form data
-          const form = document.getElementById('patientForm');
-          if (form) {
-            form.reset();
-            delete form.dataset.patientId;
-          }
-          
-          // Open the patient modal
-          this.openModal('patientModal');
-        },
-
-        // Import functionality
-        openImportModal() {
-          this.openModal('csvImportModal');
-        },
-
-        setupCSVImport() {
-          const dropZone = document.getElementById('csvDropZone');
-          const fileInput = document.getElementById('csvFileInput');
-          const confirmBtn = document.getElementById('confirmImportBtn');
-
-          if (!dropZone || !fileInput || !confirmBtn) return;
-
-          // Click to browse
-          dropZone.addEventListener('click', () => fileInput.click());
-
-          // Drag and drop
-          dropZone.addEventListener('dragover', (e) => {
-            e.preventDefault();
-            dropZone.classList.add('drag-over');
-          });
-
-          dropZone.addEventListener('dragleave', () => {
-            dropZone.classList.remove('drag-over');
-          });
-
-          dropZone.addEventListener('drop', (e) => {
-            e.preventDefault();
-            dropZone.classList.remove('drag-over');
-            this.handleFileSelect(e.dataTransfer.files[0]);
-          });
-
-          // File selection
-          fileInput.addEventListener('change', (e) => {
-            this.handleFileSelect(e.target.files[0]);
-          });
-
-          // Confirm import
-          confirmBtn.addEventListener('click', () => this.confirmImport());
-        },
-
-        handleFileSelect(file) {
-          if (!file || !file.name.endsWith('.csv')) {
-            this.showNotification('Please select a CSV file', 'error');
-            return;
-          }
-
-          if (file.size > 5 * 1024 * 1024) { // 5MB limit
-            this.showNotification('File size must be less than 5MB', 'error');
-            return;
-          }
-
-          const reader = new FileReader();
-          reader.onload = (e) => {
-            try {
-              this.csvData = this.parseCSV(e.target.result);
-              this.showCSVPreview();
-              document.getElementById('confirmImportBtn').disabled = false;
-            } catch (error) {
-              this.showNotification('Error parsing CSV file', 'error');
-            }
-          };
-          reader.readAsText(file);
-        },
-
-        parseCSV(csvText) {
-          const lines = csvText.split('\n').filter(line => line.trim());
-          const headers = lines[0].split(',').map(h => h.trim().replace(/"/g, ''));
-          const data = [];
-
-          for (let i = 1; i < lines.length; i++) {
-            const values = lines[i].split(',').map(v => v.trim().replace(/"/g, ''));
-            if (values.length === headers.length) {
-              const patient = {};
-              headers.forEach((header, index) => {
-                patient[header] = values[index];
-              });
-              data.push(patient);
-            }
-          }
-
-          return data;
-        },
-
-        showCSVPreview() {
-          const preview = document.getElementById('csvPreview');
-          if (!preview || !this.csvData) return;
-
-          const previewHtml = `
-            <h4>Preview (${this.csvData.length} records)</h4>
-            <div class="csv-preview-table">
-              <table>
-                <thead>
-                  <tr>${Object.keys(this.csvData[0]).map(key => `<th>${key}</th>`).join('')}</tr>
-                </thead>
-                <tbody>
-                  ${this.csvData.slice(0, 5).map(row => 
-                    `<tr>${Object.values(row).map(value => `<td>${value}</td>`).join('')}</tr>`
-                  ).join('')}
-                </tbody>
-              </table>
-            </div>
-            ${this.csvData.length > 5 ? `<p>... and ${this.csvData.length - 5} more records</p>` : ''}
-          `;
-          
-          preview.innerHTML = previewHtml;
-          preview.style.display = 'block';
-        },
-
-        async confirmImport() {
-          if (!this.csvData || this.csvData.length === 0) {
-            this.showNotification('No data to import', 'error');
-            return;
-          }
-
-          try {
-            this.loading = true;
-            const tenantId = this.getTenantId();
-            
-            // Convert CSV data to patient format
-            const patients = this.csvData.map(row => ({
-              firstName: row.FirstName || row.firstName || '',
-              lastName: row.LastName || row.lastName || '',
-              dateOfBirth: row.DateOfBirth || row.dateOfBirth || '',
-              gender: row.Gender || row.gender || '',
-              email: row.Email || row.email || '',
-              phone: row.Phone || row.phone || '',
-              address: row.Address || row.address || '',
-              city: row.City || row.city || '',
-              country: row.Country || row.country || '',
-              postalCode: row.PostalCode || row.postalCode || '',
-              bloodType: row.BloodType || row.bloodType || '',
-              insuranceProvider: row.InsuranceProvider || row.insuranceProvider || '',
-              insurancePolicyNumber: row.InsuranceNumber || row.insuranceNumber || ''
-            }));
-
-            // Call bulk import API
-            const response = await fetch(`/api/v1/patients/bulk-import?tenantId=${tenantId}`, {
-              method: 'POST',
-              headers: {
-                'Content-Type': 'application/json',
-                'Authorization': `Bearer ${this.getAuthToken()}`
-              },
-              body: JSON.stringify(patients)
-            });
-
-            const result = await response.json();
-            
-            if (response.ok) {
-              this.showNotification(`Successfully imported ${result.imported?.length || 0} patients`, 'success');
-              this.closeModal('csvImportModal');
-              await this.loadPatients();
-            } else {
-              this.showNotification(result.error || 'Import failed', 'error');
-            }
-          } catch (error) {
-            console.error('Import error:', error);
-            this.showNotification('Import failed', 'error');
-          } finally {
-            this.loading = false;
-          }
-        },
-
-        downloadCSVTemplate() {
-          const template = [
-            'FirstName,LastName,DateOfBirth,Gender,Email,Phone,Address,City,Country,PostalCode,BloodType,InsuranceProvider,InsuranceNumber',
-            'John,Doe,1990-01-01,Male,john.doe@email.com,+1234567890,123 Main St,Test City,Test Country,12345,O+,Test Insurance,INS123456',
-            'Jane,Smith,1985-05-15,Female,jane.smith@email.com,+0987654321,456 Oak Ave,Sample City,Sample Country,67890,A+,Sample Insurance,INS789012'
-          ].join('\n');
-
-          const blob = new Blob([template], { type: 'text/csv' });
-          const url = window.URL.createObjectURL(blob);
-          const a = document.createElement('a');
-          a.href = url;
-          a.download = 'patients_template.csv';
-          a.click();
-          window.URL.revokeObjectURL(url);
-        },
-
-        // Export functionality
-        async exportPatients() {
-          try {
-            this.loading = true;
-            
-            // Get all patients (works in both demo and authenticated mode)
-            const patients = this.patients;
-            
-            if (patients.length === 0) {
-              this.showNotification('No patients to export', 'warning');
-              return;
-            }
-
-            // Convert to CSV
-            const csv = this.convertPatientsToCSV(patients);
-            
-            // Download file
-            const blob = new Blob([csv], { type: 'text/csv' });
-            const url = window.URL.createObjectURL(blob);
-            const a = document.createElement('a');
-            a.href = url;
-            a.download = `patients_export_${new Date().toISOString().split('T')[0]}.csv`;
-            a.click();
-            window.URL.revokeObjectURL(url);
-            
-            const mode = this.getAuthToken() ? 'Authenticated' : 'Demo';
-            this.showNotification(`Exported ${patients.length} patients (${mode} Mode)`, 'success');
-          } catch (error) {
-            console.error('Export error:', error);
-            this.showNotification('Export failed', 'error');
-          } finally {
-            this.loading = false;
-          }
-        },
-
-        convertPatientsToCSV(patients) {
-          if (!Array.isArray(patients) || patients.length === 0) return '';
-          
-          const headers = [
-            'PatientNumber', 'FirstName', 'LastName', 'DateOfBirth', 'Gender', 
-            'Email', 'Phone', 'Address', 'City', 'Country', 'PostalCode',
-            'BloodType', 'Allergies', 'ChronicConditions', 'EmergencyContactName',
-            'EmergencyContactPhone', 'InsuranceProvider', 'InsuranceNumber', 'IsActive', 'CreatedAt'
-          ];
-          
-          const csvRows = [headers.join(',')];
-          
-          for (const patient of patients) {
-            const values = [
-              `"${patient.patientNumber || ''}"`,
-              `"${patient.firstName || ''}"`,
-              `"${patient.lastName || ''}"`,
-              `"${patient.dateOfBirth || ''}"`,
-              `"${patient.gender || ''}"`,
-              `"${patient.email || ''}"`,
-              `"${patient.phone || ''}"`,
-              `"${patient.address || ''}"`,
-              `"${patient.city || ''}"`,
-              `"${patient.country || ''}"`,
-              `"${patient.postalCode || ''}"`,
-              `"${patient.bloodType || ''}"`,
-              `"${patient.allergies || ''}"`,
-              `"${patient.chronicConditions || ''}"`,
-              `"${patient.emergencyContactName || ''}"`,
-              `"${patient.emergencyContactPhone || ''}"`,
-              `"${patient.insuranceProvider || ''}"`,
-              `"${patient.insuranceNumber || ''}"`,
-              `"${patient.isActive || true}"`,
-              `"${patient.createdAt || new Date().toISOString()}"`
-            ];
-            csvRows.push(values.join(','));
-          }
-          
-          return csvRows.join('\n');
-        },
-
-        // Medical Records functionality
-        openMedicalRecordModal() {
-          // For now, show a simple alert
-          this.showNotification('Medical records feature coming soon', 'info');
-          // TODO: Implement full medical records modal
-        },
-
-        // Helper methods
-        getTenantId() {
-          try {
-            const userStr = localStorage.getItem('umi_currentUser') || localStorage.getItem('umi_current_user');
-            if (userStr && userStr !== 'undefined' && userStr !== 'null') {
-              const user = JSON.parse(userStr);
-              return user.tenantId || null;
-            }
-          } catch (error) {
-            console.error('Failed to get tenant ID:', error);
-          }
-          return null;
-        },
-
-        getAuthToken() {
-          return localStorage.getItem('umi_auth_token') || 
-                 sessionStorage.getItem('umi_auth_token') || 
-                 '';
-        },
-
-        async init() {
-          // Setup event listeners first (works without auth)
-          this.setupEventListeners();
-
-          // Check authentication and tenant info
-          const userStr = localStorage.getItem('umi_currentUser') || localStorage.getItem('umi_current_user');
-          if (!userStr || userStr === 'undefined' || userStr === 'null') {
-            console.warn('No user authentication found - demo mode enabled');
-            this.showNotification('Demo mode: Some features require login for full functionality', 'info');
-            
-            // Set demo user info for basic functionality
-            this.tenantInfo.name = 'Demo Pharmacy';
-            this.tenantInfo.location = 'Demo Location';
-            this.userInfo.name = 'Demo User';
-            this.userInfo.role = 'pharmacist';
-            this.userInfo.initials = 'DU';
-            
-            // Load patients from localStorage only (demo mode)
-            try {
-              this.patients = await patientDataManager.loadFromLocalStorage();
-              console.log('Demo mode: Loaded patients from localStorage:', this.patients.length);
-            } catch (error) {
-              console.log('Demo mode: No existing patient data found');
-              this.patients = [];
-            }
-            
-            // Setup auto-save for demo mode
-            patientDataManager.setupAutoSave(() => this.patients);
-            
-            console.log('Demo mode initialized - basic functionality available');
-            return;
-          }
-
-          try {
-            const user = JSON.parse(userStr);
-            this.tenantInfo.name = user.tenantName || 'Umi Health';
-            this.userInfo.name = `${user.firstName || ''} ${user.lastName || ''}`.trim() || 'User';
-            this.userInfo.role = user.role || 'pharmacist';
-            this.userInfo.initials = this.userInfo.name.split(' ').map(n => n[0]).join('').toUpperCase().substring(0, 2);
-            
-            console.log('User authenticated:', { tenantId: user.tenantId, role: this.userInfo.role });
-          } catch (error) {
-            console.error('Failed to parse user info:', error);
-            this.showNotification('Authentication error', 'error');
-            return;
-          }
-
-          // Load patients from data manager (authenticated mode)
-          await this.loadPatients();
-          
-          // Setup auto-save
-          patientDataManager.setupAutoSave(() => this.patients);
-          
-          // Setup periodic sync
-          setInterval(async () => {
-            try {
-              await patientDataManager.syncWithServer();
-              await this.loadPatients();
-            } catch (error) {
-              console.error('Periodic sync failed:', error);
-            }
-          }, 60000); // Update every minute
-          
-          // Add sync button to header
-          this.addSyncButton();
-
-          console.log('Patient system initialized');
-        },
-        
-        addSyncButton() {
-          const headerRight = document.querySelector('.header-right');
-          if (!headerRight) return;
-          
-          const syncButton = document.createElement('button');
-          syncButton.className = 'create-button sync-button';
-          syncButton.innerHTML = `
-            <span class="material-symbols-rounded">sync</span>
-            <span>Sync</span>
-          `;
-          syncButton.addEventListener('click', async () => {
-            try {
-              syncButton.disabled = true;
-              syncButton.innerHTML = `
-                <span class="material-symbols-rounded">sync</span>
-                <span>Syncing...</span>
-              `;
-              
-              await patientDataManager.syncWithServer();
-              await this.loadPatients();
-              
-            } catch (error) {
-              console.error('Sync failed:', error);
-            } finally {
-              syncButton.disabled = false;
-              syncButton.innerHTML = `
-                <span class="material-symbols-rounded">sync</span>
-                <span>Sync</span>
-              `;
-            }
-          });
-          
-          headerRight.appendChild(syncButton);
         }
       }
     }
   </script>
-
-  <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
 </body>
 </html>

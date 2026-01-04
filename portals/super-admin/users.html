@@ -13,8 +13,8 @@
   <script src="../shared/js/data-sync.js"></script>
   <script src="../shared/js/role-based-access.js"></script>
   <script src="../shared/js/super-admin-data-sync.js"></script>
+  <script src="../shared/js/realtime-sync.js"></script>
   <script src="../admin/js/admin-api.js"></script>
-  <script src="js/super-admin-api.js"></script>
   <style>
     :root {
       --color-primary-blue: #2563EB;
@@ -1036,14 +1036,34 @@
           this.userName = sessionStorage.getItem('userName') || 'Super Admin';
           this.userEmail = sessionStorage.getItem('userEmail') || 'admin@UmiHealthInformationSystems.zm';
           
+          // Check authentication
+          if (!window.superAdminDataSync.isAuthenticated()) {
+            this.redirectToLogin();
+            return;
+          }
+          
           // Load users
           this.loadUsers();
+          
+          // Set up real-time updates
+          window.superAdminDataSync.subscribe('/users', (data) => {
+            this.loadUsers();
+          });
           
           // Check for create action in URL
           const urlParams = new URLSearchParams(window.location.search);
           if (urlParams.get('action') === 'create') {
             this.createUser();
           }
+          
+          // Set up event listeners
+          window.superAdminDataSync.addEventListener('error', (message) => {
+            this.showError(message);
+          });
+          
+          window.superAdminDataSync.addEventListener('success', (message) => {
+            this.showSuccess(message);
+          });
           
           // Close mobile menu when clicking outside
           document.addEventListener('click', (e) => {
@@ -1062,9 +1082,10 @@
             const data = await window.superAdminDataSync.getSuperAdminUsers(1, 50, this.searchQuery);
             this.users = data.data || [];
             this.filteredUsers = this.users;
+            console.log(`Loaded ${this.users.length} users`);
           } catch (error) {
             console.error('Failed to load users:', error);
-            this.showError('Failed to load users');
+            window.superAdminDataSync.notifyError('Failed to load users');
             this.users = [];
             this.filteredUsers = [];
           } finally {

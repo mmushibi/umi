@@ -57,9 +57,11 @@
     }
 
     /* Firefox scrollbar */
-    * {
-      scrollbar-width: thin;
-      scrollbar-color: rgba(255, 255, 255, 0.2) rgba(255, 255, 255, 0.05);
+    @supports (scrollbar-width: thin) {
+      * {
+        scrollbar-width: thin;
+        scrollbar-color: rgba(255, 255, 255, 0.2) rgba(255, 255, 255, 0.05);
+      }
     }
 
     /* Fallback for browsers that don't support scrollbar styling */
@@ -1286,45 +1288,21 @@
         async loadPharmacies() {
           this.loading = true;
           try {
-            // This would be replaced with actual API calls
-            console.log('Fetching pharmacies from API...');
+            console.log('Fetching pharmacies from super admin API...');
             
-            // Initialize with empty array for real implementation
+            // Use the super admin data sync service
+            const response = await window.superAdminDataSync.request('/tenants');
+            
+            this.pharmacies = response.data || [];
+            this.filteredPharmacies = [...this.pharmacies];
+            
+            console.log(`Loaded ${this.pharmacies.length} pharmacies`);
+            
+          } catch (error) {
+            console.error('Failed to load pharmacies:', error);
             this.pharmacies = [];
             this.filteredPharmacies = [];
-            
-            // Placeholder for real API call
-            // const response = await fetch('/api/pharmacies');
-            // this.pharmacies = await response.json();
-            // this.filteredPharmacies = [...this.pharmacies];
-
-            const baseUrl = this.apiBaseUrl || (window.UmiHealthInformationSystemsAPI && window.UmiHealthInformationSystemsAPI.baseUrl) || 'https://localhost:5123';
-            const response = await fetch(`${baseUrl}/api/pharmacy`, {
-              headers: await this.getAuthHeaders()
-            });
-            const result = await response.json();
-
-            if (!response.ok || !result.success) {
-              console.error('Error response loading pharmacies:', result);
-              this.pharmacies = [];
-              this.filteredPharmacies = [];
-              return;
-            }
-
-            const items = Array.isArray(result.data) ? result.data : [];
-            this.pharmacies = items.map(p => ({
-              id: p.id,
-              name: p.name,
-              location: p.city || '',
-              email: p.email,
-              phone: p.phone,
-              licenseNumber: p.licenseNumber,
-              status: p.isActive ? 'active' : 'inactive',
-              joinedDate: p.createdAt ? new Date(p.createdAt).toLocaleDateString() : ''
-            }));
-            this.filteredPharmacies = [...this.pharmacies];
-          } catch (error) {
-            console.error('Error loading pharmacies:', error);
+            window.superAdminDataSync.notifyError('Failed to load pharmacies');
           } finally {
             this.loading = false;
           }

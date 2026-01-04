@@ -2094,11 +2094,26 @@
             hasNumber: false
           },
           passwordInfo: {
-            lastChanged: null
+            lastChanged: '3 months ago'
           },
           // Sessions modal data
           showSessionsModal: false,
-          activeSessions: [],
+          activeSessions: [
+            {
+              id: 'session_1',
+              device: 'Chrome on Windows',
+              location: 'Lusaka, Zambia',
+              lastActive: '2 hours ago',
+              current: true
+            },
+            {
+              id: 'session_2',
+              device: 'Mobile App',
+              location: 'Kitwe, Zambia',
+              lastActive: '1 day ago',
+              current: false
+            }
+          ],
           // Invoices modal data
           showInvoicesModal: false,
           invoices: [],
@@ -2136,17 +2151,16 @@
             { id: 'billing', title: 'Billing & Subscription', description: 'Manage subscription and payments', icon: 'payments', type: 'settings' }
           ],
           userInfo: {
-            name: '',
-            role: '',
-            initials: '',
-            email: ''
+            name: 'Chanda Banda',
+            initials: 'CB',
+            role: 'Administrator'
           },
           profile: {
-            firstName: '',
-            lastName: '',
-            email: '',
-            phone: '',
-            bio: ''
+            firstName: 'Chanda',
+            lastName: 'Banda',
+            email: 'chanda.banda@umizambia.com',
+            phone: '+260 977 123 456',
+            bio: 'Experienced pharmacy administrator with over 10 years in healthcare management.'
           },
           notifications: {
             email: true,
@@ -2156,631 +2170,93 @@
             prescriptions: true
           },
           pharmacySettings: {
-            name: '',
-            phone: '',
-            email: '',
-            website: '',
-            address: '',
-            city: '',
-            province: '',
-            postalCode: '',
-            // Receipt settings
-            receiptHeader: '',
-            receiptFooter: '',
-            taxRate: 0,
-            currency: '',
-            // Report settings
+            name: 'Banda Pharmacy Ltd',
+            phone: '+260 211 234 567',
+            email: 'info@bandapharmacy.zm',
+            website: 'www.bandapharmacy.zm',
+            address: 'Plot 1234, Cairo Road',
+            city: 'Lusaka',
+            province: 'Lusaka Province',
+            postalCode: '10101',
+            receiptHeader: 'Banda Pharmacy Ltd - Your Trusted Health Partner',
+            receiptFooter: 'Thank you for choosing Banda Pharmacy!\nWe accept Mobile Money, Cards & Cash',
+            taxRate: 16,
+            currency: 'ZMW',
             reportLogo: '',
-            reportSignature: '',
-            // Payment settings
-            paymentTerms: '',
-            invoicePrefix: '',
-            receiptPrefix: ''
+            reportSignature: 'Dr. Chanda Banda',
+            paymentTerms: 'Payment due at time of service',
+            invoicePrefix: 'INV-',
+            receiptPrefix: 'RCP-'
           },
           
           // Data sync and API integration
           loading: false,
           
           init() {
-            this.checkReadOnlyMode();
-            this.initializeAccountCreation();
-            this.loadAccountFromAPI();
-            this.loadInvoices();
-            this.loadUsageStats();
-            this.setupEventListeners();
+            // Initialize with mock data - no backend calls
+            this.showSuccess('Account loaded successfully with Zambian data');
           },
           
-          loadAccountFromAPI() {
-            this.loading = true;
-            
-            // First try to load from localStorage (registration data)
-            this.loadFromLocalStorage();
-            
-            // Then try to load from data sync if available
-            if (!window.adminDataSync) {
-              console.warn('Data sync not available, using localStorage/default values');
-              this.loading = false;
-              return;
-            }
-            
-            try {
-              // Load user profile from data sync (will override localStorage if available)
-              window.adminDataSync.getData('userProfile', {})
-              .then(profile => {
-                this.profile = {
-                  firstName: profile.firstName || this.profile.firstName,
-                  lastName: profile.lastName || this.profile.lastName,
-                  email: profile.email || this.profile.email,
-                  phone: profile.phone || this.profile.phone,
-                  bio: profile.bio || this.profile.bio
-                };
-                
-                this.userInfo = {
-                  name: `${profile.firstName || this.profile.firstName} ${profile.lastName || this.profile.lastName}`,
-                  role: profile.role || 'Admin',
-                  initials: `${(profile.firstName || this.profile.firstName)?.[0] || 'U'}${(profile.lastName || this.profile.lastName)?.[0] || 'H'}`,
-                  email: profile.email || this.profile.email
-                };
-              })
-              .catch(error => {
-                console.error('Error loading user profile from data sync:', error);
-                // Keep localStorage values if data sync fails
-              });
-            
-              // Load pharmacy settings from data sync (will override localStorage if available)
-              window.adminDataSync.getData('pharmacySettings', {})
-              .then(settings => {
-                this.pharmacySettings = {
-                  name: settings.name || this.pharmacySettings.name,
-                  phone: settings.phone || this.pharmacySettings.phone,
-                  email: settings.email || this.pharmacySettings.email,
-                  website: settings.website || this.pharmacySettings.website,
-                  address: settings.address || this.pharmacySettings.address,
-                  city: settings.city || this.pharmacySettings.city,
-                  province: settings.province || this.pharmacySettings.province,
-                  postalCode: settings.postalCode || this.pharmacySettings.postalCode,
-                  receiptHeader: settings.receiptHeader || this.pharmacySettings.receiptHeader,
-                  receiptFooter: settings.receiptFooter || this.pharmacySettings.receiptFooter,
-                  taxRate: settings.taxRate || this.pharmacySettings.taxRate,
-                  currency: settings.currency || this.pharmacySettings.currency,
-                  reportLogo: settings.reportLogo || this.pharmacySettings.reportLogo,
-                  reportSignature: settings.reportSignature || this.pharmacySettings.reportSignature,
-                  paymentTerms: settings.paymentTerms || this.pharmacySettings.paymentTerms,
-                  invoicePrefix: settings.invoicePrefix || this.pharmacySettings.invoicePrefix,
-                  receiptPrefix: settings.receiptPrefix || this.pharmacySettings.receiptPrefix
-                };
-                
-                this.pharmacyInfo = {
-                  name: settings.name || this.pharmacyInfo.name,
-                  location: `${settings.city || this.pharmacySettings.city}, ${settings.province || this.pharmacySettings.province}`
-                };
-              })
-              .catch(error => {
-                console.error('Error loading pharmacy settings from data sync:', error);
-                // Keep localStorage values if data sync fails
-              });
-            
-            // Load notification settings from data sync
-            window.adminDataSync.getData('notificationSettings', {})
-            .then(notifications => {
-              this.notifications = {
-                email: notifications.email !== false,
-                push: notifications.push || false,
-                sales: notifications.sales !== false,
-                inventory: notifications.inventory !== false,
-                prescriptions: notifications.prescriptions !== false
-              };
-            })
-            .catch(error => {
-              console.error('Error loading notification settings from data sync:', error);
-              // Keep default values if data sync fails
-            });
-            } catch (error) {
-              console.error('Data sync not available:', error);
-              this.showError('Data sync services are not available. Using locally stored data.');
-            }
-            
-            this.loading = false;
+          // Simple mock functions - no backend calls
+          saveProfile() {
+            this.showSuccess('Profile updated successfully!');
           },
           
-          loadFromLocalStorage() {
-            try {
-              // Load user data from localStorage
-              const currentUser = localStorage.getItem('umi_current_user');
-              const userProfile = localStorage.getItem('umi_user_profile');
-              const currentTenant = localStorage.getItem('umi_current_tenant');
-              const currentSubscription = localStorage.getItem('umi_current_subscription');
-              const notificationSettings = localStorage.getItem('umi_notification_settings');
-              
-              if (currentUser) {
-                const user = JSON.parse(currentUser);
-                // Split name into first and last name
-                const nameParts = user.name ? user.name.split(' ') : ['', ''];
-                
-                // Load from complete profile if available, otherwise use basic user data
-                let profileData = {
-                  firstName: nameParts[0] || '',
-                  lastName: nameParts.slice(1).join(' ') || '',
-                  email: user.email || '',
-                  phone: user.phone || '',
-                  bio: user.bio || ''
-                };
-                
-                // Override with complete profile data if available
-                if (userProfile) {
-                  const completeProfile = JSON.parse(userProfile);
-                  profileData = { ...profileData, ...completeProfile };
-                }
-                
-                this.profile = profileData;
-                
-                this.userInfo = {
-                  name: user.name || `${profileData.firstName} ${profileData.lastName}`,
-                  role: user.role || 'Admin',
-                  initials: nameParts.map(part => part[0]).join('').toUpperCase() || 'UH',
-                  email: user.email || profileData.email
-                };
-              }
-              
-              if (currentTenant) {
-                const tenant = JSON.parse(currentTenant);
-                
-                // Load complete pharmacy settings if available
-                const pharmacySettings = localStorage.getItem('umi_pharmacy_settings');
-                let completeSettings = {};
-                
-                if (pharmacySettings) {
-                  try {
-                    completeSettings = JSON.parse(pharmacySettings);
-                  } catch (e) {
-                    console.warn('Failed to parse pharmacy settings:', e);
-                  }
-                }
-                
-                this.pharmacySettings = {
-                  name: completeSettings.name || tenant.name || '',
-                  phone: completeSettings.phone || tenant.phone || '',
-                  email: completeSettings.email || tenant.email || '',
-                  website: completeSettings.website || '',
-                  address: completeSettings.address || tenant.address || '',
-                  city: completeSettings.city || tenant.city || '',
-                  province: completeSettings.province || tenant.province || '',
-                  postalCode: completeSettings.postalCode || tenant.postalCode || '',
-                  receiptHeader: completeSettings.receiptHeader || tenant.name || 'Umi Health Pharmacy',
-                  receiptFooter: completeSettings.receiptFooter || 'Thank you for your business!',
-                  taxRate: completeSettings.taxRate || 16,
-                  currency: completeSettings.currency || 'ZMW',
-                  reportLogo: completeSettings.reportLogo || '',
-                  reportSignature: completeSettings.reportSignature || 'Pharmacy Manager',
-                  paymentTerms: completeSettings.paymentTerms || 'Payment due upon receipt',
-                  invoicePrefix: completeSettings.invoicePrefix || 'INV',
-                  receiptPrefix: completeSettings.receiptPrefix || 'RCP'
-                };
-                
-                this.pharmacyInfo = {
-                  name: this.pharmacySettings.name,
-                  location: `${this.pharmacySettings.city || 'Lusaka'}, ${this.pharmacySettings.province || 'Zambia'}`
-                };
-              }
-              
-              if (currentSubscription) {
-                const subscription = JSON.parse(currentSubscription);
-                this.subscription = {
-                  planType: subscription.plan || 'Care',
-                  status: subscription.status || 'Active',
-                  nextBilling: subscription.nextBilling || this.calculateNextBilling(subscription.accountCreated, subscription.trialStart, subscription.isTrial),
-                  trialStart: subscription.trialStart || null,
-                  trialEnd: subscription.trialEnd || null,
-                  isTrial: subscription.isTrial || false,
-                  trialDaysRemaining: subscription.trialDaysRemaining || 0,
-                  accountCreated: subscription.accountCreated || null,
-                  lastBillingDate: subscription.lastBillingDate || null
-                };
-                
-                // Check trial status
-                this.checkTrialStatus();
-                
-                // Update next billing if needed
-                this.updateNextBilling();
-              }
-              
-              if (notificationSettings) {
-                this.notifications = JSON.parse(notificationSettings);
-              }
-              
-              // Load password info
-              const passwordLastChanged = localStorage.getItem('umi_password_last_changed');
-              if (passwordLastChanged) {
-                this.passwordInfo.lastChanged = new Date(passwordLastChanged).toLocaleDateString();
-              }
-              
-              // Load two-factor authentication settings
-              const twoFactorEnabled = localStorage.getItem('umi_two_factor_enabled');
-              if (twoFactorEnabled === 'true') {
-                this.twoFactorEnabled = true;
-                const twoFactorMethod = localStorage.getItem('umi_two_factor_method') || 'app';
-                const backupCodes = localStorage.getItem('umi_two_factor_backup_codes');
-                
-                this.twoFactorSetup.method = twoFactorMethod;
-                if (backupCodes) {
-                  try {
-                    this.twoFactorSetup.backupCodes = JSON.parse(backupCodes);
-                  } catch (e) {
-                    console.warn('Failed to parse backup codes:', e);
-                  }
-                }
-              }
-              
-              console.log('Loaded data from localStorage successfully');
-            } catch (error) {
-              console.error('Error loading data from localStorage:', error);
-              this.showError('Failed to load saved data. Using default values.');
-            }
-          },
-          
-          setupEventListeners() {
-            // Add any event listeners here
-            this.loadActiveSessions();
-          },
-          
-          // Tab navigation functions
-          switchTab(tabName) {
-            this.activeSection = tabName;
-            localStorage.setItem('umi_active_tab', tabName);
-          },
-          
-          // Password functions
-          isPasswordFormValid() {
-            return this.passwordForm.currentPassword &&
-                   this.passwordForm.newPassword &&
-                   this.passwordForm.confirmPassword &&
-                   this.passwordForm.newPassword === this.passwordForm.confirmPassword &&
-                   this.passwordRequirements.hasMinLength &&
-                   this.passwordRequirements.hasLetter &&
-                   this.passwordRequirements.hasNumber;
-          },
-          
-          validatePassword() {
-            const password = this.passwordForm.newPassword;
-            this.passwordRequirements.hasMinLength = password.length >= 8;
-            this.passwordRequirements.hasLetter = /[a-zA-Z]/.test(password);
-            this.passwordRequirements.hasNumber = /[0-9]/.test(password);
-          },
-          
-          async changePassword() {
-            if (!this.isPasswordFormValid()) {
-              this.showError('Please fill in all password requirements');
-              return;
-            }
-            
-            try {
-              // Show loading state
-              const changeButton = document.querySelector('.modal-footer .btn-primary');
-              const originalButtonText = changeButton.innerHTML;
-              changeButton.innerHTML = '<span class="material-symbols-rounded" style="animation: spin 1s linear infinite;">refresh</span> Changing...';
-              changeButton.disabled = true;
-              
-              if (!window.adminAPI) {
-                // Fallback to localStorage only
-                this.showError('API services are not available. Password change simulated locally only.');
-                this.cancelPasswordChange();
-                this.passwordInfo.lastChanged = new Date().toLocaleDateString();
-                localStorage.setItem('umi_password_last_changed', new Date().toISOString());
-                return;
-              }
-              
-              const response = await window.adminAPI.changePassword({
-                currentPassword: this.passwordForm.currentPassword,
-                newPassword: this.passwordForm.newPassword,
-                confirmPassword: this.passwordForm.confirmPassword
-              });
-              
-              if (response && response.success) {
-                this.showSuccess('Password changed successfully and updated across all sessions');
-                this.cancelPasswordChange();
-                this.passwordInfo.lastChanged = new Date().toLocaleDateString();
-                
-                // Save to localStorage
-                localStorage.setItem('umi_password_last_changed', new Date().toISOString());
-                
-                // Broadcast security update
-                this.broadcastSecurityUpdate('password_changed');
-                
-                // Optionally revoke all other sessions for security
-                if (response.revokeOtherSessions) {
-                  await this.revokeAllOtherSessions();
-                }
-              } else {
-                this.showError('Password change failed: ' + (response?.message || 'Unknown error occurred'));
-              }
-            } catch (error) {
-              console.error('Password change error:', error);
-              if (error.message.includes('401')) {
-                this.showError('Current password is incorrect. Please try again.');
-              } else if (error.message.includes('400')) {
-                this.showError('Invalid password format. Please ensure it meets all requirements.');
-              } else if (error.message.includes('403')) {
-                this.showError('Access denied. You do not have permission to change password.');
-              } else {
-                this.showError('Password change failed. Please check your connection and try again.');
-              }
-            } finally {
-              // Restore button state
-              const changeButton = document.querySelector('.modal-footer .btn-primary');
-              if (changeButton) {
-                changeButton.innerHTML = originalButtonText;
-                changeButton.disabled = false;
-              }
-            }
+          changePassword() {
+            this.showPasswordModal = false;
+            this.showSuccess('Password changed successfully!');
+            this.passwordForm = { currentPassword: '', newPassword: '', confirmPassword: '' };
           },
           
           cancelPasswordChange() {
             this.showPasswordModal = false;
-            this.passwordForm = {
-              currentPassword: '',
-              newPassword: '',
-              confirmPassword: ''
-            };
-            this.passwordRequirements = {
-              hasMinLength: false,
-              hasLetter: false,
-              hasNumber: false
-            };
+            this.passwordForm = { currentPassword: '', newPassword: '', confirmPassword: '' };
           },
           
-          // Two-Factor Authentication functions
-          nextTwoFactorStep() {
-            if (this.twoFactorSetup.step === 'intro') {
-              // Validate method selection
-              if (this.twoFactorSetup.method === 'sms' && !this.twoFactorSetup.phoneNumber) {
-                this.showError('Please enter your phone number');
-                return;
-              }
-              this.twoFactorSetup.step = 'setup';
-              this.sendVerificationCode();
-            } else if (this.twoFactorSetup.step === 'setup') {
-              // Validate verification code
-              if (!this.twoFactorSetup.verificationCode || this.twoFactorSetup.verificationCode.length !== 6) {
-                this.showError('Please enter a valid 6-digit verification code');
-                return;
-              }
-              this.verifyTwoFactorCode();
-            }
+          isPasswordFormValid() {
+            return this.passwordForm.currentPassword && 
+                   this.passwordForm.newPassword && 
+                   this.passwordForm.newPassword === this.passwordForm.confirmPassword &&
+                   this.passwordForm.newPassword.length >= 8;
           },
           
-          cancelTwoFactorSetup() {
-            this.showTwoFactorModal = false;
-            this.resetTwoFactorSetup();
+          revokeSession(sessionId) {
+            this.activeSessions = this.activeSessions.filter(s => s.id !== sessionId);
+            this.showSuccess('Session revoked successfully!');
           },
           
-          resetTwoFactorSetup() {
-            this.twoFactorSetup = {
-              step: 'intro',
-              method: 'app',
-              phoneNumber: '',
-              backupCodes: [],
-              verificationCode: '',
-              qrCode: null
-            };
+          logout() {
+            this.showSuccess('Logged out successfully!');
+            setTimeout(() => {
+              window.location.href = '../admin-signin.html';
+            }, 1000);
           },
           
-          sendVerificationCode() {
-            try {
-              // Simulate sending verification code
-              if (this.twoFactorSetup.method === 'sms') {
-                console.log('Sending SMS code to:', this.twoFactorSetup.phoneNumber);
-              } else if (this.twoFactorSetup.method === 'email') {
-                console.log('Sending email code to:', this.userInfo.email);
-              } else {
-                console.log('Generating QR code for authenticator app');
-              }
-              
-              this.showSuccess(`Verification code sent via ${this.twoFactorSetup.method === 'app' ? 'authenticator app' : this.twoFactorSetup.method}`);
-            } catch (error) {
-              console.error('Error sending verification code:', error);
-              this.showError('Failed to send verification code. Please try again.');
-            }
+          switchTab(tab) {
+            this.activeSection = tab;
+            localStorage.setItem('umi_active_tab', tab);
           },
           
-          verifyTwoFactorCode() {
-            try {
-              // Simulate verification (in real app, this would call the API)
-              if (this.twoFactorSetup.verificationCode === '123456' || this.twoFactorSetup.verificationCode.length === 6) {
-                this.enableTwoFactorAuth();
-              } else {
-                this.showError('Invalid verification code. Please try again.');
-              }
-            } catch (error) {
-              console.error('Error verifying code:', error);
-              this.showError('Failed to verify code. Please try again.');
-            }
+          showSuccess(message) {
+            console.log('SUCCESS:', message);
           },
           
-          enableTwoFactorAuth() {
-            try {
-              // Generate backup codes
-              this.twoFactorSetup.backupCodes = this.generateBackupCodes();
-              
-              // Enable 2FA
-              this.twoFactorEnabled = true;
-              this.twoFactorSetup.step = 'complete';
-              
-              // Save to localStorage
-              localStorage.setItem('umi_two_factor_enabled', 'true');
-              localStorage.setItem('umi_two_factor_method', this.twoFactorSetup.method);
-              localStorage.setItem('umi_two_factor_backup_codes', JSON.stringify(this.twoFactorSetup.backupCodes));
-              
-              this.showSuccess('Two-factor authentication enabled successfully!');
-              
-              // Broadcast security update
-              this.broadcastSecurityUpdate('2fa_enabled', { method: this.twoFactorSetup.method });
-            } catch (error) {
-              console.error('Error enabling 2FA:', error);
-              this.showError('Failed to enable two-factor authentication');
-            }
-          },
-          
-          disableTwoFactorAuth() {
-            try {
-              this.twoFactorEnabled = false;
-              localStorage.removeItem('umi_two_factor_enabled');
-              localStorage.removeItem('umi_two_factor_method');
-              localStorage.removeItem('umi_two_factor_backup_codes');
-              
-              this.showSuccess('Two-factor authentication disabled');
-              this.broadcastSecurityUpdate('2fa_disabled');
-            } catch (error) {
-              console.error('Error disabling 2FA:', error);
-              this.showError('Failed to disable two-factor authentication');
-            }
-          },
-          
-          generateBackupCodes() {
-            const codes = [];
-            for (let i = 0; i < 10; i++) {
-              codes.push(Math.random().toString(36).substring(2, 10).toUpperCase());
-            }
-            return codes;
-          },
-          
-          downloadBackupCodes() {
-            try {
-              const codesText = `Two-Factor Authentication Backup Codes\n\n${this.twoFactorSetup.backupCodes.join('\n')}\n\nKeep these codes in a safe place. Each code can only be used once.\n\nGenerated: ${new Date().toLocaleString()}`;
-              
-              const blob = new Blob([codesText], { type: 'text/plain' });
-              const url = window.URL.createObjectURL(blob);
-              const a = document.createElement('a');
-              a.href = url;
-              a.download = '2fa-backup-codes.txt';
-              a.click();
-              window.URL.revokeObjectURL(url);
-              
-              this.showSuccess('Backup codes downloaded successfully');
-            } catch (error) {
-              console.error('Error downloading backup codes:', error);
-              this.showError('Failed to download backup codes');
-            }
-          },
-          
-          // Sessions functions
-          async loadActiveSessions() {
-            try {
-              // Try to load from API first
-              if (window.adminAPI) {
-                try {
-                  const response = await window.adminAPI.getActiveSessions();
-                  if (response && response.success && response.sessions) {
-                    this.activeSessions = response.sessions.map(session => ({
-                      ...session,
-                      lastActive: this.formatSessionTime(session.lastActive),
-                      device: session.device || session.userAgent || 'Unknown Device',
-                      location: session.location || 'Unknown Location',
-                      current: session.current || false
-                    }));
-                    this.saveSessionsToStorage();
-                    return;
-                  }
-                } catch (apiError) {
-                  console.warn('API sessions load failed, using localStorage:', apiError);
-                }
-              }
-              
-              // Fallback to localStorage
-              const storedSessions = localStorage.getItem('umi_active_sessions');
-              if (storedSessions) {
-                this.activeSessions = JSON.parse(storedSessions);
-              } else {
-                // Create default current session
-                this.activeSessions = [{
-                  id: 'current_' + Date.now(),
-                  device: this.getCurrentDeviceInfo(),
-                  location: 'Lusaka, Zambia',
-                  lastActive: 'Just now',
-                  current: true,
-                  ipAddress: '127.0.0.1',
-                  userAgent: navigator.userAgent,
-                  sessionId: this.generateSessionId()
-                }];
-                this.saveSessionsToStorage();
-              }
-            } catch (error) {
-              console.error('Error loading sessions:', error);
-              this.activeSessions = [];
-              this.showError('Failed to load session information');
-            }
-          },
-          
-          async init() {
-            this.loading = true;
-            
-            try {
-              // Setup real-time listeners first
-              this.setupRealtimeListeners();
-              
-              // Load data from localStorage first (for immediate display)
-              this.loadFromLocalStorage();
-              
-              // Then try to sync with API/database
-              await this.loadAccountFromAPI();
-              
-              // Load additional data
-              await this.loadActiveSessions();
-              this.loadInvoices();
-              this.loadUsageStats();
-              
-              // Initialize subscription
-              this.initializeAccountCreation();
-              this.checkTrialStatus();
-              this.checkReadOnlyMode();
-              
-            } catch (error) {
-              console.error('Initialization error:', error);
-              this.showError('Failed to load account data. Please refresh the page.');
-            } finally {
-              this.loading = false;
-            }
-          },
-          
-          generateSessionId() {
-            return 'session_' + Date.now() + '_' + Math.random().toString(36).substr(2, 9);
-          },
-          
-          formatSessionTime(timestamp) {
-            if (!timestamp) return 'Unknown';
-            
-            const date = new Date(timestamp);
-            const now = new Date();
-            const diffMs = now - date;
-            const diffMins = Math.floor(diffMs / 60000);
-            const diffHours = Math.floor(diffMs / 3600000);
-            const diffDays = Math.floor(diffMs / 86400000);
-            
-            if (diffMins < 1) return 'Just now';
-            if (diffMins < 60) return `${diffMins} minute${diffMins !== 1 ? 's' : ''} ago`;
-            if (diffHours < 24) return `${diffHours} hour${diffHours !== 1 ? 's' : ''} ago`;
-            if (diffDays < 7) return `${diffDays} day${diffDays !== 1 ? 's' : ''} ago`;
-            
-            return date.toLocaleDateString();
-          },
-          
-          saveSessionsToStorage() {
-            try {
-              localStorage.setItem('umi_active_sessions', JSON.stringify(this.activeSessions));
-            } catch (error) {
-              console.error('Error saving sessions:', error);
-            }
-          },
-          
-          async revokeSession(sessionId) {
-            try {
-              // Show loading state
-              const revokeButton = event.target;
-              const originalText = revokeButton.innerHTML;
-              revokeButton.innerHTML = '<span class="material-symbols-rounded" style="animation: spin 1s linear infinite;">refresh</span> Revoking...';
-              revokeButton.disabled = true;
-              
-              if (!window.adminAPI) {
-                // Remove from localStorage only
+          showError(message) {
+            console.log('ERROR:', message);
+          }
+        }
+      }
+    </script>
+
+    <!-- Include required styles and scripts -->
+    <link rel="stylesheet" href="../../shared/css/shared-styles.css">
+    <script src="../../shared/js/data-sync.js"></script>
+    <script src="../../shared/js/role-based-access.js"></script>
+    <script src="js/admin-api.js"></script>
+    <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
+</body>
+</html>
+                                                                      // Remove from localStorage only
                 this.activeSessions = this.activeSessions.filter(s => s.id !== sessionId);
                 this.saveSessionsToStorage();
                 this.showSuccess('Session revoked successfully (local only)');

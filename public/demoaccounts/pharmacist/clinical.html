@@ -9,10 +9,6 @@
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@100;400;500;600;700&family=Varela+Round&family=Nunito:wght@400;600;700&display=swap" rel="stylesheet">
   <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Rounded:wght@300;400;500;600;700&display=swap" rel="stylesheet">
   <script src="https://cdn.tailwindcss.com"></script>
-  <script src="https://unpkg.com/alpinejs@3.x.x/dist/cdn.min.js" defer></script>
-  <link rel="stylesheet" href="css/pharmacist-styles.css">
-  <script src="../js/api-client.js"></script>
-  <script src="js/pharmacist-api.js"></script>
   <style>
     :root {
       --color-primary: #000000;
@@ -754,12 +750,6 @@
   </style>
 </head>
 <body>
-  <div x-show="!isAuthenticated" class="demo-banner" x-transition>
-    <span>🔒 Authentication Required: Please login to access clinical decision support tools</span>
-    <button class="close-btn" @click="window.location.href='/public/signin.html'">
-      sign in
-    </button>
-  </div>
 
   <!-- Sidebar -->
   <aside class="sidebar" :class="sidebarOpen ? 'open' : ''">
@@ -1046,523 +1036,173 @@
     function clinicalSystem() {
       return {
         sidebarOpen: false,
-        loading: false,
-        isAuthenticated: false,
-        isDemoMode: true,
-        showRealTimeIndicator: false,
-        demoBannerClosed: false,
-        medications: [],
-        selectedPatient: null,
+        isAuthenticated: true,
         patientSearchQuery: '',
-        patientSearchResults: [],
         showPatientResults: false,
-        
-        // Drug Interaction Data
+        selectedPatient: null,
+        patientSearchResults: [
+          {
+            id: 'P-2024-0892',
+            firstName: 'Sarah',
+            lastName: 'Mwale',
+            dateOfBirth: '1985-03-15',
+            age: 39,
+            gender: 'Female'
+          },
+          {
+            id: 'P-2024-0893',
+            firstName: 'James',
+            lastName: 'Phiri',
+            dateOfBirth: '1992-08-22',
+            age: 31,
+            gender: 'Male'
+          },
+          {
+            id: 'P-2024-0894',
+            firstName: 'Mary',
+            lastName: 'Banda',
+            dateOfBirth: '1978-11-10',
+            age: 45,
+            gender: 'Female'
+          }
+        ],
+        medications: [
+          { id: 'MED-001', name: 'Amoxicillin 500mg' },
+          { id: 'MED-002', name: 'Paracetamol 500mg' },
+          { id: 'MED-003', name: 'Ibuprofen 400mg' },
+          { id: 'MED-004', name: 'Ciprofloxacin 500mg' },
+          { id: 'MED-005', name: 'Lisinopril 10mg' },
+          { id: 'MED-006', name: 'Salbutamol Inhaler' },
+          { id: 'MED-007', name: 'Metformin 500mg' },
+          { id: 'MED-008', name: 'Aspirin 75mg' }
+        ],
         interaction: {
           drug1: '',
           drug2: '',
-          result: null
+          result: ''
         },
-        
-        // Dosage Calculator Data
         dosage: {
           medication: '',
           weight: '',
           age: '',
-          result: null
+          result: ''
         },
-        
-        // Allergy Checker Data
         allergy: {
           patientId: '',
           medication: '',
-          result: null
+          result: ''
         },
-
-        // Initialize API client
-        apiClient: null,
-
-        async init() {
-          // Initialize API client
-          this.apiClient = new PharmacistApi();
-          
-          // Check authentication status
-          this.checkAuthenticationStatus();
-          
-          // Load initial data
-          await this.loadInitialData();
-          
-          // Set up real-time sync indicator for authenticated users
-          if (this.isAuthenticated && !this.isDemoMode) {
-            this.setupRealTimeSync();
-          }
-          
-          // Load demo banner preference
-          this.demoBannerClosed = localStorage.getItem('demoBannerClosed') === 'true';
+        init() {
+          // Initialize with mock data
         },
-
-        checkAuthenticationStatus() {
-          // Check if user is authenticated
-          this.isAuthenticated = !!(this.apiClient.token && this.apiClient.userId && this.apiClient.tenantId);
-          
-          // Determine if we're in demo mode
-          this.isDemoMode = !this.isAuthenticated;
-          
-          console.log('Authentication status:', {
-            isAuthenticated: this.isAuthenticated,
-            isDemoMode: this.isDemoMode,
-            hasToken: !!this.apiClient.token,
-            userId: this.apiClient.userId,
-            tenantId: this.apiClient.tenantId
-          });
-        },
-
-        setupRealTimeSync() {
-          // Set up periodic sync indicator for authenticated users
-          setInterval(() => {
-            if (this.isAuthenticated && !this.isDemoMode) {
-              this.showRealTimeIndicator = true;
-              setTimeout(() => {
-                this.showRealTimeIndicator = false;
-              }, 2000);
-            }
-          }, 30000);
-        },
-
-        async loadInitialData() {
-          try {
-            if (this.isAuthenticated && !this.isDemoMode) {
-              // Load real data from backend
-              await this.loadMedicationsFromBackend();
-            } else {
-              // Demo mode: load from localStorage or use empty array
-              this.loadDemoData();
-            }
-          } catch (error) {
-            console.error('Failed to load initial data:', error);
-            this.showToast('Failed to load medications', 'error');
-            
-            // Fallback to demo mode
-            this.isDemoMode = true;
-            this.loadDemoData();
-          }
-        },
-
-        async loadMedicationsFromBackend() {
-          try {
-            const response = await this.apiClient.clinical.getMedications();
-            this.medications = response.data || [];
-            console.log('Loaded medications from backend:', this.medications.length);
-          } catch (error) {
-            console.error('Failed to load medications from backend:', error);
-            throw error;
-          }
-        },
-
-        loadDemoData() {
-          // Try to load from localStorage first
-          const savedMedications = localStorage.getItem('demo_medications');
-          if (savedMedications) {
-            try {
-              this.medications = JSON.parse(savedMedications);
-              console.log('Loaded medications from localStorage:', this.medications.length);
-              return;
-            } catch (error) {
-              console.error('Failed to parse saved medications:', error);
-            }
-          }
-          
-          // Start with empty array - no sample data
-          this.medications = [];
-          this.saveDemoData();
-          
-          // Show demo toast
-          this.showToast('Demo Mode: No medications available. Add medications through inventory.', 'demo');
-        },
-
-        saveDemoData() {
-          if (this.isDemoMode) {
-            localStorage.setItem('demo_medications', JSON.stringify(this.medications));
-          }
-        },
-
-        // Patient search and selection
-        async searchPatients() {
-          if (this.patientSearchQuery.length < 2) {
-            this.patientSearchResults = [];
+        searchPatients() {
+          if (!this.patientSearchQuery) {
+            this.showPatientResults = false;
             return;
           }
-
-          try {
-            if (this.isAuthenticated && !this.isDemoMode) {
-              // Real backend search
-              const response = await this.apiClient.clinical.searchPatients(this.patientSearchQuery, 10);
-              this.patientSearchResults = response.data || [];
-            } else {
-              // Demo mode: search localStorage or return empty
-              this.searchDemoPatients();
-            }
-          } catch (error) {
-            console.error('Failed to search patients:', error);
-            this.showToast('Failed to search patients', 'error');
-            this.patientSearchResults = [];
-          }
-        },
-
-        searchDemoPatients() {
-          // Demo mode: search from localStorage or return empty
-          const savedPatients = localStorage.getItem('demo_patients');
-          let patients = [];
-          
-          if (savedPatients) {
-            try {
-              patients = JSON.parse(savedPatients);
-            } catch (error) {
-              console.error('Failed to parse saved patients:', error);
-            }
-          }
-          
-          this.patientSearchResults = patients.filter(patient => 
-            patient.firstName.toLowerCase().includes(this.patientSearchQuery.toLowerCase()) ||
-            patient.lastName.toLowerCase().includes(this.patientSearchQuery.toLowerCase()) ||
-            patient.id.toLowerCase().includes(this.patientSearchQuery.toLowerCase())
+          const searchTerm = this.patientSearchQuery.toLowerCase();
+          this.patientSearchResults = this.patientSearchResults.filter(patient => 
+            patient.firstName.toLowerCase().includes(searchTerm) ||
+            patient.lastName.toLowerCase().includes(searchTerm) ||
+            patient.id.toLowerCase().includes(searchTerm)
           );
-          
-          if (this.patientSearchResults.length === 0) {
-            this.showToast('Demo Mode: No patients found. Add patients through the Patients page.', 'demo');
-          }
+          this.showPatientResults = this.patientSearchResults.length > 0;
         },
-
         selectPatient(patient) {
           this.selectedPatient = patient;
-          this.patientSearchQuery = '';
-          this.patientSearchResults = [];
           this.showPatientResults = false;
-          
-          // Auto-fill patient ID in forms
-          this.allergy.patientId = patient.id;
-          
-          this.showToast(`Selected patient: ${patient.firstName} ${patient.lastName}`, 'success');
-          
-          // Save to demo storage
-          if (this.isDemoMode) {
-            localStorage.setItem('demo_selected_patient', JSON.stringify(patient));
-          }
+          this.patientSearchQuery = `${patient.firstName} ${patient.lastName}`;
         },
-
         clearPatient() {
           this.selectedPatient = null;
-          this.allergy.patientId = '';
-          
-          if (this.isDemoMode) {
-            localStorage.removeItem('demo_selected_patient');
-          }
-          
-          this.showToast('Patient selection cleared', 'info');
+          this.patientSearchQuery = '';
+          this.showPatientResults = false;
         },
-
-        // Drug Interaction Checker
-        async checkInteractions() {
+        checkInteractions() {
           if (!this.interaction.drug1 || !this.interaction.drug2) {
-            this.showToast('Please select both medications', 'warning');
+            alert('Please select both medications to check for interactions');
             return;
           }
-
-          if (!this.isAuthenticated && !this.isDemoMode) {
-            this.showToast('Login required to check drug interactions', 'auth-required');
-            return;
-          }
-
-          this.loading = true;
-          try {
-            if (this.isAuthenticated && !this.isDemoMode) {
-              // Real backend API call
-              const response = await this.apiClient.clinical.checkDrugInteractions(
-                this.interaction.drug1, 
-                this.interaction.drug2
-              );
-              
-              // Get severity scoring
-              const severityResponse = await this.apiClient.clinical.getInteractionSeverity(
-                this.interaction.drug1, 
-                this.interaction.drug2
-              );
-              
-              this.interaction.result = this.formatInteractionResult(response.data, severityResponse.data);
-              
-              // Save clinical decision
-              await this.saveClinicalDecision('drug_interaction', {
-                drug1: this.interaction.drug1,
-                drug2: this.interaction.drug2,
-                result: response.data,
-                severity: severityResponse.data
-              });
-              
-            } else {
-              // Demo mode: simulate with localStorage
-              this.simulateInteractionCheck();
-            }
-            
-            this.showToast('Interaction check completed', 'success');
-          } catch (error) {
-            console.error('Failed to check interactions:', error);
-            this.showToast('Failed to check interactions', 'error');
-            this.interaction.result = 'Error occurred while checking interactions.';
-          } finally {
-            this.loading = false;
-          }
-        },
-
-        simulateInteractionCheck() {
-          // Demo mode: check localStorage for saved interactions or simulate
-          const drug1Name = this.medications.find(m => m.id === this.interaction.drug1)?.name || 'Drug 1';
-          const drug2Name = this.medications.find(m => m.id === this.interaction.drug2)?.name || 'Drug 2';
           
-          this.interaction.result = `Demo Mode: No real interaction data available for ${drug1Name} and ${drug2Name}. Login for real clinical data.`;
+          const med1 = this.medications.find(m => m.id === this.interaction.drug1);
+          const med2 = this.medications.find(m => m.id === this.interaction.drug2);
           
-          // Save to demo storage
-          const demoInteractions = JSON.parse(localStorage.getItem('demo_interactions') || '[]');
-          demoInteractions.push({
-            drug1: this.interaction.drug1,
-            drug2: this.interaction.drug2,
-            result: this.interaction.result,
-            timestamp: new Date().toISOString()
-          });
-          localStorage.setItem('demo_interactions', JSON.stringify(demoInteractions));
+          this.interaction.result = `
+            <div class="interaction-result">
+              <h4>Drug Interaction Check Results</h4>
+              <p><strong>Medication 1:</strong> ${med1.name}</p>
+              <p><strong>Medication 2:</strong> ${med2.name}</p>
+              <div class="interaction-warning">
+                <p><strong>Interaction Level:</strong> Moderate</p>
+                <p><strong>Recommendation:</strong> Monitor patient for increased risk of gastrointestinal side effects. Consider alternative therapy if patient is elderly or has history of GI issues.</p>
+                <p><strong>Management:</strong> Take medications at least 2 hours apart if both are necessary.</p>
+              </div>
+            </div>
+          `;
         },
-
-        // Dosage Calculator
-        async calculateDosage() {
+        calculateDosage() {
           if (!this.dosage.medication || !this.dosage.weight || !this.dosage.age) {
-            this.showToast('Please fill in all required fields', 'warning');
+            alert('Please fill in all required fields');
             return;
           }
-
-          if (!this.isAuthenticated && !this.isDemoMode) {
-            this.showToast('Login required to calculate dosage', 'auth-required');
-            return;
-          }
-
-          this.loading = true;
-          try {
-            if (this.isAuthenticated && !this.isDemoMode) {
-              // Real backend API call
-              const response = await this.apiClient.clinical.calculateDosage(
-                this.dosage.medication,
-                parseFloat(this.dosage.weight),
-                parseInt(this.dosage.age)
-              );
-              
-              this.dosage.result = response.data.dosageRecommendation;
-              
-              // Save clinical decision
-              await this.saveClinicalDecision('dosage_calculation', {
-                medication: this.dosage.medication,
-                weight: this.dosage.weight,
-                age: this.dosage.age,
-                result: response.data
-              });
-              
-            } else {
-              // Demo mode: simulate
-              this.simulateDosageCalculation();
-            }
-            
-            this.showToast('Dosage calculation completed', 'success');
-          } catch (error) {
-            console.error('Failed to calculate dosage:', error);
-            this.showToast('Failed to calculate dosage', 'error');
-            this.dosage.result = 'Error occurred while calculating dosage.';
-          } finally {
-            this.loading = false;
-          }
-        },
-
-        simulateDosageCalculation() {
-          // Demo mode: basic calculation
-          const medicationName = this.medications.find(m => m.id === this.dosage.medication)?.name || 'Medication';
+          
+          const med = this.medications.find(m => m.id === this.dosage.medication);
           const weight = parseFloat(this.dosage.weight);
+          const age = parseInt(this.dosage.age);
           
-          this.dosage.result = `Demo Mode: Basic dosage calculation for ${medicationName} (${weight}kg). Login for accurate clinical dosing.`;
+          let dosage = '';
+          if (med.name.includes('Amoxicillin')) {
+            dosage = `${Math.round(weight * 25)}mg twice daily for 7 days`;
+          } else if (med.name.includes('Paracetamol')) {
+            dosage = `${Math.round(weight * 15)}mg every 6 hours as needed, maximum 4 doses per day`;
+          } else if (med.name.includes('Ibuprofen')) {
+            dosage = `${Math.round(weight * 10)}mg every 8 hours with food`;
+          } else {
+            dosage = 'Consult pediatric dosing guidelines for accurate calculation';
+          }
           
-          // Save to demo storage
-          const demoDosages = JSON.parse(localStorage.getItem('demo_dosages') || '[]');
-          demoDosages.push({
-            medication: this.dosage.medication,
-            weight: this.dosage.weight,
-            age: this.dosage.age,
-            result: this.dosage.result,
-            timestamp: new Date().toISOString()
-          });
-          localStorage.setItem('demo_dosages', JSON.stringify(demoDosages));
+          this.dosage.result = `
+            <div class="dosage-result">
+              <h4>Dosage Calculation Results</h4>
+              <p><strong>Medication:</strong> ${med.name}</p>
+              <p><strong>Patient Weight:</strong> ${weight} kg</p>
+              <p><strong>Patient Age:</strong> ${age} years</p>
+              <p><strong>Recommended Dosage:</strong> ${dosage}</p>
+              <div class="dosage-note">
+                <p><strong>Note:</strong> This is a general calculation. Always consider patient-specific factors, renal function, and clinical judgment.</p>
+              </div>
+            </div>
+          `;
         },
-
-        // Allergy Checker
-        async checkAllergies() {
+        checkAllergies() {
           if (!this.allergy.patientId || !this.allergy.medication) {
-            this.showToast('Please enter patient ID and select medication', 'warning');
+            alert('Please fill in all required fields');
             return;
           }
-
-          if (!this.isAuthenticated && !this.isDemoMode) {
-            this.showToast('Login required to check allergies', 'auth-required');
-            return;
-          }
-
-          this.loading = true;
-          try {
-            if (this.isAuthenticated && !this.isDemoMode) {
-              // Real backend API call
-              const response = await this.apiClient.clinical.checkAllergies(
-                this.allergy.patientId,
-                this.allergy.medication
-              );
-              
-              this.allergy.result = this.formatAllergyResult(response.data);
-              
-              // Save clinical decision
-              await this.saveClinicalDecision('allergy_check', {
-                patientId: this.allergy.patientId,
-                medication: this.allergy.medication,
-                result: response.data
-              });
-              
-            } else {
-              // Demo mode: simulate
-              this.simulateAllergyCheck();
-            }
-            
-            this.showToast('Allergy check completed', 'success');
-          } catch (error) {
-            console.error('Failed to check allergies:', error);
-            this.showToast('Failed to check allergies', 'error');
-            this.allergy.result = 'Error occurred while checking allergies.';
-          } finally {
-            this.loading = false;
-          }
-        },
-
-        simulateAllergyCheck() {
-          // Demo mode: basic allergy check
-          const medicationName = this.medications.find(m => m.id === this.allergy.medication)?.name || 'Medication';
           
-          this.allergy.result = `Demo Mode: No real allergy data available for patient ${this.allergy.patientId} and ${medicationName}. Login for actual allergy screening.`;
+          const med = this.medications.find(m => m.id === this.allergy.medication);
+          const patient = this.patientSearchResults.find(p => p.id === this.allergy.patientId) || this.selectedPatient;
           
-          // Save to demo storage
-          const demoAllergies = JSON.parse(localStorage.getItem('demo_allergies') || '[]');
-          demoAllergies.push({
-            patientId: this.allergy.patientId,
-            medication: this.allergy.medication,
-            result: this.allergy.result,
-            timestamp: new Date().toISOString()
-          });
-          localStorage.setItem('demo_allergies', JSON.stringify(demoAllergies));
-        },
-
-        // Save clinical decision (backend only)
-        async saveClinicalDecision(type, data) {
-          if (this.isAuthenticated && !this.isDemoMode) {
-            try {
-              await this.apiClient.clinical.saveClinicalDecision({
-                type,
-                data,
-                timestamp: new Date().toISOString(),
-                userId: this.apiClient.userId
-              });
-            } catch (error) {
-              console.error('Failed to save clinical decision:', error);
-              // Don't show error to user as this is background operation
-            }
-          }
-        },
-
-        // Format results
-        formatInteractionResult(data, severityData) {
-          if (data.severity === 'high') {
-            return `<div style="color: #ef4444; font-weight: 600;">
-              ⚠️ ${data.interactionType || 'High Risk Interaction'}
+          this.allergy.result = `
+            <div class="allergy-result">
+              <h4>Allergy Check Results</h4>
+              <p><strong>Patient:</strong> ${patient.firstName} ${patient.lastName}</p>
+              <p><strong>Medication:</strong> ${med.name}</p>
+              <div class="allergy-status">
+                <p><strong>Allergy Status:</strong> No known allergies to this medication</p>
+                <p><strong>Recommendation:</strong> Medication can be safely administered</p>
+              </div>
+              <div class="allergy-note">
+                <p><strong>Important:</strong> Always monitor patient for any adverse reactions, especially with first-time administration.</p>
+              </div>
             </div>
-            <div style="margin-top: 0.5rem;">${data.description || 'Significant interaction detected'}</div>
-            <div style="margin-top: 0.5rem; font-size: 0.75rem;">
-              Severity Score: ${severityData.score || 'N/A'} (${severityData.level || 'Unknown'})
-            </div>`;
-          }
-          return data.description || 'No clinically significant interactions detected.';
+          `;
         },
-
-        formatAllergyResult(data) {
-          if (data.allergyDetected) {
-            return `<div style="color: #ef4444; font-weight: 600;">
-              ⚠️ Allergy Alert
-            </div>
-            <div style="margin-top: 0.5rem;">${data.allergyType || 'Allergy detected'}</div>
-            <div style="margin-top: 0.5rem;">${data.description || 'Patient has known allergy'}</div>`;
-          }
-          return 'No known allergies detected for this medication.';
-        },
-
-        // Toast notification system
-        showToast(message, type = 'info') {
-          const toast = document.createElement('div');
-          toast.className = `toast toast-${type}`;
-          toast.textContent = message;
-          
-          document.body.appendChild(toast);
-          
-          // Trigger animation
-          setTimeout(() => toast.classList.add('show'), 100);
-          
-          // Remove toast after 4 seconds
-          setTimeout(() => {
-            toast.classList.remove('show');
-            setTimeout(() => {
-              if (toast.parentNode) {
-                toast.parentNode.removeChild(toast);
-              }
-            }, 300);
-          }, 4000);
-        },
-
-        // Demo banner management
-        closeDemoBanner() {
-          this.demoBannerClosed = true;
-          localStorage.setItem('demoBannerClosed', 'true');
-        },
-
-        // Redirect to login
-        redirectToLogin() {
-          this.showToast('Redirecting to login...', 'info');
-          setTimeout(() => {
-            window.location.href = '/public/admin-signin.html';
-          }, 1500);
-        },
-
-        // Logout function
-        handleLogout() {
+        logout() {
           if (confirm('Are you sure you want to logout?')) {
-            if (this.isAuthenticated && !this.isDemoMode) {
-              // Clear backend auth
-              this.apiClient.clearAuth();
-            }
-            
-            // Clear demo data
-            if (this.isDemoMode) {
-              localStorage.removeItem('demo_medications');
-              localStorage.removeItem('demo_patients');
-              localStorage.removeItem('demo_selected_patient');
-              localStorage.removeItem('demo_interactions');
-              localStorage.removeItem('demo_dosages');
-              localStorage.removeItem('demo_allergies');
-            }
-            
-            this.showToast('Logging out...', 'info');
-            setTimeout(() => {
-              window.location.href = 'home.html';
-            }, 1500);
+            window.location.href = '../signin.html';
           }
         }
-      }
-    }
-  </script>
+      </script>
 </body>
 </html>

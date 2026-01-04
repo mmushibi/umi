@@ -690,42 +690,108 @@
         sidebarOpen: false,
         searchQuery: '',
         pharmacyInfo: {
-          name: 'Umi Health Pharmacy',
-          location: 'Main Branch - Downtown'
+          name: 'Umi Health Pharmacy - Lusaka',
+          location: 'Cairo Road, Lusaka, Zambia',
+          phone: '+260 211 234567',
+          email: 'info@umihealth.co.zm',
+          licenseNumber: 'ZAMB-PH-2024-001'
         },
         faqs: [
           {
             id: 1,
             question: 'How do I reset my password?',
-            answer: 'Go to Account Settings > Security > Change Password. Enter your current password and then your new password twice to confirm.',
+            answer: 'Go to Account Settings > Security > Change Password. Enter your current password and then your new password twice to confirm. For security, passwords must be at least 8 characters long.',
             open: false
           },
           {
             id: 2,
             question: 'How do I add a new patient?',
-            answer: 'Navigate to the Patients page and click the "Add Patient" button. Fill in the required information including name, contact details, and medical history.',
+            answer: 'Navigate to the Patients page and click the "Add Patient" button. Fill in the required information including NRC number, contact details, and NHIS information if applicable.',
             open: false
           },
           {
             id: 3,
             question: 'How do I process a prescription?',
-            answer: 'Go to the Prescriptions page, search for the patient, and click "New Prescription". Enter the medication details, dosage, and prescribing information.',
+            answer: 'Go to the Prescriptions page, search for the patient using their ID or name, and click "New Prescription". Enter the medication details, dosage, and prescribing doctor information.',
             open: false
           },
           {
             id: 4,
             question: 'How do I check drug interactions?',
-            answer: 'Use the Clinical Decision Support tool. Select the medications and the system will automatically check for potential interactions.',
+            answer: 'Use the Clinical Decision Support tool. Select the medications from the dropdown lists and the system will automatically check for potential interactions specific to Zambian medication guidelines.',
             open: false
           },
           {
             id: 5,
             question: 'How do I update inventory levels?',
-            answer: 'Navigate to Inventory, select the product, and click "Adjust Stock". Enter the new quantity and reason for the adjustment.',
+            answer: 'Navigate to Inventory, select the product, and click "Adjust Stock". Enter the new quantity and reason for the adjustment. All changes are logged for compliance purposes.',
+            open: false
+          },
+          {
+            id: 6,
+            question: 'What payment methods are accepted?',
+            answer: 'We accept cash, mobile money (MTN, Airtel, Zamtel), bank transfers, and insurance claims from major Zambian insurance providers.',
+            open: false
+          },
+          {
+            id: 7,
+            question: 'How do I generate compliance reports?',
+            answer: 'Go to Reports > Compliance Reports. Select the date range and report type. Reports are automatically formatted according to Pharmacy and Poisons Board Zambia requirements.',
             open: false
           }
         ],
-
+        supportContacts: [
+          {
+            type: 'Technical Support',
+            name: 'IT Helpdesk',
+            phone: '+260 977 123456',
+            email: 'support@umihealth.co.zm',
+            hours: 'Monday-Friday 8:00-17:00'
+          },
+          {
+            type: 'Pharmacy Support',
+            name: 'Senior Pharmacist',
+            phone: '+260 966 987654',
+            email: 'pharmacy@umihealth.co.zm',
+            hours: 'Monday-Saturday 8:00-18:00'
+          },
+          {
+            type: 'Emergency Support',
+            name: 'On-call Pharmacist',
+            phone: '+260 955 555555',
+            email: 'emergency@umihealth.co.zm',
+            hours: '24/7 Emergency'
+          }
+        ],
+        trainingModules: [
+          {
+            id: 'TRN-001',
+            title: 'Good Pharmacy Practice (GPP)',
+            duration: '2 hours',
+            status: 'completed',
+            lastCompleted: '2024-05-15',
+            certificateExpiry: '2025-05-14'
+          },
+          {
+            id: 'TRN-002',
+            title: 'Controlled Substances Handling',
+            duration: '1.5 hours',
+            status: 'completed',
+            lastCompleted: '2024-04-20',
+            certificateExpiry: '2025-04-19'
+          },
+          {
+            id: 'TRN-003',
+            title: 'Zambian Drug Regulations Update',
+            duration: '1 hour',
+            status: 'pending',
+            lastCompleted: null,
+            certificateExpiry: null
+          }
+        ],
+        init() {
+          // Initialize with mock data
+        },
         get filteredFAQs() {
           if (!this.searchQuery) return this.faqs;
           
@@ -735,43 +801,38 @@
             faq.answer.toLowerCase().includes(query)
           );
         },
-
         searchHelp() {
           // Search functionality is handled by the computed property
         },
-
         toggleFAQ(id) {
           const faq = this.faqs.find(f => f.id === id);
           if (faq) {
             faq.open = !faq.open;
           }
         },
-
-        openSection(section) {
-          console.log('Opening section:', section);
-          // Implementation for opening different help sections
-          switch(section) {
-            case 'guides':
-              console.log('Opening user guides...');
-              break;
-            case 'tutorials':
-              console.log('Opening video tutorials...');
-              break;
-            case 'faq':
-              console.log('Opening FAQ section...');
-              break;
-            case 'contact':
-              console.log('Opening contact support...');
-              break;
+        contactSupport(type) {
+          const contact = this.supportContacts.find(c => c.type === type);
+          if (contact) {
+            alert(`Contact ${contact.name}:\nPhone: ${contact.phone}\nEmail: ${contact.email}\nHours: ${contact.hours}`);
           }
         },
-
+        startTraining(moduleId) {
+          const module = this.trainingModules.find(m => m.id === moduleId);
+          if (module) {
+            if (module.status === 'completed') {
+              alert(`You already completed this training on ${module.lastCompleted}`);
+            } else {
+              alert(`Starting training: ${module.title}`);
+            }
+          }
+        },
+        downloadUserGuide() {
+          alert('User Guide download started. The file will be saved to your downloads folder.');
+        },
         logout() {
-          console.log('Logging out...');
-          // Implementation for logout
+          if (confirm('Are you sure you want to logout?')) {
+            window.location.href = '../signin.html';
+          }
         }
       }
     }
-  </script>
-</body>
-</html>

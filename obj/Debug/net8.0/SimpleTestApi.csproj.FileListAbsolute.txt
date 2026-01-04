@@ -1,9 +1,0 @@
-C:\Users\sepio\Desktop\Umi_Health\obj\Debug\net8.0\SimpleTestApi.csproj.AssemblyReference.cache
-C:\Users\sepio\Desktop\Umi_Health\obj\Debug\net8.0\rpswa.dswa.cache.json
-C:\Users\sepio\Desktop\Umi_Health\obj\Debug\net8.0\SimpleTestApi.GeneratedMSBuildEditorConfig.editorconfig
-C:\Users\sepio\Desktop\Umi_Health\obj\Debug\net8.0\SimpleTestApi.AssemblyInfoInputs.cache
-C:\Users\sepio\Desktop\Umi_Health\obj\Debug\net8.0\SimpleTestApi.AssemblyInfo.cs
-C:\Users\sepio\Desktop\Umi_Health\obj\Debug\net8.0\SimpleTestApi.csproj.CoreCompileInputs.cache
-C:\Users\sepio\Desktop\Umi_Health\obj\Debug\net8.0\SimpleTestApi.MvcApplicationPartsAssemblyInfo.cs
-C:\Users\sepio\Desktop\Umi_Health\obj\Debug\net8.0\SimpleTestApi.MvcApplicationPartsAssemblyInfo.cache
-C:\Users\sepio\Desktop\Umi_Health\obj\Debug\net8.0\SimpleTestApi.sourcelink.json

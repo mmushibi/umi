@@ -910,6 +910,27 @@
   </div>
 
   <script>
+    // Fake Zambian Mock Data
+    const zambianMockData = {
+      firstNames: ['Chanda', 'Bwalya', 'Mulenga', 'Phiri', 'Banda', 'Tembo', 'Kunda', 'Mwansa', 'Chileshe', 'Musonda'],
+      lastNames: ['Bwalya', 'Phiri', 'Banda', 'Tembo', 'Kunda', 'Mwansa', 'Chileshe', 'Musonda', 'Kaluba', 'Mwewa'],
+      
+      products: [
+        { id: 1, name: 'Panadol Extra', price: 25.50, icon: 'medication', stock: 150 },
+        { id: 2, name: 'Artemether 80mg', price: 45.00, icon: 'medication', stock: 89 },
+        { id: 3, name: 'Amoxicillin 500mg', price: 85.75, icon: 'medication', stock: 120 },
+        { id: 4, name: 'Vitamin C 1000mg', price: 35.20, icon: 'medication', stock: 200 },
+        { id: 5, name: 'Paracetamol 500mg', price: 15.30, icon: 'medication', stock: 300 },
+        { id: 6, name: 'Ibuprofen 400mg', price: 28.90, icon: 'medication', stock: 95 },
+        { id: 7, name: 'Cough Syrup', price: 42.50, icon: 'medication', stock: 67 },
+        { id: 8, name: 'Antiseptic Solution', price: 55.00, icon: 'medication', stock: 45 },
+        { id: 9, name: 'Bandage Pack', price: 18.75, icon: 'medication', stock: 180 },
+        { id: 10, name: 'Thermometer', price: 125.00, icon: 'medication', stock: 30 },
+        { id: 11, name: 'Blood Pressure Monitor', price: 450.00, icon: 'medication', stock: 15 },
+        { id: 12, name: 'Glucometer', price: 280.50, icon: 'medication', stock: 25 }
+      ]
+    };
+
     document.addEventListener('alpine:init', () => {
       console.log('Alpine.js initialized');
     });
@@ -926,27 +947,9 @@
         currentReceipt: null,
         receiptCounter: 1000,
         isProcessingPayment: false,
-        products: [],
+        products: zambianMockData.products,
         
-        // Initialize products from backend
-        async loadProducts() {
-          try {
-            const response = await fetch('/api/products');
-            if (response.ok) {
-              this.products = await response.json();
-            } else {
-              console.warn('No products available from backend');
-              this.products = [];
-            }
-          } catch (error) {
-            console.error('Failed to load products:', error);
-            this.products = [];
-          }
-        },
-        
-        // Initialize products when page loads
-        async init() {
-          await this.loadProducts();
+        init() {
           console.log('Products loaded:', this.products.length);
         },
         
@@ -1036,79 +1039,51 @@
             }
           }
           
-          // Process payment based on method
-          this.processPaymentByMethod();
-        },
-        
-        processPaymentByMethod(method) {
+          // Process payment - no backend needed
           this.isProcessingPayment = true;
           
-          // Simulate API call for different payment methods
           setTimeout(() => {
-            let success = true;
-            let transactionId = '';
+            const change = this.paymentMethod === 'cash' ? parseFloat(this.amountReceived) - this.total : 0;
             
-            switch(method) {
-              case 'mobile':
-                transactionId = 'MOBILE_' + Date.now();
-                break;
-              case 'card':
-                transactionId = 'CARD_' + Date.now();
-                break;
-              case 'insurance':
-                transactionId = 'INS_' + Date.now();
-                break;
-              case 'cash':
-                transactionId = 'CASH_' + Date.now();
-                break;
-            }
+            this.currentReceipt = {
+              number: 'R' + (++this.receiptCounter),
+              date: new Date().toLocaleString(),
+              cashier: 'Bwalya Chanda',
+              paymentMethod: this.paymentMethod.charAt(0).toUpperCase() + this.paymentMethod.slice(1),
+              transactionType: 'SALE',
+              merchantId: 'MER001',
+              terminalId: 'TER001',
+              status: 'APPROVED',
+              authCode: this.generateAuthCode(),
+              statusCode: '00',
+              rrn: this.generateRRN(),
+              stan: this.generateSTAN(),
+              aid: this.generateAID(),
+              maskedCardNumber: this.generateMaskedCardNumber(),
+              cardType: this.generateCardType(),
+              accountType: this.generateAccountType(),
+              phoneNumber: this.paymentMethod === 'mobile' ? '+260976123456' : null,
+              insuranceProvider: this.paymentMethod === 'insurance' ? 'Zamhealth Insurance' : null,
+              policyNumber: this.paymentMethod === 'insurance' ? 'POL123456' : null,
+              memberNumber: this.paymentMethod === 'insurance' ? 'MEM789012' : null,
+              transactionId: 'TXN' + Date.now(),
+              items: [...this.cartItems],
+              subtotal: this.subtotal,
+              tax: this.tax,
+              total: this.total,
+              change: change
+            };
             
-            if (success) {
-              const change = this.paymentMethod === 'cash' ? parseFloat(this.amountReceived) - this.total : 0;
-              
-              this.currentReceipt = {
-                number: 'R' + (++this.receiptCounter),
-                date: new Date().toLocaleString(),
-                cashier: this.getCashierName(),
-                paymentMethod: this.paymentMethod.charAt(0).toUpperCase() + this.paymentMethod.slice(1),
-                transactionType: 'SALE',
-                merchantId: this.getMerchantId(),
-                terminalId: this.getTerminalId(),
-                status: 'APPROVED',
-                authCode: this.generateAuthCode(),
-                statusCode: '00',
-                rrn: this.generateRRN(),
-                stan: this.generateSTAN(),
-                aid: this.generateAID(),
-                maskedCardNumber: this.generateMaskedCardNumber(),
-                cardType: this.generateCardType(),
-                accountType: this.generateAccountType(),
-                phoneNumber: this.paymentMethod === 'mobile' ? this.getPhoneNumber() : null,
-                insuranceProvider: this.paymentMethod === 'insurance' ? this.getInsuranceProvider() : null,
-                policyNumber: this.paymentMethod === 'insurance' ? this.getPolicyNumber() : null,
-                memberNumber: this.paymentMethod === 'insurance' ? this.getMemberNumber() : null,
-                transactionId: transactionId,
-                items: [...this.cartItems],
-                subtotal: this.subtotal,
-                tax: this.tax,
-                total: this.total,
-                change: change
-              };
-              
-              this.showReceipt = true;
-              this.cartItems = [];
-              this.amountReceived = '';
-              
-              // Send receipt data to iframe after a short delay
-              setTimeout(() => {
-                this.sendReceiptDataToIframe();
-              }, 500);
-              
-              console.log('Payment processed successfully');
-            } else {
-              alert('Payment failed. Please try again.');
-            }
+            this.showReceipt = true;
+            this.cartItems = [];
+            this.amountReceived = '';
             
+            // Send receipt data to iframe after a short delay
+            setTimeout(() => {
+              this.sendReceiptDataToIframe();
+            }, 500);
+            
+            console.log('Payment processed successfully');
             this.isProcessingPayment = false;
           }, 2000);
         },
@@ -1124,57 +1099,6 @@
           } else {
             console.error('Could not send receipt data to iframe');
           }
-        },
-        
-        // Initialize products when page loads
-        async init() {
-          await this.loadProducts();
-          console.log('Products loaded:', this.products.length);
-        },
-        getCashierName() {
-          return localStorage.getItem('cashierName') || 'Cashier';
-        },
-        
-        getMerchantId() {
-          return localStorage.getItem('merchantId') || 'MER001';
-        },
-        
-        getTerminalId() {
-          return localStorage.getItem('terminalId') || 'TER001';
-        },
-        
-        getPhoneNumber() {
-          const phone = prompt('Enter customer phone number for mobile payment:');
-          return phone || '+260123456789';
-        },
-        
-        getExpiryDate() {
-          const expiry = prompt('Enter expiry date (MM/YY):');
-          return expiry || '12/25';
-        },
-        
-        getCVV() {
-          const cvv = prompt('Enter CVV:');
-          return cvv || '123';
-        },
-        
-        getInsuranceProvider() {
-          const provider = prompt('Enter insurance provider:');
-          return provider || 'Insurance Provider';
-        },
-        
-        getPolicyNumber() {
-          const policy = prompt('Enter policy number:');
-          return policy || 'POL123456';
-        },
-        
-        getMemberNumber() {
-          const member = prompt('Enter member number:');
-          return member || 'MEM789012';
-        },
-        
-        simulateDelay(ms) {
-          return new Promise(resolve => setTimeout(resolve, ms));
         },
         
         // Professional receipt data generators
@@ -1345,39 +1269,12 @@
         
         logout() {
           if (confirm('Are you sure you want to logout?')) {
-            window.location.href = '../public/admin-signin.html';
+            window.location.href = '../index.html';
           }
         }
       }
     }
   </script>
   <script src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js" defer></script>
-  <script>
-    // Initialize POS system when Alpine.js is ready
-    document.addEventListener('alpine:initialized', () => {
-      // Get the Alpine.js data and initialize products
-      Alpine.effect(() => {
-        const posData = Alpine.$data(document.querySelector('[x-data]'));
-        if (posData && posData.init) {
-          posData.init();
-        }
-      });
-    });
-    
-    // Fallback initialization if Alpine.js doesn't load properly
-    setTimeout(() => {
-      if (typeof Alpine === 'undefined') {
-        console.error('Alpine.js failed to load');
-        document.querySelectorAll('[@click]').forEach(btn => {
-          btn.addEventListener('click', function(e) {
-            e.preventDefault();
-            console.log('Fallback click handler for:', this.textContent);
-          });
-        });
-      } else {
-        console.log('Alpine.js is available');
-      }
-    }, 2000);
-  </script>
 </body>
 </html>

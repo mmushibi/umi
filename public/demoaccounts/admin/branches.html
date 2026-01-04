@@ -996,7 +996,41 @@
         showAddBranchModal: false,
         showEditBranchModal: false,
         editingBranch: null,
-        branches: [],
+        branches: [
+          {
+            id: 'branch_1',
+            name: 'Banda Pharmacy - Main Branch',
+            code: 'LUS001',
+            phone: '+260 211 234 567',
+            email: 'main@bandapharmacy.zm',
+            address: 'Plot 1234, Cairo Road',
+            city: 'Lusaka',
+            country: 'Zambia',
+            isActive: true
+          },
+          {
+            id: 'branch_2',
+            name: 'Banda Pharmacy - Kitwe',
+            code: 'KIT001',
+            phone: '+260 212 345 678',
+            email: 'kitwe@bandapharmacy.zm',
+            address: 'Plot 5678, Obi Avenue',
+            city: 'Kitwe',
+            country: 'Zambia',
+            isActive: true
+          },
+          {
+            id: 'branch_3',
+            name: 'Banda Pharmacy - Livingstone',
+            code: 'LIV001',
+            phone: '+260 213 456 789',
+            email: 'livingstone@bandapharmacy.zm',
+            address: 'Plot 9012, Mosi-oa-Tunya Road',
+            city: 'Livingstone',
+            country: 'Zambia',
+            isActive: false
+          }
+        ],
         currentTier: {
           name: 'Care',
           maxBranches: 1
@@ -1016,107 +1050,17 @@
           location: 'Main Branch'
         },
         userInfo: {
-          name: 'Admin User',
-          initials: 'AU',
+          name: 'Chanda Banda',
+          initials: 'CB',
           role: 'Administrator'
         },
 
         init() {
-          this.loadBranchData();
-          this.loadUserInfo();
-          this.loadPharmacyInfo();
-          this.determineCurrentTier();
-          this.setupRealtimeSync();
+          // Initialize with mock Zambian data - no backend calls
+          this.showSuccess('Branches loaded successfully with Zambian data');
         },
 
-        loadBranchData() {
-          // Load branches from API or localStorage
-          const savedBranches = localStorage.getItem('umi_branches');
-          if (savedBranches) {
-            this.branches = JSON.parse(savedBranches);
-          } else {
-            // Load main branch from account settings
-            this.loadMainBranchFromAccount();
-          }
-        },
-
-        loadMainBranchFromAccount() {
-          const tenant = JSON.parse(localStorage.getItem('umi_current_tenant') || '{}');
-          if (tenant && tenant.name) {
-            this.branches = [{
-              id: 'main_branch',
-              name: tenant.name || 'Main Pharmacy',
-              code: 'MAIN',
-              phone: tenant.phone || '',
-              email: tenant.email || '',
-              address: tenant.address || '',
-              city: tenant.city || 'Lusaka',
-              country: 'Zambia',
-              isActive: true,
-              isMain: true
-            }];
-            this.saveBranches();
-          }
-        },
-
-        loadUserInfo() {
-          const currentUser = JSON.parse(localStorage.getItem('umi_currentUser') || '{}');
-          this.userInfo = {
-            name: currentUser.name || 'Admin User',
-            initials: this.getInitials(currentUser.name || 'Admin User'),
-            role: currentUser.role || 'Administrator'
-          };
-        },
-
-        loadPharmacyInfo() {
-          const subscription = JSON.parse(localStorage.getItem('umi_subscription') || '{}');
-          this.pharmacyInfo = {
-            name: subscription.pharmacyName || 'Main Pharmacy',
-            location: subscription.location || 'Main Branch'
-          };
-        },
-
-        determineCurrentTier() {
-          const subscription = JSON.parse(localStorage.getItem('umi_subscription') || '{}');
-          const planType = subscription.planType || 'Care';
-          
-          const tierConfig = {
-            'Care': { name: 'Care', maxBranches: 1 },
-            'Care Plus': { name: 'Care Plus', maxBranches: 3 },
-            'Care Pro': { name: 'Care Pro', maxBranches: 10 }
-          };
-          
-          this.currentTier = tierConfig[planType] || tierConfig['Care'];
-        },
-
-        canManageBranches() {
-          return this.currentTier.maxBranches > 1;
-        },
-
-        canAddBranch() {
-          return this.branches.length < this.currentTier.maxBranches;
-        },
-
-        canDeleteBranch() {
-          return this.branches.length > 1; // Can't delete the last branch
-        },
-
-        getNextTier() {
-          const tiers = [
-            { name: 'Care', maxBranches: 1 },
-            { name: 'Care Plus', maxBranches: 3 },
-            { name: 'Care Pro', maxBranches: 10 }
-          ];
-          
-          const currentIndex = tiers.findIndex(t => t.name === this.currentTier.name);
-          return currentIndex < tiers.length - 1 ? tiers[currentIndex + 1] : tiers[currentIndex];
-        },
-
-        isBranchFormValid() {
-          return this.branchForm.name.trim() !== '' && 
-                 this.branchForm.code.trim() !== '';
-        },
-
+        // Simple mock functions - no backend calls
         editBranch(branch) {
           this.editingBranch = branch;
           this.branchForm = { ...branch };
@@ -1124,19 +1068,17 @@
         },
 
         deleteBranch(branch) {
-          if (!this.canDeleteBranch()) {
-            alert('Cannot delete the last branch.');
-            return;
-          }
-          
-          if (confirm(`Are you sure you want to delete "${branch.name}"? This action cannot be undone.`)) {
+          if (confirm('Are you sure you want to delete this branch?')) {
             this.branches = this.branches.filter(b => b.id !== branch.id);
-            this.saveBranches();
+            this.showSuccess('Branch deleted successfully!');
           }
         },
 
         saveBranch() {
-          if (!this.isBranchFormValid()) return;
+          if (!this.isBranchFormValid()) {
+            this.showError('Please fill in all required fields');
+            return;
+          }
 
           if (this.editingBranch) {
             // Update existing branch
@@ -1144,92 +1086,24 @@
             if (index !== -1) {
               this.branches[index] = { ...this.branchForm, id: this.editingBranch.id };
             }
+            this.showSuccess('Branch updated successfully!');
           } else {
             // Add new branch
             const newBranch = {
               ...this.branchForm,
-              id: this.generateId()
+              id: 'branch_' + Date.now()
             };
             this.branches.push(newBranch);
+            this.showSuccess('Branch added successfully!');
           }
 
-          this.saveBranches();
           this.closeModals();
-        },
-
-        saveBranches() {
-          localStorage.setItem('umi_branches', JSON.stringify(this.branches));
-          
-          // Trigger real-time sync if available
-          if (window.adminDataSync) {
-            window.adminDataSync.broadcast('branches', this.branches);
-          }
-          
-          // Update tenant info if main branch changed
-          this.updateTenantInfo();
-        },
-
-        updateTenantInfo() {
-          const mainBranch = this.branches.find(b => b.isMain || b.id === 'main_branch');
-          if (mainBranch) {
-            const tenant = JSON.parse(localStorage.getItem('umi_current_tenant') || '{}');
-            
-            // Update tenant with main branch info
-            tenant.name = mainBranch.name;
-            tenant.phone = mainBranch.phone;
-            tenant.email = mainBranch.email;
-            tenant.address = mainBranch.address;
-            tenant.city = mainBranch.city;
-            tenant.country = mainBranch.country;
-            
-            localStorage.setItem('umi_current_tenant', JSON.stringify(tenant));
-            
-            // Broadcast tenant update
-            if (window.adminDataSync) {
-              window.adminDataSync.broadcast('tenant', tenant);
-            }
-          }
-        },
-
-        setupRealtimeSync() {
-          // Listen for branch updates from other tabs
-          if (window.adminDataSync) {
-            window.adminDataSync.subscribe('branches', (branches) => {
-              if (branches && Array.isArray(branches)) {
-                this.branches = branches;
-              }
-            });
-            
-            window.adminDataSync.subscribe('tenant', (tenant) => {
-              if (tenant) {
-                this.pharmacyInfo = {
-                  name: tenant.name || 'Main Pharmacy',
-                  location: `${tenant.city || 'Lusaka'}, ${tenant.country || 'Zambia'}`
-                };
-              }
-            });
-          }
-          
-          // Listen for storage events from other tabs
-          window.addEventListener('storage', (e) => {
-            if (e.key === 'umi_branches' && e.newValue) {
-              try {
-                this.branches = JSON.parse(e.newValue);
-              } catch (error) {
-                console.warn('Failed to parse branches update:', error);
-              }
-            }
-          });
         },
 
         closeModals() {
           this.showAddBranchModal = false;
           this.showEditBranchModal = false;
           this.editingBranch = null;
-          this.resetBranchForm();
-        },
-
-        resetBranchForm() {
           this.branchForm = {
             name: '',
             code: '',
@@ -1242,34 +1116,32 @@
           };
         },
 
-        generateId() {
-          return 'branch_' + Date.now() + '_' + Math.random().toString(36).substr(2, 9);
-        },
-
-        getInitials(name) {
-          return name.split(' ').map(n => n[0]).join('').toUpperCase().slice(0, 2);
-        },
-
         logout() {
-          localStorage.removeItem('umi_currentUser');
-          localStorage.removeItem('umi_token');
-          window.location.href = '../../index.html';
+          this.showSuccess('Logged out successfully!');
+          setTimeout(() => {
+            window.location.href = '../admin-signin.html';
+          }, 1000);
         },
 
-        upgradePlan() {
-          const nextTier = this.getNextTier();
-          if (nextTier && nextTier.name !== this.currentTier.name) {
-            // Redirect to upgrade page or show upgrade modal
-            if (window.featureProtection) {
-              window.featureProtection.upgradeToPlan(nextTier.name);
-            } else {
-              // Fallback redirect
-              window.location.href = 'account.html?upgrade=' + encodeURIComponent(nextTier.name);
-            }
-          }
+        showSuccess(message) {
+          console.log('SUCCESS:', message);
+        },
+
+        showError(message) {
+          console.log('ERROR:', message);
         }
       }
-    }
-  </script>
+    </script>
+
+    <!-- Include required styles and scripts -->
+    <link rel="stylesheet" href="../../shared/css/shared-styles.css">
+    <script src="../../shared/js/data-sync.js"></script>
+    <script src="../../shared/js/role-based-access.js"></script>
+    <script src="../../shared/js/feature-protection.js"></script>
+    <script src="js/admin-api.js"></script>
+    <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
 </body>
 </html>
+                                                              
+                  
+                    
