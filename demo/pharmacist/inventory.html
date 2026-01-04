@@ -69,7 +69,7 @@
 
       <div class="header-right">
         <div class="search-bar">
-          <span class="search-icon">🔍</span>
+          <span class="material-symbols-rounded">search</span>
           <input 
             type="text" 
             class="search-input" 
@@ -91,8 +91,8 @@
       <!-- Alert Cards -->
       <div class="stats-grid" style="margin-bottom: 2rem;">
         <div class="stat-card" style="background: rgba(239, 68, 68, 0.1); border: 1px solid rgba(239, 68, 68, 0.2);">
-          <div class="stat-icon" style="background: rgba(239, 68, 68, 0.2); color: #ef4444;">
-            ⚠️
+          <div class="stat-icon" style="background: rgba(34, 197, 94, 0.1); color: var(--color-success);">
+            <span class="material-symbols-rounded">description</span>
           </div>
           <div class="stat-value" x-text="alerts.criticalStock"></div>
           <div class="stat-label">Critical Stock Levels</div>
@@ -101,7 +101,7 @@
 
         <div class="stat-card" style="background: rgba(245, 158, 11, 0.1); border: 1px solid rgba(245, 158, 11, 0.2);">
           <div class="stat-icon" style="background: rgba(245, 158, 11, 0.2); color: #f59e0b;">
-            ⏰
+            <span class="material-symbols-rounded">schedule</span>
           </div>
           <div class="stat-value" x-text="alerts.expiringSoon"></div>
           <div class="stat-label">Expiring Soon</div>
@@ -110,7 +110,7 @@
 
         <div class="stat-card" style="background: rgba(59, 130, 246, 0.1); border: 1px solid rgba(59, 130, 246, 0.2);">
           <div class="stat-icon" style="background: rgba(59, 130, 246, 0.2); color: #3b82f6;">
-            📦
+            <span class="material-symbols-rounded">inventory_2</span>
           </div>
           <div class="stat-value" x-text="alerts.lowStock"></div>
           <div class="stat-label">Low Stock Items</div>

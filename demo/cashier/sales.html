@@ -81,7 +81,7 @@
         </div>
 
         <button class="btn btn-primary" @click="exportSales">
-          <span style="margin-right: 0.5rem;">📤</span>
+          <span class="material-symbols-rounded" style="margin-right: 0.5rem;">upload</span>
           Export
         </button>
       </div>
@@ -93,7 +93,7 @@
       <div class="stats-grid">
         <div class="stat-card">
           <div class="stat-icon" style="background: rgba(34, 197, 94, 0.1); color: var(--color-success);">
-            💰
+            <span class="material-symbols-rounded">payments</span>
           </div>
           <div class="stat-value">ZMW <span x-text="stats.totalRevenue.toFixed(2)"></span></div>
           <div class="stat-label">Total Revenue</div>
@@ -101,7 +101,7 @@
 
         <div class="stat-card">
           <div class="stat-icon" style="background: rgba(59, 130, 246, 0.1); color: var(--color-info);">
-            🧾
+            <span class="material-symbols-rounded">receipt</span>
           </div>
           <div class="stat-value" x-text="stats.totalSales"></div>
           <div class="stat-label">Total Transactions</div>
@@ -109,7 +109,7 @@
 
         <div class="stat-card">
           <div class="stat-icon" style="background: rgba(245, 158, 11, 0.1); color: #f59e0b;">
-            📅
+            <span class="material-symbols-rounded">calendar_today</span>
           </div>
           <div class="stat-value" x-text="stats.todaySales"></div>
           <div class="stat-label">Today's Sales</div>
@@ -117,7 +117,7 @@
 
         <div class="stat-card">
           <div class="stat-icon" style="background: rgba(16, 185, 129, 0.1); color: #10b981;">
-            📊
+            <span class="material-symbols-rounded">bar_chart</span>
           </div>
           <div class="stat-value">ZMW <span x-text="stats.averageSale.toFixed(2)"></span></div>
           <div class="stat-label">Average Sale</div>

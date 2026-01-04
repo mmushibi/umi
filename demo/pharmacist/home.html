@@ -106,7 +106,7 @@
 
       <div class="header-right">
         <div class="search-bar">
-          <span class="search-icon">🔍</span>
+          <span class="material-symbols-rounded">search</span>
           <input 
             type="text" 
             class="search-input" 
@@ -132,7 +132,7 @@
       <div class="stats-grid">
         <div class="stat-card">
           <div class="stat-icon" style="background: rgba(34, 197, 94, 0.1); color: var(--color-success);">
-            📋
+            <span class="material-symbols-rounded">description</span>
           </div>
           <div class="stat-value" x-text="stats.pendingPrescriptions"></div>
           <div class="stat-label">Pending Prescriptions</div>
@@ -141,7 +141,7 @@
 
         <div class="stat-card">
           <div class="stat-icon" style="background: rgba(59, 130, 246, 0.1); color: var(--color-info);">
-            💊
+            <span class="material-symbols-rounded">medication</span>
           </div>
           <div class="stat-value" x-text="stats.lowStockItems"></div>
           <div class="stat-label">Low Stock Items</div>
@@ -150,7 +150,7 @@
 
         <div class="stat-card">
           <div class="stat-icon" style="background: rgba(245, 158, 11, 0.1); color: #f59e0b;">
-            ⏰
+            <span class="material-symbols-rounded">schedule</span>
           </div>
           <div class="stat-value" x-text="stats.expiringSoon"></div>
           <div class="stat-label">Expiring Soon</div>
@@ -273,15 +273,15 @@
           <div class="card-content">
             <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 0.75rem;">
               <button class="btn btn-secondary" @click="quickAction('new-prescription')">
-                <span style="margin-right: 0.5rem;">📋</span>
+                <span class="material-symbols-rounded" style="margin-right: 0.5rem;">description</span>
                 New Prescription
               </button>
               <button class="btn btn-secondary" @click="quickAction('dispense-medication')">
-                <span style="margin-right: 0.5rem;">💊</span>
+                <span class="material-symbols-rounded" style="margin-right: 0.5rem;">medication</span>
                 Dispense Medication
               </button>
               <button class="btn btn-secondary" @click="quickAction('stock-check')">
-                <span style="margin-right: 0.5rem;">🔍</span>
+                <span class="material-symbols-rounded" style="margin-right: 0.5rem;">search</span>
                 Stock Check
               </button>
               <button class="btn btn-secondary" @click="quickAction('patient-search')">
@@ -289,7 +289,7 @@
                 Patient Search
               </button>
               <button class="btn btn-secondary" @click="quickAction('order-supplies')">
-                <span style="margin-right: 0.5rem;">🚚</span>
+                <span class="material-symbols-rounded" style="margin-right: 0.5rem;">local_shipping</span>
                 Order Supplies
               </button>
               <button class="btn btn-secondary" @click="quickAction('generate-report')">
@@ -406,7 +406,7 @@
                 message: `Stock: ${med.stockQuantity} (Reorder at: ${med.reorderLevel})`,
                 quantity: `${med.stockQuantity} units`,
                 severity: med.stockQuantity <= med.reorderLevel / 2 ? 'high' : 'medium',
-                icon: '⚠️'
+                icon: 'warning'
               });
             }
             
@@ -436,7 +436,7 @@
           this.recentActivity = [
             ...prescriptions.slice(0, 3).map(prescription => ({
               id: prescription.id,
-              icon: '📋',
+              icon: 'description',
               title: 'New Prescription',
               description: `For ${prescription.patientName} - ${prescription.diagnosis}`,
               time: this.formatTime(prescription.date),
@@ -444,7 +444,7 @@
             })),
             ...medications.slice(0, 2).filter(m => m.stockQuantity <= m.reorderLevel).map(med => ({
               id: `${med.id}-lowstock`,
-              icon: '⚠️',
+              icon: 'warning',
               title: 'Low Stock Alert',
               description: `${med.name} - ${med.stockQuantity} units remaining`,
               time: '2 hours ago',

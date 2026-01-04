@@ -235,7 +235,9 @@
         <button class="modal-close" @click="showSuccessModal = false">×</button>
       </div>
       <div class="modal-body" style="text-align: center;">
-        <div style="font-size: 4rem; margin-bottom: 1rem;">✅</div>
+        <div style="font-size: 4rem; margin-bottom: 1rem;">
+          <span class="material-symbols-rounded" style="font-size: 4rem; color: var(--color-success);">check_circle</span>
+        </div>
         <h4 style="margin-bottom: 0.5rem;">Thank you for your purchase!</h4>
         <p style="color: var(--color-text-secondary); margin-bottom: 1.5rem;">
           Payment of ZMW <span x-text="total.toFixed(2)"></span> has been processed successfully.
