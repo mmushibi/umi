@@ -1,0 +1,4499 @@
+<!DOCTYPE html>
+<html lang="en" x-data="inventorySystem()">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Inventory - Umi Health Information Systems</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@100;400;500;600;700&family=Varela+Round&family=Nunito:wght@400;600;700&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Rounded:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --color-primary: #000000;
+      --color-accent: #14B8A6;
+      --color-success: #22c55e;
+      --color-warning: #ef4444;
+      --color-text-primary: #000000;
+      --color-text-secondary: #6b7280;
+      --color-text-muted: #9ca3af;
+      --color-background: #ffffff;
+      --color-surface: #f9fafb;
+      --color-border: #e5e7eb;
+      --font-primary: 'Inter', sans-serif;
+      --sidebar-width: 280px;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      background: var(--color-background);
+      color: var(--color-text-primary);
+      font-family: 'Nunito', 'Varela Round', sans-serif;
+      font-size: 13px;
+      line-height: 1.4;
+      overflow-x: hidden;
+    }
+
+    /* Sidebar Styles */
+    .sidebar {
+      position: fixed;
+      left: 0;
+      top: 0;
+      width: var(--sidebar-width);
+      height: 100vh;
+      background: var(--color-text-primary);
+      color: var(--color-accent);
+      z-index: 1000;
+      transition: transform 0.3s ease;
+      display: flex;
+      flex-direction: column;
+      overflow-y: auto;
+      overflow-x: hidden;
+    }
+
+    .sidebar-header {
+      padding: 1.5rem;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+    }
+
+    .logo-section {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+    }
+
+    .logo-icon {
+      width: 32px;
+      height: 32px;
+      background: rgba(255, 255, 255, 0.2);
+      border-radius: 8px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.2rem;
+    }
+
+    .logo-text {
+      font-size: 1rem;
+      font-weight: 600;
+      font-family: 'Inter', sans-serif;
+    }
+
+
+    .nav-menu {
+      padding: 1rem 0;
+      flex: 1;
+      overflow-y: auto;
+    }
+
+    .nav-item {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+      padding: 0.75rem 1.25rem;
+      color: rgba(255, 255, 255, 0.8);
+      text-decoration: none;
+      transition: all 0.2s ease;
+      cursor: pointer;
+      font-size: 0.8rem;
+      font-weight: 500;
+    }
+
+    .nav-item:hover {
+      background: rgba(255, 255, 255, 0.1);
+      color: var(--color-accent);
+    }
+
+    .nav-item.active {
+      background: rgba(255, 255, 255, 0.15);
+      color: var(--color-accent);
+      border-left: 3px solid var(--color-accent);
+    }
+
+    .nav-icon {
+      font-size: 1rem;
+    }
+
+    /* Main Content Area */
+    .main-content {
+      margin-left: var(--sidebar-width);
+      min-height: 100vh;
+      transition: margin-left 0.3s ease;
+    }
+
+    /* Header Styles */
+    .header {
+      background: white;
+      border-bottom: 1px solid #e2e8f0;
+      padding: 1rem 2rem;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      position: sticky;
+      top: 0;
+      z-index: 100;
+    }
+
+    .header-left {
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+    }
+
+    .page-title-section {
+      margin-right: 2rem;
+    }
+
+    .page-title-section .page-title {
+      font-size: 1.5rem;
+      font-weight: 700;
+      color: var(--color-text-primary);
+      margin: 0;
+      font-family: 'Inter', sans-serif;
+    }
+
+    .mobile-menu-toggle {
+      display: none;
+      background: none;
+      border: none;
+      font-size: 1.5rem;
+      color: var(--color-text-secondary);
+      cursor: pointer;
+    }
+
+    .header-right {
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+    }
+
+    .create-button {
+      background: var(--color-primary);
+      color: var(--color-accent);
+      border: none;
+      padding: 0.625rem 1.25rem;
+      border-radius: 16px;
+      font-size: 0.875rem;
+      font-weight: 600;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      transition: all 0.3s ease;
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+    }
+
+    .create-button:hover {
+      background: var(--color-text-secondary);
+      transform: translateY(-2px);
+      box-shadow: 0 8px 24px rgba(0, 0, 0, 0.2);
+    }
+
+    .user-profile {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+      padding: 0.5rem;
+      border-radius: 16px;
+      cursor: pointer;
+      transition: all 0.3s ease;
+    }
+
+    .user-profile:hover {
+      background: var(--color-surface);
+    }
+
+    .user-avatar {
+      width: 36px;
+      height: 36px;
+      background: var(--color-text-primary);
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: var(--color-accent);
+      font-weight: 600;
+      font-size: 0.875rem;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+    }
+
+    .user-info {
+      display: flex;
+      flex-direction: column;
+    }
+
+    .user-name {
+      font-size: 0.875rem;
+      font-weight: 600;
+      color: var(--color-text-primary);
+    }
+
+    .user-role {
+      font-size: 0.75rem;
+      color: var(--color-text-secondary);
+    }
+
+    /* Inventory Content */
+    .inventory-content {
+      padding: 2rem;
+    }
+
+    .stats-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+      gap: 1.5rem;
+      margin-bottom: 2rem;
+    }
+
+    .stat-card {
+      background: var(--color-background);
+      border-radius: 20px;
+      padding: 1.5rem;
+      border: 1px solid var(--color-border);
+      transition: all 0.3s ease;
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
+    }
+
+    .stat-card:hover {
+      transform: translateY(-4px);
+      box-shadow: 0 8px 24px rgba(0, 0, 0, 0.12);
+    }
+
+    .stat-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 1rem;
+    }
+
+    .stat-icon {
+      width: 48px;
+      height: 48px;
+      border-radius: 16px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.5rem;
+    }
+
+    .stat-icon.primary {
+      background: rgba(0, 0, 0, 0.1);
+      color: var(--color-primary);
+    }
+
+    .stat-icon.success {
+      background: rgba(34, 197, 94, 0.1);
+      color: var(--color-success);
+    }
+
+    .stat-icon.warning {
+      background: rgba(239, 68, 68, 0.1);
+      color: var(--color-warning);
+    }
+
+    .stat-value {
+      font-size: 2rem;
+      font-weight: 700;
+      color: var(--color-text-primary);
+      margin-bottom: 0.25rem;
+      font-family: 'Inter', sans-serif;
+    }
+
+    .stat-label {
+      color: var(--color-text-secondary);
+      font-size: 0.875rem;
+      margin-bottom: 0.5rem;
+    }
+
+    .stat-change {
+      font-size: 0.75rem;
+      font-weight: 600;
+      display: flex;
+      align-items: center;
+      gap: 0.25rem;
+    }
+
+    .stat-change.positive {
+      color: var(--color-success);
+    }
+
+    .stat-change.negative {
+      color: var(--color-warning);
+    }
+
+    /* Inventory Table */
+    .inventory-section {
+      background: var(--color-background);
+      border-radius: 20px;
+      border: 1px solid var(--color-border);
+      overflow: hidden;
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
+    }
+
+    .section-header {
+      padding: 1.5rem;
+      border-bottom: 1px solid var(--color-border);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .section-title {
+      font-size: 1.125rem;
+      font-weight: 600;
+      color: var(--color-text-primary);
+      font-family: 'Inter', sans-serif;
+    }
+
+    .controls-bar {
+      display: flex;
+      gap: 1rem;
+      align-items: center;
+    }
+
+    .search-bar {
+      position: relative;
+    }
+
+    .search-input {
+      width: 300px;
+      padding: 0.5rem 1rem 0.5rem 2.5rem;
+      border: 1px solid var(--color-border);
+      border-radius: 8px;
+      font-size: 0.875rem;
+      transition: all 0.3s ease;
+    }
+
+    .search-input:focus {
+      outline: none;
+      border-color: var(--color-primary);
+      box-shadow: 0 0 0 4px rgba(0, 0, 0, 0.1);
+    }
+
+    .search-icon {
+      position: absolute;
+      left: 0.75rem;
+      top: 50%;
+      transform: translateY(-50%);
+      color: var(--color-text-muted);
+      font-size: 1rem;
+    }
+
+    .filter-dropdown {
+      position: relative;
+    }
+
+    .filter-button {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      padding: 0.5rem 1rem;
+      border: 1px solid var(--color-border);
+      background: var(--color-background);
+      border-radius: 8px;
+      cursor: pointer;
+      font-size: 0.875rem;
+      transition: all 0.2s ease;
+    }
+
+    .filter-button:hover {
+      background: var(--color-surface);
+    }
+
+    .table-container {
+      overflow-x: auto;
+    }
+
+    .inventory-table {
+      width: 100%;
+      border-collapse: collapse;
+    }
+
+    .inventory-table th {
+      background: var(--color-surface);
+      padding: 1rem;
+      text-align: left;
+      font-weight: 600;
+      font-size: 0.875rem;
+      color: var(--color-text-primary);
+      border-bottom: 1px solid var(--color-border);
+    }
+
+    .inventory-table td {
+      padding: 1rem;
+      border-bottom: 1px solid var(--color-border);
+      font-size: 0.875rem;
+    }
+
+    .inventory-table tr:hover {
+      background: var(--color-surface);
+    }
+
+    .product-name {
+      font-weight: 600;
+      color: var(--color-text-primary);
+    }
+
+    .product-category {
+      font-size: 0.75rem;
+      color: var(--color-text-muted);
+      margin-top: 0.125rem;
+    }
+
+    .stock-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.25rem;
+      padding: 0.25rem 0.75rem;
+      border-radius: 12px;
+      font-size: 0.75rem;
+      font-weight: 600;
+    }
+
+    .stock-badge.in-stock {
+      background: rgba(34, 197, 94, 0.1);
+      color: var(--color-success);
+    }
+
+    .stock-badge.low-stock {
+      background: rgba(239, 68, 68, 0.1);
+      color: var(--color-warning);
+    }
+
+    .stock-badge.out-of-stock {
+      background: rgba(0, 0, 0, 0.1);
+      color: var(--color-text-secondary);
+    }
+
+    .status-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.25rem;
+      padding: 0.25rem 0.75rem;
+      border-radius: 12px;
+      font-size: 0.75rem;
+      font-weight: 600;
+    }
+
+    .status-badge.active {
+      background: rgba(34, 197, 94, 0.1);
+      color: var(--color-success);
+    }
+
+    .status-badge.inactive {
+      background: rgba(0, 0, 0, 0.1);
+      color: var(--color-text-secondary);
+    }
+
+    .action-buttons {
+      display: flex;
+      gap: 0.5rem;
+    }
+
+    .action-btn {
+      width: 32px;
+      height: 32px;
+      border: 1px solid var(--color-border);
+      background: var(--color-background);
+      border-radius: 6px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      font-size: 0.875rem;
+      transition: all 0.2s ease;
+    }
+
+    .action-btn:hover {
+      background: var(--color-surface);
+    }
+
+    .action-btn.edit {
+      color: var(--color-primary);
+    }
+
+    .action-btn.delete {
+      color: var(--color-warning);
+    }
+
+    .stat-change .material-symbols-rounded {
+      font-size: 1rem;
+    }
+
+    .stock-badge .material-symbols-rounded {
+      font-size: 0.75rem;
+    }
+
+    .status-badge .material-symbols-rounded {
+      font-size: 0.75rem;
+    }
+
+    .action-btn .material-symbols-rounded {
+      font-size: 0.875rem;
+    }
+
+    .logout-section {
+      padding: 1rem;
+      border-top: 1px solid rgba(255, 255, 255, 0.1);
+      margin-top: auto;
+    }
+
+    .logout-button {
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+      padding: 0.875rem 1.5rem;
+      color: rgba(255, 255, 255, 0.8);
+      text-decoration: none;
+      transition: all 0.2s ease;
+      cursor: pointer;
+      font-size: 0.9rem;
+      font-weight: 500;
+      width: 100%;
+      border: none;
+      background: transparent;
+      text-align: left;
+    }
+
+    .logout-button:hover {
+      background: rgba(239, 68, 68, 0.1);
+      color: var(--color-warning);
+    }
+
+    .logout-icon {
+      font-size: 1.25rem;
+    }
+
+    /* New Template Styles */
+    .content-area {
+      padding: 2rem;
+    }
+
+    .content-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      margin-bottom: 2rem;
+      gap: 2rem;
+    }
+
+    .content-header > div:first-child p {
+      color: var(--color-text-secondary);
+      font-size: 1rem;
+      margin: 0;
+    }
+
+    .quick-stats {
+      display: flex;
+      gap: 1rem;
+    }
+
+    .stat-button {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding: 1rem;
+      background: var(--color-background);
+      border: 1px solid var(--color-border);
+      border-radius: 12px;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      min-width: 120px;
+    }
+
+    .stat-button:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+    }
+
+    .stat-button span {
+      font-size: 0.75rem;
+      color: var(--color-text-secondary);
+      margin-bottom: 0.5rem;
+    }
+
+    .stat-button strong {
+      font-size: 1.5rem;
+      font-weight: 700;
+      color: var(--color-text-primary);
+    }
+
+    .header-actions {
+      display: flex;
+      gap: 0.75rem;
+    }
+
+    .secondary-btn {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      padding: 0.75rem 1.25rem;
+      background: var(--color-background);
+      border: 1px solid var(--color-border);
+      border-radius: 8px;
+      cursor: pointer;
+      font-size: 0.875rem;
+      font-weight: 500;
+      transition: all 0.3s ease;
+    }
+
+    .secondary-btn:hover {
+      background: var(--color-surface);
+      border-color: var(--color-primary);
+    }
+
+    .add-product-btn {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      padding: 0.75rem 1.25rem;
+      background: var(--color-primary);
+      color: var(--color-accent);
+      border: none;
+      border-radius: 8px;
+      cursor: pointer;
+      font-size: 0.875rem;
+      font-weight: 600;
+      transition: all 0.3s ease;
+    }
+
+    .add-product-btn:hover {
+      background: var(--color-text-secondary);
+      transform: translateY(-2px);
+    }
+
+    .widgets-row {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+      gap: 1.5rem;
+      margin-bottom: 2rem;
+    }
+
+    .widget {
+      background: var(--color-background);
+      border: 1px solid var(--color-border);
+      border-radius: 12px;
+      overflow: hidden;
+    }
+
+    .widget-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      padding: 1.5rem;
+      border-bottom: 1px solid var(--color-border);
+    }
+
+    .widget-title {
+      font-size: 1.125rem;
+      font-weight: 600;
+      color: var(--color-text-primary);
+      margin: 0 0 0.25rem 0;
+    }
+
+    .widget-subtitle {
+      font-size: 0.875rem;
+      color: var(--color-text-secondary);
+      margin: 0;
+    }
+
+    .icon-button {
+      width: 32px;
+      height: 32px;
+      border: 1px solid var(--color-border);
+      background: var(--color-background);
+      border-radius: 6px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      transition: all 0.2s ease;
+    }
+
+    .icon-button:hover {
+      background: var(--color-surface);
+    }
+
+    .widget-menu {
+      position: absolute;
+      background: var(--color-background);
+      border: 1px solid var(--color-border);
+      border-radius: 8px;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+      z-index: 100;
+      min-width: 150px;
+    }
+
+    .widget-menu button {
+      width: 100%;
+      padding: 0.5rem 1rem;
+      border: none;
+      background: none;
+      text-align: left;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      font-size: 0.875rem;
+    }
+
+    .widget-menu button:hover {
+      background: var(--color-surface);
+    }
+
+    .chart-container {
+      padding: 1.5rem;
+      height: 200px;
+    }
+
+    .expiry-list {
+      padding: 1.5rem;
+      max-height: 200px;
+      overflow-y: auto;
+    }
+
+    .product-list-container {
+      background: var(--color-background);
+      border: 1px solid var(--color-border);
+      border-radius: 12px;
+      overflow: hidden;
+    }
+
+    .product-list-header {
+      padding: 1.5rem;
+      border-bottom: 1px solid var(--color-border);
+    }
+
+    .product-list-header h2 {
+      font-size: 1.25rem;
+      font-weight: 600;
+      color: var(--color-text-primary);
+      margin: 0 0 0.25rem 0;
+    }
+
+    .product-list-header span {
+      font-size: 0.875rem;
+      color: var(--color-text-secondary);
+    }
+
+    .table-controls {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 1rem 1.5rem;
+      border-bottom: 1px solid var(--color-border);
+      gap: 1rem;
+    }
+
+    .control-group {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+
+    .table-search {
+      position: relative;
+      display: flex;
+      align-items: center;
+    }
+
+    .table-search i {
+      position: absolute;
+      left: 0.75rem;
+      color: var(--color-text-muted);
+      font-size: 0.875rem;
+    }
+
+    .table-search input {
+      padding: 0.5rem 1rem 0.5rem 2.5rem;
+      border: 1px solid var(--color-border);
+      border-radius: 6px;
+      font-size: 0.875rem;
+      width: 300px;
+    }
+
+    .table-search input:focus {
+      outline: none;
+      border-color: var(--color-primary);
+    }
+
+    .nav-actions {
+      display: flex;
+      gap: 0.5rem;
+    }
+
+    .control-button {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      padding: 0.5rem 1rem;
+      border: 1px solid var(--color-border);
+      background: var(--color-background);
+      border-radius: 6px;
+      cursor: pointer;
+      font-size: 0.875rem;
+      transition: all 0.2s ease;
+    }
+
+    .control-button:hover {
+      background: var(--color-surface);
+    }
+
+    .table-scroll {
+      overflow-x: auto;
+    }
+
+    .product-table {
+      width: 100%;
+      border-collapse: collapse;
+    }
+
+    .product-table th {
+      background: var(--color-surface);
+      padding: 1rem;
+      text-align: left;
+      font-weight: 600;
+      font-size: 0.875rem;
+      color: var(--color-text-primary);
+      border-bottom: 1px solid var(--color-border);
+    }
+
+    .product-table td {
+      padding: 1rem;
+      border-bottom: 1px solid var(--color-border);
+      font-size: 0.875rem;
+    }
+
+    .product-table tr:hover {
+      background: var(--color-surface);
+    }
+
+    .table-empty {
+      text-align: center;
+      padding: 3rem;
+      color: var(--color-text-secondary);
+    }
+
+    .table-empty i {
+      font-size: 3rem;
+      opacity: 0.3;
+      margin-bottom: 1rem;
+    }
+
+    .pagination {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 1rem 1.5rem;
+      border-top: 1px solid var(--color-border);
+    }
+
+    /* Modal Styles */
+    .overlay {
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background: rgba(0, 0, 0, 0.5);
+      z-index: 1000;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .modal {
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background: rgba(0, 0, 0, 0.5);
+      z-index: 1000;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .modal-content {
+      background: var(--color-background);
+      border-radius: 12px;
+      box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1);
+      max-width: 600px;
+      width: 90%;
+      max-height: 90vh;
+      overflow-y: auto;
+    }
+
+    .modal-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 1.5rem;
+      border-bottom: 1px solid var(--color-border);
+    }
+
+    .modal-header h2 {
+      font-size: 1.25rem;
+      font-weight: 600;
+      color: var(--color-text-primary);
+      margin: 0;
+    }
+
+    .modal-close {
+      width: 32px;
+      height: 32px;
+      border: 1px solid var(--color-border);
+      background: var(--color-background);
+      border-radius: 6px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      transition: all 0.2s ease;
+    }
+
+    .modal-close:hover {
+      background: var(--color-surface);
+    }
+
+    .modal-body {
+      padding: 1.5rem;
+    }
+
+    .form-grid {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 1rem;
+      margin-bottom: 1.5rem;
+    }
+
+    .form-grid label {
+      display: flex;
+      flex-direction: column;
+      gap: 0.5rem;
+    }
+
+    .form-grid label span {
+      font-size: 0.875rem;
+      font-weight: 500;
+      color: var(--color-text-primary);
+    }
+
+    .form-grid input,
+    .form-grid select {
+      padding: 0.75rem;
+      border: 1px solid var(--color-border);
+      border-radius: 6px;
+      font-size: 0.875rem;
+    }
+
+    .form-grid input:focus,
+    .form-grid select:focus {
+      outline: none;
+      border-color: var(--color-primary);
+    }
+
+    .form-textarea {
+      display: flex;
+      flex-direction: column;
+      gap: 0.5rem;
+    }
+
+    .form-textarea span {
+      font-size: 0.875rem;
+      font-weight: 500;
+      color: var(--color-text-primary);
+    }
+
+    .form-textarea textarea {
+      padding: 0.75rem;
+      border: 1px solid var(--color-border);
+      border-radius: 6px;
+      font-size: 0.875rem;
+      resize: vertical;
+    }
+
+    .form-textarea textarea:focus {
+      outline: none;
+      border-color: var(--color-primary);
+    }
+
+    .modal-footer {
+      display: flex;
+      justify-content: flex-end;
+      gap: 0.75rem;
+      padding: 1.5rem;
+      border-top: 1px solid var(--color-border);
+    }
+
+    .modal-footer button {
+      padding: 0.75rem 1.5rem;
+      border-radius: 6px;
+      font-size: 0.875rem;
+      font-weight: 500;
+      cursor: pointer;
+      transition: all 0.3s ease;
+    }
+
+    .modal-footer button.secondary {
+      background: var(--color-background);
+      border: 1px solid var(--color-border);
+      color: var(--color-text-primary);
+    }
+
+    .modal-footer button.secondary:hover {
+      background: var(--color-surface);
+    }
+
+    .modal-footer button.primary {
+      background: var(--color-primary);
+      color: var(--color-accent);
+      border: none;
+    }
+
+    .modal-footer button.primary:hover {
+      background: var(--color-text-secondary);
+    }
+
+    /* Bulk Upload Specific Styles */
+    .upload-instructions {
+      margin-bottom: 1.5rem;
+      padding: 1rem;
+      background: var(--color-surface);
+      border-radius: 8px;
+    }
+
+    .upload-instructions h3 {
+      margin: 0 0 0.5rem 0;
+      color: var(--color-text-primary);
+    }
+
+    .upload-instructions p {
+      margin: 0 0 1rem 0;
+      color: var(--color-text-secondary);
+    }
+
+    .upload-instructions ul {
+      margin: 0 0 1rem 0;
+      padding-left: 1.5rem;
+    }
+
+    .upload-instructions li {
+      margin-bottom: 0.25rem;
+      color: var(--color-text-secondary);
+      font-size: 0.875rem;
+    }
+
+    .upload-area {
+      margin-bottom: 1.5rem;
+    }
+
+    .upload-label {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: 2rem;
+      border: 2px dashed var(--color-border);
+      border-radius: 8px;
+      cursor: pointer;
+      transition: all 0.3s ease;
+    }
+
+    .upload-label:hover {
+      border-color: var(--color-primary);
+      background: var(--color-surface);
+    }
+
+    .upload-label i {
+      font-size: 2rem;
+      margin-bottom: 0.5rem;
+      color: var(--color-text-muted);
+    }
+
+    .upload-label span {
+      color: var(--color-text-secondary);
+    }
+
+    .file-info {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0.75rem;
+      background: var(--color-surface);
+      border-radius: 6px;
+      margin-top: 0.5rem;
+    }
+
+    .remove-file {
+      background: none;
+      border: none;
+      color: var(--color-warning);
+      cursor: pointer;
+      padding: 0.25rem;
+      border-radius: 4px;
+    }
+
+    .remove-file:hover {
+      background: rgba(239, 68, 68, 0.1);
+    }
+
+    .upload-preview {
+      margin-top: 1.5rem;
+    }
+
+    .upload-preview h4 {
+      margin: 0 0 1rem 0;
+      color: var(--color-text-primary);
+    }
+
+    .preview-table {
+      max-height: 200px;
+      overflow-y: auto;
+      border: 1px solid var(--color-border);
+      border-radius: 6px;
+    }
+
+    .preview-table table {
+      width: 100%;
+      border-collapse: collapse;
+    }
+
+    .preview-table th,
+    .preview-table td {
+      padding: 0.5rem;
+      text-align: left;
+      border-bottom: 1px solid var(--color-border);
+      font-size: 0.85rem;
+    }
+
+    .preview-table th {
+      background: var(--color-surface);
+      font-weight: 600;
+      color: var(--color-text-primary);
+    }
+
+    .preview-table td {
+      color: var(--color-text-secondary);
+    }
+
+    /* Enhanced Inventory Styles */
+    .reorder-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.25rem;
+      padding: 0.25rem 0.75rem;
+      border-radius: 12px;
+      font-size: 0.75rem;
+      font-weight: 600;
+      background: rgba(255, 193, 7, 0.1);
+      color: #f59e0b;
+    }
+
+    .supplier-info, .batch-info {
+      font-size: 0.875rem;
+      color: var(--color-text-secondary);
+    }
+
+    .expiry-info {
+      font-size: 0.875rem;
+    }
+
+    .expiry-info.expiring-soon {
+      color: #f59e0b;
+      font-weight: 600;
+    }
+
+    .expiry-info.expired {
+      color: var(--color-warning);
+      font-weight: 600;
+    }
+
+    .expiry-days {
+      font-size: 0.75rem;
+      margin-left: 0.5rem;
+      opacity: 0.8;
+    }
+
+    .barcode-info {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      font-size: 0.875rem;
+    }
+
+    .barcode-btn {
+      width: 24px;
+      height: 24px;
+      border: none;
+      background: var(--color-primary);
+      color: var(--color-accent);
+      border-radius: 4px;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 0.75rem;
+    }
+
+    .action-btn.scan {
+      color: #10b981;
+    }
+
+    .action-btn.reorder {
+      color: #3b82f6;
+    }
+
+    .status-badge.expired {
+      background: rgba(239, 68, 68, 0.1);
+      color: var(--color-warning);
+    }
+
+    /* Modal Large */
+    .modal-large {
+      max-width: 900px;
+      width: 95%;
+    }
+
+    /* Stocktake Styles */
+    .stocktake-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      margin-bottom: 2rem;
+      gap: 2rem;
+    }
+
+    .stocktake-stats {
+      display: flex;
+      gap: 2rem;
+      margin-top: 1rem;
+    }
+
+    .stat-item {
+      display: flex;
+      flex-direction: column;
+      gap: 0.25rem;
+    }
+
+    .stat-label {
+      font-size: 0.875rem;
+      color: var(--color-text-secondary);
+    }
+
+    .stat-value {
+      font-size: 1.25rem;
+      font-weight: 700;
+      color: var(--color-text-primary);
+    }
+
+    .stocktake-actions {
+      display: flex;
+      gap: 0.75rem;
+    }
+
+    .stocktake-search {
+      display: flex;
+      gap: 0.75rem;
+      margin-bottom: 1.5rem;
+    }
+
+    .stocktake-search input {
+      flex: 1;
+      padding: 0.75rem;
+      border: 1px solid var(--color-border);
+      border-radius: 8px;
+      font-size: 0.875rem;
+    }
+
+    .scan-btn {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      padding: 0.75rem 1rem;
+      background: var(--color-primary);
+      color: var(--color-accent);
+      border: none;
+      border-radius: 8px;
+      cursor: pointer;
+      font-size: 0.875rem;
+    }
+
+    .stocktake-items {
+      max-height: 400px;
+      overflow-y: auto;
+      border: 1px solid var(--color-border);
+      border-radius: 8px;
+    }
+
+    .stocktake-item {
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+      padding: 1rem;
+      border-bottom: 1px solid var(--color-border);
+      transition: background-color 0.2s ease;
+    }
+
+    .stocktake-item:hover {
+      background: var(--color-surface);
+    }
+
+    .stocktake-item.counted {
+      background: rgba(34, 197, 94, 0.1);
+    }
+
+    .stocktake-item.discrepancy {
+      background: rgba(239, 68, 68, 0.1);
+    }
+
+    .item-info {
+      flex: 1;
+    }
+
+    .item-name {
+      font-weight: 600;
+      color: var(--color-text-primary);
+    }
+
+    .item-details, .item-location {
+      font-size: 0.875rem;
+      color: var(--color-text-secondary);
+    }
+
+    .item-quantities {
+      display: flex;
+      gap: 1rem;
+      align-items: center;
+    }
+
+    .system-quantity, .counted-quantity, .discrepancy {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 0.25rem;
+    }
+
+    .system-quantity span, .counted-quantity span, .discrepancy span {
+      font-size: 0.75rem;
+      color: var(--color-text-secondary);
+    }
+
+    .counted-quantity input {
+      width: 60px;
+      padding: 0.25rem;
+      border: 1px solid var(--color-border);
+      border-radius: 4px;
+      text-align: center;
+    }
+
+    .discrepancy .positive {
+      color: var(--color-success);
+    }
+
+    .discrepancy .negative {
+      color: var(--color-warning);
+    }
+
+    /* Purchase Order Styles */
+    .supplier-section, .order-items-section {
+      margin-bottom: 2rem;
+    }
+
+    .supplier-section h3, .order-items-section h3 {
+      margin-bottom: 1rem;
+      color: var(--color-text-primary);
+    }
+
+    .add-item-section {
+      display: flex;
+      gap: 1rem;
+      margin-bottom: 1rem;
+      align-items: center;
+    }
+
+    .add-item-section select {
+      flex: 1;
+      padding: 0.75rem;
+      border: 1px solid var(--color-border);
+      border-radius: 8px;
+      font-size: 0.875rem;
+    }
+
+    .order-items-table {
+      margin-bottom: 1.5rem;
+    }
+
+    .order-items-table table {
+      width: 100%;
+      border-collapse: collapse;
+    }
+
+    .order-items-table th,
+    .order-items-table td {
+      padding: 0.75rem;
+      text-align: left;
+      border-bottom: 1px solid var(--color-border);
+    }
+
+    .order-items-table th {
+      background: var(--color-surface);
+      font-weight: 600;
+      font-size: 0.875rem;
+    }
+
+    .order-items-table input {
+      width: 80px;
+      padding: 0.25rem;
+      border: 1px solid var(--color-border);
+      border-radius: 4px;
+    }
+
+    .order-summary {
+      background: var(--color-surface);
+      padding: 1rem;
+      border-radius: 8px;
+      margin-bottom: 1rem;
+    }
+
+    .summary-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 0.5rem 0;
+    }
+
+    .summary-row.total {
+      border-top: 1px solid var(--color-border);
+      margin-top: 0.5rem;
+      padding-top: 1rem;
+      font-weight: 700;
+      font-size: 1.125rem;
+    }
+
+    /* Reports Styles */
+    .reports-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+      gap: 1.5rem;
+      margin-bottom: 2rem;
+    }
+
+    .report-card {
+      background: var(--color-background);
+      border: 1px solid var(--color-border);
+      border-radius: 12px;
+      padding: 1.5rem;
+      cursor: pointer;
+      transition: all 0.3s ease;
+    }
+
+    .report-card:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+    }
+
+    .report-icon {
+      width: 48px;
+      height: 48px;
+      border-radius: 12px;
+      background: rgba(0, 0, 0, 0.1);
+      color: var(--color-primary);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.5rem;
+      margin-bottom: 1rem;
+    }
+
+    .report-card h3 {
+      margin: 0 0 0.5rem 0;
+      color: var(--color-text-primary);
+    }
+
+    .report-card p {
+      margin: 0;
+      color: var(--color-text-secondary);
+      font-size: 0.875rem;
+    }
+
+    .report-preview {
+      border-top: 1px solid var(--color-border);
+      padding-top: 2rem;
+    }
+
+    .report-filters {
+      display: flex;
+      gap: 1rem;
+      align-items: end;
+      margin-bottom: 1.5rem;
+      flex-wrap: wrap;
+    }
+
+    .report-filters label {
+      display: flex;
+      flex-direction: column;
+      gap: 0.5rem;
+    }
+
+    .report-filters label span {
+      font-size: 0.875rem;
+      color: var(--color-text-secondary);
+    }
+
+    .report-filters input,
+    .report-filters select {
+      padding: 0.5rem;
+      border: 1px solid var(--color-border);
+      border-radius: 6px;
+      font-size: 0.875rem;
+    }
+
+    .report-content {
+      background: var(--color-surface);
+      border-radius: 8px;
+      padding: 1.5rem;
+      min-height: 200px;
+    }
+
+    /* Accessibility */
+    .sr-only {
+      position: absolute;
+      width: 1px;
+      height: 1px;
+      padding: 0;
+      margin: -1px;
+      overflow: hidden;
+      clip: rect(0, 0, 0, 0);
+      white-space: nowrap;
+      border: 0;
+    }
+
+    /* Hidden attribute support */
+    [hidden] {
+      display: none !important;
+    }
+
+    /* Search suggestions */
+    .search-suggestions {
+      display: none;
+    }
+
+    .search-suggestions.show {
+      display: block;
+    }
+
+    /* Notification Styles */
+    .notification {
+      position: fixed;
+      top: 20px;
+      right: 20px;
+      padding: 1rem 1.5rem;
+      border-radius: 8px;
+      color: white;
+      font-weight: 500;
+      z-index: 10000;
+      opacity: 0;
+      transform: translateX(100%);
+      transition: all 0.3s ease;
+      max-width: 400px;
+    }
+
+    .notification.show {
+      opacity: 1;
+      transform: translateX(0);
+    }
+
+    .notification-success {
+      background: var(--color-success);
+    }
+
+    .notification-error {
+      background: var(--color-warning);
+    }
+
+    .notification-warning {
+      background: #f59e0b;
+    }
+
+    .notification-info {
+      background: var(--color-primary);
+    }
+
+    /* Barcode Scanner Styles */
+    .scanner-container {
+      display: flex;
+      flex-direction: column;
+      gap: 1.5rem;
+    }
+
+    .scanner-viewfinder {
+      position: relative;
+      width: 100%;
+      max-width: 400px;
+      height: 300px;
+      margin: 0 auto;
+      background: #000;
+      border-radius: 12px;
+      overflow: hidden;
+    }
+
+    #scannerVideo {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+    }
+
+    .scanner-overlay {
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      pointer-events: none;
+    }
+
+    .scanner-frame {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      width: 200px;
+      height: 200px;
+      border: 2px solid #00ff00;
+      border-radius: 8px;
+    }
+
+    .scanner-line {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      width: 200px;
+      height: 2px;
+      background: linear-gradient(90deg, transparent, #00ff00, transparent);
+      animation: scan 2s linear infinite;
+    }
+
+    @keyframes scan {
+      0% { top: 25%; }
+      50% { top: 75%; }
+      100% { top: 25%; }
+    }
+
+    .scanner-controls {
+      display: flex;
+      justify-content: center;
+      gap: 1rem;
+      flex-wrap: wrap;
+    }
+
+    .scanner-result, .scanner-manual {
+      background: var(--color-surface);
+      padding: 1rem;
+      border-radius: 8px;
+    }
+
+    .scanner-result h3, .scanner-manual h3 {
+      margin: 0 0 1rem 0;
+      color: var(--color-text-primary);
+      font-size: 1rem;
+    }
+
+    .result-display, .header-actions {
+      display: flex;
+      gap: 0.75rem;
+      align-items: center;
+      flex-wrap: wrap;
+    }
+
+    .result-display input, .manual-input input {
+      flex: 1;
+      min-width: 200px;
+      padding: 0.75rem;
+      border: 1px solid var(--color-border);
+      border-radius: 6px;
+      font-size: 0.875rem;
+    }
+
+    @media (max-width: 768px) {
+      .scanner-viewfinder {
+        height: 250px;
+      }
+
+      .scanner-frame {
+        width: 150px;
+        height: 150px;
+      }
+
+      .scanner-line {
+        width: 150px;
+      }
+
+      .result-display, .manual-input {
+        flex-direction: column;
+        align-items: stretch;
+      }
+
+      .result-display button, .manual-input button {
+        width: 100%;
+      }
+    }
+
+    /* Enhanced Form Styles */
+    .scan-barcode-btn {
+      margin-top: 0.5rem;
+      padding: 0.5rem 1rem;
+      background: var(--color-primary);
+      color: var(--color-accent);
+      border: none;
+      border-radius: 6px;
+      cursor: pointer;
+      font-size: 0.875rem;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+
+    @media (max-width: 768px) {
+      /* Header and Navigation */
+      .header-left {
+        flex-direction: column;
+        align-items: stretch;
+        gap: 1rem;
+      }
+      
+      .page-title-section {
+        order: -1;
+      }
+      
+      .search-bar {
+        order: 2;
+      }
+      
+      .quick-stats {
+        order: 1;
+        flex-wrap: wrap;
+        gap: 0.5rem;
+      }
+      
+      .stat-button {
+        min-width: calc(50% - 0.25rem);
+        flex: 1;
+      }
+      
+      .header-actions {
+        order: 3;
+        flex-wrap: wrap;
+        gap: 0.5rem;
+      }
+      
+      .header-actions button {
+        min-width: calc(50% - 0.25rem);
+        flex: 1;
+      }
+      
+      /* Content Area */
+      .content-header {
+        flex-direction: column;
+        align-items: stretch;
+        gap: 1rem;
+      }
+      
+      /* Widgets */
+      .widgets-row {
+        grid-template-columns: 1fr;
+        gap: 1rem;
+      }
+      
+      .widget {
+        min-height: auto;
+      }
+      
+      /* Table */
+      .table-controls {
+        flex-direction: column;
+        align-items: stretch;
+        gap: 1rem;
+      }
+      
+      .control-group {
+        flex-wrap: wrap;
+        justify-content: space-between;
+      }
+      
+      .table-search input {
+        width: 100%;
+      }
+      
+      .nav-actions {
+        justify-content: center;
+        flex-wrap: wrap;
+        gap: 0.5rem;
+      }
+      
+      /* Product Table */
+      .product-table {
+        font-size: 0.875rem;
+      }
+      
+      .product-table th,
+      .product-table td {
+        padding: 0.5rem;
+      }
+      
+      .action-buttons {
+        flex-direction: column;
+        gap: 0.25rem;
+      }
+      
+      .action-btn {
+        width: 100%;
+        justify-content: center;
+      }
+      
+      .barcode-info {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 0.25rem;
+      }
+      
+      .expiry-info {
+        font-size: 0.75rem;
+      }
+      
+      /* Modals */
+      .modal-content {
+        width: 95%;
+        margin: 1rem;
+        max-height: 90vh;
+        overflow-y: auto;
+      }
+      
+      .form-grid {
+        grid-template-columns: 1fr;
+      }
+      
+      /* Stocktake */
+      .stocktake-header {
+        flex-direction: column;
+        gap: 1rem;
+      }
+      
+      .stocktake-stats {
+        flex-wrap: wrap;
+        gap: 1rem;
+      }
+      
+      .stocktake-actions {
+        flex-wrap: wrap;
+        justify-content: center;
+      }
+      
+      .stocktake-search {
+        flex-direction: column;
+      }
+      
+      .item-quantities {
+        flex-wrap: wrap;
+        gap: 0.5rem;
+      }
+      
+      .stocktake-item {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 1rem;
+      }
+      
+      .system-quantity, .counted-quantity, .discrepancy {
+        width: 100%;
+        text-align: center;
+      }
+      
+      /* Purchase Order */
+      .supplier-section, .order-items-section {
+        margin-bottom: 1rem;
+      }
+      
+      .add-item-section {
+        flex-direction: column;
+      }
+      
+      .order-items-table {
+        overflow-x: auto;
+      }
+      
+      .order-items-table table {
+        min-width: 600px;
+      }
+      
+      /* Reports */
+      .reports-grid {
+        grid-template-columns: 1fr;
+      }
+      
+      .report-filters {
+        flex-direction: column;
+        align-items: stretch;
+      }
+      
+      .report-filters label {
+        width: 100%;
+      }
+      
+      /* Barcode Scanner */
+      .scanner-viewfinder {
+        height: 250px;
+      }
+
+      .scanner-frame {
+        width: 150px;
+        height: 150px;
+      }
+
+      .scanner-line {
+        width: 150px;
+      }
+
+      .result-display, .manual-input {
+        flex-direction: column;
+        align-items: stretch;
+      }
+
+      .result-display button, .manual-input button {
+        width: 100%;
+      }
+      
+      /* Sidebar */
+      .sidebar {
+        transform: translateX(-100%);
+      }
+
+      .sidebar.open {
+        transform: translateX(0);
+      }
+
+      .main-content {
+        margin-left: 0;
+      }
+
+      .mobile-menu-toggle {
+        display: block;
+      }
+
+      .page-title-section {
+        display: none;
+      }
+
+      .content-area {
+        padding: 1rem;
+      }
+
+      .content-header {
+        flex-direction: column;
+        align-items: stretch;
+        gap: 1rem;
+      }
+
+      .quick-stats {
+        flex-wrap: wrap;
+      }
+
+      .stat-button {
+        min-width: 100px;
+        flex: 1;
+      }
+
+      .header-actions {
+        flex-wrap: wrap;
+      }
+
+      .widgets-row {
+        grid-template-columns: 1fr;
+      }
+
+      .table-controls {
+        flex-direction: column;
+        align-items: stretch;
+        gap: 1rem;
+      }
+
+      .control-group {
+        flex-wrap: wrap;
+      }
+
+      .table-search input {
+        width: 100%;
+      }
+
+      .nav-actions {
+        justify-content: center;
+      }
+
+      .form-grid {
+        grid-template-columns: 1fr;
+      }
+
+      .modal-content {
+        width: 95%;
+        margin: 1rem;
+      }
+    }
+    
+    /* Small tablets and large phones */
+    @media (max-width: 480px) {
+      .stat-button {
+        min-width: 100%;
+      }
+      
+      .header-actions button {
+        min-width: 100%;
+      }
+      
+      .product-table {
+        font-size: 0.75rem;
+      }
+      
+      .product-table th,
+      .product-table td {
+        padding: 0.25rem;
+      }
+      
+      .action-buttons {
+        gap: 0.125rem;
+      }
+      
+      .modal-content {
+        width: 98%;
+        margin: 0.5rem;
+        padding: 1rem;
+      }
+    }
+  </style>
+</head>
+<body>
+  <!-- Sidebar -->
+  <aside class="sidebar" :class="sidebarOpen ? 'open' : ''">
+    <div class="sidebar-header">
+      <div class="logo-section">
+        <div class="logo-icon">
+          <span class="material-symbols-rounded">medication</span>
+        </div>
+        <div class="logo-text">Umi Health</div>
+      </div>
+    </div>
+
+
+    <nav class="nav-menu">
+      <a href="home.html" class="nav-item">
+        <span class="material-symbols-rounded nav-icon">home</span>
+        <span>Home</span>
+      </a>
+      <a href="point-of-sale.html" class="nav-item">
+        <span class="material-symbols-rounded nav-icon">point_of_sale</span>
+        <span>Point of Sale</span>
+      </a>
+      <a href="patients.html" class="nav-item">
+        <span class="material-symbols-rounded nav-icon">people</span>
+        <span>Patients</span>
+      </a>
+      <a href="sales.html" class="nav-item">
+        <span class="material-symbols-rounded nav-icon">receipt_long</span>
+        <span>Sales</span>
+      </a>
+      <a href="payments.html" class="nav-item">
+        <span class="material-symbols-rounded nav-icon">payments</span>
+        <span>Payments</span>
+      </a>
+      <a href="inventory.html" class="nav-item active">
+        <span class="material-symbols-rounded nav-icon">inventory_2</span>
+        <span>Inventory</span>
+      </a>
+      <a href="queue-management.html" class="nav-item">
+        <span class="material-symbols-rounded nav-icon">queue</span>
+        <span>Queue</span>
+      </a>
+      <a href="shift-management.html" class="nav-item">
+        <span class="material-symbols-rounded nav-icon">schedule</span>
+        <span>Shift Management</span>
+      </a>
+      <a href="reports.html" class="nav-item">
+        <span class="material-symbols-rounded nav-icon">summarize</span>
+        <span>Reports</span>
+      </a>
+      <a href="help.html" class="nav-item">
+        <span class="material-symbols-rounded nav-icon">help</span>
+        <span>Help & Training</span>
+      </a>
+      <a href="account.html" class="nav-item">
+        <span class="material-symbols-rounded nav-icon">settings</span>
+        <span>Account</span>
+      </a>
+    </nav>
+    
+    <div class="logout-section">
+      <button class="logout-button" @click="logout()">
+        <span class="material-symbols-rounded logout-icon">logout</span>
+        <span>Logout</span>
+      </button>
+    </div>
+  </aside>
+
+  <!-- Main Content -->
+  <main class="main-content">
+    <!-- Header -->
+    <header class="header">
+      <div class="header-left">
+        <button class="mobile-menu-toggle" @click="sidebarOpen = !sidebarOpen">
+          <span class="material-symbols-rounded">menu</span>
+        </button>
+        
+        <div class="page-title-section">
+          <h1 class="page-title">Inventory Management</h1>
+        </div>
+      </div>
+
+      <div class="header-right">
+        <!-- Header elements removed per request -->
+      </div>
+    </header>
+
+    <section class="content-area">
+        <div class="content-header">
+          <div>
+            <p>Manage and track your pharmacy inventory in real-time.</p>
+          </div>
+          <div class="quick-stats">
+            <button class="stat-button" data-stat="total-products">
+              <span>Total Products</span>
+              <strong id="totalProductsCount" x-text="totalProducts"></strong>
+            </button>
+            <button class="stat-button" data-stat="low-stock">
+              <span>Low Stock</span>
+              <strong id="lowStockCount" x-text="lowStockItems"></strong>
+            </button>
+            <button class="stat-button" data-stat="out-of-stock">
+              <span>Out of Stock</span>
+              <strong id="outOfStockCount" x-text="outOfStockItems"></strong>
+            </button>
+            <button class="stat-button" data-stat="expiring">
+              <span>Expiring Soon</span>
+              <strong id="expiringCount" x-text="expiringItems"></strong>
+            </button>
+          </div>
+          <div class="header-actions">
+            <button class="secondary-btn" id="stocktakeButton" type="button" data-permission="manage_inventory">
+              <span class="material-symbols-rounded">inventory</span>
+              Stocktake
+            </button>
+            <button class="secondary-btn" id="purchaseButton" type="button" data-permission="manage_inventory">
+              <span class="material-symbols-rounded">add_shopping_cart</span>
+              Add Purchase
+            </button>
+            <button class="secondary-btn" id="reportsButton" type="button">
+              <span class="material-symbols-rounded">analytics</span>
+              Reports
+            </button>
+            <button class="secondary-btn" id="importButton" type="button" data-permission="manage_inventory">
+              <span class="material-symbols-rounded">upload_file</span>
+              Import
+            </button>
+            <button class="secondary-btn" id="exportButton" type="button" @click="exportInventoryData">
+              <span class="material-symbols-rounded">download</span>
+              Export
+            </button>
+            <button class="add-product-btn" id="addProductButton" type="button">
+              <span class="material-symbols-rounded">add</span>
+              Add Product
+            </button>
+          </div>
+        </div>
+
+        <div class="widgets-row">
+          <article class="widget">
+            <header class="widget-header">
+              <div>
+                <h3 class="widget-title">Stock Levels</h3>
+                <p class="widget-subtitle">Current inventory status</p>
+              </div>
+              <button class="icon-button" type="button" data-menu="stock" aria-haspopup="true"
+                aria-expanded="false" aria-controls="stockMenu" aria-label="Stock menu">
+                <i class="fi fi-rr-menu-dots" aria-hidden="true"></i>
+              </button>
+              <div class="widget-menu" id="stockMenu" hidden>
+                <button type="button" data-action="refresh-stock">Refresh data</button>
+                <button type="button" data-action="view-report">View detailed report</button>
+              </div>
+            </header>
+            <div class="chart-container">
+              <canvas id="stockChart" aria-label="Stock levels overview"></canvas>
+            </div>
+          </article>
+
+          <article class="widget">
+            <header class="widget-header">
+              <div>
+                <h3 class="widget-title">Category Distribution</h3>
+                <p class="widget-subtitle">Products by category</p>
+              </div>
+              <button class="icon-button" type="button" data-menu="category" aria-haspopup="true"
+                aria-expanded="false" aria-controls="categoryMenu" aria-label="Category menu">
+                <i class="fi fi-rr-menu-dots" aria-hidden="true"></i>
+              </button>
+              <div class="widget-menu" id="categoryMenu" hidden>
+                <button type="button" data-action="refresh-category">Refresh data</button>
+                <button type="button" data-action="export-category">Export report</button>
+              </div>
+            </header>
+            <div class="chart-container">
+              <canvas id="categoryChart" aria-label="Category distribution"></canvas>
+            </div>
+          </article>
+
+          <article class="widget">
+            <header class="widget-header">
+              <div>
+                <h3 class="widget-title">Expiry Tracking</h3>
+                <p class="widget-subtitle">Products expiring in next 30 days</p>
+              </div>
+              <button class="icon-button" type="button" data-menu="expiry" aria-haspopup="true"
+                aria-expanded="false" aria-controls="expiryMenu" aria-label="Expiry menu">
+                <i class="fi fi-rr-menu-dots" aria-hidden="true"></i>
+              </button>
+              <div class="widget-menu" id="expiryMenu" hidden>
+                <button type="button" data-action="refresh-expiry"><i class="fi fi-rr-refresh" aria-hidden="true"></i>Refresh list</button>
+                <button type="button" data-action="view-all-expiry"><i class="fi fi-rr-list" aria-hidden="true"></i>View all expiring</button>
+              </div>
+            </header>
+            <div class="expiry-list" id="expiryList"></div>
+          </article>
+        </div>
+
+        <article class="product-list-container">
+          <header class="product-list-header">
+            <div>
+              <h2>Product Inventory</h2>
+              <span>Manage your pharmacy products and stock levels</span>
+            </div>
+          </header>
+
+          <div class="table-controls">
+            <div class="control-group">
+              <label class="table-search">
+                <i class="fi fi-rr-search" aria-hidden="true"></i>
+                <input id="productSearchInput" type="search" placeholder="Search products by name, code or category"
+                  autocomplete="off">
+                <div class="search-autocomplete" id="productSearchAutocomplete" role="listbox" hidden></div>
+              </label>
+              <button class="icon-button" id="filterToggle" type="button" aria-haspopup="true" aria-expanded="false"
+                aria-controls="filterPanel" title="Filters">
+                <i class="fi fi-rr-filter" aria-hidden="true"></i>
+              </button>
+              <button class="icon-button" id="sortToggle" type="button" aria-haspopup="true" aria-expanded="false"
+                aria-controls="sortPanel" title="Sort">
+                <i class="fi fi-rr-bars-sort" aria-hidden="true"></i>
+              </button>
+              <button class="icon-button" id="columnsToggle" type="button" aria-haspopup="true" aria-expanded="false"
+                aria-controls="columnsPanel" title="Manage columns">
+                <i class="fi fi-rr-table-columns" aria-hidden="true"></i>
+              </button>
+            </div>
+            <div class="nav-actions">
+              <button class="control-button" type="button" @click="selectedProducts.length > 0 ? (bulkEditMode ? toggleBulkEdit() : (document.getElementById('bulkEditModal').hidden = false, document.getElementById('modalOverlay').hidden = false)) : showWarning('Please select products to bulk edit')">
+                <i class="fi fi-rr-edit" aria-hidden="true"></i>
+                <span x-text="bulkEditMode ? 'Cancel Bulk Edit' : 'Bulk Edit'"></span>
+              </button>
+              <button class="control-button" type="button" @click="printLabels()" :disabled="selectedProducts.length === 0">
+                <i class="fi fi-rr-print" aria-hidden="true"></i>
+                Print Labels
+              </button>
+            </div>
+          </div>
+          <div class="table-scroll">
+            <table class="product-table" id="productTable" aria-live="polite">
+              <thead>
+                <tr>
+                  <th scope="col" data-column="select">
+                    <input type="checkbox" id="selectAll" aria-label="Select all products" @change="selectAllProducts()">
+                  </th>
+                  <th scope="col" data-column="sku">Product Code</th>
+                  <th scope="col" data-column="name">Product Details</th>
+                  <th scope="col" data-column="category">Category</th>
+                  <th scope="col" data-column="stock">Stock</th>
+                  <th scope="col" data-column="reorder">Reorder Level</th>
+                  <th scope="col" data-column="cost">Cost Price</th>
+                  <th scope="col" data-column="price">Selling Price</th>
+                  <th scope="col" data-column="supplier">Supplier</th>
+                  <th scope="col" data-column="batch">Batch/Lot</th>
+                  <th scope="col" data-column="expiry">Expiry Date</th>
+                  <th scope="col" data-column="barcode">Barcode</th>
+                  <th scope="col" data-column="status">Status</th>
+                  <th scope="col" data-column="actions">Actions</th>
+                </tr>
+              </thead>
+              <tbody id="productTableBody">
+                <template x-for="product in filteredProducts" :key="product.id">
+                  <tr>
+                    <td>
+                      <input type="checkbox" :value="product.id" @change="toggleProductSelection(product.id)" :checked="selectedProducts.includes(product.id)" aria-label="Select product">
+                    </td>
+                    <td x-text="product.id"></td>
+                    <td>
+                      <div class="product-info">
+                        <div class="product-name" x-text="product.brandName"></div>
+                        <div class="product-sku" x-text="`${product.genericName} • ${product.strength || ''} ${product.form || ''}`"></div>
+                      </div>
+                    </td>
+                    <td x-text="product.category"></td>
+                    <td>
+                      <span class="stock-badge" :class="{
+                        'in-stock': product.stockQuantity > product.lowStockThreshold,
+                        'low-stock': product.stockQuantity > 0 && product.stockQuantity <= product.lowStockThreshold,
+                        'out-of-stock': product.stockQuantity <= 0
+                      }" x-text="product.stockQuantity"></span>
+                    </td>
+                    <td>
+                      <span class="reorder-badge" x-text="product.lowStockThreshold || 0"></span>
+                    </td>
+                    <td x-text="formatCurrency(product.costPrice)"></td>
+                    <td x-text="formatCurrency(product.sellingPrice)"></td>
+                    <td>
+                      <div class="supplier-info" x-text="product.supplier || 'N/A'"></div>
+                    </td>
+                    <td>
+                      <div class="batch-info" x-text="product.batchNumber || 'N/A'"></div>
+                    </td>
+                    <td>
+                      <div class="expiry-info" :class="{
+                        'expiring-soon': isExpiringSoon(product.expiryDate),
+                        'expired': isExpired(product.expiryDate)
+                      }">
+                        <span x-text="formatDate(product.expiryDate)"></span>
+                        <span class="expiry-days" x-show="isExpiringSoon(product.expiryDate)" x-text="`${getDaysToExpiry(product.expiryDate)} days`"></span>
+                      </div>
+                    </td>
+                    <td>
+                      <div class="barcode-info">
+                        <span x-text="product.barcode || 'N/A'"></span>
+                        <button class="barcode-btn" @click="generateBarcode(product)" x-show="!product.barcode" title="Generate Barcode">
+                          <span class="material-symbols-rounded">qr_code_2</span>
+                        </button>
+                      </div>
+                    </td>
+                    <td>
+                      <span class="status-badge" :class="{
+                        'in-stock': product.status === 'In Stock',
+                        'low-stock': product.status === 'Low Stock',
+                        'out-of-stock': product.status === 'Out of Stock',
+                        'expired': isExpired(product.expiryDate)
+                      }" x-text="isExpired(product.expiryDate) ? 'Expired' : product.status"></span>
+                    </td>
+                    <td>
+                      <div class="action-buttons">
+                        <button class="action-btn scan" @click="scanProduct(product)" title="Scan Barcode">
+                          <span class="material-symbols-rounded">qr_code_scanner</span>
+                        </button>
+                        <button class="action-btn edit" @click="editProduct(product)" title="Edit product">
+                          <span class="material-symbols-rounded">edit</span>
+                        </button>
+                        <button class="action-btn reorder" @click="reorderProduct(product)" title="Reorder">
+                          <span class="material-symbols-rounded">shopping_cart</span>
+                        </button>
+                        <button class="action-btn delete" @click="deleteProduct(product)" title="Delete product">
+                          <span class="material-symbols-rounded">delete</span>
+                        </button>
+                      </div>
+                    </td>
+                  </tr>
+                </template>
+              </tbody>
+            </table>
+          </div>
+
+          <div class="table-empty" id="productEmptyState" hidden>
+            <i class="fi fi-rr-box" aria-hidden="true"></i>
+            <p>No products match your filters. Adjust search or filters to view results.</p>
+          </div>
+
+          <footer class="pagination" id="pagination" hidden>
+            <div class="pagination-info" id="paginationInfo"></div>
+            <div class="pagination-controls" id="paginationControls"></div>
+            <div class="pagination-show">
+              <label>
+                Show
+                <select id="pageSizeSelect" aria-label="Select page size">
+                  <option value="10">10</option>
+                  <option value="25">25</option>
+                  <option value="50">50</option>
+                </select>
+                entries
+              </label>
+            </div>
+          </footer>
+          
+        </article>
+      </section>
+  </main>
+
+  <div class="overlay" id="modalOverlay" hidden></div>
+
+  <section class="modal" id="productModal" role="dialog" aria-modal="true" aria-labelledby="productModalTitle"
+    hidden>
+    <div class="modal-content">
+      <header class="modal-header">
+        <h2 id="productModalTitle">Add Product</h2>
+        <button type="button" class="modal-close" data-close="productModal" aria-label="Close add product form">
+          <span class="material-symbols-rounded">close</span>
+        </button>
+      </header>
+      <form id="productForm" class="modal-body">
+        <div class="form-grid">
+          <label>
+            <span>Brand Name</span>
+            <input type="text" id="formProductName" name="productName" required>
+          </label>
+          <label>
+            <span>Generic Name</span>
+            <input type="text" id="formGenericName" name="genericName" required>
+          </label>
+          <label>
+            <span>Strength</span>
+            <input type="text" id="formStrength" name="strength" placeholder="e.g., 500mg">
+          </label>
+          <label>
+            <span>Form</span>
+            <select id="formForm" name="form">
+              <option value="">Select form</option>
+              <option value="Tablet">Tablet</option>
+              <option value="Capsule">Capsule</option>
+              <option value="Syrup">Syrup</option>
+              <option value="Injection">Injection</option>
+              <option value="Ointment">Ointment</option>
+              <option value="Cream">Cream</option>
+              <option value="Drops">Drops</option>
+              <option value="Inhaler">Inhaler</option>
+              <option value="Suppository">Suppository</option>
+            </select>
+          </label>
+          <label>
+            <span>Category</span>
+            <select id="formCategory" name="category" required>
+              <option value="">Select category</option>
+              <option value="Antibiotics">Antibiotics</option>
+              <option value="Analgesics">Analgesics</option>
+              <option value="Antimalarials">Antimalarials</option>
+              <option value="Antihypertensives">Antihypertensives</option>
+              <option value="Diabetes">Diabetes</option>
+              <option value="Vitamins & Supplements">Vitamins & Supplements</option>
+              <option value="OTC">OTC</option>
+              <option value="Community Health">Community Health</option>
+              <option value="Endocrinology">Endocrinology</option>
+            </select>
+          </label>
+          <label>
+            <span>Unit Size</span>
+            <input type="text" id="formUnitSize" name="unitSize" placeholder="e.g., 10s, 100ml">
+          </label>
+          <label>
+            <span>Supplier</span>
+            <input type="text" id="formSupplier" name="supplier" list="supplierList">
+            <datalist id="supplierList">
+              <option value="PharmaCorp Ltd">
+              <option value="MedSupply Zambia">
+              <option value="HealthDist Solutions">
+              <option value="Universal Medicines">
+            </datalist>
+          </label>
+          <label>
+            <span>Low Stock Threshold</span>
+            <input type="number" id="formLowStockThreshold" name="lowStockThreshold" min="0" required>
+          </label>
+          <label>
+            <span>Manufacture Date</span>
+            <input type="date" id="formManufactureDate" name="manufactureDate" required>
+          </label>
+          <label>
+            <span>Batch Number</span>
+            <input type="text" id="formBatchNumber" name="batchNumber" required>
+          </label>
+          <label>
+            <span>License Number</span>
+            <input type="text" id="formLicenseNumber" name="licenseNumber" required>
+          </label>
+          <label>
+            <span>Zambia REG Number</span>
+            <input type="text" id="formZambiaRegNumber" name="zambiaRegNumber" required>
+          </label>
+          <label>
+            <span>Packing Type</span>
+            <select id="formPackingType" name="packingType" required>
+              <option value="">Select packing type</option>
+              <option value="Box">Box</option>
+              <option value="Blister">Blister</option>
+              <option value="Bottle">Bottle</option>
+              <option value="Tube">Tube</option>
+              <option value="Sachet">Sachet</option>
+              <option value="Vial">Vial</option>
+              <option value="Ampoule">Ampoule</option>
+            </select>
+          </label>
+          <label>
+            <span>Barcode</span>
+            <input type="text" id="formBarcode" name="barcode" placeholder="Scan or enter barcode">
+            <button type="button" class="scan-barcode-btn" onclick="scanBarcode()">
+              <i class="fi fi-rr-camera"></i> Scan
+            </button>
+          </label>
+          <label>
+            <span>Cost Price (ZMW)</span>
+            <input type="number" id="formCostPrice" name="costPrice" min="0" step="0.01" required>
+          </label>
+          <label>
+            <span>Selling Price (ZMW)</span>
+            <input type="number" id="formSellingPrice" name="sellingPrice" min="0" step="0.01" required>
+          </label>
+          <label>
+            <span>Stock Quantity</span>
+            <input type="number" id="formStock" name="stockQuantity" min="0" required>
+          </label>
+          <label>
+            <span>Expiry Date</span>
+            <input type="date" id="formExpiry" name="expiryDate" required>
+          </label>
+        </div>
+        <label class="form-textarea">
+          <span>Description</span>
+          <textarea id="formDescription" name="description" rows="3"
+            placeholder="Add optional notes about the product"></textarea>
+        </label>
+      </form>
+      <footer class="modal-footer">
+        <button type="button" class="secondary" data-close="productModal">Cancel</button>
+        <button type="submit" form="productForm" class="primary" id="submitProduct">Save &amp; Continue</button>
+      </footer>
+    </div>
+  </section>
+
+  <section class="modal" id="bulkUploadModal" role="dialog" aria-modal="true" aria-labelledby="bulkUploadModalTitle"
+    hidden>
+    <div class="modal-content">
+      <header class="modal-header">
+        <h2 id="bulkUploadModalTitle">Bulk Upload Products</h2>
+        <button type="button" class="modal-close" data-close="bulkUploadModal" aria-label="Close bulk upload">
+          <span class="material-symbols-rounded">close</span>
+        </button>
+      </header>
+      <div class="modal-body">
+        <div class="upload-instructions">
+          <h3>Instructions</h3>
+          <p>Upload a CSV file with the following columns:</p>
+          <ul>
+            <li>Brand Name</li>
+            <li>Generic Name</li>
+            <li>Category</li>
+            <li>Manufacture Date</li>
+            <li>Batch Number</li>
+            <li>License Number</li>
+            <li>Zambia REG Number</li>
+            <li>Packing Type</li>
+            <li>Cost Price</li>
+            <li>Selling Price</li>
+            <li>Stock Quantity</li>
+            <li>Expiry Date</li>
+            <li>Description (optional)</li>
+          </ul>
+          <button class="secondary-btn" id="downloadTemplateBtn">
+            <i class="fi fi-rr-download" aria-hidden="true"></i>
+            Download Template
+          </button>
+        </div>
+        <div class="upload-area">
+          <label for="bulkFileInput" class="upload-label">
+            <i class="fi fi-rr-upload" aria-hidden="true"></i>
+            <span>Choose CSV file or drag and drop</span>
+            <input type="file" id="bulkFileInput" accept=".csv" hidden>
+          </label>
+          <div class="file-info" id="fileInfo" hidden>
+            <span id="fileName"></span>
+            <button type="button" class="remove-file" id="removeFile" title="Remove file">
+              <i class="fi fi-rr-cross" aria-hidden="true"></i>
+            </button>
+          </div>
+        </div>
+        <div class="upload-preview" id="uploadPreview" hidden>
+          <h4>Preview</h4>
+          <div class="preview-table">
+            <table>
+              <thead>
+                <tr>
+                  <th>Brand Name</th>
+                  <th>Generic Name</th>
+                  <th>Category</th>
+                  <th>Stock</th>
+                  <th>Price</th>
+                </tr>
+              </thead>
+              <tbody id="previewBody"></tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+      <footer class="modal-footer">
+        <button type="button" class="secondary" data-close="bulkUploadModal">Cancel</button>
+        <button type="button" class="primary" id="processBulkUpload" disabled>Upload Products</button>
+      </footer>
+    </div>
+  </section>
+
+  <!-- Stocktake Modal -->
+  <section class="modal" id="stocktakeModal" role="dialog" aria-modal="true" aria-labelledby="stocktakeModalTitle"
+    hidden>
+    <div class="modal-content modal-large">
+      <header class="modal-header">
+        <h2 id="stocktakeModalTitle">Physical Stock Count</h2>
+        <button type="button" class="modal-close" data-close="stocktakeModal" aria-label="Close stocktake">
+          <span class="material-symbols-rounded">close</span>
+        </button>
+      </header>
+      <div class="modal-body">
+        <div class="stocktake-header">
+          <div class="stocktake-info">
+            <p>Count your physical inventory and reconcile with system records.</p>
+            <div class="stocktake-stats">
+              <div class="stat-item">
+                <span class="stat-label">Items to Count:</span>
+                <span class="stat-value" x-text="products.length"></span>
+              </div>
+              <div class="stat-item">
+                <span class="stat-label">Counted:</span>
+                <span class="stat-value" x-text="stocktakeCounted.length"></span>
+              </div>
+              <div class="stat-item">
+                <span class="stat-label">Discrepancies:</span>
+                <span class="stat-value" x-text="stocktakeDiscrepancies.length"></span>
+              </div>
+            </div>
+          </div>
+          <div class="stocktake-actions">
+            <button type="button" class="secondary-btn" onclick="startStocktake()">
+              <i class="fi fi-rr-play"></i> Start Counting
+            </button>
+            <button type="button" class="secondary-btn" onclick="pauseStocktake()">
+              <i class="fi fi-rr-pause"></i> Pause
+            </button>
+            <button type="button" class="primary-btn" onclick="completeStocktake()">
+              <i class="fi fi-rr-check"></i> Complete
+            </button>
+          </div>
+        </div>
+        
+        <div class="stocktake-search">
+          <input type="text" placeholder="Search product to count..." x-model="stocktakeSearch">
+          <button type="button" class="scan-btn" onclick="scanForStocktake()">
+            <i class="fi fi-rr-camera"></i> Scan
+          </button>
+        </div>
+
+        <div class="stocktake-items">
+          <template x-for="product in filteredStocktakeProducts" :key="product.id">
+            <div class="stocktake-item" :class="{ 'counted': product.counted, 'discrepancy': product.hasDiscrepancy }">
+              <div class="item-info">
+                <div class="item-name" x-text="product.brandName"></div>
+                <div class="item-details" x-text="`${product.genericName} • ${product.strength || ''}`"></div>
+                <div class="item-location" x-text="`Location: ${product.location || 'A1'}`"></div>
+              </div>
+              <div class="item-quantities">
+                <div class="system-quantity">
+                  <span>System:</span>
+                  <strong x-text="product.stockQuantity"></strong>
+                </div>
+                <div class="counted-quantity">
+                  <span>Counted:</span>
+                  <input type="number" x-model="product.countedQuantity" @input="updateDiscrepancy(product)" min="0">
+                </div>
+                <div class="discrepancy" x-show="product.hasDiscrepancy">
+                  <span>Diff:</span>
+                  <strong :class="product.discrepancy > 0 ? 'positive' : 'negative'" x-text="product.discrepancy"></strong>
+                </div>
+              </div>
+              <div class="item-actions">
+                <button type="button" class="action-btn" @click="markAsCounted(product)">
+                  <i class="fi fi-rr-check"></i>
+                </button>
+                <button type="button" class="action-btn" @click="addNote(product)">
+                  <i class="fi fi-rr-edit"></i>
+                </button>
+              </div>
+            </div>
+          </template>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Purchase Order Modal -->
+  <section class="modal" id="purchaseModal" role="dialog" aria-modal="true" aria-labelledby="purchaseModalTitle"
+    hidden>
+    <div class="modal-content modal-large">
+      <header class="modal-header">
+        <h2 id="purchaseModalTitle">Create Purchase Order</h2>
+        <button type="button" class="modal-close" data-close="purchaseModal" aria-label="Close purchase order">
+          <span class="material-symbols-rounded">close</span>
+        </button>
+      </header>
+      <div class="modal-body">
+        <div class="purchase-form">
+          <div class="supplier-section">
+            <h3>Supplier Information</h3>
+            <div class="form-grid">
+              <label>
+                <span>Supplier</span>
+                <select x-model="purchaseOrder.supplier" @change="updateSupplierDetails()">
+                  <option value="">Select supplier</option>
+                  <template x-for="supplier in suppliers" :key="supplier.id">
+                    <option :value="supplier.id" x-text="supplier.name"></option>
+                  </template>
+                </select>
+              </label>
+              <label>
+                <span>Order Date</span>
+                <input type="date" x-model="purchaseOrder.orderDate">
+              </label>
+              <label>
+                <span>Expected Delivery</span>
+                <input type="date" x-model="purchaseOrder.expectedDelivery">
+              </label>
+              <label>
+                <span>Reference Number</span>
+                <input type="text" x-model="purchaseOrder.reference" placeholder="PO-2024-001">
+              </label>
+            </div>
+          </div>
+
+          <div class="order-items-section">
+            <h3>Order Items</h3>
+            <div class="add-item-section">
+              <select x-model="selectedProductId" @change="addProductToOrder()">
+                <option value="">Add product to order...</option>
+                <template x-for="product in products" :key="product.id">
+                  <option :value="product.id" x-text="`${product.brandName} - ${product.genericName}`"></option>
+                </template>
+              </select>
+              <button type="button" class="secondary-btn" onclick="addLowStockItems()">
+                <i class="fi fi-rr-plus"></i> Add All Low Stock Items
+              </button>
+            </div>
+
+            <div class="order-items-table">
+              <table>
+                <thead>
+                  <tr>
+                    <th>Product</th>
+                    <th>Current Stock</th>
+                    <th>Order Qty</th>
+                    <th>Unit Cost</th>
+                    <th>Total</th>
+                    <th>Actions</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <template x-for="item in purchaseOrder.items" :key="item.id">
+                    <tr>
+                      <td>
+                        <div x-text="item.brandName"></div>
+                        <small x-text="item.genericName"></small>
+                      </td>
+                      <td x-text="item.currentStock"></td>
+                      <td>
+                        <input type="number" x-model="item.quantity" @input="updateOrderTotal(item)" min="1">
+                      </td>
+                      <td>
+                        <input type="number" x-model="item.unitCost" @input="updateOrderTotal(item)" min="0" step="0.01">
+                      </td>
+                      <td x-text="formatCurrency(item.total)"></td>
+                      <td>
+                        <button type="button" class="action-btn delete" @click="removeFromOrder(item.id)">
+                          <i class="fi fi-rr-trash"></i>
+                        </button>
+                      </td>
+                    </tr>
+                  </template>
+                </tbody>
+              </table>
+            </div>
+
+            <div class="order-summary">
+              <div class="summary-row">
+                <span>Subtotal:</span>
+                <span x-text="formatCurrency(purchaseOrder.subtotal)"></span>
+              </div>
+              <div class="summary-row">
+                <span>VAT (16%):</span>
+                <span x-text="formatCurrency(purchaseOrder.vat)"></span>
+              </div>
+              <div class="summary-row total">
+                <span>Total:</span>
+                <span x-text="formatCurrency(purchaseOrder.total)"></span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <footer class="modal-footer">
+        <button type="button" class="secondary" data-close="purchaseModal">Cancel</button>
+        <button type="button" class="primary" onclick="savePurchaseOrder()">Create Order</button>
+      </footer>
+    </div>
+  </section>
+
+  <!-- Reports Modal -->
+  <section class="modal" id="reportsModal" role="dialog" aria-modal="true" aria-labelledby="reportsModalTitle"
+    hidden>
+    <div class="modal-content modal-large">
+      <header class="modal-header">
+        <h2 id="reportsModalTitle">Inventory Reports</h2>
+        <button type="button" class="modal-close" data-close="reportsModal" aria-label="Close reports">
+          <span class="material-symbols-rounded">close</span>
+        </button>
+      </header>
+      <div class="modal-body">
+        <div class="reports-grid">
+          <div class="report-card" @click="generateReport('stockValue')">
+            <div class="report-icon">
+              <i class="fi fi-rr-chart-pie"></i>
+            </div>
+            <h3>Stock Value Report</h3>
+            <p>Total value of current inventory by category</p>
+          </div>
+          
+          <div class="report-card" @click="generateReport('expiryAnalysis')">
+            <div class="report-icon">
+              <i class="fi fi-rr-calendar-exclamation"></i>
+            </div>
+            <h3>Expiry Analysis</h3>
+            <p>Products expiring in next 90 days</p>
+          </div>
+          
+          <div class="report-card" @click="generateReport('salesPerformance')">
+            <div class="report-icon">
+              <i class="fi fi-rr-trending-up"></i>
+            </div>
+            <h3>Sales Performance</h3>
+            <p>Best/worst selling products analysis</p>
+          </div>
+          
+          <div class="report-card" @click="generateReport('profitability')">
+            <div class="report-icon">
+              <i class="fi fi-rr-coins"></i>
+            </div>
+            <h3>Profitability Analysis</h3>
+            <p>Profit margins by product category</p>
+          </div>
+          
+          <div class="report-card" @click="generateReport('lowStock')">
+            <div class="report-icon">
+              <i class="fi fi-rr-exclamation-triangle"></i>
+            </div>
+            <h3>Low Stock Report</h3>
+            <p>Items needing reorder attention</p>
+          </div>
+          
+          <div class="report-card" @click="generateReport('supplierPerformance')">
+            <div class="report-icon">
+              <i class="fi fi-rr-truck"></i>
+            </div>
+            <h3>Supplier Performance</h3>
+            <p>Delivery times and quality metrics</p>
+          </div>
+        </div>
+
+        <div class="report-preview" x-show="currentReport && currentReport.title">
+          <h3 x-text="currentReport?.title || 'Select a report'"></h3>
+          <div class="report-filters">
+            <label>
+              <span>Date From:</span>
+              <input type="date" x-model="reportFilters.dateFrom">
+            </label>
+            <label>
+              <span>Date To:</span>
+              <input type="date" x-model="reportFilters.dateTo">
+            </label>
+            <label>
+              <span>Category:</span>
+              <select x-model="reportFilters.category">
+                <option value="">All Categories</option>
+                <template x-for="cat in categories" :key="cat">
+                  <option :value="cat" x-text="cat"></option>
+                </template>
+              </select>
+            </label>
+            <button type="button" class="primary-btn" @click="runReport()">
+              <i class="fi fi-rr-refresh"></i> Generate Report
+            </button>
+            <button type="button" class="secondary-btn" @click="exportReport()">
+              <i class="fi fi-rr-download"></i> Export
+            </button>
+          </div>
+          <div class="report-content" id="reportContent">
+            <!-- Report content will be dynamically generated here -->
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Bulk Edit Modal -->
+  <section class="modal" id="bulkEditModal" role="dialog" aria-modal="true" aria-labelledby="bulkEditModalTitle"
+    hidden>
+    <div class="modal-content">
+      <header class="modal-header">
+        <h2 id="bulkEditModalTitle">Bulk Edit Products</h2>
+        <button type="button" class="modal-close" data-close="bulkEditModal" aria-label="Close bulk edit">
+          <span class="material-symbols-rounded">close</span>
+        </button>
+      </header>
+      <div class="modal-body">
+        <p>Update the following fields for <span x-text="selectedProducts.length"></span> selected products:</p>
+        
+        <div class="form-grid">
+          <label>
+            <span>Category</span>
+            <select id="bulkCategory" name="category">
+              <option value="">Keep Current</option>
+              <option value="Antibiotics">Antibiotics</option>
+              <option value="Analgesics">Analgesics</option>
+              <option value="Antimalarials">Antimalarials</option>
+              <option value="Antihypertensives">Antihypertensives</option>
+              <option value="Diabetes">Diabetes</option>
+              <option value="Vitamins & Supplements">Vitamins & Supplements</option>
+              <option value="OTC">OTC</option>
+              <option value="Community Health">Community Health</option>
+              <option value="Endocrinology">Endocrinology</option>
+            </select>
+          </label>
+          <label>
+            <span>Supplier</span>
+            <input type="text" id="bulkSupplier" name="supplier" placeholder="Leave empty to keep current">
+          </label>
+          <label>
+            <span>Low Stock Threshold</span>
+            <input type="number" id="bulkLowStockThreshold" name="lowStockThreshold" min="0" placeholder="Leave empty to keep current">
+          </label>
+          <label>
+            <span>Cost Price (ZMW)</span>
+            <input type="number" id="bulkCostPrice" name="costPrice" min="0" step="0.01" placeholder="Leave empty to keep current">
+          </label>
+          <label>
+            <span>Selling Price (ZMW)</span>
+            <input type="number" id="bulkSellingPrice" name="sellingPrice" min="0" step="0.01" placeholder="Leave empty to keep current">
+          </label>
+          <label>
+            <span>Status</span>
+            <select id="bulkStatus" name="status">
+              <option value="">Keep Current</option>
+              <option value="In Stock">In Stock</option>
+              <option value="Low Stock">Low Stock</option>
+              <option value="Out of Stock">Out of Stock</option>
+            </select>
+          </label>
+        </div>
+      </div>
+      <footer class="modal-footer">
+        <button type="button" class="secondary" data-close="bulkEditModal">Cancel</button>
+        <button type="button" class="primary" @click="applyBulkEdit()">Apply Changes</button>
+      </footer>
+    </div>
+  </section>
+
+  <!-- Barcode Scanner Modal -->
+  <section class="modal" id="barcodeScannerModal" role="dialog" aria-modal="true" aria-labelledby="barcodeScannerModalTitle"
+    hidden>
+    <div class="modal-content">
+      <header class="modal-header">
+        <h2 id="barcodeScannerModalTitle">Barcode Scanner</h2>
+        <button type="button" class="modal-close" data-close="barcodeScannerModal" aria-label="Close barcode scanner">
+          <span class="material-symbols-rounded">close</span>
+        </button>
+      </header>
+      <div class="modal-body">
+        <div class="scanner-container">
+          <div class="scanner-viewfinder" id="scannerViewfinder">
+            <video id="scannerVideo" autoplay muted></video>
+            <canvas id="scannerCanvas" hidden></canvas>
+            <div class="scanner-overlay">
+              <div class="scanner-frame"></div>
+              <div class="scanner-line"></div>
+            </div>
+          </div>
+          
+          <div class="scanner-controls">
+            <button type="button" class="primary-btn" id="startScanning" @click="startBarcodeScanning">
+              <span class="material-symbols-rounded">qr_code_scanner</span>
+              Start Scanning
+            </button>
+            <button type="button" class="secondary-btn" id="stopScanning" @click="stopBarcodeScanning" disabled>
+              <span class="material-symbols-rounded">stop</span>
+              Stop
+            </button>
+            <button type="button" class="secondary-btn" id="switchCamera" @click="switchCamera" disabled>
+              <span class="material-symbols-rounded">flip_camera_android</span>
+              Switch Camera
+            </button>
+          </div>
+          
+          <div class="scanner-result" x-show="scannedBarcode">
+            <h3>Scanned Result:</h3>
+            <div class="result-display">
+              <label for="scannedBarcodeInput" class="sr-only">Scanned Barcode</label>
+              <input type="text" id="scannedBarcodeInput" x-model="scannedBarcode" readonly 
+                     aria-label="Scanned barcode result" title="Scanned barcode">
+              <button type="button" class="primary-btn" @click="useScannedBarcode">
+                <span class="material-symbols-rounded">check</span>
+                Use Barcode
+              </button>
+              <button type="button" class="secondary-btn" @click="clearScannedBarcode">
+                <span class="material-symbols-rounded">clear</span>
+                Clear
+              </button>
+            </div>
+          </div>
+          
+          <div class="scanner-manual">
+            <h3>Or enter barcode manually:</h3>
+            <div class="manual-input">
+              <label for="manualBarcodeInput" class="sr-only">Manual Barcode Entry</label>
+              <input type="text" id="manualBarcodeInput" x-model="manualBarcode" 
+                     placeholder="Enter barcode number" aria-label="Manual barcode entry">
+              <button type="button" class="primary-btn" @click="useManualBarcode">
+                <span class="material-symbols-rounded">keyboard</span>
+                Use Manual
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Alpine.js Component -->
+  <script>
+    function inventorySystem() {
+      return {
+        sidebarOpen: false,
+        searchQuery: '',
+        showFilterMenu: false,
+        showAddModal: false,
+        // User and pharmacy info - will be populated dynamically
+        pharmacyInfo: {
+          name: '',
+          location: ''
+        },
+        userInfo: {
+          name: '',
+          role: '',
+          initials: ''
+        },
+        products: [],
+        
+        // Dashboard metrics
+        totalProducts: 0,
+        lowStockItems: 0,
+        outOfStockItems: 0,
+        expiringItems: 0,
+        
+        // Stocktake functionality
+        stocktakeActive: false,
+        stocktakeSearch: '',
+        stocktakeCounted: [],
+        stocktakeDiscrepancies: [],
+        
+        // Purchase Order functionality
+        purchaseOrder: {
+          supplier: '',
+          orderDate: new Date().toISOString().split('T')[0],
+          expectedDelivery: '',
+          reference: '',
+          items: [],
+          subtotal: 0,
+          vat: 0,
+          total: 0
+        },
+        selectedProductId: '',
+        suppliers: [
+          { id: 1, name: 'PharmaCorp Ltd', contact: '+260 211 123456', email: 'orders@pharmacorp.com' },
+          { id: 2, name: 'MedSupply Zambia', contact: '+260 211 234567', email: 'info@medsupply.co.zm' },
+          { id: 3, name: 'HealthDist Solutions', contact: '+260 211 345678', email: 'orders@healthdist.com' },
+          { id: 4, name: 'Universal Medicines', contact: '+260 211 456789', email: 'sales@universalmed.com' }
+        ],
+        
+        // Reports functionality
+        currentReport: null,
+        reportFilters: {
+          dateFrom: '',
+          dateTo: '',
+          category: ''
+        },
+        categories: [],
+        
+        // Data sync and API integration
+        loading: false,
+        
+        // Search suggestions
+        searchSuggestions: [],
+        filteredSuggestions: [],
+        
+        // Barcode scanning functionality
+        scannedBarcode: '',
+        manualBarcode: '',
+        isScanning: false,
+        currentStream: null,
+        currentCamera: 'environment', // 'environment' for back camera, 'user' for front
+        availableCameras: [],
+        scannerContext: null, // 'product' or 'stocktake' or 'purchase'
+        
+        init() {
+          this.loadPharmacyInfo();
+          this.loadInventoryFromAPI();
+          this.setupEventListeners();
+        },
+
+        // Load pharmacy info from localStorage
+        loadPharmacyInfo() {
+          try {
+            const currentTenant = localStorage.getItem('umi_current_tenant');
+            if (currentTenant) {
+              const tenant = JSON.parse(currentTenant);
+              this.pharmacyInfo = {
+                name: tenant.name || '',
+                location: `${tenant.city || ''}, ${tenant.province || ''}`
+              };
+            }
+          } catch (error) {
+            console.error('Error loading pharmacy info:', error);
+          }
+        },
+        
+        loadInventoryFromAPI() {
+          this.loading = true;
+          
+          // Try to load from localStorage first
+          const storedProducts = localStorage.getItem('umi_inventory_products');
+          if (storedProducts) {
+            try {
+              const products = JSON.parse(storedProducts);
+              this.products = products.map(p => ({
+                ...p,
+                status: p.stockQuantity <= 0 ? 'Out of Stock' : 
+                       p.stockQuantity <= p.lowStockThreshold ? 'Low Stock' : 'In Stock'
+              }));
+              this.updateDashboardMetrics();
+              this.loading = false;
+              return;
+            } catch (e) {
+              console.error('Error loading stored products:', e);
+            }
+          }
+          
+          // Load products from API
+          this.products = [];
+          this.updateDashboardMetrics();
+          this.loading = false;
+        },
+        
+        updateDashboardMetrics() {
+          this.totalProducts = this.products.length;
+          this.lowStockItems = this.products.filter(p => p.stockQuantity <= p.lowStockThreshold).length;
+          this.outOfStockItems = this.products.filter(p => p.stockQuantity <= 0).length;
+          this.expiringItems = this.products.filter(p => this.isExpiringSoon(p.expiryDate)).length;
+        },
+        
+        // Notification methods
+        showSuccess(message) {
+          this.showNotification(message, 'success');
+        },
+
+        showError(message) {
+          this.showNotification(message, 'error');
+        },
+
+        showWarning(message) {
+          this.showNotification(message, 'warning');
+        },
+
+        showNotification(message, type = 'info') {
+          // Create notification element
+          const notification = document.createElement('div');
+          notification.className = `notification notification-${type}`;
+          notification.textContent = message;
+          document.body.appendChild(notification);
+
+          // Animate in
+          setTimeout(() => {
+            notification.classList.add('show');
+          }, 100);
+
+          // Remove after 5 seconds
+          setTimeout(() => {
+            notification.classList.remove('show');
+            setTimeout(() => {
+              if (notification.parentNode) {
+                document.body.removeChild(notification);
+              }
+            }, 300);
+          }, 5000);
+        },
+        
+        get filteredSuggestions() {
+          if (!this.searchQuery || !this.searchSuggestions) return [];
+          
+          return this.searchSuggestions.filter(suggestion =>
+            suggestion.name.toLowerCase().includes(this.searchQuery.toLowerCase())
+          );
+        },
+        
+        selectSuggestion(suggestion) {
+          if (!suggestion) return;
+          this.searchQuery = suggestion.title || suggestion.name || '';
+          this.searchOpen = false;
+        },
+        
+        get filteredProducts() {
+          if (!this.searchQuery) return this.products;
+          
+          return this.products.filter(product => 
+            product.brandName.toLowerCase().includes(this.searchQuery.toLowerCase()) ||
+            product.genericName.toLowerCase().includes(this.searchQuery.toLowerCase()) ||
+            product.category.toLowerCase().includes(this.searchQuery.toLowerCase())
+          );
+        },
+        
+        // Helper methods
+        formatCurrency(amount) {
+          return new Intl.NumberFormat('en-ZM', {
+            style: 'currency',
+            currency: 'ZMW'
+          }).format(amount);
+        },
+        
+        formatDate(dateString) {
+          if (!dateString) return 'N/A';
+          const date = new Date(dateString);
+          return date.toLocaleDateString('en-ZM', {
+            year: 'numeric',
+            month: 'short',
+            day: 'numeric'
+          });
+        },
+        
+        // Expiry management methods
+        isExpired(dateString) {
+          if (!dateString) return false;
+          const expiryDate = new Date(dateString);
+          const today = new Date();
+          return expiryDate < today;
+        },
+        
+        isExpiringSoon(dateString) {
+          if (!dateString) return false;
+          const expiryDate = new Date(dateString);
+          const thirtyDaysFromNow = new Date();
+          thirtyDaysFromNow.setDate(thirtyDaysFromNow.getDate() + 30);
+          return expiryDate >= new Date() && expiryDate <= thirtyDaysFromNow;
+        },
+        
+        getDaysToExpiry(dateString) {
+          if (!dateString) return 0;
+          const expiryDate = new Date(dateString);
+          const today = new Date();
+          const diffTime = expiryDate - today;
+          const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+          return diffDays;
+        },
+        
+        // Notification methods
+        showSuccess(message) {
+          this.showNotification(message, 'success');
+        },
+
+        showError(message) {
+          this.showNotification(message, 'error');
+        },
+
+        showWarning(message) {
+          this.showNotification(message, 'warning');
+        },
+
+        showNotification(message, type = 'info') {
+          // Create notification element
+          const notification = document.createElement('div');
+          notification.className = `notification notification-${type}`;
+          notification.textContent = message;
+          document.body.appendChild(notification);
+
+          // Animate in
+          setTimeout(() => {
+            notification.classList.add('show');
+          }, 100);
+
+          // Remove after 5 seconds
+          setTimeout(() => {
+            notification.classList.remove('show');
+            setTimeout(() => {
+              if (notification.parentNode) {
+                document.body.removeChild(notification);
+              }
+            }, 300);
+          }, 5000);
+        },
+        
+        setupEventListeners() {
+          // Set up event listeners for modal interactions
+          document.addEventListener('keydown', (e) => {
+            if (e.key === 'Escape') {
+              // Close any open modals
+              const openModal = document.querySelector('.modal:not([hidden])');
+              if (openModal) {
+                openModal.hidden = true;
+                document.getElementById('modalOverlay').hidden = true;
+              }
+            }
+          });
+          
+          // Handle window resize for responsive behavior
+          window.addEventListener('resize', () => {
+            // Update any responsive components if needed
+          });
+        },
+
+        get filteredProducts() {
+          if (!this.searchQuery) return this.products;
+          
+          return this.products.filter(product => 
+            product.brandName.toLowerCase().includes(this.searchQuery.toLowerCase()) ||
+            product.genericName.toLowerCase().includes(this.searchQuery.toLowerCase()) ||
+            product.category.toLowerCase().includes(this.searchQuery.toLowerCase())
+          );
+        },
+        
+        // Helper methods
+        formatCurrency(amount) {
+          return new Intl.NumberFormat('en-ZM', {
+            style: 'currency',
+            currency: 'ZMW'
+          }).format(amount);
+        },
+        
+        formatDate(dateString) {
+          if (!dateString) return 'N/A';
+          const date = new Date(dateString);
+          return date.toLocaleDateString('en-ZM', {
+            year: 'numeric',
+            month: 'short',
+            day: 'numeric'
+          });
+        },
+        
+        // Expiry management methods
+        isExpired(dateString) {
+          if (!dateString) return false;
+          const expiryDate = new Date(dateString);
+          const today = new Date();
+          return expiryDate < today;
+        },
+        
+        isExpiringSoon(dateString) {
+          if (!dateString) return false;
+          const expiryDate = new Date(dateString);
+          const thirtyDaysFromNow = new Date();
+          thirtyDaysFromNow.setDate(thirtyDaysFromNow.getDate() + 30);
+          return expiryDate >= new Date() && expiryDate <= thirtyDaysFromNow;
+        },
+        
+        getDaysToExpiry(dateString) {
+          if (!dateString) return 0;
+          const expiryDate = new Date(dateString);
+          const today = new Date();
+          const diffTime = expiryDate - today;
+          const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+          return diffDays;
+        },
+        
+        // Barcode scanning methods
+        async startBarcodeScanning() {
+          try {
+            // Request camera permissions
+            const stream = await navigator.mediaDevices.getUserMedia({
+              video: { facingMode: this.currentCamera }
+            });
+            
+            this.currentStream = stream;
+            const video = document.getElementById('scannerVideo');
+            video.srcObject = stream;
+            
+            this.isScanning = true;
+            
+            // Update button states
+            document.getElementById('startScanning').disabled = true;
+            document.getElementById('stopScanning').disabled = false;
+            document.getElementById('switchCamera').disabled = false;
+            
+            // Start barcode detection
+            this.startBarcodeDetection();
+            
+            this.showSuccess('Camera started. Point at barcode to scan.');
+          } catch (error) {
+            console.error('Error accessing camera:', error);
+            this.showError('Unable to access camera. Please check permissions.');
+          }
+        },
+        
+        stopBarcodeScanning() {
+          if (this.currentStream) {
+            this.currentStream.getTracks().forEach(track => track.stop());
+            this.currentStream = null;
+          }
+          
+          this.isScanning = false;
+          
+          // Update button states
+          document.getElementById('startScanning').disabled = false;
+          document.getElementById('stopScanning').disabled = true;
+          document.getElementById('switchCamera').disabled = true;
+          
+          const video = document.getElementById('scannerVideo');
+          video.srcObject = null;
+        },
+        
+        async switchCamera() {
+          this.currentCamera = this.currentCamera === 'environment' ? 'user' : 'environment';
+          
+          if (this.currentStream) {
+            this.stopBarcodeScanning();
+            await this.startBarcodeScanning();
+          }
+        },
+        
+        startBarcodeDetection() {
+          // This is a simplified implementation
+          // In production, you would use a proper barcode scanning library like QuaggaJS or ZXing
+          const video = document.getElementById('scannerVideo');
+          const canvas = document.getElementById('scannerCanvas');
+          const ctx = canvas.getContext('2d');
+          
+          const detectBarcode = () => {
+            if (!this.isScanning) return;
+            
+            canvas.width = video.videoWidth;
+            canvas.height = video.videoHeight;
+            ctx.drawImage(video, 0, 0);
+            
+            // Simulate barcode detection (replace with actual barcode library)
+            // This is where you would integrate a real barcode scanning library
+            this.simulateBarcodeDetection();
+            
+            requestAnimationFrame(detectBarcode);
+          };
+          
+          detectBarcode();
+        },
+        
+        simulateBarcodeDetection() {
+          // This is a placeholder for actual barcode detection
+          // In production, replace this with a real barcode scanning library
+          // For demo purposes, we'll simulate finding a barcode after 3 seconds
+          if (!this.scannedBarcode && Math.random() < 0.001) { // Very small chance to simulate detection
+            const sampleBarcode = `INV${Date.now().toString().slice(-8)}`;
+            this.scannedBarcode = sampleBarcode;
+            this.showSuccess(`Barcode detected: ${sampleBarcode}`);
+            this.stopBarcodeScanning();
+          }
+        },
+        
+        scanProduct(product) {
+          this.scannerContext = 'product';
+          this.currentProduct = product;
+          this.openBarcodeScanner();
+        },
+        
+        scanForStocktake() {
+          this.scannerContext = 'stocktake';
+          this.openBarcodeScanner();
+        },
+        
+        openBarcodeScanner() {
+          document.getElementById('barcodeScannerModal').hidden = false;
+          document.getElementById('modalOverlay').hidden = false;
+        },
+        
+        useScannedBarcode() {
+          if (!this.scannedBarcode) return;
+          
+          switch (this.scannerContext) {
+            case 'product':
+              if (this.currentProduct) {
+                this.currentProduct.barcode = this.scannedBarcode;
+                this.showSuccess(`Barcode assigned to ${this.currentProduct.brandName}`);
+              }
+              break;
+            case 'stocktake':
+              this.findProductByBarcode(this.scannedBarcode);
+              break;
+            case 'purchase':
+              this.findProductForOrder(this.scannedBarcode);
+              break;
+          }
+          
+          this.closeBarcodeScanner();
+        },
+        
+        useManualBarcode() {
+          if (!this.manualBarcode) return;
+          
+          this.scannedBarcode = this.manualBarcode;
+          this.useScannedBarcode();
+        },
+        
+        clearScannedBarcode() {
+          this.scannedBarcode = '';
+          this.manualBarcode = '';
+        },
+        
+        closeBarcodeScanner() {
+          this.stopBarcodeScanning();
+          this.clearScannedBarcode();
+          document.getElementById('barcodeScannerModal').hidden = true;
+          document.getElementById('modalOverlay').hidden = true;
+        },
+        
+        findProductByBarcode(barcode) {
+          const product = this.products.find(p => p.barcode === barcode);
+          if (product) {
+            if (this.stocktakeActive) {
+              this.markAsCounted(product);
+              product.countedQuantity = product.stockQuantity + 1; // Increment by 1
+              this.updateDiscrepancy(product);
+              this.showSuccess(`Product found: ${product.brandName}`);
+            }
+          } else {
+            this.showError('Product not found with this barcode');
+          }
+        },
+        
+        findProductForOrder(barcode) {
+          const product = this.products.find(p => p.barcode === barcode);
+          if (product) {
+            this.selectedProductId = product.id;
+            this.addProductToOrder();
+            this.showSuccess(`Added to order: ${product.brandName}`);
+          } else {
+            this.showError('Product not found with this barcode');
+          }
+        },
+        
+        // Barcode functionality
+        generateBarcode(product) {
+          // Generate a simple barcode based on product ID and timestamp
+          const barcode = `INV${product.id}${Date.now().toString().slice(-6)}`;
+          product.barcode = barcode;
+          this.showSuccess('Barcode generated successfully');
+        },
+        
+        reorderProduct(product) {
+          this.selectedProductId = product.id;
+          this.addProductToOrder();
+          document.getElementById('purchaseModal').hidden = false;
+          document.getElementById('modalOverlay').hidden = false;
+        },
+        
+        // Stocktake functionality
+        get filteredStocktakeProducts() {
+          if (!this.stocktakeSearch) return this.products;
+          
+          return this.products.filter(product => 
+            product.brandName.toLowerCase().includes(this.stocktakeSearch.toLowerCase()) ||
+            product.genericName.toLowerCase().includes(this.stocktakeSearch.toLowerCase()) ||
+            product.barcode?.includes(this.stocktakeSearch)
+          );
+        },
+        
+        startStocktake() {
+          this.stocktakeActive = true;
+          this.stocktakeCounted = [];
+          this.stocktakeDiscrepancies = [];
+          
+          // Initialize stocktake data
+          this.products.forEach(product => {
+            product.counted = false;
+            product.countedQuantity = 0;
+            product.hasDiscrepancy = false;
+            product.discrepancy = 0;
+          });
+          
+          this.showSuccess('Stocktake started. Count your inventory items.');
+        },
+        
+        updateDiscrepancy(product) {
+          const discrepancy = product.countedQuantity - product.stockQuantity;
+          product.discrepancy = discrepancy;
+          product.hasDiscrepancy = discrepancy !== 0;
+          
+          if (product.hasDiscrepancy && !this.stocktakeDiscrepancies.find(p => p.id === product.id)) {
+            this.stocktakeDiscrepancies.push(product);
+          } else if (!product.hasDiscrepancy) {
+            this.stocktakeDiscrepancies = this.stocktakeDiscrepancies.filter(p => p.id !== product.id);
+          }
+        },
+        
+        markAsCounted(product) {
+          product.counted = true;
+          if (!this.stocktakeCounted.find(p => p.id === product.id)) {
+            this.stocktakeCounted.push(product);
+          }
+          this.updateDiscrepancy(product);
+        },
+        
+        completeStocktake() {
+          if (confirm(`Complete stocktake? ${this.stocktakeDiscrepancies.length} discrepancies found.`)) {
+            this.showSuccess('Stocktake completed successfully');
+            this.stocktakeActive = false;
+            // Here you would normally save the stocktake results
+          }
+        },
+        
+        // Purchase Order functionality
+        addProductToOrder() {
+          if (!this.selectedProductId) return;
+          
+          const product = this.products.find(p => p.id == this.selectedProductId);
+          if (!product) return;
+          
+          // Check if product already in order
+          const existingItem = this.purchaseOrder.items.find(item => item.id === product.id);
+          if (existingItem) {
+            existingItem.quantity += 1;
+            this.updateOrderTotal(existingItem);
+          } else {
+            const orderItem = {
+              id: product.id,
+              brandName: product.brandName,
+              genericName: product.genericName,
+              currentStock: product.stockQuantity,
+              quantity: 1,
+              unitCost: product.costPrice,
+              total: product.costPrice
+            };
+            this.purchaseOrder.items.push(orderItem);
+          }
+          
+          this.selectedProductId = '';
+          this.calculateOrderTotals();
+          // Generate reference number if not already set
+          if (!this.purchaseOrder.reference) {
+            this.generateReferenceNumber();
+          }
+        },
+        
+        generateReferenceNumber() {
+          const date = new Date();
+          const year = date.getFullYear();
+          const month = String(date.getMonth() + 1).padStart(2, '0');
+          const day = String(date.getDate()).padStart(2, '0');
+          const random = Math.floor(Math.random() * 1000).toString().padStart(3, '0');
+          this.purchaseOrder.reference = `PO-${year}${month}${day}-${random}`;
+        },
+        
+        addLowStockItems() {
+          this.products.filter(product => product.stockQuantity <= product.lowStockThreshold).forEach(product => {
+            this.selectedProductId = product.id;
+            this.addProductToOrder();
+          });
+          this.showSuccess('All low stock items added to order');
+        },
+        
+        updateOrderTotal(item) {
+          item.total = item.quantity * item.unitCost;
+          this.calculateOrderTotals();
+        },
+        
+        removeFromOrder(productId) {
+          this.purchaseOrder.items = this.purchaseOrder.items.filter(item => item.id !== productId);
+          this.calculateOrderTotals();
+        },
+        
+        calculateOrderTotals() {
+          this.purchaseOrder.subtotal = this.purchaseOrder.items.reduce((total, item) => total + item.total, 0);
+          this.purchaseOrder.vat = this.purchaseOrder.subtotal * 0.16; // 16% VAT in Zambia
+          this.purchaseOrder.total = this.purchaseOrder.subtotal + this.purchaseOrder.vat;
+        },
+        
+        // Reports functionality
+        generateReport(type) {
+          const reports = {
+            stockValue: { title: 'Stock Value Report', type: 'stockValue' },
+            expiryAnalysis: { title: 'Expiry Analysis Report', type: 'expiryAnalysis' },
+            salesPerformance: { title: 'Sales Performance Report', type: 'salesPerformance' },
+            profitability: { title: 'Profitability Analysis', type: 'profitability' },
+            lowStock: { title: 'Low Stock Report', type: 'lowStock' },
+            supplierPerformance: { title: 'Supplier Performance Report', type: 'supplierPerformance' }
+          };
+          
+          this.currentReport = reports[type];
+          this.runReport();
+        },
+        
+        runReport() {
+          if (!this.currentReport) return;
+          
+          const reportContent = document.getElementById('reportContent');
+          let html = '';
+          
+          switch (this.currentReport.type) {
+            case 'stockValue':
+              html = this.generateStockValueReport();
+              break;
+            case 'expiryAnalysis':
+              html = this.generateExpiryReport();
+              break;
+            case 'lowStock':
+              html = this.generateLowStockReport();
+              break;
+            default:
+              html = '<p>Report generation in progress...</p>';
+          }
+          
+          reportContent.innerHTML = html;
+        },
+        
+        generateStockValueReport() {
+          const categoryValues = {};
+          let totalValue = 0;
+          
+          this.products.forEach(product => {
+            const category = product.category || 'Uncategorized';
+            const value = product.stockQuantity * product.sellingPrice;
+            
+            if (!categoryValues[category]) {
+              categoryValues[category] = 0;
+            }
+            categoryValues[category] += value;
+            totalValue += value;
+          });
+          
+          let html = '<table class="report-table"><thead><tr><th>Category</th><th>Items</th><th>Total Value</th></tr></thead><tbody>';
+          
+          Object.entries(categoryValues).forEach(([category, value]) => {
+            const itemCount = this.products.filter(p => p.category === category).length;
+            html += `<tr><td>${category}</td><td>${itemCount}</td><td>${this.formatCurrency(value)}</td></tr>`;
+          });
+          
+          html += `<tr class="total-row"><td><strong>Total</strong></td><td><strong>${this.products.length}</strong></td><td><strong>${this.formatCurrency(totalValue)}</strong></td></tr>`;
+          html += '</tbody></table>';
+          
+          return html;
+        },
+        
+        generateExpiryReport() {
+          const expiringProducts = this.products.filter(product => this.isExpiringSoon(product.expiryDate));
+          
+          let html = '<table class="report-table"><thead><tr><th>Product</th><th>Expiry Date</th><th>Days to Expiry</th><th>Stock</th><th>Value</th></tr></thead><tbody>';
+          
+          expiringProducts.forEach(product => {
+            const daysToExpiry = this.getDaysToExpiry(product.expiryDate);
+            const value = product.stockQuantity * product.sellingPrice;
+            html += `<tr>
+              <td>${product.brandName}</td>
+              <td>${this.formatDate(product.expiryDate)}</td>
+              <td class="${daysToExpiry <= 7 ? 'danger' : daysToExpiry <= 30 ? 'warning' : ''}">${daysToExpiry}</td>
+              <td>${product.stockQuantity}</td>
+              <td>${this.formatCurrency(value)}</td>
+            </tr>`;
+          });
+          
+          html += '</tbody></table>';
+          return html;
+        },
+        
+        generateLowStockReport() {
+          const lowStockProducts = this.products.filter(product => product.stockQuantity <= product.lowStockThreshold);
+          
+          let html = '<table class="report-table"><thead><tr><th>Product</th><th>Current Stock</th><th>Reorder Level</th><th>Needed</th><th>Supplier</th></tr></thead><tbody>';
+          
+          lowStockProducts.forEach(product => {
+            const needed = product.lowStockThreshold - product.stockQuantity;
+            html += `<tr>
+              <td>${product.brandName}</td>
+              <td class="danger">${product.stockQuantity}</td>
+              <td>${product.lowStockThreshold}</td>
+              <td class="warning">${needed}</td>
+              <td>${product.supplier || 'N/A'}</td>
+            </tr>`;
+          });
+          
+          html += '</tbody></table>';
+          return html;
+        },
+        
+        exportReport() {
+          if (!this.currentReport) return;
+          
+          let csvContent = '';
+          let filename = '';
+          
+          switch (this.currentReport.type) {
+            case 'stockValue':
+              csvContent = this.generateStockValueCSV();
+              filename = `stock-value-report-${new Date().toISOString().split('T')[0]}.csv`;
+              break;
+            case 'expiryAnalysis':
+              csvContent = this.generateExpiryCSV();
+              filename = `expiry-analysis-report-${new Date().toISOString().split('T')[0]}.csv`;
+              break;
+            case 'lowStock':
+              csvContent = this.generateLowStockCSV();
+              filename = `low-stock-report-${new Date().toISOString().split('T')[0]}.csv`;
+              break;
+            default:
+              csvContent = 'Report data not available for export';
+              filename = 'report.csv';
+          }
+          
+          this.downloadCSV(csvContent, filename);
+        },
+        
+        generateStockValueCSV() {
+          const categoryValues = {};
+          let totalValue = 0;
+          
+          this.products.forEach(product => {
+            const category = product.category || 'Uncategorized';
+            const value = product.stockQuantity * product.sellingPrice;
+            
+            if (!categoryValues[category]) {
+              categoryValues[category] = { count: 0, value: 0 };
+            }
+            categoryValues[category].count++;
+            categoryValues[category].value += value;
+            totalValue += value;
+          });
+          
+          let csv = 'Category,Item Count,Total Value (ZMW)\n';
+          Object.entries(categoryValues).forEach(([category, data]) => {
+            csv += `"${category}",${data.count},"${this.formatCurrency(data.value)}"\n`;
+          });
+          csv += `"TOTAL",${this.products.length},"${this.formatCurrency(totalValue)}"\n`;
+          
+          return csv;
+        },
+        
+        generateExpiryCSV() {
+          const expiringProducts = this.products.filter(product => this.isExpiringSoon(product.expiryDate));
+          
+          let csv = 'Product,Expiry Date,Days to Expiry,Stock,Value (ZMW)\n';
+          expiringProducts.forEach(product => {
+            const daysToExpiry = this.getDaysToExpiry(product.expiryDate);
+            const value = product.stockQuantity * product.sellingPrice;
+            csv += `"${product.brandName}","${this.formatDate(product.expiryDate)}",${daysToExpiry},${product.stockQuantity},"${this.formatCurrency(value)}"\n`;
+          });
+          
+          return csv;
+        },
+        
+        generateLowStockCSV() {
+          const lowStockProducts = this.products.filter(product => product.stockQuantity <= product.lowStockThreshold);
+          
+          let csv = 'Product,Current Stock,Reorder Level,Needed,Supplier\n';
+          lowStockProducts.forEach(product => {
+            const needed = product.lowStockThreshold - product.stockQuantity;
+            csv += `"${product.brandName}",${product.stockQuantity},${product.lowStockThreshold},${needed},"${product.supplier || 'N/A'}"\n`;
+          });
+          
+          return csv;
+        },
+        
+        downloadCSV(content, filename) {
+          const blob = new Blob([content], { type: 'text/csv;charset=utf-8;' });
+          const link = document.createElement('a');
+          const url = URL.createObjectURL(blob);
+          link.setAttribute('href', url);
+          link.setAttribute('download', filename);
+          link.style.visibility = 'hidden';
+          document.body.appendChild(link);
+          link.click();
+          document.body.removeChild(link);
+          this.showSuccess(`Report exported as ${filename}`);
+        },
+        
+        // Export functionality
+        exportInventoryData() {
+          let csvContent = 'Product Code,Brand Name,Generic Name,Strength,Form,Category,Stock Quantity,Reorder Level,Cost Price,Selling Price,Supplier,Batch Number,Expiry Date,Barcode,Status\n';
+          
+          this.products.forEach(product => {
+            const row = [
+              product.id || '',
+              `"${product.brandName || ''}"`,
+              `"${product.genericName || ''}"`,
+              `"${product.strength || ''}"`,
+              `"${product.form || ''}"`,
+              `"${product.category || ''}"`,
+              product.stockQuantity || 0,
+              product.lowStockThreshold || 0,
+              product.costPrice || 0,
+              product.sellingPrice || 0,
+              `"${product.supplier || ''}"`,
+              `"${product.batchNumber || ''}"`,
+              product.expiryDate || '',
+              product.barcode || '',
+              this.isExpired(product.expiryDate) ? 'Expired' : product.status || 'Unknown'
+            ];
+            csvContent += row.join(',') + '\n';
+          });
+          
+          const filename = `inventory-export-${new Date().toISOString().split('T')[0]}.csv`;
+          this.downloadCSV(csvContent, filename);
+        },
+        editProduct(product) {
+          this.editingProduct = product;
+          
+          // Populate form with product data
+          document.getElementById('formProductName').value = product.brandName || '';
+          document.getElementById('formGenericName').value = product.genericName || '';
+          document.getElementById('formStrength').value = product.strength || '';
+          document.getElementById('formForm').value = product.form || '';
+          document.getElementById('formCategory').value = product.category || '';
+          document.getElementById('formUnitSize').value = product.unitSize || '';
+          document.getElementById('formSupplier').value = product.supplier || '';
+          document.getElementById('formLowStockThreshold').value = product.lowStockThreshold || 0;
+          document.getElementById('formManufactureDate').value = product.manufactureDate || '';
+          document.getElementById('formBatchNumber').value = product.batchNumber || '';
+          document.getElementById('formLicenseNumber').value = product.licenseNumber || '';
+          document.getElementById('formZambiaRegNumber').value = product.zambiaRegNumber || '';
+          document.getElementById('formPackingType').value = product.packingType || '';
+          document.getElementById('formBarcode').value = product.barcode || '';
+          document.getElementById('formCostPrice').value = product.costPrice || 0;
+          document.getElementById('formSellingPrice').value = product.sellingPrice || 0;
+          document.getElementById('formStock').value = product.stockQuantity || 0;
+          document.getElementById('formExpiry').value = product.expiryDate || '';
+          document.getElementById('formDescription').value = product.description || '';
+          
+          // Update modal title
+          document.getElementById('productModalTitle').textContent = 'Edit Product';
+          document.getElementById('submitProduct').textContent = 'Update Product';
+          
+          // Open modal
+          document.getElementById('productModal').hidden = false;
+          document.getElementById('modalOverlay').hidden = false;
+        },
+        
+        // Bulk edit functionality
+        selectedProducts: [],
+        bulkEditMode: false,
+        
+        toggleBulkEdit() {
+          this.bulkEditMode = !this.bulkEditMode;
+          if (!this.bulkEditMode) {
+            this.selectedProducts = [];
+            // Uncheck all checkboxes
+            document.querySelectorAll('#productTableBody input[type="checkbox"]').forEach(cb => cb.checked = false);
+          }
+        },
+        
+        toggleProductSelection(productId) {
+          if (this.selectedProducts.includes(productId)) {
+            this.selectedProducts = this.selectedProducts.filter(id => id !== productId);
+          } else {
+            this.selectedProducts.push(productId);
+          }
+        },
+        
+        selectAllProducts() {
+          const selectAllCheckbox = document.getElementById('selectAll');
+          if (selectAllCheckbox.checked) {
+            this.selectedProducts = this.products.map(p => p.id);
+          } else {
+            this.selectedProducts = [];
+          }
+        },
+        
+        bulkUpdateProducts(updates) {
+          const updatedProducts = this.products.map(product => {
+            if (this.selectedProducts.includes(product.id)) {
+              return { ...product, ...updates };
+            }
+            return product;
+          });
+          
+          this.products = updatedProducts;
+          localStorage.setItem('umi_inventory_products', JSON.stringify(this.products));
+          this.updateDashboardMetrics();
+          this.showSuccess(`${this.selectedProducts.length} products updated successfully`);
+          this.toggleBulkEdit();
+        },
+        
+        // Apply bulk edit changes
+        applyBulkEdit() {
+          const updates = {};
+          
+          // Get values from bulk edit form
+          const category = document.getElementById('bulkCategory').value;
+          const supplier = document.getElementById('bulkSupplier').value;
+          const lowStockThreshold = document.getElementById('bulkLowStockThreshold').value;
+          const costPrice = document.getElementById('bulkCostPrice').value;
+          const sellingPrice = document.getElementById('bulkSellingPrice').value;
+          const status = document.getElementById('bulkStatus').value;
+          
+          // Only include fields that have values
+          if (category) updates.category = category;
+          if (supplier) updates.supplier = supplier;
+          if (lowStockThreshold) updates.lowStockThreshold = parseInt(lowStockThreshold);
+          if (costPrice) updates.costPrice = parseFloat(costPrice);
+          if (sellingPrice) updates.sellingPrice = parseFloat(sellingPrice);
+          if (status) updates.status = status;
+          
+          if (Object.keys(updates).length === 0) {
+            this.showWarning('Please select at least one field to update');
+            return;
+          }
+          
+          this.bulkUpdateProducts(updates);
+          
+          // Close modal and reset form
+          document.getElementById('bulkEditModal').hidden = true;
+          document.getElementById('modalOverlay').hidden = true;
+          document.getElementById('bulkCategory').value = '';
+          document.getElementById('bulkSupplier').value = '';
+          document.getElementById('bulkLowStockThreshold').value = '';
+          document.getElementById('bulkCostPrice').value = '';
+          document.getElementById('bulkSellingPrice').value = '';
+          document.getElementById('bulkStatus').value = '';
+        },
+        
+        // Print labels functionality
+        printLabels() {
+          if (this.selectedProducts.length === 0) {
+            this.showWarning('Please select products to print labels for');
+            return;
+          }
+          
+          const productsToPrint = this.products.filter(p => this.selectedProducts.includes(p.id));
+          this.generateLabelPrint(productsToPrint);
+        },
+        
+        generateLabelPrint(products) {
+          const printWindow = window.open('', '_blank');
+          let html = `
+            <!DOCTYPE html>
+            <html>
+            <head>
+              <title>Product Labels</title>
+              <style>
+                body { font-family: Arial, sans-serif; margin: 20px; }
+                .label { 
+                  width: 200px; 
+                  height: 100px; 
+                  border: 2px solid #000; 
+                  margin: 5px; 
+                  padding: 10px; 
+                  float: left; 
+                  page-break-inside: avoid;
+                }
+                .brand-name { font-weight: bold; font-size: 14px; }
+                .generic-name { font-size: 12px; color: #666; }
+                .strength { font-size: 11px; }
+                .barcode { font-family: monospace; font-size: 10px; margin-top: 5px; }
+                .price { font-weight: bold; margin-top: 5px; }
+              </style>
+            </head>
+            <body>
+              <h3>Product Labels - ${new Date().toLocaleDateString()}</h3>
+          `;
+          
+          products.forEach(product => {
+            html += `
+              <div class="label">
+                <div class="brand-name">${product.brandName || 'N/A'}</div>
+                <div class="generic-name">${product.genericName || 'N/A'}</div>
+                <div class="strength">${product.strength || ''} ${product.form || ''}</div>
+                <div class="barcode">${product.barcode || 'N/A'}</div>
+                <div class="price">${this.formatCurrency(product.sellingPrice)}</div>
+              </div>
+            `;
+          });
+          
+          html += `
+            </body>
+            </html>
+          `;
+          
+          printWindow.document.write(html);
+          printWindow.document.close();
+          printWindow.print();
+          
+          this.showSuccess(`Labels generated for ${products.length} products`);
+        },
+        
+        deleteProduct(product) {
+          if (confirm(`Are you sure you want to delete ${product.brandName}? This action cannot be undone.`)) {
+            // Remove from local array
+            this.products = this.products.filter(p => p.id !== product.id);
+            
+            // Update localStorage
+            localStorage.setItem('umi_inventory_products', JSON.stringify(this.products));
+            
+            // Update metrics
+            this.updateDashboardMetrics();
+            
+            this.showSuccess(`${product.brandName} deleted successfully`);
+          }
+        },
+
+        get totalProducts() {
+          return this.products.length;
+        },
+
+        get inStockCount() {
+          return this.products.filter(p => p.stockQuantity > p.lowStockThreshold).length;
+        },
+
+        get lowStockCount() {
+          return this.products.filter(p => p.stockQuantity <= p.lowStockThreshold && p.stockQuantity > 0).length;
+        },
+
+        get totalValue() {
+          return this.products.reduce((total, product) => total + (product.stockQuantity * product.sellingPrice), 0);
+        },
+
+        getStockClass(stock, lowStockThreshold = 10) {
+          if (stock === 0) return 'out-of-stock';
+          if (stock <= lowStockThreshold) return 'low-stock';
+          return 'in-stock';
+        },
+
+        deleteProduct(productId) {
+          if (confirm('Are you sure you want to delete this product?')) {
+            this.products = this.products.filter(p => p.id !== productId);
+          }
+        },
+
+        logout() {
+          if (confirm('Are you sure you want to logout?')) {
+            window.location.href = 'index.html';
+          }
+        },
+
+        canManageBranches() {
+          const subscription = JSON.parse(localStorage.getItem('umi_subscription') || '{}');
+          const planType = subscription.planType || 'Care';
+          
+          const tierConfig = {
+            'Care': { maxBranches: 1 },
+            'Care Plus': { maxBranches: 3 },
+            'Care Pro': { maxBranches: 10 }
+          };
+          
+          return tierConfig[planType] ? tierConfig[planType].maxBranches > 1 : false;
+        }
+      }
+    }
+  </script>
+
+  <script>
+    // Modal and Bulk Upload Functionality
+    document.addEventListener('DOMContentLoaded', function() {
+      // Modal elements
+      const productModal = document.getElementById('productModal');
+      const bulkUploadModal = document.getElementById('bulkUploadModal');
+      const bulkEditModal = document.getElementById('bulkEditModal');
+      const stocktakeModal = document.getElementById('stocktakeModal');
+      const purchaseModal = document.getElementById('purchaseModal');
+      const reportsModal = document.getElementById('reportsModal');
+      const barcodeScannerModal = document.getElementById('barcodeScannerModal');
+      const modalOverlay = document.getElementById('modalOverlay');
+      const addProductButton = document.getElementById('addProductButton');
+      const importButton = document.getElementById('importButton');
+      const stocktakeButton = document.getElementById('stocktakeButton');
+      const purchaseButton = document.getElementById('purchaseButton');
+      const reportsButton = document.getElementById('reportsButton');
+      const exportButton = document.getElementById('exportButton');
+      
+      // Bulk upload elements
+      const bulkFileInput = document.getElementById('bulkFileInput');
+      const fileInfo = document.getElementById('fileInfo');
+      const fileName = document.getElementById('fileName');
+      const removeFile = document.getElementById('removeFile');
+      const uploadPreview = document.getElementById('uploadPreview');
+      const previewBody = document.getElementById('previewBody');
+      const processBulkUpload = document.getElementById('processBulkUpload');
+      const downloadTemplateBtn = document.getElementById('downloadTemplateBtn');
+      
+      // Product form
+      const productForm = document.getElementById('productForm');
+      
+      // Open product modal
+      addProductButton?.addEventListener('click', () => {
+        productModal.hidden = false;
+        modalOverlay.hidden = false;
+      });
+      
+      // Open bulk upload modal
+      importButton?.addEventListener('click', () => {
+        bulkUploadModal.hidden = false;
+        modalOverlay.hidden = false;
+      });
+      
+      // Open stocktake modal
+      stocktakeButton?.addEventListener('click', () => {
+        stocktakeModal.hidden = false;
+        modalOverlay.hidden = false;
+      });
+      
+      // Open purchase modal
+      purchaseButton?.addEventListener('click', () => {
+        purchaseModal.hidden = false;
+        modalOverlay.hidden = false;
+      });
+      
+      // Open reports modal
+      reportsButton?.addEventListener('click', () => {
+        reportsModal.hidden = false;
+        modalOverlay.hidden = false;
+      });
+      
+      // Close modals
+      document.querySelectorAll('[data-close]').forEach(button => {
+        button.addEventListener('click', (e) => {
+          const modalId = e.target.closest('[data-close]').getAttribute('data-close');
+          document.getElementById(modalId).hidden = true;
+          modalOverlay.hidden = true;
+        });
+      });
+      
+      // Close modal on overlay click
+      modalOverlay?.addEventListener('click', () => {
+        productModal.hidden = true;
+        bulkUploadModal.hidden = true;
+        bulkEditModal.hidden = true;
+        stocktakeModal.hidden = true;
+        purchaseModal.hidden = true;
+        reportsModal.hidden = true;
+        barcodeScannerModal.hidden = true;
+        modalOverlay.hidden = true;
+      });
+      
+      // Download template
+      downloadTemplateBtn?.addEventListener('click', () => {
+        const csvContent = 'Brand Name,Generic Name,Category,Manufacture Date,Batch Number,License Number,Zambia REG Number,Packing Type,Cost Price,Selling Price,Stock Quantity,Expiry Date,Description\n';
+        const blob = new Blob([csvContent], { type: 'text/csv' });
+        const url = window.URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = 'inventory-template.csv';
+        a.click();
+        window.URL.revokeObjectURL(url);
+      });
+      
+      // File handling for bulk upload
+      bulkFileInput?.addEventListener('change', handleFileSelect);
+      
+      function handleFileSelect(event) {
+        const file = event.target.files[0];
+        if (file && file.type === 'text/csv') {
+          fileName.textContent = file.name;
+          fileInfo.hidden = false;
+          readAndPreviewCSV(file);
+        } else {
+          alert('Please select a valid CSV file');
+        }
+      }
+      
+      function readAndPreviewCSV(file) {
+        const reader = new FileReader();
+        reader.onload = function(e) {
+          const csv = e.target.result;
+          const lines = csv.split('\n').filter(line => line.trim());
+          
+          let previewHTML = '';
+          for (let i = 1; i < Math.min(6, lines.length); i++) {
+            const values = lines[i].split(',').map(v => v.trim());
+            if (values.length >= 5) {
+              previewHTML += `
+                <tr>
+                  <td>${values[0] || ''}</td>
+                  <td>${values[1] || ''}</td>
+                  <td>${values[2] || ''}</td>
+                  <td>${values[10] || ''}</td>
+                  <td>${values[9] || ''}</td>
+                </tr>
+              `;
+            }
+          }
+          
+          previewBody.innerHTML = previewHTML;
+          uploadPreview.hidden = false;
+          processBulkUpload.disabled = false;
+        };
+        reader.readAsText(file);
+      }
+      
+      // Remove file
+      removeFile?.addEventListener('click', () => {
+        bulkFileInput.value = '';
+        fileInfo.hidden = true;
+        uploadPreview.hidden = true;
+        processBulkUpload.disabled = true;
+      });
+      
+      // Process bulk upload
+      processBulkUpload?.addEventListener('click', () => {
+        const file = bulkFileInput.files[0];
+        if (file) {
+          alert('Processing bulk upload...');
+          bulkUploadModal.hidden = true;
+          modalOverlay.hidden = true;
+          bulkFileInput.value = '';
+          fileInfo.hidden = true;
+          uploadPreview.hidden = true;
+          processBulkUpload.disabled = true;
+        }
+      });
+      
+      // Handle product form submission
+      productForm?.addEventListener('submit', (e) => {
+        e.preventDefault();
+        const formData = new FormData(productForm);
+        const productData = Object.fromEntries(formData);
+        
+        // Get the Alpine.js instance
+        const alpineData = window.Alpine?.evaluate(document.querySelector('[x-data]'), 'inventorySystem()');
+        
+        if (alpineData && alpineData.editingProduct) {
+          // Update existing product
+          const index = alpineData.products.findIndex(p => p.id === alpineData.editingProduct.id);
+          if (index !== -1) {
+            alpineData.products[index] = { ...alpineData.products[index], ...productData };
+            localStorage.setItem('umi_inventory_products', JSON.stringify(alpineData.products));
+            alpineData.updateDashboardMetrics();
+            alpineData.showSuccess('Product updated successfully');
+          }
+        } else {
+          // Add new product
+          const newProduct = {
+            id: Date.now(),
+            ...productData,
+            status: productData.stockQuantity > 0 ? 'In Stock' : 'Out of Stock'
+          };
+          alpineData.products.push(newProduct);
+          localStorage.setItem('umi_inventory_products', JSON.stringify(alpineData.products));
+          alpineData.updateDashboardMetrics();
+          alpineData.showSuccess('Product added successfully');
+        }
+        
+        // Reset form and close modal
+        productModal.hidden = true;
+        modalOverlay.hidden = true;
+        productForm.reset();
+        
+        // Reset editing state
+        if (alpineData) {
+          alpineData.editingProduct = null;
+          document.getElementById('productModalTitle').textContent = 'Add Product';
+          document.getElementById('submitProduct').textContent = 'Save & Continue';
+        }
+      });
+      
+      // Widget menu functionality
+      document.querySelectorAll('[data-menu]').forEach(button => {
+        button.addEventListener('click', (e) => {
+          e.stopPropagation();
+          const menuId = e.target.closest('[data-menu]').getAttribute('data-menu');
+          const menu = document.getElementById(menuId + 'Menu');
+          
+          // Close all other menus
+          document.querySelectorAll('.widget-menu').forEach(m => {
+            if (m !== menu) m.hidden = true;
+          });
+          
+          menu.hidden = !menu.hidden;
+        });
+      });
+      
+      // Close menus when clicking outside
+      document.addEventListener('click', () => {
+        document.querySelectorAll('.widget-menu').forEach(menu => {
+          menu.hidden = true;
+        });
+      });
+      
+      // Update stats (placeholder functionality)
+      function updateStats() {
+        // Stats will be updated dynamically by the Alpine.js component
+        // These values are now populated from the actual products data
+      }
+      
+      updateStats();
+    });
+
+    // Global functions for barcode scanning and stocktake
+    function scanBarcode() {
+      // This function can be called from anywhere to open the barcode scanner
+      if (window.Alpine && window.Alpine.$data) {
+        const inventoryData = window.Alpine.$data(document.querySelector('[x-data]'));
+        if (inventoryData && inventoryData.openBarcodeScanner) {
+          inventoryData.scannerContext = 'product';
+          inventoryData.openBarcodeScanner();
+        }
+      }
+    }
+
+    function scanForStocktake() {
+      if (window.Alpine && window.Alpine.$data) {
+        const inventoryData = window.Alpine.$data(document.querySelector('[x-data]'));
+        if (inventoryData && inventoryData.scanForStocktake) {
+          inventoryData.scanForStocktake();
+        }
+      }
+    }
+
+    function startStocktake() {
+      alert('Starting stocktake process...');
+    }
+
+    function pauseStocktake() {
+      alert('Stocktake paused');
+    }
+
+    function completeStocktake() {
+      alert('Stocktake completed - saving results...');
+    }
+
+    function addNote(product) {
+      const note = prompt(`Add note for ${product.brandName}:`);
+      if (note) {
+        product.note = note;
+        alert('Note added successfully');
+      }
+    }
+
+    function addLowStockItems() {
+      alert('Adding all low stock items to purchase order...');
+    }
+
+    function savePurchaseOrder() {
+      alert('Purchase order would be saved to database and sent to supplier');
+      document.getElementById('purchaseModal').hidden = true;
+      document.getElementById('modalOverlay').hidden = true;
+    }
+
+    function updateSupplierDetails() {
+      alert('Supplier details would be updated based on selection');
+    }
+  </script>
+
+  <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
+</body>
+</html>

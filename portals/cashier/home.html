@@ -9,6 +9,10 @@
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@100;400;500;600;700&family=Varela+Round&family=Nunito:wght@400;600;700&display=swap" rel="stylesheet">
   <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Rounded:wght@300;400;500;600;700&display=swap" rel="stylesheet">
   <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="stylesheet" href="../shared/css/shared-styles.css">
+  <script src="../shared/js/data-sync.js"></script>
+  <script src="../shared/js/role-based-access.js"></script>
+  <script src="../shared/js/portal-data-sync.js"></script>
   <style>
     :root {
       --color-primary: #000000;
@@ -999,11 +1003,32 @@
         },
 
         init() {
+          // Check authentication
+          if (!window.cashierDataSync.isAuthenticated()) {
+            this.redirectToLogin();
+            return;
+          }
+          
           this.api = new CashierAPI();
           this.updateDateTime();
           setInterval(() => this.updateDateTime(), 60000);
           this.loadUserData();
           this.loadDashboardData();
+          
+          // Set up real-time updates using portal data sync
+          window.cashierDataSync.subscribe('/dashboard', (data) => {
+            this.updateDashboardStats(data);
+          });
+          
+          // Set up event listeners
+          window.cashierDataSync.addEventListener('error', (message) => {
+            this.showError(message);
+          });
+          
+          window.cashierDataSync.addEventListener('success', (message) => {
+            this.showSuccess(message);
+          });
+          
           // Set up auto-refresh every 30 seconds
           setInterval(() => this.loadDashboardData(), 30000);
         },
@@ -1051,12 +1076,12 @@
             this.loading = true;
             this.error = null;
 
-            // Load all dashboard data in parallel
+            // Use portal data sync for better offline support
             const [statsResponse, salesResponse, queueResponse, patientsResponse] = await Promise.all([
-              this.api.getSalesStats(),
-              this.api.getRecentSales(5),
-              this.api.getQueueStats(),
-              this.api.getRecentPatients(3)
+              window.cashierDataSync.request('/sales/stats'),
+              window.cashierDataSync.request('/sales/recent?limit=5'),
+              window.cashierDataSync.request('/queue/stats'),
+              window.cashierDataSync.request('/patients/recent?limit=3')
             ]);
 
             // Process stats data
