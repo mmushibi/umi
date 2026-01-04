@@ -1,0 +1,476 @@
+<!DOCTYPE html>
+<html lang="en" x-data="pharmacistPrescriptions()">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Prescriptions - Pharmacist Portal - Umi Health Demo</title>
+  <link rel="icon" href="../../logo.png" type="image/png">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@100;400;500;600;700&family=Varela+Round&family=Nunito:wght@400;600;700&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Rounded:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="stylesheet" href="../shared/css/shared-styles.css">
+  <script src="../shared/js/demo-storage.js"></script>
+</head>
+<body>
+  <!-- Demo Banner -->
+  <div class="demo-banner">
+    <strong>DEMO MODE:</strong> This is a demonstration version using local storage with Zambian sample data. No backend connection required.
+  </div>
+
+  <!-- Sidebar -->
+  <aside class="sidebar" :class="{ 'open': sidebarOpen }">
+    <div class="sidebar-header">
+      <div class="sidebar-logo">
+        <img src="../../logo.png" alt="Umi Health" />
+        <div>
+          <div class="sidebar-title">Umi Health</div>
+          <div class="sidebar-subtitle">Pharmacist Portal</div>
+        </div>
+      </div>
+    </div>
+
+    <nav class="sidebar-nav">
+      <div class="nav-section">
+        <div class="nav-section-title">Pharmacy</div>
+        <a href="home.html" class="nav-item">
+          <span class="material-symbols-rounded">home</span>
+          Dashboard
+        </a>
+        <a href="#" class="nav-item active">
+          <span class="material-symbols-rounded">description</span>
+          Prescriptions
+        </a>
+        <a href="inventory.html" class="nav-item">
+          <span class="material-symbols-rounded">medication</span>
+          Inventory
+        </a>
+        <a href="patients.html" class="nav-item">
+          <span class="material-symbols-rounded">group</span>
+          Patients
+        </a>
+      </div>
+    </nav>
+  </aside>
+
+  <!-- Main Content -->
+  <main class="main-content">
+    <!-- Header -->
+    <header class="header">
+      <div class="header-left">
+        <button class="mobile-menu-toggle" @click="sidebarOpen = !sidebarOpen">
+          <span class="material-symbols-rounded">menu</span>
+        </button>
+        <div class="page-title-section">
+          <h1 class="page-title">Prescription Management</h1>
+        </div>
+      </div>
+
+      <div class="header-right">
+        <div class="search-bar">
+          <span class="search-icon">🔍</span>
+          <input 
+            type="text" 
+            class="search-input" 
+            placeholder="Search prescriptions..."
+            x-model="searchQuery"
+            @input="searchPrescriptions"
+          >
+        </div>
+
+        <button class="btn btn-primary" @click="showAddPrescriptionModal = true">
+          <span style="margin-right: 0.5rem;">+</span>
+          New Prescription
+        </button>
+      </div>
+    </header>
+
+    <!-- Content -->
+    <div class="content">
+      <!-- Stats Cards -->
+      <div class="stats-grid">
+        <div class="stat-card">
+          <div class="stat-icon" style="background: rgba(34, 197, 94, 0.1); color: var(--color-success);">
+            📋
+          </div>
+          <div class="stat-value" x-text="stats.totalPrescriptions"></div>
+          <div class="stat-label">Total Prescriptions</div>
+        </div>
+
+        <div class="stat-card">
+          <div class="stat-icon" style="background: rgba(59, 130, 246, 0.1); color: var(--color-info);">
+            ⏳
+          </div>
+          <div class="stat-value" x-text="stats.pendingPrescriptions"></div>
+          <div class="stat-label">Pending Processing</div>
+        </div>
+
+        <div class="stat-card">
+          <div class="stat-icon" style="background: rgba(245, 158, 11, 0.1); color: #f59e0b;">
+            <span class="material-symbols-rounded">check_circle</span>
+          </div>
+          <div class="stat-value" x-text="stats.completedToday"></div>
+          <div class="stat-label">Completed Today</div>
+        </div>
+
+        <div class="stat-card">
+          <div class="stat-icon" style="background: rgba(16, 185, 129, 0.1); color: #10b981;">
+            <span class="material-symbols-rounded">payments</span>
+          </div>
+          <div class="stat-value">ZMW <span x-text="stats.totalValue.toFixed(2)"></span></div>
+          <div class="stat-label">Total Value</div>
+        </div>
+      </div>
+
+      <!-- Prescriptions Queue -->
+      <div class="card" style="margin-bottom: 2rem;">
+        <div class="card-header">
+          <h3 class="card-title">Prescription Queue</h3>
+          <div class="table-actions">
+            <select class="form-select" style="width: auto;" x-model="filterStatus" @change="filterPrescriptions">
+              <option value="all">All Status</option>
+              <option value="Active">Active</option>
+              <option value="Completed">Completed</option>
+              <option value="Cancelled">Cancelled</option>
+            </select>
+          </div>
+        </div>
+        <div class="card-content">
+          <div class="prescription-queue">
+            <template x-for="prescription in filteredPrescriptions" :key="prescription.id">
+              <div class="prescription-card" :class="`priority-${getPriority(prescription)}`">
+                <div class="prescription-header">
+                  <div class="patient-info">
+                    <h4 x-text="prescription.patientName"></h4>
+                    <span class="status-badge" :class="`status-${prescription.status.toLowerCase()}`" x-text="prescription.status"></span>
+                  </div>
+                  <div class="prescription-meta">
+                    <div><strong>Dr.</strong> <span x-text="prescription.doctorName"></span></div>
+                    <div x-text="formatDate(prescription.date)"></div>
+                  </div>
+                </div>
+                
+                <div class="prescription-body">
+                  <div class="diagnosis">
+                    <strong>Diagnosis:</strong> <span x-text="prescription.diagnosis"></span>
+                  </div>
+                  
+                  <div class="medications">
+                    <h5>Medications:</h5>
+                    <template x-for="med in prescription.medications" :key="med.name">
+                      <div class="medication-item">
+                        <div class="med-name" x-text="med.name"></div>
+                        <div class="med-details">
+                          <span x-text="med.dosage"></span> • 
+                          <span x-text="med.duration"></span>
+                        </div>
+                        <div class="med-instructions" x-text="med.instructions"></div>
+                      </div>
+                    </template>
+                  </div>
+                  
+                  <div class="prescription-footer">
+                    <div class="total-cost">
+                      <strong>Total Cost:</strong> ZMW <span x-text="prescription.totalCost.toFixed(2)"></span>
+                    </div>
+                    <div class="actions">
+                      <button class="btn btn-sm btn-secondary" @click="viewPrescription(prescription)">View Details</button>
+                      <button class="btn btn-sm btn-primary" @click="processPrescription(prescription)" x-show="prescription.status === 'Active'">Process</button>
+                      <button class="btn btn-sm btn-success" @click="completePrescription(prescription)" x-show="prescription.status === 'Active'">Complete</button>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </template>
+          </div>
+        </div>
+      </div>
+    </div>
+  </main>
+
+  <!-- View Prescription Modal -->
+  <div class="modal-overlay" x-show="showViewModal" @click.self="showViewModal = false">
+    <div class="modal" style="max-width: 700px;">
+      <div class="modal-header">
+        <h3 class="modal-title">Prescription Details</h3>
+        <button class="modal-close" @click="showViewModal = false">×</button>
+      </div>
+      <div class="modal-body" x-show="selectedPrescription">
+        <div style="margin-bottom: 1.5rem;">
+          <h4 style="font-weight: 600; margin-bottom: 0.5rem;">Patient Information</h4>
+          <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; font-size: 0.875rem;">
+            <div><strong>Name:</strong> <span x-text="selectedPrescription?.patientName"></span></div>
+            <div><strong>Date:</strong> <span x-text="formatDate(selectedPrescription?.date)"></span></div>
+            <div><strong>Doctor:</strong> <span x-text="selectedPrescription?.doctorName"></span></div>
+            <div><strong>Status:</strong> <span x-text="selectedPrescription?.status"></span></div>
+          </div>
+        </div>
+        
+        <div style="margin-bottom: 1.5rem;">
+          <h4 style="font-weight: 600; margin-bottom: 0.5rem;">Diagnosis</h4>
+          <p style="color: var(--color-text-secondary);" x-text="selectedPrescription?.diagnosis"></p>
+        </div>
+        
+        <div>
+          <h4 style="font-weight: 600; margin-bottom: 0.5rem;">Medications</h4>
+          <div style="border: 1px solid var(--color-border); border-radius: 0.5rem; overflow: hidden;">
+            <template x-for="med in selectedPrescription?.medications" :key="med.name">
+              <div style="padding: 1rem; border-bottom: 1px solid var(--color-border);">
+                <div style="font-weight: 500; margin-bottom: 0.25rem;" x-text="med.name"></div>
+                <div style="font-size: 0.875rem; color: var(--color-text-secondary); margin-bottom: 0.25rem;" x-text="med.dosage"></div>
+                <div style="font-size: 0.875rem; color: var(--color-text-secondary); margin-bottom: 0.25rem;" x-text="med.duration"></div>
+                <div style="font-size: 0.75rem; color: var(--color-text-muted);" x-text="med.instructions"></div>
+              </div>
+            </template>
+            <div style="padding: 1rem; background: var(--color-surface); font-weight: 600; display: flex; justify-content: space-between;">
+              <span>Total Cost:</span>
+              <span>ZMW <span x-text="selectedPrescription?.totalCost.toFixed(2)"></span></span>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button class="btn btn-secondary" @click="showViewModal = false">Close</button>
+        <button class="btn btn-primary" @click="processPrescription(selectedPrescription)" x-show="selectedPrescription?.status === 'Active'">Process Prescription</button>
+        <button class="btn btn-success" @click="completePrescription(selectedPrescription)" x-show="selectedPrescription?.status === 'Active'">Complete Prescription</button>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    function pharmacistPrescriptions() {
+      return {
+        sidebarOpen: false,
+        searchQuery: '',
+        filterStatus: 'all',
+        showViewModal: false,
+        showAddPrescriptionModal: false,
+        selectedPrescription: null,
+        prescriptions: [],
+        filteredPrescriptions: [],
+        stats: {},
+
+        init() {
+          this.loadPrescriptions();
+          this.updateStats();
+        },
+
+        loadPrescriptions() {
+          this.prescriptions = window.demoStorage.getItem('prescriptions') || [];
+          this.filterPrescriptions();
+        },
+
+        filterPrescriptions() {
+          let filtered = this.prescriptions;
+          
+          if (this.filterStatus !== 'all') {
+            filtered = filtered.filter(p => p.status === this.filterStatus);
+          }
+          
+          if (this.searchQuery.trim()) {
+            filtered = filtered.filter(p => 
+              p.patientName.toLowerCase().includes(this.searchQuery.toLowerCase()) ||
+              p.doctorName.toLowerCase().includes(this.searchQuery.toLowerCase()) ||
+              p.diagnosis.toLowerCase().includes(this.searchQuery.toLowerCase())
+            );
+          }
+          
+          this.filteredPrescriptions = filtered.sort((a, b) => {
+            // Active prescriptions first, then by date
+            if (a.status === 'Active' && b.status !== 'Active') return -1;
+            if (a.status !== 'Active' && b.status === 'Active') return 1;
+            return new Date(b.date) - new Date(a.date);
+          });
+        },
+
+        searchPrescriptions() {
+          this.filterPrescriptions();
+        },
+
+        updateStats() {
+          const today = new Date().toISOString().split('T')[0];
+          this.stats = {
+            totalPrescriptions: this.prescriptions.length,
+            pendingPrescriptions: this.prescriptions.filter(p => p.status === 'Active').length,
+            completedToday: this.prescriptions.filter(p => p.status === 'Completed' && p.date === today).length,
+            totalValue: this.prescriptions.reduce((sum, p) => sum + p.totalCost, 0)
+          };
+        },
+
+        getPriority(prescription) {
+          if (prescription.status === 'Active') return 'high';
+          if (prescription.status === 'Completed') return 'normal';
+          return 'low';
+        },
+
+        viewPrescription(prescription) {
+          this.selectedPrescription = prescription;
+          this.showViewModal = true;
+        },
+
+        processPrescription(prescription) {
+          // In a real system, this would check inventory, prepare medications, etc.
+          this.showNotification(`Processing prescription for ${prescription.patientName}...`, 'info');
+          
+          // Simulate processing
+          setTimeout(() => {
+            this.showNotification(`Prescription processed successfully for ${prescription.patientName}`, 'success');
+          }, 1500);
+        },
+
+        completePrescription(prescription) {
+          if (confirm(`Are you sure you want to complete this prescription for ${prescription.patientName}?`)) {
+            window.demoStorage.updatePrescription(prescription.id, { status: 'Completed' });
+            this.showNotification('Prescription completed successfully', 'success');
+            this.loadPrescriptions();
+            this.updateStats();
+            this.showViewModal = false;
+          }
+        },
+
+        formatDate(dateString) {
+          return new Date(dateString).toLocaleDateString('en-ZM');
+        },
+
+        showNotification(message, type = 'info') {
+          const notification = document.createElement('div');
+          notification.className = `notification notification-${type}`;
+          notification.textContent = message;
+          notification.style.cssText = `
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            padding: 1rem 1.5rem;
+            background: ${type === 'success' ? '#22c55e' : type === 'error' ? '#ef4444' : '#3b82f6'};
+            color: white;
+            border-radius: 0.5rem;
+            z-index: 9999;
+            animation: slideIn 0.3s ease;
+          `;
+          
+          document.body.appendChild(notification);
+          
+          setTimeout(() => {
+            notification.style.animation = 'slideOut 0.3s ease';
+            setTimeout(() => notification.remove(), 300);
+          }, 3000);
+        }
+      };
+    }
+  </script>
+
+  <style>
+    .prescription-queue {
+      display: grid;
+      gap: 1rem;
+    }
+
+    .prescription-card {
+      border: 1px solid var(--color-border);
+      border-radius: 0.75rem;
+      padding: 1.5rem;
+      background: var(--color-surface);
+      transition: all 0.2s ease;
+    }
+
+    .prescription-card:hover {
+      box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+    }
+
+    .prescription-card.priority-high {
+      border-left: 4px solid var(--color-warning);
+    }
+
+    .prescription-card.priority-normal {
+      border-left: 4px solid var(--color-success);
+    }
+
+    .prescription-card.priority-low {
+      border-left: 4px solid var(--color-text-muted);
+    }
+
+    .prescription-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      margin-bottom: 1rem;
+    }
+
+    .patient-info h4 {
+      font-size: 1.125rem;
+      font-weight: 600;
+      margin-bottom: 0.5rem;
+    }
+
+    .prescription-meta {
+      text-align: right;
+      font-size: 0.875rem;
+      color: var(--color-text-secondary);
+    }
+
+    .diagnosis {
+      margin-bottom: 1rem;
+      padding: 0.75rem;
+      background: rgba(59, 130, 246, 0.1);
+      border-radius: 0.5rem;
+    }
+
+    .medications h5 {
+      font-weight: 600;
+      margin-bottom: 0.75rem;
+    }
+
+    .medication-item {
+      padding: 0.75rem;
+      border: 1px solid var(--color-border);
+      border-radius: 0.5rem;
+      margin-bottom: 0.5rem;
+    }
+
+    .med-name {
+      font-weight: 500;
+      margin-bottom: 0.25rem;
+    }
+
+    .med-details {
+      font-size: 0.875rem;
+      color: var(--color-text-secondary);
+      margin-bottom: 0.25rem;
+    }
+
+    .med-instructions {
+      font-size: 0.75rem;
+      color: var(--color-text-muted);
+    }
+
+    .prescription-footer {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-top: 1rem;
+      padding-top: 1rem;
+      border-top: 1px solid var(--color-border);
+    }
+
+    .total-cost {
+      font-weight: 600;
+    }
+
+    .actions {
+      display: flex;
+      gap: 0.5rem;
+    }
+
+    @keyframes slideIn {
+      from { transform: translateX(100%); opacity: 0; }
+      to { transform: translateX(0); opacity: 1; }
+    }
+    
+    @keyframes slideOut {
+      from { transform: translateX(0); opacity: 1; }
+      to { transform: translateX(100%); opacity: 0; }
+    }
+  </style>
+</body>
+</html>

@@ -1,0 +1,486 @@
+<!DOCTYPE html>
+<html lang="en" x-data="cashierPatients()">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Patients - Cashier Portal - Umi Health Demo</title>
+  <link rel="icon" href="../../logo.png" type="image/png">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@100;400;500;600;700&family=Varela+Round&family=Nunito:wght@400;600;700&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Rounded:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="stylesheet" href="../shared/css/shared-styles.css">
+  <script src="../shared/js/demo-storage.js"></script>
+</head>
+<body>
+  <!-- Demo Banner -->
+  <div class="demo-banner">
+    <strong>DEMO MODE:</strong> This is a demonstration version using local storage. No backend connection required.
+  </div>
+
+  <!-- Sidebar -->
+  <aside class="sidebar" :class="{ 'open': sidebarOpen }">
+    <div class="sidebar-header">
+      <div class="sidebar-logo">
+        <img src="../../logo.png" alt="Umi Health" />
+        <div>
+          <div class="sidebar-title">Umi Health</div>
+          <div class="sidebar-subtitle">Cashier Portal</div>
+        </div>
+      </div>
+    </div>
+
+    <nav class="sidebar-nav">
+      <div class="nav-section">
+        <div class="nav-section-title">Operations</div>
+        <a href="home.html" class="nav-item">
+          <span class="material-symbols-rounded">home</span>
+          Dashboard
+        </a>
+        <a href="point-of-sale.html" class="nav-item">
+          <span class="material-symbols-rounded">point_of_sale</span>
+          Point of Sale
+        </a>
+        <a href="#" class="nav-item active">
+          <span class="material-symbols-rounded">person</span>
+          Patients
+        </a>
+        <a href="inventory.html" class="nav-item">
+          <span class="material-symbols-rounded">medication</span>
+          Inventory
+        </a>
+      </div>
+    </nav>
+  </aside>
+
+  <!-- Main Content -->
+  <main class="main-content">
+    <!-- Header -->
+    <header class="header">
+      <div class="header-left">
+        <button class="mobile-menu-toggle" @click="sidebarOpen = !sidebarOpen">
+          <span class="material-symbols-rounded">menu</span>
+        </button>
+        <div class="page-title-section">
+          <h1 class="page-title">Patient Directory</h1>
+        </div>
+      </div>
+
+      <div class="header-right">
+        <div class="search-bar">
+          <span class="search-icon">🔍</span>
+          <input 
+            type="text" 
+            class="search-input" 
+            placeholder="Search patients..."
+            x-model="searchQuery"
+            @input="searchPatients"
+          >
+        </div>
+
+        <button class="btn btn-primary" @click="showAddPatientModal = true">
+          <span style="margin-right: 0.5rem;">+</span>
+          Add Patient
+        </button>
+      </div>
+    </header>
+
+    <!-- Content -->
+    <div class="content">
+      <!-- Quick Stats -->
+      <div class="stats-grid">
+        <div class="stat-card">
+          <div class="stat-icon" style="background: rgba(34, 197, 94, 0.1); color: var(--color-success);">
+            👥
+          </div>
+          <div class="stat-value" x-text="stats.totalPatients"></div>
+          <div class="stat-label">Total Patients</div>
+        </div>
+
+        <div class="stat-card">
+          <div class="stat-icon" style="background: rgba(59, 130, 246, 0.1); color: var(--color-info);">
+            🛒
+          </div>
+          <div class="stat-value" x-text="stats.todayCustomers"></div>
+          <div class="stat-label">Today's Customers</div>
+        </div>
+
+        <div class="stat-card">
+          <div class="stat-icon" style="background: rgba(245, 158, 11, 0.1); color: #f59e0b;">
+            💰
+          </div>
+          <div class="stat-value">ZMW <span x-text="stats.avgSpent.toFixed(2)"></span></div>
+          <div class="stat-label">Avg. Transaction</div>
+        </div>
+
+        <div class="stat-card">
+          <div class="stat-icon" style="background: rgba(16, 185, 129, 0.1); color: #10b981;">
+            📈
+          </div>
+          <div class="stat-value" x-text="stats.newThisMonth"></div>
+          <div class="stat-label">New This Month</div>
+        </div>
+      </div>
+
+      <!-- Patients Grid -->
+      <div class="card">
+        <div class="card-header">
+          <h3 class="card-title">Patient Directory</h3>
+          <div class="table-actions">
+            <select class="form-select" style="width: auto;" x-model="viewMode" @change="updateView">
+              <option value="grid">Grid View</option>
+              <option value="list">List View</option>
+            </select>
+          </div>
+        </div>
+        <div class="card-content">
+          <!-- Grid View -->
+          <div x-show="viewMode === 'grid'" class="patients-grid">
+            <template x-for="patient in filteredPatients" :key="patient.id">
+              <div class="patient-card" @click="selectPatient(patient)">
+                <div class="patient-avatar" x-text="patient.firstName.charAt(0)"></div>
+                <div class="patient-info">
+                  <h4 x-text="`${patient.firstName} ${patient.lastName}`"></h4>
+                  <div class="patient-details">
+                    <div x-text="patient.phone"></div>
+                    <div x-text="patient.nrc"></div>
+                    <div x-text="patient.province"></div>
+                  </div>
+                </div>
+                <div class="patient-stats">
+                  <div class="stat-item">
+                    <span class="stat-value" x-text="getPatientStats(patient.id).totalPurchases"></span>
+                    <span class="stat-label">Purchases</span>
+                  </div>
+                  <div class="stat-item">
+                    <span class="stat-value">ZMW <span x-text="getPatientStats(patient.id).totalSpent.toFixed(2)"></span></span>
+                    <span class="stat-label">Total Spent</span>
+                  </div>
+                </div>
+              </div>
+            </template>
+          </div>
+
+          <!-- List View -->
+          <div x-show="viewMode === 'list'">
+            <div class="table-wrapper">
+              <table>
+                <thead>
+                  <tr>
+                    <th>Patient</th>
+                    <th>Contact</th>
+                    <th>Location</th>
+                    <th>Purchases</th>
+                    <th>Total Spent</th>
+                    <th>Last Visit</th>
+                    <th>Actions</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <template x-for="patient in filteredPatients" :key="patient.id">
+                    <tr>
+                      <td>
+                        <div style="display: flex; align-items: center; gap: 0.75rem;">
+                          <div class="user-avatar" x-text="patient.firstName.charAt(0)"></div>
+                          <div>
+                            <div style="font-weight: 500;" x-text="`${patient.firstName} ${patient.lastName}`"></div>
+                            <div style="font-size: 0.75rem; color: var(--color-text-secondary);" x-text="patient.nrc"></div>
+                          </div>
+                        </div>
+                      </td>
+                      <td>
+                        <div style="font-size: 0.875rem;">
+                          <div x-text="patient.phone"></div>
+                          <div x-text="patient.email" style="font-size: 0.75rem; color: var(--color-text-muted);"></div>
+                        </div>
+                      </td>
+                      <td>
+                        <div style="font-size: 0.875rem;">
+                          <div x-text="patient.address"></div>
+                          <div x-text="patient.province" style="font-size: 0.75rem; color: var(--color-text-muted);"></div>
+                        </div>
+                      </td>
+                      <td>
+                        <div style="text-align: center;">
+                          <div style="font-weight: 600;" x-text="getPatientStats(patient.id).totalPurchases"></div>
+                        </div>
+                      </td>
+                      <td>
+                        <div style="font-weight: 600;">ZMW <span x-text="getPatientStats(patient.id).totalSpent.toFixed(2)"></span></div>
+                      </td>
+                      <td x-text="formatDate(patient.registrationDate)"></td>
+                      <td>
+                        <div style="display: flex; gap: 0.5rem;">
+                          <button class="btn btn-xs btn-primary" @click="startSale(patient)">New Sale</button>
+                          <button class="btn btn-xs btn-secondary" @click="viewPatient(patient)">View</button>
+                        </div>
+                      </td>
+                    </tr>
+                  </template>
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </main>
+
+  <!-- Patient Details Modal -->
+  <div class="modal-overlay" x-show="showDetailsModal" @click.self="showDetailsModal = false">
+    <div class="modal">
+      <div class="modal-header">
+        <h3 class="modal-title">Patient Details</h3>
+        <button class="modal-close" @click="showDetailsModal = false">×</button>
+      </div>
+      <div class="modal-body" x-show="selectedPatient">
+        <div style="display: flex; align-items: center; gap: 1rem; margin-bottom: 1.5rem;">
+          <div class="user-avatar" style="width: 60px; height: 60px; font-size: 1.5rem;" x-text="selectedPatient.firstName.charAt(0)"></div>
+          <div>
+            <h3 x-text="`${selectedPatient.firstName} ${selectedPatient.lastName}`"></h3>
+            <div style="color: var(--color-text-secondary);">
+              <div x-text="selectedPatient.nrc"></div>
+              <div x-text="selectedPatient.phone"></div>
+            </div>
+          </div>
+        </div>
+
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin-bottom: 1.5rem;">
+          <div class="form-group">
+            <label class="form-label">Email</label>
+            <input type="text" class="form-input" :value="selectedPatient.email" readonly>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Date of Birth</label>
+            <input type="text" class="form-input" :value="formatDate(selectedPatient.dateOfBirth)" readonly>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Gender</label>
+            <input type="text" class="form-input" :value="selectedPatient.gender" readonly>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Blood Group</label>
+            <input type="text" class="form-input" :value="selectedPatient.bloodGroup" readonly>
+          </div>
+          <div class="form-group" style="grid-column: 1 / -1;">
+            <label class="form-label">Address</label>
+            <input type="text" class="form-input" :value="`${selectedPatient.address}, ${selectedPatient.province}`" readonly>
+          </div>
+        </div>
+
+        <div style="margin-bottom: 1.5rem;">
+          <h4 style="font-weight: 600; margin-bottom: 1rem;">Purchase History</h4>
+          <div style="border: 1px solid var(--color-border); border-radius: 0.5rem; overflow: hidden;">
+            <template x-for="sale in getPatientSales(selectedPatient.id)" :key="sale.id">
+              <div style="padding: 1rem; border-bottom: 1px solid var(--color-border);">
+                <div style="display: flex; justify-content: space-between; align-items: center;">
+                  <div>
+                    <div style="font-weight: 500;" x-text="formatDate(sale.date)"></div>
+                    <div style="font-size: 0.875rem; color: var(--color-text-secondary);">
+                      <span x-text="sale.items.length"></span> items • <span x-text="sale.paymentMethod"></span>
+                    </div>
+                  </div>
+                  <div style="text-align: right;">
+                    <div style="font-weight: 600;">ZMW <span x-text="sale.totalAmount.toFixed(2)"></span></div>
+                    <div style="font-size: 0.75rem; color: var(--color-text-secondary);" x-text="sale.cashierName"></div>
+                  </div>
+                </div>
+              </div>
+            </template>
+            <div x-show="getPatientSales(selectedPatient.id).length === 0" style="padding: 2rem; text-align: center; color: var(--color-text-muted);">
+              No purchase history found
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button class="btn btn-secondary" @click="showDetailsModal = false">Close</button>
+        <button class="btn btn-primary" @click="startSale(selectedPatient)">Start New Sale</button>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    function cashierPatients() {
+      return {
+        sidebarOpen: false,
+        searchQuery: '',
+        viewMode: 'grid',
+        showDetailsModal: false,
+        showAddPatientModal: false,
+        selectedPatient: null,
+        patients: [],
+        filteredPatients: [],
+        sales: [],
+        stats: {},
+
+        init() {
+          this.loadData();
+          this.updateStats();
+        },
+
+        loadData() {
+          this.patients = window.demoStorage.getItem('patients') || [];
+          this.sales = window.demoStorage.getItem('sales') || [];
+          this.filterPatients();
+        },
+
+        filterPatients() {
+          if (this.searchQuery.trim()) {
+            this.filteredPatients = this.patients.filter(p => 
+              `${p.firstName} ${p.lastName}`.toLowerCase().includes(this.searchQuery.toLowerCase()) ||
+              p.nrc.includes(this.searchQuery) ||
+              p.phone.includes(this.searchQuery) ||
+              p.email.toLowerCase().includes(this.searchQuery.toLowerCase())
+            );
+          } else {
+            this.filteredPatients = this.patients;
+          }
+        },
+
+        searchPatients() {
+          this.filterPatients();
+        },
+
+        updateStats() {
+          const today = new Date().toISOString().split('T')[0];
+          const todaySales = this.sales.filter(s => s.date === today);
+          const thisMonth = new Date().getMonth();
+          const thisYear = new Date().getFullYear();
+          
+          this.stats = {
+            totalPatients: this.patients.length,
+            todayCustomers: new Set(todaySales.map(s => s.patientId)).size,
+            avgSpent: todaySales.length > 0 ? todaySales.reduce((sum, s) => sum + s.totalAmount, 0) / todaySales.length : 0,
+            newThisMonth: this.patients.filter(p => {
+              const regDate = new Date(p.registrationDate);
+              return regDate.getMonth() === thisMonth && regDate.getFullYear() === thisYear;
+            }).length
+          };
+        },
+
+        getPatientStats(patientId) {
+          const patientSales = this.sales.filter(s => s.patientId === patientId);
+          return {
+            totalPurchases: patientSales.length,
+            totalSpent: patientSales.reduce((sum, s) => sum + s.totalAmount, 0)
+          };
+        },
+
+        getPatientSales(patientId) {
+          return this.sales
+            .filter(s => s.patientId === patientId)
+            .sort((a, b) => new Date(b.date) - new Date(a.date))
+            .slice(0, 10);
+        },
+
+        selectPatient(patient) {
+          this.selectedPatient = patient;
+          this.showDetailsModal = true;
+        },
+
+        viewPatient(patient) {
+          this.selectedPatient = patient;
+          this.showDetailsModal = true;
+        },
+
+        startSale(patient) {
+          // Navigate to point of sale with patient pre-selected
+          window.location.href = `point-of-sale.html?patient=${patient.id}`;
+        },
+
+        updateView() {
+          // View mode change handled by x-show
+        },
+
+        formatDate(dateString) {
+          return new Date(dateString).toLocaleDateString('en-ZM');
+        }
+      };
+    }
+  </script>
+
+  <style>
+    .patients-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+      gap: 1.5rem;
+    }
+
+    .patient-card {
+      border: 1px solid var(--color-border);
+      border-radius: 0.75rem;
+      padding: 1.5rem;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      background: var(--color-surface);
+    }
+
+    .patient-card:hover {
+      box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+      transform: translateY(-2px);
+    }
+
+    .patient-avatar {
+      width: 50px;
+      height: 50px;
+      border-radius: 50%;
+      background: var(--color-primary);
+      color: white;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: 600;
+      font-size: 1.25rem;
+      margin-bottom: 1rem;
+    }
+
+    .patient-info h4 {
+      font-size: 1.125rem;
+      font-weight: 600;
+      margin-bottom: 0.5rem;
+    }
+
+    .patient-details {
+      font-size: 0.875rem;
+      color: var(--color-text-secondary);
+      line-height: 1.4;
+    }
+
+    .patient-stats {
+      margin-top: 1rem;
+      padding-top: 1rem;
+      border-top: 1px solid var(--color-border);
+      display: flex;
+      justify-content: space-between;
+    }
+
+    .stat-item {
+      text-align: center;
+    }
+
+    .stat-item .stat-value {
+      display: block;
+      font-weight: 600;
+      font-size: 0.875rem;
+      color: var(--color-text-primary);
+    }
+
+    .stat-item .stat-label {
+      font-size: 0.75rem;
+      color: var(--color-text-muted);
+    }
+
+    @keyframes slideIn {
+      from { transform: translateX(100%); opacity: 0; }
+      to { transform: translateX(0); opacity: 1; }
+    }
+    
+    @keyframes slideOut {
+      from { transform: translateX(0); opacity: 1; }
+      to { transform: translateX(100%); opacity: 0; }
+    }
+  </style>
+</body>
+</html>

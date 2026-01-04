@@ -1,0 +1,471 @@
+<!DOCTYPE html>
+<html lang="en" x-data="pointOfSale()">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Point of Sale - Cashier Portal - Umi Health Demo</title>
+  <link rel="icon" href="../../logo.png" type="image/png">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@100;400;500;600;700&family=Varela+Round&family=Nunito:wght@400;600;700&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Rounded:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="stylesheet" href="../shared/css/shared-styles.css">
+  <script src="../shared/js/demo-storage.js"></script>
+</head>
+<body>
+  <!-- Demo Banner -->
+  <div class="demo-banner">
+    <strong>DEMO MODE:</strong> This is a demonstration version using local storage with Zambian sample data. No backend connection required.
+  </div>
+
+  <!-- Sidebar -->
+  <aside class="sidebar" :class="{ 'open': sidebarOpen }">
+    <div class="sidebar-header">
+      <div class="sidebar-logo">
+        <img src="../../logo.png" alt="Umi Health" />
+        <div>
+          <div class="sidebar-title">Umi Health</div>
+          <div class="sidebar-subtitle">Cashier Portal</div>
+        </div>
+      </div>
+    </div>
+
+    <nav class="sidebar-nav">
+      <div class="nav-section">
+        <div class="nav-section-title">Sales</div>
+        <a href="home.html" class="nav-item">
+          <span class="material-symbols-rounded">home</span>
+          Dashboard
+        </a>
+        <a href="#" class="nav-item active">
+          <span class="material-symbols-rounded">point_of_sale</span>
+          Point of Sale
+        </a>
+        <a href="sales.html" class="nav-item">
+          <span class="material-symbols-rounded">bar_chart</span>
+          Sales History
+        </a>
+        <a href="payments.html" class="nav-item">
+          <span class="material-symbols-rounded">credit_card</span>
+          Payments
+        </a>
+      </div>
+    </nav>
+  </aside>
+
+  <!-- Main Content -->
+  <main class="main-content">
+    <!-- Header -->
+    <header class="header">
+      <div class="header-left">
+        <button class="mobile-menu-toggle" @click="sidebarOpen = !sidebarOpen">
+          <span class="material-symbols-rounded">menu</span>
+        </button>
+        <div class="page-title-section">
+          <h1 class="page-title">Point of Sale</h1>
+        </div>
+      </div>
+
+      <div class="header-right">
+        <div class="user-info">
+          <div class="user-avatar">C</div>
+          <div class="user-details">
+            <div class="user-name">Joseph Banda</div>
+            <div class="user-role">Cashier</div>
+          </div>
+        </div>
+      </div>
+    </header>
+
+    <!-- Content -->
+    <div class="content">
+      <div style="display: grid; grid-template-columns: 1fr 400px; gap: 2rem;">
+        <!-- Left Side - Product Selection -->
+        <div>
+          <!-- Customer Search -->
+          <div class="card" style="margin-bottom: 2rem;">
+            <div class="card-header">
+              <h3 class="card-title">Customer Information</h3>
+            </div>
+            <div class="card-content">
+              <div class="form-group">
+                <label class="form-label">Search Customer</label>
+                <div style="display: flex; gap: 0.5rem;">
+                  <input 
+                    type="text" 
+                    class="form-input" 
+                    placeholder="Enter name, NRC, or phone..."
+                    x-model="customerSearch"
+                    @input="searchCustomers"
+                  >
+                  <button class="btn btn-secondary" @click="clearCustomer">Clear</button>
+                </div>
+              </div>
+              
+              <div x-show="selectedCustomer" style="padding: 1rem; background: var(--color-surface); border-radius: 0.5rem; margin-top: 1rem;">
+                <div style="font-weight: 600; margin-bottom: 0.5rem;" x-text="`${selectedCustomer.firstName} ${selectedCustomer.lastName}`"></div>
+                <div style="font-size: 0.875rem; color: var(--color-text-secondary);">
+                  <div>NRC: <span x-text="selectedCustomer.nrc"></span></div>
+                  <div>Phone: <span x-text="selectedCustomer.phone"></span></div>
+                </div>
+              </div>
+
+              <div x-show="customerSearch && searchResults.length > 0 && !selectedCustomer" style="margin-top: 1rem;">
+                <template x-for="customer in searchResults" :key="customer.id">
+                  <div style="padding: 0.75rem; border: 1px solid var(--color-border); border-radius: 0.5rem; margin-bottom: 0.5rem; cursor: pointer;" @click="selectCustomer(customer)">
+                    <div style="font-weight: 500;" x-text="`${customer.firstName} ${customer.lastName}`"></div>
+                    <div style="font-size: 0.75rem; color: var(--color-text-secondary);" x-text="`${customer.phone} • ${customer.nrc}`"></div>
+                  </div>
+                </template>
+              </div>
+            </div>
+          </div>
+
+          <!-- Product Search -->
+          <div class="card">
+            <div class="card-header">
+              <h3 class="card-title">Add Products</h3>
+            </div>
+            <div class="card-content">
+              <div class="form-group">
+                <label class="form-label">Search Medications</label>
+                <input 
+                  type="text" 
+                  class="form-input" 
+                  placeholder="Search medications..."
+                  x-model="productSearch"
+                  @input="searchProducts"
+                >
+              </div>
+
+              <div x-show="productSearch && productResults.length > 0" style="margin-top: 1rem;">
+                <template x-for="product in productResults" :key="product.id">
+                  <div style="padding: 1rem; border: 1px solid var(--color-border); border-radius: 0.5rem; margin-bottom: 0.5rem; display: flex; justify-content: space-between; align-items: center;">
+                    <div>
+                      <div style="font-weight: 500;" x-text="product.name"></div>
+                      <div style="font-size: 0.875rem; color: var(--color-text-secondary);">
+                        Stock: <span x-text="product.stockQuantity"></span> • 
+                        Price: ZMW <span x-text="product.unitPrice.toFixed(2)"></span>
+                      </div>
+                    </div>
+                    <button class="btn btn-sm btn-primary" @click="addToCart(product)" :disabled="product.stockQuantity === 0">
+                      Add to Cart
+                    </button>
+                  </div>
+                </template>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Right Side - Cart -->
+        <div>
+          <div class="card">
+            <div class="card-header">
+              <h3 class="card-title">Shopping Cart</h3>
+              <button class="btn btn-sm btn-secondary" @click="clearCart" x-show="cart.length > 0">Clear</button>
+            </div>
+            <div class="card-content">
+              <div x-show="cart.length === 0" style="text-align: center; padding: 2rem; color: var(--color-text-muted);">
+                <div style="font-size: 3rem; margin-bottom: 1rem;">🛒</div>
+                <div>Cart is empty</div>
+                <div style="font-size: 0.875rem;">Add products to start selling</div>
+              </div>
+
+              <div x-show="cart.length > 0">
+                <template x-for="(item, index) in cart" :key="index">
+                  <div style="display: flex; justify-content: space-between; align-items: center; padding: 1rem 0; border-bottom: 1px solid var(--color-border);">
+                    <div style="flex: 1;">
+                      <div style="font-weight: 500;" x-text="item.name"></div>
+                      <div style="font-size: 0.875rem; color: var(--color-text-secondary);">ZMW <span x-text="item.unitPrice.toFixed(2)"></span> each</div>
+                    </div>
+                    <div style="display: flex; align-items: center; gap: 0.5rem;">
+                      <button class="btn btn-xs btn-secondary" @click="updateQuantity(index, item.quantity - 1)" :disabled="item.quantity <= 1">-</button>
+                      <span style="min-width: 30px; text-align: center;" x-text="item.quantity"></span>
+                      <button class="btn btn-xs btn-secondary" @click="updateQuantity(index, item.quantity + 1)">+</button>
+                      <button class="btn btn-xs btn-warning" @click="removeFromCart(index)">×</button>
+                    </div>
+                  </div>
+                </template>
+
+                <div style="padding: 1rem 0; border-top: 2px solid var(--color-border); margin-top: 1rem;">
+                  <div style="display: flex; justify-content: space-between; margin-bottom: 0.5rem;">
+                    <span>Subtotal:</span>
+                    <span>ZMW <span x-text="subtotal.toFixed(2)"></span></span>
+                  </div>
+                  <div style="display: flex; justify-content: space-between; margin-bottom: 0.5rem;">
+                    <span>Tax (16%):</span>
+                    <span>ZMW <span x-text="tax.toFixed(2)"></span></span>
+                  </div>
+                  <div style="display: flex; justify-content: space-between; font-weight: 600; font-size: 1.125rem;">
+                    <span>Total:</span>
+                    <span>ZMW <span x-text="total.toFixed(2)"></span></span>
+                  </div>
+                </div>
+
+                <div style="margin-top: 1.5rem;">
+                  <div class="form-group">
+                    <label class="form-label">Payment Method</label>
+                    <select class="form-select" x-model="paymentMethod">
+                      <option value="Cash">Cash</option>
+                      <option value="Mobile Money">Mobile Money</option>
+                      <option value="Card">Card</option>
+                      <option value="Insurance">Insurance</option>
+                    </select>
+                  </div>
+
+                  <button class="btn btn-primary" style="width: 100%;" @click="processPayment()" :disabled="!selectedCustomer || cart.length === 0">
+                    Process Payment - ZMW <span x-text="total.toFixed(2)"></span>
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </main>
+
+  <!-- Payment Success Modal -->
+  <div class="modal-overlay" x-show="showSuccessModal" @click.self="showSuccessModal = false">
+    <div class="modal">
+      <div class="modal-header">
+        <h3 class="modal-title">Payment Successful!</h3>
+        <button class="modal-close" @click="showSuccessModal = false">×</button>
+      </div>
+      <div class="modal-body" style="text-align: center;">
+        <div style="font-size: 4rem; margin-bottom: 1rem;">✅</div>
+        <h4 style="margin-bottom: 0.5rem;">Thank you for your purchase!</h4>
+        <p style="color: var(--color-text-secondary); margin-bottom: 1.5rem;">
+          Payment of ZMW <span x-text="total.toFixed(2)"></span> has been processed successfully.
+        </p>
+        <div style="padding: 1rem; background: var(--color-surface); border-radius: 0.5rem; text-align: left;">
+          <div><strong>Customer:</strong> <span x-text="`${selectedCustomer?.firstName} ${selectedCustomer?.lastName}`"></span></div>
+          <div><strong>Payment Method:</strong> <span x-text="paymentMethod"></span></div>
+          <div><strong>Items:</strong> <span x-text="cart.length"></span></div>
+          <div><strong>Transaction ID:</strong> <span x-text="transactionId"></span></div>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button class="btn btn-secondary" @click="printReceipt()">Print Receipt</button>
+        <button class="btn btn-primary" @click="newSale()">New Sale</button>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    function pointOfSale() {
+      return {
+        sidebarOpen: false,
+        customerSearch: '',
+        productSearch: '',
+        selectedCustomer: null,
+        searchResults: [],
+        productResults: [],
+        cart: [],
+        paymentMethod: 'Cash',
+        showSuccessModal: false,
+        transactionId: '',
+        patients: [],
+        medications: [],
+
+        get subtotal() {
+          return this.cart.reduce((sum, item) => sum + (item.unitPrice * item.quantity), 0);
+        },
+
+        get tax() {
+          return this.subtotal * 0.16;
+        },
+
+        get total() {
+          return this.subtotal + this.tax;
+        },
+
+        init() {
+          this.loadData();
+        },
+
+        loadData() {
+          this.patients = window.demoStorage.getItem('patients') || [];
+          this.medications = window.demoStorage.getItem('medications') || [];
+        },
+
+        searchCustomers() {
+          if (!this.customerSearch.trim()) {
+            this.searchResults = [];
+            return;
+          }
+
+          this.searchResults = this.patients.filter(patient => 
+            `${patient.firstName} ${patient.lastName}`.toLowerCase().includes(this.customerSearch.toLowerCase()) ||
+            patient.nrc.includes(this.customerSearch) ||
+            patient.phone.includes(this.customerSearch)
+          ).slice(0, 5);
+        },
+
+        searchProducts() {
+          if (!this.productSearch.trim()) {
+            this.productResults = [];
+            return;
+          }
+
+          this.productResults = this.medications.filter(med => 
+            med.name.toLowerCase().includes(this.productSearch.toLowerCase()) ||
+            med.category.toLowerCase().includes(this.productSearch.toLowerCase())
+          ).slice(0, 10);
+        },
+
+        selectCustomer(customer) {
+          this.selectedCustomer = customer;
+          this.customerSearch = '';
+          this.searchResults = [];
+        },
+
+        clearCustomer() {
+          this.selectedCustomer = null;
+          this.customerSearch = '';
+          this.searchResults = [];
+        },
+
+        addToCart(product) {
+          if (product.stockQuantity === 0) {
+            this.showNotification('Product is out of stock', 'error');
+            return;
+          }
+
+          const existingItem = this.cart.find(item => item.id === product.id);
+          if (existingItem) {
+            if (existingItem.quantity >= product.stockQuantity) {
+              this.showNotification('Not enough stock available', 'error');
+              return;
+            }
+            existingItem.quantity++;
+          } else {
+            this.cart.push({
+              id: product.id,
+              name: product.name,
+              unitPrice: product.unitPrice,
+              quantity: 1,
+              maxQuantity: product.stockQuantity
+            });
+          }
+
+          this.productSearch = '';
+          this.productResults = [];
+          this.showNotification('Product added to cart', 'success');
+        },
+
+        updateQuantity(index, newQuantity) {
+          if (newQuantity < 1 || newQuantity > this.cart[index].maxQuantity) {
+            return;
+          }
+          this.cart[index].quantity = newQuantity;
+        },
+
+        removeFromCart(index) {
+          this.cart.splice(index, 1);
+        },
+
+        clearCart() {
+          if (confirm('Are you sure you want to clear the cart?')) {
+            this.cart = [];
+          }
+        },
+
+        processPayment() {
+          if (!this.selectedCustomer || this.cart.length === 0) {
+            this.showNotification('Please select a customer and add products to cart', 'error');
+            return;
+          }
+
+          // Create sale record
+          const sale = {
+            patientId: this.selectedCustomer.id,
+            patientName: `${this.selectedCustomer.firstName} ${this.selectedCustomer.lastName}`,
+            date: new Date().toISOString().split('T')[0],
+            items: this.cart.map(item => ({
+              medicationName: item.name,
+              quantity: item.quantity,
+              unitPrice: item.unitPrice,
+              totalPrice: item.unitPrice * item.quantity
+            })),
+            totalAmount: this.total,
+            paymentMethod: this.paymentMethod,
+            paymentStatus: 'Paid',
+            cashierName: 'Joseph Banda'
+          };
+
+          window.demoStorage.addSale(sale);
+
+          // Update inventory
+          this.cart.forEach(cartItem => {
+            const medication = this.medications.find(m => m.id === cartItem.id);
+            if (medication) {
+              window.demoStorage.updateMedication(medication.id, {
+                stockQuantity: medication.stockQuantity - cartItem.quantity
+              });
+            }
+          });
+
+          // Generate transaction ID
+          this.transactionId = 'TXN' + Date.now();
+
+          // Show success modal
+          this.showSuccessModal = true;
+        },
+
+        printReceipt() {
+          console.log('Printing receipt for transaction:', this.transactionId);
+          this.showNotification('Receipt printed successfully', 'success');
+        },
+
+        newSale() {
+          this.selectedCustomer = null;
+          this.cart = [];
+          this.paymentMethod = 'Cash';
+          this.showSuccessModal = false;
+          this.customerSearch = '';
+          this.productSearch = '';
+        },
+
+        showNotification(message, type = 'info') {
+          const notification = document.createElement('div');
+          notification.className = `notification notification-${type}`;
+          notification.textContent = message;
+          notification.style.cssText = `
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            padding: 1rem 1.5rem;
+            background: ${type === 'success' ? '#22c55e' : type === 'error' ? '#ef4444' : '#3b82f6'};
+            color: white;
+            border-radius: 0.5rem;
+            z-index: 9999;
+            animation: slideIn 0.3s ease;
+          `;
+          
+          document.body.appendChild(notification);
+          
+          setTimeout(() => {
+            notification.style.animation = 'slideOut 0.3s ease';
+            setTimeout(() => notification.remove(), 300);
+          }, 3000);
+        }
+      };
+    }
+  </script>
+
+  <style>
+    @keyframes slideIn {
+      from { transform: translateX(100%); opacity: 0; }
+      to { transform: translateX(0); opacity: 1; }
+    }
+    
+    @keyframes slideOut {
+      from { transform: translateX(0); opacity: 1; }
+      to { transform: translateX(100%); opacity: 0; }
+    }
+  </style>
+</body>
+</html>

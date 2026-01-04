@@ -1,0 +1,527 @@
+<!DOCTYPE html>
+<html lang="en" x-data="inventoryManager()">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Inventory Management - Umi Health Demo</title>
+  <link rel="icon" href="../../logo.png" type="image/png">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@100;400;500;600;700&family=Varela+Round&family=Nunito:wght@400;600;700&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Rounded:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="stylesheet" href="../shared/css/shared-styles.css">
+  <script src="../shared/js/demo-storage.js"></script>
+</head>
+<body>
+  <!-- Demo Banner -->
+  <div class="demo-banner">
+    <strong>DEMO MODE:</strong> This is a demonstration version using local storage with Zambian sample data. No backend connection required.
+  </div>
+
+  <!-- Sidebar -->
+  <aside class="sidebar" :class="{ 'open': sidebarOpen }">
+    <div class="sidebar-header">
+      <div class="sidebar-logo">
+        <img src="../../logo.png" alt="Umi Health" />
+        <div>
+          <div class="sidebar-title">Umi Health</div>
+          <div class="sidebar-subtitle">Admin Portal</div>
+        </div>
+      </div>
+    </div>
+
+    <nav class="sidebar-nav">
+      <div class="nav-section">
+        <div class="nav-section-title">Main</div>
+        <a href="home.html" class="nav-item">
+          <span class="material-symbols-rounded">home</span>
+          Dashboard
+        </a>
+        <a href="patients.html" class="nav-item">
+          <span class="material-symbols-rounded">group</span>
+          Patients
+        </a>
+        <a href="prescriptions.html" class="nav-item">
+          <span class="material-symbols-rounded">description</span>
+          Prescriptions
+        </a>
+        <a href="#" class="nav-item active">
+          <span class="material-symbols-rounded">medication</span>
+          Inventory
+        </a>
+        <a href="sales.html" class="nav-item">
+          <span class="material-symbols-rounded">payments</span>
+          Sales
+        </a>
+        <a href="reports.html" class="nav-item">
+          <span class="material-symbols-rounded">bar_chart</span>
+          Reports
+        </a>
+      </div>
+    </nav>
+  </aside>
+
+  <!-- Main Content -->
+  <main class="main-content">
+    <!-- Header -->
+    <header class="header">
+      <div class="header-left">
+        <button class="mobile-menu-toggle" @click="sidebarOpen = !sidebarOpen">
+          <span class="material-symbols-rounded">menu</span>
+        </button>
+        <div class="page-title-section">
+          <h1 class="page-title">Inventory Management</h1>
+        </div>
+      </div>
+
+      <div class="header-right">
+        <div class="search-bar">
+          <span class="material-symbols-rounded">search</span>
+          <input 
+            type="text" 
+            class="search-input" 
+            placeholder="Search medications..."
+            x-model="searchQuery"
+            @input="searchMedications"
+          >
+        </div>
+
+        <button class="btn btn-primary" @click="showAddMedicationModal = true">
+          <span style="margin-right: 0.5rem;">+</span>
+          Add Medication
+        </button>
+      </div>
+    </header>
+
+    <!-- Content -->
+    <div class="content">
+      <!-- Stats Cards -->
+      <div class="stats-grid">
+        <div class="stat-card">
+          <div class="stat-icon" style="background: rgba(34, 197, 94, 0.1); color: var(--color-success);">
+            💊
+          </div>
+          <div class="stat-value" x-text="stats.totalMedications"></div>
+          <div class="stat-label">Total Medications</div>
+        </div>
+
+        <div class="stat-card">
+          <div class="stat-icon" style="background: rgba(245, 158, 11, 0.1); color: #f59e0b;">
+            ⚠️
+          </div>
+          <div class="stat-value" x-text="stats.lowStockItems"></div>
+          <div class="stat-label">Low Stock Items</div>
+        </div>
+
+        <div class="stat-card">
+          <div class="stat-icon" style="background: rgba(239, 68, 68, 0.1); color: #ef4444;">
+            ⏰
+          </div>
+          <div class="stat-value" x-text="stats.expiringSoon"></div>
+          <div class="stat-label">Expiring Soon</div>
+        </div>
+
+        <div class="stat-card">
+          <div class="stat-icon" style="background: rgba(59, 130, 246, 0.1); color: var(--color-info);">
+            📦
+          </div>
+          <div class="stat-value" x-text="stats.totalValue"></div>
+          <div class="stat-label">Total Value (ZMW)</div>
+        </div>
+      </div>
+
+      <!-- Inventory Table -->
+      <div class="card">
+        <div class="card-header">
+          <h3 class="card-title">Medications Inventory</h3>
+          <div class="table-actions">
+            <select class="form-select" style="width: auto;" x-model="filterCategory" @change="filterMedications">
+              <option value="all">All Categories</option>
+              <option value="Analgesic">Analgesic</option>
+              <option value="Antibiotic">Antibiotic</option>
+              <option value="Antimalarial">Antimalarial</option>
+              <option value="Antihypertensive">Antihypertensive</option>
+            </select>
+          </div>
+        </div>
+        <div class="table-wrapper">
+          <table>
+            <thead>
+              <tr>
+                <th>ID</th>
+                <th>Medication Name</th>
+                <th>Category</th>
+                <th>Stock</th>
+                <th>Reorder Level</th>
+                <th>Unit Price (ZMW)</th>
+                <th>Expiry Date</th>
+                <th>Status</th>
+                <th>Actions</th>
+              </tr>
+            </thead>
+            <tbody>
+              <template x-for="med in filteredMedications" :key="med.id">
+                <tr>
+                  <td x-text="med.id"></td>
+                  <td>
+                    <div style="font-weight: 500;" x-text="med.name"></div>
+                    <div style="font-size: 0.75rem; color: var(--color-text-secondary);" x-text="med.description"></div>
+                  </td>
+                  <td x-text="med.category"></td>
+                  <td>
+                    <div style="display: flex; align-items: center; gap: 0.5rem;">
+                      <span x-text="med.stockQuantity"></span>
+                      <span x-text="med.unit"></span>
+                    </div>
+                  </td>
+                  <td x-text="med.reorderLevel"></td>
+                  <td x-text="med.unitPrice.toFixed(2)"></td>
+                  <td x-text="formatDate(med.expiryDate)"></td>
+                  <td>
+                    <span class="status-badge" :class="getStockStatusClass(med)" x-text="getStockStatus(med)"></span>
+                  </td>
+                  <td>
+                    <div style="display: flex; gap: 0.5rem;">
+                      <button class="btn btn-xs btn-secondary" @click="editMedication(med)">Edit</button>
+                      <button class="btn btn-xs btn-primary" @click="adjustStock(med)">Stock</button>
+                    </div>
+                  </td>
+                </tr>
+              </template>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  </main>
+
+  <!-- Add/Edit Medication Modal -->
+  <div class="modal-overlay" x-show="showAddMedicationModal" @click.self="showAddMedicationModal = false">
+    <div class="modal">
+      <div class="modal-header">
+        <h3 class="modal-title" x-text="editingMedication ? 'Edit Medication' : 'Add New Medication'"></h3>
+        <button class="modal-close" @click="closeMedicationModal()">×</button>
+      </div>
+      <div class="modal-body">
+        <form @submit.prevent="saveMedication">
+          <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem;">
+            <div class="form-group">
+              <label class="form-label">Medication Name</label>
+              <input type="text" class="form-input" x-model="medicationForm.name" required>
+            </div>
+            <div class="form-group">
+              <label class="form-label">Category</label>
+              <select class="form-select" x-model="medicationForm.category" required>
+                <option value="">Select Category</option>
+                <option value="Analgesic">Analgesic</option>
+                <option value="Antibiotic">Antibiotic</option>
+                <option value="Antimalarial">Antimalarial</option>
+                <option value="Antihypertensive">Antihypertensive</option>
+                <option value="Antidiabetic">Antidiabetic</option>
+                <option value="Vitamin">Vitamin</option>
+                <option value="Other">Other</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label class="form-label">Description</label>
+              <input type="text" class="form-input" x-model="medicationForm.description">
+            </div>
+            <div class="form-group">
+              <label class="form-label">Unit</label>
+              <select class="form-select" x-model="medicationForm.unit" required>
+                <option value="">Select Unit</option>
+                <option value="Tablet">Tablet</option>
+                <option value="Capsule">Capsule</option>
+                <option value="Syrup">Syrup</option>
+                <option value="Injection">Injection</option>
+                <option value="Cream">Cream</option>
+                <option value="Ointment">Ointment</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label class="form-label">Stock Quantity</label>
+              <input type="number" class="form-input" x-model="medicationForm.stockQuantity" required min="0">
+            </div>
+            <div class="form-group">
+              <label class="form-label">Reorder Level</label>
+              <input type="number" class="form-input" x-model="medicationForm.reorderLevel" required min="0">
+            </div>
+            <div class="form-group">
+              <label class="form-label">Unit Price (ZMW)</label>
+              <input type="number" class="form-input" x-model="medicationForm.unitPrice" required min="0" step="0.01">
+            </div>
+            <div class="form-group">
+              <label class="form-label">Supplier</label>
+              <input type="text" class="form-input" x-model="medicationForm.supplier">
+            </div>
+            <div class="form-group">
+              <label class="form-label">Expiry Date</label>
+              <input type="date" class="form-input" x-model="medicationForm.expiryDate" required>
+            </div>
+            <div class="form-group">
+              <label class="form-label">Batch Number</label>
+              <input type="text" class="form-input" x-model="medicationForm.batchNumber">
+            </div>
+            <div class="form-group">
+              <label class="form-label">Storage Conditions</label>
+              <input type="text" class="form-input" x-model="medicationForm.storageConditions" placeholder="e.g., Room temperature, Cool dry place">
+            </div>
+          </div>
+        </form>
+      </div>
+      <div class="modal-footer">
+        <button class="btn btn-secondary" @click="closeMedicationModal()">Cancel</button>
+        <button class="btn btn-primary" @click="saveMedication()">Save Medication</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Stock Adjustment Modal -->
+  <div class="modal-overlay" x-show="showStockModal" @click.self="showStockModal = false">
+    <div class="modal">
+      <div class="modal-header">
+        <h3 class="modal-title">Adjust Stock</h3>
+        <button class="modal-close" @click="showStockModal = false">×</button>
+      </div>
+      <div class="modal-body">
+        <div class="form-group">
+          <label class="form-label">Medication</label>
+          <input type="text" class="form-input" :value="selectedMedication?.name" readonly>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Current Stock</label>
+          <input type="text" class="form-input" :value="selectedMedication?.stockQuantity" readonly>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Adjustment Type</label>
+          <select class="form-select" x-model="stockAdjustment.type">
+            <option value="add">Add Stock</option>
+            <option value="remove">Remove Stock</option>
+            <option value="set">Set Stock Level</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Quantity</label>
+          <input type="number" class="form-input" x-model="stockAdjustment.quantity" required min="0">
+        </div>
+        <div class="form-group">
+          <label class="form-label">Reason</label>
+          <textarea class="form-textarea" x-model="stockAdjustment.reason" placeholder="Reason for adjustment..."></textarea>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button class="btn btn-secondary" @click="showStockModal = false">Cancel</button>
+        <button class="btn btn-primary" @click="saveStockAdjustment()">Save Adjustment</button>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    function inventoryManager() {
+      return {
+        sidebarOpen: false,
+        searchQuery: '',
+        filterCategory: 'all',
+        showAddMedicationModal: false,
+        showStockModal: false,
+        editingMedication: null,
+        selectedMedication: null,
+        medications: [],
+        filteredMedications: [],
+        medicationForm: {
+          name: '',
+          category: '',
+          description: '',
+          unit: '',
+          stockQuantity: 0,
+          reorderLevel: 0,
+          unitPrice: 0,
+          supplier: '',
+          expiryDate: '',
+          batchNumber: '',
+          storageConditions: ''
+        },
+        stockAdjustment: {
+          type: 'add',
+          quantity: 0,
+          reason: ''
+        },
+        stats: {},
+
+        init() {
+          this.loadMedications();
+          this.updateStats();
+        },
+
+        loadMedications() {
+          this.medications = window.demoStorage.getItem('medications') || [];
+          this.filterMedications();
+        },
+
+        filterMedications() {
+          let filtered = this.medications;
+          
+          if (this.filterCategory !== 'all') {
+            filtered = filtered.filter(m => m.category === this.filterCategory);
+          }
+          
+          if (this.searchQuery.trim()) {
+            filtered = filtered.filter(m => 
+              m.name.toLowerCase().includes(this.searchQuery.toLowerCase()) ||
+              m.category.toLowerCase().includes(this.searchQuery.toLowerCase())
+            );
+          }
+          
+          this.filteredMedications = filtered;
+        },
+
+        searchMedications() {
+          this.filterMedications();
+        },
+
+        updateStats() {
+          const threeMonthsFromNow = new Date();
+          threeMonthsFromNow.setMonth(threeMonthsFromNow.getMonth() + 3);
+          
+          this.stats = {
+            totalMedications: this.medications.length,
+            lowStockItems: this.medications.filter(m => m.stockQuantity <= m.reorderLevel).length,
+            expiringSoon: this.medications.filter(m => new Date(m.expiryDate) <= threeMonthsFromNow).length,
+            totalValue: this.medications.reduce((sum, m) => sum + (m.stockQuantity * m.unitPrice), 0).toFixed(2)
+          };
+        },
+
+        editMedication(medication) {
+          this.editingMedication = medication;
+          this.medicationForm = { ...medication };
+          this.showAddMedicationModal = true;
+        },
+
+        adjustStock(medication) {
+          this.selectedMedication = medication;
+          this.stockAdjustment = {
+            type: 'add',
+            quantity: 0,
+            reason: ''
+          };
+          this.showStockModal = true;
+        },
+
+        saveMedication() {
+          if (this.editingMedication) {
+            window.demoStorage.updateMedication(this.editingMedication.id, this.medicationForm);
+            this.showNotification('Medication updated successfully', 'success');
+          } else {
+            window.demoStorage.addMedication(this.medicationForm);
+            this.showNotification('Medication added successfully', 'success');
+          }
+          
+          this.closeMedicationModal();
+          this.loadMedications();
+          this.updateStats();
+        },
+
+        saveStockAdjustment() {
+          if (!this.selectedMedication) return;
+          
+          let newStock = this.selectedMedication.stockQuantity;
+          
+          switch (this.stockAdjustment.type) {
+            case 'add':
+              newStock += parseInt(this.stockAdjustment.quantity);
+              break;
+            case 'remove':
+              newStock = Math.max(0, newStock - parseInt(this.stockAdjustment.quantity));
+              break;
+            case 'set':
+              newStock = parseInt(this.stockAdjustment.quantity);
+              break;
+          }
+          
+          window.demoStorage.updateMedication(this.selectedMedication.id, {
+            stockQuantity: newStock
+          });
+          
+          this.showNotification('Stock adjusted successfully', 'success');
+          this.showStockModal = false;
+          this.loadMedications();
+          this.updateStats();
+        },
+
+        closeMedicationModal() {
+          this.showAddMedicationModal = false;
+          this.editingMedication = null;
+          this.medicationForm = {
+            name: '',
+            category: '',
+            description: '',
+            unit: '',
+            stockQuantity: 0,
+            reorderLevel: 0,
+            unitPrice: 0,
+            supplier: '',
+            expiryDate: '',
+            batchNumber: '',
+            storageConditions: ''
+          };
+        },
+
+        getStockStatus(medication) {
+          if (medication.stockQuantity === 0) return 'Out of Stock';
+          if (medication.stockQuantity <= medication.reorderLevel / 2) return 'Critical';
+          if (medication.stockQuantity <= medication.reorderLevel) return 'Low';
+          return 'In Stock';
+        },
+
+        getStockStatusClass(medication) {
+          if (medication.stockQuantity === 0) return 'status-inactive';
+          if (medication.stockQuantity <= medication.reorderLevel / 2) return 'status-pending';
+          if (medication.stockQuantity <= medication.reorderLevel) return 'status-pending';
+          return 'status-active';
+        },
+
+        formatDate(dateString) {
+          return new Date(dateString).toLocaleDateString('en-ZM');
+        },
+
+        showNotification(message, type = 'info') {
+          const notification = document.createElement('div');
+          notification.className = `notification notification-${type}`;
+          notification.textContent = message;
+          notification.style.cssText = `
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            padding: 1rem 1.5rem;
+            background: ${type === 'success' ? '#22c55e' : type === 'error' ? '#ef4444' : '#3b82f6'};
+            color: white;
+            border-radius: 0.5rem;
+            z-index: 9999;
+            animation: slideIn 0.3s ease;
+          `;
+          
+          document.body.appendChild(notification);
+          
+          setTimeout(() => {
+            notification.style.animation = 'slideOut 0.3s ease';
+            setTimeout(() => notification.remove(), 300);
+          }, 3000);
+        }
+      };
+    }
+  </script>
+
+  <style>
+    @keyframes slideIn {
+      from { transform: translateX(100%); opacity: 0; }
+      to { transform: translateX(0); opacity: 1; }
+    }
+    
+    @keyframes slideOut {
+      from { transform: translateX(0); opacity: 1; }
+      to { transform: translateX(100%); opacity: 0; }
+    }
+  </style>
+</body>
+</html>

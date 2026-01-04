@@ -1,0 +1,586 @@
+<!DOCTYPE html>
+<html lang="en" x-data="cashierDashboard()">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Cashier Dashboard - Umi Health Demo</title>
+  <link rel="icon" href="../../logo.png" type="image/png">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@100;400;500;600;700&family=Varela+Round&family=Nunito:wght@400;600;700&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Rounded:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <link rel="stylesheet" href="../shared/css/shared-styles.css">
+  <script src="../shared/js/demo-storage.js"></script>
+</head>
+<body>
+  <!-- Demo Banner -->
+  <div class="demo-banner">
+    <strong>DEMO MODE:</strong> This is a demonstration version using local storage. No backend connection required.
+  </div>
+
+  <!-- Sidebar -->
+  <aside class="sidebar" :class="{ 'open': sidebarOpen }">
+    <div class="sidebar-header">
+      <div class="sidebar-logo">
+        <img src="../../logo.png" alt="Umi Health" />
+        <div>
+          <div class="sidebar-title">Umi Health</div>
+          <div class="sidebar-subtitle">Cashier Portal</div>
+        </div>
+      </div>
+    </div>
+
+    <nav class="sidebar-nav">
+      <div class="nav-section">
+        <div class="nav-section-title">Sales</div>
+        <a href="home.html" class="nav-item">
+          <span class="material-symbols-rounded">home</span>
+          Dashboard
+        </a>
+        <a href="point-of-sale.html" class="nav-item" @click="navigateTo('point-of-sale')">
+          <span class="material-symbols-rounded">point_of_sale</span>
+          Point of Sale
+        </a>
+        <a href="sales.html" class="nav-item" @click="navigateTo('sales')">
+          <span class="material-symbols-rounded">bar_chart</span>
+          Sales History
+        </a>
+        <a href="payments.html" class="nav-item" @click="navigateTo('payments')">
+          <span class="material-symbols-rounded">credit_card</span>
+          Payments
+        </a>
+        <a href="#" class="nav-item" @click="navigateTo('queue-management')">
+          <span class="material-symbols-rounded">group</span>
+          Queue Management
+        </a>
+      </div>
+
+      <div class="nav-section">
+        <div class="nav-section-title">Operations</div>
+        <a href="#" class="nav-item" @click="navigateTo('patients')">
+          <span class="material-symbols-rounded">person</span>
+          Patients
+        </a>
+        <a href="#" class="nav-item" @click="navigateTo('inventory')">
+          <span class="material-symbols-rounded">medication</span>
+          Inventory
+        </a>
+        <a href="#" class="nav-item" @click="navigateTo('reports')">
+          <span class="material-symbols-rounded">trending_up</span>
+          Reports
+        </a>
+        <a href="#" class="nav-item" @click="navigateTo('shift-management')">
+          <span class="material-symbols-rounded">schedule</span>
+          Shift Management
+        </a>
+      </div>
+
+      <div class="nav-section">
+        <div class="nav-section-title">System</div>
+        <a href="#" class="nav-item" @click="showSettings()">
+          <span class="material-symbols-rounded">settings</span>
+          Settings
+        </a>
+        <a href="#" class="nav-item" @click="exportData()">
+          <span class="material-symbols-rounded">upload</span>
+          Export Data
+        </a>
+        <a href="#" class="nav-item" @click="help()">
+          <span class="material-symbols-rounded">help</span>
+          Help
+        </a>
+      </div>
+    </nav>
+  </aside>
+
+  <!-- Main Content -->
+  <main class="main-content">
+    <!-- Header -->
+    <header class="header">
+      <div class="header-left">
+        <button class="mobile-menu-toggle" @click="sidebarOpen = !sidebarOpen">
+          <span class="material-symbols-rounded">menu</span>
+        </button>
+        <div class="page-title-section">
+          <h1 class="page-title">Cashier Dashboard</h1>
+        </div>
+      </div>
+
+      <div class="header-right">
+        <div class="search-bar">
+          <span class="search-icon">🔍</span>
+          <input 
+            type="text" 
+            class="search-input" 
+            placeholder="Search patients, medications..."
+            x-model="searchQuery"
+            @input="performSearch"
+          >
+        </div>
+
+        <div class="user-info">
+          <div class="user-avatar">C</div>
+          <div class="user-details">
+            <div class="user-name">Joseph Banda</div>
+            <div class="user-role">Cashier</div>
+          </div>
+        </div>
+      </div>
+    </header>
+
+    <!-- Content -->
+    <div class="content">
+      <!-- Today's Summary -->
+      <div class="stats-grid">
+        <div class="stat-card">
+          <div class="stat-icon" style="background: rgba(34, 197, 94, 0.1); color: var(--color-success);">
+            💰
+          </div>
+          <div class="stat-value">ZMW <span x-text="stats.todayRevenue.toFixed(2)"></span></div>
+          <div class="stat-label">Today's Revenue</div>
+          <div class="stat-change positive">+12% from yesterday</div>
+        </div>
+
+        <div class="stat-card">
+          <div class="stat-icon" style="background: rgba(59, 130, 246, 0.1); color: var(--color-info);">
+            🧾
+          </div>
+          <div class="stat-value" x-text="stats.todayTransactions"></div>
+          <div class="stat-label">Today's Transactions</div>
+          <div class="stat-change positive">+8 from yesterday</div>
+        </div>
+
+        <div class="stat-card">
+          <div class="stat-icon" style="background: rgba(245, 158, 11, 0.1); color: #f59e0b;">
+            👥
+          </div>
+          <div class="stat-value" x-text="stats.queueLength"></div>
+          <div class="stat-label">Queue Length</div>
+          <div class="stat-change negative">3 waiting</div>
+        </div>
+
+        <div class="stat-card">
+          <div class="stat-icon" style="background: rgba(16, 185, 129, 0.1); color: #10b981;">
+            ⭐
+          </div>
+          <div class="stat-value" x-text="stats.averageTransaction.toFixed(2)"></div>
+          <div class="stat-label">Avg Transaction (ZMW)</div>
+          <div class="stat-change positive">+5% increase</div>
+        </div>
+      </div>
+
+      <!-- Quick Actions -->
+      <div class="card" style="margin-bottom: 2rem;">
+        <div class="card-header">
+          <h3 class="card-title">Quick Actions</h3>
+        </div>
+        <div class="card-content">
+          <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1rem;">
+            <button class="btn btn-primary" @click="startNewSale()" style="justify-content: center;">
+              <span style="margin-right: 0.5rem;">💰</span>
+              New Sale
+            </button>
+            <button class="btn btn-secondary" @click="searchPatient()" style="justify-content: center;">
+              <span style="margin-right: 0.5rem;">👤</span>
+              Find Patient
+            </button>
+            <button class="btn btn-secondary" @click="processPayment()" style="justify-content: center;">
+              <span style="margin-right: 0.5rem;">💳</span>
+              Process Payment
+            </button>
+            <button class="btn btn-secondary" @click="printReceipt()" style="justify-content: center;">
+              <span style="margin-right: 0.5rem;">🧾</span>
+              Print Receipt
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Main Content Grid -->
+      <div style="display: grid; grid-template-columns: 2fr 1fr; gap: 1.5rem; margin-bottom: 2rem;">
+        <!-- Recent Sales -->
+        <div class="card">
+          <div class="card-header">
+            <h3 class="card-title">Recent Sales</h3>
+            <button class="btn btn-sm btn-primary" @click="navigateTo('sales')">
+              View All
+            </button>
+          </div>
+          <div class="card-content">
+            <div class="sales-list">
+              <template x-for="sale in recentSales" :key="sale.id">
+                <div style="display: flex; align-items: center; justify-content: space-between; padding: 1rem; border: 1px solid var(--color-border); border-radius: 0.5rem; margin-bottom: 0.75rem; background: var(--color-surface);">
+                  <div style="flex: 1;">
+                    <div style="display: flex; align-items: center; gap: 0.5rem; margin-bottom: 0.5rem;">
+                      <span style="font-weight: 600; color: var(--color-text-primary);" x-text="sale.patientName"></span>
+                      <span class="status-badge" :class="`status-${sale.paymentStatus.toLowerCase()}`" x-text="sale.paymentStatus"></span>
+                    </div>
+                    <div style="font-size: 0.875rem; color: var(--color-text-secondary); margin-bottom: 0.5rem;">
+                      <span x-text="sale.items.length"></span> items • 
+                      <span x-text="sale.paymentMethod"></span>
+                    </div>
+                    <div style="font-size: 0.75rem; color: var(--color-text-muted);">
+                      <span x-text="formatDate(sale.date)"></span>
+                      <span style="margin: 0 0.5rem;">•</span>
+                      <span>Cashier: </span><span x-text="sale.cashierName"></span>
+                    </div>
+                  </div>
+                  <div style="text-align: right;">
+                    <div style="font-weight: 600; color: var(--color-text-primary); font-size: 1.125rem;">
+                      ZMW <span x-text="sale.totalAmount.toFixed(2)"></span>
+                    </div>
+                    <button class="btn btn-xs btn-secondary" @click="viewSaleDetails(sale)" style="margin-top: 0.25rem;">
+                      Details
+                    </button>
+                  </div>
+                </div>
+              </template>
+            </div>
+          </div>
+        </div>
+
+        <!-- Queue Status -->
+        <div class="card">
+          <div class="card-header">
+            <h3 class="card-title">Queue Status</h3>
+            <button class="btn btn-sm btn-secondary" @click="navigateTo('queue-management')">
+              Manage
+            </button>
+          </div>
+          <div class="card-content">
+            <div class="queue-list">
+              <template x-for="patient in queue" :key="patient.id">
+                <div style="display: flex; align-items: center; justify-content: space-between; padding: 0.75rem; border-radius: 0.5rem; margin-bottom: 0.5rem; background: var(--color-surface); border: 1px solid var(--color-border);">
+                  <div style="display: flex; align-items: center; gap: 0.75rem;">
+                    <div style="width: 32px; height: 32px; border-radius: 50%; background: var(--color-primary); color: white; display: flex; align-items: center; justify-content: center; font-weight: 600; font-size: 0.875rem;" x-text="patient.position">
+                    </div>
+                    <div>
+                      <div style="font-weight: 500; color: var(--color-text-primary); font-size: 0.875rem;" x-text="patient.name"></div>
+                      <div style="font-size: 0.75rem; color: var(--color-text-secondary);" x-text="patient.waitTime"></div>
+                    </div>
+                  </div>
+                  <button class="btn btn-xs btn-primary" @click="servePatient(patient)">
+                    Serve
+                  </button>
+                </div>
+              </template>
+            </div>
+            
+            <div style="margin-top: 1rem; padding: 0.75rem; background: rgba(59, 130, 246, 0.1); border-radius: 0.5rem; text-align: center;">
+              <div style="font-size: 0.875rem; color: var(--color-info); font-weight: 500;">
+                Average wait time: <span x-text="stats.averageWaitTime"></span> minutes
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Payment Methods Breakdown -->
+      <div class="card">
+        <div class="card-header">
+          <h3 class="card-title">Payment Methods Breakdown</h3>
+          <select class="form-select" style="width: auto;" @change="updatePaymentChart($event.target.value)">
+            <option value="today">Today</option>
+            <option value="week">This Week</option>
+            <option value="month">This Month</option>
+          </select>
+        </div>
+        <div class="card-content">
+          <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 2rem; align-items: center;">
+            <div>
+              <canvas id="paymentChart" width="200" height="200"></canvas>
+            </div>
+            <div>
+              <template x-for="method in paymentMethods" :key="method.name">
+                <div style="display: flex; align-items: center; justify-content: space-between; padding: 0.75rem 0; border-bottom: 1px solid var(--color-border);">
+                  <div style="display: flex; align-items: center; gap: 0.75rem;">
+                    <div style="width: 12px; height: 12px; border-radius: 50%;" :style="`background: ${method.color};`"></div>
+                    <span style="font-weight: 500;" x-text="method.name"></span>
+                  </div>
+                  <div style="text-align: right;">
+                    <div style="font-weight: 600;" x-text="method.count"></div>
+                    <div style="font-size: 0.75rem; color: var(--color-text-secondary);">transactions</div>
+                  </div>
+                </div>
+              </template>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </main>
+
+  <!-- Sale Details Modal -->
+  <div class="modal-overlay" x-show="showSaleModal" @click.self="showSaleModal = false">
+    <div class="modal">
+      <div class="modal-header">
+        <h3 class="modal-title">Sale Details</h3>
+        <button class="modal-close" @click="showSaleModal = false">×</button>
+      </div>
+      <div class="modal-body">
+        <div x-show="selectedSale">
+          <div style="margin-bottom: 1.5rem;">
+            <h4 style="font-weight: 600; margin-bottom: 0.5rem;">Transaction Information</h4>
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; font-size: 0.875rem;">
+              <div><strong>Patient:</strong> <span x-text="selectedSale?.patientName"></span></div>
+              <div><strong>Date:</strong> <span x-text="formatDate(selectedSale?.date)"></span></div>
+              <div><strong>Payment Method:</strong> <span x-text="selectedSale?.paymentMethod"></span></div>
+              <div><strong>Status:</strong> <span x-text="selectedSale?.paymentStatus"></span></div>
+              <div><strong>Cashier:</strong> <span x-text="selectedSale?.cashierName"></span></div>
+              <div><strong>Total Amount:</strong> ZMW <span x-text="selectedSale?.totalAmount.toFixed(2)"></span></div>
+            </div>
+          </div>
+          
+          <div>
+            <h4 style="font-weight: 600; margin-bottom: 0.5rem;">Items Purchased</h4>
+            <div style="border: 1px solid var(--color-border); border-radius: 0.5rem; overflow: hidden;">
+              <template x-for="item in selectedSale?.items" :key="item.medicationName">
+                <div style="padding: 1rem; border-bottom: 1px solid var(--color-border); display: flex; justify-content: space-between; align-items: center;">
+                  <div>
+                    <div style="font-weight: 500;" x-text="item.medicationName"></div>
+                    <div style="font-size: 0.875rem; color: var(--color-text-secondary);">
+                      Qty: <span x-text="item.quantity"></span> × ZMW <span x-text="item.unitPrice.toFixed(2)"></span>
+                    </div>
+                  </div>
+                  <div style="font-weight: 600;">
+                    ZMW <span x-text="item.totalPrice.toFixed(2)"></span>
+                  </div>
+                </div>
+              </template>
+              <div style="padding: 1rem; background: var(--color-surface); font-weight: 600; display: flex; justify-content: space-between;">
+                <span>Total:</span>
+                <span>ZMW <span x-text="selectedSale?.totalAmount.toFixed(2)"></span></span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button class="btn btn-secondary" @click="showSaleModal = false">Close</button>
+        <button class="btn btn-primary" @click="printReceipt(selectedSale)">Print Receipt</button>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    function cashierDashboard() {
+      return {
+        sidebarOpen: false,
+        searchQuery: '',
+        showSaleModal: false,
+        selectedSale: null,
+        stats: {},
+        recentSales: [],
+        queue: [],
+        paymentMethods: [],
+        paymentChart: null,
+
+        init() {
+          this.loadDashboardData();
+          this.loadRecentSales();
+          this.loadQueueStatus();
+          this.initializePaymentChart();
+        },
+
+        loadDashboardData() {
+          const sales = window.demoStorage.getItem('sales') || [];
+          const today = new Date().toISOString().split('T')[0];
+          const todaySales = sales.filter(s => s.date === today);
+          
+          this.stats = {
+            todayRevenue: todaySales.reduce((sum, sale) => sum + sale.totalAmount, 0),
+            todayTransactions: todaySales.length,
+            queueLength: 3,
+            averageTransaction: todaySales.length > 0 ? todaySales.reduce((sum, sale) => sum + sale.totalAmount, 0) / todaySales.length : 0,
+            averageWaitTime: 15
+          };
+        },
+
+        loadRecentSales() {
+          const sales = window.demoStorage.getItem('sales') || [];
+          this.recentSales = sales.slice(-5).reverse();
+        },
+
+        loadQueueStatus() {
+          // Simulated queue data
+          this.queue = [
+            { id: 1, name: 'Mary Banda', waitTime: '5 min', position: 1 },
+            { id: 2, name: 'John Phiri', waitTime: '8 min', position: 2 },
+            { id: 3, name: 'Grace Tembo', waitTime: '12 min', position: 3 }
+          ];
+        },
+
+        initializePaymentChart() {
+          const ctx = document.getElementById('paymentChart').getContext('2d');
+          this.paymentChart = new Chart(ctx, {
+            type: 'doughnut',
+            data: {
+              labels: ['Cash', 'Mobile Money', 'Card', 'Insurance'],
+              datasets: [{
+                data: [45, 30, 15, 10],
+                backgroundColor: ['#22c55e', '#3b82f6', '#f59e0b', '#8b5cf6'],
+                borderWidth: 0
+              }]
+            },
+            options: {
+              responsive: true,
+              maintainAspectRatio: false,
+              plugins: {
+                legend: {
+                  display: false
+                }
+              }
+            }
+          });
+
+          this.paymentMethods = [
+            { name: 'Cash', count: 45, color: '#22c55e' },
+            { name: 'Mobile Money', count: 30, color: '#3b82f6' },
+            { name: 'Card', count: 15, color: '#f59e0b' },
+            { name: 'Insurance', count: 10, color: '#8b5cf6' }
+          ];
+        },
+
+        formatDate(dateString) {
+          return new Date(dateString).toLocaleDateString('en-ZM', {
+            year: 'numeric',
+            month: 'short',
+            day: 'numeric'
+          });
+        },
+
+        navigateTo(page) {
+          console.log('Navigate to:', page);
+          this.showNotification(`Navigating to ${page}...`, 'info');
+        },
+
+        performSearch() {
+          if (this.searchQuery.trim()) {
+            const patients = window.demoStorage.searchPatients(this.searchQuery);
+            console.log('Search results:', patients);
+          }
+        },
+
+        startNewSale() {
+          this.navigateTo('point-of-sale');
+        },
+
+        searchPatient() {
+          this.navigateTo('patients');
+        },
+
+        processPayment() {
+          this.navigateTo('payments');
+        },
+
+        printReceipt(sale) {
+          if (sale) {
+            console.log('Printing receipt for:', sale);
+            this.showNotification('Receipt printed successfully', 'success');
+          } else {
+            this.showNotification('No sale selected', 'error');
+          }
+        },
+
+        viewSaleDetails(sale) {
+          this.selectedSale = sale;
+          this.showSaleModal = true;
+        },
+
+        servePatient(patient) {
+          this.queue = this.queue.filter(p => p.id !== patient.id);
+          this.queue.forEach((p, index) => p.position = index + 1);
+          this.showNotification(`Now serving ${patient.name}`, 'success');
+          this.loadDashboardData();
+        },
+
+        updatePaymentChart(period) {
+          let data;
+          
+          switch(period) {
+            case 'today':
+              data = [45, 30, 15, 10];
+              break;
+            case 'week':
+              data = [40, 35, 18, 7];
+              break;
+            case 'month':
+              data = [42, 32, 16, 10];
+              break;
+          }
+
+          this.paymentChart.data.datasets[0].data = data;
+          this.paymentChart.update();
+
+          // Update counts
+          const total = data.reduce((sum, val) => sum + val, 0);
+          this.paymentMethods = [
+            { name: 'Cash', count: data[0], color: '#22c55e' },
+            { name: 'Mobile Money', count: data[1], color: '#3b82f6' },
+            { name: 'Card', count: data[2], color: '#f59e0b' },
+            { name: 'Insurance', count: data[3], color: '#8b5cf6' }
+          ];
+        },
+
+        showSettings() {
+          this.showNotification('Opening settings...', 'info');
+        },
+
+        exportData() {
+          const data = window.demoStorage.exportData();
+          const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
+          const url = URL.createObjectURL(blob);
+          const a = document.createElement('a');
+          a.href = url;
+          a.download = `cashier-demo-export-${new Date().toISOString().split('T')[0]}.json`;
+          a.click();
+          URL.revokeObjectURL(url);
+          this.showNotification('Data exported successfully', 'success');
+        },
+
+        help() {
+          this.showNotification('Opening help documentation...', 'info');
+        },
+
+        showNotification(message, type = 'info') {
+          const notification = document.createElement('div');
+          notification.className = `notification notification-${type}`;
+          notification.textContent = message;
+          notification.style.cssText = `
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            padding: 1rem 1.5rem;
+            background: ${type === 'success' ? '#22c55e' : type === 'error' ? '#ef4444' : '#3b82f6'};
+            color: white;
+            border-radius: 0.5rem;
+            z-index: 9999;
+            animation: slideIn 0.3s ease;
+          `;
+          
+          document.body.appendChild(notification);
+          
+          setTimeout(() => {
+            notification.style.animation = 'slideOut 0.3s ease';
+            setTimeout(() => notification.remove(), 300);
+          }, 3000);
+        }
+      };
+    }
+  </script>
+
+  <style>
+    @keyframes slideIn {
+      from { transform: translateX(100%); opacity: 0; }
+      to { transform: translateX(0); opacity: 1; }
+    }
+    
+    @keyframes slideOut {
+      from { transform: translateX(0); opacity: 1; }
+      to { transform: translateX(100%); opacity: 0; }
+    }
+  </style>
+</body>
+</html>
