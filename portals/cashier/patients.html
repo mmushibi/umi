@@ -1116,7 +1116,13 @@
       }
     }
   </style>
-</head>
+
+    <!-- Backend Integration Libraries -->
+    <script src="../../js/api-client.js"></script>
+    <script src="../../js/auth-manager.js"></script>
+    <script src="../shared/js/backend-integration-helper.js"></script>
+    <script src="../shared/js/page-integration-template.js"></script>
+    <script src="https://unpkg.com/alpinejs@3.x.x/dist/cdn.min.js" defer></script></head>
 <body>
   <!-- Sidebar -->
   <aside class="sidebar" :class="sidebarOpen ? 'open' : ''">
@@ -1932,6 +1938,21 @@
     
     function patientSystem() {
       return {
+        // Initialize backend integration
+        const pageIntegration = new PageIntegrationTemplate('cashier-patients', {
+            requireAuth: true,
+            enableRealTime: true,
+            enableCaching: true
+        });
+        
+        return {
+            ...pageIntegration,
+            backendHelper: window.backendHelper,
+            apiClient: window.apiClient,
+            authManager: window.authManager,
+            isAuthenticated: false,
+            loading: false,
+            error: null,
         sidebarOpen: false,
         searchQuery: '',
         showAddModal: false,
@@ -2459,13 +2480,34 @@
         },
 
         // Initialize
-        async init() {
-          // Check authentication first
-          const userStr = localStorage.getItem('umi_currentUser') || localStorage.getItem('umi_current_user');
-          if (!userStr || userStr === 'undefined' || userStr === 'null') {
-            console.warn('No user authentication found - demo mode enabled');
-            this.showNotification('Demo mode: Some features require login for full functionality', 'info');
-          }
+        async async init() {
+            try {
+                // Check authentication
+                this.isAuthenticated = this.authManager?.isAuthenticated() || false;
+                
+                if (!this.isAuthenticated) {
+                    this.error = 'Please login to access this page';
+                    return;
+                }
+                
+                // Initialize backend integration
+                await this.backendHelper.initPage('cashier-patients', {
+                    enableRealTime: true,
+                    initialData: this.getInitialDataConfig()
+                });
+                
+                // Load page data
+                await this.loadPageData();
+                
+                // Set up event listeners
+                this.setupEventListeners();
+                
+                console.log('cashier-patients page initialized with backend integration');
+            } catch (error) {
+                console.error('Failed to initialize cashier-patients page:', error);
+                this.error = 'Failed to initialize page';
+            }
+        },
 
           // Load real data from API or localStorage
           await this.loadPatientsFromAPI();

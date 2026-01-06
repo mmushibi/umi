@@ -39,7 +39,7 @@ jobs:
           echo "REGISTRY=${{ env.REGISTRY || 'ghcr.io' }}" >> $GITHUB_ENV
 
       - name: Log in to registry (GHCR or ACR)
-        if: secrets.ACR_LOGIN_SERVER != ''
+        if: ${{ secrets.ACR_LOGIN_SERVER != '' }}
         uses: docker/login-action@v2
         with:
           registry: ${{ secrets.ACR_LOGIN_SERVER }}
@@ -47,7 +47,7 @@ jobs:
           password: ${{ secrets.ACR_PASSWORD }}
 
       - name: Log in to GHCR (fallback)
-        if: secrets.ACR_LOGIN_SERVER == ''
+        if: ${{ secrets.ACR_LOGIN_SERVER == '' }}
         uses: docker/login-action@v2
         with:
           registry: ${{ env.REGISTRY }}

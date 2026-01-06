@@ -738,7 +738,13 @@
       }
     }
   </style>
-</head>
+
+    <!-- Backend Integration Libraries -->
+    <script src="../../js/api-client.js"></script>
+    <script src="../../js/auth-manager.js"></script>
+    <script src="../shared/js/backend-integration-helper.js"></script>
+    <script src="../shared/js/page-integration-template.js"></script>
+    <script src="https://unpkg.com/alpinejs@3.x.x/dist/cdn.min.js" defer></script></head>
 <body>
   <div class="dashboard-container">
     <aside class="sidebar" :class="{ 'open': mobileMenuOpen }">
@@ -1020,6 +1026,21 @@
   <script>
     function subscriptionsManagement() {
       return {
+        // Initialize backend integration
+        const pageIntegration = new PageIntegrationTemplate('operations-subscriptions', {
+            requireAuth: true,
+            enableRealTime: false,
+            enableCaching: true
+        });
+        
+        return {
+            ...pageIntegration,
+            backendHelper: window.backendHelper,
+            apiClient: window.apiClient,
+            authManager: window.authManager,
+            isAuthenticated: false,
+            loading: false,
+            error: null,
         mobileMenuOpen: false,
         searchQuery: '',
         showFilterDropdown: false,
@@ -1044,10 +1065,34 @@
         subscriptions: [],
         pendingTransactions: [],
         
-        async init() {
-          await this.loadData();
-          await this.loadPendingTransactions();
-        },
+        async async init() {
+            try {
+                // Check authentication
+                this.isAuthenticated = this.authManager?.isAuthenticated() || false;
+                
+                if (!this.isAuthenticated) {
+                    this.error = 'Please login to access this page';
+                    return;
+                }
+                
+                // Initialize backend integration
+                await this.backendHelper.initPage('operations-subscriptions', {
+                    enableRealTime: false,
+                    initialData: this.getInitialDataConfig()
+                });
+                
+                // Load page data
+                await this.loadPageData();
+                
+                // Set up event listeners
+                this.setupEventListeners();
+                
+                console.log('operations-subscriptions page initialized with backend integration');
+            } catch (error) {
+                console.error('Failed to initialize operations-subscriptions page:', error);
+                this.error = 'Failed to initialize page';
+            }
+        },,
         
         async loadPendingTransactions() {
           try {

@@ -325,6 +325,12 @@ class ApiClient {
         return this.request(`/patients/search?q=${encodeURIComponent(searchTerm)}`);
     }
 
+    async deletePatient(patientId) {
+        return this.request(`/patients/${patientId}`, {
+            method: 'DELETE'
+        });
+    }
+
     // ==================== PRESCRIPTION ENDPOINTS ====================
 
     async getPrescriptions(patientId = null, page = 1, pageSize = 50) {

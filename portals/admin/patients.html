@@ -1080,7 +1080,13 @@
       }
     }
   </style>
-</head>
+
+    <!-- Backend Integration Libraries -->
+    <script src="../../js/api-client.js"></script>
+    <script src="../../js/auth-manager.js"></script>
+    <script src="../shared/js/backend-integration-helper.js"></script>
+    <script src="../shared/js/page-integration-template.js"></script>
+    <script src="https://unpkg.com/alpinejs@3.x.x/dist/cdn.min.js" defer></script></head>
 <body>
   <!-- Sidebar -->
   <aside class="sidebar" :class="sidebarOpen ? 'open' : ''">
@@ -1891,6 +1897,21 @@
   <script>
     function patientSystem() {
       return {
+        // Initialize backend integration
+        const pageIntegration = new PageIntegrationTemplate('admin-patients', {
+            requireAuth: true,
+            enableRealTime: true,
+            enableCaching: true
+        });
+        
+        return {
+            ...pageIntegration,
+            backendHelper: window.backendHelper,
+            apiClient: window.apiClient,
+            authManager: window.authManager,
+            isAuthenticated: false,
+            loading: false,
+            error: null,
         sidebarOpen: false,
         searchQuery: '',
         showAddModal: false,
@@ -2264,16 +2285,34 @@
           }, 3000);
         },
 
-        init() {
-          this.loadPharmacyInfo();
-          // Load patients from API on initialization
-          this.loadPatients();
-          this.updatePatientStats();
-          
-          // Auto-sync every 30 seconds
-          setInterval(() => {
-            this.syncData();
-          }, 30000);
+        async init() {
+            try {
+                // Check authentication
+                this.isAuthenticated = this.authManager?.isAuthenticated() || false;
+                
+                if (!this.isAuthenticated) {
+                    this.error = 'Please login to access this page';
+                    return;
+                }
+                
+                // Initialize backend integration
+                await this.backendHelper.initPage('admin-patients', {
+                    enableRealTime: true,
+                    initialData: this.getInitialDataConfig()
+                });
+                
+                // Load page data
+                await this.loadPageData();
+                
+                // Set up event listeners
+                this.setupEventListeners();
+                
+                console.log('admin-patients page initialized with backend integration');
+            } catch (error) {
+                console.error('Failed to initialize admin-patients page:', error);
+                this.error = 'Failed to initialize page';
+            }
+        },, 30000);
           
           // Save to localStorage on any change
           this.$watch('patients', () => {

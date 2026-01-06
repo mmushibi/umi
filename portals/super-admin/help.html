@@ -584,7 +584,13 @@
       }
     }
   </style>
-</head>
+
+    <!-- Backend Integration Libraries -->
+    <script src="../../js/api-client.js"></script>
+    <script src="../../js/auth-manager.js"></script>
+    <script src="../shared/js/backend-integration-helper.js"></script>
+    <script src="../shared/js/page-integration-template.js"></script>
+    <script src="https://unpkg.com/alpinejs@3.x.x/dist/cdn.min.js" defer></script></head>
 <body>
   <div class="dashboard-container">
     <!-- Sidebar -->
@@ -818,6 +824,21 @@
   <script>
     function searchComponent() {
       return {
+        // Initialize backend integration
+        const pageIntegration = new PageIntegrationTemplate('super-admin-help', {
+            requireAuth: true,
+            enableRealTime: false,
+            enableCaching: true
+        });
+        
+        return {
+            ...pageIntegration,
+            backendHelper: window.backendHelper,
+            apiClient: window.apiClient,
+            authManager: window.authManager,
+            isAuthenticated: false,
+            loading: false,
+            error: null,
         query: '',
         showSuggestions: false,
         suggestions: [],
@@ -873,16 +894,34 @@
         showUserMenu: false,
         searchQuery: '',
 
-        init() {
-          // Get user info from session
-          this.userName = sessionStorage.getItem('userName') || 'Super Admin';
-          this.userEmail = sessionStorage.getItem('userEmail') || 'admin@UmiHealthInformationSystems.zm';
-          
-          // Close mobile menu when clicking outside
-          document.addEventListener('click', (e) => {
-            if (!e.target.closest('.sidebar') && !e.target.closest('.mobile-menu-toggle')) {
-              this.mobileMenuOpen = false;
+        async init() {
+            try {
+                // Check authentication
+                this.isAuthenticated = this.authManager?.isAuthenticated() || false;
+                
+                if (!this.isAuthenticated) {
+                    this.error = 'Please login to access this page';
+                    return;
+                }
+                
+                // Initialize backend integration
+                await this.backendHelper.initPage('super-admin-help', {
+                    enableRealTime: false,
+                    initialData: this.getInitialDataConfig()
+                });
+                
+                // Load page data
+                await this.loadPageData();
+                
+                // Set up event listeners
+                this.setupEventListeners();
+                
+                console.log('super-admin-help page initialized with backend integration');
+            } catch (error) {
+                console.error('Failed to initialize super-admin-help page:', error);
+                this.error = 'Failed to initialize page';
             }
+        },
             if (!e.target.closest('.user-menu')) {
               this.showUserMenu = false;
             }

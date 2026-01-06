@@ -550,7 +550,13 @@
       }
     }
   </style>
-</head>
+
+    <!-- Backend Integration Libraries -->
+    <script src="../../js/api-client.js"></script>
+    <script src="../../js/auth-manager.js"></script>
+    <script src="../shared/js/backend-integration-helper.js"></script>
+    <script src="../shared/js/page-integration-template.js"></script>
+    <script src="https://unpkg.com/alpinejs@3.x.x/dist/cdn.min.js" defer></script></head>
 <body x-data="complianceSystem()" x-init="init()">
   <!-- Sidebar -->
   <aside class="sidebar" :class="sidebarOpen ? 'open' : ''">
@@ -797,26 +803,146 @@
     </div>
   </main>
 
+  <!-- Filter Modal -->
+  <section class="modal" id="filterModal" role="dialog" aria-modal="true" aria-labelledby="filterModalTitle" hidden>
+    <div class="modal-content">
+      <header class="modal-header">
+        <h2 id="filterModalTitle">Filter Compliance Data</h2>
+        <button type="button" class="modal-close" data-close="filterModal" aria-label="Close filter modal">
+          <span class="material-symbols-rounded" aria-hidden="true">close</span>
+        </button>
+      </header>
+      <form id="filterForm" class="filter-form">
+        <div class="modal-body">
+          <div class="filter-sections">
+            <div class="filter-section">
+              <h3>Date Range</h3>
+              <div class="date-range-filters">
+                <label class="form-input">
+                  <span>Start Date</span>
+                  <input type="date" id="filterStartDate" name="startDate">
+                </label>
+                <label class="form-input">
+                  <span>End Date</span>
+                  <input type="date" id="filterEndDate" name="endDate">
+                </label>
+              </div>
+            </div>
+
+            <div class="filter-section">
+              <h3>Compliance Status</h3>
+              <div class="status-filters">
+                <label class="checkbox-label">
+                  <input type="checkbox" id="filterCompliant" name="status" value="compliant" checked>
+                  <span>Compliant</span>
+                </label>
+                <label class="checkbox-label">
+                  <input type="checkbox" id="filterWarning" name="status" value="warning" checked>
+                  <span>Warning</span>
+                </label>
+                <label class="checkbox-label">
+                  <input type="checkbox" id="filterNonCompliant" name="status" value="non-compliant" checked>
+                  <span>Non-Compliant</span>
+                </label>
+              </div>
+            </div>
+
+            <div class="filter-section">
+              <h3>Compliance Areas</h3>
+              <div class="area-filters">
+                <label class="checkbox-label">
+                  <input type="checkbox" id="filterLicenses" name="areas" value="licenses" checked>
+                  <span>Licenses</span>
+                </label>
+                <label class="checkbox-label">
+                  <input type="checkbox" id="filterAudit" name="areas" value="audit" checked>
+                  <span>Audit Trail</span>
+                </label>
+                <label class="checkbox-label">
+                  <input type="checkbox" id="filterTraining" name="areas" value="training" checked>
+                  <span>Training</span>
+                </label>
+                <label class="checkbox-label">
+                  <input type="checkbox" id="filterDocumentation" name="areas" value="documentation" checked>
+                  <span>Documentation</span>
+                </label>
+              </div>
+            </div>
+
+            <div class="filter-section">
+              <h3>Additional Filters</h3>
+              <div class="additional-filters">
+                <label class="form-input">
+                  <span>Keywords</span>
+                  <input type="text" id="filterKeywords" name="keywords" placeholder="Search keywords...">
+                </label>
+                <label class="form-input">
+                  <span>Priority</span>
+                  <select id="filterPriority" name="priority">
+                    <option value="">All Priorities</option>
+                    <option value="high">High</option>
+                    <option value="medium">Medium</option>
+                    <option value="low">Low</option>
+                  </select>
+                </label>
+              </div>
+            </div>
+          </div>
+        </div>
+      </form>
+      <footer class="modal-footer">
+        <button type="button" class="secondary-button" onclick="resetFilters()">Reset Filters</button>
+        <button type="button" class="secondary-button" data-close="filterModal">Cancel</button>
+        <button type="submit" form="filterForm" class="primary-button">Apply Filters</button>
+      </footer>
+    </div>
+  </section>
+
   <script src="js/pharmacist-api.js"></script>
   <script>
     function complianceSystem() {
       return {
+        // Initialize backend integration
+        const pageIntegration = new PageIntegrationTemplate('pharmacist-compliance', {
+            requireAuth: true,
+            enableRealTime: false,
+            enableCaching: true
+        });
+        
+        return {
+            ...pageIntegration,
+            backendHelper: window.backendHelper,
+            apiClient: window.apiClient,
+            authManager: window.authManager,
+            isAuthenticated: false,
+            loading: false,
+            error: null,
         sidebarOpen: false,
         loading: true,
         pharmacyInfo: {},
         licenseData: null,
-        auditData: null,
-        trainingData: null,
-        documentationData: null,
-        auditTrail: [],
-        crossPageData: {},
-
-        async init() {
-          await this.loadPharmacyInfo();
-          await this.loadComplianceData();
-          await this.loadCrossPageData();
-          this.loading = false;
-        },
+                    this.error = 'Please login to access this page';
+                    return;
+                }
+                
+                // Initialize backend integration
+                await this.backendHelper.initPage('pharmacist-compliance', {
+                    enableRealTime: false,
+                    initialData: this.getInitialDataConfig()
+                });
+                
+                // Load page data
+                await this.loadPageData();
+                
+                // Set up event listeners
+                this.setupEventListeners();
+                
+                console.log('pharmacist-compliance page initialized with backend integration');
+            } catch (error) {
+                console.error('Failed to initialize pharmacist-compliance page:', error);
+                this.error = 'Failed to initialize page';
+            }
+        },,
 
         async loadPharmacyInfo() {
           try {
@@ -893,12 +1019,130 @@
 
         async openFilterModal() {
           try {
-            console.log('Opening filter modal...');
-            // TODO: Implement filter modal
-            alert('Filter functionality will be implemented soon.');
+            // Show modal
+            document.getElementById('filterModal').hidden = false;
+            document.getElementById('modalOverlay').hidden = false;
+            
+            // Set current filter values
+            this.resetFilterForm();
           } catch (error) {
             console.error('Failed to open filter modal:', error);
           }
+        },
+
+        resetFilterForm() {
+          const form = document.getElementById('filterForm');
+          if (form) {
+            form.reset();
+            // Set default checked values
+            document.getElementById('filterCompliant').checked = true;
+            document.getElementById('filterWarning').checked = true;
+            document.getElementById('filterNonCompliant').checked = true;
+            document.getElementById('filterLicenses').checked = true;
+            document.getElementById('filterAudit').checked = true;
+            document.getElementById('filterTraining').checked = true;
+            document.getElementById('filterDocumentation').checked = true;
+          }
+        },
+
+        async applyFilters(event) {
+          event.preventDefault();
+          
+          try {
+            const formData = new FormData(event.target);
+            const filters = {
+              startDate: formData.get('startDate'),
+              endDate: formData.get('endDate'),
+              status: formData.getAll('status'),
+              areas: formData.getAll('areas'),
+              keywords: formData.get('keywords'),
+              priority: formData.get('priority')
+            };
+
+            // Apply filters to audit trail
+            this.filteredAuditTrail = this.filterAuditTrail(this.auditTrail, filters);
+            
+            // Apply filters to compliance data
+            this.applyFiltersToComplianceData(filters);
+            
+            this.closeFilterModal();
+            this.showNotification('Filters applied successfully', 'success');
+            
+          } catch (error) {
+            console.error('Failed to apply filters:', error);
+            this.showNotification('Failed to apply filters', 'error');
+          }
+        },
+
+        filterAuditTrail(auditTrail, filters) {
+          let filtered = [...auditTrail];
+          
+          // Date range filter
+          if (filters.startDate) {
+            const startDate = new Date(filters.startDate);
+            filtered = filtered.filter(item => new Date(item.datetime) >= startDate);
+          }
+          
+          if (filters.endDate) {
+            const endDate = new Date(filters.endDate);
+            endDate.setHours(23, 59, 59, 999); // End of day
+            filtered = filtered.filter(item => new Date(item.datetime) <= endDate);
+          }
+          
+          // Status filter
+          if (filters.status && filters.status.length > 0) {
+            filtered = filtered.filter(item => {
+              const status = item.action.toLowerCase();
+              return filters.status.some(s => status.includes(s.toLowerCase()));
+            });
+          }
+          
+          // Keywords filter
+          if (filters.keywords) {
+            const keywords = filters.keywords.toLowerCase();
+            filtered = filtered.filter(item => 
+              item.user.toLowerCase().includes(keywords) ||
+              item.action.toLowerCase().includes(keywords) ||
+              item.module.toLowerCase().includes(keywords) ||
+              item.details.toLowerCase().includes(keywords)
+            );
+          }
+          
+          return filtered;
+        },
+
+        applyFiltersToComplianceData(filters) {
+          // Apply filters to license data
+          if (filters.areas && !filters.areas.includes('licenses')) {
+            this.licenseData.licenses = [];
+          }
+          
+          // Apply filters to audit data
+          if (filters.areas && !filters.areas.includes('audit')) {
+            this.auditData.items = [];
+          }
+          
+          // Apply filters to training data
+          if (filters.areas && !filters.areas.includes('training')) {
+            this.trainingData.trainings = [];
+          }
+          
+          // Apply filters to documentation
+          if (filters.areas && !filters.areas.includes('documentation')) {
+            this.documentationData.documents = [];
+          }
+        },
+
+        closeFilterModal() {
+          document.getElementById('filterModal').hidden = true;
+          document.getElementById('modalOverlay').hidden = true;
+        },
+
+        resetFilters() {
+          this.resetFilterForm();
+          // Reset all data to original state
+          this.loadComplianceData();
+          this.showNotification('Filters reset', 'info');
         },
 
         async exportAuditTrail() {

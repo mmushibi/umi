@@ -765,7 +765,13 @@
       }
     }
   </style>
-</head>
+
+    <!-- Backend Integration Libraries -->
+    <script src="../../js/api-client.js"></script>
+    <script src="../../js/auth-manager.js"></script>
+    <script src="../shared/js/backend-integration-helper.js"></script>
+    <script src="../shared/js/page-integration-template.js"></script>
+    <script src="https://unpkg.com/alpinejs@3.x.x/dist/cdn.min.js" defer></script></head>
 <body>
   <!-- Sidebar -->
   <aside class="sidebar" :class="sidebarOpen ? 'open' : ''">
@@ -1037,6 +1043,21 @@
       <script>
         function salesSystem() {
           return {
+        // Initialize backend integration
+        const pageIntegration = new PageIntegrationTemplate('admin-sales', {
+            requireAuth: true,
+            enableRealTime: true,
+            enableCaching: true
+        });
+        
+        return {
+            ...pageIntegration,
+            backendHelper: window.backendHelper,
+            apiClient: window.apiClient,
+            authManager: window.authManager,
+            isAuthenticated: false,
+            loading: false,
+            error: null,
             sidebarOpen: false,
             searchQuery: '',
             showFilterMenu: false,
@@ -1346,12 +1367,34 @@
           }
         },
 
-        init() {
-          this.loadPharmacyInfo();
-          this.loadSalesData();
-          this.setupEventListeners();
-          this.initCharts();
-        },
+        async init() {
+            try {
+                // Check authentication
+                this.isAuthenticated = this.authManager?.isAuthenticated() || false;
+                
+                if (!this.isAuthenticated) {
+                    this.error = 'Please login to access this page';
+                    return;
+                }
+                
+                // Initialize backend integration
+                await this.backendHelper.initPage('admin-sales', {
+                    enableRealTime: true,
+                    initialData: this.getInitialDataConfig()
+                });
+                
+                // Load page data
+                await this.loadPageData();
+                
+                // Set up event listeners
+                this.setupEventListeners();
+                
+                console.log('admin-sales page initialized with backend integration');
+            } catch (error) {
+                console.error('Failed to initialize admin-sales page:', error);
+                this.error = 'Failed to initialize page';
+            }
+        },,
 
         updateCharts() {
           // Update revenue chart with actual data

@@ -1102,7 +1102,13 @@
       }
     }
   </style>
-</head>
+
+    <!-- Backend Integration Libraries -->
+    <script src="../../js/api-client.js"></script>
+    <script src="../../js/auth-manager.js"></script>
+    <script src="../shared/js/backend-integration-helper.js"></script>
+    <script src="../shared/js/page-integration-template.js"></script>
+    <script src="https://unpkg.com/alpinejs@3.x.x/dist/cdn.min.js" defer></script></head>
 <body>
   <!-- Sidebar -->
   <aside class="sidebar" :class="sidebarOpen ? 'open' : ''">
@@ -1895,6 +1901,21 @@
   <script>
     function inventorySystem() {
       return {
+        // Initialize backend integration
+        const pageIntegration = new PageIntegrationTemplate('pharmacist-inventory', {
+            requireAuth: true,
+            enableRealTime: true,
+            enableCaching: true
+        });
+        
+        return {
+            ...pageIntegration,
+            backendHelper: window.backendHelper,
+            apiClient: window.apiClient,
+            authManager: window.authManager,
+            isAuthenticated: false,
+            loading: false,
+            error: null,
         // Basic state
         sidebarOpen: false,
         showAddItemModal: false,
@@ -1982,11 +2003,34 @@
           });
         },
 
-        init() {
-          // Show demo mode notification if not authenticated
-          if (this.isDemoMode) {
-            this.showNotification('Demo Mode: Some features require login for full functionality', 'info');
-          }
+        async init() {
+            try {
+                // Check authentication
+                this.isAuthenticated = this.authManager?.isAuthenticated() || false;
+                
+                if (!this.isAuthenticated) {
+                    this.error = 'Please login to access this page';
+                    return;
+                }
+                
+                // Initialize backend integration
+                await this.backendHelper.initPage('pharmacist-inventory', {
+                    enableRealTime: true,
+                    initialData: this.getInitialDataConfig()
+                });
+                
+                // Load page data
+                await this.loadPageData();
+                
+                // Set up event listeners
+                this.setupEventListeners();
+                
+                console.log('pharmacist-inventory page initialized with backend integration');
+            } catch (error) {
+                console.error('Failed to initialize pharmacist-inventory page:', error);
+                this.error = 'Failed to initialize page';
+            }
+        },
           
           this.loadInventory();
           this.checkAlerts();
@@ -2494,8 +2538,51 @@
         },
 
         handleLogout() {
-          // TODO: Implement logout functionality
-          console.log('Logout clicked');
+          if (confirm('Are you sure you want to logout?')) {
+            try {
+              // Clear authentication data
+              localStorage.removeItem('umi_current_user');
+              localStorage.removeItem('umi_currentUser');
+              localStorage.removeItem('umi_auth_token');
+              localStorage.removeItem('authToken');
+              sessionStorage.removeItem('umi_auth_token');
+              sessionStorage.removeItem('authToken');
+              
+              // Clear user-specific data
+              localStorage.removeItem('umi_cart');
+              localStorage.removeItem('umi_notifications');
+              
+              // Disconnect SignalR connections if available
+              if (window.signalRClient) {
+                window.signalRClient.disconnectAll();
+              }
+              
+              // Clear any cached data
+              if (window.caches) {
+                caches.keys().then(names => {
+                  names.forEach(name => {
+                    caches.delete(name);
+                  });
+                });
+              }
+              
+              // Show logout success message
+              this.showNotification('Logged out successfully', 'success');
+              
+              // Redirect to login page after a short delay
+              setTimeout(() => {
+                window.location.href = '../../index.html';
+              }, 1000);
+              
+            } catch (error) {
+              console.error('Error during logout:', error);
+              this.showNotification('Error during logout', 'error');
+              // Force redirect even if there's an error
+              setTimeout(() => {
+                window.location.href = '../../index.html';
+              }, 1000);
+            }
+          }
         },
 
         // Reporting Functions

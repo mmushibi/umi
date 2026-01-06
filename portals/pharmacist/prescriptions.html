@@ -1280,7 +1280,13 @@
       }
     }
   </style>
-</head>
+
+    <!-- Backend Integration Libraries -->
+    <script src="../../js/api-client.js"></script>
+    <script src="../../js/auth-manager.js"></script>
+    <script src="../shared/js/backend-integration-helper.js"></script>
+    <script src="../shared/js/page-integration-template.js"></script>
+    <script src="https://unpkg.com/alpinejs@3.x.x/dist/cdn.min.js" defer></script></head>
 <body>
   <div x-show="!isAuthenticated" class="demo-banner" x-transition>
     <span>🔒 Authentication Required: Please login to access prescription management</span>
@@ -2245,6 +2251,21 @@
   <script>
     function prescriptionsSystem() {
       return {
+        // Initialize backend integration
+        const pageIntegration = new PageIntegrationTemplate('pharmacist-prescriptions', {
+            requireAuth: true,
+            enableRealTime: true,
+            enableCaching: true
+        });
+        
+        return {
+            ...pageIntegration,
+            backendHelper: window.backendHelper,
+            apiClient: window.apiClient,
+            authManager: window.authManager,
+            isAuthenticated: false,
+            loading: false,
+            error: null,
         sidebarOpen: false,
         viewMode: 'table',
         showDetailsModal: false,
@@ -2398,15 +2419,34 @@
           return filtered;
         },
 
-        init() {
-          console.log('PMS Prescriptions system initialized');
-          this.loadPrescriptions();
-          this.loadStats();
-          this.loadPrescribers();
-          this.loadPatients();
-          this.initDraggablePanel();
-          this.initSignatureCanvas();
-        },
+        async init() {
+            try {
+                // Check authentication
+                this.isAuthenticated = this.authManager?.isAuthenticated() || false;
+                
+                if (!this.isAuthenticated) {
+                    this.error = 'Please login to access this page';
+                    return;
+                }
+                
+                // Initialize backend integration
+                await this.backendHelper.initPage('pharmacist-prescriptions', {
+                    enableRealTime: true,
+                    initialData: this.getInitialDataConfig()
+                });
+                
+                // Load page data
+                await this.loadPageData();
+                
+                // Set up event listeners
+                this.setupEventListeners();
+                
+                console.log('pharmacist-prescriptions page initialized with backend integration');
+            } catch (error) {
+                console.error('Failed to initialize pharmacist-prescriptions page:', error);
+                this.error = 'Failed to initialize page';
+            }
+        },,
 
         // API Integration Methods
         async loadPrescriptions() {

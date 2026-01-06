@@ -1223,7 +1223,13 @@
       }
     }
   </style>
-</head>
+
+    <!-- Backend Integration Libraries -->
+    <script src="../../js/api-client.js"></script>
+    <script src="../../js/auth-manager.js"></script>
+    <script src="../shared/js/backend-integration-helper.js"></script>
+    <script src="../shared/js/page-integration-template.js"></script>
+    <script src="https://unpkg.com/alpinejs@3.x.x/dist/cdn.min.js" defer></script></head>
 <body>
   <div x-show="!isAuthenticated" class="demo-banner" x-transition>
     <span>🔒 Authentication Required: Please login to access patient management</span>
@@ -2054,23 +2060,130 @@
       </footer>
     </div>
   </section>
-  </main>
 
-  <!-- Include API and Data Sync Services -->
-  <script src="../../shared/js/data-manager.js"></script>
-  <script src="../../shared/js/data-sync.js"></script>
-  <script src="../../shared/js/role-based-access.js"></script>
-  <script src="../admin/js/admin-api.js"></script>
-  <script src="js/pharmacist-api.js"></script>
+  <!-- Medical Records Modal -->
+  <section class="modal" id="medicalRecordModal" role="dialog" aria-modal="true" aria-labelledby="medicalRecordTitle" hidden>
+    <div class="modal-content large">
+      <header class="modal-header">
+        <h2 id="medicalRecordTitle">Add Medical Record</h2>
+        <button type="button" class="modal-close" data-close="medicalRecordModal" aria-label="Close medical record form">
+          <span class="material-symbols-rounded" aria-hidden="true">close</span>
+        </button>
+      </header>
+      <form id="medicalRecordForm" class="medical-record-form">
+        <div class="modal-body">
+          <div class="form-grid">
+            <div class="form-section">
+              <h3>Visit Information</h3>
+              <label class="form-input">
+                <span>Visit Date *</span>
+                <input type="datetime-local" id="visitDate" name="visitDate" required>
+              </label>
+              <label class="form-input">
+                <span>Visit Type *</span>
+                <select id="visitType" name="visitType" required>
+                  <option value="">Select visit type</option>
+                  <option value="consultation">Consultation</option>
+                  <option value="followup">Follow-up</option>
+                  <option value="emergency">Emergency</option>
+                  <option value="routine">Routine Check-up</option>
+                  <option value="vaccination">Vaccination</option>
+                </select>
+              </label>
+              <label class="form-input">
+                <span>Chief Complaint *</span>
+                <textarea id="chiefComplaint" name="chiefComplaint" rows="3" placeholder="Main reason for visit..." required></textarea>
+              </label>
+            </div>
+
+            <div class="form-section">
+              <h3>Vital Signs</h3>
+              <div class="vitals-grid">
+                <label class="form-input">
+                  <span>Blood Pressure</span>
+                  <input type="text" id="bloodPressure" name="bloodPressure" placeholder="120/80">
+                </label>
+                <label class="form-input">
+                  <span>Heart Rate (bpm)</span>
+                  <input type="number" id="heartRate" name="heartRate" placeholder="72">
+                </label>
+                <label class="form-input">
+                  <span>Temperature (°C)</span>
+                  <input type="number" id="temperature" name="temperature" step="0.1" placeholder="36.5">
+                </label>
+                <label class="form-input">
+                  <span>Weight (kg)</span>
+                  <input type="number" id="weight" name="weight" step="0.1" placeholder="70">
+                </label>
+                <label class="form-input">
+                  <span>Height (cm)</span>
+                  <input type="number" id="height" name="height" placeholder="170">
+                </label>
+              </div>
+            </div>
+
+            <div class="form-section">
+              <h3>Diagnosis & Treatment</h3>
+              <label class="form-input">
+                <span>Diagnosis *</span>
+                <textarea id="diagnosis" name="diagnosis" rows="3" placeholder="Diagnosis based on examination..." required></textarea>
+              </label>
+              <label class="form-input">
+                <span>Treatment Plan *</span>
+                <textarea id="treatment" name="treatment" rows="3" placeholder="Treatment and management plan..." required></textarea>
+              </label>
+              <label class="form-input">
+                <span>Medications Prescribed</span>
+                <textarea id="medications" name="medications" rows="3" placeholder="List of medications prescribed..."></textarea>
+              </label>
+              <label class="form-input">
+                <span>Follow-up Instructions</span>
+                <textarea id="followup" name="followup" rows="2" placeholder="Follow-up care instructions..."></textarea>
+              </label>
+            </div>
+
+            <div class="form-section">
+              <h3>Additional Notes</h3>
+              <label class="form-textarea">
+                <span>Clinical Notes</span>
+                <textarea id="clinicalNotes" name="clinicalNotes" rows="4" placeholder="Detailed clinical observations and notes..."></textarea>
+              </label>
+              <label class="form-input">
+                <span>Attending Healthcare Provider *</span>
+                <input type="text" id="provider" name="provider" placeholder="Dr. Smith" required>
+              </label>
+            </div>
+          </div>
+        </div>
+      </form>
+      <footer class="modal-footer">
+        <button type="button" class="secondary-button" data-close="medicalRecordModal">Cancel</button>
+        <button type="submit" form="medicalRecordForm" class="primary-button">Save Medical Record</button>
+      </footer>
+    </div>
+  </section>
+  </main>
 
   <!-- Alpine.js Component -->
   <script>
     // Patient System with Backend Integration
-    // Initialize data manager for patients
-    const patientDataManager = new UmiDataManager('pharmacist', '/api/v1/patients');
     
     function patientSystem() {
+      // Initialize backend integration
+      const pageIntegration = new PageIntegrationTemplate('pharmacist-patients', {
+          requireAuth: true,
+          enableRealTime: true,
+          enableCaching: true
+      });
+      
       return {
+        pageIntegration,
+        backendHelper: window.backendHelper,
+        apiClient: window.apiClient,
+        authManager: window.authManager,
+        isAuthenticated: false,
+        loading: false,
+        error: null,
         sidebarOpen: false,
         searchQuery: '',
         showFilterMenu: false,
@@ -2144,11 +2257,18 @@
         async loadPatients() {
           try {
             this.loading = true;
-            this.patients = await patientDataManager.load();
-            console.log('Patients loaded:', this.patients.length);
+            const response = await api.getPatients();
+            
+            if (response.success) {
+              this.patients = response.data || [];
+              console.log('Patients loaded:', this.patients.length);
+            } else {
+              throw new Error(response.message || 'Failed to load patients');
+            }
           } catch (error) {
             console.error('Failed to load patients:', error);
-            this.showNotification('Failed to load patients', 'error');
+            this.showNotification('Failed to load patients: ' + error.message, 'error');
+            this.patients = [];
           } finally {
             this.loading = false;
           }
@@ -2158,20 +2278,18 @@
           try {
             this.loading = true;
             
-            // Check if we're in demo mode (no auth token)
-            const authToken = this.getAuthToken();
-            if (!authToken) {
-              // Show authentication required toast
-              this.showToast('Please login to create patients', 'warning');
-              return null;
+            const response = await api.createPatient(patientData);
+            
+            if (response.success) {
+              this.showNotification('Patient created successfully', 'success');
+              await this.loadPatients(); // Refresh the list
+              return response.data;
+            } else {
+              throw new Error(response.message || 'Failed to create patient');
             }
-            // Real API call for authenticated users
-            const response = await window.pharmacistApi.patients.createPatient(patientData);
-            this.showNotification('Patient created successfully', 'success');
-            return response.data;
           } catch (error) {
             console.error('Failed to create patient:', error);
-            this.showNotification('Failed to create patient', 'error');
+            this.showNotification('Failed to create patient: ' + error.message, 'error');
             throw error;
           } finally {
             this.loading = false;
@@ -2181,16 +2299,21 @@
         async updatePatient(id, patientData) {
           try {
             this.loading = true;
-            const updatedPatient = await patientDataManager.updateItem(id, patientData);
-            const index = this.patients.findIndex(p => p.id === id);
-            if (index !== -1) {
-              this.patients[index] = updatedPatient;
+            const response = await api.updatePatient(id, patientData);
+            
+            if (response.success) {
+              const index = this.patients.findIndex(p => p.id === id);
+              if (index !== -1) {
+                this.patients[index] = response.data;
+              }
+              this.showNotification('Patient updated successfully', 'success');
+              return response.data;
+            } else {
+              throw new Error(response.message || 'Failed to update patient');
             }
-            this.showNotification('Patient updated successfully', 'success');
-            return updatedPatient;
           } catch (error) {
             console.error('Failed to update patient:', error);
-            this.showNotification('Failed to update patient', 'error');
+            this.showNotification('Failed to update patient: ' + error.message, 'error');
             throw error;
           } finally {
             this.loading = false;
@@ -2205,26 +2328,17 @@
           try {
             this.loading = true;
             
-            // Check if we're in demo mode (no auth token)
-            const authToken = this.getAuthToken();
-            if (!authToken) {
-              // Demo mode: Delete locally
-              this.patients = this.patients.filter(p => p.id !== patientId);
-              
-              // Save to localStorage
-              await patientDataManager.saveToLocalStorage(this.patients);
-              
-              this.showNotification('Patient deleted successfully (Demo Mode)', 'success');
-              return;
-            }
+            const response = await api.deletePatient(patientId);
             
-            // Authenticated mode: Use API
-            await patientDataManager.deleteItem(patientId);
-            this.patients = this.patients.filter(p => p.id !== patientId);
-            this.showNotification('Patient deleted successfully', 'success');
+            if (response.success) {
+              this.patients = this.patients.filter(p => p.id !== patientId);
+              this.showNotification('Patient deleted successfully', 'success');
+            } else {
+              throw new Error(response.message || 'Failed to delete patient');
+            }
           } catch (error) {
             console.error('Failed to delete patient:', error);
-            this.showNotification('Failed to delete patient', 'error');
+            this.showNotification('Failed to delete patient: ' + error.message, 'error');
           } finally {
             this.loading = false;
           }
@@ -2241,16 +2355,10 @@
         // Search Patients functionality
         async searchPatients(query, limit = 10) {
           try {
-            const tenantId = this.getTenantId();
-            const response = await fetch(`/api/v1/patients/search?tenantId=${tenantId}&query=${encodeURIComponent(query)}&limit=${limit}`, {
-              headers: {
-                'Authorization': `Bearer ${this.getAuthToken()}`
-              }
-            });
-
-            if (response.ok) {
-              const data = await response.json();
-              return data.data || [];
+            const response = await api.searchPatients(query);
+            
+            if (response.success) {
+              return (response.data || []).slice(0, limit);
             }
           } catch (error) {
             console.error('Failed to search patients:', error);
@@ -2397,6 +2505,12 @@
           const addMedicalBtn = document.getElementById('addMedicalRecordBtn');
           if (addMedicalBtn) {
             addMedicalBtn.addEventListener('click', () => this.openMedicalRecordModal());
+          }
+
+          // Medical Record Form
+          const medicalRecordForm = document.getElementById('medicalRecordForm');
+          if (medicalRecordForm) {
+            medicalRecordForm.addEventListener('submit', (e) => this.submitMedicalRecord(e));
           }
 
           // Download Template Button
@@ -2686,9 +2800,135 @@
 
         // Medical Records functionality
         openMedicalRecordModal() {
-          // For now, show a simple alert
-          this.showNotification('Medical records feature coming soon', 'info');
-          // TODO: Implement full medical records modal
+          this.selectedPatient = this.getCurrentSelectedPatient();
+          if (!this.selectedPatient) {
+            this.showNotification('Please select a patient first', 'warning');
+            return;
+          }
+          
+          // Reset form
+          this.resetMedicalRecordForm();
+          
+          // Set default values
+          const now = new Date();
+          document.getElementById('visitDate').value = now.toISOString().slice(0, 16);
+          document.getElementById('provider').value = this.userInfo.name || 'Pharmacist';
+          
+          // Show modal
+          document.getElementById('medicalRecordModal').hidden = false;
+          document.getElementById('modalOverlay').hidden = false;
+        },
+
+        resetMedicalRecordForm() {
+          const form = document.getElementById('medicalRecordForm');
+          if (form) {
+            form.reset();
+          }
+        },
+
+        async submitMedicalRecord(event) {
+          event.preventDefault();
+          
+          if (!this.selectedPatient) {
+            this.showNotification('No patient selected', 'error');
+            return;
+          }
+
+          const formData = new FormData(event.target);
+          const medicalRecord = {
+            id: Date.now().toString(),
+            patientId: this.selectedPatient.id,
+            patientName: `${this.selectedPatient.firstName} ${this.selectedPatient.lastName}`,
+            visitDate: formData.get('visitDate'),
+            visitType: formData.get('visitType'),
+            chiefComplaint: formData.get('chiefComplaint'),
+            vitalSigns: {
+              bloodPressure: formData.get('bloodPressure'),
+              heartRate: formData.get('heartRate'),
+              temperature: formData.get('temperature'),
+              weight: formData.get('weight'),
+              height: formData.get('height')
+            },
+            diagnosis: formData.get('diagnosis'),
+            treatment: formData.get('treatment'),
+            medications: formData.get('medications'),
+            followup: formData.get('followup'),
+            clinicalNotes: formData.get('clinicalNotes'),
+            provider: formData.get('provider'),
+            createdAt: new Date().toISOString(),
+            tenantId: this.getTenantId()
+          };
+
+          try {
+            // Try to save via API first
+            if (this.apiClient) {
+              await this.apiClient.createMedicalRecord(medicalRecord);
+            } else {
+              // Fallback to localStorage
+              this.saveMedicalRecordLocally(medicalRecord);
+            }
+            
+            this.showNotification('Medical record saved successfully!', 'success');
+            this.closeMedicalRecordModal();
+            this.loadPatientMedicalRecords(); // Refresh records
+            
+          } catch (error) {
+            console.error('Error saving medical record:', error);
+            this.showNotification('Failed to save medical record', 'error');
+          }
+        },
+
+        saveMedicalRecordLocally(record) {
+          const records = JSON.parse(localStorage.getItem('umi_medical_records') || '[]');
+          records.push(record);
+          localStorage.setItem('umi_medical_records', JSON.stringify(records));
+        },
+
+        closeMedicalRecordModal() {
+          document.getElementById('medicalRecordModal').hidden = true;
+          document.getElementById('modalOverlay').hidden = true;
+        },
+
+        getCurrentSelectedPatient() {
+          // Get selected patient from the patients table or current view
+          const selectedRow = document.querySelector('.patient-row.selected');
+          if (selectedRow) {
+            const patientId = selectedRow.dataset.patientId;
+            return this.patients.find(p => p.id === patientId);
+          }
+          return this.selectedPatient || null;
+        },
+
+        loadPatientMedicalRecords() {
+          if (!this.selectedPatient) return;
+          
+          try {
+            const records = JSON.parse(localStorage.getItem('umi_medical_records') || '[]');
+            const patientRecords = records.filter(r => r.patientId === this.selectedPatient.id);
+            
+            // Update the medical records display in patient details
+            this.updateMedicalRecordsDisplay(patientRecords);
+          } catch (error) {
+            console.error('Error loading medical records:', error);
+          }
+        },
+
+        updateMedicalRecordsDisplay(records) {
+          const recordsContainer = document.querySelector('.records-timeline');
+          if (!recordsContainer) return;
+
+          recordsContainer.innerHTML = records.map(record => `
+            <div class="timeline-item">
+              <div class="timeline-date">${this.formatDate(record.visitDate)}</div>
+              <div class="timeline-content">
+                <h5>${record.visitType} - ${record.diagnosis}</h5>
+                <p><strong>Provider:</strong> ${record.provider}</p>
+                <p><strong>Chief Complaint:</strong> ${record.chiefComplaint}</p>
+                <p><strong>Treatment:</strong> ${record.treatment}</p>
+                ${record.medications ? `<p><strong>Medications:</strong> ${record.medications}</p>` : ''}
+              </div>
+            </div>
+          `).join('');
         },
 
         // Helper methods
@@ -2712,12 +2952,136 @@
         },
 
         async init() {
+            try {
+                // Check authentication
+                this.isAuthenticated = this.authManager?.isAuthenticated() || false;
+                
+                if (!this.isAuthenticated) {
+                    this.error = 'Please login to access this page';
+                    return;
+                }
+                
+                // Initialize backend integration
+                await this.backendHelper.initPage('pharmacist-patients', {
+                    enableRealTime: true,
+                    initialData: this.getInitialDataConfig()
+                });
+                
+                // Load page data
+                await this.loadPageData();
+                
+                // Set up event listeners
+                this.setupEventListeners();
+                
+                console.log('pharmacist-patients page initialized with backend integration');
+            } catch (error) {
+                console.error('Failed to initialize pharmacist-patients page:', error);
+                this.error = 'Failed to initialize page';
+            }
+        },
+
+        // Methods required by PageIntegrationTemplate
+        getInitialDataConfig() {
+            return {
+                patients: {
+                    endpoint: '/patients',
+                    autoLoad: true,
+                    cacheKey: 'patients-list'
+                }
+            };
+        },
+
+        async loadPageData() {
+            await this.loadPatients();
+        },
+
+        setupEventListeners() {
+            // Setup modal event listeners, form submissions, etc.
+            this.setupModalListeners();
+            this.setupFormListeners();
+        },
+
+        setupModalListeners() {
+            // Modal close buttons
+            document.querySelectorAll('[data-close]').forEach(button => {
+                button.addEventListener('click', (e) => {
+                    const modalId = e.target.closest('[data-close]').dataset.close;
+                    this.closeModal(modalId);
+                });
+            });
+
+            // Modal backdrop clicks
+            document.querySelectorAll('.modal').forEach(modal => {
+                modal.addEventListener('click', (e) => {
+                    if (e.target === modal) {
+                        this.closeModal(modal.id);
+                    }
+                });
+            });
+        },
+
+        setupFormListeners() {
+            // Patient form submission
+            const patientForm = document.getElementById('patientForm');
+            if (patientForm) {
+                patientForm.addEventListener('submit', async (e) => {
+                    e.preventDefault();
+                    await this.handlePatientSubmit(patientForm);
+                });
+            }
+        },
+
+        async handlePatientSubmit(form) {
+            const formData = new FormData(form);
+            const patientData = Object.fromEntries(formData.entries());
+            const patientId = form.dataset.patientId;
+
+            try {
+                if (patientId) {
+                    await this.updatePatient(patientId, patientData);
+                } else {
+                    await this.createPatient(patientData);
+                }
+                this.closeModal('patientModal');
+                form.reset();
+                delete form.dataset.patientId;
+            } catch (error) {
+                console.error('Failed to save patient:', error);
+            }
+        },
+
+        openModal(modalId) {
+            const modal = document.getElementById(modalId);
+            if (modal) {
+                modal.removeAttribute('hidden');
+                modal.querySelector('input, select, textarea')?.focus();
+            }
+        },
+
+        closeModal(modalId) {
+            const modal = document.getElementById(modalId);
+            if (modal) {
+                modal.setAttribute('hidden', '');
+            }
+        },
+
+        showNotification(message, type = 'info', duration = 5000) {
+            // Use backend helper notification if available, otherwise fallback
+            if (this.backendHelper) {
+                this.backendHelper.showNotification(message, type, duration);
+            } else {
+                console.log(`[${type.toUpperCase()}] ${message}`);
+            }
+        },
+
+        // Legacy init method for backward compatibility
+        async initLegacy() {
           // Setup event listeners first (works without auth)
           this.setupEventListeners();
 
-          // Check authentication and tenant info
-          const userStr = localStorage.getItem('umi_currentUser') || localStorage.getItem('umi_current_user');
-          if (!userStr || userStr === 'undefined' || userStr === 'null') {
+          // Get user information from auth manager
+          const authInfo = auth.getAuthInfo();
+          if (!authInfo.isAuthenticated) {
             console.warn('No user authentication found - demo mode enabled');
             this.showNotification('Demo mode: Some features require login for full functionality', 'info');
             
@@ -2728,51 +3092,38 @@
             this.userInfo.role = 'pharmacist';
             this.userInfo.initials = 'DU';
             
-            // Load patients from localStorage only (demo mode)
-            try {
-              this.patients = await patientDataManager.loadFromLocalStorage();
-              console.log('Demo mode: Loaded patients from localStorage:', this.patients.length);
-            } catch (error) {
-              console.log('Demo mode: No existing patient data found');
-              this.patients = [];
-            }
-            
-            // Setup auto-save for demo mode
-            patientDataManager.setupAutoSave(() => this.patients);
+            // Load patients from API
+            await this.loadPatients();
             
             console.log('Demo mode initialized - basic functionality available');
             return;
           }
 
           try {
-            const user = JSON.parse(userStr);
-            this.tenantInfo.name = user.tenantName || 'Umi Health';
-            this.userInfo.name = `${user.firstName || ''} ${user.lastName || ''}`.trim() || 'User';
-            this.userInfo.role = user.role || 'pharmacist';
+            const user = authInfo.user;
+            this.tenantInfo.name = 'Umi Health';
+            this.userInfo.name = user.name || 'User';
+            this.userInfo.role = user.roles?.[0] || 'pharmacist';
             this.userInfo.initials = this.userInfo.name.split(' ').map(n => n[0]).join('').toUpperCase().substring(0, 2);
             
-            console.log('User authenticated:', { tenantId: user.tenantId, role: this.userInfo.role });
+            console.log('User authenticated:', { userId: user.id, role: this.userInfo.role });
           } catch (error) {
             console.error('Failed to parse user info:', error);
             this.showNotification('Authentication error', 'error');
             return;
           }
 
-          // Load patients from data manager (authenticated mode)
+          // Load patients from API
           await this.loadPatients();
           
-          // Setup auto-save
-          patientDataManager.setupAutoSave(() => this.patients);
-          
-          // Setup periodic sync
+          // Setup periodic refresh
           setInterval(async () => {
             try {
-              await patientDataManager.syncWithServer();
               await this.loadPatients();
             } catch (error) {
-              console.error('Periodic sync failed:', error);
+              console.error('Periodic refresh failed:', error);
             }
-          }, 60000); // Update every minute
+          }, 60000); // Refresh every minute
           
           // Add sync button to header
           this.addSyncButton();
@@ -2798,7 +3149,6 @@
                 <span>Syncing...</span>
               `;
               
-              await patientDataManager.syncWithServer();
               await this.loadPatients();
               
             } catch (error) {
@@ -2814,7 +3164,25 @@
           
           headerRight.appendChild(syncButton);
         }
-      }
+      };
+    }
+  </script>
+
+  <script src="../../js/api-client.js"></script>
+  <script src="../../js/auth-manager.js"></script>
+  <script>
+    // Initialize API clients
+    const api = apiClient;
+    const auth = authManager;
+
+    // Check authentication
+    if (!auth.isAuthenticated()) {
+      window.location.href = '/signin';
+    }
+
+    // Check permissions
+    if (!auth.hasAnyRole(['Pharmacist', 'Admin', 'SuperAdmin'])) {
+      window.location.href = '/unauthorized';
     }
   </script>
 

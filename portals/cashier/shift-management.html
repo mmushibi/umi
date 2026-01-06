@@ -448,7 +448,13 @@
       animation: spin 1s linear infinite;
     }
   </style>
-</head>
+
+    <!-- Backend Integration Libraries -->
+    <script src="../../js/api-client.js"></script>
+    <script src="../../js/auth-manager.js"></script>
+    <script src="../shared/js/backend-integration-helper.js"></script>
+    <script src="../shared/js/page-integration-template.js"></script>
+    <script src="https://unpkg.com/alpinejs@3.x.x/dist/cdn.min.js" defer></script></head>
 <body>
   <!-- Sidebar -->
   <aside class="sidebar" :class="sidebarOpen ? 'open' : ''">
@@ -660,6 +666,21 @@
   <script>
     function shiftSystem() {
       return {
+        // Initialize backend integration
+        const pageIntegration = new PageIntegrationTemplate('cashier-shift-management', {
+            requireAuth: true,
+            enableRealTime: false,
+            enableCaching: true
+        });
+        
+        return {
+            ...pageIntegration,
+            backendHelper: window.backendHelper,
+            apiClient: window.apiClient,
+            authManager: window.authManager,
+            isAuthenticated: false,
+            loading: false,
+            error: null,
         sidebarOpen: false,
         userInfo: {
           name: 'Cashier',
@@ -689,19 +710,34 @@
           'Evening': { start: '00:00', end: '08:00', duration: '8h 0m' }
         },
 
-        async init() {
-          // Check for data manager availability
-          this.useDataManager = !!(window.umiDataManager);
-          
-          // Setup online/offline detection
-          this.setupConnectivityMonitoring();
-          
-          await this.loadUserInfo();
-          await this.loadShiftData();
-          this.setupDataSync();
-          this.setupRealtimeUpdates();
-          this.setupAutoSave();
-        },
+        async async init() {
+            try {
+                // Check authentication
+                this.isAuthenticated = this.authManager?.isAuthenticated() || false;
+                
+                if (!this.isAuthenticated) {
+                    this.error = 'Please login to access this page';
+                    return;
+                }
+                
+                // Initialize backend integration
+                await this.backendHelper.initPage('cashier-shift-management', {
+                    enableRealTime: false,
+                    initialData: this.getInitialDataConfig()
+                });
+                
+                // Load page data
+                await this.loadPageData();
+                
+                // Set up event listeners
+                this.setupEventListeners();
+                
+                console.log('cashier-shift-management page initialized with backend integration');
+            } catch (error) {
+                console.error('Failed to initialize cashier-shift-management page:', error);
+                this.error = 'Failed to initialize page';
+            }
+        },,
 
         async loadUserInfo() {
           try {

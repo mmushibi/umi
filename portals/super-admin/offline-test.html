@@ -1,9 +1,15 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" x-data="offlineTest()">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Super Admin Offline Test</title>
+    <script src="https://unpkg.com/alpinejs@3.x.x/dist/cdn.min.js" defer></script>
+    <!-- Backend Integration Libraries -->
+    <script src="../../js/api-client.js"></script>
+    <script src="../../js/auth-manager.js"></script>
+    <script src="../shared/js/backend-integration-helper.js"></script>
+    <script src="../shared/js/page-integration-template.js"></script>
     <style>
         body {
             font-family: Arial, sans-serif;
@@ -286,6 +292,44 @@
                 }
             }, 1000);
         });
+
+        // Alpine.js component function
+        function offlineTest() {
+            return {
+                async init() {
+                    this.updateConnectionStatus();
+                    this.setupEventListeners();
+                },
+                
+                updateConnectionStatus() {
+                    updateConnectionStatus();
+                },
+                
+                setupEventListeners() {
+                    if (window.superAdminDataSync) {
+                        // Set up event listeners
+                        window.superAdminDataSync.addEventListener('error', (message) => {
+                            log(`Data sync error: ${message}`, 'error');
+                        });
+                        
+                        window.superAdminDataSync.addEventListener('success', (message) => {
+                            log(`Data sync success: ${message}`, 'success');
+                        });
+                        
+                        // Listen for connection changes
+                        window.addEventListener('online', () => {
+                            log('Browser went online');
+                            this.updateConnectionStatus();
+                        });
+                        
+                        window.addEventListener('offline', () => {
+                            log('Browser went offline');
+                            this.updateConnectionStatus();
+                        });
+                    }
+                }
+            }
+        }
     </script>
 </body>
 </html>

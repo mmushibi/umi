@@ -1,9 +1,15 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" x-data="allPortalsTest()">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>All Portals Offline Test Suite</title>
+    <script src="https://unpkg.com/alpinejs@3.x.x/dist/cdn.min.js" defer></script>
+    <!-- Backend Integration Libraries -->
+    <script src="../../js/api-client.js"></script>
+    <script src="../../js/auth-manager.js"></script>
+    <script src="../shared/js/backend-integration-helper.js"></script>
+    <script src="../shared/js/page-integration-template.js"></script>
     <style>
         body {
             font-family: Arial, sans-serif;
@@ -511,6 +517,47 @@
                 log('Test suite initialized successfully');
             }, 2000);
         });
+
+        // Alpine.js component function
+        function allPortalsTest() {
+            return {
+                async init() {
+                    this.updatePortalStatus();
+                    this.setupEventListeners();
+                },
+                
+                updatePortalStatus() {
+                    updatePortalStatus();
+                },
+                
+                setupEventListeners() {
+                    // Set up event listeners for all portals
+                    portals.forEach(portal => {
+                        const instance = window[portal.instance];
+                        if (instance) {
+                            instance.addEventListener('error', (message) => {
+                                log(`${portal.name} error: ${message}`, 'error');
+                            });
+                            
+                            instance.addEventListener('success', (message) => {
+                                log(`${portal.name} success: ${message}`, 'success');
+                            });
+                        }
+                    });
+                    
+                    // Listen for connection changes
+                    window.addEventListener('online', () => {
+                        log('Browser went online');
+                        this.updatePortalStatus();
+                    });
+                    
+                    window.addEventListener('offline', () => {
+                        log('Browser went offline');
+                        this.updatePortalStatus();
+                    });
+                }
+            }
+        }
     </script>
 </body>
 </html>

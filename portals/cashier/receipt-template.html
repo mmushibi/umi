@@ -1,9 +1,15 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" x-data="receiptTemplate()">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>POS Receipt Template</title>
+    <script src="https://unpkg.com/alpinejs@3.x.x/dist/cdn.min.js" defer></script>
+    <!-- Backend Integration Libraries -->
+    <script src="../../js/api-client.js"></script>
+    <script src="../../js/auth-manager.js"></script>
+    <script src="../shared/js/backend-integration-helper.js"></script>
+    <script src="../shared/js/page-integration-template.js"></script>
     <style>
         /* Reset and Base Styles */
         * {
@@ -831,6 +837,15 @@
                 downloadPDF();
             }
         });
+
+        // Alpine.js component function
+        function receiptTemplate() {
+            return {
+                async init() {
+                    await loadPharmacySettings();
+                }
+            }
+        }
     </script>
 </body>
 </html>

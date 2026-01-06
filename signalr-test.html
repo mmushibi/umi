@@ -1,0 +1,159 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SignalR Connection Test</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/microsoft-signalr/7.0.5/signalr.min.js"></script>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 20px; }
+        .status { padding: 10px; margin: 5px 0; border-radius: 5px; }
+        .success { background-color: #d4edda; color: #155724; }
+        .error { background-color: #f8d7da; color: #721c24; }
+        .warning { background-color: #fff3cd; color: #856404; }
+        .info { background-color: #d1ecf1; color: #0c5460; }
+        button { padding: 10px 20px; margin: 5px; cursor: pointer; }
+        pre { background: #f5f5f5; padding: 10px; border-radius: 5px; overflow-x: auto; }
+    </style>
+</head>
+<body>
+    <h1>SignalR Connection Test</h1>
+    
+    <div id="status"></div>
+    
+    <div>
+        <button onclick="testLibrary()">Test SignalR Library</button>
+        <button onclick="testConnection('test')">Test Hub (No Auth)</button>
+        <button onclick="testConnection('notifications')">Test Notifications Hub</button>
+        <button onclick="testConnection('inventory')">Test Inventory Hub</button>
+        <button onclick="testConnection('sales')">Test Sales Hub</button>
+        <button onclick="testAllHubs()">Test All Hubs</button>
+        <button onclick="testRoleBased('Pharmacist')">Test Pharmacist Role</button>
+        <button onclick="disconnectAll()">Disconnect All</button>
+    </div>
+    
+    <div>
+        <h3>Connection Status:</h3>
+        <pre id="connectionStatus">No connections</pre>
+    </div>
+
+    <script src="shared/js/signalr-client.js"></script>
+    <script>
+        function log(message, type = 'info') {
+            const statusDiv = document.getElementById('status');
+            const timestamp = new Date().toLocaleTimeString();
+            statusDiv.innerHTML += `<div class="status ${type}">[${timestamp}] ${message}</div>`;
+            statusDiv.scrollTop = statusDiv.scrollHeight;
+        }
+
+        function updateStatus() {
+            const statusPre = document.getElementById('connectionStatus');
+            const connections = {};
+            
+            for (const [hubName, connection] of window.signalRClient.connections) {
+                connections[hubName] = {
+                    state: connection.state,
+                    connectionId: connection.connectionId,
+                    url: window.signalRClient.getHubUrl(window.signalRClient.hubs[hubName])
+                };
+            }
+            
+            statusPre.textContent = JSON.stringify(connections, null, 2);
+        }
+
+        async function testLibrary() {
+            try {
+                if (typeof signalR === 'undefined') {
+                    log('❌ SignalR library not loaded', 'error');
+                    return;
+                }
+                
+                log('✅ SignalR library loaded successfully', 'success');
+                log(`📦 SignalR version: ${signalR.version || 'Unknown'}`, 'info');
+            } catch (error) {
+                log(`❌ Library test failed: ${error.message}`, 'error');
+            }
+        }
+
+        async function testConnection(hubName) {
+            try {
+                log(`🔍 Testing ${hubName} hub...`, 'info');
+                
+                const connection = await window.signalRClient.init(hubName);
+                log(`✅ Connected to ${hubName} hub`, 'success');
+                
+                const testResult = await window.signalRClient.testConnection(hubName);
+                if (testResult) {
+                    log(`✅ ${hubName} hub connection test passed`, 'success');
+                } else {
+                    log(`⚠️ ${hubName} hub connection test failed`, 'warning');
+                }
+                
+                updateStatus();
+            } catch (error) {
+                log(`❌ Failed to connect to ${hubName}: ${error.message}`, 'error');
+            }
+        }
+
+        async function testAllHubs() {
+            log('🚀 Testing all hubs...', 'info');
+            
+            const hubs = ['notifications', 'inventory', 'sales', 'prescriptions', 'patients'];
+            const results = {};
+            
+            for (const hubName of hubs) {
+                try {
+                    await testConnection(hubName);
+                    results[hubName] = 'success';
+                } catch (error) {
+                    results[hubName] = `failed: ${error.message}`;
+                }
+            }
+            
+            log(`📊 Test results: ${JSON.stringify(results, null, 2)}`, 'info');
+            updateStatus();
+        }
+
+        async function testRoleBased(userRole) {
+            try {
+                log(`🚀 Testing role-based initialization for ${userRole}...`, 'info');
+                
+                const result = await window.signalRClient.initializeForRole(userRole);
+                
+                log(`📊 Role-based test summary:`, 'info');
+                log(`   Total hubs: ${result.summary.total}`, 'info');
+                log(`   Connected: ${result.summary.connected}`, 'success');
+                log(`   Failed: ${result.summary.failed}`, result.summary.failed > 0 ? 'warning' : 'info');
+                
+                if (result.errors.length > 0) {
+                    log('❌ Errors:', 'error');
+                    result.errors.forEach(err => {
+                        log(`   ${err.hubName}: ${err.error.message}`, 'error');
+                    });
+                }
+                
+                updateStatus();
+            } catch (error) {
+                log(`❌ Role-based test failed: ${error.message}`, 'error');
+            }
+        }
+
+        async function disconnectAll() {
+            try {
+                await window.signalRClient.disconnectAll();
+                log('🔌 Disconnected from all hubs', 'info');
+                updateStatus();
+            } catch (error) {
+                log(`❌ Disconnect failed: ${error.message}`, 'error');
+            }
+        }
+
+        // Auto-update status every 2 seconds
+        setInterval(updateStatus, 2000);
+
+        // Initialize
+        log('🚀 SignalR Connection Test Ready', 'success');
+        testLibrary();
+    </script>
+</body>
+</html>

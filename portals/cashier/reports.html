@@ -9,7 +9,13 @@
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@100;400;500;600;700&family=Varela+Round&family=Nunito:wght@400;600;700&display=swap" rel="stylesheet">
   <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Rounded:wght@300;400;500;600;700&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="css/reports.css">
-  </head>
+  
+    <!-- Backend Integration Libraries -->
+    <script src="../../js/api-client.js"></script>
+    <script src="../../js/auth-manager.js"></script>
+    <script src="../shared/js/backend-integration-helper.js"></script>
+    <script src="../shared/js/page-integration-template.js"></script>
+    <script src="https://unpkg.com/alpinejs@3.x.x/dist/cdn.min.js" defer></script></head>
 <body>
   <!-- Sidebar -->
   <aside class="sidebar" :class="sidebarOpen ? 'open' : ''">
@@ -405,6 +411,21 @@
   <script>
     function reportsSystem() {
       return {
+        // Initialize backend integration
+        const pageIntegration = new PageIntegrationTemplate('cashier-reports', {
+            requireAuth: true,
+            enableRealTime: false,
+            enableCaching: true
+        });
+        
+        return {
+            ...pageIntegration,
+            backendHelper: window.backendHelper,
+            apiClient: window.apiClient,
+            authManager: window.authManager,
+            isAuthenticated: false,
+            loading: false,
+            error: null,
         sidebarOpen: false,
         activeTab: localStorage.getItem('activeReportTab') || 'sales',
         userInfo: {
@@ -439,14 +460,34 @@
           patients: true
         },
 
-        async init() {
-          await this.loadUserInfo();
-          
-          // Ensure data manager is available
-          if (!window.umiDataManager) {
-            console.warn('Data manager not available, using fallback API calls');
-            this.useDataManager = false;
-          } else {
+        async async init() {
+            try {
+                // Check authentication
+                this.isAuthenticated = this.authManager?.isAuthenticated() || false;
+                
+                if (!this.isAuthenticated) {
+                    this.error = 'Please login to access this page';
+                    return;
+                }
+                
+                // Initialize backend integration
+                await this.backendHelper.initPage('cashier-reports', {
+                    enableRealTime: false,
+                    initialData: this.getInitialDataConfig()
+                });
+                
+                // Load page data
+                await this.loadPageData();
+                
+                // Set up event listeners
+                this.setupEventListeners();
+                
+                console.log('cashier-reports page initialized with backend integration');
+            } catch (error) {
+                console.error('Failed to initialize cashier-reports page:', error);
+                this.error = 'Failed to initialize page';
+            }
+        }, else {
             this.useDataManager = true;
             // Subscribe to real-time data updates
             this.subscribeToDataUpdates();

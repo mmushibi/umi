@@ -1868,7 +1868,13 @@
       }
     }
   </style>
-</head>
+
+    <!-- Backend Integration Libraries -->
+    <script src="../../js/api-client.js"></script>
+    <script src="../../js/auth-manager.js"></script>
+    <script src="../shared/js/backend-integration-helper.js"></script>
+    <script src="../shared/js/page-integration-template.js"></script>
+    <script src="https://unpkg.com/alpinejs@3.x.x/dist/cdn.min.js" defer></script></head>
 <body>
   <!-- Sidebar -->
   <aside class="sidebar" :class="sidebarOpen ? 'open' : ''">
@@ -2559,17 +2565,34 @@
       }
       
       // Initialize
-      function init() {
-        loadPharmacyInfo();
-        loadProducts();
-        updateCart();
-        
-        // Add event listener for product search
-        document.addEventListener('product-search', (event) => {
-          const posData = window.Alpine?.evaluate(document.querySelector('[x-data]'), 'posSystem()');
-          if (posData && posData.onProductSearch) {
-            posData.onProductSearch(event);
-          }
+      function async init() {
+            try {
+                // Check authentication
+                this.isAuthenticated = this.authManager?.isAuthenticated() || false;
+                
+                if (!this.isAuthenticated) {
+                    this.error = 'Please login to access this page';
+                    return;
+                }
+                
+                // Initialize backend integration
+                await this.backendHelper.initPage('cashier-point-of-sale', {
+                    enableRealTime: true,
+                    initialData: this.getInitialDataConfig()
+                });
+                
+                // Load page data
+                await this.loadPageData();
+                
+                // Set up event listeners
+                this.setupEventListeners();
+                
+                console.log('cashier-point-of-sale page initialized with backend integration');
+            } catch (error) {
+                console.error('Failed to initialize cashier-point-of-sale page:', error);
+                this.error = 'Failed to initialize page';
+            }
+        },
         });
         
         // Add event listeners for report buttons
@@ -2611,6 +2634,21 @@
 
     function posSystem() {
       return {
+        // Initialize backend integration
+        const pageIntegration = new PageIntegrationTemplate('cashier-point-of-sale', {
+            requireAuth: true,
+            enableRealTime: true,
+            enableCaching: true
+        });
+        
+        return {
+            ...pageIntegration,
+            backendHelper: window.backendHelper,
+            apiClient: window.apiClient,
+            authManager: window.authManager,
+            isAuthenticated: false,
+            loading: false,
+            error: null,
         sidebarOpen: false,
         searchQuery: '',
         searchSuggestions: [],

@@ -1815,7 +1815,13 @@
       }
     }
   </style>
-</head>
+
+    <!-- Backend Integration Libraries -->
+    <script src="../../js/api-client.js"></script>
+    <script src="../../js/auth-manager.js"></script>
+    <script src="../shared/js/backend-integration-helper.js"></script>
+    <script src="../shared/js/page-integration-template.js"></script>
+    <script src="https://unpkg.com/alpinejs@3.x.x/dist/cdn.min.js" defer></script></head>
 <body>
   <!-- Sidebar -->
   <aside class="sidebar" :class="sidebarOpen ? 'open' : ''">
@@ -2344,6 +2350,13 @@
   <script>
     function userManagementSystem() {
       return {
+        // Initialize backend integration
+        pageIntegration: new PageIntegrationTemplate('admin-user-management', {
+            requireAuth: true,
+            enableRealTime: false,
+            enableCaching: true
+        }),
+        
         sidebarOpen: false,
         searchQuery: '',
         showFilterMenu: false,
@@ -2377,15 +2390,33 @@
         api: null,
 
         // Initialize the system
-        init() {
-          this.api = new AdminAPI();
-          this.loadPharmacyInfo();
-          this.loadBranches();
-          this.loadEmployees();
-          this.setupEventListeners();
-          this.setupRealtimeSync();
-          this.updateEmployeeStats();
-          this.switchTab('schedule');
+        async init() {
+            try {
+                // Check authentication
+                this.isAuthenticated = this.authManager?.isAuthenticated() || false;
+                
+                if (!this.isAuthenticated) {
+                    this.error = 'Please login to access this page';
+                    return;
+                }
+                
+                // Initialize backend integration
+                await this.backendHelper.initPage('admin-user-management', {
+                    enableRealTime: false,
+                    initialData: this.getInitialDataConfig()
+                });
+                
+                // Load page data
+                await this.loadPageData();
+                
+                // Set up event listeners
+                this.setupEventListeners();
+                
+                console.log('admin-user-management page initialized with backend integration');
+            } catch (error) {
+                console.error('Failed to initialize admin-user-management page:', error);
+                this.error = 'Failed to initialize page';
+            }
         },
 
         // Load pharmacy info from localStorage
@@ -2865,46 +2896,30 @@
         async submitSaveEmployee(event) {
           event.preventDefault();
           
-          console.log('=== SAVE EMPLOYEE DEBUG START ===');
-          console.log('Form element:', event.target);
-          console.log('Form data available:', !!event.target);
+          if (!event.target) {
+            console.error('Form not available');
+            return;
+          }
           
           // Check if API is available
-          console.log('API client:', this.api);
-          console.log('API client type:', typeof this.api);
-          console.log('AdminAPI available:', typeof AdminAPI);
-          
           if (!this.api) {
             console.error('API client is not initialized!');
             this.showError('API client not initialized. Please refresh the page.');
             return;
           }
           
-          console.log('Starting employee save process...');
-          
           const formData = new FormData(event.target);
           const password = formData.get('password');
           const confirmPassword = formData.get('confirmPassword');
           
-          console.log('Form data collected:', {
-            firstName: formData.get('firstName'),
-            lastName: formData.get('lastName'),
-            email: formData.get('email'),
-            employeeId: formData.get('employeeId'),
-            branch: formData.get('branch'),
-            password: password ? '***' : 'empty'
-          });
-          
           // Validate passwords match
           if (password !== confirmPassword) {
-            console.log('Password validation failed');
             this.showError('Passwords do not match. Please try again.');
             return;
           }
           
           // Validate password strength
           if (password.length < 6) {
-            console.log('Password too short');
             this.showError('Password must be at least 6 characters long.');
             return;
           }
@@ -2913,7 +2928,6 @@
           const requiredFields = ['firstName', 'lastName', 'email', 'phone', 'branch'];
           const missingFields = requiredFields.filter(field => !formData.get(field));
           if (missingFields.length > 0) {
-            console.log('Missing required fields:', missingFields);
             this.showError(`Please fill in all required fields: ${missingFields.join(', ')}`);
             return;
           }
@@ -2945,9 +2959,6 @@
             permissions: this.getRolePermissions(formData.get('role'))
           };
           
-          console.log('Employee data prepared:', employeeData);
-          
-          // Use real API for backend integration
           try {
             const userPayload = {
               firstName: employeeData.firstName,
@@ -2971,16 +2982,10 @@
               password: employeeData.password
             };
 
-            console.log('API payload prepared:', userPayload);
-            console.log('About to make API call...');
-
             let response;
             if (employeeData.employeeId) {
-              console.log('Updating existing employee:', employeeData.employeeId);
               // Update existing user
               response = await this.api.updateUser(employeeData.employeeId, userPayload);
-              console.log('Update response:', response);
-              
               const index = this.employees.findIndex(emp => emp.id === employeeData.employeeId);
               if (index !== -1) {
                 this.employees[index] = { ...this.employees[index], ...response, updatedAt: new Date().toISOString() };
@@ -2988,11 +2993,8 @@
               this.broadcastUpdate('updated', response);
               this.showSuccess('Employee updated successfully!');
             } else {
-              console.log('Creating new employee');
               // Create new user
               response = await this.api.createUser(userPayload);
-              console.log('Create response:', response);
-              
               const newEmployee = {
                 id: response.id || this.generateEmployeeId(),
                 ...response,
@@ -3003,9 +3005,6 @@
               this.showSuccess('Employee created successfully!');
             }
 
-            console.log('Employee save process completed successfully');
-            console.log('=== SAVE EMPLOYEE DEBUG END ===');
-            
             // Save to localStorage for offline support and data persistence
             this.saveEmployeesToStorage();
             
@@ -3030,21 +3029,11 @@
             ]);
             
           } catch (error) {
-            console.error('=== SAVE EMPLOYEE ERROR ===');
             console.error('Error saving employee:', error);
-            console.error('Error details:', {
-              message: error.message,
-              stack: error.stack,
-              response: error.response,
-              status: error.status,
-              statusText: error.statusText
-            });
-            console.error('=== END ERROR DEBUG ===');
             
             // Enhanced error handling with fallback to local storage
             if (error.status === 404 || error.status === 0) {
               // API unavailable - save to localStorage as fallback
-              console.log('API unavailable, saving to localStorage as fallback');
               this.saveEmployeeLocally(employeeData, userPayload);
               this.showWarning('Employee saved locally. Will sync when connection is available.');
             } else {

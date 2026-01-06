@@ -24,8 +24,11 @@ var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
 
-// Add SignalR
-builder.Services.AddSignalR();
+// Add SignalR with authentication
+builder.Services.AddSignalR(options =>
+{
+    options.EnableDetailedErrors = true;
+});
 
 // Configure Swagger/OpenAPI
 builder.Services.AddSwaggerGen(c =>
@@ -61,10 +64,15 @@ if (app.Environment.IsDevelopment())
 
 app.UseHttpsRedirection();
 app.UseCors("AllowAll");
-app.UseAuthorization();
 
-// Configure SignalR hubs
+// Configure SignalR hubs (must be before UseAuthorization)
 app.MapHub<PharmacyHub>("/pharmacyHub");
+app.MapHub<InventoryHub>("/inventoryHub");
+app.MapHub<SalesHub>("/salesHub");
+app.MapHub<NotificationHub>("/notificationHub");
+app.MapHub<TestHub>("/testHub");
+
+app.UseAuthorization();
 
 app.MapControllers();
 

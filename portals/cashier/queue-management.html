@@ -864,7 +864,13 @@
       }
     }
   </style>
-</head>
+
+    <!-- Backend Integration Libraries -->
+    <script src="../../js/api-client.js"></script>
+    <script src="../../js/auth-manager.js"></script>
+    <script src="../shared/js/backend-integration-helper.js"></script>
+    <script src="../shared/js/page-integration-template.js"></script>
+    <script src="https://unpkg.com/alpinejs@3.x.x/dist/cdn.min.js" defer></script></head>
 <body>
   <!-- Sidebar -->
   <aside class="sidebar" :class="sidebarOpen ? 'open' : ''">
@@ -1727,6 +1733,21 @@
   <script>
     function queueSystem() {
       return {
+        // Initialize backend integration
+        const pageIntegration = new PageIntegrationTemplate('cashier-queue-management', {
+            requireAuth: true,
+            enableRealTime: false,
+            enableCaching: true
+        });
+        
+        return {
+            ...pageIntegration,
+            backendHelper: window.backendHelper,
+            apiClient: window.apiClient,
+            authManager: window.authManager,
+            isAuthenticated: false,
+            loading: false,
+            error: null,
         sidebarOpen: false,
         userInfo: {
           name: '',
@@ -1797,25 +1818,34 @@
           action: ''
         },
 
-        async init() {
-          await this.loadUserInfo();
-          await Promise.all([
-            this.loadQueueData(),
-            this.loadProviders(),
-            this.loadEmergencyQueue(),
-            this.loadAnalytics(),
-            this.loadSettings()
-          ]);
-          
-          // Start real-time updates
-          setInterval(() => this.loadQueueData(), 30000); // Update every 30 seconds
-          setInterval(() => this.loadEmergencyQueue(), 30000);
-          
-          // Subscribe to data changes from other pages
-          if (window.umiDataManager) {
-            window.umiDataManager.subscribe('queue', (data) => {
-              this.loadQueueData();
-            });
+        async async init() {
+            try {
+                // Check authentication
+                this.isAuthenticated = this.authManager?.isAuthenticated() || false;
+                
+                if (!this.isAuthenticated) {
+                    this.error = 'Please login to access this page';
+                    return;
+                }
+                
+                // Initialize backend integration
+                await this.backendHelper.initPage('cashier-queue-management', {
+                    enableRealTime: false,
+                    initialData: this.getInitialDataConfig()
+                });
+                
+                // Load page data
+                await this.loadPageData();
+                
+                // Set up event listeners
+                this.setupEventListeners();
+                
+                console.log('cashier-queue-management page initialized with backend integration');
+            } catch (error) {
+                console.error('Failed to initialize cashier-queue-management page:', error);
+                this.error = 'Failed to initialize page';
+            }
+        },);
           }
         },
 

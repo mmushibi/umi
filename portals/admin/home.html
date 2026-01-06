@@ -11,6 +11,12 @@
   <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Rounded:wght@300;400;500;600;700&display=swap" rel="stylesheet">
   <script src="https://cdn.tailwindcss.com"></script>
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <script src="https://unpkg.com/alpinejs@3.x.x/dist/cdn.min.js" defer></script>
+  <!-- Backend Integration Libraries -->
+  <script src="../../js/api-client.js"></script>
+  <script src="../../js/auth-manager.js"></script>
+  <script src="../shared/js/backend-integration-helper.js"></script>
+  <script src="../shared/js/page-integration-template.js"></script>
   <link rel="stylesheet" href="../shared/css/shared-styles.css">
   <script src="../shared/js/data-sync.js"></script>
   <script src="../shared/js/role-based-access.js"></script>
@@ -2417,7 +2423,16 @@
   <!-- Alpine.js Component -->
   <script>
     function adminDashboard() {
+      // Initialize backend integration
+      const pageIntegration = new PageIntegrationTemplate('admin-home', {
+        requireAuth: true,
+        enableRealTime: true,
+        enableCaching: true
+      });
+      
       return {
+        ...pageIntegration,
+        
         // Data state
         dashboardStats: {
           totalUsers: 0,
@@ -2433,6 +2448,7 @@
         systemHealth: 'good',
         loading: false,
         error: null,
+        isAuthenticated: false,
         
         // Connection status
         connectionStatus: 'disconnected', // 'connected', 'disconnected', 'error', 'connecting'
@@ -2504,43 +2520,140 @@
           description: ''
         },
         
-        init() {
-          // Check authentication
-          if (!window.adminDataSync.isAuthenticated()) {
-            this.redirectToLogin();
-            return;
+        async init() {
+          try {
+            // Check authentication
+            this.isAuthenticated = this.authManager?.isAuthenticated() || false;
+            
+            if (!this.isAuthenticated) {
+              this.error = 'Please login to access the admin dashboard';
+              return;
+            }
+            
+            // Initialize backend integration
+            await this.backendHelper.initPage('admin-home', {
+              enableRealTime: true,
+              initialData: this.getInitialDataConfig()
+            });
+            
+            // Load dashboard data
+            await this.loadDashboardData();
+            
+            // Set up event listeners
+            this.setupEventListeners();
+            
+            console.log('Admin dashboard initialized with backend integration');
+          } catch (error) {
+            console.error('Failed to initialize admin dashboard:', error);
+            this.error = 'Failed to initialize dashboard';
           }
-          
-          this.loadPharmacyInfo();
-          this.initializeDataSync();
-          this.checkApiConnection();
-          this.initializeWebSocket();
-          this.renderDashboardContent();
-          this.setupEventListeners();
-          
-          // Set up real-time updates
-          window.adminDataSync.subscribe('/dashboard', (data) => {
-            this.updateDashboardStats(data);
-          });
-          
-          // Set up event listeners
-          window.adminDataSync.addEventListener('error', (message) => {
-            this.showError(message);
-          });
-          
-          window.adminDataSync.addEventListener('success', (message) => {
-            this.showSuccess(message);
-          });
-          
-          // Set up periodic updates only if WebSocket is not available
-          this.startPeriodicUpdates();
-          
-          console.log('Admin dashboard initialized with real-time data integration');
         },
         
-        loadPharmacyInfo() {
-          // Load pharmacy information from localStorage or API
+        getInitialDataConfig() {
+          return {
+            dashboardStats: {
+              endpoint: '/analytics/dashboard',
+              method: 'GET'
+            },
+            users: {
+              endpoint: '/users?page=1&pageSize=10',
+              method: 'GET'
+            },
+            branches: {
+              endpoint: '/branch?page=1&pageSize=10',
+              method: 'GET'
+            },
+            sales: {
+              endpoint: '/pos/sales?page=1&pageSize=10',
+              method: 'GET'
+            },
+            prescriptions: {
+              endpoint: '/prescriptions?page=1&pageSize=10',
+              method: 'GET'
+            },
+            inventory: {
+              endpoint: '/inventory/low-stock',
+              method: 'GET'
+            }
+          };
+        },
+        
+        async loadDashboardData() {
+          this.loading = true;
+          this.error = null;
+          
           try {
+            const dataConfig = this.getInitialDataConfig();
+            const data = await this.backendHelper.loadInitialData(dataConfig);
+            
+            // Update dashboard stats
+            if (data.dashboardStats) {
+              this.dashboardStats = {
+                totalUsers: data.dashboardStats.totalUsers || 0,
+                activeUsers: data.dashboardStats.activeUsers || 0,
+                totalBranches: data.dashboardStats.totalBranches || 0,
+                activeBranches: data.dashboardStats.activeBranches || 0,
+                totalSales: data.dashboardStats.totalSales || 0,
+                todaySales: data.dashboardStats.todaySales || 0,
+                pendingPrescriptions: data.dashboardStats.pendingPrescriptions || 0,
+                lowStockItems: data.dashboardStats.lowStockItems || 0
+              };
+            }
+            
+            // Update recent activity
+            if (data.sales && data.sales.length > 0) {
+              this.recentActivity = data.sales.slice(0, 5).map(sale => ({
+                id: sale.id,
+                type: 'sale',
+                title: `Sale #${sale.id}`,
+                description: `Amount: ${this.formatCurrency(sale.totalAmount)}`,
+                time: this.formatDate(sale.createdAt, 'datetime'),
+                icon: 'payments'
+              }));
+            }
+            
+            // Load user info
+            const currentUser = this.authManager?.getCurrentUser();
+            if (currentUser) {
+              this.userInfo = {
+                name: `${currentUser.firstName || ''} ${currentUser.lastName || ''}`.trim() || 'Admin User',
+                role: currentUser.roles?.[0] || 'Admin',
+                initials: `${(currentUser.firstName || '')[0] || 'U'}${(currentUser.lastName || '')[0] || 'H'}`
+              };
+            }
+            
+            // Load pharmacy info
+            await this.loadPharmacyInfo();
+            
+          } catch (error) {
+            console.error('Error loading dashboard data:', error);
+            this.error = 'Failed to load dashboard data';
+            this.backendHelper?.showNotification('Failed to load dashboard data', 'error');
+          } finally {
+            this.loading = false;
+          }
+        },
+        
+        async loadPharmacyInfo() {
+          try {
+            const branchId = this.authManager?.getCurrentUser()?.branchId;
+            if (!branchId) {
+              console.warn('No branch ID found');
+              return;
+            }
+            
+            const response = await this.backendHelper?.apiClient.getBranch(branchId);
+            if (response && response.success) {
+              const branch = response.data;
+              this.pharmacyInfo = {
+                name: branch.name || 'Umi Health Pharmacy',
+                location: `${branch.city || 'Lusaka'}, ${branch.province || 'Zambia'}`
+              };
+            }
+          } catch (error) {
+            console.error('Error loading pharmacy info:', error);
+          }
+        },
             const savedPharmacy = localStorage.getItem('pharmacyInfo');
             if (savedPharmacy) {
               this.pharmacyInfo = JSON.parse(savedPharmacy);

@@ -716,7 +716,13 @@
       }
     }
   </style>
-</head>
+
+    <!-- Backend Integration Libraries -->
+    <script src="../../js/api-client.js"></script>
+    <script src="../../js/auth-manager.js"></script>
+    <script src="../shared/js/backend-integration-helper.js"></script>
+    <script src="../shared/js/page-integration-template.js"></script>
+    <script src="https://unpkg.com/alpinejs@3.x.x/dist/cdn.min.js" defer></script></head>
 <body>
   <div x-show="!isAuthenticated" class="demo-banner" x-transition>
     <span>🔒 Authentication Required: Please login to access account settings</span>
@@ -1549,6 +1555,21 @@
   <script>
     function accountSystem() {
       return {
+        // Initialize backend integration
+        const pageIntegration = new PageIntegrationTemplate('pharmacist-account', {
+            requireAuth: true,
+            enableRealTime: false,
+            enableCaching: true
+        });
+        
+        return {
+            ...pageIntegration,
+            backendHelper: window.backendHelper,
+            apiClient: window.apiClient,
+            authManager: window.authManager,
+            isAuthenticated: false,
+            loading: false,
+            error: null,
         sidebarOpen: false,
         activeSection: localStorage.getItem('activeSection') || 'profile',
         pharmacyInfo: {
@@ -1624,10 +1645,34 @@
         },
 
         // Initialize data from backend
-        init() {
-          console.log('Account system initializing...');
-          this.loadUserData();
-        },
+        async init() {
+            try {
+                // Check authentication
+                this.isAuthenticated = this.authManager?.isAuthenticated() || false;
+                
+                if (!this.isAuthenticated) {
+                    this.error = 'Please login to access this page';
+                    return;
+                }
+                
+                // Initialize backend integration
+                await this.backendHelper.initPage('pharmacist-account', {
+                    enableRealTime: false,
+                    initialData: this.getInitialDataConfig()
+                });
+                
+                // Load page data
+                await this.loadPageData();
+                
+                // Set up event listeners
+                this.setupEventListeners();
+                
+                console.log('pharmacist-account page initialized with backend integration');
+            } catch (error) {
+                console.error('Failed to initialize pharmacist-account page:', error);
+                this.error = 'Failed to initialize page';
+            }
+        },,
 
         async loadUserData() {
           try {
