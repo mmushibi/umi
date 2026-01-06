@@ -842,7 +842,35 @@
         function receiptTemplate() {
             return {
                 async init() {
+                    // Initialize backend integration
+                    if (window.backendHelper) {
+                        await window.backendHelper.initPage('receipt-template', {
+                            enableRealTime: false
+                        });
+                    }
+                    
                     await loadPharmacySettings();
+                },
+                
+                // Backend integration methods
+                async refreshData() {
+                    if (window.backendHelper) {
+                        await window.backendHelper.refreshCurrentPage();
+                    }
+                },
+                
+                async saveSettings(settings) {
+                    if (window.backendHelper) {
+                        try {
+                            await window.backendHelper.apiCall('/api/pharmacy/settings', {
+                                method: 'PUT',
+                                body: JSON.stringify(settings)
+                            });
+                            window.backendHelper.showNotification('Settings saved successfully', 'success');
+                        } catch (error) {
+                            window.backendHelper.handleError(error, 'Save Settings');
+                        }
+                    }
                 }
             }
         }

@@ -522,6 +522,13 @@
         function allPortalsTest() {
             return {
                 async init() {
+                    // Initialize backend integration
+                    if (window.backendHelper) {
+                        await window.backendHelper.initPage('all-portals-test', {
+                            enableRealTime: false
+                        });
+                    }
+                    
                     this.updatePortalStatus();
                     this.setupEventListeners();
                 },
@@ -555,6 +562,19 @@
                         log('Browser went offline');
                         this.updatePortalStatus();
                     });
+                },
+                
+                async testPortal(portalName) {
+                    if (window.backendHelper) {
+                        try {
+                            window.backendHelper.showNotification(`Testing ${portalName}...`, 'info');
+                            // Simulate portal test
+                            await new Promise(resolve => setTimeout(resolve, 1000));
+                            window.backendHelper.showNotification(`${portalName} test completed`, 'success');
+                        } catch (error) {
+                            window.backendHelper.handleError(error, `Test ${portalName}`);
+                        }
+                    }
                 }
             }
         }

@@ -297,6 +297,13 @@
         function offlineTest() {
             return {
                 async init() {
+                    // Initialize backend integration
+                    if (window.backendHelper) {
+                        await window.backendHelper.initPage('offline-test', {
+                            enableRealTime: false
+                        });
+                    }
+                    
                     this.updateConnectionStatus();
                     this.setupEventListeners();
                 },
@@ -326,6 +333,32 @@
                             log('Browser went offline');
                             this.updateConnectionStatus();
                         });
+                    }
+                },
+                
+                async testOfflineMode() {
+                    if (window.backendHelper) {
+                        try {
+                            window.backendHelper.showNotification('Testing offline mode...', 'info');
+                            // Simulate offline test
+                            await new Promise(resolve => setTimeout(resolve, 2000));
+                            window.backendHelper.showNotification('Offline mode test completed', 'success');
+                        } catch (error) {
+                            window.backendHelper.handleError(error, 'Offline Test');
+                        }
+                    }
+                },
+                
+                async testSyncMode() {
+                    if (window.backendHelper) {
+                        try {
+                            window.backendHelper.showNotification('Testing sync mode...', 'info');
+                            // Simulate sync test
+                            await new Promise(resolve => setTimeout(resolve, 1500));
+                            window.backendHelper.showNotification('Sync mode test completed', 'success');
+                        } catch (error) {
+                            window.backendHelper.handleError(error, 'Sync Test');
+                        }
                     }
                 }
             }

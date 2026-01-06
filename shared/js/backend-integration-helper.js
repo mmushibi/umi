@@ -66,8 +66,26 @@ class BackendIntegrationHelper {
      * Initialize SignalR connection for real-time updates
      */
     async initSignalR() {
+        // Check if SignalR libraries are loaded
+        if (typeof window.signalRClient === 'undefined') {
+            console.warn('⚠️ SignalR client not loaded. Including SignalR libraries...');
+            
+            // Dynamically load SignalR libraries if not present
+            try {
+                await this.loadScript('https://cdnjs.cloudflare.com/ajax/libs/microsoft-signalr/7.0.5/signalr.min.js');
+                await this.loadScript('/shared/js/signalr-client.js');
+                await this.loadScript('/shared/js/realtime-events.js');
+                
+                // Wait a bit for the scripts to initialize
+                await new Promise(resolve => setTimeout(resolve, 500));
+            } catch (error) {
+                console.error('❌ Failed to load SignalR libraries:', error);
+                return false;
+            }
+        }
+
         if (!window.signalRClient || !window.realtimeEvents) {
-            console.warn('⚠️ SignalR libraries not loaded');
+            console.warn('⚠️ SignalR libraries not available');
             return false;
         }
 
@@ -88,6 +106,19 @@ class BackendIntegrationHelper {
             console.error('❌ Failed to initialize SignalR:', error);
             return false;
         }
+    }
+
+    /**
+     * Dynamically load a script
+     */
+    loadScript(src) {
+        return new Promise((resolve, reject) => {
+            const script = document.createElement('script');
+            script.src = src;
+            script.onload = resolve;
+            script.onerror = reject;
+            document.head.appendChild(script);
+        });
     }
 
     /**
