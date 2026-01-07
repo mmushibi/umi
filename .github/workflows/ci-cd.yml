@@ -60,13 +60,19 @@ jobs:
           password: ${{ secrets.ACR_PASSWORD }}
           ecr: false
 
+      - name: Debug secrets
+        if: env.HAS_ACR_LOGIN != 'true'
+        run: |
+          echo "CR_PAT secret available: ${{ secrets.CR_PAT != '' }}"
+          echo "GITHUB_TOKEN available: ${{ secrets.GITHUB_TOKEN != '' }}"
+
       - name: Log in to GHCR (fallback)
         if: env.HAS_ACR_LOGIN != 'true'
         uses: docker/login-action@v2
         with:
           registry: ghcr.io
           username: mmushibi
-          password: ${{ secrets.CR_PAT }}
+          password: ${{ secrets.CR_PAT || secrets.GITHUB_TOKEN }}
           ecr: false
 
       - name: Build and push API image
