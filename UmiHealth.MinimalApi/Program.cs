@@ -13,9 +13,6 @@ builder.Services.AddSingleton(new Dictionary<string, object>());
 // Tier service (scaffolding)
 builder.Services.AddSingleton<ITierService, TierService>();
 
-// Audit service (scaffolding)
-builder.Services.AddSingleton<IAuditService, AuditService>();
-
 var app = builder.Build();
 
 // Configure the HTTP request pipeline.
