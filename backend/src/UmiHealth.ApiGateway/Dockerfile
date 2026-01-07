@@ -28,14 +28,16 @@ WORKDIR /app
 RUN apt-get update && apt-get install -y curl && rm -rf /var/lib/apt/lists/*
 
 # Create non-root user
-RUN addgroup --system gateway && adduser --system --group gateway
+RUN addgroup --system app 2>/dev/null || true && \
+    adduser --system --ingroup app app || \
+    adduser --system --group app
 
 # Copy published files
 COPY --from=publish /app/publish .
 
 # Set ownership and permissions
-RUN chown -R gateway:gateway /app
-USER gateway
+RUN chown -R app:app /app
+USER app
 
 # Expose port
 EXPOSE 8080
