@@ -1,10 +1,14 @@
-name: Enhanced-CI-CD
+name: Enhanced CI/CD
 
 on:
   push:
     branches: [ main, develop ]
   pull_request:
     branches: [ main, develop ]
+
+permissions:
+  contents: read
+  packages: write
 
 env:
   REGISTRY: ghcr.io
@@ -64,7 +68,7 @@ jobs:
         with:
           registry: ghcr.io
           username: mmushibi
-          password: ${{ secrets.CR_PAT || secrets.GITHUB_TOKEN }}
+          password: ${{ secrets.CR_PAT }}
           ecr: false
 
       - name: Extract metadata
