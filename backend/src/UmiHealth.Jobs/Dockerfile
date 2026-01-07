@@ -3,20 +3,20 @@ FROM mcr.microsoft.com/dotnet/sdk:8.0 AS build
 WORKDIR /src
 
 # Copy csproj files and restore dependencies
-COPY ["UmiHealth.Jobs/UmiHealth.Jobs.csproj", "UmiHealth.Jobs/"]
-COPY ["UmiHealth.Core/UmiHealth.Core.csproj", "UmiHealth.Core/"]
-COPY ["UmiHealth.Infrastructure/UmiHealth.Infrastructure.csproj", "UmiHealth.Infrastructure/"]
-COPY ["UmiHealth.Application/UmiHealth.Application.csproj", "UmiHealth.Application/"]
-COPY ["UmiHealth.Domain/UmiHealth.Domain.csproj", "UmiHealth.Domain/"]
-COPY ["UmiHealth.Shared/UmiHealth.Shared.csproj", "UmiHealth.Shared/"]
+COPY ["src/UmiHealth.Jobs/UmiHealth.Jobs.csproj", "src/UmiHealth.Jobs/"]
+COPY ["src/UmiHealth.Core/UmiHealth.Core.csproj", "src/UmiHealth.Core/"]
+COPY ["src/UmiHealth.Infrastructure/UmiHealth.Infrastructure.csproj", "src/UmiHealth.Infrastructure/"]
+COPY ["src/UmiHealth.Application/UmiHealth.Application.csproj", "src/UmiHealth.Application/"]
+COPY ["src/UmiHealth.Domain/UmiHealth.Domain.csproj", "src/UmiHealth.Domain/"]
+COPY ["src/UmiHealth.Shared/UmiHealth.Shared.csproj", "src/UmiHealth.Shared/"]
 
-RUN dotnet restore "UmiHealth.Jobs/UmiHealth.Jobs.csproj"
+RUN dotnet restore "src/UmiHealth.Jobs/UmiHealth.Jobs.csproj"
 
 # Copy the rest of the source code
 COPY . .
 
 # Build the application
-WORKDIR "/src/UmiHealth.Jobs"
+WORKDIR "/src/src/UmiHealth.Jobs"
 RUN dotnet build "UmiHealth.Jobs.csproj" -c Release -o /app/build
 
 # Publish the application
