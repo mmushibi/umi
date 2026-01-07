@@ -2,7 +2,7 @@
 
 ## Overview
 
-This document outlines the comprehensive multi-tenant architecture for Umi Health Pharmacy Management System, designed to support multiple pharmacy chains with branch-level isolation, scalability, and security.
+This document outlines the comprehensive multi-tenant architecture for Umi Health Pharmacy Management System, designed to support multiple pharmacy chains with branch-level isolation, scalability, and security using modern .NET technologies and Docker containerization.
 
 ## 1. Architecture Overview
 
@@ -10,32 +10,53 @@ This document outlines the comprehensive multi-tenant architecture for Umi Healt
 ┌─────────────────────────────────────────────────────────────────────────────────┐
 │                            Frontend Applications                                │
 ├─────────────────────────────────────────────────────────────────────────────────┤
-│  Web Portal │ Mobile App │ Partner Integrations │ Customer Portal │ Admin UI   │
+│  Admin Portal │ Pharmacist Portal │ Cashier Portal │ Operations Portal │ Demo   │
 └─────────────────────────────────────────────────────────────────────────────────┘
                                       │
 ┌─────────────────────────────────────────────────────────────────────────────────┐
-│                              API Gateway                                        │
+│                              API Gateway (.NET 8.0)                             │
 │  (Authentication, Rate Limiting, Routing, Load Balancing, CORS, Caching)      │
 └─────────────────────────────────────────────────────────────────────────────────┘
                                       │
 ┌─────────────────────────────────────────────────────────────────────────────────┐
 │                          Microservices Layer                                    │
 ├─────────────────────────────────────────────────────────────────────────────────┤
-│ Tenant Service │ User Service │ Branch Service │ Pharmacy Service │ POS API    │
-│ Inventory API  │ Reports API │ Payment Service │ Notification API  │ Audit API  │
-│ Compliance API │ Analytics API │ Integration API │ File Storage API │           │
+│ Identity Service │ UmiHealth API │ Background Jobs │ Minimal API (.NET 10.0)   │
+│ Tenant Management │ User Management │ Branch Management │ Pharmacy Operations  │
+│ Inventory API │ POS API │ Reports API │ Payment Service │ Notification API   │
 └─────────────────────────────────────────────────────────────────────────────────┘
                                       │
 ┌─────────────────────────────────────────────────────────────────────────────────┐
 │                               Data Layer                                        │
 ├─────────────────────────────────────────────────────────────────────────────────┤
-│  PostgreSQL (Multi-Tenant) │ Redis Cache │ Elasticsearch │ File Storage      │
+│  PostgreSQL 15 (Multi-Tenant) │ Redis 7 Cache │ File Storage │ Monitoring      │
 └─────────────────────────────────────────────────────────────────────────────────┘
 ```
 
-## 2. Database Schema Design
+## 2. Technology Stack
 
-### 2.1 Shared Schema (System-Wide)
+### 2.1 Backend Services
+- **.NET 8.0**: Main API and Identity services
+- **.NET 10.0**: Minimal API for lightweight operations
+- **PostgreSQL 15**: Multi-tenant database with row-level security
+- **Redis 7**: Caching and session management
+- **Docker**: Containerization and orchestration
+
+### 2.2 Frontend Portals
+- **HTML5/CSS3/JavaScript**: Modern web standards
+- **Responsive Design**: Mobile-friendly interfaces
+- **JWT Authentication**: Secure token-based access
+- **SignalR**: Real-time notifications
+
+### 2.3 DevOps & Monitoring
+- **Docker Compose**: Multi-container deployment
+- **Prometheus**: Metrics collection and monitoring
+- **Grafana**: Visualization and alerting
+- **Serilog**: Structured logging
+
+## 3. Database Schema Design
+
+### 3.1 Shared Schema (System-Wide)
 
 ```sql
 -- Tenant Management

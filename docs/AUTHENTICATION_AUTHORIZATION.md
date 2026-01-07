@@ -1,33 +1,47 @@
-# Authentication & Authorization System
+# Umi Health Authentication & Authorization System
 
-This document describes comprehensive authentication and authorization system implemented for Umi Health.
+This document describes the comprehensive authentication and authorization system implemented for Umi Health Pharmacy Management System using modern .NET technologies and JWT-based security.
 
 ## Overview
 
-The system implements JWT-based authentication with RS256 signing, role-based access control (RBAC), and branch-level access control for multi-tenant pharmacy management.
+The system implements JWT-based authentication with secure token handling, role-based access control (RBAC), multi-tenant security, and branch-level access control for pharmacy management operations.
 
-## 5.1 JWT Token Strategy
+## 1. Technology Stack
 
-### Access Token
+### 1.1 Authentication Framework
+- **.NET 8.0 Identity**: User management and authentication
+- **JWT Bearer**: Token-based authentication
+- **ASP.NET Core Authorization**: Policy-based authorization
+- **Redis**: Token revocation and session management
+
+### 1.2 Security Features
+- **Multi-Factor Authentication**: Optional 2FA support
+- **Rate Limiting**: API protection against brute force
+- **Password Policies**: Strong password requirements
+- **Audit Logging**: Complete authentication trail
+
+## 2. JWT Token Strategy
+
+### 2.1 Access Token
 
 - **Expiry**: 15 minutes
-- **Algorithm**: RS256 (asymmetric encryption)
-- **Claims**: User ID, Email, Name, Role, Tenant ID, Branch ID, Permissions, Branch Access
+- **Algorithm**: HS256 (symmetric encryption for microservices)
+- **Claims**: User ID, Email, Name, Role, Tenant ID, Branch ID, Permissions
 - **Usage**: API requests, session management
 
-### Refresh Token
+### 2.2 Refresh Token
 
 - **Expiry**: 7 days
-- **Algorithm**: RS256
+- **Algorithm**: HS256
 - **Claims**: User ID, Tenant ID, Token Type (refresh)
-- **Storage**: HTTP-only cookies (recommended)
+- **Storage**: HTTP-only cookies
 - **Usage**: Token renewal without re-authentication
 
-### Token Format
+### 2.3 Token Format
 
 ```json
 {
-  "alg": "RS256",
+  "alg": "HS256",
   "typ": "JWT"
 }
 {
@@ -47,7 +61,103 @@ The system implements JWT-based authentication with RS256 signing, role-based ac
 }
 ```
 
-## 5.2 Permission Matrix
+## 3. Implementation Details
+
+### 3.1 JWT Service Configuration
+
+```csharp
+// UmiHealth.Identity/Services/JwtService.cs
+public class JwtService : IJwtService
+{
+    private readonly JwtOptions _jwtOptions;
+    private readonly UserManager<ApplicationUser> _userManager;
+    private readonly IMemoryCache _cache;
+
+    public string GenerateToken(ApplicationUser user, string tenantId)
+    {
+        var claims = new[]
+        {
+            new Claim(JwtRegisteredClaimNames.Sub, user.Id),
+            new Claim(JwtRegisteredClaimNames.Email, user.Email),
+            new Claim(JwtRegisteredClaimNames.GivenName, user.FirstName),
+            new Claim(JwtRegisteredClaimNames.FamilyName, user.LastName),
+            new Claim("role", user.Role),
+            new Claim("tenant_id", tenantId),
+            new Claim("branch_id", user.BranchId?.ToString() ?? ""),
+            new Claim("username", user.UserName),
+            new Claim(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString())
+        };
+
+        var token = new JwtSecurityToken(
+            issuer: _jwtOptions.Issuer,
+            audience: _jwtOptions.Audience,
+            claims: claims,
+            expires: DateTime.UtcNow.Add(_jwtOptions.AccessTokenExpiration),
+            signingCredentials: new SigningCredentials(
+                _jwtOptions.SigningKey, 
+                SecurityAlgorithms.HmacSha256)
+        );
+
+        return new JwtSecurityTokenHandler().WriteToken(token);
+    }
+}
+```
+
+### 3.2 Authentication Middleware
+
+```csharp
+// UmiHealth.API/Middleware/TenantAuthenticationMiddleware.cs
+public class TenantAuthenticationMiddleware
+{
+    private readonly RequestDelegate _next;
+    private readonly ITenantProvider _tenantProvider;
+
+    public async Task InvokeAsync(HttpContext context)
+    {
+        var token = context.Request.Headers["Authorization"]
+            .FirstOrDefault()?.Split(" ").Last();
+
+        if (token != null)
+        {
+            try
+            {
+                var tokenHandler = new JwtSecurityTokenHandler();
+                var key = Encoding.ASCII.GetBytes(_jwtOptions.Secret);
+                
+                tokenHandler.ValidateToken(token, new TokenValidationParameters
+                {
+                    ValidateIssuerSigningKey = true,
+                    IssuerSigningKey = new SymmetricSecurityKey(key),
+                    ValidateIssuer = true,
+                    ValidateAudience = true,
+                    ClockSkew = TimeSpan.Zero
+                }, out SecurityToken validatedToken);
+
+                var jwtToken = (JwtSecurityToken)validatedToken;
+                var tenantId = jwtToken.Claims.FirstOrDefault(x => x.Type == "tenant_id")?.Value;
+                
+                if (tenantId != null)
+                {
+                    _tenantProvider.SetCurrentTenant(tenantId);
+                }
+            }
+            catch
+            {
+                // Token validation failed
+                context.Response.StatusCode = 401;
+                await context.Response.WriteAsync("Unauthorized");
+                return;
+            }
+        }
+
+        await _next(context);
+    }
+}
+```
+
+## 4. Role-Based Access Control
+
+### 4.1 Permission Matrix
 
 | Role | Permissions |
 |------|-------------|

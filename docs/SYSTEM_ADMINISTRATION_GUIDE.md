@@ -2,7 +2,7 @@
 
 ## Overview
 
-This guide provides comprehensive information for system administrators responsible for deploying, maintaining, and securing the Umi Health pharmacy management system.
+This guide provides comprehensive information for system administrators responsible for deploying, maintaining, and securing the Umi Health Pharmacy Management System using modern microservices architecture and Docker containerization.
 
 ## Table of Contents
 
@@ -23,11 +23,387 @@ This guide provides comprehensive information for system administrators responsi
 ┌─────────────────────────────────────────────────────────────────┐
 │                    Frontend Layer                        │
 ├─────────────────────────────────────────────────────────────────┤
-│  Web Portal │ Mobile App │ Admin UI │ Customer Portal    │
+│  Admin Portal │ Pharmacist Portal │ Cashier Portal │ Operations │
 └─────────────────────────────────────────────────────────────────┘
                               │
 ┌─────────────────────────────────────────────────────────────────┐
-│                    API Gateway                           │
+│              API Gateway (.NET 8.0)                     │
+├─────────────────────────────────────────────────────────────────┤
+│  Authentication │ Rate Limiting │ Routing │ Load Balancing    │
+└─────────────────────────────────────────────────────────────────┘
+                              │
+┌─────────────────────────────────────────────────────────────────┐
+│                Microservices Layer                    │
+├─────────────────────────────────────────────────────────────────┤
+│ Identity Service │ UmiHealth API │ Background Jobs │ Minimal API│
+│ Tenant Management │ User Management │ Pharmacy Operations │     │
+└─────────────────────────────────────────────────────────────────┘
+                              │
+┌─────────────────────────────────────────────────────────────────┐
+│                 Data Layer                           │
+├─────────────────────────────────────────────────────────────────┤
+│ PostgreSQL 15 │ Redis 7 │ File Storage │ Monitoring      │
+└─────────────────────────────────────────────────────────────────┘
+```
+
+### Technology Stack
+
+- **Container Platform**: Docker & Docker Compose
+- **Backend Framework**: .NET 8.0/.NET 10.0
+- **Database**: PostgreSQL 15 with multi-tenant support
+- **Cache**: Redis 7
+- **Monitoring**: Prometheus + Grafana
+- **Logging**: Serilog with structured logging
+
+## Installation and Deployment
+
+### Prerequisites
+
+```bash
+# Minimum system requirements
+- CPU: 4 cores
+- RAM: 8GB
+- Storage: 100GB SSD
+- OS: Ubuntu 20.04+ / CentOS 8+ / Windows Server 2019+
+
+# Required software
+- Docker 20.10+
+- Docker Compose 2.0+
+- Git
+```
+
+### Quick Deployment
+
+```bash
+# 1. Clone repository
+git clone https://github.com/mmushibi/umi.git
+cd umi
+
+# 2. Configure environment
+cp appsettings.Security.json.example appsettings.Security.json
+# Edit with your configuration
+
+# 3. Deploy services
+docker-compose up -d
+
+# 4. Verify deployment
+docker-compose ps
+curl http://localhost/health
+```
+
+### Production Deployment
+
+```bash
+# Deploy with production profile
+docker-compose -f docker-compose.yml -f docker-compose.override.yml --profile production up -d
+
+# Scale services as needed
+docker-compose up -d --scale umihealth-api=3
+```
+
+## Database Management
+
+### PostgreSQL Configuration
+
+```bash
+# Connect to database
+docker-compose exec postgres psql -U umihealth -d UmiHealth
+
+# Create new tenant
+SELECT create_tenant_schema(
+    'tenant-uuid',
+    'tenant_schema_name'
+);
+
+# Backup database
+docker-compose exec postgres pg_dump -U umihealth UmiHealth > backup.sql
+
+# Restore database
+docker-compose exec -T postgres psql -U umihealth UmiHealth < backup.sql
+```
+
+### Database Migrations
+
+```bash
+# Run migrations
+docker-compose exec umihealth-api dotnet ef database update
+
+# Generate new migration
+docker-compose exec umihealth-api dotnet ef migrations add MigrationName
+
+# Reset database (development only)
+docker-compose exec umihealth-api dotnet ef database drop
+docker-compose exec umihealth-api dotnet ef database update
+```
+
+### Multi-Tenant Management
+
+```sql
+-- List all tenants
+SELECT id, name, subdomain, status FROM shared.tenants;
+
+-- Create new tenant
+INSERT INTO shared.tenants (name, subdomain, database_name, subscription_plan)
+VALUES ('New Pharmacy', 'newpharmacy', 'newpharmacy_db', 'premium');
+
+-- Add branch to tenant
+INSERT INTO shared.branches (tenant_id, name, code, address)
+VALUES ('tenant-uuid', 'Main Branch', 'MAIN', '123 Main St');
+```
+
+## Security Configuration
+
+### JWT Configuration
+
+```json
+{
+  "JwtSettings": {
+    "Secret": "your-256-bit-secret-key-here",
+    "Issuer": "https://yourdomain.com",
+    "Audience": "https://yourdomain.com",
+    "AccessTokenExpiration": "00:15:00",
+    "RefreshTokenExpiration": "7.00:00:00"
+  }
+}
+```
+
+### SSL/TLS Setup
+
+```bash
+# Generate SSL certificates (development)
+openssl req -x509 -nodes -days 365 -newkey rsa:2048 \
+  -keyout nginx/ssl/private.key \
+  -out nginx/ssl/certificate.crt
+
+# Use Let's Encrypt (production)
+sudo certbot --nginx -d yourdomain.com
+```
+
+### Firewall Configuration
+
+```bash
+# Ubuntu UFW
+sudo ufw allow 22/tcp
+sudo ufw allow 80/tcp
+sudo ufw allow 443/tcp
+sudo ufw enable
+
+# CentOS firewalld
+sudo firewall-cmd --permanent --add-service=http
+sudo firewall-cmd --permanent --add-service=https
+sudo firewall-cmd --reload
+```
+
+## Monitoring and Maintenance
+
+### Health Monitoring
+
+```bash
+# Check all service health
+curl http://localhost/health
+curl http://localhost:5001/health
+curl http://localhost:5000/health
+
+# Monitor container resources
+docker stats
+
+# View service logs
+docker-compose logs -f umihealth-api
+docker-compose logs -f identity-service
+```
+
+### Prometheus Metrics
+
+Access metrics at:
+- **Prometheus**: http://localhost:9090
+- **Grafana**: http://localhost:3000
+
+Key metrics to monitor:
+- `umi_api_requests_total` - Total API requests
+- `umi_api_request_duration_seconds` - Request duration
+- `process_cpu_seconds_total` - CPU usage
+- `process_resident_memory_bytes` - Memory usage
+
+### Log Management
+
+```bash
+# View application logs
+docker-compose logs -f --tail=100 umihealth-api
+
+# Rotate logs (add to crontab)
+0 2 * * * docker system prune -f
+
+# Export logs
+docker-compose logs --no-color > application-logs.txt
+```
+
+## Backup and Recovery
+
+### Automated Backup Script
+
+```bash
+#!/bin/bash
+# backup.sh
+
+DATE=$(date +%Y%m%d_%H%M%S)
+BACKUP_DIR="/opt/backups"
+
+# Create backup directory
+mkdir -p $BACKUP_DIR
+
+# Database backup
+docker-compose exec -T postgres pg_dump -U umihealth UmiHealth > $BACKUP_DIR/db_backup_$DATE.sql
+
+# Volume backups
+docker run --rm -v umihealth_postgres_data:/data -v $BACKUP_DIR:/backup alpine tar czf /backup/postgres_$DATE.tar.gz -C /data .
+docker run --rm -v umihealth_redis_data:/data -v $BACKUP_DIR:/backup alpine tar czf /backup/redis_$DATE.tar.gz -C /data .
+
+# Clean old backups (keep 7 days)
+find $BACKUP_DIR -name "*.sql" -mtime +7 -delete
+find $BACKUP_DIR -name "*.tar.gz" -mtime +7 -delete
+```
+
+### Recovery Procedures
+
+```bash
+# Restore database
+docker-compose exec -T postgres psql -U umihealth UmiHealth < backup.sql
+
+# Restore volumes
+docker run --rm -v umihealth_postgres_data:/data -v $(pwd):/backup alpine tar xzf postgres_backup.tar.gz -C /data
+
+# Full system recovery
+docker-compose down
+# Restore volumes
+docker-compose up -d
+```
+
+## Troubleshooting
+
+### Common Issues
+
+#### Service Won't Start
+```bash
+# Check logs
+docker-compose logs service-name
+
+# Check resource usage
+docker stats
+
+# Restart service
+docker-compose restart service-name
+```
+
+#### Database Connection Issues
+```bash
+# Test database connection
+docker-compose exec postgres pg_isready -U umihealth
+
+# Check connection string
+docker-compose exec umihealth-api env | grep ConnectionStrings
+```
+
+#### Authentication Issues
+```bash
+# Check JWT configuration
+docker-compose exec identity-service env | grep Jwt
+
+# Verify user in database
+docker-compose exec postgres psql -U umihealth -c "SELECT * FROM shared.users WHERE email='user@example.com';"
+```
+
+### Debug Commands
+
+```bash
+# System information
+docker-compose version
+docker version
+docker info
+
+# Network diagnostics
+docker network ls
+docker network inspect umihealth_umihealth-network
+
+# Container diagnostics
+docker inspect container-name
+docker top container-name
+```
+
+## Performance Optimization
+
+### Database Optimization
+
+```sql
+-- Analyze query performance
+SELECT query, mean_time, calls FROM pg_stat_statements 
+ORDER BY mean_time DESC LIMIT 10;
+
+-- Create indexes for performance
+CREATE INDEX CONCURRENTLY idx_patients_tenant_id ON patients(tenant_id);
+CREATE INDEX CONCURRENTLY idx_prescriptions_patient_id ON prescriptions(patient_id);
+
+-- Update statistics
+ANALYZE;
+```
+
+### Application Optimization
+
+```bash
+# Monitor application performance
+curl http://localhost/metrics
+
+# Check memory usage
+docker stats --no-stream
+
+# Optimize Docker resources
+# Edit docker-compose.yml to add resource limits:
+services:
+  umihealth-api:
+    deploy:
+      resources:
+        limits:
+          cpus: '1.0'
+          memory: 1G
+        reservations:
+          cpus: '0.5'
+          memory: 512M
+```
+
+### Caching Strategy
+
+```bash
+# Redis optimization
+docker-compose exec redis redis-cli CONFIG SET maxmemory 512mb
+docker-compose exec redis redis-cli CONFIG SET maxmemory-policy allkeys-lru
+
+# Monitor Redis performance
+docker-compose exec redis redis-cli INFO memory
+docker-compose exec redis redis-cli INFO stats
+```
+
+## Maintenance Schedule
+
+### Daily Tasks
+- [ ] Monitor system health dashboards
+- [ ] Check error logs for issues
+- [ ] Verify backup completion
+- [ ] Review resource utilization
+
+### Weekly Tasks
+- [ ] Apply security patches
+- [ ] Review performance metrics
+- [ ] Clean up old logs and temporary files
+- [ ] Test backup restoration
+
+### Monthly Tasks
+- [ ] Update application versions
+- [ ] Security audit and vulnerability scan
+- [ ] Database maintenance and optimization
+- [ ] Review and update documentation
+
+---
+
+For additional support or questions, contact the system administration team at admin@umihealth.com or refer to the [API Documentation](API_DOCUMENTATION.md) and [Implementation Guide](IMPLEMENTATION_GUIDE.md).
 │  (Authentication, Rate Limiting, Routing, Load Balancing) │
 └─────────────────────────────────────────────────────────────────┘
                               │

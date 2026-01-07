@@ -3,7 +3,7 @@ FROM mcr.microsoft.com/dotnet/sdk:8.0 AS build
 WORKDIR /src
 
 # Copy csproj files and restore dependencies
-COPY ["UmiHealth.Api/UmiHealth.Api.csproj", "UmiHealth.Api/"]
+COPY ["UmiHealth.API/UmiHealth.API.csproj", "UmiHealth.API/"]
 COPY ["UmiHealth.Core/UmiHealth.Core.csproj", "UmiHealth.Core/"]
 COPY ["UmiHealth.Infrastructure/UmiHealth.Infrastructure.csproj", "UmiHealth.Infrastructure/"]
 COPY ["UmiHealth.Application/UmiHealth.Application.csproj", "UmiHealth.Application/"]
@@ -11,18 +11,18 @@ COPY ["UmiHealth.Domain/UmiHealth.Domain.csproj", "UmiHealth.Domain/"]
 COPY ["UmiHealth.Shared/UmiHealth.Shared.csproj", "UmiHealth.Shared/"]
 COPY ["UmiHealth.Identity/UmiHealth.Identity.csproj", "UmiHealth.Identity/"]
 
-RUN dotnet restore "UmiHealth.Api/UmiHealth.Api.csproj"
+RUN dotnet restore "UmiHealth.API/UmiHealth.API.csproj"
 
 # Copy the rest of the source code
 COPY . .
 
 # Build the application
-WORKDIR "/src/UmiHealth.Api"
-RUN dotnet build "UmiHealth.Api.csproj" -c Release -o /app/build
+WORKDIR "/src/UmiHealth.API"
+RUN dotnet build "UmiHealth.API.csproj" -c Release -o /app/build
 
 # Publish the application
 FROM build AS publish
-RUN dotnet publish "UmiHealth.Api.csproj" -c Release -o /app/publish /p:UseAppHost=false
+RUN dotnet publish "UmiHealth.API.csproj" -c Release -o /app/publish /p:UseAppHost=false
 
 # Build the final runtime image
 FROM mcr.microsoft.com/dotnet/aspnet:8.0 AS final
@@ -53,4 +53,4 @@ ENV ASPNETCORE_URLS=http://+:8080
 ENV ASPNETCORE_ENVIRONMENT=Production
 
 # Entry point
-ENTRYPOINT ["dotnet", "UmiHealth.Api.dll"]
+ENTRYPOINT ["dotnet", "UmiHealth.API.dll"]

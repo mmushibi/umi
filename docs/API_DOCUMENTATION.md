@@ -6,9 +6,10 @@ The Umi Health API provides comprehensive functionality for pharmacy management,
 
 ## Base URL
 
-- **Production**: `https://api.umihealth.com`
-- **Staging**: `https://staging-api.umihealth.com`
-- **Development**: `https://dev-api.umihealth.com`
+- **Production**: `http://localhost:80` (Docker deployment)
+- **Development**: `https://localhost:5000` (local development)
+- **API Gateway**: `http://localhost:80/api` (microservices)
+- **Identity Service**: `http://localhost:5001` (authentication)
 
 ## Authentication Overview
 
