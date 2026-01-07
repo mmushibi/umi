@@ -25,7 +25,7 @@ jobs:
         run: dotnet build backend/UmiHealth.sln --configuration Release --no-restore
 
       - name: Test
-        run: dotnet test backend/tests/ --no-build --verbosity normal
+        run: dotnet test backend/UmiHealth.sln --no-build --verbosity normal
 
   build-and-push:
     needs: build-test
@@ -35,11 +35,14 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
       - name: Set registry variables
+        env:
+          ACR_LOGIN_SERVER: ${{ secrets.ACR_LOGIN_SERVER }}
         run: |
           echo "REGISTRY=${{ env.REGISTRY || 'ghcr.io' }}" >> $GITHUB_ENV
+          echo "HAS_ACR_LOGIN=$([[ -n \"$ACR_LOGIN_SERVER\" ]] && echo 'true' || echo 'false')" >> $GITHUB_ENV
 
       - name: Log in to registry (GHCR or ACR)
-        if: secrets.ACR_LOGIN_SERVER != ''
+        if: env.HAS_ACR_LOGIN == 'true'
         uses: docker/login-action@v2
         with:
           registry: ${{ secrets.ACR_LOGIN_SERVER }}
@@ -47,7 +50,7 @@ jobs:
           password: ${{ secrets.ACR_PASSWORD }}
 
       - name: Log in to GHCR (fallback)
-        if: secrets.ACR_LOGIN_SERVER == ''
+        if: env.HAS_ACR_LOGIN != 'true'
         uses: docker/login-action@v2
         with:
           registry: ${{ env.REGISTRY }}
