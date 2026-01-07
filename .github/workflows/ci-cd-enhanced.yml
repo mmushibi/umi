@@ -62,7 +62,7 @@ jobs:
       - name: Log in to Container Registry
         uses: docker/login-action@v2
         with:
-          registry: ${{ env.REGISTRY }}
+          registry: ghcr.io
           username: ${{ github.actor }}
           password: ${{ secrets.CR_PAT || secrets.GITHUB_TOKEN }}
           ecr: false
@@ -71,7 +71,7 @@ jobs:
         id: meta
         uses: docker/metadata-action@v4
         with:
-          images: ${{ env.REGISTRY }}/${{ github.repository_owner }}/umihealth-${{ matrix.service }}
+          images: ghcr.io/${{ github.repository_owner }}/umihealth-${{ matrix.service }}
           tags: |
             type=ref,event=branch
             type=ref,event=pr
