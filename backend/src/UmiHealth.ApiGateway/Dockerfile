@@ -28,9 +28,9 @@ WORKDIR /app
 RUN apt-get update && apt-get install -y curl && rm -rf /var/lib/apt/lists/*
 
 # Create non-root user
-RUN addgroup --system app 2>/dev/null || true && \
-    adduser --system --ingroup app app || \
-    adduser --system --group app
+RUN if ! getent group app >/dev/null 2>&1; then addgroup --system app; fi && \
+    adduser --system --disabled-password --gecos "" app || \
+    usermod -a -G app app 2>/dev/null || true
 
 # Copy published files
 COPY --from=publish /app/publish .
