@@ -37,9 +37,15 @@ jobs:
       - name: Set registry variables
         env:
           ACR_LOGIN_SERVER: ${{ secrets.ACR_LOGIN_SERVER }}
+          ACR_USERNAME: ${{ secrets.ACR_USERNAME }}
+          ACR_PASSWORD: ${{ secrets.ACR_PASSWORD }}
         run: |
           echo "REGISTRY=${{ env.REGISTRY || 'ghcr.io' }}" >> $GITHUB_ENV
-          echo "HAS_ACR_LOGIN=$([[ -n \"$ACR_LOGIN_SERVER\" ]] && echo 'true' || echo 'false')" >> $GITHUB_ENV
+          if [[ -n "$ACR_LOGIN_SERVER" && -n "$ACR_USERNAME" && -n "$ACR_PASSWORD" ]]; then
+            echo "HAS_ACR_LOGIN=true" >> $GITHUB_ENV
+          else
+            echo "HAS_ACR_LOGIN=false" >> $GITHUB_ENV
+          fi
 
       - name: Log in to registry (GHCR or ACR)
         if: env.HAS_ACR_LOGIN == 'true'
