@@ -63,7 +63,7 @@ jobs:
         uses: docker/login-action@v2
         with:
           registry: ghcr.io
-          username: ${{ github.actor }}
+          username: mmushibi
           password: ${{ secrets.CR_PAT || secrets.GITHUB_TOKEN }}
           ecr: false
 
@@ -71,7 +71,7 @@ jobs:
         id: meta
         uses: docker/metadata-action@v4
         with:
-          images: ghcr.io/${{ github.repository_owner }}/umihealth-${{ matrix.service }}
+          images: ghcr.io/mmushibi/umihealth-${{ matrix.service }}
           tags: |
             type=ref,event=branch
             type=ref,event=pr
