@@ -72,8 +72,8 @@ jobs:
           file: backend/Dockerfile
           push: true
           tags: |
-            ${{ env.REGISTRY }}/${{ github.repository }}/umihealth-api:latest
-            ${{ env.REGISTRY }}/${{ github.repository }}/umihealth-api:${{ github.sha }}
+            ${{ env.REGISTRY }}/${{ github.repository_owner }}/umihealth-api:latest
+            ${{ env.REGISTRY }}/${{ github.repository_owner }}/umihealth-api:${{ github.sha }}
 
       - name: Build and push Identity image
         uses: docker/build-push-action@v4
@@ -82,8 +82,8 @@ jobs:
           file: backend/src/UmiHealth.Identity/Dockerfile
           push: true
           tags: |
-            ${{ env.REGISTRY }}/${{ github.repository }}/umihealth-identity:latest
-            ${{ env.REGISTRY }}/${{ github.repository }}/umihealth-identity:${{ github.sha }}
+            ${{ env.REGISTRY }}/${{ github.repository_owner }}/umihealth-identity:latest
+            ${{ env.REGISTRY }}/${{ github.repository_owner }}/umihealth-identity:${{ github.sha }}
 
       - name: Build and push Background Jobs image
         uses: docker/build-push-action@v4
@@ -92,8 +92,8 @@ jobs:
           file: backend/src/UmiHealth.Jobs/Dockerfile
           push: true
           tags: |
-            ${{ env.REGISTRY }}/${{ github.repository }}/umihealth-jobs:latest
-            ${{ env.REGISTRY }}/${{ github.repository }}/umihealth-jobs:${{ github.sha }}
+            ${{ env.REGISTRY }}/${{ github.repository_owner }}/umihealth-jobs:latest
+            ${{ env.REGISTRY }}/${{ github.repository_owner }}/umihealth-jobs:${{ github.sha }}
 
   deploy-azure:
     needs: build-and-push

@@ -71,7 +71,7 @@ jobs:
         id: meta
         uses: docker/metadata-action@v4
         with:
-          images: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}/umihealth-${{ matrix.service }}
+          images: ${{ env.REGISTRY }}/${{ github.repository_owner }}/umihealth-${{ matrix.service }}
           tags: |
             type=ref,event=branch
             type=ref,event=pr
