@@ -60,11 +60,16 @@ jobs:
           password: ${{ secrets.ACR_PASSWORD }}
           ecr: false
 
-      - name: Debug secrets
+      - name: Check CR_PAT availability
         if: env.HAS_ACR_LOGIN != 'true'
         run: |
-          echo "CR_PAT secret available: ${{ secrets.CR_PAT != '' }}"
-          echo "GITHUB_TOKEN available: ${{ secrets.GITHUB_TOKEN != '' }}"
+          if [[ -z "${{ secrets.CR_PAT }}" ]]; then
+            echo "❌ CR_PAT secret is not set or empty"
+            echo "Please create a Personal Access Token with 'write:packages' scope and add it as CR_PAT secret"
+            exit 1
+          else
+            echo "✅ CR_PAT secret is available"
+          fi
 
       - name: Log in to GHCR (fallback)
         if: env.HAS_ACR_LOGIN != 'true'
@@ -72,7 +77,7 @@ jobs:
         with:
           registry: ghcr.io
           username: mmushibi
-          password: ${{ secrets.CR_PAT || secrets.GITHUB_TOKEN }}
+          password: ${{ secrets.CR_PAT }}
           ecr: false
 
       - name: Build and push API image
