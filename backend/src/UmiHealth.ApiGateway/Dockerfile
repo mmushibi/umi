@@ -3,17 +3,17 @@ FROM mcr.microsoft.com/dotnet/sdk:8.0 AS build
 WORKDIR /src
 
 # Copy csproj files and restore dependencies
-COPY ["src/UmiHealth.ApiGateway/UmiHealth.ApiGateway.csproj", "src/UmiHealth.ApiGateway/"]
-COPY ["src/UmiHealth.Core/UmiHealth.Core.csproj", "src/UmiHealth.Core/"]
-COPY ["src/UmiHealth.Shared/UmiHealth.Shared.csproj", "src/UmiHealth.Shared/"]
+COPY ["UmiHealth.ApiGateway/UmiHealth.ApiGateway.csproj", "UmiHealth.ApiGateway/"]
+COPY ["UmiHealth.Core/UmiHealth.Core.csproj", "UmiHealth.Core/"]
+COPY ["UmiHealth.Shared/UmiHealth.Shared.csproj", "UmiHealth.Shared/"]
 
-RUN dotnet restore "src/UmiHealth.ApiGateway/UmiHealth.ApiGateway.csproj"
+RUN dotnet restore "UmiHealth.ApiGateway/UmiHealth.ApiGateway.csproj"
 
 # Copy rest of source code
 COPY . .
 
 # Build application
-WORKDIR "/src/src/UmiHealth.ApiGateway"
+WORKDIR "/src/UmiHealth.ApiGateway"
 RUN dotnet build "UmiHealth.ApiGateway.csproj" -c Release -o /app/build
 
 # Publish application
