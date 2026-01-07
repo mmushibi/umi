@@ -3,21 +3,21 @@ FROM mcr.microsoft.com/dotnet/sdk:8.0 AS build
 WORKDIR /src
 
 # Copy csproj files and restore dependencies
-COPY ["UmiHealth.API/UmiHealth.API.csproj", "UmiHealth.API/"]
-COPY ["UmiHealth.Core/UmiHealth.Core.csproj", "UmiHealth.Core/"]
-COPY ["UmiHealth.Infrastructure/UmiHealth.Infrastructure.csproj", "UmiHealth.Infrastructure/"]
-COPY ["UmiHealth.Application/UmiHealth.Application.csproj", "UmiHealth.Application/"]
-COPY ["UmiHealth.Domain/UmiHealth.Domain.csproj", "UmiHealth.Domain/"]
-COPY ["UmiHealth.Shared/UmiHealth.Shared.csproj", "UmiHealth.Shared/"]
-COPY ["UmiHealth.Identity/UmiHealth.Identity.csproj", "UmiHealth.Identity/"]
+COPY ["src/UmiHealth.API/UmiHealth.API.csproj", "src/UmiHealth.API/"]
+COPY ["src/UmiHealth.Core/UmiHealth.Core.csproj", "src/UmiHealth.Core/"]
+COPY ["src/UmiHealth.Infrastructure/UmiHealth.Infrastructure.csproj", "src/UmiHealth.Infrastructure/"]
+COPY ["src/UmiHealth.Application/UmiHealth.Application.csproj", "src/UmiHealth.Application/"]
+COPY ["src/UmiHealth.Domain/UmiHealth.Domain.csproj", "src/UmiHealth.Domain/"]
+COPY ["src/UmiHealth.Shared/UmiHealth.Shared.csproj", "src/UmiHealth.Shared/"]
+COPY ["src/UmiHealth.Identity/UmiHealth.Identity.csproj", "src/UmiHealth.Identity/"]
 
-RUN dotnet restore "UmiHealth.API/UmiHealth.API.csproj"
+RUN dotnet restore "src/UmiHealth.API/UmiHealth.API.csproj"
 
 # Copy the rest of the source code
 COPY . .
 
 # Build the application
-WORKDIR "/src/UmiHealth.API"
+WORKDIR "/src/src/UmiHealth.API"
 RUN dotnet build "UmiHealth.API.csproj" -c Release -o /app/build
 
 # Publish the application
