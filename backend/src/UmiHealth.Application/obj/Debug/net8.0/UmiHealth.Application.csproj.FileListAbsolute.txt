@@ -47,3 +47,5 @@ C:\Users\sepio\Desktop\Umi_Health\Umi_Health\Umi_Health\backend\src\UmiHealth.Ap
 C:\Users\sepio\Desktop\Umi_Health\Umi_Health\Umi_Health\backend\src\UmiHealth.Application\obj\Debug\net8.0\refint\UmiHealth.Application.dll
 C:\Users\sepio\Desktop\Umi_Health\Umi_Health\Umi_Health\backend\src\UmiHealth.Application\obj\Debug\net8.0\UmiHealth.Application.pdb
 C:\Users\sepio\Desktop\Umi_Health\Umi_Health\Umi_Health\backend\src\UmiHealth.Application\obj\Debug\net8.0\ref\UmiHealth.Application.dll
+C:\Users\sepio\Desktop\Umi_Health\Umi_Health\Umi_Health\backend\src\UmiHealth.Application\bin\Debug\net8.0\UmiHealth.Identity.dll
+C:\Users\sepio\Desktop\Umi_Health\Umi_Health\Umi_Health\backend\src\UmiHealth.Application\bin\Debug\net8.0\UmiHealth.Identity.pdb

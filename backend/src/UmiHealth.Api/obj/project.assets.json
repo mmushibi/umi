@@ -4759,7 +4759,7 @@
           "Microsoft.IdentityModel.Tokens": "7.1.2",
           "System.IdentityModel.Tokens.Jwt": "7.1.2",
           "UmiHealth.Core": "1.0.0",
-          "UmiHealth.Infrastructure": "1.0.0",
+          "UmiHealth.Persistence": "1.0.0",
           "UmiHealth.Shared": "1.0.0"
         },
         "compile": {
@@ -4786,6 +4786,7 @@
           "Serilog.Sinks.PostgreSQL": "2.3.0",
           "StackExchange.Redis": "2.7.27",
           "UmiHealth.Core": "1.0.0",
+          "UmiHealth.Identity": "1.0.0",
           "UmiHealth.Persistence": "1.0.0"
         },
         "compile": {
@@ -12882,11 +12883,11 @@
   "project": {
     "version": "1.0.0",
     "restore": {
-      "projectUniqueName": "C:\\Users\\sepio\\Desktop\\Umi_Health\\Umi_Health\\Umi_Health\\backend\\src\\UmiHealth.API\\UmiHealth.API.csproj",
+      "projectUniqueName": "C:\\Users\\sepio\\Desktop\\Umi_Health\\Umi_Health\\Umi_Health\\backend\\src\\UmiHealth.Api\\UmiHealth.API.csproj",
       "projectName": "UmiHealth.API",
-      "projectPath": "C:\\Users\\sepio\\Desktop\\Umi_Health\\Umi_Health\\Umi_Health\\backend\\src\\UmiHealth.API\\UmiHealth.API.csproj",
+      "projectPath": "C:\\Users\\sepio\\Desktop\\Umi_Health\\Umi_Health\\Umi_Health\\backend\\src\\UmiHealth.Api\\UmiHealth.API.csproj",
       "packagesPath": "C:\\Users\\sepio\\.nuget\\packages\\",
-      "outputPath": "C:\\Users\\sepio\\Desktop\\Umi_Health\\Umi_Health\\Umi_Health\\backend\\src\\UmiHealth.API\\obj\\",
+      "outputPath": "C:\\Users\\sepio\\Desktop\\Umi_Health\\Umi_Health\\Umi_Health\\backend\\src\\UmiHealth.Api\\obj\\",
       "projectStyle": "PackageReference",
       "configFilePaths": [
         "C:\\Users\\sepio\\AppData\\Roaming\\NuGet\\NuGet.Config"

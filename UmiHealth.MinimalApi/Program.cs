@@ -1,3 +1,6 @@
+using UmiHealth.MinimalApi.Services;
+using UmiHealth.MinimalApi.Middleware;
+
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
@@ -6,6 +9,12 @@ builder.Services.AddCors();
 
 // Add in-memory database for demo
 builder.Services.AddSingleton(new Dictionary<string, object>());
+
+// Tier service (scaffolding)
+builder.Services.AddSingleton<ITierService, TierService>();
+
+// Audit service (scaffolding)
+builder.Services.AddSingleton<IAuditService, AuditService>();
 
 var app = builder.Build();
 
@@ -17,6 +26,10 @@ if (app.Environment.IsDevelopment())
 
 app.UseHttpsRedirection();
 app.UseCors(policy => policy.AllowAnyOrigin().AllowAnyMethod().AllowAnyHeader());
+
+// Tier-based rate limiting and feature gates (scaffolding)
+app.UseMiddleware<TierRateLimitMiddleware>();
+app.UseMiddleware<FeatureGateMiddleware>();
 
 // Get in-memory databases
 var usersDb = app.Services.GetRequiredService<Dictionary<string, object>>();
@@ -498,7 +511,7 @@ app.MapPost("/api/v1/inventory", async (HttpRequest request, Dictionary<string, 
             message = $"Error creating inventory item: {ex.Message}" 
         });
     }
-});
+}).WithMetadata(new FeatureRequirement("inventory:create"));
 
 // Update inventory item
 app.MapPut("/api/v1/inventory/{id}", async (string id, HttpRequest request, Dictionary<string, object> inventoryDb) =>

@@ -226,7 +226,7 @@ class ApiClient {
 
         if (response.success) {
             this.saveTokens(
-                response.data?.token,
+                response.data?.accessToken || response.data?.token,
                 response.data?.refreshToken
             );
         }
@@ -241,9 +241,21 @@ class ApiClient {
         });
     }
 
-    async logout() {
-        await this.request('/auth/logout', { method: 'POST' });
-        this.clearTokens();
+    async logout(refreshToken = null) {
+        try {
+            // Call server logout endpoint with refresh token
+            const token = refreshToken || this.refreshToken;
+            if (token) {
+                await this.request('/auth/logout', {
+                    method: 'POST',
+                    body: JSON.stringify({ refreshToken: token })
+                });
+            }
+        } catch (error) {
+            console.warn('Server logout request failed, clearing local tokens anyway', error);
+        } finally {
+            this.clearTokens();
+        }
     }
 
     async getProfile() {

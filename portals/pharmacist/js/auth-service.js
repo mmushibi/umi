@@ -110,10 +110,24 @@ class AuthService {
     }
 
     // Logout method
-    logout() {
-        this.clearAuthData();
-        // Redirect to login page
-        window.location.href = '../login.html';
+    async logout() {
+        try {
+            // Call server logout endpoint
+            const refreshToken = localStorage.getItem('umi_refresh_token');
+            if (refreshToken) {
+                await fetch(window.API_BASE || 'http://localhost:5000/api/v1', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ refreshToken })
+                }).catch(e => console.warn('Server logout failed:', e));
+            }
+        } catch (e) {
+            console.error('Logout error:', e);
+        } finally {
+            this.clearAuthData();
+            // Redirect to login page
+            window.location.href = '../auth/signin.html';
+        }
     }
 
     // Refresh token (if needed)
@@ -149,3 +163,47 @@ window.authService = new AuthService();
 
 // Setup automatic token refresh
 window.authService.setupTokenRefresh();
+
+// Setup inactivity auto-logout (syncs across tabs)
+(function setupInactivityLogout() {
+    const getTimeoutMinutes = () => {
+        const v = localStorage.getItem('sessionTimeoutMinutes');
+        return v ? parseInt(v, 10) : 30;
+    };
+    const timeoutMs = () => getTimeoutMinutes() * 60 * 1000;
+    let inactivityTimer = null;
+    function resetTimer(broadcast = true) {
+        localStorage.setItem('umi_last_activity', Date.now().toString());
+        if (inactivityTimer) clearTimeout(inactivityTimer);
+        inactivityTimer = setTimeout(async () => {
+            const last = parseInt(localStorage.getItem('umi_last_activity')||'0',10);
+            if (Date.now() - last >= timeoutMs()) {
+                try { window.authService.clearAuthData(); } catch(e){}
+                localStorage.setItem('umi_logged_out', Date.now().toString());
+                try { window.authService.logout(); } catch(e){ window.location.href = '../auth/signin.html'; }
+            } else {
+                resetTimer(false);
+            }
+        }, timeoutMs());
+    }
+    ['click','mousemove','keydown','scroll','touchstart'].forEach(evt => {
+        window.addEventListener(evt, () => resetTimer(true), {passive:true});
+    });
+    window.addEventListener('storage', (e) => {
+        if (e.key === 'umi_last_activity') {
+            if (inactivityTimer) clearTimeout(inactivityTimer);
+            inactivityTimer = setTimeout(() => {
+                const last = parseInt(localStorage.getItem('umi_last_activity')||'0',10);
+                if (Date.now() - last >= timeoutMs()) {
+                    localStorage.setItem('umi_logged_out', Date.now().toString());
+                    try { window.authService.logout(); } catch(e){ window.location.href = '../auth/signin.html'; }
+                }
+            }, timeoutMs());
+        }
+        if (e.key === 'umi_logged_out') {
+            try { window.authService.clearAuthData(); } catch(e){}
+            setTimeout(()=> { window.location.href = '../auth/signin.html'; }, 800);
+        }
+    });
+    resetTimer(true);
+})();

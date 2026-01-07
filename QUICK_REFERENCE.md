@@ -322,7 +322,88 @@ OPERATIONS ✅
 
 ---
 
-## 📞 Quick Help
+## � Recent Security & Compliance Enhancements (Jan 2026)
+
+### Tier-Based Feature Gating
+```
+✓ TierService.cs - Feature availability matrix
+✓ FeatureGateMiddleware.cs - Enforces feature access
+✓ Plans: Free, Care, Enterprise
+  - Free: inventory:view only
+  - Care: inventory:view, inventory:create, inventory:export
+  - Enterprise: all features + reports:advanced
+```
+
+### Rate Limiting by Tier
+```
+✓ TierRateLimitMiddleware.cs - Per-tenant rate limits
+✓ Free: 60 req/min
+✓ Care: 300 req/min
+✓ Enterprise: 1000 req/min
+✓ 429 (Too Many Requests) when limit exceeded
+```
+
+### Super-Admin Safe Bypass & Audit
+```
+✓ SuperAdminContextHelper.cs - Safe cross-tenant context
+✓ AuditService.cs - Audit logging scaffolding
+✓ docs/SUPERADMIN_BYPASS.md - Best practices guide
+✓ All elevated operations audited and logged
+✓ Prevents accidental RLS bypass with tracking
+```
+
+### Super-Admin Endpoints (Global)
+```
+✓ GET/POST/PUT /api/v1/superadmin/tenants
+✓ GET /api/v1/superadmin/users (all)
+✓ GET /api/v1/superadmin/tenants/{id}/users
+✓ PUT /api/v1/superadmin/users/{id}/status
+✓ GET /api/v1/superadmin/audit (audit logs)
+```
+
+### Integration Test Scaffolding
+```
+✓ MultiTenantIntegrationTests.cs - 30+ test placeholders
+  - MultiTenantIsolationTests
+  - RoleBasedAccessControlTests
+  - BranchAccessControlTests
+  - RowLevelSecurityTests
+  - TierLimitEnforcementTests
+  - AuditLoggingTests
+```
+
+### Updated Documentation
+```
+✓ MULTI_TENANCY_IMPLEMENTATION.md - Section: "Recent Enhancements (Jan 2026)"
+✓ docs/SUPERADMIN_BYPASS.md - Super-admin patterns & recommendations
+✓ UmiHealth.MinimalApi/SuperAdminEndpoints.cs - Endpoint code
+```
+
+---
+
+## 📂 New Files Created This Session (Jan 2026)
+
+**Services** (4 files)
+- `Services/ITierService.cs` - Tier interface
+- `Services/TierService.cs` - Feature/rate limit lookup
+- `Services/SuperAdminContextHelper.cs` - Cross-tenant context helpers
+- `Services/AuditService.cs` - Audit logging scaffolding
+
+**Middleware** (2 files)
+- `Middleware/FeatureGateMiddleware.cs` - Feature access enforcement
+- `Middleware/TierRateLimitMiddleware.cs` - Rate limiting enforcement
+
+**Endpoints** (1 file)
+- `SuperAdminEndpoints.cs` - Super-admin CRUD endpoints
+
+**Tests** (1 file)
+- `.Tests/MultiTenantIntegrationTests.cs` - 30+ test placeholders
+
+**Documentation** (2 files)
+- `docs/SUPERADMIN_BYPASS.md` - Safe bypass recommendations
+- `MULTI_TENANCY_IMPLEMENTATION.md` - Updated with Jan 2026 enhancements
+
+---
 
 **API won't start?**
 - Check PostgreSQL is running
@@ -381,10 +462,9 @@ A **production-ready backend** with:
 
 ---
 
-**Last Updated**: December 24, 2025  
-**Session Time**: ~4 hours  
-**Productivity**: Completed Priorities 1, 2, and significant security setup  
-**Status**: Ready for next phase ✅
+**Last Updated**: January 7, 2026  
+**Latest Session**: Tier enforcement, super-admin safe bypass, audit logging, integration tests  
+**Status**: Multi-tenancy scaffolding complete; authorization middleware and persistent audit needed next ✅
 
 ---
 

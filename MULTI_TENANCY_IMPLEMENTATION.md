@@ -274,6 +274,53 @@ builder.Services.AddScoped<IBranchReportingService, BranchReportingService>();
 - Permission boundary testing
 - Cross-tenant access prevention
 
+## Recent Enhancements (Jan 2026)
+
+### Tier-Based Feature Gating & Rate Limiting
+- **Location**: `UmiHealth.MinimalApi/Services/TierService.cs`
+- **Middleware**: `FeatureGateMiddleware.cs`, `TierRateLimitMiddleware.cs`
+- **Features**:
+  - Per-tenant feature availability based on subscription plan (Free, Care, Enterprise)
+  - Rate limiting enforced per tenant per minute
+  - Extensible feature matrix and limit configuration
+  - Middleware-based enforcement without modifying endpoint code
+
+### Super-Admin Safe Bypass & Context Management
+- **Location**: `UmiHealth.MinimalApi/Services/SuperAdminContextHelper.cs`, `SuperAdminContextHelper.sql`
+- **Features**:
+  - Recommended patterns for super-admin cross-tenant operations
+  - Audit entry scaffolding to track all elevated actions
+  - DB context builder for intentional RLS bypass (with audit)
+  - Documentation in `docs/SUPERADMIN_BYPASS.md`
+
+### Audit Logging Scaffolding
+- **Location**: `UmiHealth.MinimalApi/Services/AuditService.cs`
+- **Features**:
+  - In-memory audit log for super-admin actions, role enforcement, cross-tenant access
+  - Ready to integrate with `audit_logs` database table
+  - Categorized logging: SUPER_ADMIN_ACTION, ROLE_ENFORCEMENT, CROSS_TENANT_ACCESS
+
+### Super-Admin & Operations Endpoints
+- **Location**: `UmiHealth.MinimalApi/SuperAdminEndpoints.cs`
+- **Endpoints**:
+  - `GET/POST/PUT /api/v1/superadmin/tenants` - Tenant CRUD (global)
+  - `GET /api/v1/superadmin/users` - List all users (global)
+  - `GET /api/v1/superadmin/tenants/{tenantId}/users` - Tenant-scoped users
+  - `PUT /api/v1/superadmin/users/{userId}/status` - Force user status (with audit)
+  - `GET /api/v1/superadmin/audit` - Retrieve audit logs
+- **TODO**: Add authorization middleware to enforce super-admin/operations role checks
+
+### Integration Test Scaffolding
+- **Location**: `UmiHealth.MinimalApi.Tests/MultiTenantIntegrationTests.cs`
+- **Test Categories**:
+  - MultiTenantIsolationTests: Feature gating, rate limits, context helper
+  - RoleBasedAccessControlTests: Role hierarchy, role-specific access
+  - BranchAccessControlTests: Branch isolation and cross-branch access
+  - RowLevelSecurityTests: Tenant data isolation and RLS bypass
+  - TierLimitEnforcementTests: Feature blocking and rate limiting
+  - AuditLoggingTests: Action audit trails
+- **Status**: Placeholders ready for HTTP/DB assertions
+
 ## Future Enhancements
 
 ### Scalability
@@ -287,14 +334,24 @@ builder.Services.AddScoped<IBranchReportingService, BranchReportingService>();
 - Advanced analytics and insights
 - Mobile app integration
 
+### Remaining Work
+1. **Authorization Middleware**: Add role-based checks (super-admin/operations only) to super-admin endpoints
+2. **Full Integration Tests**: Replace test placeholders with real HTTP calls and database assertions
+3. **Persistent Audit**: Integrate audit service with audit_logs table (currently in-memory)
+4. **Tier Enforcement Integration**: Connect tier service to actual tenant plans in database
+5. **Rate Limit Refinement**: Implement sliding window or token bucket instead of simple minute counter
+
 ## Conclusion
 
 The multi-tenancy implementation provides a robust, secure, and scalable foundation for Umi Health's branch operations. The hybrid approach with row-level security ensures data isolation while maintaining cost efficiency. The comprehensive branch support features enable efficient multi-branch operations with proper security controls and analytics capabilities.
 
+Recent additions (Jan 2026) introduce tier-based feature gating, super-admin safe operation patterns, audit logging, and integration test scaffolding to strengthen security posture and operational compliance.
+
 The implementation follows best practices for:
-- Security (RLS, granular permissions)
-- Performance (optimized queries, proper indexing)
+- Security (RLS, granular permissions, audit trails)
+- Performance (optimized queries, proper indexing, tier-based rate limiting)
 - Maintainability (clean architecture, separation of concerns)
 - Scalability (modular design, extensible architecture)
+- Compliance (audit logging, super-admin oversight, feature control)
 
-All core multi-tenancy features are now implemented and ready for production deployment.
+Core multi-tenancy features are implemented and production-ready. Recent enhancements complete the tier and audit scaffolding; full integration and authorization middleware are the next priorities.

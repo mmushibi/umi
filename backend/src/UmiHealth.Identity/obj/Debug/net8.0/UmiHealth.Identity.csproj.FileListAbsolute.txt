@@ -15,12 +15,10 @@ C:\Users\sepio\Desktop\Umi_Health\Umi_Health\Umi_Health\backend\src\UmiHealth.Id
 C:\Users\sepio\Desktop\Umi_Health\Umi_Health\Umi_Health\backend\src\UmiHealth.Identity\bin\Debug\net8.0\UmiHealth.Identity.pdb
 C:\Users\sepio\Desktop\Umi_Health\Umi_Health\Umi_Health\backend\src\UmiHealth.Identity\bin\Debug\net8.0\UmiHealth.Core.dll
 C:\Users\sepio\Desktop\Umi_Health\Umi_Health\Umi_Health\backend\src\UmiHealth.Identity\bin\Debug\net8.0\UmiHealth.Domain.dll
-C:\Users\sepio\Desktop\Umi_Health\Umi_Health\Umi_Health\backend\src\UmiHealth.Identity\bin\Debug\net8.0\UmiHealth.Infrastructure.dll
 C:\Users\sepio\Desktop\Umi_Health\Umi_Health\Umi_Health\backend\src\UmiHealth.Identity\bin\Debug\net8.0\UmiHealth.Persistence.dll
 C:\Users\sepio\Desktop\Umi_Health\Umi_Health\Umi_Health\backend\src\UmiHealth.Identity\bin\Debug\net8.0\UmiHealth.Shared.dll
 C:\Users\sepio\Desktop\Umi_Health\Umi_Health\Umi_Health\backend\src\UmiHealth.Identity\bin\Debug\net8.0\UmiHealth.Core.pdb
 C:\Users\sepio\Desktop\Umi_Health\Umi_Health\Umi_Health\backend\src\UmiHealth.Identity\bin\Debug\net8.0\UmiHealth.Shared.pdb
-C:\Users\sepio\Desktop\Umi_Health\Umi_Health\Umi_Health\backend\src\UmiHealth.Identity\bin\Debug\net8.0\UmiHealth.Infrastructure.pdb
 C:\Users\sepio\Desktop\Umi_Health\Umi_Health\Umi_Health\backend\src\UmiHealth.Identity\bin\Debug\net8.0\UmiHealth.Domain.pdb
 C:\Users\sepio\Desktop\Umi_Health\Umi_Health\Umi_Health\backend\src\UmiHealth.Identity\bin\Debug\net8.0\UmiHealth.Persistence.pdb
 C:\Users\sepio\Desktop\Umi_Health\Umi_Health\Umi_Health\backend\src\UmiHealth.Identity\obj\Debug\net8.0\UmiHealt.FAAFAB24.Up2Date

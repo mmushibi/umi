@@ -20,6 +20,32 @@ using UmiHealth.Infrastructure.Data;
 
 var builder = WebApplication.CreateBuilder(args);
 
+// Add environment-specific configuration files
+builder.Configuration
+    .SetBasePath(builder.Environment.ContentRootPath)
+    .AddJsonFile("appsettings.json", optional: false, reloadOnChange: true)
+    .AddJsonFile($"appsettings.{builder.Environment.EnvironmentName}.json", optional: true, reloadOnChange: true)
+    .AddJsonFile("appsettings.Security.json", optional: true, reloadOnChange: true)
+    .AddEnvironmentVariables()  // Read from environment variables (highest priority)
+    .Build();
+
+// Validate critical configuration on startup
+var jwtSecret = builder.Configuration["Jwt:Key"];
+if (string.IsNullOrEmpty(jwtSecret) || jwtSecret.Length < 32)
+{
+    throw new InvalidOperationException(
+        "JWT_SECRET is not configured or too short (min 32 chars). " +
+        "Set the JWT_SECRET environment variable before starting the application.");
+}
+
+var connectionString = builder.Configuration.GetConnectionString("DefaultConnection");
+if (string.IsNullOrEmpty(connectionString))
+{
+    throw new InvalidOperationException(
+        "DATABASE_CONNECTION is not configured. " +
+        "Set the DefaultConnection connection string or DATABASE_CONNECTION environment variable.");
+}
+
 // Add services to the container
 builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();

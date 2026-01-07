@@ -16,7 +16,7 @@ services:
       # PostgreSQL Configuration (sensitive data from .env file)
       - POSTGRES_DB=UmiHealth
       - POSTGRES_USER=umihealth
-      - POSTGRES_PASSWORD=${POSTGRES_PASSWORD:-UmiHealth@2024!}
+      - POSTGRES_PASSWORD=root
       
       # API Configuration
       - ASPNETCORE_ENVIRONMENT=Production

@@ -223,6 +223,8 @@ namespace UmiHealth.Application.DTOs
         public DateTime CreatedAt { get; set; }
         public DateTime? CompletedAt { get; set; }
         public DateTime? ExpiresAt { get; set; }
+        public byte[] Data { get; set; } = Array.Empty<byte>();
+        public string FileName { get; set; } = "backup.zip";
     }
 
     public class CreateBackupDto

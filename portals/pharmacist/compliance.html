@@ -902,31 +902,23 @@
   <script>
     function complianceSystem() {
       return {
-        // Initialize backend integration
-        const pageIntegration = new PageIntegrationTemplate('pharmacist-compliance', {
-            requireAuth: true,
-            enableRealTime: false,
-            enableCaching: true
-        });
-        
-        return {
-            ...pageIntegration,
-            backendHelper: window.backendHelper,
-            apiClient: window.apiClient,
-            authManager: window.authManager,
-            isAuthenticated: false,
-            loading: false,
-            error: null,
+        // Properties
         sidebarOpen: false,
         loading: true,
         pharmacyInfo: {},
         licenseData: null,
+        error: null,
+        
+        // Initialize backend integration
+        async init() {
+            try {
+                if (!window.authManager.isAuthenticated()) {
                     this.error = 'Please login to access this page';
                     return;
                 }
                 
                 // Initialize backend integration
-                await this.backendHelper.initPage('pharmacist-compliance', {
+                await window.backendHelper.initPage('pharmacist-compliance', {
                     enableRealTime: false,
                     initialData: this.getInitialDataConfig()
                 });
@@ -942,7 +934,7 @@
                 console.error('Failed to initialize pharmacist-compliance page:', error);
                 this.error = 'Failed to initialize page';
             }
-        },,
+        },
 
         async loadPharmacyInfo() {
           try {

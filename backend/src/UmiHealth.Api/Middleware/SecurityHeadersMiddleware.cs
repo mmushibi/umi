@@ -1,18 +1,24 @@
+using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Http;
+using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.DependencyInjection;
+using System;
 using System.Threading.Tasks;
 
 namespace UmiHealth.Api.Middleware
 {
     /// <summary>
-    /// Middleware to add security headers to all responses
+    /// Enhanced middleware to add comprehensive security headers to all responses
     /// </summary>
     public class SecurityHeadersMiddleware
     {
         private readonly RequestDelegate _next;
+        private readonly IConfiguration _configuration;
 
-        public SecurityHeadersMiddleware(RequestDelegate next)
+        public SecurityHeadersMiddleware(RequestDelegate next, IConfiguration configuration)
         {
             _next = next;
+            _configuration = configuration;
         }
 
         public async Task InvokeAsync(HttpContext context)
@@ -20,17 +26,20 @@ namespace UmiHealth.Api.Middleware
             // Add security headers
             if (!context.Response.HasStarted)
             {
-                // Content Security Policy
-                context.Response.Headers.Add("Content-Security-Policy", 
+                // Enhanced Content Security Policy with configurable values
+                var csp = _configuration["SecurityHeaders:ContentSecurityPolicy"] ??
                     "default-src 'self'; " +
-                    "script-src 'self' 'unsafe-inline' 'unsafe-eval'; " +
-                    "style-src 'self' 'unsafe-inline'; " +
+                    "script-src 'self' 'unsafe-inline' 'unsafe-eval' https://cdn.jsdelivr.net https://cdnjs.cloudflare.com; " +
+                    "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com https://cdnjs.cloudflare.com; " +
+                    "font-src 'self' https://fonts.gstatic.com https://cdnjs.cloudflare.com; " +
                     "img-src 'self' data: https:; " +
-                    "font-src 'self' data:; " +
                     "connect-src 'self' wss:; " +
                     "frame-ancestors 'none'; " +
+                    "form-action 'self'; " +
                     "base-uri 'self'; " +
-                    "form-action 'self'");
+                    "upgrade-insecure-requests";
+
+                context.Response.Headers.Add("Content-Security-Policy", csp);
 
                 // Prevent clickjacking
                 context.Response.Headers.Add("X-Frame-Options", "DENY");
@@ -44,8 +53,8 @@ namespace UmiHealth.Api.Middleware
                 // Referrer Policy
                 context.Response.Headers.Add("Referrer-Policy", "strict-origin-when-cross-origin");
 
-                // Permissions Policy
-                context.Response.Headers.Add("Permissions-Policy", 
+                // Enhanced Permissions Policy
+                var permissionsPolicy = _configuration["SecurityHeaders:PermissionsPolicy"] ??
                     "geolocation=(), " +
                     "microphone=(), " +
                     "camera=(), " +
@@ -53,13 +62,25 @@ namespace UmiHealth.Api.Middleware
                     "usb=(), " +
                     "magnetometer=(), " +
                     "gyroscope=(), " +
-                    "accelerometer=()");
+                    "accelerometer=(), " +
+                    "interest-cohort=()";
+
+                context.Response.Headers.Add("Permissions-Policy", permissionsPolicy);
 
                 // HSTS (only in production with HTTPS)
                 if (context.Request.IsHttps)
                 {
-                    context.Response.Headers.Add("Strict-Transport-Security", 
-                        "max-age=31536000; includeSubDomains; preload");
+                    var hstsMaxAge = _configuration["SecurityHeaders:HstsMaxAge"] ?? "31536000";
+                    var includeSubDomains = _configuration["SecurityHeaders:IncludeSubDomains"] ?? "true";
+                    var preload = _configuration["SecurityHeaders:Preload"] ?? "true";
+
+                    var hsts = $"max-age={hstsMaxAge}";
+                    if (bool.Parse(includeSubDomains))
+                        hsts += "; includeSubDomains";
+                    if (bool.Parse(preload))
+                        hsts += "; preload";
+
+                    context.Response.Headers.Add("Strict-Transport-Security", hsts);
                 }
 
                 // Remove server information
@@ -79,5 +100,28 @@ namespace UmiHealth.Api.Middleware
 
             await _next(context);
         }
+    }
+
+    public static class SecurityHeadersMiddlewareExtensions
+    {
+        public static IApplicationBuilder UseSecurityHeaders(this IApplicationBuilder builder)
+        {
+            return builder.UseMiddleware<SecurityHeadersMiddleware>();
+        }
+
+        public static IServiceCollection AddSecurityHeaders(this IServiceCollection services, IConfiguration configuration)
+        {
+            services.Configure<SecurityHeadersOptions>(configuration.GetSection("SecurityHeaders"));
+            return services;
+        }
+    }
+
+    public class SecurityHeadersOptions
+    {
+        public string ContentSecurityPolicy { get; set; }
+        public string PermissionsPolicy { get; set; }
+        public string HstsMaxAge { get; set; } = "31536000";
+        public bool IncludeSubDomains { get; set; } = true;
+        public bool Preload { get; set; } = true;
     }
 }

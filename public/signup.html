@@ -931,7 +931,7 @@
     window.authAPI = {
       register: async (data) => {
         try {
-          const response = await fetch('http://localhost:5000/api/v1/auth/register', {
+          const response = await fetch('http://localhost:5001/api/v1/auth/register', {
             method: 'POST',
             mode: 'cors',
             headers: {
@@ -989,7 +989,7 @@
           if (error.message && error.message.includes('Failed to fetch')) {
             return {
               success: false,
-              message: 'Network Error: Unable to connect to the backend server. Please ensure the backend is running on http://localhost:5000'
+              message: 'Network Error: Unable to connect to backend server. Please ensure backend is running on http://localhost:5001'
             };
           }
           
@@ -1100,7 +1100,7 @@
             }
 
             const result = await window.UmiHealthInformationSystemsAPI.get(
-              `http://localhost:5000/api/auth/check-pharmacy-name/${encodeURIComponent(this.signupForm.pharmacyName)}`
+              `http://localhost:5001/api/auth/check-pharmacy-name/${encodeURIComponent(this.signupForm.pharmacyName)}`
             );
 
             if (!result.success) {
@@ -1292,16 +1292,15 @@
               this.successMessage = 'Welcome to Umi Health! Your account has been created successfully. Redirecting to setup...';
                 
               // Store auth data
-              localStorage.setItem('umi_access_token', result.accessToken);
-              localStorage.setItem('umi_refresh_token', result.refreshToken);
-              localStorage.setItem('umi_current_user', JSON.stringify(result.user));
-              localStorage.setItem('umi_current_tenant', JSON.stringify(result.tenant));
-              localStorage.setItem('umi_current_subscription', JSON.stringify(result.subscription));
-              localStorage.setItem('umi_tenant_id', result.tenant.id);
+              localStorage.setItem('umi_access_token', result.data.accessToken);
+              localStorage.setItem('umi_refresh_token', result.data.refreshToken);
+              localStorage.setItem('umi_current_user', JSON.stringify(result.data.user));
+              localStorage.setItem('umi_current_tenant', JSON.stringify(result.data.tenant));
+              localStorage.setItem('umi_tenant_id', result.data.tenant.id);
 
               // Redirect to setup page
               setTimeout(() => {
-                window.location.href = result.redirectUrl || '/account/setup.html';
+                window.location.href = result.redirectUrl || '/portals/admin/home.html';
               }, 2000);
             } else {
               this.errorMessage = result.message || 'Failed to create account. Please try again.';

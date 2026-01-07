@@ -51,8 +51,9 @@ app.post('/api/v1/auth/register', (req, res) => {
     res.json({
         success: true,
         message: 'Registration successful',
+        redirectUrl: '/portals/admin/home.html',
         data: {
-            token: 'mock-jwt-token-' + Date.now(),
+            accessToken: 'mock-jwt-token-' + Date.now(),
             refreshToken: 'mock-refresh-token-' + Date.now(),
             user: {
                 id: 'user-' + Date.now(),
@@ -67,6 +68,33 @@ app.post('/api/v1/auth/register', (req, res) => {
                 name: pharmacyName
             }
         }
+    });
+});
+
+// Mock pharmacy name check endpoint
+app.get('/api/auth/check-pharmacy-name/:pharmacyName', (req, res) => {
+    const { pharmacyName } = req.params;
+    
+    // Simple validation - in real app this would check database
+    if (!pharmacyName || pharmacyName.length < 3) {
+        return res.json({
+            success: false,
+            message: 'Pharmacy name must be at least 3 characters long'
+        });
+    }
+    
+    // Simulate checking if name is already taken
+    const takenNames = ['test pharmacy', 'demo pharmacy', 'sample pharmacy'];
+    if (takenNames.includes(pharmacyName.toLowerCase())) {
+        return res.json({
+            success: false,
+            message: 'This pharmacy name is already taken'
+        });
+    }
+    
+    res.json({
+        success: true,
+        message: 'Pharmacy name is available'
     });
 });
 

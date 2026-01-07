@@ -1,0 +1,5 @@
+:root{--font-sans: Arial, sans-serif}
+.center-intro{text-align:center;padding:50px;font-family:var(--font-sans)}
+.muted-sub{opacity:0.8;margin-top:0.5rem}
+.large-muted{font-size:2rem;margin-bottom:1rem;opacity:0.5}
+.small-muted{font-size:0.9rem;opacity:0.6;margin-top:0.5rem}

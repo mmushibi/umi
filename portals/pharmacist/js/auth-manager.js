@@ -153,6 +153,60 @@ class AuthManager {
 // Export singleton instance
 window.authManager = new AuthManager();
 
+// Setup inactivity auto-logout (syncs across tabs)
+(function setupInactivityLogout() {
+    const getTimeoutMinutes = () => {
+        const v = localStorage.getItem('sessionTimeoutMinutes');
+        return v ? parseInt(v, 10) : 30;
+    };
+    const timeoutMs = () => getTimeoutMinutes() * 60 * 1000;
+
+    let inactivityTimer = null;
+    function resetTimer(broadcast = true) {
+        localStorage.setItem('umi_last_activity', Date.now().toString());
+        if (inactivityTimer) clearTimeout(inactivityTimer);
+        inactivityTimer = setTimeout(() => {
+            const last = parseInt(localStorage.getItem('umi_last_activity')||'0',10);
+            if (Date.now() - last >= timeoutMs()) {
+                window.authManager.showToast('Session expired due to inactivity', 'warning');
+                localStorage.removeItem('authToken');
+                localStorage.removeItem('umi_access_token');
+                localStorage.removeItem('umi_currentUser');
+                localStorage.setItem('umi_logged_out', Date.now().toString());
+                setTimeout(()=> { window.location.href = '../auth/signin.html'; }, 1000);
+            } else {
+                resetTimer(false);
+            }
+        }, timeoutMs());
+    }
+
+    ['click','mousemove','keydown','scroll','touchstart'].forEach(evt => {
+        window.addEventListener(evt, () => resetTimer(true), {passive:true});
+    });
+
+    window.addEventListener('storage', (e) => {
+        if (e.key === 'umi_last_activity') {
+            if (inactivityTimer) clearTimeout(inactivityTimer);
+            inactivityTimer = setTimeout(() => {
+                const last = parseInt(localStorage.getItem('umi_last_activity')||'0',10);
+                if (Date.now() - last >= timeoutMs()) {
+                    localStorage.setItem('umi_logged_out', Date.now().toString());
+                    window.location.href = '../auth/signin.html';
+                }
+            }, timeoutMs());
+        }
+        if (e.key === 'umi_logged_out') {
+            window.authManager.showToast('You have been logged out', 'info');
+            localStorage.removeItem('authToken');
+            localStorage.removeItem('umi_access_token');
+            localStorage.removeItem('umi_currentUser');
+            setTimeout(()=> { window.location.href = '../auth/signin.html'; }, 800);
+        }
+    });
+
+    resetTimer(true);
+})();
+
 // Make it available globally for Alpine.js
 window.isAuthenticated = window.authManager.isAuthenticated;
 window.showToast = (message, type, duration) => window.authManager.showToast(message, type, duration);

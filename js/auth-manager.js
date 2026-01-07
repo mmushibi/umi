@@ -96,7 +96,12 @@ class AuthManager {
      */
     async logout() {
         try {
-            await this.apiClient.logout();
+            // Get refresh token from storage
+            const refreshToken = localStorage.getItem('auth_tokens') 
+                ? JSON.parse(localStorage.getItem('auth_tokens')).refreshToken 
+                : null;
+            
+            await this.apiClient.logout(refreshToken);
             this.currentUser = null;
             this.notifyAuthChange();
 
@@ -242,6 +247,52 @@ class AuthManager {
 
 // Create global instance
 const authManager = new AuthManager(apiClient);
+
+// Setup inactivity auto-logout (syncs across tabs)
+(function setupInactivityLogout() {
+    const getTimeoutMinutes = () => {
+        const v = localStorage.getItem('sessionTimeoutMinutes');
+        return v ? parseInt(v, 10) : 30;
+    };
+    const timeoutMs = () => getTimeoutMinutes() * 60 * 1000;
+    let inactivityTimer = null;
+
+    function resetTimer(broadcast = true) {
+        localStorage.setItem('umi_last_activity', Date.now().toString());
+        if (inactivityTimer) clearTimeout(inactivityTimer);
+        inactivityTimer = setTimeout(async () => {
+            const last = parseInt(localStorage.getItem('umi_last_activity')||'0',10);
+            if (Date.now() - last >= timeoutMs()) {
+                try { await authManager.logout(); } catch(e) { console.error(e); }
+                localStorage.setItem('umi_logged_out', Date.now().toString());
+            } else {
+                resetTimer(false);
+            }
+        }, timeoutMs());
+    }
+
+    ['click','mousemove','keydown','scroll','touchstart'].forEach(evt => {
+        window.addEventListener(evt, () => resetTimer(true), {passive:true});
+    });
+
+    window.addEventListener('storage', (e) => {
+        if (e.key === 'umi_last_activity') {
+            if (inactivityTimer) clearTimeout(inactivityTimer);
+            inactivityTimer = setTimeout(() => {
+                const last = parseInt(localStorage.getItem('umi_last_activity')||'0',10);
+                if (Date.now() - last >= timeoutMs()) {
+                    localStorage.setItem('umi_logged_out', Date.now().toString());
+                    try { authManager.logout(); } catch(e) { window.location.href = '/auth/signin.html'; }
+                }
+            }, timeoutMs());
+        }
+        if (e.key === 'umi_logged_out') {
+            try { authManager.logout(); } catch(e) { window.location.href = '/auth/signin.html'; }
+        }
+    });
+
+    resetTimer(true);
+})();
 
 // Export for use
 if (typeof module !== 'undefined' && module.exports) {

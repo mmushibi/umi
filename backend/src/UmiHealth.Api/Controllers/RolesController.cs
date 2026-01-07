@@ -2,7 +2,7 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using UmiHealth.Core.Entities;
-using UmiHealth.Infrastructure;
+using UmiHealth.Persistence;
 
 namespace UmiHealth.Api.Controllers
 {
