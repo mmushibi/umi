@@ -1,3 +1,4 @@
+using UmiHealth.Core.Interfaces;
 using UmiHealth.Infrastructure.Cache;
 
 namespace UmiHealth.Infrastructure.Cache;

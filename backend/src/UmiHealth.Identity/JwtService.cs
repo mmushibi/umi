@@ -2,12 +2,13 @@ using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 using System.Security.Cryptography;
 using System.Text;
+using Microsoft.Extensions.Configuration;
+using Microsoft.IdentityModel.Tokens;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
-using Microsoft.IdentityModel.Tokens;
 using UmiHealth.Core.Entities;
-using UmiHealth.Infrastructure;
 using UmiHealth.Core.Interfaces;
+using UmiHealth.Persistence;
 
 namespace UmiHealth.Identity
 {
@@ -16,9 +17,8 @@ namespace UmiHealth.Identity
         private readonly JwtSettings _jwtSettings;
         private readonly UmiHealthDbContext _context;
         private readonly ILogger<JwtService> _logger;
-        private readonly RSA _privateKey;
-        private readonly RSA _publicKey;
         private readonly ITokenBlacklistService _tokenBlacklistService;
+        private readonly byte[] _symmetricKey;
 
         public JwtService(
             JwtSettings jwtSettings,
@@ -30,14 +30,17 @@ namespace UmiHealth.Identity
             _context = context;
             _logger = logger;
             _tokenBlacklistService = tokenBlacklistService;
-            _privateKey = CreateOrLoadPrivateKey();
-            _publicKey = CreateOrLoadPublicKey();
+            
+            if (string.IsNullOrEmpty(_jwtSettings.Key))
+                throw new ArgumentNullException(nameof(jwtSettings.Key), "JWT Key not configured");
+                
+            _symmetricKey = Encoding.ASCII.GetBytes(_jwtSettings.Key);
         }
 
         public string GenerateAccessToken(User user, IEnumerable<Role> roles, Guid? branchId = null)
         {
             var tokenHandler = new JwtSecurityTokenHandler();
-            var key = new RsaSecurityKey(_privateKey);
+            var key = new SymmetricSecurityKey(_symmetricKey);
 
             var claims = new List<Claim>
             {
@@ -85,7 +88,7 @@ namespace UmiHealth.Identity
                 Expires = DateTime.UtcNow.AddMinutes(_jwtSettings.AccessTokenExpiration),
                 Issuer = _jwtSettings.Issuer,
                 Audience = _jwtSettings.Audience,
-                SigningCredentials = new SigningCredentials(key, SecurityAlgorithms.RsaSha256)
+                SigningCredentials = new SigningCredentials(key, SecurityAlgorithms.HmacSha256)
             };
 
             var token = tokenHandler.CreateToken(tokenDescriptor);
@@ -128,7 +131,7 @@ namespace UmiHealth.Identity
                 // Blacklist the associated JWT token if it exists
                 if (!string.IsNullOrEmpty(token.JwtTokenId))
                 {
-                    await _tokenBlacklistService.BlacklistTokenAsync(token.JwtTokenId, token.ExpiresAt);
+                    await _tokenBlacklistService.BlacklistTokenAsync(token.JwtTokenId, "Token revoked");
                 }
                 
                 await _context.SaveChangesAsync(cancellationToken);
@@ -150,7 +153,7 @@ namespace UmiHealth.Identity
                 // Blacklist the associated JWT token if it exists
                 if (!string.IsNullOrEmpty(existingToken.JwtTokenId))
                 {
-                    await _tokenBlacklistService.BlacklistTokenAsync(existingToken.JwtTokenId, existingToken.ExpiresAt);
+                    await _tokenBlacklistService.BlacklistTokenAsync(existingToken.JwtTokenId, "Token revoked");
                 }
             }
 
@@ -165,10 +168,12 @@ namespace UmiHealth.Identity
         {
             var tokenValidationParameters = new TokenValidationParameters
             {
-                ValidateAudience = false,
-                ValidateIssuer = false,
                 ValidateIssuerSigningKey = true,
-                IssuerSigningKey = new RsaSecurityKey(_publicKey),
+                IssuerSigningKey = new SymmetricSecurityKey(_symmetricKey),
+                ValidateIssuer = true,
+                ValidIssuer = _jwtSettings.Issuer,
+                ValidateAudience = true,
+                ValidAudience = _jwtSettings.Audience,
                 ValidateLifetime = false // We're validating an expired token
             };
 
@@ -176,7 +181,7 @@ namespace UmiHealth.Identity
             var principal = tokenHandler.ValidateToken(token, tokenValidationParameters, out SecurityToken securityToken);
 
             if (securityToken is not JwtSecurityToken jwtSecurityToken || 
-                !jwtSecurityToken.Header.Alg.Equals(SecurityAlgorithms.RsaSha256, StringComparison.InvariantCultureIgnoreCase))
+                !jwtSecurityToken.Header.Alg.Equals(SecurityAlgorithms.HmacSha256, StringComparison.InvariantCultureIgnoreCase))
             {
                 throw new SecurityTokenException("Invalid token");
             }
@@ -184,47 +189,5 @@ namespace UmiHealth.Identity
             return principal;
         }
 
-        private RSA CreateOrLoadPrivateKey()
-        {
-            var rsa = System.Security.Cryptography.RSA.Create();
-            
-            // Try to load from configuration
-            var privateKeyPem = _jwtSettings.Secret;
-            if (!string.IsNullOrEmpty(privateKeyPem))
-            {
-                try
-                {
-                    rsa.ImportFromPem(privateKeyPem);
-                    return rsa;
-                }
-                catch
-                {
-                    // If loading fails, create new key
-                }
-            }
-
-            // Generate new key pair
-            rsa.KeySize = 2048;
-            
-            // Export the public key for storage
-            var publicKeyPem = rsa.ExportRSAPublicKeyPem();
-            var privateKeyPemGenerated = rsa.ExportRSAPrivateKeyPem();
-            
-            // In a production environment, you would store these securely
-            // For now, we'll use the generated key in memory
-            
-            return rsa;
-        }
-
-        private RSA CreateOrLoadPublicKey()
-        {
-            var rsa = System.Security.Cryptography.RSA.Create();
-            
-            // Use the public part of the private key
-            var publicKey = _privateKey.ExportRSAPublicKey();
-            rsa.ImportRSAPublicKey(publicKey, out _);
-            
-            return rsa;
-        }
     }
 }

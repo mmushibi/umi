@@ -9,6 +9,7 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Glacial+Indifference:wght@400;500;600;700&family=Material+Symbols+Rounded:wght@300;400;500;600;700&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="../../assets/css/tailwind.output.css">
+  <link rel="stylesheet" href="../../assets/css/inline-fixes.css">
   <!-- Include API and Data Sync Services -->
   <script src="../shared/js/data-sync.js"></script>
   <script src="../shared/js/role-based-access.js"></script>
@@ -62,11 +63,7 @@
       background: rgba(255, 255, 255, 0.3);
     }
 
-    /* Firefox scrollbar */
-    * {
-      scrollbar-width: thin;
-      scrollbar-color: rgba(255, 255, 255, 0.2) rgba(255, 255, 255, 0.05);
-    }
+    /* Firefox scrollbar: removed non-portable properties to improve cross-browser compatibility */
 
     .dashboard-container {
       display: flex;
@@ -811,7 +808,7 @@
         <div class="page-header">
           <div>
             <h2 class="page-title">User Management</h2>
-            <p style="opacity: 0.8; margin-top: 0.5rem;">Manage all user accounts across the UmiHealthInformationSystems platform</p>
+            <p class="muted-sub">Manage all user accounts across the UmiHealthInformationSystems platform</p>
           </div>
           <div class="page-actions">
             <button class="btn btn-secondary" @click="exportUsers">
@@ -911,11 +908,11 @@
               <tr x-show="!loading && filteredUsers.length === 0">
                 <td colspan="7">
                   <div class="loading-state">
-                    <div style="font-size: 2rem; margin-bottom: 1rem; opacity: 0.5;">
+                    <div class="large-muted">
                       <span class="material-symbols-rounded">people</span>
                     </div>
                     <div>No users found</div>
-                    <div style="font-size: 0.9rem; opacity: 0.6; margin-top: 0.5rem;">
+                    <div class="small-muted">
                       Try adjusting your search or filters
                     </div>
                   </div>
@@ -979,34 +976,36 @@
     function searchComponent() {
       return {
         // Initialize backend integration
-        const pageIntegration = new PageIntegrationTemplate('super-admin-users', {
-            requireAuth: true,
-            enableRealTime: false,
-            enableCaching: true
-        });
-        
-        return {
-            ...pageIntegration,
-            backendHelper: window.backendHelper,
-            apiClient: window.apiClient,
-            authManager: window.authManager,
-            isAuthenticated: false,
-            loading: false,
-            error: null,
-        query: '',
-        showSuggestions: false,
-        suggestions: [],
-        allSuggestions: [
-          { id: 1, title: 'Pharmacies', description: 'Manage pharmacy tenants', type: 'page', icon: 'store', url: 'pharmacies.html' },
-          { id: 2, title: 'Users', description: 'User management', type: 'page', icon: 'people', url: 'users.html' },
-          { id: 3, title: 'Transactions', description: 'Transaction history', type: 'page', icon: 'receipt_long', url: 'transactions.html' },
-          { id: 4, title: 'Analytics', description: 'System analytics', type: 'page', icon: 'analytics', url: 'analytics.html' },
-          { id: 5, title: 'Reports', description: 'Reports & insights', type: 'page', icon: 'assessment', url: 'reports.html' },
-          { id: 6, title: 'Security', description: 'Security center', type: 'page', icon: 'security', url: 'security.html' },
-          { id: 7, title: 'Settings', description: 'Account & system settings', type: 'page', icon: 'settings', url: 'settings.html' },
-          { id: 8, title: 'Help Center', description: 'Support and documentation', type: 'page', icon: 'help_center', url: 'help.html' },
-          { id: 9, title: 'System Logs', description: 'System activity logs', type: 'page', icon: 'history', url: 'logs.html' }
-        ],
+        init() {
+            const pageIntegration = new PageIntegrationTemplate('super-admin-users', {
+                requireAuth: true,
+                enableRealTime: false,
+                enableCaching: true
+            });
+            
+            Object.assign(this, pageIntegration);
+            
+            this.backendHelper = window.backendHelper;
+            this.apiClient = window.apiClient;
+            this.authManager = window.authManager;
+            this.isAuthenticated = false;
+            this.loading = false;
+            this.error = null;
+            this.query = '';
+            this.showSuggestions = false;
+            this.suggestions = [];
+            this.allSuggestions = [
+              { id: 1, title: 'Pharmacies', description: 'Manage pharmacy tenants', type: 'page', icon: 'store', url: 'pharmacies.html' },
+              { id: 2, title: 'Users', description: 'User management', type: 'page', icon: 'people', url: 'users.html' },
+              { id: 3, title: 'Transactions', description: 'Transaction history', type: 'page', icon: 'receipt_long', url: 'transactions.html' },
+              { id: 4, title: 'Analytics', description: 'System analytics', type: 'page', icon: 'analytics', url: 'analytics.html' },
+              { id: 5, title: 'Reports', description: 'Reports & insights', type: 'page', icon: 'assessment', url: 'reports.html' },
+              { id: 6, title: 'Security', description: 'Security center', type: 'page', icon: 'security', url: 'security.html' },
+              { id: 7, title: 'Settings', description: 'Account & system settings', type: 'page', icon: 'settings', url: 'settings.html' },
+              { id: 8, title: 'Help Center', description: 'Support and documentation', type: 'page', icon: 'help_center', url: 'help.html' },
+              { id: 9, title: 'System Logs', description: 'System activity logs', type: 'page', icon: 'history', url: 'logs.html' }
+            ];
+        },
 
         handleSearch() {
           const q = (this.query || '').trim().toLowerCase();
@@ -1080,39 +1079,67 @@
                 this.error = 'Failed to initialize page';
             }
         },
-          
-          // Load users
-          this.loadUsers();
-          
-          // Set up real-time updates
-          window.superAdminDataSync.subscribe('/users', (data) => {
+
+        async init() {
+            try {
+                // Check authentication
+                this.isAuthenticated = this.authManager?.isAuthenticated() || false;
+                
+                if (!this.isAuthenticated) {
+                    this.error = 'Please login to access this page';
+                    return;
+                }
+                
+                // Initialize backend integration
+                await this.backendHelper.initPage('super-admin-users', {
+                    enableRealTime: false,
+                    initialData: this.getInitialDataConfig()
+                });
+                
+                // Load page data
+                await this.loadPageData();
+                
+                // Set up event listeners
+                this.setupEventListeners();
+                
+                console.log('super-admin-users page initialized with backend integration');
+            } catch (error) {
+                console.error('Failed to initialize super-admin-users page:', error);
+                this.error = 'Failed to initialize page';
+            }
+            
+            // Load users
             this.loadUsers();
-          });
-          
-          // Check for create action in URL
-          const urlParams = new URLSearchParams(window.location.search);
-          if (urlParams.get('action') === 'create') {
-            this.createUser();
-          }
-          
-          // Set up event listeners
-          window.superAdminDataSync.addEventListener('error', (message) => {
-            this.showError(message);
-          });
-          
-          window.superAdminDataSync.addEventListener('success', (message) => {
-            this.showSuccess(message);
-          });
-          
-          // Close mobile menu when clicking outside
-          document.addEventListener('click', (e) => {
-            if (!e.target.closest('.sidebar') && !e.target.closest('.mobile-menu-toggle')) {
-              this.mobileMenuOpen = false;
+            
+            // Set up real-time updates
+            window.superAdminDataSync.subscribe('/users', (data) => {
+                this.loadUsers();
+            });
+            
+            // Check for create action in URL
+            const urlParams = new URLSearchParams(window.location.search);
+            if (urlParams.get('action') === 'create') {
+                this.createUser();
             }
-            if (!e.target.closest('.user-menu')) {
-              this.showUserMenu = false;
-            }
-          });
+            
+            // Set up event listeners
+            window.superAdminDataSync.addEventListener('error', (message) => {
+                this.showError(message);
+            });
+            
+            window.superAdminDataSync.addEventListener('success', (message) => {
+                this.showSuccess(message);
+            });
+            
+            // Close mobile menu when clicking outside
+            document.addEventListener('click', (e) => {
+                if (!e.target.closest('.sidebar') && !e.target.closest('.mobile-menu-toggle')) {
+                    this.mobileMenuOpen = false;
+                }
+                if (!e.target.closest('.user-menu')) {
+                    this.showUserMenu = false;
+                }
+            });
         },
 
         async loadUsers() {

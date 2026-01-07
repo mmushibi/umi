@@ -10,6 +10,7 @@ using UmiHealth.Infrastructure.Cache;
 using UmiHealth.Infrastructure.Data;
 using UmiHealth.Infrastructure.Repositories;
 using UmiHealth.Infrastructure.Storage;
+using UmiHealth.Persistence;
 
 namespace UmiHealth.Infrastructure;
 
@@ -47,6 +48,9 @@ public static class DependencyInjection
         services.AddScoped<UmiHealth.Core.Interfaces.ITenantRepository<UmiHealth.Core.Entities.Patient>, PatientRepository>();
         services.AddScoped<UmiHealth.Core.Interfaces.ITenantRepository<UmiHealth.Core.Entities.Sale>, SaleRepository>();
         services.AddScoped<UmiHealth.Core.Interfaces.ITenantRepository<UmiHealth.Core.Entities.Prescription>, PrescriptionRepository>();
+
+        // Token Blacklist Service - registered in Identity layer
+        // services.AddScoped<ITokenBlacklistService, TokenBlacklistService>();
 
         // File Storage
         services.AddScoped<IFileStorageService, LocalFileStorageService>();

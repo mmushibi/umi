@@ -1,0 +1,134 @@
+name: Enhanced-CI-CD
+
+on:
+  push:
+    branches: [ main, develop ]
+  pull_request:
+    branches: [ main, develop ]
+
+env:
+  REGISTRY: ghcr.io
+  IMAGE_NAME: ${{ github.repository }}
+
+jobs:
+  code-quality:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v3
+        with:
+          dotnet-version: '8.0.x'
+
+      - name: Restore dependencies
+        run: dotnet restore backend/UmiHealth.sln
+
+      - name: Build
+        run: dotnet build backend/UmiHealth.sln --configuration Release --no-restore
+
+      - name: Run Unit Tests
+        run: dotnet test backend/UmiHealth.sln --no-build --verbosity normal --logger trx --collect:"XPlat Code Coverage"
+
+      - name: Upload Test Results
+        uses: actions/upload-artifact@v3
+        if: always()
+        with:
+          name: test-results
+          path: '**/*.trx'
+
+      - name: Upload Coverage Reports
+        uses: actions/upload-artifact@v3
+        if: always()
+        with:
+          name: coverage-reports
+          path: '**/coverage.cobertura.xml'
+
+  build-and-push:
+    needs: code-quality
+    runs-on: ubuntu-latest
+    if: github.ref == 'refs/heads/main' || github.ref == 'refs/heads/develop'
+    strategy:
+      matrix:
+        service: [api, identity, jobs, gateway]
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v2
+
+      - name: Log in to Container Registry
+        uses: docker/login-action@v2
+        with:
+          registry: ${{ env.REGISTRY }}
+          username: ${{ github.actor }}
+          password: ${{ secrets.CR_PAT }}
+
+      - name: Extract metadata
+        id: meta
+        uses: docker/metadata-action@v4
+        with:
+          images: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}/umihealth-${{ matrix.service }}
+          tags: |
+            type=ref,event=branch
+            type=ref,event=pr
+            type=sha,prefix={{branch}}-
+            type=raw,value=latest,enable={{is_default_branch}}
+
+      - name: Build and push ${{ matrix.service }} image
+        uses: docker/build-push-action@v4
+        with:
+          context: backend/
+          file: backend/src/UmiHealth.${{ matrix.service }}/Dockerfile
+          push: true
+          tags: ${{ steps.meta.outputs.tags }}
+          labels: ${{ steps.meta.outputs.labels }}
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+          platforms: linux/amd64,linux/arm64
+
+  deploy-azure:
+    needs: build-and-push
+    runs-on: ubuntu-latest
+    if: github.ref == 'refs/heads/main'
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Deploy to Azure Web App
+        id: deploy
+        uses: azure/webapps-deploy@v2
+        with:
+          app-name: ${{ secrets.AZURE_WEBAPP_NAME }}
+          slot-name: production
+          publish-profile: ${{ secrets.AZURE_PUBLISH_PROFILE }}
+          images: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}/umihealth-api:${{ github.sha }}
+
+      - name: Wait for app to become available
+        run: |
+          for i in {1..12}; do
+            if curl -fsS https://${{ secrets.AZURE_WEBAPP_DEFAULT_HOSTNAME }}/health; then
+              echo "app is healthy"
+              break
+            fi
+            echo "waiting for app... ($i)"
+            sleep 5
+          done
+
+      - name: Run EF Core migrations
+        env:
+          DOTNET_NOLOGO: true
+          DB_CONN: ${{ secrets.DATABASE_CONNECTION }}
+        run: |
+          echo "Running EF Core migrations..."
+          cd backend
+          dotnet tool restore
+          dotnet restore
+          dotnet build --configuration Release
+          dotnet ef database update --project src/UmiHealth.Infrastructure --startup-project src/UmiHealth.Api --connection "$DB_CONN"
+
+      - name: Smoke test
+        run: |
+          curl -f https://${{ secrets.AZURE_WEBAPP_DEFAULT_HOSTNAME }}/health || (echo "Health check failed" && exit 1)

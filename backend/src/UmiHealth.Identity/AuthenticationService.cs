@@ -6,7 +6,8 @@ using System.Security.Claims;
 using System.Security.Cryptography;
 using System.Text;
 using UmiHealth.Core.Entities;
-using UmiHealth.Infrastructure;
+using UmiHealth.Core.Interfaces;
+using UmiHealth.Persistence;
 
 namespace UmiHealth.Identity
 {
@@ -19,6 +20,7 @@ namespace UmiHealth.Identity
         Task<bool> ChangePasswordAsync(Guid userId, string currentPassword, string newPassword, CancellationToken cancellationToken = default);
         Task<bool> ForgotPasswordAsync(string email, CancellationToken cancellationToken = default);
         Task<bool> ResetPasswordAsync(string token, string newPassword, CancellationToken cancellationToken = default);
+        Task<GetProfileResult> GetProfileAsync(Guid userId, CancellationToken cancellationToken = default);
     }
 
     public class AuthenticationService : IAuthenticationService
@@ -367,6 +369,31 @@ namespace UmiHealth.Identity
             }
         }
 
+        public async Task<GetProfileResult> GetProfileAsync(Guid userId, CancellationToken cancellationToken = default)
+        {
+            try
+            {
+                var user = await _context.Users
+                    .Include(u => u.UserRoles)
+                    .ThenInclude(ur => ur.Role)
+                    .FirstOrDefaultAsync(u => u.Id == userId && u.IsActive, cancellationToken);
+
+                if (user == null)
+                {
+                    return GetProfileResult.Failed("User not found");
+                }
+
+                var roles = user.UserRoles.Select(ur => ur.Role).ToList();
+
+                return GetProfileResult.Successful(user, roles);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error fetching user profile: {UserId}", userId);
+                return GetProfileResult.Failed("An error occurred fetching profile");
+            }
+        }
+
         private string GenerateJwtTokenId(string token)
         {
             var handler = new JwtSecurityTokenHandler();
@@ -425,6 +452,7 @@ namespace UmiHealth.Identity
         public bool Success { get; set; }
         public User? User { get; set; }
         public string? Error { get; set; }
+        public string Message { get; set; } = string.Empty;
 
         public static RegistrationResult Successful(User user)
         {
@@ -440,7 +468,36 @@ namespace UmiHealth.Identity
             return new RegistrationResult
             {
                 Success = false,
-                Error = error
+                Error = error,
+                Message = error
+            };
+        }
+    }
+
+    public class GetProfileResult
+    {
+        public bool Success { get; set; }
+        public User? User { get; set; }
+        public IEnumerable<Role>? Roles { get; set; }
+        public string? Message { get; set; }
+
+        public static GetProfileResult Successful(User user, IEnumerable<Role> roles)
+        {
+            return new GetProfileResult
+            {
+                Success = true,
+                User = user,
+                Roles = roles,
+                Message = "Profile retrieved successfully"
+            };
+        }
+
+        public static GetProfileResult Failed(string message)
+        {
+            return new GetProfileResult
+            {
+                Success = false,
+                Message = message
             };
         }
     }

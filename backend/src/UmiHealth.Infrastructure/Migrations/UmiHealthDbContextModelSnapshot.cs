@@ -8,6 +8,8 @@ using UmiHealth.Core.Entities;
 
 #nullable disable
 
+using UmiHealth.Persistence;
+
 namespace UmiHealth.Infrastructure.Migrations
 {
     [DbContext(typeof(UmiHealthDbContext))]

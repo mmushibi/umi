@@ -2,6 +2,7 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.IdentityModel.Tokens;
 using System.Text;
+using UmiHealth.Core.Interfaces;
 using UmiHealth.Identity.Services;
 
 namespace UmiHealth.Identity;
@@ -45,6 +46,7 @@ public static class DependencyInjection
         services.AddScoped<IJwtService, JwtService>();
         services.AddScoped<IPasswordService, PasswordService>();
         services.AddScoped<ITokenService, TokenService>();
+        services.AddScoped<ITokenBlacklistService, TokenBlacklistService>();
 
         return services;
     }

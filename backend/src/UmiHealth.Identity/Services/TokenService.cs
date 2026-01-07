@@ -1,7 +1,7 @@
 using Microsoft.EntityFrameworkCore;
 using UmiHealth.Core.Entities;
-using UmiHealth.Infrastructure.Repositories;
-using UmiHealth.Infrastructure.Cache;
+using UmiHealth.Core.Interfaces;
+using UmiHealth.Persistence;
 
 namespace UmiHealth.Identity.Services;
 
