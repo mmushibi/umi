@@ -48,6 +48,7 @@ jobs:
           registry: ${{ secrets.ACR_LOGIN_SERVER }}
           username: ${{ secrets.ACR_USERNAME }}
           password: ${{ secrets.ACR_PASSWORD }}
+          ecr: false
 
       - name: Log in to GHCR (fallback)
         if: env.HAS_ACR_LOGIN != 'true'
@@ -56,6 +57,7 @@ jobs:
           registry: ${{ env.REGISTRY }}
           username: ${{ github.actor }}
           password: ${{ secrets.CR_PAT }}
+          ecr: false
 
       - name: Build and push API image
         uses: docker/build-push-action@v4
