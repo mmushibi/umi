@@ -114,16 +114,6 @@ jobs:
 
       - name: Build and push ${{ matrix.service }} image
         run: |
-          echo "=== DEBUG: Current directory ==="
-          pwd
-          echo "=== DEBUG: Listing repository root ==="
-          ls -la
-          echo "=== DEBUG: Checking if backend exists ==="
-          ls -la backend/ || echo "backend directory not found"
-          echo "=== DEBUG: Checking if backend/src exists ==="
-          ls -la backend/src/ || echo "backend/src directory not found"
-          echo "=== DEBUG: Full tree of backend ==="
-          find backend -type d -name "*UmiHealth*" | head -10
           echo "Building ${{ matrix.service }} service..."
           if [ "${{ matrix.service }}" = "API" ]; then
             docker buildx build \
