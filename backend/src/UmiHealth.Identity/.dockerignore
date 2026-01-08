@@ -2,17 +2,6 @@
 # Inherits from parent .dockerignore but can be more specific
 
 # Exclude other services (we only need what Identity depends on)
-../UmiHealth.API/
-../UmiHealth.Jobs/
-
-# Include only necessary dependencies
-!../UmiHealth.Core/
-!../UmiHealth.Infrastructure/
-!../UmiHealth.Application/
-!../UmiHealth.Domain/
-!../UmiHealth.Shared/
-!../UmiHealth.Persistence/
-
 # Exclude test projects
 **/*.Tests/
 **/*.Test/

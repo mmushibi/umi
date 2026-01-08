@@ -3,7 +3,7 @@ FROM mcr.microsoft.com/dotnet/sdk:8.0 AS build
 WORKDIR /src
 
 # Copy csproj files and restore dependencies
-COPY ["UmiHealth.Api/UmiHealth.Api.csproj", "UmiHealth.Api/"]
+COPY ["UmiHealth.Api/UmiHealth.API.csproj", "UmiHealth.Api/"]
 COPY ["UmiHealth.Core/UmiHealth.Core.csproj", "UmiHealth.Core/"]
 COPY ["UmiHealth.Infrastructure/UmiHealth.Infrastructure.csproj", "UmiHealth.Infrastructure/"]
 COPY ["UmiHealth.Application/UmiHealth.Application.csproj", "UmiHealth.Application/"]
@@ -11,7 +11,7 @@ COPY ["UmiHealth.Domain/UmiHealth.Domain.csproj", "UmiHealth.Domain/"]
 COPY ["UmiHealth.Shared/UmiHealth.Shared.csproj", "UmiHealth.Shared/"]
 COPY ["UmiHealth.Identity/UmiHealth.Identity.csproj", "UmiHealth.Identity/"]
 
-RUN dotnet restore "UmiHealth.Api/UmiHealth.Api.csproj"
+RUN dotnet restore "UmiHealth.Api/UmiHealth.API.csproj"
 
 # Copy the rest of the source code
 COPY . .
@@ -55,4 +55,4 @@ ENV ASPNETCORE_URLS=http://+:8080
 ENV ASPNETCORE_ENVIRONMENT=Production
 
 # Entry point
-ENTRYPOINT ["dotnet", "UmiHealth.Api.dll"]
+ENTRYPOINT ["dotnet", "UmiHealth.API.dll"]
