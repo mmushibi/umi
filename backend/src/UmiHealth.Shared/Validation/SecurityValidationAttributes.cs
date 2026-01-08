@@ -94,15 +94,15 @@ namespace UmiHealth.Shared.Validation
         protected override ValidationResult IsValid(object value, ValidationContext validationContext)
         {
             if (value == null)
-                return ValidationResult.Success;
+                return new ValidationResult("Email address is required", validationContext.MemberName != null ? new[] { validationContext.MemberName } : null);
 
             var email = value.ToString().Trim();
 
             if (string.IsNullOrWhiteSpace(email))
-                return new ValidationResult("Email address is required", new[] { validationContext.MemberName });
+                return new ValidationResult("Email address is required", validationContext.MemberName != null ? new[] { validationContext.MemberName } : null);
 
             if (!EmailRegex.IsMatch(email))
-                return new ValidationResult("Invalid email address format", new[] { validationContext.MemberName });
+                return new ValidationResult("Invalid email address format", validationContext.MemberName != null ? new[] { validationContext.MemberName } : null);
 
             return ValidationResult.Success;
         }
@@ -124,21 +124,21 @@ namespace UmiHealth.Shared.Validation
         protected override ValidationResult IsValid(object value, ValidationContext validationContext)
         {
             if (value == null)
-                return new ValidationResult("Password is required", new[] { validationContext.MemberName });
+                return new ValidationResult("Password is required", validationContext.MemberName != null ? new[] { validationContext.MemberName } : null);
 
             var password = value.ToString();
 
             if (password.Length < _minLength)
-                return new ValidationResult($"Password must be at least {_minLength} characters long", new[] { validationContext.MemberName });
+                return new ValidationResult($"Password must be at least {_minLength} characters long", validationContext.MemberName != null ? new[] { validationContext.MemberName } : null);
 
             if (!Regex.IsMatch(password, "[A-Z]"))
-                return new ValidationResult("Password must contain at least one uppercase letter", new[] { validationContext.MemberName });
+                return new ValidationResult("Password must contain at least one uppercase letter", validationContext.MemberName != null ? new[] { validationContext.MemberName } : null);
 
             if (!Regex.IsMatch(password, "[a-z]"))
-                return new ValidationResult("Password must contain at least one lowercase letter", new[] { validationContext.MemberName });
+                return new ValidationResult("Password must contain at least one lowercase letter", validationContext.MemberName != null ? new[] { validationContext.MemberName } : null);
 
             if (!Regex.IsMatch(password, @"\d"))
-                return new ValidationResult("Password must contain at least one digit", new[] { validationContext.MemberName });
+                return new ValidationResult("Password must contain at least one digit", validationContext.MemberName != null ? new[] { validationContext.MemberName } : null);
 
             return ValidationResult.Success;
         }
