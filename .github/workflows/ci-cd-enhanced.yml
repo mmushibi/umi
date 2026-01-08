@@ -117,20 +117,20 @@ jobs:
           echo "Building ${{ matrix.service }} service..."
           if [ "${{ matrix.service }}" = "API" ]; then
             docker buildx build \
-              --context backend/src \
               --file backend/src/UmiHealth.API/Dockerfile \
               --tag ghcr.io/mmushibi/umihealth-api:latest \
               --tag ghcr.io/mmushibi/umihealth-api:main \
               --platform linux/amd64 \
-              --push .
+              --push \
+              backend/src
           elif [ "${{ matrix.service }}" = "Identity" ]; then
             docker buildx build \
-              --context backend/src \
               --file backend/src/UmiHealth.Identity/Dockerfile \
               --tag ghcr.io/mmushibi/umihealth-identity:latest \
               --tag ghcr.io/mmushibi/umihealth-identity:main \
               --platform linux/amd64 \
-              --push .
+              --push \
+              backend/src
           fi
         shell: bash
 
