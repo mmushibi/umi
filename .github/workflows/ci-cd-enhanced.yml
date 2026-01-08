@@ -97,6 +97,22 @@ jobs:
             type=raw,value=latest,enable={{is_default_branch}}
 
       - name: Build and push ${{ matrix.service }} image
+        run: |
+          echo "=== DEBUG: Current directory ==="
+          pwd
+          echo "=== DEBUG: Listing repository root ==="
+          ls -la
+          echo "=== DEBUG: Listing backend directory ==="
+          ls -la backend/ || echo "backend directory not found"
+          echo "=== DEBUG: Listing backend/src directory ==="
+          ls -la backend/src/ || echo "backend/src directory not found"
+          echo "=== DEBUG: Checking specific service directory ==="
+          ls -la backend/src/UmiHealth.${{ matrix.service }}/ || echo "Service directory not found"
+          echo "=== DEBUG: Checking if Dockerfile exists ==="
+          test -f backend/src/UmiHealth.${{ matrix.service }}/Dockerfile && echo "Dockerfile exists" || echo "Dockerfile NOT found"
+        shell: bash
+
+      - name: Build and push ${{ matrix.service }} image
         uses: docker/build-push-action@v4
         with:
           context: backend/src/UmiHealth.${{ matrix.service }}
