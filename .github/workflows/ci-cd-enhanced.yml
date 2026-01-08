@@ -142,7 +142,7 @@ jobs:
           
           if [ "${{ matrix.service }}" = "API" ]; then
             docker buildx build \
-              --file backend/src/UmiHealth.API/Dockerfile \
+              --file backend/src/UmiHealth.Api/Dockerfile \
               --tag ghcr.io/mmushibi/umihealth-api:latest \
               --tag ghcr.io/mmushibi/umihealth-api:main \
               --platform linux/amd64 \
