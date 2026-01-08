@@ -115,6 +115,31 @@ jobs:
       - name: Build and push ${{ matrix.service }} image
         run: |
           echo "Building ${{ matrix.service }} service..."
+          
+          # Check if the service directory exists
+          SERVICE_DIR="backend/src/UmiHealth.${{ matrix.service }}"
+          echo "Checking service directory: $SERVICE_DIR"
+          
+          if [ ! -d "$SERVICE_DIR" ]; then
+            echo "❌ Service directory not found: $SERVICE_DIR"
+            echo "Available directories in backend/src:"
+            ls -la backend/src/
+            exit 1
+          fi
+          
+          # Check if Dockerfile exists
+          DOCKERFILE="$SERVICE_DIR/Dockerfile"
+          echo "Checking Dockerfile: $DOCKERFILE"
+          
+          if [ ! -f "$DOCKERFILE" ]; then
+            echo "❌ Dockerfile not found: $DOCKERFILE"
+            echo "Files in service directory:"
+            ls -la "$SERVICE_DIR/"
+            exit 1
+          fi
+          
+          echo "✅ Service directory and Dockerfile found"
+          
           if [ "${{ matrix.service }}" = "API" ]; then
             docker buildx build \
               --file backend/src/UmiHealth.API/Dockerfile \
