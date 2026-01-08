@@ -55,7 +55,7 @@ jobs:
     if: github.ref == 'refs/heads/main' || github.ref == 'refs/heads/develop'
     strategy:
       matrix:
-        service: [API, Identity, Jobs]
+        service: [API, Identity]
     steps:
       - name: Checkout
         uses: actions/checkout@v4
