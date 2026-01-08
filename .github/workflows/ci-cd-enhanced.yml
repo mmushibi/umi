@@ -116,8 +116,13 @@ jobs:
         run: |
           echo "Building ${{ matrix.service }} service..."
           
-          # Check if the service directory exists
-          SERVICE_DIR="backend/src/UmiHealth.${{ matrix.service }}"
+          # Set correct directory name based on service
+          if [ "${{ matrix.service }}" = "API" ]; then
+            SERVICE_DIR="backend/src/UmiHealth.Api"
+          elif [ "${{ matrix.service }}" = "Identity" ]; then
+            SERVICE_DIR="backend/src/UmiHealth.Identity"
+          fi
+          
           echo "Checking service directory: $SERVICE_DIR"
           
           if [ ! -d "$SERVICE_DIR" ]; then
