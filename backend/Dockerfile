@@ -3,7 +3,7 @@ FROM mcr.microsoft.com/dotnet/sdk:8.0 AS build
 WORKDIR /src
 
 # Copy csproj files and restore dependencies
-COPY ["src/UmiHealth.Api/UmiHealth.API.csproj", "src/UmiHealth.Api/"]
+COPY ["src/UmiHealth.API/UmiHealth.API.csproj", "src/UmiHealth.API/"]
 COPY ["src/UmiHealth.Core/UmiHealth.Core.csproj", "src/UmiHealth.Core/"]
 COPY ["src/UmiHealth.Infrastructure/UmiHealth.Infrastructure.csproj", "src/UmiHealth.Infrastructure/"]
 COPY ["src/UmiHealth.Application/UmiHealth.Application.csproj", "src/UmiHealth.Application/"]
@@ -11,13 +11,13 @@ COPY ["src/UmiHealth.Domain/UmiHealth.Domain.csproj", "src/UmiHealth.Domain/"]
 COPY ["src/UmiHealth.Shared/UmiHealth.Shared.csproj", "src/UmiHealth.Shared/"]
 COPY ["src/UmiHealth.Identity/UmiHealth.Identity.csproj", "src/UmiHealth.Identity/"]
 
-RUN dotnet restore "src/UmiHealth.Api/UmiHealth.API.csproj"
+RUN dotnet restore "src/UmiHealth.API/UmiHealth.API.csproj"
 
 # Copy the rest of the source code
 COPY . .
 
 # Build the application
-WORKDIR "/src/src/UmiHealth.Api"
+WORKDIR "/src/src/UmiHealth.API"
 RUN dotnet build "UmiHealth.API.csproj" -c Release -o /app/build
 
 # Publish the application
