@@ -83,17 +83,21 @@ jobs:
             image=moby/buildkit:buildx-stable-1
           buildkitd-flags: --allow-insecure-entitlement security.insecure --allow-insecure-entitlement network.host
 
-      - name: Log in to GitHub Container Registry
-        uses: docker/login-action@v3
-        with:
-          registry: ghcr.io
-          username: ${{ github.actor }}
-          password: ${{ secrets.GITHUB_TOKEN }}
-          
-      - name: Verify GHCR login
+      - name: Check CR_PAT availability
         run: |
-          echo "Testing GHCR access..."
-          echo ${{ secrets.GITHUB_TOKEN }} | docker login ghcr.io -u ${{ github.actor }} --password-stdin || echo "Login failed, but continuing with build..."
+          if [[ -z "${{ secrets.CR_PAT }}" ]]; then
+            echo "❌ CR_PAT secret is not set or empty"
+            echo "Please create a Personal Access Token with 'write:packages' scope and add it as CR_PAT secret"
+            exit 1
+          else
+            echo "✅ CR_PAT secret is available"
+          fi
+
+      - name: Log in to GitHub Container Registry
+        run: |
+          echo ${{ secrets.CR_PAT }} | docker login ghcr.io -u ${{ github.actor }} --password-stdin
+        env:
+          CR_PAT: ${{ secrets.CR_PAT }}
 
       - name: Extract metadata
         id: meta
