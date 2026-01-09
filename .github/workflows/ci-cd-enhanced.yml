@@ -118,16 +118,24 @@ jobs:
           if [ "${{ matrix.service }}" = "API" ]; then
             SERVICE_NAME="api"
             DOCKERFILE_PATH="backend/src/UmiHealth.API/Dockerfile"
-            CONTEXT="."
+            CONTEXT="backend/src"
           elif [ "${{ matrix.service }}" = "Identity" ]; then
             SERVICE_NAME="identity"
             DOCKERFILE_PATH="backend/src/UmiHealth.Identity/Dockerfile"
-            CONTEXT="."
+            CONTEXT="backend/src"
           fi
           
           echo "Building service: $SERVICE_NAME"
           echo "Using Dockerfile: $DOCKERFILE_PATH"
           echo "Build context: $CONTEXT"
+          
+          # Verify Dockerfile exists
+          if [ ! -f "$DOCKERFILE_PATH" ]; then
+            echo "❌ Dockerfile not found: $DOCKERFILE_PATH"
+            echo "Available files in context:"
+            find "$CONTEXT" -name "Dockerfile" -type f || echo "No Dockerfiles found"
+            exit 1
+          fi
           
           # Build and push the image
           docker buildx build \
