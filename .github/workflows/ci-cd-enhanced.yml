@@ -93,13 +93,19 @@ jobs:
             echo "✅ CR_PAT secret is available"
           fi
 
-      - name: Log in to Container Registry
-        uses: docker/login-action@v2
+      - name: Log in to GitHub Container Registry
+        uses: docker/login-action@v3
         with:
           registry: ghcr.io
-          username: mmushibi
-          password: ${{ secrets.CR_PAT }}
-          ecr: false
+          username: ${{ github.repository_owner }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+          
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+        with:
+          driver-opts: |
+            image=moby/buildkit:buildx-stable-1
+          buildkitd-flags: --allow-insecure-entitlement security.insecure --allow-insecure-entitlement network.host
 
       - name: Extract metadata
         id: meta
@@ -116,54 +122,34 @@ jobs:
         run: |
           echo "Building ${{ matrix.service }} service..."
           
-          # Set correct directory name based on service
+          # Set service-specific variables
           if [ "${{ matrix.service }}" = "API" ]; then
-            SERVICE_DIR="backend/src/UmiHealth.API"
+            SERVICE_NAME="api"
+            DOCKERFILE_PATH="backend/src/UmiHealth.API/Dockerfile"
+            CONTEXT="."
           elif [ "${{ matrix.service }}" = "Identity" ]; then
-            SERVICE_DIR="backend/src/UmiHealth.Identity"
+            SERVICE_NAME="identity"
+            DOCKERFILE_PATH="backend/src/UmiHealth.Identity/Dockerfile"
+            CONTEXT="."
           fi
           
-          echo "Checking service directory: $SERVICE_DIR"
+          echo "Building service: $SERVICE_NAME"
+          echo "Using Dockerfile: $DOCKERFILE_PATH"
+          echo "Build context: $CONTEXT"
           
-          if [ ! -d "$SERVICE_DIR" ]; then
-            echo "❌ Service directory not found: $SERVICE_DIR"
-            echo "Available directories in backend/src:"
-            ls -la backend/src/
-            exit 1
-          fi
-          
-          # Check if Dockerfile exists
-          DOCKERFILE="$SERVICE_DIR/Dockerfile"
-          echo "Checking Dockerfile: $DOCKERFILE"
-          
-          if [ ! -f "$DOCKERFILE" ]; then
-            echo "❌ Dockerfile not found: $DOCKERFILE"
-            echo "Files in service directory:"
-            ls -la "$SERVICE_DIR/"
-            exit 1
-          fi
-          
-          echo "✅ Service directory and Dockerfile found"
-          
-          if [ "${{ matrix.service }}" = "API" ]; then
-            docker buildx build \
-              --file backend/src/UmiHealth.API/Dockerfile \
-              --build-arg BUILDKIT_INLINE_CACHE=1 \
-              --tag ghcr.io/mmushibi/umihealth-api:latest \
-              --tag ghcr.io/mmushibi/umihealth-api:main \
-              --platform linux/amd64 \
-              --push \
-              .
-          elif [ "${{ matrix.service }}" = "Identity" ]; then
-            docker buildx build \
-              --file backend/src/UmiHealth.Identity/Dockerfile \
-              --build-arg BUILDKIT_INLINE_CACHE=1 \
-              --tag ghcr.io/mmushibi/umihealth-identity:latest \
-              --tag ghcr.io/mmushibi/umihealth-identity:main \
-              --platform linux/amd64 \
-              --push \
-              .
-          fi
+          # Build and push the image
+          docker buildx build \
+            --file "$DOCKERFILE_PATH" \
+            --tag ghcr.io/${{ github.repository_owner }}/umihealth-$SERVICE_NAME:latest \
+            --tag ghcr.io/${{ github.repository_owner }}/umihealth-$SERVICE_NAME:${{ github.sha }} \
+            --cache-from type=gha \
+            --cache-to type=gha,mode=max \
+            --build-arg BUILDKIT_INLINE_CACHE=1 \
+            --platform linux/amd64 \
+            --push \
+            "$CONTEXT"
+            
+          echo "✅ Successfully built and pushed $SERVICE_NAME image"
         shell: bash
 
   deploy-azure:
