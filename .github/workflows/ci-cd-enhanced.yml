@@ -118,7 +118,7 @@ jobs:
           
           # Set correct directory name based on service
           if [ "${{ matrix.service }}" = "API" ]; then
-            SERVICE_DIR="backend/src/UmiHealth.Api"
+            SERVICE_DIR="backend/src/UmiHealth.API"
           elif [ "${{ matrix.service }}" = "Identity" ]; then
             SERVICE_DIR="backend/src/UmiHealth.Identity"
           fi
@@ -147,20 +147,22 @@ jobs:
           
           if [ "${{ matrix.service }}" = "API" ]; then
             docker buildx build \
-              --file backend/src/UmiHealth.Api/Dockerfile \
+              --file backend/src/UmiHealth.API/Dockerfile \
+              --build-arg BUILDKIT_INLINE_CACHE=1 \
               --tag ghcr.io/mmushibi/umihealth-api:latest \
               --tag ghcr.io/mmushibi/umihealth-api:main \
               --platform linux/amd64 \
               --push \
-              backend/src
+              .
           elif [ "${{ matrix.service }}" = "Identity" ]; then
             docker buildx build \
               --file backend/src/UmiHealth.Identity/Dockerfile \
+              --build-arg BUILDKIT_INLINE_CACHE=1 \
               --tag ghcr.io/mmushibi/umihealth-identity:latest \
               --tag ghcr.io/mmushibi/umihealth-identity:main \
               --platform linux/amd64 \
               --push \
-              backend/src
+              .
           fi
         shell: bash
 
