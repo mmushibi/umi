@@ -119,8 +119,8 @@ jobs:
           # Set service-specific variables
           if [ "${{ matrix.service }}" = "API" ]; then
             SERVICE_NAME="api"
-            DOCKERFILE_PATH="backend/src/UmiHealth.API/Dockerfile"
-            CONTEXT="backend/src"
+            DOCKERFILE_PATH="backend/Dockerfile"
+            CONTEXT="backend"
           elif [ "${{ matrix.service }}" = "Identity" ]; then
             SERVICE_NAME="identity"
             DOCKERFILE_PATH="backend/src/UmiHealth.Identity/Dockerfile"
