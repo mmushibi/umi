@@ -121,3 +121,23 @@ backend/*.UserSecrets.json
 *.db
 *.sqlite
 *.sqlite3
+
+# Sensitive configuration files
+appsettings.Security.json
+*.Security.json
+appsettings.*.Security.json
+CONFIGURATION_SECRETS.md
+GITHUB_SECRETS_CHECKLIST.md
+
+# Documentation files (exclude as requested)
+*.md
+!README.md
+
+# Demo accounts and sensitive data
+public/demoaccounts/
+demo-data.js
+demo-verification.js
+
+# Scripts with sensitive information
+scripts/azure-setup-simple.ps1
+scripts/azure-deploy-setup.ps1
