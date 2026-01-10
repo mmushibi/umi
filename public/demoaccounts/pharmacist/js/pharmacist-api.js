@@ -1,58 +1,116 @@
 /**
- * Pharmacist Portal Demo API Client
- * Mock API that returns sample data for demo purposes
+ * Pharmacist Portal API Client
+ * Real API integration with backend endpoints
  */
 class PharmacistApi {
   constructor() {
-    // Demo mode - no real API calls
-    this.demoMode = true;
+    this.baseURL = this.getBaseURL();
+    this.accessToken = localStorage.getItem('umi_access_token');
+    this.tenantId = localStorage.getItem('umi_tenant_id');
+    this.branchId = localStorage.getItem('umi_branch_id');
   }
 
-  // Simulate API delay
-  async delay(ms = 500) {
-    return new Promise(resolve => setTimeout(resolve, ms));
+  getBaseURL() {
+    // Determine if we're in development or production
+    if (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1') {
+      return 'http://localhost:5001/api';
+    }
+    
+    // Extract subdomain for tenant-specific API calls
+    const subdomain = window.location.hostname.split('.')[0];
+    if (subdomain && subdomain !== 'www' && subdomain !== 'umihealth') {
+      return `https://${subdomain}.umihealth.com/api`;
+    }
+    
+    return 'https://api.umihealth.com/api';
   }
 
-  // Generate random IDs
-  generateId() {
-    return Math.random().toString(36).substr(2, 9);
-  }
-
-  // Clear authentication information (mock)
-  clearAuth() {
-    // Demo mode - no real auth to clear
-    console.log('Demo mode: Auth cleared');
-  }
-
-  // Initialize API service (mock)
-  init() {
-    console.log('Demo mode: Pharmacist API initialized');
-  }
-
-  // Load authentication information (mock)
-  loadAuthInfo() {
-    // Demo mode - no real auth info to load
-  }
-
-  // Setup interceptors (mock)
-  setupInterceptors() {
-    // Demo mode - no real interceptors needed
-  }
-
-  // Dashboard APIs
-  async getDashboardStats() {
-    await this.delay();
-    return {
-      success: true,
-      data: {
-        pendingPrescriptions: 12,
-        completedToday: 28,
-        totalPatients: 156,
-        criticalAlerts: 3,
-        lowStockMedications: 8,
-        expiringThisWeek: 5
-      }
+  async request(endpoint, options = {}) {
+    const url = `${this.baseURL}${endpoint}`;
+    
+    const config = {
+      headers: {
+        'Content-Type': 'application/json',
+        ...options.headers
+      },
+      ...options
     };
+
+    // Add auth token if available
+    if (this.accessToken) {
+      config.headers['Authorization'] = `Bearer ${this.accessToken}`;
+    }
+
+    // Add tenant context if available
+    if (this.tenantId) {
+      config.headers['X-Tenant-ID'] = this.tenantId;
+    }
+
+    // Add branch context if available
+    if (this.branchId) {
+      config.headers['X-Branch-ID'] = this.branchId;
+    }
+
+    try {
+      const response = await fetch(url, config);
+      const data = await response.json();
+
+      if (!response.ok) {
+        throw new Error(data.message || data.error || `HTTP error! status: ${response.status}`);
+      }
+
+      return data;
+    } catch (error) {
+      console.error('Pharmacist API request failed:', error);
+      throw error;
+    }
+  }
+
+  async get(endpoint) {
+    return this.request(endpoint, {
+      method: 'GET'
+    });
+  }
+
+  async post(endpoint, data) {
+    return this.request(endpoint, {
+      method: 'POST',
+      body: JSON.stringify(data)
+    });
+  }
+
+  async put(endpoint, data) {
+    return this.request(endpoint, {
+      method: 'PUT',
+      body: JSON.stringify(data)
+    });
+  }
+
+  async delete(endpoint) {
+    return this.request(endpoint, {
+      method: 'DELETE'
+    });
+  }
+
+  // User info from backend
+  async getUserInfo() {
+    return await this.get('/pharmacist/user-info');
+  }
+
+  async getPharmacyInfo() {
+    const params = new URLSearchParams();
+    if (this.tenantId) params.append('tenantId', this.tenantId);
+    
+    return await this.get(`/pharmacist/pharmacy-info?${params.toString()}`);
+  }
+
+  // Dashboard APIs from backend
+  async getDashboardStats() {
+    const params = new URLSearchParams();
+    if (this.tenantId) params.append('tenantId', this.tenantId);
+    if (this.branchId) params.append('branchId', this.branchId);
+    
+    return await this.get(`/pharmacist/dashboard?${params.toString()}`);
   }
 
   async getRecentActivity() {
@@ -69,47 +127,15 @@ class PharmacistApi {
     };
   }
 
-  // Prescription Management
+  // Prescription Management from backend
   async getPrescriptions(filters = {}) {
-    await this.delay();
-    return {
-      success: true,
-      data: [
-        { 
-          id: '1', 
-          patient: 'John Doe', 
-          medication: 'Amoxicillin 500mg', 
-          dosage: '1 tablet twice daily', 
-          duration: '7 days',
-          prescribedBy: 'Dr. Smith',
-          date: '2024-01-15',
-          status: 'pending',
-          priority: 'normal'
-        },
-        { 
-          id: '2', 
-          patient: 'Jane Smith', 
-          medication: 'Paracetamol 500mg', 
-          dosage: '1 tablet as needed', 
-          duration: '30 days',
-          prescribedBy: 'Dr. Johnson',
-          date: '2024-01-15',
-          status: 'approved',
-          priority: 'normal'
-        },
-        { 
-          id: '3', 
-          patient: 'Bob Johnson', 
-          medication: 'Ibuprofen 400mg', 
-          dosage: '1 tablet three times daily', 
-          duration: '5 days',
-          prescribedBy: 'Dr. Brown',
-          date: '2024-01-14',
-          status: 'dispensed',
-          priority: 'high'
-        }
-      ]
-    };
+    const params = new URLSearchParams();
+    if (this.tenantId) params.append('tenantId', this.tenantId);
+    if (filters.status) params.append('status', filters.status);
+    if (filters.patientName) params.append('patientName', filters.patientName);
+    if (filters.prescriptionNumber) params.append('prescriptionNumber', filters.prescriptionNumber);
+    
+    return await this.get(`/pharmacist/prescriptions?${params.toString()}`);
   }
 
   async getPrescriptionDetails(prescriptionId) {
@@ -156,16 +182,17 @@ class PharmacistApi {
   }
 
   async createPrescription(prescriptionData) {
-    await this.delay();
-    return { 
-      success: true, 
-      data: { id: this.generateId(), ...prescriptionData, created: new Date().toISOString() }
-    };
+    const params = new URLSearchParams();
+    if (this.tenantId) params.append('tenantId', this.tenantId);
+    
+    return await this.post(`/pharmacist/prescriptions?${params.toString()}`, prescriptionData);
   }
 
-  async updatePrescription(prescriptionId, prescriptionData) {
-    await this.delay();
-    return { success: true, message: 'Prescription updated successfully' };
+  async updatePrescriptionStatus(prescriptionId, statusData) {
+    const params = new URLSearchParams();
+    if (this.tenantId) params.append('tenantId', this.tenantId);
+    
+    return await this.put(`/pharmacist/prescriptions/${prescriptionId}/status?${params.toString()}`, statusData);
   }
 
   // Patient Management
@@ -607,6 +634,24 @@ class PharmacistApi {
   async updateNotificationSettings(settings) {
     await this.delay();
     return { success: true, message: 'Notification settings updated successfully' };
+  }
+
+  // Sync functionality from backend
+  async triggerSync(entityType = null) {
+    const params = new URLSearchParams();
+    if (this.tenantId) params.append('tenantId', this.tenantId);
+    if (this.branchId) params.append('branchId', this.branchId);
+    if (entityType) params.append('entityType', entityType);
+    
+    return await this.post(`/pharmacist/sync/trigger?${params.toString()}`);
+  }
+
+  async getSyncStatus() {
+    const params = new URLSearchParams();
+    if (this.tenantId) params.append('tenantId', this.tenantId);
+    if (this.branchId) params.append('branchId', this.branchId);
+    
+    return await this.get(`/pharmacist/sync/status?${params.toString()}`);
   }
 
   // Mock other required methods with basic implementations

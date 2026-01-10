@@ -1,37 +1,104 @@
 /**
- * Cashier Portal Demo API Client
- * Mock API that returns sample data for demo purposes
+ * Cashier Portal API Client
+ * Real API integration with backend endpoints
  */
 class CashierAPI {
   constructor() {
-    // Demo mode - no real API calls
-    this.demoMode = true;
+    this.baseURL = this.getBaseURL();
+    this.accessToken = localStorage.getItem('umi_access_token');
+    this.tenantId = localStorage.getItem('umi_tenant_id');
+    this.branchId = localStorage.getItem('umi_branch_id');
   }
 
-  // Simulate API delay
-  async delay(ms = 500) {
-    return new Promise(resolve => setTimeout(resolve, ms));
+  getBaseURL() {
+    // Determine if we're in development or production
+    if (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1') {
+      return 'http://localhost:5001/api/v1';
+    }
+    
+    // Extract subdomain for tenant-specific API calls
+    const subdomain = window.location.hostname.split('.')[0];
+    if (subdomain && subdomain !== 'www' && subdomain !== 'umihealth') {
+      return `https://${subdomain}.umihealth.com/api/v1`;
+    }
+    
+    return 'https://api.umihealth.com/api/v1';
   }
 
-  // Generate random IDs
-  generateId() {
-    return Math.random().toString(36).substr(2, 9);
-  }
-
-  // Dashboard APIs
-  async getDashboardStats() {
-    await this.delay();
-    return {
-      success: true,
-      data: {
-        todaySales: 2345.67,
-        todayTransactions: 45,
-        averageSale: 52.12,
-        customersServed: 38,
-        pendingQueue: 5,
-        lowStockCount: 8
-      }
+  async request(endpoint, options = {}) {
+    const url = `${this.baseURL}${endpoint}`;
+    
+    const config = {
+      headers: {
+        'Content-Type': 'application/json',
+        ...options.headers
+      },
+      ...options
     };
+
+    // Add auth token if available
+    if (this.accessToken) {
+      config.headers['Authorization'] = `Bearer ${this.accessToken}`;
+    }
+
+    // Add tenant context if available
+    if (this.tenantId) {
+      config.headers['X-Tenant-ID'] = this.tenantId;
+    }
+
+    // Add branch context if available
+    if (this.branchId) {
+      config.headers['X-Branch-ID'] = this.branchId;
+    }
+
+    try {
+      const response = await fetch(url, config);
+      const data = await response.json();
+
+      if (!response.ok) {
+        throw new Error(data.message || data.error || `HTTP error! status: ${response.status}`);
+      }
+
+      return data;
+    } catch (error) {
+      console.error('Cashier API request failed:', error);
+      throw error;
+    }
+  }
+
+  async get(endpoint) {
+    return this.request(endpoint, {
+      method: 'GET'
+    });
+  }
+
+  async post(endpoint, data) {
+    return this.request(endpoint, {
+      method: 'POST',
+      body: JSON.stringify(data)
+    });
+  }
+
+  async put(endpoint, data) {
+    return this.request(endpoint, {
+      method: 'PUT',
+      body: JSON.stringify(data)
+    });
+  }
+
+  async delete(endpoint) {
+    return this.request(endpoint, {
+      method: 'DELETE'
+    });
+  }
+
+  // Dashboard APIs from backend
+  async getDashboardStats() {
+    const params = new URLSearchParams();
+    if (this.tenantId) params.append('tenantId', this.tenantId);
+    if (this.branchId) params.append('branchId', this.branchId);
+    
+    return await this.get(`/cashier/dashboard?${params.toString()}`);
   }
 
   async getSalesStats() {
@@ -91,18 +158,17 @@ class CashierAPI {
     };
   }
 
-  // Sales Management
+  // Sales Management from backend
   async getSales(filters = {}) {
-    await this.delay();
-    return {
-      success: true,
-      data: [
-        { id: '1', total: 45.99, items: 3, customer: 'John Doe', date: '2024-01-15', status: 'completed', paymentMethod: 'Card' },
-        { id: '2', total: 23.50, items: 2, customer: 'Jane Smith', date: '2024-01-15', status: 'completed', paymentMethod: 'Cash' },
-        { id: '3', total: 67.25, items: 5, customer: 'Bob Johnson', date: '2024-01-14', status: 'pending', paymentMethod: 'Mobile' }
-      ],
-      pagination: { page: 1, pageSize: 50, total: 127, pages: 3 }
-    };
+    const params = new URLSearchParams();
+    if (this.tenantId) params.append('tenantId', this.tenantId);
+    if (this.branchId) params.append('branchId', this.branchId);
+    if (filters.startDate) params.append('startDate', filters.startDate);
+    if (filters.endDate) params.append('endDate', filters.endDate);
+    params.append('page', filters.page || 1);
+    params.append('limit', filters.limit || 50);
+    
+    return await this.get(`/cashier/sales?${params.toString()}`);
   }
 
   async getSaleDetails(saleId) {
@@ -128,11 +194,11 @@ class CashierAPI {
   }
 
   async createSale(saleData) {
-    await this.delay();
-    return { 
-      success: true, 
-      data: { id: this.generateId(), ...saleData, status: 'completed', created: new Date().toISOString() }
-    };
+    const params = new URLSearchParams();
+    if (this.tenantId) params.append('tenantId', this.tenantId);
+    if (this.branchId) params.append('branchId', this.branchId);
+    
+    return await this.post(`/cashier/sales?${params.toString()}`, saleData);
   }
 
   async updateSale(saleId, saleData) {
@@ -225,19 +291,17 @@ class CashierAPI {
     };
   }
 
-  // Point of Sale
+  // Point of Sale from backend
   async getProducts(filters = {}) {
-    await this.delay();
-    return {
-      success: true,
-      data: [
-        { id: '1', name: 'Paracetamol 500mg', sku: 'PAR001', price: 45.50, stock: 150, category: 'Pain Relief' },
-        { id: '2', name: 'Ibuprofen 400mg', sku: 'IBU002', price: 68.75, stock: 89, category: 'Pain Relief' },
-        { id: '3', name: 'Amoxicillin 250mg', sku: 'AMX003', price: 125.00, stock: 45, category: 'Antibiotics' },
-        { id: '4', name: 'Vitamin C 500mg', sku: 'VIT004', price: 89.90, stock: 120, category: 'Vitamins' },
-        { id: '5', name: 'Cough Syrup', sku: 'COU005', price: 56.25, stock: 67, category: 'Cold & Flu' }
-      ]
-    };
+    const params = new URLSearchParams();
+    if (this.tenantId) params.append('tenantId', this.tenantId);
+    if (this.branchId) params.append('branchId', this.branchId);
+    if (filters.category) params.append('category', filters.category);
+    if (filters.search) params.append('search', filters.search);
+    params.append('page', filters.page || 1);
+    params.append('limit', filters.limit || 50);
+    
+    return await this.get(`/cashier/products?${params.toString()}`);
   }
 
   async getProductDetails(productId) {
@@ -258,18 +322,12 @@ class CashierAPI {
   }
 
   async getProductByBarcode(barcode) {
-    await this.delay();
-    return {
-      success: true,
-      data: {
-        id: '1',
-        name: 'Paracetamol 500mg',
-        sku: 'PAR001',
-        price: 5.99,
-        stock: 150,
-        barcode: barcode
-      }
-    };
+    const params = new URLSearchParams();
+    if (this.tenantId) params.append('tenantId', this.tenantId);
+    if (this.branchId) params.append('branchId', this.branchId);
+    params.append('barcode', barcode);
+    
+    return await this.get(`/cashier/products/barcode?${params.toString()}`);
   }
 
   async searchProducts(query) {
@@ -296,17 +354,15 @@ class CashierAPI {
     };
   }
 
-  // Patients Management
+  // Patients Management from backend
   async getPatients(filters = {}) {
-    await this.delay();
-    return {
-      success: true,
-      data: [
-        { id: '1', name: 'John Doe', email: 'john@demo.com', phone: '555-0101', dob: '1980-01-15', memberSince: '2020-05-15' },
-        { id: '2', name: 'Jane Smith', email: 'jane@demo.com', phone: '555-0102', dob: '1985-05-20', memberSince: '2021-03-10' },
-        { id: '3', name: 'Bob Johnson', email: 'bob@demo.com', phone: '555-0103', dob: '1975-11-30', memberSince: '2019-08-22' }
-      ]
-    };
+    const params = new URLSearchParams();
+    if (this.tenantId) params.append('tenantId', this.tenantId);
+    if (filters.search) params.append('search', filters.search);
+    params.append('page', filters.page || 1);
+    params.append('limit', filters.limit || 50);
+    
+    return await this.get(`/cashier/patients?${params.toString()}`);
   }
 
   async getPatientDetails(patientId) {
@@ -328,11 +384,10 @@ class CashierAPI {
   }
 
   async createPatient(patientData) {
-    await this.delay();
-    return { 
-      success: true, 
-      data: { id: this.generateId(), ...patientData, created: new Date().toISOString() }
-    };
+    const params = new URLSearchParams();
+    if (this.tenantId) params.append('tenantId', this.tenantId);
+    
+    return await this.post(`/cashier/patients?${params.toString()}`, patientData);
   }
 
   async updatePatient(patientId, patientData) {
@@ -653,11 +708,30 @@ class CashierAPI {
   async getLoginSessions() { await this.delay(); return { success: true, data: [] }; }
   async revokeSession(sessionId) { await this.delay(); return { success: true }; }
   async revokeAllSessions() { await this.delay(); return { success: true }; }
-  async getUserId() { return 'demo-cashier'; }
-  async getTenantId() { return 'demo-tenant'; }
-  async registerPortal() { await this.delay(); return { success: true }; }
-  async getPortalStatus() { await this.delay(); return { success: true, data: { status: 'active' } }; }
-  async notifyDataChange(entityType, data) { await this.delay(); return { success: true }; }
+  // Portal registration from backend
+  async registerPortal() {
+    const params = new URLSearchParams();
+    if (this.tenantId) params.append('tenantId', this.tenantId);
+    if (this.branchId) params.append('branchId', this.branchId);
+    
+    return await this.post(`/cashier/register?${params.toString()}`);
+  }
+
+  async getPortalStatus() {
+    const params = new URLSearchParams();
+    if (this.tenantId) params.append('tenantId', this.tenantId);
+    if (this.branchId) params.append('branchId', this.branchId);
+    
+    return await this.get(`/cashier/status?${params.toString()}`);
+  }
+
+  async notifyDataChange(entityType, data) {
+    const params = new URLSearchParams();
+    if (this.tenantId) params.append('tenantId', this.tenantId);
+    if (this.branchId) params.append('branchId', this.branchId);
+    
+    return await this.post(`/cashier/notify/${entityType}?${params.toString()}`, data);
+  }
   async notifyUserChange(changeData) { await this.delay(); return { success: true }; }
   async logout() { await this.delay(); return { success: true }; }
   async completePatientService(patientId, serviceData) { await this.delay(); return { success: true }; }

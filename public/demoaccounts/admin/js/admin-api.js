@@ -1,54 +1,112 @@
 /**
- * Admin Portal Demo API Client
- * Mock API that returns sample data for demo purposes
+ * Admin Portal API Client
+ * Real API integration with backend endpoints
  */
 class AdminAPI {
   constructor() {
-    // Demo mode - no real API calls
-    this.demoMode = true;
+    this.baseURL = this.getBaseURL();
+    this.accessToken = localStorage.getItem('umi_access_token');
+    this.tenantId = localStorage.getItem('umi_tenant_id');
+    this.branchId = localStorage.getItem('umi_branch_id');
   }
 
-  // Simulate API delay
-  async delay(ms = 500) {
-    return new Promise(resolve => setTimeout(resolve, ms));
+  getBaseURL() {
+    // Determine if we're in development or production
+    if (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1') {
+      return 'http://localhost:5001/api/v1';
+    }
+    
+    // Extract subdomain for tenant-specific API calls
+    const subdomain = window.location.hostname.split('.')[0];
+    if (subdomain && subdomain !== 'www' && subdomain !== 'umihealth') {
+      return `https://${subdomain}.umihealth.com/api/v1`;
+    }
+    
+    return 'https://api.umihealth.com/api/v1';
   }
 
-  // Generate random IDs
-  generateId() {
-    return Math.random().toString(36).substr(2, 9);
-  }
-
-  // Mock dashboard data
-  async getDashboardStats() {
-    await this.delay();
-    return {
-      success: true,
-      data: {
-        totalPatients: 1247,
-        activePrescriptions: 89,
-        totalSales: 45678.90,
-        lowStockItems: 12,
-        newPatientsToday: 8,
-        pendingApprovals: 3,
-        monthlyRevenue: 234567.89,
-        totalBranches: 4,
-        activeUsers: 24
-      }
+  async request(endpoint, options = {}) {
+    const url = `${this.baseURL}${endpoint}`;
+    
+    const config = {
+      headers: {
+        'Content-Type': 'application/json',
+        ...options.headers
+      },
+      ...options
     };
+
+    // Add auth token if available
+    if (this.accessToken) {
+      config.headers['Authorization'] = `Bearer ${this.accessToken}`;
+    }
+
+    // Add tenant context if available
+    if (this.tenantId) {
+      config.headers['X-Tenant-ID'] = this.tenantId;
+    }
+
+    // Add branch context if available
+    if (this.branchId) {
+      config.headers['X-Branch-ID'] = this.branchId;
+    }
+
+    try {
+      const response = await fetch(url, config);
+      const data = await response.json();
+
+      if (!response.ok) {
+        throw new Error(data.message || data.error || `HTTP error! status: ${response.status}`);
+      }
+
+      return data;
+    } catch (error) {
+      console.error('Admin API request failed:', error);
+      throw error;
+    }
+  }
+
+  async get(endpoint) {
+    return this.request(endpoint, {
+      method: 'GET'
+    });
+  }
+
+  async post(endpoint, data) {
+    return this.request(endpoint, {
+      method: 'POST',
+      body: JSON.stringify(data)
+    });
+  }
+
+  async put(endpoint, data) {
+    return this.request(endpoint, {
+      method: 'PUT',
+      body: JSON.stringify(data)
+    });
+  }
+
+  async delete(endpoint) {
+    return this.request(endpoint, {
+      method: 'DELETE'
+    });
+  }
+
+  // Real dashboard data from backend
+  async getDashboardStats() {
+    const params = new URLSearchParams();
+    if (this.tenantId) params.append('tenantId', this.tenantId);
+    if (this.branchId) params.append('branchId', this.branchId);
+    
+    return await this.get(`/admin/dashboard?${params.toString()}`);
   }
 
   async getRecentActivity() {
-    await this.delay();
-    return {
-      success: true,
-      data: [
-        { id: 1, action: 'New patient registered', user: 'Bwalya Mwansa', time: '2 mins ago', type: 'info' },
-        { id: 2, action: 'Prescription approved', user: 'Dr. Mutale Chanda', time: '5 mins ago', type: 'success' },
-        { id: 3, action: 'Low stock alert', user: 'System', time: '10 mins ago', type: 'warning' },
-        { id: 4, action: 'Payment received', user: 'Chipo Banda', time: '15 mins ago', type: 'success' },
-        { id: 5, action: 'User login', user: 'Admin', time: '20 mins ago', type: 'info' }
-      ]
-    };
+    const params = new URLSearchParams();
+    if (this.tenantId) params.append('tenantId', this.tenantId);
+    if (this.branchId) params.append('branchId', this.branchId);
+    
+    return await this.get(`/admin/recent-activity?${params.toString()}`);
   }
 
   async getSystemHealth() {
@@ -106,41 +164,35 @@ class AdminAPI {
     return { success: true, message: 'Subscription upgraded successfully' };
   }
 
-  // Mock user management
+  // Real user management from backend
   async getUsers(page = 1, limit = 100, filters = {}) {
-    await this.delay();
-    const users = Array.from({ length: 10 }, (_, i) => ({
-      id: this.generateId(),
-      name: `User ${i + 1}`,
-      email: `user${i + 1}@demo.com`,
-      role: ['Admin', 'Cashier', 'Pharmacist'][i % 3],
-      status: ['active', 'inactive'][i % 2],
-      created: new Date(Date.now() - Math.random() * 30 * 24 * 60 * 60 * 1000).toISOString()
-    }));
-
-    return {
-      success: true,
-      data: users,
-      pagination: { page, limit, total: 45, pages: 5 }
-    };
+    const params = new URLSearchParams();
+    if (this.tenantId) params.append('tenantId', this.tenantId);
+    params.append('page', page);
+    params.append('limit', limit);
+    
+    return await this.get(`/admin/users?${params.toString()}`);
   }
 
   async createUser(userData) {
-    await this.delay();
-    return { 
-      success: true, 
-      data: { id: this.generateId(), ...userData, created: new Date().toISOString() }
-    };
+    const params = new URLSearchParams();
+    if (this.tenantId) params.append('tenantId', this.tenantId);
+    
+    return await this.post(`/admin/users?${params.toString()}`, userData);
   }
 
   async updateUser(userId, userData) {
-    await this.delay();
-    return { success: true, message: 'User updated successfully' };
+    const params = new URLSearchParams();
+    if (this.tenantId) params.append('tenantId', this.tenantId);
+    
+    return await this.put(`/admin/users/${userId}?${params.toString()}`, userData);
   }
 
   async deleteUser(userId) {
-    await this.delay();
-    return { success: true, message: 'User deleted successfully' };
+    const params = new URLSearchParams();
+    if (this.tenantId) params.append('tenantId', this.tenantId);
+    
+    return await this.delete(`/admin/users/${userId}?${params.toString()}`);
   }
 
   async getUserPermissions(userId) {
@@ -156,25 +208,19 @@ class AdminAPI {
     return { success: true, message: 'Permissions updated successfully' };
   }
 
-  // Mock branch management
+  // Real branch management from backend
   async getBranches() {
-    await this.delay();
-    return {
-      success: true,
-      data: [
-        { id: '1', name: 'Main Branch', address: '123 Main St', phone: '555-0101', status: 'active' },
-        { id: '2', name: 'North Branch', address: '456 North Ave', phone: '555-0102', status: 'active' },
-        { id: '3', name: 'East Branch', address: '789 East Blvd', phone: '555-0103', status: 'inactive' }
-      ]
-    };
+    const params = new URLSearchParams();
+    if (this.tenantId) params.append('tenantId', this.tenantId);
+    
+    return await this.get(`/admin/branches?${params.toString()}`);
   }
 
   async createBranch(branchData) {
-    await this.delay();
-    return { 
-      success: true, 
-      data: { id: this.generateId(), ...branchData, created: new Date().toISOString() }
-    };
+    const params = new URLSearchParams();
+    if (this.tenantId) params.append('tenantId', this.tenantId);
+    
+    return await this.post(`/admin/branches?${params.toString()}`, branchData);
   }
 
   async updateBranch(branchId, branchData) {
@@ -200,17 +246,15 @@ class AdminAPI {
     };
   }
 
-  // Mock inventory
+  // Real inventory from backend
   async getInventory(filters = {}) {
-    await this.delay();
-    return {
-      success: true,
-      data: [
-        { id: '1', name: 'Paracetamol 500mg', sku: 'PAR001', stock: 150, lowStock: false, price: 5.99 },
-        { id: '2', name: 'Ibuprofen 400mg', sku: 'IBU002', stock: 12, lowStock: true, price: 7.99 },
-        { id: '3', name: 'Amoxicillin 250mg', sku: 'AMX003', stock: 45, lowStock: false, price: 12.99 }
-      ]
-    };
+    const params = new URLSearchParams();
+    if (this.tenantId) params.append('tenantId', this.tenantId);
+    if (this.branchId) params.append('branchId', this.branchId);
+    params.append('page', filters.page || 1);
+    params.append('limit', filters.limit || 50);
+    
+    return await this.get(`/admin/inventory?${params.toString()}`);
   }
 
   async addProduct(productData) {
@@ -242,17 +286,17 @@ class AdminAPI {
     };
   }
 
-  // Mock sales
+  // Real sales from backend
   async getSales(filters = {}) {
-    await this.delay();
-    return {
-      success: true,
-      data: [
-        { id: '1', total: 45.99, items: 3, customer: 'John Doe', date: '2024-01-15', status: 'completed' },
-        { id: '2', total: 23.50, items: 2, customer: 'Jane Smith', date: '2024-01-15', status: 'completed' },
-        { id: '3', total: 67.25, items: 5, customer: 'Bob Johnson', date: '2024-01-14', status: 'pending' }
-      ]
-    };
+    const params = new URLSearchParams();
+    if (this.tenantId) params.append('tenantId', this.tenantId);
+    if (this.branchId) params.append('branchId', this.branchId);
+    if (filters.startDate) params.append('startDate', filters.startDate);
+    if (filters.endDate) params.append('endDate', filters.endDate);
+    params.append('page', filters.page || 1);
+    params.append('limit', filters.limit || 50);
+    
+    return await this.get(`/admin/sales?${params.toString()}`);
   }
 
   async getSaleDetails(saleId) {
@@ -331,24 +375,19 @@ class AdminAPI {
     return { success: true, message: 'Prescription rejected successfully' };
   }
 
-  // Mock system settings
-  async getSystemSettings() {
-    await this.delay();
-    return {
-      success: true,
-      data: {
-        systemName: 'Umi Health Demo',
-        version: '1.0.0',
-        maintenance: false,
-        backupEnabled: true,
-        logLevel: 'info'
-      }
-    };
+  // Real settings from backend
+  async getSettings() {
+    const params = new URLSearchParams();
+    if (this.tenantId) params.append('tenantId', this.tenantId);
+    
+    return await this.get(`/admin/settings?${params.toString()}`);
   }
 
-  async updateSystemSettings(settings) {
-    await this.delay();
-    return { success: true, message: 'System settings updated successfully' };
+  async updateSettings(settingsDto) {
+    const params = new URLSearchParams();
+    if (this.tenantId) params.append('tenantId', this.tenantId);
+    
+    return await this.put(`/admin/settings?${params.toString()}`, settingsDto);
   }
 
   async getAuditLogs(filters = {}) {
