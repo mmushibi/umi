@@ -3,7 +3,8 @@ class PortalDataSync {
     constructor(portalType, baseURL) {
         this.portalType = portalType;
         this.baseURL = baseURL;
-        this.token = localStorage.getItem('authToken');
+        this.accessToken = null;
+        this.refreshToken = null;
         this.refreshInterval = 30000;
         this.intervals = {};
         this.cache = new Map();
@@ -11,9 +12,35 @@ class PortalDataSync {
         this.isOnline = navigator.onLine;
         this.offlineQueue = [];
         
+        // Load tokens from storage
+        this.loadTokens();
+        
         this.setupInterceptors();
         this.setupOfflineListeners();
         this.initializeOfflineStorage();
+    }
+
+    /**
+     * Load tokens from local storage
+     */
+    loadTokens() {
+        try {
+            const storedTokens = localStorage.getItem('auth_tokens');
+            if (storedTokens) {
+                const { accessToken, refreshToken } = JSON.parse(storedTokens);
+                this.accessToken = accessToken;
+                this.refreshToken = refreshToken;
+            }
+        } catch (error) {
+            console.error('Failed to load tokens from storage:', error);
+        }
+    }
+
+    /**
+     * Check if user is authenticated
+     */
+    isAuthenticated() {
+        return !!this.accessToken;
     }
 
     setupInterceptors() {
@@ -21,10 +48,10 @@ class PortalDataSync {
         window.fetch = async (...args) => {
             const [url, options = {}] = args;
             
-            if (url.startsWith('/api/') && this.token) {
+            if (url.startsWith('/api/') && this.accessToken) {
                 options.headers = {
                     ...options.headers,
-                    'Authorization': `Bearer ${this.token}`,
+                    'Authorization': `Bearer ${this.accessToken}`,
                     'Content-Type': 'application/json'
                 };
             }
@@ -69,7 +96,7 @@ class PortalDataSync {
             const response = await fetch(`${this.baseURL}${endpoint}`, {
                 ...options,
                 headers: {
-                    'Authorization': `Bearer ${this.token}`,
+                    'Authorization': `Bearer ${this.accessToken}`,
                     'Content-Type': 'application/json',
                     ...options.headers
                 }
@@ -313,18 +340,24 @@ class PortalDataSync {
         }
     }
 
-    setToken(token) {
-        this.token = token;
-        localStorage.setItem('authToken', token);
+    setTokens(accessToken, refreshToken) {
+        this.accessToken = accessToken;
+        this.refreshToken = refreshToken;
+        
+        try {
+            localStorage.setItem('auth_tokens', JSON.stringify({
+                accessToken,
+                refreshToken
+            }));
+        } catch (error) {
+            console.error('Failed to save tokens to storage:', error);
+        }
     }
 
-    clearToken() {
-        this.token = null;
-        localStorage.removeItem('authToken');
-    }
-
-    isAuthenticated() {
-        return !!this.token;
+    clearTokens() {
+        this.accessToken = null;
+        this.refreshToken = null;
+        localStorage.removeItem('auth_tokens');
     }
 
     getConnectionStatus() {

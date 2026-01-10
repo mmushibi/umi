@@ -89,13 +89,46 @@ class SignalRClient {
     }
 
     /**
-     * Get full hub URL
+     * Get full hub URL with configurable endpoint
      */
     getHubUrl(hubUrl) {
-        const baseUrl = window.apiClient?.baseUrl || 
-                       window.location.origin || 
-                       'http://localhost:5000';
-        return baseUrl + hubUrl;
+        // Check for environment variable first
+        if (typeof process !== 'undefined' && process.env?.UMI_API_BASE_URL) {
+            return process.env.UMI_API_BASE_URL + hubUrl;
+        }
+        
+        // Check for global configuration
+        if (typeof window !== 'undefined' && window.UMI_CONFIG?.apiBaseUrl) {
+            return window.UMI_CONFIG.apiBaseUrl + hubUrl;
+        }
+        
+        // Check for localStorage configuration
+        if (typeof window !== 'undefined') {
+            const storedUrl = localStorage.getItem('umi_api_base_url');
+            if (storedUrl) {
+                return storedUrl + hubUrl;
+            }
+        }
+        
+        // Fallback to environment-based defaults
+        if (typeof window !== 'undefined') {
+            const hostname = window.location.hostname;
+            const port = window.location.port;
+            
+            if (hostname === 'localhost' || hostname === '127.0.0.1') {
+                // Development environment
+                return `http://localhost:${parseInt(port) + 1 || 5001}${hubUrl}`;
+            } else if (hostname.includes('staging') || hostname.includes('dev')) {
+                // Staging environment
+                return `https://api-staging.umihealth.com${hubUrl}`;
+            } else {
+                // Production environment
+                return `https://api.umihealth.com${hubUrl}`;
+            }
+        }
+        
+        // Default fallback
+        return 'http://localhost:5001' + hubUrl;
     }
 
     /**
@@ -108,8 +141,26 @@ class SignalRClient {
             return token?.replace('Bearer ', '') || token;
         }
         
-        // Fallback to storage
-        const token = localStorage.getItem('umi_auth_token') || 
+        // Try auth API
+        if (window.authAPI?.isAuthenticated()) {
+            return window.authAPI.accessToken;
+        }
+        
+        // Try standardized auth_tokens storage
+        try {
+            const storedTokens = localStorage.getItem('auth_tokens');
+            if (storedTokens) {
+                const { accessToken } = JSON.parse(storedTokens);
+                return accessToken?.replace('Bearer ', '') || accessToken;
+            }
+        } catch (error) {
+            console.error('Error reading auth_tokens:', error);
+        }
+        
+        // Fallback to legacy storage
+        const token = localStorage.getItem('umi_access_token') || 
+                     sessionStorage.getItem('umi_access_token') ||
+                     localStorage.getItem('umi_auth_token') || 
                      sessionStorage.getItem('umi_auth_token');
         return token?.replace('Bearer ', '') || token;
     }

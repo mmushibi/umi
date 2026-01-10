@@ -2,7 +2,32 @@
 class OperationsAPI {
     constructor() {
         this.baseURL = 'http://localhost:5000/api/v1/operations';
-        this.token = localStorage.getItem('authToken') || '';
+        this.accessToken = null;
+        this.refreshToken = null;
+        this.loadTokens();
+    }
+
+    /**
+     * Load tokens from local storage
+     */
+    loadTokens() {
+        try {
+            const storedTokens = localStorage.getItem('auth_tokens');
+            if (storedTokens) {
+                const { accessToken, refreshToken } = JSON.parse(storedTokens);
+                this.accessToken = accessToken;
+                this.refreshToken = refreshToken;
+            }
+        } catch (error) {
+            console.error('Failed to load tokens from storage:', error);
+        }
+    }
+
+    /**
+     * Check if user is authenticated
+     */
+    isAuthenticated() {
+        return !!this.accessToken;
     }
 
     async request(endpoint, options = {}) {
@@ -10,7 +35,7 @@ class OperationsAPI {
         const config = {
             headers: {
                 'Content-Type': 'application/json',
-                'Authorization': `Bearer ${this.token}`,
+                'Authorization': `Bearer ${this.accessToken}`,
                 ...options.headers
             },
             ...options
@@ -136,7 +161,7 @@ class OperationsAPI {
         const url = `${this.baseURL}/transactions/${id}/receipt`;
         const config = {
             headers: {
-                'Authorization': `Bearer ${this.token}`
+                'Authorization': `Bearer ${this.accessToken}`
             }
         };
 
@@ -176,16 +201,26 @@ class OperationsAPI {
         });
     }
 
-    // Helper method to set auth token
-    setAuthToken(token) {
-        this.token = token;
-        localStorage.setItem('authToken', token);
+    // Helper method to set auth tokens
+    setAuthTokens(accessToken, refreshToken) {
+        this.accessToken = accessToken;
+        this.refreshToken = refreshToken;
+        
+        try {
+            localStorage.setItem('auth_tokens', JSON.stringify({
+                accessToken,
+                refreshToken
+            }));
+        } catch (error) {
+            console.error('Failed to save tokens to storage:', error);
+        }
     }
 
-    // Helper method to clear auth token
-    clearAuthToken() {
-        this.token = '';
-        localStorage.removeItem('authToken');
+    // Helper method to clear auth tokens
+    clearAuthTokens() {
+        this.accessToken = null;
+        this.refreshToken = null;
+        localStorage.removeItem('auth_tokens');
     }
 }
 

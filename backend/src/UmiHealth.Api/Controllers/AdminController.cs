@@ -16,15 +16,21 @@ namespace UmiHealth.Api.Controllers
         private readonly ILogger<AdminController> _logger;
         private readonly IReportsService _reportsService;
         private readonly ITenantService _tenantService;
+        private readonly IAuthService _authService;
+        private readonly Core.Interfaces.IPharmacyService _pharmacyService;
 
         public AdminController(
             ILogger<AdminController> logger,
             IReportsService reportsService,
-            ITenantService tenantService)
+            ITenantService tenantService,
+            IAuthService authService,
+            Core.Interfaces.IPharmacyService pharmacyService)
         {
             _logger = logger;
             _reportsService = reportsService;
             _tenantService = tenantService;
+            _authService = authService;
+            _pharmacyService = pharmacyService;
         }
 
         [HttpGet("dashboard")]
@@ -74,15 +80,14 @@ namespace UmiHealth.Api.Controllers
                     return Forbid();
                 }
 
-                // Mock data for now
-                var activity = new[]
+                // Get recent activity from audit logs or database
+                // TODO: Implement proper activity logging service
+                var recentActivity = new[]
                 {
-                    new { id = 1, action = "New patient registered", user = "Bwalya Mwansa", time = "2 mins ago", type = "info" },
-                    new { id = 2, action = "Prescription approved", user = "Dr. Mutale Chanda", time = "5 mins ago", type = "success" },
-                    new { id = 3, action = "Low stock alert", user = "System", time = "10 mins ago", type = "warning" }
+                    new { id = 1, action = "System activity logging will be implemented", user = "System", time = "Just now", type = "info" }
                 };
 
-                return Ok(activity);
+                return Ok(recentActivity);
             }
             catch (Exception ex)
             {
@@ -102,11 +107,10 @@ namespace UmiHealth.Api.Controllers
                     return Forbid();
                 }
 
-                // Mock data for now - replace with real user service when available
+                // TODO: Implement proper user management service
                 var users = new[]
                 {
-                    new UmiHealth.Application.DTOs.UserDto { Id = Guid.NewGuid(), Name = "Admin User", Email = "admin@example.com", Role = "Admin", Status = "active" },
-                    new UmiHealth.Application.DTOs.UserDto { Id = Guid.NewGuid(), Name = "Cashier User", Email = "cashier@example.com", Role = "Cashier", Status = "active" }
+                    new UmiHealth.Application.DTOs.UserDto { Id = Guid.NewGuid(), Name = "User management will be implemented", Email = "admin@example.com", Role = "Admin", Status = "active" }
                 };
 
                 return Ok(users);
@@ -268,11 +272,10 @@ namespace UmiHealth.Api.Controllers
                     return Forbid();
                 }
 
-                // Mock data for now
+                // TODO: Implement proper inventory service
                 var inventory = new[]
                 {
-                    new { id = "1", name = "Paracetamol 500mg", sku = "PAR001", stock = 150, lowStock = false, price = 5.99 },
-                    new { id = "2", name = "Ibuprofen 400mg", sku = "IBU002", stock = 12, lowStock = true, price = 7.99 }
+                    new { id = "1", name = "Inventory service will be implemented", sku = "TODO001", stock = 0, lowStock = false, price = 0.00 }
                 };
 
                 return Ok(inventory);
@@ -295,10 +298,10 @@ namespace UmiHealth.Api.Controllers
                     return Forbid();
                 }
 
+                // TODO: Implement proper sales reporting service
                 var sales = new[]
                 {
-                    new { id = "1", total = 45.99, items = 3, customer = "John Doe", date = "2024-01-15", status = "completed" },
-                    new { id = "2", total = 23.50, items = 2, customer = "Jane Smith", date = "2024-01-15", status = "completed" }
+                    new { id = "1", total = 0.00, items = 0, customer = "Sales service will be implemented", date = DateTime.Now.ToString("yyyy-MM-dd"), status = "pending" }
                 };
 
                 return Ok(sales);

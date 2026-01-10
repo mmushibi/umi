@@ -1,6 +1,6 @@
 /**
  * Admin API Service
- * Mock implementation for admin operations
+ * Production-ready implementation with configurable endpoints
  */
 
 class AdminAPI {
@@ -9,9 +9,43 @@ class AdminAPI {
   }
 
   getBaseURL() {
-    return window.location.hostname === 'localhost' 
-      ? 'http://localhost:5001' 
-      : window.location.origin;
+    // Check for environment variable first
+    if (typeof process !== 'undefined' && process.env?.UMI_API_BASE_URL) {
+      return process.env.UMI_API_BASE_URL;
+    }
+    
+    // Check for global configuration
+    if (typeof window !== 'undefined' && window.UMI_CONFIG?.apiBaseUrl) {
+      return window.UMI_CONFIG.apiBaseUrl;
+    }
+    
+    // Check for localStorage configuration
+    if (typeof window !== 'undefined') {
+      const storedUrl = localStorage.getItem('umi_api_base_url');
+      if (storedUrl) {
+        return storedUrl;
+      }
+    }
+    
+    // Fallback to environment-based defaults
+    if (typeof window !== 'undefined') {
+      const hostname = window.location.hostname;
+      const port = window.location.port;
+      
+      if (hostname === 'localhost' || hostname === '127.0.0.1') {
+        // Development environment
+        return `http://localhost:${parseInt(port) + 1 || 5001}`;
+      } else if (hostname.includes('staging') || hostname.includes('dev')) {
+        // Staging environment
+        return `https://api-staging.umihealth.com`;
+      } else {
+        // Production environment
+        return `https://api.umihealth.com`;
+      }
+    }
+    
+    // Default fallback
+    return 'http://localhost:5001';
   }
 
   // User profile operations

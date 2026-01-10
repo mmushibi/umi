@@ -1273,12 +1273,86 @@
 
         async logout() {
           try {
+          }
+          
+          this.recentActivities = activities;
+        },
+        
+        processQueueData(queueData) {
+          this.queueStatus = {
+            waiting: queueData.waitingCount || 0,
+            averageWaitTime: queueData.averageWaitTime || '0 min',
+            prescriptionsPending: queueData.prescriptionsPending || 0,
+            nextPickup: queueData.nextPickupIn || 'N/A',
+            paymentsProcessing: queueData.paymentsProcessing || 0,
+            lastPayment: queueData.lastPayment ? this.formatTimeAgo(queueData.lastPayment) : 'N/A'
+          };
+        },
+        
+        processPatientData(patients) {
+          if (Array.isArray(patients)) {
+            patients.slice(0, 3).forEach(patient => {
+              this.recentActivities.unshift({
+                id: `patient-${patient.id}`,
+                type: 'patient',
+                icon: 'person_add',
+                title: 'New Patient Registered',
+                description: `${patient.firstName} ${patient.lastName} - ID: #${patient.id}`,
+                time: this.formatTimeAgo(patient.createdAt)
+              });
+            });
+          }
+        },
+        
+        formatTimeAgo(dateString) {
+          if (!dateString) return 'Unknown';
+          
+          const date = new Date(dateString);
+          const now = new Date();
+          const diffMs = now - date;
+          const diffMins = Math.floor(diffMs / 60000);
+          const diffHours = Math.floor(diffMins / 60);
+          const diffDays = Math.floor(diffHours / 24);
+          
+          if (diffMins < 1) return 'Just now';
+          if (diffMins < 60) return `${diffMins} minute${diffMins > 1 ? 's' : ''} ago`;
+          if (diffHours < 24) return `${diffHours} hour${diffHours > 1 ? 's' : ''} ago`;
+          return `${diffDays} day${diffDays > 1 ? 's' : ''} ago`;
+        },
+        
+        setDefaultValues() {
+          this.stats = {
+            todaySales: 0,
+            salesChange: 0,
+            patientsServed: 0,
+            patientsChange: 0,
+            todayRevenue: 0,
+            revenueChange: 0,
+            prescriptions: 0,
+            prescriptionsChange: 0
+          };
+          
+          this.queueStatus = {
+            waiting: 0,
+            averageWaitTime: '0 min',
+            prescriptionsPending: 0,
+            nextPickup: 'N/A',
+            paymentsProcessing: 0,
+            lastPayment: 'N/A'
+          };
+          
+          this.recentActivities = [];
+        },
+        
+        async logout() {
+          try {
             await this.api.logout();
           } catch (error) {
             console.error('Logout error:', error);
           }
           
           // Clear local storage
+          localStorage.removeItem('auth_tokens');
           localStorage.removeItem('umi_access_token');
           localStorage.removeItem('umi_tenant_id');
           localStorage.removeItem('umi_branch_id');

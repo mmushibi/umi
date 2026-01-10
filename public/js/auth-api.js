@@ -11,18 +11,47 @@ class AuthAPI {
     }
 
     getBaseURL() {
-        // Determine if we're in development or production
-        if (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1') {
-            return 'http://localhost:5001/api/v1';
+        // Check for environment variable first
+        if (typeof process !== 'undefined' && process.env?.UMI_API_BASE_URL) {
+            return process.env.UMI_API_BASE_URL + '/api/v1';
         }
         
-        // Extract subdomain for tenant-specific API calls
-        const subdomain = window.location.hostname.split('.')[0];
-        if (subdomain && subdomain !== 'www' && subdomain !== 'umihealth') {
-            return `https://${subdomain}.umihealth.com/api/v1`;
+        // Check for global configuration
+        if (typeof window !== 'undefined' && window.UMI_CONFIG?.apiBaseUrl) {
+            return window.UMI_CONFIG.apiBaseUrl + '/api/v1';
         }
         
-        return 'https://api.umihealth.com/api/v1';
+        // Check for localStorage configuration
+        if (typeof window !== 'undefined') {
+            const storedUrl = localStorage.getItem('umi_api_base_url');
+            if (storedUrl) {
+                return storedUrl + '/api/v1';
+            }
+        }
+        
+        // Fallback to environment-based defaults
+        if (typeof window !== 'undefined') {
+            const hostname = window.location.hostname;
+            const port = window.location.port;
+            
+            if (hostname === 'localhost' || hostname === '127.0.0.1') {
+                // Development environment
+                return `http://localhost:${parseInt(port) + 1 || 5001}/api/v1`;
+            } else if (hostname.includes('staging') || hostname.includes('dev')) {
+                // Staging environment
+                return `https://api-staging.umihealth.com/api/v1`;
+            } else {
+                // Production environment - extract subdomain for tenant-specific API calls
+                const subdomain = hostname.split('.')[0];
+                if (subdomain && subdomain !== 'www' && subdomain !== 'umihealth') {
+                    return `https://${subdomain}.umihealth.com/api/v1`;
+                }
+                return `https://api.umihealth.com/api/v1`;
+            }
+        }
+        
+        // Default fallback
+        return 'http://localhost:5001/api/v1';
     }
 
     async request(endpoint, options = {}) {

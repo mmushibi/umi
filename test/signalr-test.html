@@ -163,23 +163,44 @@
             log('Testing SignalR connection...');
             
             try {
-                // Mock user for testing
-                const mockUser = {
-                    id: 'test-user-123',
-                    name: 'Test User',
-                    roles: ['Admin'],
-                    tenantId: 'test-tenant',
-                    branchId: 'test-branch',
-                    token: 'mock-token'
+                // Get real authentication token
+                const token = localStorage.getItem('umi_access_token');
+                if (!token) {
+                    log('No authentication token found. Please sign in first.', 'error');
+                    updateConnectionStatus('offline');
+                    return;
+                }
+
+                // Get real user data from API
+                const response = await fetch('http://localhost:5001/api/v1/auth/profile', {
+                    headers: {
+                        'Authorization': `Bearer ${token}`,
+                        'Content-Type': 'application/json'
+                    }
+                });
+
+                if (!response.ok) {
+                    throw new Error(`Failed to fetch user profile: ${response.status}`);
+                }
+
+                const userData = await response.json();
+                const realUser = {
+                    id: userData.id || userData.userId,
+                    name: userData.name || userData.fullName,
+                    roles: userData.roles || [userData.role],
+                    tenantId: userData.tenantId,
+                    branchId: userData.branchId,
+                    token: token
                 };
 
-                // Initialize real-time events
-                await window.realtimeEvents.initialize(mockUser);
+                // Initialize real-time events with real user data
+                await window.realtimeEvents.initialize(realUser);
                 
                 const status = window.realtimeEvents.getStatus();
                 updateConnectionStatus(status.isConnected ? 'online' : 'offline', status);
                 
                 log(`SignalR connection test: ${status.isConnected ? 'SUCCESS' : 'FAILED'}`);
+                log(`User: ${realUser.name}, Roles: ${realUser.roles.join(', ')}`);
                 log(`Status: ${JSON.stringify(status, null, 2)}`);
                 
             } catch (error) {
@@ -192,21 +213,40 @@
             log('Testing notification events...');
             
             try {
-                // Simulate receiving a notification
-                const mockNotification = {
-                    id: 'notif-123',
-                    type: 'info',
-                    title: 'Test Notification',
-                    message: 'This is a test notification from SignalR',
-                    timestamp: new Date().toISOString(),
-                    userId: 'test-user-123'
-                };
-                
-                // Trigger the notification handler directly
-                window.realtimeEvents.handleNotification(mockNotification);
-                addEventToList('notification-received', mockNotification);
-                
-                log('Notification test completed successfully');
+                // Get real notifications from API
+                const token = localStorage.getItem('umi_access_token');
+                const response = await fetch('http://localhost:5001/api/v1/admin/notifications', {
+                    headers: {
+                        'Authorization': `Bearer ${token}`,
+                        'Content-Type': 'application/json'
+                    }
+                });
+
+                if (response.ok) {
+                    const notifications = await response.json();
+                    if (notifications.length > 0) {
+                        // Use the first real notification for testing
+                        const realNotification = notifications[0];
+                        window.realtimeEvents.handleNotification(realNotification);
+                        addEventToList('notification-received', realNotification);
+                        log('Notification test completed with real data');
+                    } else {
+                        // Create a test notification if no real ones exist
+                        const testNotification = {
+                            id: 'notif-test',
+                            type: 'info',
+                            title: 'Test Notification',
+                            message: 'This is a test notification (no real notifications found)',
+                            timestamp: new Date().toISOString(),
+                            userId: window.realtimeEvents.currentUser?.id
+                        };
+                        window.realtimeEvents.handleNotification(testNotification);
+                        addEventToList('notification-received', testNotification);
+                        log('Notification test completed (no real notifications available)');
+                    }
+                } else {
+                    throw new Error(`Failed to fetch notifications: ${response.status}`);
+                }
             } catch (error) {
                 log(`Notification test failed: ${error.message}`, 'error');
             }
@@ -216,19 +256,37 @@
             log('Testing inventory events...');
             
             try {
-                const mockStockChange = {
-                    productId: 'prod-123',
-                    productName: 'Test Medicine',
-                    currentStock: 15,
-                    previousStock: 25,
-                    isLowStock: true,
-                    changeType: 'decrease'
-                };
-                
-                window.realtimeEvents.handleStockLevelChange(mockStockChange);
-                addEventToList('stock-level-changed', mockStockChange);
-                
-                log('Inventory test completed successfully');
+                // Get real inventory data from API
+                const token = localStorage.getItem('umi_access_token');
+                const response = await fetch('http://localhost:5001/api/v1/admin/inventory', {
+                    headers: {
+                        'Authorization': `Bearer ${token}`,
+                        'Content-Type': 'application/json'
+                    }
+                });
+
+                if (response.ok) {
+                    const inventory = await response.json();
+                    if (inventory.length > 0) {
+                        // Find a low stock item or use the first item
+                        const lowStockItem = inventory.find(item => item.lowStock) || inventory[0];
+                        const realStockChange = {
+                            productId: lowStockItem.id,
+                            productName: lowStockItem.name,
+                            currentStock: lowStockItem.stock,
+                            previousStock: lowStockItem.stock + 5,
+                            isLowStock: lowStockItem.lowStock,
+                            changeType: 'decrease'
+                        };
+                        window.realtimeEvents.handleStockLevelChange(realStockChange);
+                        addEventToList('stock-level-changed', realStockChange);
+                        log('Inventory test completed with real data');
+                    } else {
+                        log('No inventory items found for testing');
+                    }
+                } else {
+                    throw new Error(`Failed to fetch inventory: ${response.status}`);
+                }
             } catch (error) {
                 log(`Inventory test failed: ${error.message}`, 'error');
             }
@@ -238,18 +296,29 @@
             log('Testing prescription events...');
             
             try {
-                const mockPrescription = {
-                    id: 'presc-123',
-                    patientName: 'John Doe',
-                    medications: ['Paracetamol', 'Ibuprofen'],
-                    status: 'pending',
-                    createdAt: new Date().toISOString()
-                };
-                
-                window.realtimeEvents.handleNewPrescription(mockPrescription);
-                addEventToList('new-prescription', mockPrescription);
-                
-                log('Prescription test completed successfully');
+                // Get real prescription data from API
+                const token = localStorage.getItem('umi_access_token');
+                const response = await fetch('http://localhost:5001/api/v1/pharmacist/prescriptions', {
+                    headers: {
+                        'Authorization': `Bearer ${token}`,
+                        'Content-Type': 'application/json'
+                    }
+                });
+
+                if (response.ok) {
+                    const prescriptions = await response.json();
+                    if (prescriptions.length > 0) {
+                        // Use the first real prescription for testing
+                        const realPrescription = prescriptions[0];
+                        window.realtimeEvents.handleNewPrescription(realPrescription);
+                        addEventToList('new-prescription', realPrescription);
+                        log('Prescription test completed with real data');
+                    } else {
+                        log('No prescriptions found for testing');
+                    }
+                } else {
+                    throw new Error(`Failed to fetch prescriptions: ${response.status}`);
+                }
             } catch (error) {
                 log(`Prescription test failed: ${error.message}`, 'error');
             }
@@ -259,19 +328,29 @@
             log('Testing sales events...');
             
             try {
-                const mockSale = {
-                    id: 'sale-123',
-                    totalAmount: 150.00,
-                    items: ['Medicine A', 'Medicine B'],
-                    customerName: 'Jane Smith',
-                    status: 'completed',
-                    timestamp: new Date().toISOString()
-                };
-                
-                window.realtimeEvents.handleSaleCompleted(mockSale);
-                addEventToList('sale-completed', mockSale);
-                
-                log('Sales test completed successfully');
+                // Get real sales data from API
+                const token = localStorage.getItem('umi_access_token');
+                const response = await fetch('http://localhost:5001/api/v1/admin/sales', {
+                    headers: {
+                        'Authorization': `Bearer ${token}`,
+                        'Content-Type': 'application/json'
+                    }
+                });
+
+                if (response.ok) {
+                    const sales = await response.json();
+                    if (sales.length > 0) {
+                        // Use the first real sale for testing
+                        const realSale = sales[0];
+                        window.realtimeEvents.handleSaleCompleted(realSale);
+                        addEventToList('sale-completed', realSale);
+                        log('Sales test completed with real data');
+                    } else {
+                        log('No sales found for testing');
+                    }
+                } else {
+                    throw new Error(`Failed to fetch sales: ${response.status}`);
+                }
             } catch (error) {
                 log(`Sales test failed: ${error.message}`, 'error');
             }

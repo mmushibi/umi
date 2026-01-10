@@ -45,6 +45,13 @@ class OperationsDataSync {
      */
     loadAuthData() {
         try {
+            const storedTokens = localStorage.getItem('auth_tokens');
+            if (storedTokens) {
+                const { accessToken, refreshToken } = JSON.parse(storedTokens);
+                this.accessToken = accessToken;
+                this.refreshToken = refreshToken;
+            }
+            
             const authData = localStorage.getItem('authData') || sessionStorage.getItem('authData');
             if (authData) {
                 const parsed = JSON.parse(authData);
@@ -55,6 +62,28 @@ class OperationsDataSync {
         } catch (error) {
             console.error('Error loading auth data:', error);
         }
+    }
+
+    /**
+     * Get access token from storage
+     */
+    getAccessToken() {
+        if (this.accessToken) {
+            return this.accessToken;
+        }
+        
+        try {
+            const storedTokens = localStorage.getItem('auth_tokens');
+            if (storedTokens) {
+                const { accessToken } = JSON.parse(storedTokens);
+                this.accessToken = accessToken;
+                return accessToken;
+            }
+        } catch (error) {
+            console.error('Error getting access token:', error);
+        }
+        
+        return null;
     }
 
     /**
@@ -295,7 +324,7 @@ class OperationsDataSync {
             throw new Error('Network is offline');
         }
 
-        const token = localStorage.getItem('authToken') || sessionStorage.getItem('authToken');
+        const token = this.getAccessToken();
         if (!token) {
             throw new Error('No authentication token found');
         }
