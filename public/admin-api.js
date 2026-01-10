@@ -16,191 +16,138 @@ class AdminAPI {
 
   // User profile operations
   async updateUserProfile(profile) {
-    try {
-      const response = await fetch(`${this.baseURL}/api/v1/admin/profile`, {
-        method: 'PUT',
-        headers: {
-          'Authorization': `Bearer ${this.getAuthToken()}`,
-          'Content-Type': 'application/json'
-        },
-        body: JSON.stringify(profile)
-      });
+    const response = await fetch(`${this.baseURL}/api/v1/admin/profile`, {
+      method: 'PUT',
+      headers: {
+        'Authorization': `Bearer ${this.getAuthToken()}`,
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify(profile)
+    });
 
-      if (!response.ok) {
-        throw new Error(`HTTP error! status: ${response.status}`);
-      }
-
-      return await response.json();
-    } catch (error) {
-      console.error('Error updating user profile:', error);
-      // Return mock success for development
-      return { success: true, message: 'Profile updated successfully' };
+    if (!response.ok) {
+      const error = await response.json().catch(() => ({}));
+      throw new Error(error.message || `HTTP error! status: ${response.status}`);
     }
+
+    return await response.json();
   }
 
   // Pharmacy settings operations
   async updatePharmacySettings(settings) {
-    try {
-      const response = await fetch(`${this.baseURL}/api/v1/admin/pharmacy-settings`, {
-        method: 'PUT',
-        headers: {
-          'Authorization': `Bearer ${this.getAuthToken()}`,
-          'Content-Type': 'application/json'
-        },
-        body: JSON.stringify(settings)
-      });
+    const response = await fetch(`${this.baseURL}/api/v1/admin/settings`, {
+      method: 'PUT',
+      headers: {
+        'Authorization': `Bearer ${this.getAuthToken()}`,
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify(settings)
+    });
 
-      if (!response.ok) {
-        throw new Error(`HTTP error! status: ${response.status}`);
-      }
-
-      return await response.json();
-    } catch (error) {
-      console.error('Error updating pharmacy settings:', error);
-      // Return mock success for development
-      return { success: true, message: 'Pharmacy settings updated successfully' };
+    if (!response.ok) {
+      const error = await response.json().catch(() => ({}));
+      throw new Error(error.message || `HTTP error! status: ${response.status}`);
     }
+
+    return await response.json();
   }
 
   // Notification settings operations
   async updateNotificationSettings(settings) {
-    try {
-      const response = await fetch(`${this.baseURL}/api/v1/admin/notification-settings`, {
-        method: 'PUT',
-        headers: {
-          'Authorization': `Bearer ${this.getAuthToken()}`,
-          'Content-Type': 'application/json'
-        },
-        body: JSON.stringify(settings)
-      });
+    const response = await fetch(`${this.baseURL}/api/v1/admin/settings`, {
+      method: 'PUT',
+      headers: {
+        'Authorization': `Bearer ${this.getAuthToken()}`,
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify(settings)
+    });
 
-      if (!response.ok) {
-        throw new Error(`HTTP error! status: ${response.status}`);
-      }
-
-      return await response.json();
-    } catch (error) {
-      console.error('Error updating notification settings:', error);
-      // Return mock success for development
-      return { success: true, message: 'Notification settings updated successfully' };
+    if (!response.ok) {
+      const error = await response.json().catch(() => ({}));
+      throw new Error(error.message || `HTTP error! status: ${response.status}`);
     }
+
+    return await response.json();
   }
 
   // Subscription operations
   async upgradeSubscription(upgradeData) {
-    try {
-      const response = await fetch(`${this.baseURL}/api/v1/admin/subscription-upgrade`, {
-        method: 'POST',
-        headers: {
-          'Authorization': `Bearer ${this.getAuthToken()}`,
-          'Content-Type': 'application/json'
-        },
-        body: JSON.stringify(upgradeData)
-      });
+    const response = await fetch(`${this.baseURL}/api/v1/admin/subscription-upgrade`, {
+      method: 'POST',
+      headers: {
+        'Authorization': `Bearer ${this.getAuthToken()}`,
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify(upgradeData)
+    });
 
-      if (!response.ok) {
-        throw new Error(`HTTP error! status: ${response.status}`);
-      }
-
-      return await response.json();
-    } catch (error) {
-      console.error('Error processing subscription upgrade:', error);
-      // Return mock success for development
-      return { 
-        success: true, 
-        message: 'Upgrade request submitted successfully',
-        transactionId: 'TXN' + Date.now()
-      };
+    if (!response.ok) {
+      const error = await response.json().catch(() => ({}));
+      throw new Error(error.message || `HTTP error! status: ${response.status}`);
     }
+
+    return await response.json();
   }
 
   // Get subscription info
   async getSubscriptionInfo() {
-    try {
-      const response = await fetch(`${this.baseURL}/api/v1/admin/subscription`, {
-        method: 'GET',
-        headers: {
-          'Authorization': `Bearer ${this.getAuthToken()}`,
-          'Content-Type': 'application/json'
-        }
-      });
-
-      if (!response.ok) {
-        throw new Error(`HTTP error! status: ${response.status}`);
+    const response = await fetch(`${this.baseURL}/api/v1/admin/settings`, {
+      method: 'GET',
+      headers: {
+        'Authorization': `Bearer ${this.getAuthToken()}`,
+        'Content-Type': 'application/json'
       }
+    });
 
-      return await response.json();
-    } catch (error) {
-      console.error('Error fetching subscription info:', error);
-      // Return mock data for development
-      return {
-        success: true,
-        data: {
-          planType: 'Care Plus',
-          status: 'Active',
-          nextBilling: '2025-01-24'
-        }
-      };
+    if (!response.ok) {
+      const error = await response.json().catch(() => ({}));
+      throw new Error(error.message || `HTTP error! status: ${response.status}`);
     }
+
+    return await response.json();
   }
 
   // Get users
   async getUsers() {
-    try {
-      const response = await fetch(`${this.baseURL}/api/v1/admin/users`, {
-        method: 'GET',
-        headers: {
-          'Authorization': `Bearer ${this.getAuthToken()}`,
-          'Content-Type': 'application/json'
-        }
-      });
-
-      if (!response.ok) {
-        throw new Error(`HTTP error! status: ${response.status}`);
+    const response = await fetch(`${this.baseURL}/api/v1/admin/users`, {
+      method: 'GET',
+      headers: {
+        'Authorization': `Bearer ${this.getAuthToken()}`,
+        'Content-Type': 'application/json'
       }
+    });
 
-      return await response.json();
-    } catch (error) {
-      console.error('Error fetching users:', error);
-      // Return mock data for development
-      return {
-        success: true,
-        data: []
-      };
+    if (!response.ok) {
+      const error = await response.json().catch(() => ({}));
+      throw new Error(error.message || `HTTP error! status: ${response.status}`);
     }
+
+    return await response.json();
   }
 
   // Create user
   async createUser(userData) {
-    try {
-      const response = await fetch(`${this.baseURL}/api/v1/admin/users`, {
-        method: 'POST',
-        headers: {
-          'Authorization': `Bearer ${this.getAuthToken()}`,
-          'Content-Type': 'application/json'
-        },
-        body: JSON.stringify(userData)
-      });
+    const response = await fetch(`${this.baseURL}/api/v1/admin/users`, {
+      method: 'POST',
+      headers: {
+        'Authorization': `Bearer ${this.getAuthToken()}`,
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify(userData)
+    });
 
-      if (!response.ok) {
-        throw new Error(`HTTP error! status: ${response.status}`);
-      }
-
-      return await response.json();
-    } catch (error) {
-      console.error('Error creating user:', error);
-      // Return mock success for development
-      return { 
-        success: true, 
-        message: 'User created successfully',
-        userId: 'USR' + Date.now()
-      };
+    if (!response.ok) {
+      const error = await response.json().catch(() => ({}));
+      throw new Error(error.message || `HTTP error! status: ${response.status}`);
     }
+
+    return await response.json();
   }
 
   // Get auth token
   getAuthToken() {
-    return localStorage.getItem('umi_access_token') || 'mock-token';
+    return localStorage.getItem('umi_access_token');
   }
 }
 

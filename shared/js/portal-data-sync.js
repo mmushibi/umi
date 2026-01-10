@@ -166,7 +166,8 @@ class PortalDataSync {
             this.queueOfflineRequest(endpoint, options);
         }
         
-        return Promise.resolve(this.getMockData(endpoint));
+        // Return error instead of mock data - backend should always be available
+        return Promise.reject(new Error('Backend service unavailable and no offline data'));
     }
 
     queueOfflineRequest(endpoint, options) {
@@ -204,32 +205,8 @@ class PortalDataSync {
         }
     }
 
-    getMockData(endpoint) {
-        const mockData = {
-            // Admin portal mock data
-            '/dashboard': {
-                totalSales: 0,
-                totalPrescriptions: 0,
-                totalPatients: 0,
-                totalInventory: 0
-            },
-            '/patients': [],
-            '/prescriptions': [],
-            '/inventory': [],
-            
-            // Cashier portal mock data
-            '/sales': [],
-            '/products': [],
-            '/customers': [],
-            
-            // Pharmacist portal mock data
-            '/medications': [],
-            '/prescriptions': [],
-            '/patients': []
-        };
-        
-        return mockData[endpoint] || null;
-    }
+    // Remove mock data fallback - API should always return real data
+    // If backend is unavailable, handle error appropriately instead of returning mock data
 
     setCache(key, data, ttl = 300000) {
         this.cache.set(key, {

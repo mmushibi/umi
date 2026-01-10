@@ -774,8 +774,8 @@ class SuperAdminDataSync {
             this.queueOfflineRequest(endpoint, options);
         }
         
-        // Return mock data as last resort
-        return Promise.resolve(this.getMockData(endpoint));
+        // Return error instead of mock data - backend should always be available
+        return Promise.reject(new Error('Backend service unavailable and no offline data'));
     }
 
     queueOfflineRequest(endpoint, options) {
@@ -810,43 +810,6 @@ class SuperAdminDataSync {
         } catch (error) {
             console.error('Failed to process offline queue:', error);
         }
-    }
-
-    getMockData(endpoint) {
-        // Provide fallback mock data for critical endpoints
-        const mockData = {
-            '/dashboard': {
-                totalTenants: 0,
-                activeTenants: 0,
-                totalUsers: 0,
-                activeUsers: 0,
-                totalTransactions: 0,
-                totalRevenue: 0,
-                criticalSecurityEvents: 0,
-                pendingReports: 0,
-                failedBackups: 0,
-                recentLogs: [],
-                recentSecurityEvents: []
-            },
-            '/health': {
-                status: 'offline',
-                services: {
-                    database: 'offline',
-                    cache: 'offline',
-                    messaging: 'offline'
-                },
-                timestamp: new Date().toISOString()
-            },
-            '/metrics': {
-                cpu: 0,
-                memory: 0,
-                disk: 0,
-                network: 0,
-                timestamp: new Date().toISOString()
-            }
-        };
-        
-        return mockData[endpoint] || null;
     }
 
     // Real-time sync with fallback

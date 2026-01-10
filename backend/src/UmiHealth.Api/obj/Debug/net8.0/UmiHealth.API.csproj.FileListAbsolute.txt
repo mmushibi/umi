@@ -264,3 +264,4 @@ C:\Users\sepio\Desktop\Umi_Health\Umi_Health\Umi_Health\backend\src\UmiHealth.AP
 C:\Users\sepio\Desktop\Umi_Health\Umi_Health\Umi_Health\backend\src\UmiHealth.API\obj\Debug\net8.0\UmiHealth.API.genruntimeconfig.cache
 C:\Users\sepio\Desktop\Umi_Health\Umi_Health\Umi_Health\backend\src\UmiHealth.API\obj\Debug\net8.0\ref\UmiHealth.API.dll
 C:\Users\sepio\Desktop\Umi_Health\Umi_Health\Umi_Health\backend\src\UmiHealth.Api\obj\Debug\net8.0\UmiHealt.7D63C289.Up2Date
+C:\Users\sepio\Desktop\Umi_Health\Umi_Health\Umi_Health\backend\src\UmiHealth.API\bin\Debug\net8.0\appsettings.json
