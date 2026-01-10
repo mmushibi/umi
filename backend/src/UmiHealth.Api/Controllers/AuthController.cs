@@ -56,6 +56,9 @@ namespace UmiHealth.Api.Controllers
 
                 _logger.LogInformation("User logged in successfully: {Email}", request.Email);
 
+                // Determine redirect URL based on user role
+                var redirectUrl = GetRoleBasedRedirectUrl(result.Roles?.FirstOrDefault());
+
                 return Ok(new
                 {
                     success = true,
@@ -64,6 +67,7 @@ namespace UmiHealth.Api.Controllers
                     {
                         accessToken = result.AccessToken,
                         refreshToken = result.RefreshToken,
+                        redirectUrl = redirectUrl,
                         user = new
                         {
                             id = result.User?.Id,
@@ -434,6 +438,18 @@ namespace UmiHealth.Api.Controllers
                 return userId;
             }
             return Guid.Empty;
+        }
+
+        private string GetRoleBasedRedirectUrl(string? role)
+        {
+            return role?.ToLower() switch
+            {
+                "admin" => "/portals/admin/home.html",
+                "pharmacist" => "/portals/pharmacist/home.html",
+                "cashier" => "/portals/cashier/home.html",
+                "operations" => "/portals/operations/home.html",
+                _ => "/portals/admin/home.html" // Default fallback
+            };
         }
     }
 

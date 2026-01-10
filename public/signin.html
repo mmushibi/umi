@@ -669,15 +669,17 @@
       },
       
       getRedirectUrl: (user) => {
-        // Redirect based on user role
+        // Enhanced role-based redirection with tenant and branch context
+        const baseUrl = '../portals';
+        
         if (user.role === 'admin' || user.role === 'manager') {
-          return '../portals/admin/home.html';
+          return `${baseUrl}/admin/home.html?tenant=${user.tenantId}&branch=${user.branchId || ''}`;
         } else if (user.role === 'cashier') {
-          return '../portals/cashier/home.html';
+          return `${baseUrl}/cashier/home.html?tenant=${user.tenantId}&branch=${user.branchId || ''}`;
         } else if (user.role === 'pharmacist') {
-          return '../portals/pharmacist/home.html';
+          return `${baseUrl}/pharmacist/home.html?tenant=${user.tenantId}&branch=${user.branchId || ''}`;
         } else {
-          return '../portals/admin/home.html';
+          return `${baseUrl}/admin/home.html?tenant=${user.tenantId}&branch=${user.branchId || ''}`;
         }
       }
     };

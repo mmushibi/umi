@@ -2,7 +2,12 @@
 FROM mcr.microsoft.com/dotnet/sdk:8.0 AS build
 WORKDIR /src
 
-# Copy csproj files and restore dependencies
+# Configure NuGet for better reliability
+ENV NUGET_XMLDOC_MODE=skip
+ENV DOTNET_SKIP_FIRST_TIME_EXPERIENCE=1
+ENV DOTNET_CLI_TELEMETRY_OPTOUT=1
+
+# Copy csproj files and restore dependencies with retry logic
 COPY ["src/UmiHealth.API/UmiHealth.API.csproj", "src/UmiHealth.API/"]
 COPY ["src/UmiHealth.Core/UmiHealth.Core.csproj", "src/UmiHealth.Core/"]
 COPY ["src/UmiHealth.Infrastructure/UmiHealth.Infrastructure.csproj", "src/UmiHealth.Infrastructure/"]
@@ -10,19 +15,29 @@ COPY ["src/UmiHealth.Application/UmiHealth.Application.csproj", "src/UmiHealth.A
 COPY ["src/UmiHealth.Domain/UmiHealth.Domain.csproj", "src/UmiHealth.Domain/"]
 COPY ["src/UmiHealth.Shared/UmiHealth.Shared.csproj", "src/UmiHealth.Shared/"]
 COPY ["src/UmiHealth.Identity/UmiHealth.Identity.csproj", "src/UmiHealth.Identity/"]
+COPY ["src/UmiHealth.Persistence/UmiHealth.Persistence.csproj", "src/UmiHealth.Persistence/"]
 
-RUN dotnet restore "src/UmiHealth.API/UmiHealth.API.csproj"
+# Restore with retry logic and increased timeout
+RUN dotnet restore "src/UmiHealth.API/UmiHealth.API.csproj" \
+    --source https://api.nuget.org/v3/index.json \
+    --verbosity normal \
+    --timeout 1200 || \
+    dotnet restore "src/UmiHealth.API/UmiHealth.API.csproj" \
+    --source https://api.nuget.org/v3/index.json \
+    --verbosity normal
 
 # Copy the rest of the source code
 COPY . .
 
-# Build the application
+# Build the application with retry logic
 WORKDIR "/src/src/UmiHealth.API"
-RUN dotnet build "UmiHealth.API.csproj" -c Release -o /app/build
+RUN dotnet build "UmiHealth.API.csproj" -c Release -o /app/build --no-restore || \
+    dotnet build "UmiHealth.API.csproj" -c Release -o /app/build --no-restore
 
 # Publish the application
 FROM build AS publish
-RUN dotnet publish "UmiHealth.API.csproj" -c Release -o /app/publish /p:UseAppHost=false
+RUN dotnet publish "UmiHealth.API.csproj" -c Release -o /app/publish /p:UseAppHost=false --no-restore || \
+    dotnet publish "UmiHealth.API.csproj" -c Release -o /app/publish /p:UseAppHost=false --no-restore
 
 # Build the final image
 FROM mcr.microsoft.com/dotnet/aspnet:8.0 AS final

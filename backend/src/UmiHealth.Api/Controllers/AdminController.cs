@@ -3,34 +3,34 @@ using Microsoft.AspNetCore.Mvc;
 using UmiHealth.Application.DTOs;
 using UmiHealth.Application.Services;
 using UmiHealth.Core.Interfaces;
+using UmiHealth.Infrastructure.Data;
 using System;
 using System.Threading.Tasks;
 
 namespace UmiHealth.Api.Controllers
 {
     [ApiController]
-    [Route("api/v1/[controller]")]
+    [Route("api/v1/admin")]
     [Authorize]
     public class AdminController : ControllerBase
     {
         private readonly ILogger<AdminController> _logger;
+        private readonly IUserService _userService;
         private readonly IReportsService _reportsService;
         private readonly ITenantService _tenantService;
-        private readonly IAuthService _authService;
-        private readonly Core.Interfaces.IPharmacyService _pharmacyService;
 
         public AdminController(
             ILogger<AdminController> logger,
+            IUserService userService,
             IReportsService reportsService,
             ITenantService tenantService,
-            IAuthService authService,
-            Core.Interfaces.IPharmacyService pharmacyService)
+            IUserInvitationService userInvitationService)
         {
             _logger = logger;
+            _userService = userService;
             _reportsService = reportsService;
             _tenantService = tenantService;
-            _authService = authService;
-            _pharmacyService = pharmacyService;
+            _userInvitationService = userInvitationService;
         }
 
         [HttpGet("dashboard")]
@@ -97,7 +97,7 @@ namespace UmiHealth.Api.Controllers
         }
 
         [HttpGet("users")]
-        public async Task<IActionResult> GetUsers([FromQuery] Guid tenantId, [FromQuery] int page = 1, [FromQuery] int limit = 50)
+        public async Task<IActionResult> GetUsers([FromQuery] Guid tenantId, [FromQuery] int page = 1, [FromQuery] int limit = 50, [FromQuery] string? search = null, [FromQuery] string? role = null)
         {
             try
             {
@@ -107,12 +107,7 @@ namespace UmiHealth.Api.Controllers
                     return Forbid();
                 }
 
-                // TODO: Implement proper user management service
-                var users = new[]
-                {
-                    new UmiHealth.Application.DTOs.UserDto { Id = Guid.NewGuid(), Name = "User management will be implemented", Email = "admin@example.com", Role = "Admin", Status = "active" }
-                };
-
+                var users = await _userService.GetUsersAsync(tenantId, page, limit, search, role);
                 return Ok(users);
             }
             catch (Exception ex)
@@ -123,7 +118,7 @@ namespace UmiHealth.Api.Controllers
         }
 
         [HttpPost("users")]
-        public async Task<IActionResult> CreateUser([FromQuery] Guid tenantId, [FromBody] UpdateUserRequest userDto)
+        public async Task<IActionResult> CreateUser([FromQuery] Guid tenantId, [FromBody] CreateUserRequest userRequest)
         {
             try
             {
@@ -133,16 +128,12 @@ namespace UmiHealth.Api.Controllers
                     return Forbid();
                 }
 
-                var user = new UmiHealth.Application.DTOs.UserDto 
-                { 
-                    Id = Guid.NewGuid(), 
-                    Name = userDto.Name, 
-                    Email = userDto.Email, 
-                    Role = userDto.Role, 
-                    Status = userDto.Status 
-                };
-
+                var user = await _userService.CreateUserAsync(tenantId, userRequest);
                 return Ok(user);
+            }
+            catch (InvalidOperationException ex)
+            {
+                return BadRequest(new { error = ex.Message });
             }
             catch (Exception ex)
             {
@@ -152,7 +143,7 @@ namespace UmiHealth.Api.Controllers
         }
 
         [HttpPut("users/{userId}")]
-        public async Task<IActionResult> UpdateUser([FromQuery] Guid tenantId, Guid userId, [FromBody] UpdateUserRequest userDto)
+        public async Task<IActionResult> UpdateUser([FromQuery] Guid tenantId, Guid userId, [FromBody] UpdateUserRequest userRequest)
         {
             try
             {
@@ -162,16 +153,16 @@ namespace UmiHealth.Api.Controllers
                     return Forbid();
                 }
 
-                var user = new UmiHealth.Application.DTOs.UserDto 
-                { 
-                    Id = userId, 
-                    Name = userDto.Name, 
-                    Email = userDto.Email, 
-                    Role = userDto.Role, 
-                    Status = userDto.Status 
-                };
-
+                var user = await _userService.UpdateUserAsync(userId, tenantId, userRequest);
                 return Ok(user);
+            }
+            catch (KeyNotFoundException ex)
+            {
+                return NotFound(new { error = ex.Message });
+            }
+            catch (InvalidOperationException ex)
+            {
+                return BadRequest(new { error = ex.Message });
             }
             catch (Exception ex)
             {
@@ -191,7 +182,15 @@ namespace UmiHealth.Api.Controllers
                     return Forbid();
                 }
 
-                return Ok(new { message = "User deleted successfully" });
+                var result = await _userService.DeleteUserAsync(userId, tenantId);
+                if (result)
+                {
+                    return Ok(new { message = "User deleted successfully" });
+                }
+                else
+                {
+                    return NotFound(new { error = "User not found" });
+                }
             }
             catch (Exception ex)
             {
@@ -199,6 +198,108 @@ namespace UmiHealth.Api.Controllers
                 return StatusCode(500, new { error = "Failed to delete user" });
             }
         }
+
+        // User invitation endpoints
+        [HttpPost("invite-user")]
+        public async Task<IActionResult> InviteUser([FromQuery] Guid tenantId, [FromBody] CreateUserRequest userRequest)
+        {
+            try
+            {
+                var tenantIdFromClaims = User.FindFirst("TenantId")?.Value;
+                if (string.IsNullOrEmpty(tenantIdFromClaims) || Guid.Parse(tenantIdFromClaims) != tenantId)
+                {
+                    return Forbid();
+                }
+
+                var currentUserId = GetUserIdFromClaims();
+                var result = await _userInvitationService.SendUserInvitationAsync(tenantId, currentUserId, userRequest);
+                
+                if (result)
+                {
+                    return Ok(new { message = "Invitation sent successfully" });
+                }
+                else
+                {
+                    return BadRequest(new { error = "Failed to send invitation" });
+                }
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error sending user invitation for tenant {TenantId}", tenantId);
+                return StatusCode(500, new { error = "Failed to send invitation" });
+            }
+        }
+
+        [HttpGet("validate-invitation")]
+        [AllowAnonymous]
+        public async Task<IActionResult> ValidateInvitation([FromQuery] string token)
+        {
+            try
+            {
+                var result = await _userInvitationService.ValidateInvitationTokenAsync(token);
+                
+                return Ok(new { 
+                    valid = result,
+                    message = result ? "Invitation is valid" : "Invalid or expired invitation" 
+                });
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error validating invitation token");
+                return StatusCode(500, new { error = "Failed to validate invitation" });
+            }
+        }
+
+        [HttpPost("accept-invitation")]
+        [AllowAnonymous]
+        public async Task<IActionResult> AcceptInvitation([FromBody] AcceptInvitationRequest request)
+        {
+            try
+            {
+                var result = await _userInvitationService.AcceptInvitationAsync(request.Token, request.Password);
+                
+                if (result.Success)
+                {
+                    return Ok(new { 
+                        success = true,
+                        message = result.Message,
+                        redirectUrl = result.RedirectUrl,
+                        user = result.User
+                    });
+                }
+                else
+                {
+                    return BadRequest(new { 
+                        success = false, 
+                        message = result.Message 
+                    });
+                }
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error accepting invitation");
+                return StatusCode(500, new { error = "Failed to accept invitation" });
+            }
+        }
+
+        // Helper method
+        private Guid GetUserIdFromClaims()
+        {
+            var userIdClaim = User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value;
+            if (Guid.TryParse(userIdClaim, out var userId))
+            {
+                return userId;
+            }
+            return Guid.Empty;
+        }
+    }
+
+    // Request DTOs
+    public class AcceptInvitationRequest
+    {
+        public string Token { get; set; } = string.Empty;
+        public string Password { get; set; } = string.Empty;
+    }
 
         [HttpGet("branches")]
         public async Task<IActionResult> GetBranches([FromQuery] Guid tenantId)

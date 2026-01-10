@@ -76,7 +76,7 @@ namespace UmiHealth.Api.Middleware
             // First try to get from JWT token claims
             if (context.User.Identity?.IsAuthenticated == true)
             {
-                var tenantClaim = context.User.FindFirst("tenant_id");
+                var tenantClaim = context.User.FindFirst("TenantId") ?? context.User.FindFirst("tenant_id");
                 if (tenantClaim != null && Guid.TryParse(tenantClaim.Value, out var tenantId))
                 {
                     return tenantId;
@@ -125,7 +125,7 @@ namespace UmiHealth.Api.Middleware
         {
             if (context.User.Identity?.IsAuthenticated == true)
             {
-                var branchClaim = context.User.FindFirst("branch_id");
+                var branchClaim = context.User.FindFirst("BranchId") ?? context.User.FindFirst("branch_id");
                 if (branchClaim != null && Guid.TryParse(branchClaim.Value, out var branchId))
                 {
                     return branchId;

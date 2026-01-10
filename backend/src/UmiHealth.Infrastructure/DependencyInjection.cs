@@ -3,7 +3,7 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using StackExchange.Redis;
-// using UmiHealth.Application.Services; // Temporarily commented out due to project reference issue
+using UmiHealth.Application.Services;
 using UmiHealth.Core.Interfaces;
 using UmiHealth.Core.Entities;
 using UmiHealth.Infrastructure.Cache;
@@ -21,7 +21,7 @@ public static class DependencyInjection
         IConfiguration configuration)
     {
         // Database
-        services.AddDbContext<AppDbContext>(options =>
+        services.AddDbContext<UmiHealthDbContext>(options =>
             options.UseNpgsql(configuration.GetConnectionString("DefaultConnection")));
 
         // Redis
@@ -55,11 +55,15 @@ public static class DependencyInjection
         // File Storage
         services.AddScoped<IFileStorageService, LocalFileStorageService>();
 
-        // Application Services - Temporarily commented out due to project reference issue
-        // services.AddScoped<ISubscriptionService, SubscriptionService>();
-        // services.AddScoped<INotificationService, NotificationService>();
-        // services.AddScoped<IAdditionalUserService, AdditionalUserService>();
-        // services.AddScoped<IPaymentVerificationService, PaymentVerificationService>();
+        // Application Services
+        services.AddScoped<IUserService, UserService>();
+        services.AddScoped<IUserInvitationService, UserInvitationService>();
+        services.AddScoped<IEmailService, EmailService>();
+        services.AddScoped<ISubscriptionService, SubscriptionService>();
+        services.AddScoped<INotificationService, NotificationService>();
+        services.AddScoped<IAdditionalUserService, AdditionalUserService>();
+        services.AddScoped<IPaymentVerificationService, PaymentVerificationService>();
+        services.AddScoped<ITenantService, TenantService>();
 
         // Logging
         services.AddLogging(builder =>
@@ -75,7 +79,7 @@ public static class DependencyInjection
 // Specific repository implementations
 public class BranchRepository : TenantRepository<Branch>
 {
-    public BranchRepository(AppDbContext context) : base(context) { }
+    public BranchRepository(UmiHealthDbContext context) : base(context) { }
 
     public override async Task<IReadOnlyList<Branch>> GetByTenantAndBranchAsync(Guid tenantId, Guid branchId, CancellationToken cancellationToken = default)
     {
@@ -88,7 +92,7 @@ public class BranchRepository : TenantRepository<Branch>
 
 public class UserRepository : TenantRepository<User>
 {
-    public UserRepository(AppDbContext context) : base(context) { }
+    public UserRepository(UmiHealthDbContext context) : base(context) { }
 
     public override async Task<IReadOnlyList<User>> GetByTenantAndBranchAsync(Guid tenantId, Guid branchId, CancellationToken cancellationToken = default)
     {
@@ -101,12 +105,12 @@ public class UserRepository : TenantRepository<User>
 
 public class ProductRepository : TenantRepository<Product>
 {
-    public ProductRepository(AppDbContext context) : base(context) { }
+    public ProductRepository(UmiHealthDbContext context) : base(context) { }
 }
 
 public class InventoryRepository : TenantRepository<Inventory>
 {
-    public InventoryRepository(AppDbContext context) : base(context) { }
+    public InventoryRepository(UmiHealthDbContext context) : base(context) { }
 
     public override async Task<IReadOnlyList<Inventory>> GetByTenantAndBranchAsync(Guid tenantId, Guid branchId, CancellationToken cancellationToken = default)
     {
@@ -120,12 +124,12 @@ public class InventoryRepository : TenantRepository<Inventory>
 
 public class PatientRepository : TenantRepository<Patient>
 {
-    public PatientRepository(AppDbContext context) : base(context) { }
+    public PatientRepository(UmiHealthDbContext context) : base(context) { }
 }
 
 public class SaleRepository : TenantRepository<Sale>
 {
-    public SaleRepository(AppDbContext context) : base(context) { }
+    public SaleRepository(UmiHealthDbContext context) : base(context) { }
 
     public override async Task<IReadOnlyList<Sale>> GetByTenantAndBranchAsync(Guid tenantId, Guid branchId, CancellationToken cancellationToken = default)
     {
@@ -141,7 +145,7 @@ public class SaleRepository : TenantRepository<Sale>
 
 public class PrescriptionRepository : TenantRepository<Prescription>
 {
-    public PrescriptionRepository(AppDbContext context) : base(context) { }
+    public PrescriptionRepository(UmiHealthDbContext context) : base(context) { }
 
     public override async Task<IReadOnlyList<Prescription>> GetByTenantAndBranchAsync(Guid tenantId, Guid branchId, CancellationToken cancellationToken = default)
     {

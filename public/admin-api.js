@@ -165,15 +165,123 @@ class AdminAPI {
     const response = await fetch(`${this.baseURL}/api/v1/admin/users`, {
       method: 'POST',
       headers: {
-        'Authorization': `Bearer ${this.getAuthToken()}`,
-        'Content-Type': 'application/json'
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${this.getAuthToken()}`
+      },
+      body: JSON.stringify({
+        firstName: userData.firstName || userData.name?.split(' ')[0] || '',
+        lastName: userData.lastName || userData.name?.split(' ')[1] || '',
+        email: userData.email,
+        phone: userData.phone || '',
+        role: userData.role || 'Staff',
+        password: userData.password || 'TempPassword123!',
+        branchId: userData.branchId || null,
+        sendInviteEmail: true
+      })
+    });
+
+    if (!response.ok) {
+      const error = await response.json();
+      throw new Error(error.error || 'Failed to create user');
+    }
+
+    return await response.json();
+  }
+
+  // Update user
+  async updateUser(userId, userData) {
+    const response = await fetch(`${this.baseURL}/api/v1/admin/users/${userId}`, {
+      method: 'PUT',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${this.getAuthToken()}`
+      },
+      body: JSON.stringify({
+        firstName: userData.firstName || userData.name?.split(' ')[0] || '',
+        lastName: userData.lastName || userData.name?.split(' ')[1] || '',
+        email: userData.email,
+        phone: userData.phone || '',
+        role: userData.role || 'Staff',
+        status: userData.status || 'active',
+        branchId: userData.branchId || null
+      })
+    });
+
+    if (!response.ok) {
+      const error = await response.json();
+      throw new Error(error.error || 'Failed to update user');
+    }
+
+    return await response.json();
+  }
+
+  // Delete user
+  async deleteUser(userId) {
+    const response = await fetch(`${this.baseURL}/api/v1/admin/users/${userId}`, {
+      method: 'DELETE',
+      headers: {
+        'Authorization': `Bearer ${this.getAuthToken()}`
+      }
+    });
+
+    if (!response.ok) {
+      const error = await response.json();
+      throw new Error(error.error || 'Failed to delete user');
+    }
+
+    return await response.json();
+  }
+
+  // User invitation methods
+  async inviteUser(userData) {
+    const response = await fetch(`${this.baseURL}/api/v1/admin/invite-user`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${this.getAuthToken()}`
       },
       body: JSON.stringify(userData)
     });
 
     if (!response.ok) {
-      const error = await response.json().catch(() => ({}));
-      throw new Error(error.message || `HTTP error! status: ${response.status}`);
+      const error = await response.json();
+      throw new Error(error.error || 'Failed to send invitation');
+    }
+
+    return await response.json();
+  }
+
+  async validateInvitation(token) {
+    const response = await fetch(`${this.baseURL}/api/v1/admin/validate-invitation?token=${token}`, {
+      method: 'GET',
+      headers: {
+        'Authorization': `Bearer ${this.getAuthToken()}`
+      }
+    });
+
+    if (!response.ok) {
+      const error = await response.json();
+      throw new Error(error.error || 'Failed to validate invitation');
+    }
+
+    return await response.json();
+  }
+
+  async acceptInvitation(token, password) {
+    const response = await fetch(`${this.baseURL}/api/v1/admin/accept-invitation`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify({
+        token: token,
+        password: password
+      })
+    });
+
+    if (!response.ok) {
+      const error = await response.json();
+      throw new Error(error.error || 'Failed to accept invitation');
     }
 
     return await response.json();

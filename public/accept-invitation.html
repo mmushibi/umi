@@ -1,0 +1,319 @@
+<!DOCTYPE html>
+<html lang="en" x-data="invitationAcceptance()">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Accept Invitation - Umi Health</title>
+    <link rel="icon" href="../logo.png" type="image/png">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@100;400;700&family=Varela+Round&family=Nunito:wght@400;600;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Rounded:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="./assets/css/tailwind.output.css">
+    <style>
+        :root {
+            --color-primary-blue: #2563EB;
+            --color-accent-teal: #14B8A6;
+            --color-text-white: #FFFFFF;
+            --color-subtle-blue: #EFF6FF;
+            --font-primary: 'Inter', sans-serif;
+        }
+
+        body {
+            background: linear-gradient(135deg, var(--color-primary-blue) 0%, var(--color-accent-teal) 100%);
+            color: var(--color-text-white);
+            font-family: 'Nunito', 'Varela Round', sans-serif;
+            line-height: 1.5;
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .invitation-container {
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+            border-radius: 20px;
+            padding: 3rem;
+            max-width: 500px;
+            width: 100%;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.3);
+        }
+
+        .logo-container {
+            text-align: center;
+            margin-bottom: 2rem;
+        }
+
+        .umi-logo {
+            max-width: 150px;
+            height: auto;
+            border-radius: 12px;
+        }
+
+        .form-container {
+            background: white;
+            padding: 2rem;
+            border-radius: 15px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+        }
+
+        .form-group {
+            margin-bottom: 1.5rem;
+        }
+
+        .form-label {
+            display: block;
+            margin-bottom: 0.5rem;
+            font-weight: 600;
+            color: #333;
+        }
+
+        .form-input {
+            width: 100%;
+            padding: 0.75rem 1rem;
+            border: 2px solid #e5e7eb;
+            border-radius: 8px;
+            font-size: 1rem;
+            transition: border-color 0.3s ease;
+        }
+
+        .form-input:focus {
+            outline: none;
+            border-color: var(--color-primary-blue);
+            box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
+        }
+
+        .submit-button {
+            width: 100%;
+            padding: 0.75rem 1rem;
+            background: var(--color-primary-blue);
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .submit-button:hover:not(:disabled) {
+            background: #1d4ed8;
+            transform: translateY(-2px);
+        }
+
+        .submit-button:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+        }
+
+        .error-message {
+            background: #fee;
+            color: #c53030;
+            padding: 0.75rem 1rem;
+            border-radius: 8px;
+            margin-bottom: 1rem;
+            text-align: center;
+        }
+
+        .success-message {
+            background: #d4edda;
+            color: #155724;
+            padding: 0.75rem 1rem;
+            border-radius: 8px;
+            margin-bottom: 1rem;
+            text-align: center;
+        }
+
+        .loading-spinner {
+            display: inline-block;
+            width: 20px;
+            height: 20px;
+            border: 3px solid #f3f3f;
+            border-radius: 50%;
+            border-top-color: var(--color-primary-blue);
+            animation: spin 1s linear infinite;
+            margin-right: 0.5rem;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+    </style>
+</head>
+<body>
+    <div class="invitation-container">
+        <div class="logo-container">
+            <img src="../logo.png" alt="Umi Health" class="umi-logo">
+        </div>
+
+        <div class="form-container" x-show="!loading && !accepted">
+            <h2 style="text-align: center; margin-bottom: 1.5rem; color: #333;">Accept Your Invitation</h2>
+            <p style="text-align: center; margin-bottom: 2rem; color: #666;">
+                You've been invited to join Umi Health! Please set your password to activate your account.
+            </p>
+
+            <div x-show="errorMessage" class="error-message" x-text="errorMessage"></div>
+            <div x-show="successMessage" class="success-message" x-text="successMessage"></div>
+
+            <form @submit.prevent="acceptInvitation">
+                <div class="form-group">
+                    <label class="form-label" for="password">Choose Your Password</label>
+                    <input 
+                        type="password" 
+                        id="password" 
+                        class="form-input" 
+                        placeholder="Enter a secure password" 
+                        x-model="password"
+                        required
+                        minlength="8"
+                    >
+                </div>
+
+                <div class="form-group">
+                    <label class="form-label" for="confirmPassword">Confirm Password</label>
+                    <input 
+                        type="password" 
+                        id="confirmPassword" 
+                        class="form-input" 
+                        placeholder="Confirm your password" 
+                        x-model="confirmPassword"
+                        required
+                        minlength="8"
+                    >
+                </div>
+
+                <button type="submit" class="submit-button" :disabled="loading || !password || !confirmPassword || password !== confirmPassword">
+                    <span x-show="!loading">Accept Invitation & Create Account</span>
+                    <span x-show="loading">
+                        <span class="loading-spinner"></span>
+                        Processing...
+                    </span>
+                </button>
+            </form>
+        </div>
+
+        <div class="form-container" x-show="accepted">
+            <div style="text-align: center;">
+                <h2 style="color: #28a745; margin-bottom: 1rem;">✅ Invitation Accepted!</h2>
+                <p style="color: #666; margin-bottom: 1.5rem;">Your account has been created successfully.</p>
+                <p style="color: #666; margin-bottom: 2rem;">Redirecting you to your dashboard...</p>
+                <div class="loading-spinner" style="margin: 0 auto;"></div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        function invitationAcceptance() {
+            return {
+                token: new URLSearchParams(window.location.search).get('token') || '',
+                password: '',
+                confirmPassword: '',
+                loading: false,
+                accepted: false,
+                errorMessage: '',
+                successMessage: '',
+
+                async acceptInvitation() {
+                    if (!this.password || !this.confirmPassword) {
+                        this.errorMessage = 'Please enter and confirm your password';
+                        return;
+                    }
+
+                    if (this.password.length < 8) {
+                        this.errorMessage = 'Password must be at least 8 characters long';
+                        return;
+                    }
+
+                    if (this.password !== this.confirmPassword) {
+                        this.errorMessage = 'Passwords do not match';
+                        return;
+                    }
+
+                    this.loading = true;
+                    this.errorMessage = '';
+
+                    try {
+                        const response = await fetch(`${this.getApiUrl()}/api/v1/admin/accept-invitation`, {
+                            method: 'POST',
+                            headers: {
+                                'Content-Type': 'application/json'
+                            },
+                            body: JSON.stringify({
+                                token: this.token,
+                                password: this.password
+                            })
+                        });
+
+                        const result = await response.json();
+
+                        if (result.success) {
+                            this.accepted = true;
+                            this.successMessage = result.message;
+                            
+                            // Store auth data
+                            if (result.user) {
+                                localStorage.setItem('auth_tokens', JSON.stringify({
+                                    accessToken: 'temp-token', // Will be updated after real login
+                                    refreshToken: 'temp-refresh'
+                                }));
+                                localStorage.setItem('umi_current_user', JSON.stringify(result.user));
+                                localStorage.setItem('umi_tenant_id', result.user.tenantId);
+                            }
+
+                            // Redirect to appropriate portal
+                            setTimeout(() => {
+                                window.location.href = result.redirectUrl;
+                            }, 2000);
+                        } else {
+                            this.errorMessage = result.message || 'Failed to accept invitation';
+                        }
+                    } catch (error) {
+                        console.error('Error accepting invitation:', error);
+                        this.errorMessage = 'Failed to process invitation. Please try again.';
+                    } finally {
+                        this.loading = false;
+                    }
+                },
+
+                getApiUrl() {
+                    // Check for environment variable first
+                    if (typeof process !== 'undefined' && process.env?.UMI_API_BASE_URL) {
+                        return process.env.UMI_API_BASE_URL;
+                    }
+                    
+                    // Check for global configuration
+                    if (typeof window !== 'undefined' && window.UMI_CONFIG?.apiBaseUrl) {
+                        return window.UMI_CONFIG.apiBaseUrl;
+                    }
+                    
+                    // Check for localStorage configuration
+                    if (typeof window !== 'undefined') {
+                        const storedUrl = localStorage.getItem('umi_api_base_url');
+                        if (storedUrl) {
+                            return storedUrl;
+                        }
+                    }
+                    
+                    // Fallback to environment-based defaults
+                    if (typeof window !== 'undefined') {
+                        const hostname = window.location.hostname;
+                        const port = window.location.port;
+                        
+                        if (hostname === 'localhost' || hostname === '127.0.0.1') {
+                            return `http://localhost:${parseInt(port) + 1 || 5001}`;
+                        } else if (hostname.includes('staging') || hostname.includes('dev')) {
+                            return `https://api-staging.umihealth.com`;
+                        } else {
+                            return `https://api.umihealth.com`;
+                        }
+                    }
+                    
+                    return 'http://localhost:5001';
+                }
+            };
+        }
+    </script>
+</body>
+</html>
