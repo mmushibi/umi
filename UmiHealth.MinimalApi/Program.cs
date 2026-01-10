@@ -13,6 +13,9 @@ builder.Services.AddSingleton(new Dictionary<string, object>());
 // Tier service (scaffolding)
 builder.Services.AddSingleton<ITierService, TierService>();
 
+// JWT service
+builder.Services.AddSingleton<IJwtService, JwtService>();
+
 var app = builder.Build();
 
 // Configure the HTTP request pipeline.
@@ -98,7 +101,7 @@ app.MapPost("/api/v1/auth/register", async (HttpRequest request) =>
 });
 
 // Login endpoint with role-based authentication
-app.MapPost("/api/v1/auth/login", async (HttpRequest request, Dictionary<string, object> usersDb, Dictionary<string, object> tenantsDb) =>
+app.MapPost("/api/v1/auth/login", async (HttpRequest request, Dictionary<string, object> usersDb, Dictionary<string, object> tenantsDb, IJwtService jwtService) =>
 {
     try
     {
@@ -159,6 +162,10 @@ app.MapPost("/api/v1/auth/login", async (HttpRequest request, Dictionary<string,
             redirectUrl = "/portals/admin/home.html";
         }
 
+        // Generate real JWT tokens
+        var accessToken = jwtService.GenerateAccessToken(user.id.ToString(), user.email, user.role?.ToString(), tenantId);
+        var refreshToken = jwtService.GenerateRefreshToken(user.id.ToString());
+
         return Results.Ok(new { 
             success = true, 
             message = "Login successful!",
@@ -169,8 +176,8 @@ app.MapPost("/api/v1/auth/login", async (HttpRequest request, Dictionary<string,
                 role = user.role,
                 tenantId = tenantId,
                 tenant = tenant,
-                accessToken = "mock-jwt-token-" + Guid.NewGuid().ToString("N")[..8],
-                refreshToken = "mock-refresh-token-" + Guid.NewGuid().ToString("N")[..8]
+                accessToken = accessToken,
+                refreshToken = refreshToken
             },
             redirectUrl = redirectUrl
         });
