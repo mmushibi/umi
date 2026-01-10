@@ -43,29 +43,6 @@ namespace UmiHealth.Application.DTOs
         public string Status { get; set; } = string.Empty;
     }
 
-    // User-related DTOs
-    public class UserDto
-    {
-        public Guid Id { get; set; }
-        public string Name { get; set; } = string.Empty;
-        public string Email { get; set; } = string.Empty;
-        public string Role { get; set; } = string.Empty;
-        public string Status { get; set; } = string.Empty;
-        public string Phone { get; set; } = string.Empty;
-        public string Tenant { get; set; } = string.Empty;
-        public string LastActive { get; set; } = string.Empty;
-        public DateTime? LastLogin { get; set; }
-    }
-
-    public class UpdateUserRequest
-    {
-        public string Name { get; set; } = string.Empty;
-        public string Email { get; set; } = string.Empty;
-        public string Phone { get; set; } = string.Empty;
-        public string Role { get; set; } = string.Empty;
-        public string Status { get; set; } = string.Empty;
-    }
-
     // Subscription-related DTOs
     public class SubscriptionDto
     {

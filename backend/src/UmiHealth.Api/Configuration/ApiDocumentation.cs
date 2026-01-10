@@ -10,7 +10,7 @@ namespace UmiHealth.Api.Configuration
     public class ApiResponse<T>
     {
         /// <summary>
-        /// Indicates if the operation was successful
+        /// Indicates if operation was successful
         /// </summary>
         public bool Success { get; set; }
 
@@ -183,88 +183,5 @@ namespace UmiHealth.Api.Configuration
         /// Response message
         /// </summary>
         public string Message { get; set; } = string.Empty;
-    }
-
-    public class UserDto
-    {
-        /// <summary>
-        /// Unique user identifier
-        /// </summary>
-        public string Id { get; set; } = string.Empty;
-
-        /// <summary>
-        /// User email address
-        /// </summary>
-        public string Email { get; set; } = string.Empty;
-
-        /// <summary>
-        /// User phone number
-        /// </summary>
-        public string? PhoneNumber { get; set; }
-
-        /// <summary>
-        /// User username
-        /// </summary>
-        public string Username { get; set; } = string.Empty;
-
-        /// <summary>
-        /// User first name
-        /// </summary>
-        public string? FirstName { get; set; }
-
-        /// <summary>
-        /// User last name
-        /// </summary>
-        public string? LastName { get; set; }
-
-        /// <summary>
-        /// User role within the system
-        /// </summary>
-        public string Role { get; set; } = string.Empty;
-
-        /// <summary>
-        /// Tenant identifier
-        /// </summary>
-        public string? TenantId { get; set; }
-
-        /// <summary>
-        /// Branch identifier
-        /// </summary>
-        public string? BranchId { get; set; }
-
-        /// <summary>
-        /// Branch access permissions
-        /// </summary>
-        public List<string>? BranchAccess { get; set; }
-
-        /// <summary>
-        /// User permissions
-        /// </summary>
-        public List<string>? Permissions { get; set; }
-
-        /// <summary>
-        /// Account active status
-        /// </summary>
-        public bool IsActive { get; set; }
-
-        /// <summary>
-        /// Email verification status
-        /// </summary>
-        public bool EmailVerified { get; set; }
-
-        /// <summary>
-        /// Phone verification status
-        /// </summary>
-        public bool PhoneVerified { get; set; }
-
-        /// <summary>
-        /// Two-factor authentication enabled
-        /// </summary>
-        public bool TwoFactorEnabled { get; set; }
-
-        /// <summary>
-        /// Last login timestamp
-        /// </summary>
-        public DateTime? LastLogin { get; set; }
     }
 }

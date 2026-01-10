@@ -17,11 +17,16 @@ namespace UmiHealth.Core.Interfaces
         Task<bool> IsEmailUniqueAsync(Guid tenantId, string email, Guid? excludeUserId = null, CancellationToken cancellationToken = default);
     }
 
-    // DTOs moved here to avoid circular dependency
+    // DTOs to avoid circular dependency
     public class PagedResult<T>
     {
         public IEnumerable<T> Data { get; set; } = new List<T>();
         public int TotalCount { get; set; }
+        public int Page { get; set; }
+        public int PageSize { get; set; }
+        public int TotalPages { get; set; }
+        public bool HasNextPage { get; set; }
+        public bool HasPreviousPage { get; set; }
     }
 
     public class UserDto
@@ -31,18 +36,19 @@ namespace UmiHealth.Core.Interfaces
         public string Email { get; set; } = string.Empty;
         public string Role { get; set; } = string.Empty;
         public string Status { get; set; } = string.Empty;
-        public DateTime CreatedAt { get; set; }
+        public string Phone { get; set; } = string.Empty;
+        public string Tenant { get; set; } = string.Empty;
+        public string LastActive { get; set; } = string.Empty;
         public DateTime? LastLogin { get; set; }
     }
 
     public class CreateUserRequest
     {
-        public string Name { get; set; } = string.Empty;
+        public string FirstName { get; set; } = string.Empty;
+        public string LastName { get; set; } = string.Empty;
         public string Email { get; set; } = string.Empty;
         public string Password { get; set; } = string.Empty;
         public string Role { get; set; } = string.Empty;
-        public string? FirstName { get; set; }
-        public string? LastName { get; set; }
         public string? Phone { get; set; }
         public Guid? BranchId { get; set; }
         public bool SendInviteEmail { get; set; } = true;

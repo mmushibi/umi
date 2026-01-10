@@ -41,6 +41,17 @@ namespace UmiHealth.Persistence
         public DbSet<UserClaim> UserClaims { get; set; }
         public DbSet<RefreshToken> RefreshTokens { get; set; }
         public DbSet<BlacklistedToken> BlacklistedTokens { get; set; }
+        public DbSet<UserInvitation> UserInvitations { get; set; }
+
+        // Subscriptions and Billing
+        public DbSet<Subscription> Subscriptions { get; set; }
+        public DbSet<SubscriptionTransaction> SubscriptionTransactions { get; set; }
+
+        // Notifications
+        public DbSet<Notification> Notifications { get; set; }
+
+        // Additional Users
+        public DbSet<UserAdditionalUser> UserAdditionalUsers { get; set; }
 
         // Products and Inventory
         public DbSet<Product> Products { get; set; }
@@ -73,6 +84,10 @@ namespace UmiHealth.Persistence
             ConfigureTenant(modelBuilder);
             ConfigureBranch(modelBuilder);
             ConfigureUser(modelBuilder);
+            ConfigureInvitation(modelBuilder);
+            ConfigureSubscription(modelBuilder);
+            ConfigureNotification(modelBuilder);
+            ConfigureAdditionalUser(modelBuilder);
             ConfigureProduct(modelBuilder);
             ConfigureInventory(modelBuilder);
             ConfigurePatient(modelBuilder);
@@ -160,6 +175,73 @@ namespace UmiHealth.Persistence
                 entity.HasIndex(e => e.RoleId);
                 entity.HasIndex(e => new { e.UserId, e.RoleId }).IsUnique();
             });
+
+            modelBuilder.Entity<UserInvitation>(entity =>
+            {
+                entity.HasKey(e => e.Id);
+                entity.Property(e => e.Id).HasDefaultValueSql("uuid_generate_v4()");
+                entity.Property(e => e.Email).IsRequired().HasMaxLength(255);
+                entity.Property(e => e.FirstName).IsRequired().HasMaxLength(100);
+                entity.Property(e => e.LastName).IsRequired().HasMaxLength(100);
+                entity.Property(e => e.Role).IsRequired().HasMaxLength(50);
+                entity.Property(e => e.Token).IsRequired().HasMaxLength(500);
+                entity.HasOne(e => e.Tenant).WithMany().HasForeignKey(e => e.TenantId);
+                entity.HasIndex(e => e.TenantId);
+                entity.HasIndex(e => e.Email);
+                entity.HasIndex(e => e.Token);
+                entity.HasIndex(e => e.ExpiresAt);
+                entity.HasIndex(e => e.IsAccepted);
+            });
+
+            modelBuilder.Entity<Subscription>(entity =>
+            {
+                entity.HasKey(e => e.Id);
+                entity.Property(e => e.Id).HasDefaultValueSql("uuid_generate_v4()");
+                entity.Property(e => e.Plan).IsRequired().HasMaxLength(50);
+                entity.HasOne(e => e.Tenant).WithMany(t => t.Subscriptions).HasForeignKey(e => e.TenantId);
+                entity.HasIndex(e => e.TenantId);
+                entity.HasIndex(e => e.EndDate);
+                entity.HasIndex(e => e.IsActive);
+            });
+
+            modelBuilder.Entity<Notification>(entity =>
+            {
+                entity.HasKey(e => e.Id);
+                entity.Property(e => e.Id).HasDefaultValueSql("uuid_generate_v4()");
+                entity.Property(e => e.Title).IsRequired().HasMaxLength(200);
+                entity.Property(e => e.Message).IsRequired();
+                entity.Property(e => e.Type).IsRequired().HasMaxLength(50);
+                entity.HasOne(e => e.User).WithMany().HasForeignKey(e => e.UserId);
+                entity.HasIndex(e => e.UserId);
+                entity.HasIndex(e => e.IsRead);
+                entity.HasIndex(e => e.CreatedAt);
+            });
+
+            modelBuilder.Entity<UserAdditionalUser>(entity =>
+            {
+                entity.HasKey(e => e.Id);
+                entity.Property(e => e.Id).HasDefaultValueSql("uuid_generate_v4()");
+                entity.HasOne(e => e.MainUser).WithMany().HasForeignKey(e => e.MainUserId);
+                entity.HasOne(e => e.AdditionalUser).WithMany().HasForeignKey(e => e.AdditionalUserId);
+                entity.HasIndex(e => e.MainUserId);
+                entity.HasIndex(e => e.AdditionalUserId);
+                entity.HasIndex(e => new { e.MainUserId, e.AdditionalUserId }).IsUnique();
+            });
+        }
+
+        private void ConfigureSubscription(ModelBuilder modelBuilder)
+        {
+            // Already configured above
+        }
+
+        private void ConfigureNotification(ModelBuilder modelBuilder)
+        {
+            // Already configured above
+        }
+
+        private void ConfigureAdditionalUser(ModelBuilder modelBuilder)
+        {
+            // Already configured above
         }
 
         private void ConfigureProduct(ModelBuilder modelBuilder)
