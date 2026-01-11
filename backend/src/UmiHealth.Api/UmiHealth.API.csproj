@@ -26,6 +26,7 @@
     <ProjectReference Include="..\UmiHealth.Infrastructure\UmiHealth.Infrastructure.csproj" />
     <ProjectReference Include="..\UmiHealth.Shared\UmiHealth.Shared.csproj" />
     <ProjectReference Include="..\UmiHealth.Identity\UmiHealth.Identity.csproj" />
+    <ProjectReference Include="..\UmiHealth.Persistence\UmiHealth.Persistence.csproj" />
   </ItemGroup>
 
 </Project>

@@ -14,13 +14,16 @@ namespace UmiHealth.Api.Controllers
     {
         private readonly ICashierIntegrationService _cashierIntegrationService;
         private readonly ILogger<CashierController> _logger;
+        private readonly ISubscriptionFeatureService _subscriptionFeatureService;
 
         public CashierController(
             ICashierIntegrationService cashierIntegrationService,
-            ILogger<CashierController> logger)
+            ILogger<CashierController> logger,
+            ISubscriptionFeatureService subscriptionFeatureService)
         {
             _cashierIntegrationService = cashierIntegrationService;
             _logger = logger;
+            _subscriptionFeatureService = subscriptionFeatureService;
         }
 
         [HttpPost("register")]
@@ -28,6 +31,13 @@ namespace UmiHealth.Api.Controllers
         {
             try
             {
+                // Check subscription feature access
+                var featureCheck = await _subscriptionFeatureService.EnforceFeatureAccessAsync(HttpContext, "basic_prescriptions");
+                if (featureCheck != null)
+                {
+                    return featureCheck;
+                }
+
                 var tenantId = User.FindFirst("TenantId")?.Value;
                 var branchId = User.FindFirst("BranchId")?.Value;
                 var userId = User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value;

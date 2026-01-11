@@ -2526,18 +2526,18 @@
             this.isAuthenticated = this.authManager?.isAuthenticated() || false;
             
             if (!this.isAuthenticated) {
-              this.error = 'Please login to access the admin dashboard';
+              window.location.href = '/public/admin-signin.html';
               return;
             }
+            
+            // Check for onboarding completion and display welcome message
+            this.checkOnboardingCompletion();
             
             // Initialize backend integration
             await this.backendHelper.initPage('admin-home', {
               enableRealTime: true,
               initialData: this.getInitialDataConfig()
             });
-            
-            // Load dashboard data
-            await this.loadDashboardData();
             
             // Set up event listeners
             this.setupEventListeners();
@@ -2546,6 +2546,93 @@
           } catch (error) {
             console.error('Failed to initialize admin dashboard:', error);
             this.error = 'Failed to initialize dashboard';
+          }
+        },
+        
+        checkOnboardingCompletion() {
+          const onboardingCompleted = localStorage.getItem('umi_onboarding_completed');
+          const onboardingData = localStorage.getItem('umi_onboarding_data');
+          
+          if (onboardingCompleted === 'true' && onboardingData) {
+            try {
+              const data = JSON.parse(onboardingData);
+              
+              // Show welcome notification with onboarding details
+              this.showWelcomeNotification(data);
+              
+              // Update pharmacy info with onboarding data
+              this.updatePharmacyInfoFromOnboarding(data);
+              
+              // Clear the onboarding data after processing
+              setTimeout(() => {
+                localStorage.removeItem('umi_onboarding_data');
+                localStorage.removeItem('umi_onboarding_completed');
+              }, 5000);
+              
+            } catch (error) {
+              console.error('Error processing onboarding data:', error);
+            }
+          }
+        },
+        
+        showWelcomeNotification(onboardingData) {
+          // Create a welcome notification
+          const notification = document.createElement('div');
+          notification.className = 'welcome-notification';
+          notification.innerHTML = `
+            <div class="notification-content">
+              <h3>🎉 Welcome to Umi Health!</h3>
+              <p>Your pharmacy <strong>${onboardingData.pharmacyType || 'Pharmacy'}</strong> has been successfully set up.</p>
+              <div class="onboarding-summary">
+                <p><strong>License:</strong> ${onboardingData.licenseNumber || 'Not provided'}</p>
+                <p><strong>Location:</strong> ${onboardingData.city || 'Not provided'}, ${onboardingData.province || 'Not provided'}</p>
+                <p><strong>Administrator:</strong> ${onboardingData.adminFullName || 'Not provided'}</p>
+              </div>
+              <button onclick="this.parentElement.parentElement.remove()">Get Started</button>
+            </div>
+          `;
+          
+          // Add styles for the notification
+          notification.style.cssText = `
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            background: linear-gradient(135deg, #14B8A6 0%, #0d9488 100%);
+            color: white;
+            padding: 1.5rem;
+            border-radius: 12px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+            z-index: 1000;
+            max-width: 400px;
+            animation: slideIn 0.5s ease-out;
+          `;
+          
+          document.body.appendChild(notification);
+          
+          // Auto-remove after 10 seconds
+          setTimeout(() => {
+            if (notification.parentElement) {
+              notification.remove();
+            }
+          }, 10000);
+        },
+        
+        updatePharmacyInfoFromOnboarding(onboardingData) {
+          // Update pharmacy info with onboarding data
+          if (onboardingData.pharmacyType || onboardingData.physicalAddress) {
+            this.pharmacyInfo = {
+              name: onboardingData.pharmacyType ? `${onboardingData.pharmacyType.charAt(0).toUpperCase() + onboardingData.pharmacyType.slice(1)} Pharmacy` : 'Umi Health Pharmacy',
+              location: `${onboardingData.city || 'Lusaka'}, ${onboardingData.province || 'Zambia'}`
+            };
+          }
+          
+          // Update user info if available
+          if (onboardingData.adminFullName && !this.userInfo.name) {
+            this.userInfo = {
+              ...this.userInfo,
+              name: onboardingData.adminFullName,
+              initials: onboardingData.adminFullName.split(' ').map(n => n[0]).join('').toUpperCase().slice(0, 2)
+            };
           }
         },
         

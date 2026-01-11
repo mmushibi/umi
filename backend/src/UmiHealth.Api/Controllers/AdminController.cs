@@ -107,6 +107,23 @@ namespace UmiHealth.Api.Controllers
                     return Forbid();
                 }
 
+                // Check subscription limits
+                var subscriptionStatus = HttpContext.Items["SubscriptionStatus"] as SubscriptionStatus;
+                if (subscriptionStatus != null && !subscriptionStatus.IsTrial)
+                {
+                    // Enforce user limit for paid plans
+                    var currentUsers = await _userService.GetUsersCountAsync(tenantId);
+                    if (currentUsers >= subscriptionStatus.MaxUsers)
+                    {
+                        return BadRequest(new { 
+                            error = "User limit reached for your subscription plan",
+                            maxUsers = subscriptionStatus.MaxUsers,
+                            currentUsers = currentUsers,
+                            requiresUpgrade = true
+                        });
+                    }
+                }
+
                 var users = await _userService.GetUsersAsync(tenantId, page, limit, search, role);
                 return Ok(users);
             }
@@ -126,6 +143,24 @@ namespace UmiHealth.Api.Controllers
                 if (string.IsNullOrEmpty(tenantIdFromClaims) || Guid.Parse(tenantIdFromClaims) != tenantId)
                 {
                     return Forbid();
+                }
+
+                // Check subscription limits
+                var subscriptionStatus = HttpContext.Items["SubscriptionStatus"] as SubscriptionStatus;
+                if (subscriptionStatus != null && !subscriptionStatus.IsTrial)
+                {
+                    // Enforce user limit for paid plans
+                    var currentUsers = await _userService.GetUsersCountAsync(tenantId);
+                    if (currentUsers >= subscriptionStatus.MaxUsers)
+                    {
+                        return BadRequest(new { 
+                            error = "User limit reached for your subscription plan",
+                            maxUsers = subscriptionStatus.MaxUsers,
+                            currentUsers = currentUsers,
+                            requiresUpgrade = true,
+                            upgradeUrl = "/api/v1/subscription/plans"
+                        });
+                    }
                 }
 
                 var user = await _userService.CreateUserAsync(tenantId, userRequest);
@@ -340,6 +375,24 @@ namespace UmiHealth.Api.Controllers
                 if (string.IsNullOrEmpty(tenantIdFromClaims) || Guid.Parse(tenantIdFromClaims) != tenantId)
                 {
                     return Forbid();
+                }
+
+                // Check subscription branch limits
+                var subscriptionStatus = HttpContext.Items["SubscriptionStatus"] as SubscriptionStatus;
+                if (subscriptionStatus != null && !subscriptionStatus.IsTrial)
+                {
+                    // Enforce branch limit for paid plans
+                    var currentBranches = await _tenantService.GetBranchCountAsync(tenantId);
+                    if (currentBranches >= subscriptionStatus.MaxBranches)
+                    {
+                        return BadRequest(new { 
+                            error = "Branch limit reached for your subscription plan",
+                            maxBranches = subscriptionStatus.MaxBranches,
+                            currentBranches = currentBranches,
+                            requiresUpgrade = true,
+                            upgradeUrl = "/api/v1/subscription/plans"
+                        });
+                    }
                 }
 
                 var branch = await _tenantService.CreateBranchAsync(tenantId, branchRequest);

@@ -1,0 +1,235 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Account Suspended | Umi Health</title>
+    <link rel="icon" href="../logo.png" type="image/png">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@100;400;500;600;700&family=Varela+Round&family=Nunito:wght@400;600;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Rounded:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --color-primary-blue: #2563EB;
+            --color-accent-teal: #14B8A6;
+            --color-danger: #ef4444;
+            --color-warning: #f59e0b;
+            --color-text-primary: #1f2937;
+            --color-text-secondary: #6b7280;
+            --color-text-white: #000000;
+            --color-background: #00080f;
+            --color-surface: #ffffff;
+            --color-border: #e5e7eb;
+            --font-primary: 'Nunito', 'Varela Round', sans-serif;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            background: linear-gradient(135deg, var(--color-primary-blue) 0%, var(--color-accent-teal) 100%);
+            color: var(--color-text-primary);
+            font-family: 'Nunito', 'Varela Round', sans-serif;
+            line-height: 1.4;
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 0.5rem;
+        }
+
+        .suspended-card {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            border-radius: 16px;
+            padding: 1.5rem;
+            box-shadow: 0 25px 50px rgba(0, 0, 0, 0.2);
+            max-width: 400px;
+            width: 100%;
+            text-align: center;
+            max-height: 95vh;
+            overflow-y: auto;
+        }
+
+        .logo-section {
+            margin-bottom: 1rem;
+        }
+
+        .logo-image {
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            object-fit: cover;
+            margin-bottom: 0.5rem;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.15);
+        }
+
+        .page-title {
+            font-size: 1.25rem;
+            font-weight: 700;
+            color: var(--color-text-primary);
+            margin-bottom: 0.25rem;
+        }
+
+        .page-subtitle {
+            color: var(--color-text-secondary);
+            font-size: 0.85rem;
+            margin-bottom: 1rem;
+        }
+
+        .suspended-notice {
+            background: linear-gradient(135deg, #fef2f2, #fee2e2);
+            border: 1px solid #fecaca;
+            border-radius: 8px;
+            padding: 1rem;
+            margin-bottom: 1rem;
+        }
+
+        .suspended-notice h3 {
+            color: #991b1b;
+            font-size: 0.95rem;
+            font-weight: 600;
+            margin-bottom: 0.25rem;
+        }
+
+        .suspended-notice p {
+            color: #7f1d1d;
+            margin: 0;
+            font-size: 0.8rem;
+        }
+
+        .contact-info {
+            background: rgba(255, 255, 255, 0.1);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            border-radius: 8px;
+            padding: 1rem;
+            margin-bottom: 1rem;
+        }
+
+        .contact-info h4 {
+            color: var(--color-text-white);
+            font-size: 0.85rem;
+            font-weight: 600;
+            margin-bottom: 0.5rem;
+        }
+
+        .contact-info p {
+            color: rgba(10, 0, 0, 0.9);
+            margin-bottom: 0.25rem;
+            font-size: 0.75rem;
+        }
+
+        .btn {
+            padding: 0.625rem 1rem;
+            border: none;
+            border-radius: 8px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-family: 'Nunito', sans-serif;
+            font-size: 0.8rem;
+            text-decoration: none;
+            display: inline-block;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, var(--color-accent-teal), #0d9488);
+            color: white;
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 4px 15px rgba(20, 184, 166, 0.3);
+        }
+
+        .btn-secondary {
+            background: rgba(255, 255, 255, 0.2);
+            color: rgb(0, 0, 0);
+            border: 2px solid rgba(255, 255, 255, 0.3);
+        }
+
+        .btn-secondary:hover {
+            background: rgba(255, 255, 255, 0.3);
+        }
+
+        .back-link {
+            position: absolute;
+            top: 1rem;
+            left: 1rem;
+            display: flex;
+            align-items: center;
+            gap: 0.25rem;
+            color: var(--color-text-white);
+            text-decoration: none;
+            font-weight: 500;
+            transition: all 0.3s ease;
+            font-size: 0.8rem;
+        }
+
+        .back-link:hover {
+            color: rgba(255, 255, 255, 0.8);
+            transform: translateX(-2px);
+        }
+
+        @media (max-width: 480px) {
+            .suspended-card {
+                padding: 1rem;
+                margin: 0.5rem;
+            }
+            
+            .btn {
+                font-size: 0.75rem;
+                padding: 0.5rem 0.75rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <a href="/public/signin.html" class="back-link">
+        <span class="material-symbols-rounded">arrow_back</span>
+        Back to Login
+    </a>
+
+    <div class="suspended-card">
+        <!-- Logo Section -->
+        <div class="logo-section">
+            <img src="../logo.png" alt="Umi Health" class="logo-image">
+            <h1 class="page-title">Account Suspended</h1>
+            <p class="page-subtitle">Your account has been temporarily suspended</p>
+        </div>
+
+        <!-- Suspended Notice -->
+        <div class="suspended-notice">
+            <span class="material-symbols-rounded" style="font-size: 2rem;">warning</span>
+            <h3>Account Suspended</h3>
+            <p>Your account has been temporarily suspended due to subscription issues or policy violations.</p>
+        </div>
+
+        <!-- Contact Information -->
+        <div class="contact-info">
+            <h4>What to do next?</h4>
+            <p>Please contact our support team to resolve this issue.</p>
+            <p>Email: support@umihealth.com</p>
+            <p>Phone: +260 211 234 567</p>
+            <p>Business Hours: Monday - Friday, 8AM - 5PM</p>
+        </div>
+
+        <!-- Action Buttons -->
+        <div style="display: flex; gap: 1rem; justify-content: center;">
+            <a href="mailto:support@umihealth.com?subject=Account%20Suspension%20Inquiry" class="btn btn-primary">
+                <span class="material-symbols-rounded" style="vertical-align: middle;">email</span>
+                Contact Support
+            </a>
+            <a href="/public/signin.html" class="btn btn-secondary">
+                <span class="material-symbols-rounded" style="vertical-align: middle;">refresh</span>
+                Try Login Again
+            </a>
+        </div>
+    </div>
+</body>
+</html>

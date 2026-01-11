@@ -21,6 +21,8 @@ public static class DependencyInjection
         // Database
         services.AddDbContext<AppDbContext>(options =>
             options.UseNpgsql(configuration.GetConnectionString("DefaultConnection")));
+        services.AddDbContext<UmiHealthDbContext>(options =>
+            options.UseNpgsql(configuration.GetConnectionString("DefaultConnection")));
 
         // Redis
         var redisConnectionString = configuration.GetConnectionString("Redis");

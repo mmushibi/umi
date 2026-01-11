@@ -26,19 +26,22 @@ namespace UmiHealth.Api.Controllers
         private readonly IDataSyncService _dataSyncService;
         private readonly IHubContext<PharmacyHub> _hubContext;
         private readonly ILogger<PharmacistController> _logger;
+        private readonly ISubscriptionFeatureService _subscriptionFeatureService;
 
         public PharmacistController(
             IPrescriptionService prescriptionService,
             CoreIPharmacyService pharmacyService,
             IDataSyncService dataSyncService,
             IHubContext<PharmacyHub> hubContext,
-            ILogger<PharmacistController> logger)
+            ILogger<PharmacistController> logger,
+            ISubscriptionFeatureService subscriptionFeatureService)
         {
             _prescriptionService = prescriptionService;
             _pharmacyService = pharmacyService;
             _dataSyncService = dataSyncService;
             _hubContext = hubContext;
             _logger = logger;
+            _subscriptionFeatureService = subscriptionFeatureService;
         }
 
         [HttpGet("dashboard")]
@@ -50,6 +53,13 @@ namespace UmiHealth.Api.Controllers
                 if (string.IsNullOrEmpty(tenantIdFromClaims) || Guid.Parse(tenantIdFromClaims) != tenantId)
                 {
                     return Forbid();
+                }
+
+                // Check subscription feature access
+                var featureCheck = await _subscriptionFeatureService.EnforceFeatureAccessAsync(HttpContext, "basic_analytics");
+                if (featureCheck != null)
+                {
+                    return featureCheck;
                 }
 
                 var todayPrescriptionsTask = GetPrescriptionStatsAsync(tenantId, branchId);

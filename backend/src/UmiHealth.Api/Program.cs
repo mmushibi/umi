@@ -81,9 +81,17 @@ namespace UmiHealth.Api
 
             // Add Infrastructure and Application layers
             builder.Services.AddInfrastructure(builder.Configuration);
+            builder.Services.AddPersistence(builder.Configuration);
+            builder.Services.AddApplication();
+            // builder.Services.AddIdentity(builder.Configuration);
 
             // Register application services
             builder.Services.AddScoped<IPatientService, PatientService>();
+            builder.Services.AddScoped<IUserInvitationService, UserInvitationService>();
+            builder.Services.AddScoped<IUserService, UserService>();
+            builder.Services.AddScoped<IEmailService, EmailService>();
+            builder.Services.AddScoped<ISubscriptionService, SubscriptionService>();
+            builder.Services.AddScoped<ISubscriptionFeatureService, SubscriptionFeatureService>();
 
             var app = builder.Build();
 
@@ -105,6 +113,9 @@ namespace UmiHealth.Api
             app.MapHub<TestHub>("/testHub");
 
             app.UseAuthorization();
+
+            // Add subscription middleware (after auth, before controllers)
+            app.UseMiddleware<SubscriptionMiddleware>();
 
             app.MapControllers();
 

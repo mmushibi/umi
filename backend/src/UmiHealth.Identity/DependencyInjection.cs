@@ -47,6 +47,7 @@ public static class DependencyInjection
         services.AddScoped<IPasswordService, PasswordService>();
         services.AddScoped<ITokenService, TokenService>();
         services.AddScoped<ITokenBlacklistService, TokenBlacklistService>();
+        services.AddScoped<IAuthenticationService, AuthenticationService>();
 
         return services;
     }

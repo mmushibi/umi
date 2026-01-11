@@ -637,12 +637,7 @@
         <div class="success-message" x-show="successMessage" x-text="successMessage"></div>
 
         <form @submit.prevent="handleSignUp">
-          <div class="tab-bar">
-            <button type="button" class="tab-button" :class="{ 'active': activeTab === 'pharmacy' }" @click="activeTab = 'pharmacy'">Pharmacy</button>
-            <button type="button" class="tab-button" :class="{ 'active': activeTab === 'admin' }" @click="activeTab = 'admin'">Administrator</button>
-            <button type="button" class="tab-button" :class="{ 'active': activeTab === 'account' }" @click="activeTab = 'account'">Account</button>
-          </div>
-          <div class="form-section" x-show="activeTab === 'pharmacy'">
+          <div class="form-section">
             <h2 class="section-heading">Pharmacy Details</h2>
             <div class="form-group">
               <label class="form-label" for="pharmacyName">Pharmacy Name <span class="required">*</span></label>
@@ -650,100 +645,40 @@
               <div class="field-error" x-show="fieldErrors.pharmacyName" x-text="fieldErrors.pharmacyName"></div>
             </div>
             <div class="form-group">
-              <label class="form-label" for="physicalAddress">Physical Address (Town / Area) <span class="required">*</span></label>
-              <input type="text" id="physicalAddress" class="form-input" placeholder="e.g. Woodlands, Lusaka" x-model="signupForm.physicalAddress" required>
-              <div class="field-error" x-show="fieldErrors.physicalAddress" x-text="fieldErrors.physicalAddress"></div>
-            </div>
-            <div class="form-group">
-              <label class="form-label" for="province">Province <span class="required">*</span></label>
-              <select id="province" class="form-select" x-model="signupForm.province" required>
-                <option value="" disabled selected>Select province</option>
-                <option>Central</option>
-                <option>Copperbelt</option>
-                <option>Eastern</option>
-                <option>Luapula</option>
-                <option>Lusaka</option>
-                <option>Muchinga</option>
-                <option>North-Western</option>
-                <option>Northern</option>
-                <option>Southern</option>
-                <option>Western</option>
-              </select>
-              <div class="field-error" x-show="fieldErrors.province" x-text="fieldErrors.province"></div>
-            </div>
-           
-          </div>
-
-          <div class="form-section" x-show="activeTab === 'admin'">
-            <h2 class="section-heading">Administrator Details</h2>
-            <div class="form-group">
-              <label class="form-label" for="adminFullName">Full Name <span class="required">*</span></label>
-              <input type="text" id="adminFullName" class="form-input" placeholder="Admin or owner name" x-model="signupForm.adminFullName" required>
-              <div class="field-error" x-show="fieldErrors.adminFullName" x-text="fieldErrors.adminFullName"></div>
-            </div>
-            <div class="form-group">
               <label class="form-label" for="phoneNumber">Phone Number <span class="required">*</span></label>
               <input type="tel" id="phoneNumber" class="form-input" placeholder="+260..." x-model="signupForm.phoneNumber" required>
               <div class="field-error" x-show="fieldErrors.phoneNumber" x-text="fieldErrors.phoneNumber"></div>
             </div>
             <div class="form-group">
-              <label class="form-label" for="adminEmail">Email Address <span class="optional-label">(optional)</span></label>
-              <input type="email" id="adminEmail" class="form-input" placeholder="Optional contact email" x-model="signupForm.adminEmail">
-              <div class="field-error" x-show="fieldErrors.adminEmail" x-text="fieldErrors.adminEmail"></div>
-            </div>
-          </div>
-
-          <div class="form-section" x-show="activeTab === 'account'">
-            <h2 class="section-heading">Account Setup</h2>
-            <div class="form-group">
-              <label class="form-label" for="username">Username <span class="required">*</span></label>
-              <input type="text" id="username" class="form-input" placeholder="Choose a username" x-model="signupForm.username" required>
-              <div class="field-error" x-show="fieldErrors.username" x-text="fieldErrors.username"></div>
-            </div>
-            <div class="form-group">
               <label class="form-label" for="password">Password <span class="required">*</span></label>
               <div class="password-input-wrapper">
-                <input :type="showPassword ? 'text' : 'password'"
-                       id="password"
-                       class="form-input"
-                       placeholder="Create a password (min 6 characters)"
-                       x-model="signupForm.password"
-                       @input="checkPasswordStrength"
-                       required>
-                <button type="button" class="password-toggle" @click="showPassword = !showPassword" aria-label="Toggle password visibility">
-                  <span class="material-symbols-rounded" x-text="showPassword ? 'visibility_off' : 'visibility'"></span>
+                <input type="password" id="password" class="form-input" placeholder="Create a strong password" x-model="signupForm.password" @input="checkPasswordStrength" required>
+                <button type="button" class="password-toggle" @click="showPassword = !showPassword">
+                  <span class="material-symbols-rounded" x-show="!showPassword">visibility</span>
+                  <span class="material-symbols-rounded" x-show="showPassword">visibility_off</span>
                 </button>
               </div>
-              <div class="password-requirements">
-                <p x-text="passwordMessage" :style="{ color: passwordMessageColor }"></p>
-                <ul>
-                  <li :class="{ met: passwordRequirements.hasMinLength }"></li>
-                  <li :class="{ met: passwordRequirements.hasLetter }"></li>
-                  <li :class="{ met: passwordRequirements.hasNumber }"></li>
+              <div class="password-strength" x-show="signupForm.password">
+                <div class="password-strength-bar" :class="passwordStrengthClass"></div>
+              </div>
+              <div class="password-requirements" x-show="signupForm.password">
+                <p>Password must contain:</p>
+                <ul class="password-requirements">
+                  <li :class="{ 'met': passwordRequirements.hasMinLength }">At least 8 characters</li>
+                  <li :class="{ 'met': passwordRequirements.hasLetter }">At least 1 letter</li>
+                  <li :class="{ 'met': passwordRequirements.hasNumber }">At least 1 number</li>
                 </ul>
               </div>
-              <div class="field-error" x-show="fieldErrors.password" x-text="fieldErrors.password"></div>
             </div>
-            <div class="form-group">
-              <label class="form-label" for="confirmPassword">Confirm Password <span class="required">*</span></label>
-              <input :type="showPassword ? 'text' : 'password'"
-                     id="confirmPassword"
-                     class="form-input"
-                     placeholder="Re-enter password"
-                     x-model="signupForm.confirmPassword"
-                     required>
-              <div class="field-error" x-show="fieldErrors.confirmPassword" x-text="fieldErrors.confirmPassword"></div>
+            <div class="checkbox-wrapper">
+              <label class="flex items-center gap-2 cursor-pointer">
+                <input type="checkbox" x-model="signupForm.acceptTerms" class="w-4 h-4 text-accent-teal rounded border-gray-300 focus:ring-accent-teal">
+                <span class="text-sm">
+                  I agree to the <a href="#" @click.prevent="showTermsModal = true" class="text-accent-teal hover:underline">Terms and Conditions</a> and <a href="#" @click.prevent="showPrivacyModal = true" class="text-accent-teal hover:underline">Privacy Policy</a>
+                </span>
+              </label>
             </div>
           </div>
-
-          <div class="checkbox-wrapper">
-            <input type="checkbox" id="terms" x-model="signupForm.acceptTerms" required>
-            <label for="terms">
-              I agree to the <a href="#" @click.prevent="showTermsModal = true">Terms of Service</a> and <a href="#" @click.prevent="showPrivacyModal = true">Privacy Policy</a>
-            </label>
-          </div>
-          <div class="field-error" x-show="fieldErrors.acceptTerms" x-text="fieldErrors.acceptTerms"></div>
-
           <button type="submit" class="submit-button" :disabled="loading || !isFormValid" x-text="loading ? 'Creating Account...' : 'Create Account'" title="Create Account">
           </button>
         </form>
@@ -931,24 +866,21 @@
     window.authAPI = {
       register: async (data) => {
         try {
-          const response = await fetch('http://localhost:5001/api/v1/auth/register', {
+          const result = await fetch('http://localhost:5000/api/v1/auth/simple-register', {
             method: 'POST',
             mode: 'cors',
             headers: {
               'Content-Type': 'application/json',
             },
             body: JSON.stringify({
-              email: data.email,
-              password: data.password,
-              confirmPassword: data.confirmPassword,
-              adminFullName: data.adminFullName,
-              phoneNumber: data.phoneNumber,
               pharmacyName: data.pharmacyName,
-              username: data.username
+              phoneNumber: data.phoneNumber,
+              email: data.email,
+              password: data.password
             })
           });
 
-          const result = await response.json();
+          const response = await response.json();
 
           if (response.ok && result.success) {
             const data = result.data || {};
@@ -1032,23 +964,21 @@
         usernameTouched: false,
         signupForm: {
           pharmacyName: '',
-          physicalAddress: '',
-          province: '',
-          pharmacyType: 'Retail',
-          adminFullName: '',
           phoneNumber: '',
-          adminEmail: '',
-          licenseNumber: '',
-          licenseExpiryDate: '',
-          username: '',
           password: '',
-          confirmPassword: '',
           acceptTerms: false
         },
         passwordRequirements: {
           hasMinLength: false,
           hasLetter: false,
           hasNumber: false
+        },
+        get passwordStrengthClass() {
+          const metRequirements = Object.values(this.passwordRequirements).filter(Boolean).length;
+          if (metRequirements === 3) return 'strong';
+          if (metRequirements === 2) return 'medium';
+          if (metRequirements === 1) return 'weak';
+          return '';
         },
         generateEmail() {
           return this.signupForm.pharmacyName.trim().toLowerCase().replace(/\s+/g, '.') + '@pharmacy.local';
@@ -1057,21 +987,13 @@
         get isFormValid() {
           const requiredFields = [
             'pharmacyName',
-            'physicalAddress',
-            'province',
-            'adminFullName',
             'phoneNumber',
-            'username',
-            'password',
-            'confirmPassword'
+            'password'
           ];
 
           const allFilled = requiredFields.every(field => Boolean(this.signupForm[field]));
 
-          const passwordsMatch = this.signupForm.password && this.signupForm.password === this.signupForm.confirmPassword;
-
           return allFilled &&
-                 passwordsMatch &&
                  this.signupForm.acceptTerms &&
                  this.passwordRequirements.hasMinLength &&
                  this.passwordRequirements.hasLetter &&
@@ -1154,39 +1076,12 @@
             this.fieldErrors.password = 'Password is required';
           } else if (!this.passwordRequirements.hasMinLength || !this.passwordRequirements.hasLetter || !this.passwordRequirements.hasNumber) {
             this.fieldErrors.password = 'Password must have at least 6 characters, 1 letter, and 1 number';
-          }
-
-          // Validate password confirmation
-          if (this.signupForm.password && this.signupForm.confirmPassword && this.signupForm.password !== this.signupForm.confirmPassword) {
-            this.fieldErrors.confirmPassword = 'Passwords must match';
-          }
-
-          if (!this.signupForm.pharmacyName) {
+          } else if (!this.signupForm.pharmacyName) {
             this.fieldErrors.pharmacyName = 'Pharmacy name is required';
-          }
-
-          if (!this.signupForm.physicalAddress) {
-            this.fieldErrors.physicalAddress = 'Please provide the pharmacy location';
-          }
-
-          if (!this.signupForm.province) {
-            this.fieldErrors.province = 'Please select a province';
-          }
-
-          if (!this.signupForm.adminFullName) {
-            this.fieldErrors.adminFullName = 'Administrator name is required';
-          }
-
-          if (!this.signupForm.phoneNumber) {
+          } else if (!this.signupForm.phoneNumber) {
             this.fieldErrors.phoneNumber = 'Phone number is required';
-          }
-
-          if (!this.signupForm.username) {
-            this.fieldErrors.username = 'Username is required';
-          }
-
-          if (!this.signupForm.acceptTerms) {
-            this.fieldErrors.acceptTerms = 'You must agree to Terms & Conditions';
+          } else if (!this.signupForm.acceptTerms) {
+            this.fieldErrors.acceptTerms = 'You must agree to Terms of Service';
           }
 
           return Object.keys(this.fieldErrors).length === 0;
@@ -1273,15 +1168,9 @@
             const generatedEmail = this.signupForm.pharmacyName.trim().toLowerCase().replace(/\s+/g, '.') + '@pharmacy.local';
             const requestData = {
               pharmacyName: this.signupForm.pharmacyName.trim(),
-              pharmacyLicenseNumber: this.signupForm.licenseNumber.trim() || '',
-              address: this.signupForm.physicalAddress.trim(),
-              province: this.signupForm.province,
-              adminFullName: this.signupForm.adminFullName.trim(),
               phoneNumber: this.signupForm.phoneNumber.trim(),
-              email: this.signupForm.adminEmail.trim() || generatedEmail,
-              username: this.signupForm.username.trim(),
-              password: this.signupForm.password,
-              confirmPassword: this.signupForm.confirmPassword
+              email: generatedEmail,
+              password: this.signupForm.password
             };
 
             console.log('Sending signup request:', requestData);
@@ -1289,29 +1178,33 @@
             const result = await window.authAPI.register(requestData);
 
             if (result.success) {
-              this.successMessage = 'Welcome to Umi Health! Your account has been created successfully. Redirecting to setup...';
-                
+              this.successMessage = 'Welcome to Umi Health! Your pharmacy account has been created successfully.';
+              
               // Store auth data
               localStorage.setItem('umi_access_token', result.data.accessToken);
               localStorage.setItem('umi_refresh_token', result.data.refreshToken);
               localStorage.setItem('umi_current_user', JSON.stringify(result.data.user));
               localStorage.setItem('umi_current_tenant', JSON.stringify(result.data.tenant));
               localStorage.setItem('umi_tenant_id', result.data.tenant.id);
-
-              // Redirect to setup page
+              
+              // Redirect to onboarding or admin portal
               setTimeout(() => {
-                window.location.href = result.redirectUrl || '/portals/admin/home.html';
+                if (result.data.requiresOnboarding) {
+                  window.location.href = '/public/onboarding.html';
+                } else {
+                  window.location.href = '/portals/admin/home.html';
+                }
               }, 2000);
             } else {
-              this.errorMessage = result.message || 'Failed to create account. Please try again.';
+              this.errorMessage = result.message || 'Registration failed. Please try again.';
             }
           } catch (error) {
-            console.error('Signup error:', error);
-            this.errorMessage = 'Registration failed. Please check your connection and try again.';
+            console.error('Registration error:', error);
+            this.errorMessage = 'Registration failed. Please try again.';
           } finally {
             this.loading = false;
           }
-        }
+        },
       }
     }
   </script>

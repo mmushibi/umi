@@ -8,6 +8,8 @@ using System.Linq;
 using UmiHealth.Identity;
 using UmiHealth.Identity.Services;
 using UmiHealth.Shared.DTOs;
+using UmiHealth.Application.Services;
+using UmiHealth.Persistence.Data;
 namespace UmiHealth.Api.Controllers
 {
     [ApiController]
@@ -17,22 +19,31 @@ namespace UmiHealth.Api.Controllers
         private readonly IAuthenticationService _authenticationService;
         private readonly UmiHealth.Identity.Services.IJwtService _jwtService;
         private readonly ITokenBlacklistService _tokenBlacklistService;
+        private readonly ISimpleRegistrationService _simpleRegistrationService;
+        private readonly IOnboardingService _onboardingService;
+        private readonly SharedDbContext _context;
         private readonly ILogger<AuthController> _logger;
 
         public AuthController(
             IAuthenticationService authenticationService,
             UmiHealth.Identity.Services.IJwtService jwtService,
             ITokenBlacklistService tokenBlacklistService,
+            ISimpleRegistrationService simpleRegistrationService,
+            IOnboardingService onboardingService,
+            SharedDbContext context,
             ILogger<AuthController> logger)
         {
             _authenticationService = authenticationService;
             _jwtService = jwtService;
             _tokenBlacklistService = tokenBlacklistService;
+            _simpleRegistrationService = simpleRegistrationService;
+            _onboardingService = onboardingService;
+            _context = context;
             _logger = logger;
         }
 
         /// <summary>
-        /// Login user with email and password
+        /// Login user with email or phone number and password
         /// Returns access token and refresh token
         /// </summary>
         [HttpPost("login")]
@@ -46,18 +57,60 @@ namespace UmiHealth.Api.Controllers
                     return BadRequest(new { success = false, message = "Invalid request", errors = ModelState });
                 }
 
-                var result = await _authenticationService.LoginAsync(request.Email, request.Password, cancellationToken);
+                // Determine if identifier is email or phone number
+                bool isEmail = request.Identifier.Contains("@");
+                string identifier = request.Identifier.Trim();
+
+                var result = await _authenticationService.LoginAsync(identifier, request.Password, cancellationToken);
 
                 if (!result.Success)
                 {
-                    _logger.LogWarning("Login failed for email: {Email}", request.Email);
+                    _logger.LogWarning("Login failed for identifier: {Identifier}", identifier);
                     return Unauthorized(new { success = false, message = result.Error });
                 }
 
-                _logger.LogInformation("User logged in successfully: {Email}", request.Email);
+                _logger.LogInformation("User logged in successfully: {Identifier}", identifier);
 
                 // Determine redirect URL based on user role
                 var redirectUrl = GetRoleBasedRedirectUrl(result.Roles?.FirstOrDefault()?.Name);
+
+                // Check subscription status and modify redirect if needed
+                var subscriptionStatus = await CheckSubscriptionStatusForLogin(result.User?.TenantId);
+                if (!subscriptionStatus.HasAccess)
+                {
+                    return Ok(new
+                    {
+                        success = true,
+                        message = "Login successful",
+                        data = new
+                        {
+                            accessToken = result.AccessToken,
+                            refreshToken = result.RefreshToken,
+                            redirectUrl = subscriptionStatus.TenantSuspended ? "/public/account-suspended.html" : "/portals/admin/subscription.html",
+                            user = new
+                            {
+                                id = result.User?.Id,
+                                email = result.User?.Email,
+                                phoneNumber = result.User?.PhoneNumber,
+                                firstName = result.User?.FirstName,
+                                lastName = result.User?.LastName,
+                                tenantId = result.User?.TenantId,
+                                branchId = result.User?.BranchId,
+                                roles = result.Roles
+                            },
+                            subscriptionStatus = new
+                            {
+                                hasAccess = subscriptionStatus.HasAccess,
+                                isTrial = subscriptionStatus.IsTrial,
+                                planType = subscriptionStatus.PlanType,
+                                trialEndDate = subscriptionStatus.TrialEndDate,
+                                subscriptionEndDate = subscriptionStatus.SubscriptionEndDate,
+                                reason = subscriptionStatus.Reason,
+                                isSuspended = subscriptionStatus.TenantSuspended
+                            }
+                        }
+                    });
+                }
 
                 return Ok(new
                 {
@@ -72,11 +125,22 @@ namespace UmiHealth.Api.Controllers
                         {
                             id = result.User?.Id,
                             email = result.User?.Email,
+                            phoneNumber = result.User?.PhoneNumber,
                             firstName = result.User?.FirstName,
                             lastName = result.User?.LastName,
                             tenantId = result.User?.TenantId,
                             branchId = result.User?.BranchId,
                             roles = result.Roles
+                        },
+                        subscriptionStatus = new
+                        {
+                            hasAccess = subscriptionStatus.HasAccess,
+                            isTrial = subscriptionStatus.IsTrial,
+                            planType = subscriptionStatus.PlanType,
+                            trialEndDate = subscriptionStatus.TrialEndDate,
+                            subscriptionEndDate = subscriptionStatus.SubscriptionEndDate,
+                            reason = subscriptionStatus.Reason,
+                            isSuspended = subscriptionStatus.TenantSuspended
                         }
                     }
                 });
@@ -85,6 +149,267 @@ namespace UmiHealth.Api.Controllers
             {
                 _logger.LogError(ex, "Error during login");
                 return StatusCode(500, new { success = false, message = "An error occurred during login" });
+            }
+        }
+
+        /// <summary>
+        /// Simple registration endpoint for pharmacy signup
+        /// </summary>
+        [HttpPost("simple-register")]
+        [AllowAnonymous]
+        public async Task<IActionResult> SimpleRegister([FromBody] SimpleRegisterRequest request, CancellationToken cancellationToken = default)
+        {
+            try
+            {
+                if (!ModelState.IsValid)
+                {
+                    return BadRequest(new { success = false, message = "Invalid request data", errors = ModelState });
+                }
+
+                var registrationRequest = new SimpleRegistrationRequest
+                {
+                    PharmacyName = request.PharmacyName,
+                    PhoneNumber = request.PhoneNumber,
+                    Password = request.Password
+                };
+
+                var result = await _simpleRegistrationService.RegisterPharmacyAsync(registrationRequest, cancellationToken);
+
+                if (result.Success)
+                {
+                    return Ok(new { 
+                        success = true, 
+                        message = result.Message,
+                        data = new {
+                            accessToken = result.AccessToken,
+                            refreshToken = result.RefreshToken,
+                            user = result.User,
+                            tenant = result.Tenant,
+                            requiresOnboarding = result.RequiresOnboarding,
+                            redirectUrl = result.RequiresOnboarding ? "/public/onboarding.html" : "/portals/admin/home.html"
+                        }
+                    });
+                }
+                else
+                {
+                    return BadRequest(new { success = false, message = result.Message });
+                }
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error during simple registration");
+                return StatusCode(500, new { success = false, message = "Registration failed due to an internal error" });
+            }
+        }
+
+        public class SimpleRegisterRequest
+        {
+            public string PharmacyName { get; set; }
+            public string PhoneNumber { get; set; }
+            public string Password { get; set; }
+        }
+
+        /// <summary>
+        /// Complete onboarding for newly registered pharmacy
+        /// </summary>
+        [HttpPost("complete-onboarding")]
+        [Authorize]
+        public async Task<IActionResult> CompleteOnboarding([FromBody] OnboardingRequest request, CancellationToken cancellationToken = default)
+        {
+            try
+            {
+                if (!ModelState.IsValid)
+                {
+                    return BadRequest(new { success = false, message = "Invalid request data", errors = ModelState });
+                }
+
+                // Get current user from JWT token
+                var userIdClaim = User.FindFirst("sub")?.Value ?? User.FindFirst("userId")?.Value;
+                if (string.IsNullOrEmpty(userIdClaim) || !Guid.TryParse(userIdClaim, out var userId))
+                {
+                    return Unauthorized(new { success = false, message = "Invalid user token" });
+                }
+
+                var user = await _context.Users
+                    .Include(u => u.Tenant)
+                    .Include(u => u.Branch)
+                    .FirstOrDefaultAsync(u => u.Id == userId, cancellationToken);
+
+                if (user == null)
+                {
+                    return NotFound(new { success = false, message = "User not found" });
+                }
+
+                // Update branch information
+                if (user.Branch != null)
+                {
+                    user.Branch.Phone = request.PhoneNumber ?? user.Branch.Phone;
+                    user.Branch.Email = request.ContactEmail ?? user.Branch.Email;
+                    user.Branch.LicenseNumber = request.LicenseNumber ?? user.Branch.LicenseNumber;
+                    user.Branch.OperatingHours = request.OperatingHours ?? user.Branch.OperatingHours;
+                    user.Branch.UpdatedAt = DateTime.UtcNow;
+                }
+
+                // Update tenant information
+                if (user.Tenant != null)
+                {
+                    var settings = new
+                    {
+                        pharmacyType = request.PharmacyType,
+                        zamraNumber = request.ZamraNumber,
+                        physicalAddress = request.PhysicalAddress,
+                        province = request.Province,
+                        city = request.City,
+                        postalCode = request.PostalCode,
+                        website = request.Website,
+                        pharmacistCount = request.PharmacistCount,
+                        services = request.Services,
+                        emergencyContact = request.EmergencyContact,
+                        onboardingCompleted = true,
+                        onboardingCompletedAt = DateTime.UtcNow
+                    };
+
+                    user.Tenant.Settings = System.Text.Json.JsonSerializer.Serialize(settings);
+                    user.Tenant.UpdatedAt = DateTime.UtcNow;
+                }
+
+                // Update user information
+                user.FirstName = request.AdminFullName?.Split(' ').FirstOrDefault() ?? user.FirstName;
+                user.LastName = request.AdminFullName?.Split(' ').LastOrDefault() ?? user.LastName;
+                user.Email = request.AdminEmail ?? user.Email;
+                user.UpdatedAt = DateTime.UtcNow;
+
+                await _context.SaveChangesAsync(cancellationToken);
+
+                _logger.LogInformation("User {UserId} completed onboarding for tenant {TenantId}", userId, user.TenantId);
+
+                return Ok(new { 
+                    success = true, 
+                    message = "Onboarding completed successfully",
+                    data = new {
+                        redirectUrl = "/portals/admin/home.html"
+                    }
+                });
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error during onboarding completion");
+                return StatusCode(500, new { success = false, message = "Failed to complete onboarding" });
+            }
+        }
+
+        public class OnboardingRequest
+        {
+            public string PharmacyType { get; set; }
+            public string LicenseNumber { get; set; }
+            public string LicenseExpiryDate { get; set; }
+            public string ZamraNumber { get; set; }
+            public string PhysicalAddress { get; set; }
+            public string Province { get; set; }
+            public string City { get; set; }
+            public string PostalCode { get; set; }
+            public string OperatingHours { get; set; }
+            public string ContactEmail { get; set; }
+            public string PhoneNumber { get; set; }
+            public string EmergencyContact { get; set; }
+            public string Website { get; set; }
+            public int PharmacistCount { get; set; }
+            public ServicesDto Services { get; set; }
+            public string AdminFullName { get; set; }
+            public string AdminEmail { get; set; }
+            public string AdminTitle { get; set; }
+            public int AdminExperience { get; set; }
+        }
+
+        public class ServicesDto
+        {
+            public bool PrescriptionFilling { get; set; }
+            public bool Compounding { get; set; }
+            public bool HealthScreening { get; set; }
+            public bool Vaccination { get; set; }
+            public bool MedicinalTherapy { get; set; }
+            public bool HealthConsultation { get; set; }
+        }
+
+        /// <summary>
+        /// Test endpoint to verify API is working
+        /// </summary>
+        [HttpGet("test")]
+        [AllowAnonymous]
+        public IActionResult Test()
+        {
+            return Ok(new { success = true, message = "API is working!", timestamp = DateTime.UtcNow });
+        }
+
+        /// <summary>
+        /// Get tenant onboarding data (for operations and super admin)
+        /// </summary>
+        [HttpGet("onboarding/{tenantId}")]
+        [Authorize(Roles = "admin,superadmin")]
+        public async Task<IActionResult> GetTenantOnboarding(Guid tenantId, CancellationToken cancellationToken = default)
+        {
+            try
+            {
+                var data = await _onboardingService.GetTenantOnboardingAsync(tenantId, cancellationToken);
+                if (data == null)
+                {
+                    return NotFound(new { success = false, message = "Tenant not found" });
+                }
+
+                return Ok(new { success = true, data = data });
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error retrieving onboarding data for tenant {TenantId}", tenantId);
+                return StatusCode(500, new { success = false, message = "Internal server error" });
+            }
+        }
+
+        /// <summary>
+        /// Get all tenants onboarding data (for super admin)
+        /// </summary>
+        [HttpGet("onboarding")]
+        [Authorize(Roles = "superadmin")]
+        public async Task<IActionResult> GetAllTenantsOnboarding(CancellationToken cancellationToken = default)
+        {
+            try
+            {
+                var data = await _onboardingService.GetAllTenantsOnboardingAsync(cancellationToken);
+                return Ok(new { success = true, data = data });
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error retrieving all tenants onboarding data");
+                return StatusCode(500, new { success = false, message = "Internal server error" });
+            }
+        }
+
+        /// <summary>
+        /// Update tenant onboarding data (for operations and super admin)
+        /// </summary>
+        [HttpPut("onboarding/{tenantId}")]
+        [Authorize(Roles = "admin,superadmin")]
+        public async Task<IActionResult> UpdateTenantOnboarding(Guid tenantId, [FromBody] UpdateOnboardingRequest request, CancellationToken cancellationToken = default)
+        {
+            try
+            {
+                if (!ModelState.IsValid)
+                {
+                    return BadRequest(new { success = false, message = "Invalid request data", errors = ModelState });
+                }
+
+                var success = await _onboardingService.UpdateTenantOnboardingAsync(tenantId, request, cancellationToken);
+                if (!success)
+                {
+                    return NotFound(new { success = false, message = "Tenant not found" });
+                }
+
+                return Ok(new { success = true, message = "Onboarding data updated successfully" });
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error updating onboarding data for tenant {TenantId}", tenantId);
+                return StatusCode(500, new { success = false, message = "Internal server error" });
             }
         }
 
@@ -451,14 +776,117 @@ namespace UmiHealth.Api.Controllers
                 _ => "/portals/admin/home.html" // Default fallback
             };
         }
+
+        private async Task<SubscriptionLoginStatus> CheckSubscriptionStatusForLogin(Guid? tenantId)
+        {
+            try
+            {
+                if (!tenantId.HasValue)
+                {
+                    return new SubscriptionLoginStatus
+                    {
+                        HasAccess = false,
+                        Reason = "No tenant found"
+                    };
+                }
+
+                // Get tenant info
+                var tenant = await _context.Tenants.FindAsync(tenantId.Value);
+                if (tenant == null)
+                {
+                    return new SubscriptionLoginStatus
+                    {
+                        HasAccess = false,
+                        Reason = "Tenant not found"
+                    };
+                }
+
+                // Check if tenant is suspended
+                if (tenant.IsSuspended)
+                {
+                    return new SubscriptionLoginStatus
+                    {
+                        HasAccess = false,
+                        IsTrial = false,
+                        PlanType = "Suspended",
+                        TrialExpired = false,
+                        TenantSuspended = true,
+                        Reason = "Tenant account is suspended. Please contact support."
+                    };
+                }
+
+                // Check if tenant has active paid subscription
+                var subscription = await _subscriptionService.GetTenantSubscriptionAsync(tenantId.Value);
+                if (subscription != null && subscription.EndDate > DateTime.UtcNow)
+                {
+                    return new SubscriptionLoginStatus
+                    {
+                        HasAccess = true,
+                        IsTrial = false,
+                        PlanType = subscription.PlanType,
+                        SubscriptionEndDate = subscription.EndDate,
+                        TenantSuspended = false,
+                        Reason = "Active subscription"
+                    };
+                }
+
+                // Check if tenant is in 14-day trial period
+                var trialEndDate = tenant.CreatedAt.AddDays(14);
+                var isInTrial = DateTime.UtcNow <= trialEndDate;
+
+                if (isInTrial)
+                {
+                    return new SubscriptionLoginStatus
+                    {
+                        HasAccess = true,
+                        IsTrial = true,
+                        PlanType = "Trial",
+                        TrialEndDate = trialEndDate,
+                        TenantSuspended = false,
+                        Reason = "Trial period active"
+                    };
+                }
+
+                // No active subscription and trial expired
+                return new SubscriptionLoginStatus
+                {
+                    HasAccess = false,
+                    IsTrial = false,
+                    TrialExpired = true,
+                    TenantSuspended = false,
+                    Reason = "Trial period expired and no active subscription"
+                };
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error checking subscription status during login");
+                return new SubscriptionLoginStatus
+                {
+                    HasAccess = false,
+                    Reason = "Error checking subscription status"
+                };
+            }
+        }
     }
 
     // Request DTOs
     public class LoginRequest
     {
-        public string Email { get; set; } = string.Empty;
+        public string Identifier { get; set; } = string.Empty; // Can be email or phone number
         public string Password { get; set; } = string.Empty;
         public string? TenantSubdomain { get; set; }
+    }
+
+    public class SubscriptionLoginStatus
+    {
+        public bool HasAccess { get; set; }
+        public bool IsTrial { get; set; }
+        public string PlanType { get; set; } = string.Empty;
+        public DateTime? TrialEndDate { get; set; }
+        public DateTime? SubscriptionEndDate { get; set; }
+        public string Reason { get; set; } = string.Empty;
+        public bool TrialExpired { get; set; }
+        public bool TenantSuspended { get; set; }
     }
 
     public class RegisterRequest

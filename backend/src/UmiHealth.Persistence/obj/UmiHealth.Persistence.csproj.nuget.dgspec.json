@@ -1,17 +1,17 @@
 {
   "format": 1,
   "restore": {
-    "c:\\Users\\sepio\\Desktop\\Umi_Health\\Umi_Health\\Umi_Health\\backend\\src\\UmiHealth.Persistence\\UmiHealth.Persistence.csproj": {}
+    "C:\\Users\\sepio\\Desktop\\Umi_Health\\Umi_Health\\Umi_Health\\backend\\src\\UmiHealth.Persistence\\UmiHealth.Persistence.csproj": {}
   },
   "projects": {
-    "c:\\Users\\sepio\\Desktop\\Umi_Health\\Umi_Health\\Umi_Health\\backend\\src\\UmiHealth.Core\\UmiHealth.Core.csproj": {
+    "C:\\Users\\sepio\\Desktop\\Umi_Health\\Umi_Health\\Umi_Health\\backend\\src\\UmiHealth.Core\\UmiHealth.Core.csproj": {
       "version": "1.0.0",
       "restore": {
-        "projectUniqueName": "c:\\Users\\sepio\\Desktop\\Umi_Health\\Umi_Health\\Umi_Health\\backend\\src\\UmiHealth.Core\\UmiHealth.Core.csproj",
+        "projectUniqueName": "C:\\Users\\sepio\\Desktop\\Umi_Health\\Umi_Health\\Umi_Health\\backend\\src\\UmiHealth.Core\\UmiHealth.Core.csproj",
         "projectName": "UmiHealth.Core",
-        "projectPath": "c:\\Users\\sepio\\Desktop\\Umi_Health\\Umi_Health\\Umi_Health\\backend\\src\\UmiHealth.Core\\UmiHealth.Core.csproj",
+        "projectPath": "C:\\Users\\sepio\\Desktop\\Umi_Health\\Umi_Health\\Umi_Health\\backend\\src\\UmiHealth.Core\\UmiHealth.Core.csproj",
         "packagesPath": "C:\\Users\\sepio\\.nuget\\packages\\",
-        "outputPath": "c:\\Users\\sepio\\Desktop\\Umi_Health\\Umi_Health\\Umi_Health\\backend\\src\\UmiHealth.Core\\obj\\",
+        "outputPath": "C:\\Users\\sepio\\Desktop\\Umi_Health\\Umi_Health\\Umi_Health\\backend\\src\\UmiHealth.Core\\obj\\",
         "projectStyle": "PackageReference",
         "configFilePaths": [
           "C:\\Users\\sepio\\AppData\\Roaming\\NuGet\\NuGet.Config"
@@ -26,8 +26,8 @@
           "net8.0": {
             "targetAlias": "net8.0",
             "projectReferences": {
-              "c:\\Users\\sepio\\Desktop\\Umi_Health\\Umi_Health\\Umi_Health\\backend\\src\\UmiHealth.Shared\\UmiHealth.Shared.csproj": {
-                "projectPath": "c:\\Users\\sepio\\Desktop\\Umi_Health\\Umi_Health\\Umi_Health\\backend\\src\\UmiHealth.Shared\\UmiHealth.Shared.csproj"
+              "C:\\Users\\sepio\\Desktop\\Umi_Health\\Umi_Health\\Umi_Health\\backend\\src\\UmiHealth.Shared\\UmiHealth.Shared.csproj": {
+                "projectPath": "C:\\Users\\sepio\\Desktop\\Umi_Health\\Umi_Health\\Umi_Health\\backend\\src\\UmiHealth.Shared\\UmiHealth.Shared.csproj"
               }
             }
           }
@@ -67,14 +67,14 @@
         }
       }
     },
-    "c:\\Users\\sepio\\Desktop\\Umi_Health\\Umi_Health\\Umi_Health\\backend\\src\\UmiHealth.Domain\\UmiHealth.Domain.csproj": {
+    "C:\\Users\\sepio\\Desktop\\Umi_Health\\Umi_Health\\Umi_Health\\backend\\src\\UmiHealth.Domain\\UmiHealth.Domain.csproj": {
       "version": "1.0.0",
       "restore": {
-        "projectUniqueName": "c:\\Users\\sepio\\Desktop\\Umi_Health\\Umi_Health\\Umi_Health\\backend\\src\\UmiHealth.Domain\\UmiHealth.Domain.csproj",
+        "projectUniqueName": "C:\\Users\\sepio\\Desktop\\Umi_Health\\Umi_Health\\Umi_Health\\backend\\src\\UmiHealth.Domain\\UmiHealth.Domain.csproj",
         "projectName": "UmiHealth.Domain",
-        "projectPath": "c:\\Users\\sepio\\Desktop\\Umi_Health\\Umi_Health\\Umi_Health\\backend\\src\\UmiHealth.Domain\\UmiHealth.Domain.csproj",
+        "projectPath": "C:\\Users\\sepio\\Desktop\\Umi_Health\\Umi_Health\\Umi_Health\\backend\\src\\UmiHealth.Domain\\UmiHealth.Domain.csproj",
         "packagesPath": "C:\\Users\\sepio\\.nuget\\packages\\",
-        "outputPath": "c:\\Users\\sepio\\Desktop\\Umi_Health\\Umi_Health\\Umi_Health\\backend\\src\\UmiHealth.Domain\\obj\\",
+        "outputPath": "C:\\Users\\sepio\\Desktop\\Umi_Health\\Umi_Health\\Umi_Health\\backend\\src\\UmiHealth.Domain\\obj\\",
         "projectStyle": "PackageReference",
         "configFilePaths": [
           "C:\\Users\\sepio\\AppData\\Roaming\\NuGet\\NuGet.Config"
@@ -89,8 +89,8 @@
           "net8.0": {
             "targetAlias": "net8.0",
             "projectReferences": {
-              "c:\\Users\\sepio\\Desktop\\Umi_Health\\Umi_Health\\Umi_Health\\backend\\src\\UmiHealth.Core\\UmiHealth.Core.csproj": {
-                "projectPath": "c:\\Users\\sepio\\Desktop\\Umi_Health\\Umi_Health\\Umi_Health\\backend\\src\\UmiHealth.Core\\UmiHealth.Core.csproj"
+              "C:\\Users\\sepio\\Desktop\\Umi_Health\\Umi_Health\\Umi_Health\\backend\\src\\UmiHealth.Core\\UmiHealth.Core.csproj": {
+                "projectPath": "C:\\Users\\sepio\\Desktop\\Umi_Health\\Umi_Health\\Umi_Health\\backend\\src\\UmiHealth.Core\\UmiHealth.Core.csproj"
               }
             }
           }
@@ -130,14 +130,14 @@
         }
       }
     },
-    "c:\\Users\\sepio\\Desktop\\Umi_Health\\Umi_Health\\Umi_Health\\backend\\src\\UmiHealth.Persistence\\UmiHealth.Persistence.csproj": {
+    "C:\\Users\\sepio\\Desktop\\Umi_Health\\Umi_Health\\Umi_Health\\backend\\src\\UmiHealth.Persistence\\UmiHealth.Persistence.csproj": {
       "version": "1.0.0",
       "restore": {
-        "projectUniqueName": "c:\\Users\\sepio\\Desktop\\Umi_Health\\Umi_Health\\Umi_Health\\backend\\src\\UmiHealth.Persistence\\UmiHealth.Persistence.csproj",
+        "projectUniqueName": "C:\\Users\\sepio\\Desktop\\Umi_Health\\Umi_Health\\Umi_Health\\backend\\src\\UmiHealth.Persistence\\UmiHealth.Persistence.csproj",
         "projectName": "UmiHealth.Persistence",
-        "projectPath": "c:\\Users\\sepio\\Desktop\\Umi_Health\\Umi_Health\\Umi_Health\\backend\\src\\UmiHealth.Persistence\\UmiHealth.Persistence.csproj",
+        "projectPath": "C:\\Users\\sepio\\Desktop\\Umi_Health\\Umi_Health\\Umi_Health\\backend\\src\\UmiHealth.Persistence\\UmiHealth.Persistence.csproj",
         "packagesPath": "C:\\Users\\sepio\\.nuget\\packages\\",
-        "outputPath": "c:\\Users\\sepio\\Desktop\\Umi_Health\\Umi_Health\\Umi_Health\\backend\\src\\UmiHealth.Persistence\\obj\\",
+        "outputPath": "C:\\Users\\sepio\\Desktop\\Umi_Health\\Umi_Health\\Umi_Health\\backend\\src\\UmiHealth.Persistence\\obj\\",
         "projectStyle": "PackageReference",
         "configFilePaths": [
           "C:\\Users\\sepio\\AppData\\Roaming\\NuGet\\NuGet.Config"
@@ -152,8 +152,8 @@
           "net8.0": {
             "targetAlias": "net8.0",
             "projectReferences": {
-              "c:\\Users\\sepio\\Desktop\\Umi_Health\\Umi_Health\\Umi_Health\\backend\\src\\UmiHealth.Domain\\UmiHealth.Domain.csproj": {
-                "projectPath": "c:\\Users\\sepio\\Desktop\\Umi_Health\\Umi_Health\\Umi_Health\\backend\\src\\UmiHealth.Domain\\UmiHealth.Domain.csproj"
+              "C:\\Users\\sepio\\Desktop\\Umi_Health\\Umi_Health\\Umi_Health\\backend\\src\\UmiHealth.Domain\\UmiHealth.Domain.csproj": {
+                "projectPath": "C:\\Users\\sepio\\Desktop\\Umi_Health\\Umi_Health\\Umi_Health\\backend\\src\\UmiHealth.Domain\\UmiHealth.Domain.csproj"
               }
             }
           }
@@ -207,14 +207,14 @@
         }
       }
     },
-    "c:\\Users\\sepio\\Desktop\\Umi_Health\\Umi_Health\\Umi_Health\\backend\\src\\UmiHealth.Shared\\UmiHealth.Shared.csproj": {
+    "C:\\Users\\sepio\\Desktop\\Umi_Health\\Umi_Health\\Umi_Health\\backend\\src\\UmiHealth.Shared\\UmiHealth.Shared.csproj": {
       "version": "1.0.0",
       "restore": {
-        "projectUniqueName": "c:\\Users\\sepio\\Desktop\\Umi_Health\\Umi_Health\\Umi_Health\\backend\\src\\UmiHealth.Shared\\UmiHealth.Shared.csproj",
+        "projectUniqueName": "C:\\Users\\sepio\\Desktop\\Umi_Health\\Umi_Health\\Umi_Health\\backend\\src\\UmiHealth.Shared\\UmiHealth.Shared.csproj",
         "projectName": "UmiHealth.Shared",
-        "projectPath": "c:\\Users\\sepio\\Desktop\\Umi_Health\\Umi_Health\\Umi_Health\\backend\\src\\UmiHealth.Shared\\UmiHealth.Shared.csproj",
+        "projectPath": "C:\\Users\\sepio\\Desktop\\Umi_Health\\Umi_Health\\Umi_Health\\backend\\src\\UmiHealth.Shared\\UmiHealth.Shared.csproj",
         "packagesPath": "C:\\Users\\sepio\\.nuget\\packages\\",
-        "outputPath": "c:\\Users\\sepio\\Desktop\\Umi_Health\\Umi_Health\\Umi_Health\\backend\\src\\UmiHealth.Shared\\obj\\",
+        "outputPath": "C:\\Users\\sepio\\Desktop\\Umi_Health\\Umi_Health\\Umi_Health\\backend\\src\\UmiHealth.Shared\\obj\\",
         "projectStyle": "PackageReference",
         "configFilePaths": [
           "C:\\Users\\sepio\\AppData\\Roaming\\NuGet\\NuGet.Config"

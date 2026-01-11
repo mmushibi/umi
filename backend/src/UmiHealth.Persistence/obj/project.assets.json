@@ -895,8 +895,8 @@
         "net8.0": {
           "targetAlias": "net8.0",
           "projectReferences": {
-            "c:\\Users\\sepio\\Desktop\\Umi_Health\\Umi_Health\\Umi_Health\\backend\\src\\UmiHealth.Domain\\UmiHealth.Domain.csproj": {
-              "projectPath": "c:\\Users\\sepio\\Desktop\\Umi_Health\\Umi_Health\\Umi_Health\\backend\\src\\UmiHealth.Domain\\UmiHealth.Domain.csproj"
+            "C:\\Users\\sepio\\Desktop\\Umi_Health\\Umi_Health\\Umi_Health\\backend\\src\\UmiHealth.Domain\\UmiHealth.Domain.csproj": {
+              "projectPath": "C:\\Users\\sepio\\Desktop\\Umi_Health\\Umi_Health\\Umi_Health\\backend\\src\\UmiHealth.Domain\\UmiHealth.Domain.csproj"
             }
           }
         }
