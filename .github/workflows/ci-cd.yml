@@ -164,7 +164,7 @@ jobs:
           dotnet restore
           dotnet build --configuration Release
           # Run migrations for the UmiHealth project
-          dotnet ef database update --project src/UmiHealth.Infrastructure --startup-project src/UmiHealth.Api --connection "$DB_CONN"
+          dotnet ef database update --project src/UmiHealth.Infrastructure --startup-project src/UmiHealth.API --connection "$DB_CONN"
 
       - name: Smoke test
         run: |
