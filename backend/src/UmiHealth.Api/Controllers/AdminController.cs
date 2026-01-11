@@ -4,6 +4,7 @@ using UmiHealth.Application.DTOs;
 using UmiHealth.Application.Services;
 using UmiHealth.Core.Interfaces;
 using UmiHealth.Infrastructure.Data;
+using UmiHealth.API.Middleware;
 using System;
 using System.Threading.Tasks;
 using System.Linq;

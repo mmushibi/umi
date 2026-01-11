@@ -16,6 +16,7 @@ namespace UmiHealth.Core.Interfaces
         Task<bool> UpdateUserStatusAsync(Guid userId, Guid tenantId, string status, CancellationToken cancellationToken = default);
         Task<IEnumerable<IUserDto>> GetUsersByRoleAsync(Guid tenantId, string role, CancellationToken cancellationToken = default);
         Task<bool> IsEmailUniqueAsync(Guid tenantId, string email, Guid? excludeUserId = null, CancellationToken cancellationToken = default);
+        Task<int> GetUsersCountAsync(Guid tenantId, CancellationToken cancellationToken = default);
     }
 
     public class CreateUserRequest

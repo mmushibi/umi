@@ -24,6 +24,7 @@ namespace UmiHealth.Domain.Entities
         public string? BillingInfo { get; set; }
         public string? ComplianceSettings { get; set; }
         public bool IsActive { get; set; } = true;
+        public bool IsSuspended { get; set; }
 
         // Navigation properties
         public virtual ICollection<Branch> Branches { get; set; } = new List<Branch>();

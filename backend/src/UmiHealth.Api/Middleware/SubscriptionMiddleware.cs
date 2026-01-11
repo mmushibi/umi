@@ -129,7 +129,7 @@ namespace UmiHealth.API.Middleware
                 "/public/account-suspended.html"
             };
 
-            return skipPaths.Any(skipPath => path.StartsWith(skipPath, StringComparison.OrdinalIgnoreCase));
+            return skipPaths.Any(skipPath => path.StartsWithSegments(skipPath));
         }
 
         private Guid? ExtractTenantId(HttpContext context)

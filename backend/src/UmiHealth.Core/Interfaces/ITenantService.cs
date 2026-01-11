@@ -16,6 +16,7 @@ public interface ITenantService
     Task<bool> DeleteBranchAsync(Guid branchId, CancellationToken cancellationToken = default);
     Task<IReadOnlyList<Branch>> GetTenantBranchesAsync(Guid tenantId, CancellationToken cancellationToken = default);
     Task<bool> IsSubscriptionActiveAsync(Guid tenantId, CancellationToken cancellationToken = default);
+    Task<int> GetBranchCountAsync(Guid tenantId, CancellationToken cancellationToken = default);
 }
 
 public record CreateTenantRequest(

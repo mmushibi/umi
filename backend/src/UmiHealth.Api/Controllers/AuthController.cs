@@ -1,6 +1,7 @@
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
+using Microsoft.EntityFrameworkCore;
 using System;
 using System.Threading;
 using System.Threading.Tasks;
@@ -21,6 +22,7 @@ namespace UmiHealth.Api.Controllers
         private readonly ITokenBlacklistService _tokenBlacklistService;
         private readonly ISimpleRegistrationService _simpleRegistrationService;
         private readonly IOnboardingService _onboardingService;
+        private readonly ISubscriptionService _subscriptionService;
         private readonly SharedDbContext _context;
         private readonly ILogger<AuthController> _logger;
 
@@ -30,6 +32,7 @@ namespace UmiHealth.Api.Controllers
             ITokenBlacklistService tokenBlacklistService,
             ISimpleRegistrationService simpleRegistrationService,
             IOnboardingService onboardingService,
+            ISubscriptionService subscriptionService,
             SharedDbContext context,
             ILogger<AuthController> logger)
         {
@@ -38,6 +41,7 @@ namespace UmiHealth.Api.Controllers
             _tokenBlacklistService = tokenBlacklistService;
             _simpleRegistrationService = simpleRegistrationService;
             _onboardingService = onboardingService;
+            _subscriptionService = subscriptionService;
             _context = context;
             _logger = logger;
         }
@@ -246,7 +250,17 @@ namespace UmiHealth.Api.Controllers
                     user.Branch.Phone = request.PhoneNumber ?? user.Branch.Phone;
                     user.Branch.Email = request.ContactEmail ?? user.Branch.Email;
                     user.Branch.LicenseNumber = request.LicenseNumber ?? user.Branch.LicenseNumber;
-                    user.Branch.OperatingHours = request.OperatingHours ?? user.Branch.OperatingHours;
+                    if (!string.IsNullOrEmpty(request.OperatingHours))
+                    {
+                        try
+                        {
+                            user.Branch.OperatingHours = System.Text.Json.JsonSerializer.Deserialize<Dictionary<string, object>>(request.OperatingHours) ?? user.Branch.OperatingHours;
+                        }
+                        catch
+                        {
+                            // Keep existing OperatingHours if deserialization fails
+                        }
+                    }
                     user.Branch.UpdatedAt = DateTime.UtcNow;
                 }
 

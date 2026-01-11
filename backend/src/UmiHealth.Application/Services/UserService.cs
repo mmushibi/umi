@@ -364,5 +364,20 @@ namespace UmiHealth.Application.Services
                 throw;
             }
         }
+
+        public async Task<int> GetUsersCountAsync(Guid tenantId, CancellationToken cancellationToken = default)
+        {
+            try
+            {
+                return await _context.Users
+                    .Where(u => u.TenantId == tenantId)
+                    .CountAsync(cancellationToken);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error getting users count for tenant {TenantId}", tenantId);
+                throw;
+            }
+        }
     }
 }

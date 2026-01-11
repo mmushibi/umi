@@ -14,7 +14,8 @@ public class Tenant : BaseEntity
     public string Address { get; set; } = string.Empty;
     public string City { get; set; } = string.Empty;
     public string Country { get; set; } = string.Empty;
-    public string PostalCode { get; set; } = string.Empty;
+    public string PostalCode { get; set; }
+    public bool IsSuspended { get; set; }
 
     public virtual ICollection<Branch> Branches { get; set; } = new List<Branch>();
     public virtual ICollection<User> Users { get; set; } = new List<User>();

@@ -275,5 +275,19 @@ namespace UmiHealth.Application.Services
                 return false;
             }
         }
+
+        public async Task<int> GetBranchCountAsync(Guid tenantId, CancellationToken cancellationToken = default)
+        {
+            try
+            {
+                var branches = await _branchRepository.GetByTenantAsync(tenantId, cancellationToken);
+                return branches.Count(b => b.IsActive);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error getting branch count for tenant {TenantId}", tenantId);
+                return 0;
+            }
+        }
     }
 }
