@@ -69,7 +69,7 @@ namespace UmiHealth.Application.Services
                     Province = settings.GetValueOrDefault("province", "").ToString(),
                     City = settings.GetValueOrDefault("city", "").ToString(),
                     PostalCode = settings.GetValueOrDefault("postalCode", "").ToString(),
-                    OperatingHours = new Dictionary<string, object>(),
+                    OperatingHours = "{}",
                     ContactEmail = mainBranch?.Email,
                     PhoneNumber = mainBranch?.Phone,
                     EmergencyContact = settings.GetValueOrDefault("emergencyContact", "").ToString(),
@@ -144,7 +144,21 @@ namespace UmiHealth.Application.Services
                 if (mainBranch != null)
                 {
                     mainBranch.LicenseNumber = request.LicenseNumber;
-                    mainBranch.OperatingHours = request.OperatingHours ?? new Dictionary<string, object>();
+                    if (!string.IsNullOrEmpty(request.OperatingHours))
+                    {
+                        try
+                        {
+                            mainBranch.OperatingHours = System.Text.Json.JsonSerializer.Deserialize<Dictionary<string, object>>(request.OperatingHours) ?? new Dictionary<string, object>();
+                        }
+                        catch
+                        {
+                            mainBranch.OperatingHours = new Dictionary<string, object>();
+                        }
+                    }
+                    else
+                    {
+                        mainBranch.OperatingHours = new Dictionary<string, object>();
+                    }
                     mainBranch.Email = request.ContactEmail;
                     mainBranch.Phone = request.PhoneNumber;
                     mainBranch.UpdatedAt = DateTime.UtcNow;
@@ -214,7 +228,7 @@ namespace UmiHealth.Application.Services
                         Province = settings.GetValueOrDefault("province", "").ToString(),
                         City = settings.GetValueOrDefault("city", "").ToString(),
                         PostalCode = settings.GetValueOrDefault("postalCode", "").ToString(),
-                        OperatingHours = mainBranch?.OperatingHours,
+                        OperatingHours = mainBranch?.OperatingHours != null ? System.Text.Json.JsonSerializer.Serialize(mainBranch.OperatingHours) : "{}",
                         ContactEmail = mainBranch?.Email,
                         PhoneNumber = mainBranch?.Phone,
                         EmergencyContact = settings.GetValueOrDefault("emergencyContact", "").ToString(),

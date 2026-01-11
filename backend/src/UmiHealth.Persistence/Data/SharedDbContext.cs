@@ -1,5 +1,6 @@
 using Microsoft.EntityFrameworkCore;
 using UmiHealth.Domain.Entities;
+using UmiHealth.Core.Entities;
 
 namespace UmiHealth.Persistence.Data
 {
@@ -10,61 +11,61 @@ namespace UmiHealth.Persistence.Data
         }
 
         // Shared schema tables
-        public DbSet<Tenant> Tenants { get; set; }
-        public DbSet<Branch> Branches { get; set; }
-        public DbSet<User> Users { get; set; }
-        public DbSet<Subscription> Subscriptions { get; set; }
-        public DbSet<SubscriptionTransaction> SubscriptionTransactions { get; set; }
-        public DbSet<SubscriptionPlan> SubscriptionPlans { get; set; }
-        public DbSet<AdditionalUserRequest> AdditionalUserRequests { get; set; }
-        public DbSet<AdditionalUserCharge> AdditionalUserCharges { get; set; }
-        public DbSet<Notification> Notifications { get; set; }
-        public DbSet<NotificationSettings> NotificationSettings { get; set; }
-        public DbSet<PaymentTransaction> PaymentTransactions { get; set; }
-        public DbSet<RefundRequestEntity> RefundRequests { get; set; }
+        public DbSet<Domain.Entities.Tenant> Tenants { get; set; }
+        public DbSet<Domain.Entities.Branch> Branches { get; set; }
+        public DbSet<Core.Entities.User> Users { get; set; }
+        public DbSet<Domain.Entities.Subscription> Subscriptions { get; set; }
+        public DbSet<Domain.Entities.SubscriptionTransaction> SubscriptionTransactions { get; set; }
+        public DbSet<Domain.Entities.SubscriptionPlan> SubscriptionPlans { get; set; }
+        public DbSet<Domain.Entities.AdditionalUserRequest> AdditionalUserRequests { get; set; }
+        public DbSet<Domain.Entities.AdditionalUserCharge> AdditionalUserCharges { get; set; }
+        public DbSet<Domain.Entities.Notification> Notifications { get; set; }
+        public DbSet<Domain.Entities.NotificationSettings> NotificationSettings { get; set; }
+        public DbSet<Domain.Entities.PaymentTransaction> PaymentTransactions { get; set; }
+        public DbSet<Domain.Entities.RefundRequestEntity> RefundRequests { get; set; }
         
         // Multi-tenancy entities
-        public DbSet<StockTransfer> StockTransfers { get; set; }
-        public DbSet<StockTransferItem> StockTransferItems { get; set; }
-        public DbSet<Inventory> Inventories { get; set; }
-        public DbSet<Product> Products { get; set; }
-        public DbSet<Patient> Patients { get; set; }
-        public DbSet<Prescription> Prescriptions { get; set; }
-        public DbSet<Sale> Sales { get; set; }
-        public DbSet<Payment> Payments { get; set; }
-        public DbSet<AuditLog> AuditLogs { get; set; }
-        public DbSet<BranchPermission> BranchPermissions { get; set; }
-        public DbSet<ProcurementRequest> ProcurementRequests { get; set; }
-        public DbSet<ProcurementItem> ProcurementItems { get; set; }
-        public DbSet<ProcurementDistribution> ProcurementDistributions { get; set; }
-        public DbSet<BranchReport> BranchReports { get; set; }
+        public DbSet<Domain.Entities.StockTransfer> StockTransfers { get; set; }
+        public DbSet<Domain.Entities.StockTransferItem> StockTransferItems { get; set; }
+        public DbSet<Core.Entities.Inventory> Inventories { get; set; }
+        public DbSet<Core.Entities.Product> Products { get; set; }
+        public DbSet<Domain.Entities.Patient> Patients { get; set; }
+        public DbSet<Domain.Entities.Prescription> Prescriptions { get; set; }
+        public DbSet<Domain.Entities.Sale> Sales { get; set; }
+        public DbSet<Core.Entities.Payment> Payments { get; set; }
+        public DbSet<Domain.Entities.AuditLog> AuditLogs { get; set; }
+        public DbSet<Domain.Entities.BranchPermission> BranchPermissions { get; set; }
+        public DbSet<Domain.Entities.ProcurementRequest> ProcurementRequests { get; set; }
+        public DbSet<Domain.Entities.ProcurementItem> ProcurementItems { get; set; }
+        public DbSet<Domain.Entities.ProcurementDistribution> ProcurementDistributions { get; set; }
+        public DbSet<Domain.Entities.BranchReport> BranchReports { get; set; }
 
         // Queue Management entities
-        public DbSet<QueuePatient> QueuePatients { get; set; }
-        public DbSet<QueueHistory> QueueHistory { get; set; }
-        public DbSet<QueueSettings> QueueSettings { get; set; }
-        public DbSet<QueueNotification> QueueNotifications { get; set; }
-        public DbSet<QueueAnalytics> QueueAnalytics { get; set; }
-        public DbSet<HourlyQueueData> HourlyQueueData { get; set; }
-        public DbSet<ProviderPerformance> ProviderPerformance { get; set; }
+        public DbSet<Domain.Entities.QueuePatient> QueuePatients { get; set; }
+        public DbSet<Domain.Entities.QueueHistory> QueueHistory { get; set; }
+        public DbSet<Domain.Entities.QueueSettings> QueueSettings { get; set; }
+        public DbSet<Domain.Entities.QueueNotification> QueueNotifications { get; set; }
+        public DbSet<Domain.Entities.QueueAnalytics> QueueAnalytics { get; set; }
+        public DbSet<Domain.Entities.HourlyQueueData> HourlyQueueData { get; set; }
+        public DbSet<Domain.Entities.ProviderPerformance> ProviderPerformance { get; set; }
 
         // Super Admin schema tables
-        public DbSet<SuperAdminLog> SuperAdminLogs { get; set; }
-        public DbSet<SuperAdminReport> SuperAdminReports { get; set; }
-        public DbSet<SystemAnalytics> SystemAnalytics { get; set; }
-        public DbSet<SecurityEvent> SecurityEvents { get; set; }
-        public DbSet<SystemSetting> SystemSettings { get; set; }
-        public DbSet<SuperAdminUser> SuperAdminUsers { get; set; }
-        public DbSet<SystemNotification> SystemNotifications { get; set; }
-        public DbSet<BackupRecord> BackupRecords { get; set; }
-        public DbSet<ApiKey> ApiKeys { get; set; }
+        public DbSet<Domain.Entities.SuperAdminLog> SuperAdminLogs { get; set; }
+        public DbSet<Domain.Entities.SuperAdminReport> SuperAdminReports { get; set; }
+        public DbSet<Domain.Entities.SystemAnalytics> SystemAnalytics { get; set; }
+        public DbSet<Domain.Entities.SecurityEvent> SecurityEvents { get; set; }
+        public DbSet<Domain.Entities.SystemSetting> SystemSettings { get; set; }
+        public DbSet<Domain.Entities.SuperAdminUser> SuperAdminUsers { get; set; }
+        public DbSet<Domain.Entities.SystemNotification> SystemNotifications { get; set; }
+        public DbSet<Domain.Entities.BackupRecord> BackupRecords { get; set; }
+        public DbSet<Domain.Entities.ApiKey> ApiKeys { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             base.OnModelCreating(modelBuilder);
 
             // Configure Tenant entity
-            modelBuilder.Entity<Tenant>(entity =>
+            modelBuilder.Entity<Domain.Entities.Tenant>(entity =>
             {
                 entity.ToTable("tenants", "shared");
                 entity.HasKey(e => e.Id);
@@ -112,7 +113,7 @@ namespace UmiHealth.Persistence.Data
             });
 
             // Configure Branch entity
-            modelBuilder.Entity<Branch>(entity =>
+            modelBuilder.Entity<Domain.Entities.Branch>(entity =>
             {
                 entity.ToTable("branches", "shared");
                 entity.HasKey(e => e.Id);
@@ -160,7 +161,7 @@ namespace UmiHealth.Persistence.Data
             });
 
             // Configure User entity
-            modelBuilder.Entity<User>(entity =>
+            modelBuilder.Entity<Core.Entities.User>(entity =>
             {
                 entity.ToTable("users", "shared");
                 entity.HasKey(e => e.Id);
@@ -184,12 +185,6 @@ namespace UmiHealth.Persistence.Data
                 entity.Property(e => e.Role)
                     .IsRequired()
                     .HasMaxLength(50);
-
-                entity.Property(e => e.BranchAccess)
-                    .HasColumnType("uuid[]");
-
-                entity.Property(e => e.Permissions)
-                    .HasColumnType("jsonb");
 
                 entity.HasOne(e => e.Tenant)
                     .WithMany(t => t.Users)

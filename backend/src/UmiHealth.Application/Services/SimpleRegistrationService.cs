@@ -80,7 +80,7 @@ namespace UmiHealth.Application.Services
                 };
 
                 // Create main branch
-                var branch = new Branch
+                var branch = new UmiHealth.Domain.Entities.Branch
                 {
                     Id = Guid.NewGuid(),
                     Name = request.PharmacyName,
@@ -95,7 +95,7 @@ namespace UmiHealth.Application.Services
                 var passwordHash = _passwordService.HashPassword(request.Password);
 
                 // Create admin user
-                var user = new User
+                var user = new UmiHealth.Core.Entities.User
                 {
                     Id = Guid.NewGuid(),
                     TenantId = tenant.Id,
@@ -139,7 +139,17 @@ namespace UmiHealth.Application.Services
                     await _context.SaveChangesAsync(cancellationToken);
 
                     // Generate tokens
-                    var accessToken = _jwtService.GenerateToken(user, tenant);
+                    var claims = new[]
+                    {
+                        new System.Security.Claims.Claim(System.Security.Claims.ClaimTypes.NameIdentifier, user.Id.ToString()),
+                        new System.Security.Claims.Claim(System.Security.Claims.ClaimTypes.Email, user.Email),
+                        new System.Security.Claims.Claim(System.Security.Claims.ClaimTypes.Name, user.UserName),
+                        new System.Security.Claims.Claim(System.Security.Claims.ClaimTypes.Role, user.Role),
+                        new System.Security.Claims.Claim("TenantId", user.TenantId.ToString()),
+                        new System.Security.Claims.Claim("BranchId", user.BranchId?.ToString() ?? "")
+                    };
+                    var claimsPrincipal = new System.Security.Claims.ClaimsPrincipal(new System.Security.Claims.ClaimsIdentity(claims, "Jwt"));
+                    var accessToken = _jwtService.GenerateToken(claimsPrincipal);
                     var refreshToken = GenerateRefreshToken();
 
                     await transaction.CommitAsync(cancellationToken);
