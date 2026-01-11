@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
+using UmiHealth.Shared.DTOs;
 
 namespace UmiHealth.Core.Interfaces
 {
@@ -15,31 +16,6 @@ namespace UmiHealth.Core.Interfaces
         Task<bool> UpdateUserStatusAsync(Guid userId, Guid tenantId, string status, CancellationToken cancellationToken = default);
         Task<IEnumerable<UserDto>> GetUsersByRoleAsync(Guid tenantId, string role, CancellationToken cancellationToken = default);
         Task<bool> IsEmailUniqueAsync(Guid tenantId, string email, Guid? excludeUserId = null, CancellationToken cancellationToken = default);
-    }
-
-    // DTOs to avoid circular dependency
-    public class PagedResult<T>
-    {
-        public IEnumerable<T> Data { get; set; } = new List<T>();
-        public int TotalCount { get; set; }
-        public int Page { get; set; }
-        public int PageSize { get; set; }
-        public int TotalPages { get; set; }
-        public bool HasNextPage { get; set; }
-        public bool HasPreviousPage { get; set; }
-    }
-
-    public class UserDto
-    {
-        public Guid Id { get; set; }
-        public string Name { get; set; } = string.Empty;
-        public string Email { get; set; } = string.Empty;
-        public string Role { get; set; } = string.Empty;
-        public string Status { get; set; } = string.Empty;
-        public string Phone { get; set; } = string.Empty;
-        public string Tenant { get; set; } = string.Empty;
-        public string LastActive { get; set; } = string.Empty;
-        public DateTime? LastLogin { get; set; }
     }
 
     public class CreateUserRequest
