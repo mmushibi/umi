@@ -80,5 +80,6 @@ namespace UmiHealth.Domain.Entities
         public virtual Tenant Tenant { get; set; } = null!;
         public virtual Branch? Branch { get; set; }
         public virtual ICollection<User> Users { get; set; } = new List<User>();
+        public virtual ICollection<UserRole> UserRoles { get; set; } = new List<UserRole>();
     }
 }

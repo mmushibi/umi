@@ -25,6 +25,7 @@
           "System.IdentityModel.Tokens.Jwt": "7.1.2",
           "UmiHealth.Core": "1.0.0",
           "UmiHealth.Domain": "1.0.0",
+          "UmiHealth.Identity": "1.0.0",
           "UmiHealth.Infrastructure": "1.0.0",
           "UmiHealth.Persistence": "1.0.0",
           "UmiHealth.Shared": "1.0.0"
@@ -1529,6 +1530,9 @@
         }
       },
       "UmiHealth.Core/1.0.0": {
+        "dependencies": {
+          "UmiHealth.Shared": "1.0.0"
+        },
         "runtime": {
           "UmiHealth.Core.dll": {
             "assemblyVersion": "1.0.0.0",

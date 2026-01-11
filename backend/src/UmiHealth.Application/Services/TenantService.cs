@@ -13,13 +13,13 @@ namespace UmiHealth.Application.Services
 {
     public class TenantService : ITenantService
     {
-        private readonly ITenantRepository<Tenant> _tenantRepository;
-        private readonly ITenantRepository<Branch> _branchRepository;
+        private readonly IRepository<UmiHealth.Core.Entities.Tenant> _tenantRepository;
+        private readonly ITenantRepository<UmiHealth.Core.Entities.Branch> _branchRepository;
         private readonly ILogger<TenantService> _logger;
 
         public TenantService(
-            ITenantRepository<Tenant> tenantRepository,
-            ITenantRepository<Branch> branchRepository,
+            IRepository<UmiHealth.Core.Entities.Tenant> tenantRepository,
+            ITenantRepository<UmiHealth.Core.Entities.Branch> branchRepository,
             ILogger<TenantService> logger)
         {
             _tenantRepository = tenantRepository;
@@ -27,7 +27,7 @@ namespace UmiHealth.Application.Services
             _logger = logger;
         }
 
-        public async Task<Tenant?> GetTenantByIdAsync(Guid tenantId, CancellationToken cancellationToken = default)
+        public async Task<UmiHealth.Core.Entities.Tenant?> GetTenantByIdAsync(Guid tenantId, CancellationToken cancellationToken = default)
         {
             try
             {
@@ -40,7 +40,7 @@ namespace UmiHealth.Application.Services
             }
         }
 
-        public async Task<Tenant?> GetTenantBySubdomainAsync(string subdomain, CancellationToken cancellationToken = default)
+        public async Task<UmiHealth.Core.Entities.Tenant?> GetTenantBySubdomainAsync(string subdomain, CancellationToken cancellationToken = default)
         {
             try
             {
@@ -54,7 +54,7 @@ namespace UmiHealth.Application.Services
             }
         }
 
-        public async Task<IReadOnlyList<Tenant>> GetAllTenantsAsync(CancellationToken cancellationToken = default)
+        public async Task<IReadOnlyList<UmiHealth.Core.Entities.Tenant>> GetAllTenantsAsync(CancellationToken cancellationToken = default)
         {
             try
             {
@@ -68,16 +68,16 @@ namespace UmiHealth.Application.Services
             }
         }
 
-        public async Task<IEnumerable<Tenant>> GetAllAsync()
+        public async Task<IEnumerable<UmiHealth.Core.Entities.Tenant>> GetAllAsync()
         {
             return await GetAllTenantsAsync();
         }
 
-        public async Task<Tenant> CreateTenantAsync(CreateTenantRequest request, CancellationToken cancellationToken = default)
+        public async Task<UmiHealth.Core.Entities.Tenant> CreateTenantAsync(CreateTenantRequest request, CancellationToken cancellationToken = default)
         {
             try
             {
-                var tenant = new Tenant
+                var tenant = new UmiHealth.Core.Entities.Tenant
                 {
                     Id = Guid.NewGuid(),
                     Name = request.Name,
@@ -96,7 +96,6 @@ namespace UmiHealth.Application.Services
                 };
 
                 var createdTenant = await _tenantRepository.AddAsync(tenant, cancellationToken);
-                await _tenantRepository.SaveChangesAsync(cancellationToken);
 
                 _logger.LogInformation("Created tenant {TenantName} with ID {TenantId}", tenant.Name, tenant.Id);
                 return createdTenant;
@@ -108,7 +107,7 @@ namespace UmiHealth.Application.Services
             }
         }
 
-        public async Task<Tenant> UpdateTenantAsync(Guid tenantId, UpdateTenantRequest request, CancellationToken cancellationToken = default)
+        public async Task<UmiHealth.Core.Entities.Tenant> UpdateTenantAsync(Guid tenantId, UpdateTenantRequest request, CancellationToken cancellationToken = default)
         {
             try
             {
@@ -126,7 +125,7 @@ namespace UmiHealth.Application.Services
                 tenant.PostalCode = request.PostalCode;
                 tenant.UpdatedAt = DateTime.UtcNow;
 
-                await _tenantRepository.SaveChangesAsync(cancellationToken);
+                await _tenantRepository.UpdateAsync(tenant, cancellationToken);
 
                 _logger.LogInformation("Updated tenant {TenantId}", tenantId);
                 return tenant;
@@ -149,7 +148,7 @@ namespace UmiHealth.Application.Services
                 tenant.IsActive = false;
                 tenant.UpdatedAt = DateTime.UtcNow;
 
-                await _tenantRepository.SaveChangesAsync(cancellationToken);
+                await _tenantRepository.UpdateAsync(tenant, cancellationToken);
 
                 _logger.LogInformation("Deleted tenant {TenantId}", tenantId);
                 return true;
@@ -161,7 +160,7 @@ namespace UmiHealth.Application.Services
             }
         }
 
-        public async Task<Branch> CreateBranchAsync(Guid tenantId, CreateBranchRequest request, CancellationToken cancellationToken = default)
+        public async Task<UmiHealth.Core.Entities.Branch> CreateBranchAsync(Guid tenantId, CreateBranchRequest request, CancellationToken cancellationToken = default)
         {
             try
             {
@@ -169,7 +168,7 @@ namespace UmiHealth.Application.Services
                 if (tenant == null)
                     throw new KeyNotFoundException($"Tenant {tenantId} not found");
 
-                var branch = new Branch
+                var branch = new UmiHealth.Core.Entities.Branch
                 {
                     Id = Guid.NewGuid(),
                     TenantId = tenantId,
@@ -178,19 +177,14 @@ namespace UmiHealth.Application.Services
                     Address = request.Address,
                     City = request.City,
                     Country = request.Country,
-                    PostalCode = request.PostalCode,
                     Phone = request.Phone,
                     Email = request.Email,
-                    IsMainBranch = request.IsMainBranch,
-                    ManagerName = request.ManagerName,
-                    ManagerPhone = request.ManagerPhone,
                     IsActive = true,
                     CreatedAt = DateTime.UtcNow,
                     UpdatedAt = DateTime.UtcNow
                 };
 
                 var createdBranch = await _branchRepository.AddAsync(branch, cancellationToken);
-                await _branchRepository.SaveChangesAsync(cancellationToken);
 
                 _logger.LogInformation("Created branch {BranchName} for tenant {TenantId}", branch.Name, tenantId);
                 return createdBranch;
@@ -202,7 +196,7 @@ namespace UmiHealth.Application.Services
             }
         }
 
-        public async Task<Branch> UpdateBranchAsync(Guid branchId, UpdateBranchRequest request, CancellationToken cancellationToken = default)
+        public async Task<UmiHealth.Core.Entities.Branch> UpdateBranchAsync(Guid branchId, UpdateBranchRequest request, CancellationToken cancellationToken = default)
         {
             try
             {
@@ -215,14 +209,11 @@ namespace UmiHealth.Application.Services
                 branch.Address = request.Address;
                 branch.City = request.City;
                 branch.Country = request.Country;
-                branch.PostalCode = request.PostalCode;
                 branch.Phone = request.Phone;
                 branch.Email = request.Email;
-                branch.ManagerName = request.ManagerName;
-                branch.ManagerPhone = request.ManagerPhone;
                 branch.UpdatedAt = DateTime.UtcNow;
 
-                await _branchRepository.SaveChangesAsync(cancellationToken);
+                await _branchRepository.UpdateAsync(branch, cancellationToken);
 
                 _logger.LogInformation("Updated branch {BranchId}", branchId);
                 return branch;
@@ -245,7 +236,7 @@ namespace UmiHealth.Application.Services
                 branch.IsActive = false;
                 branch.UpdatedAt = DateTime.UtcNow;
 
-                await _branchRepository.SaveChangesAsync(cancellationToken);
+                await _branchRepository.UpdateAsync(branch, cancellationToken);
 
                 _logger.LogInformation("Deleted branch {BranchId}", branchId);
                 return true;
@@ -257,7 +248,7 @@ namespace UmiHealth.Application.Services
             }
         }
 
-        public async Task<IReadOnlyList<Branch>> GetTenantBranchesAsync(Guid tenantId, CancellationToken cancellationToken = default)
+        public async Task<IReadOnlyList<UmiHealth.Core.Entities.Branch>> GetTenantBranchesAsync(Guid tenantId, CancellationToken cancellationToken = default)
         {
             try
             {
@@ -267,7 +258,7 @@ namespace UmiHealth.Application.Services
             catch (Exception ex)
             {
                 _logger.LogError(ex, "Error getting branches for tenant {TenantId}", tenantId);
-                return new List<Branch>().AsReadOnly();
+                return new List<UmiHealth.Core.Entities.Branch>().AsReadOnly();
             }
         }
 

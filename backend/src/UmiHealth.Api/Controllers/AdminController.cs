@@ -6,7 +6,7 @@ using UmiHealth.Core.Interfaces;
 using UmiHealth.Infrastructure.Data;
 using System;
 using System.Threading.Tasks;
-
+using System.Linq;
 namespace UmiHealth.Api.Controllers
 {
     [ApiController]
@@ -18,6 +18,7 @@ namespace UmiHealth.Api.Controllers
         private readonly IUserService _userService;
         private readonly IReportsService _reportsService;
         private readonly ITenantService _tenantService;
+        private readonly IUserInvitationService _userInvitationService;
 
         public AdminController(
             ILogger<AdminController> logger,
@@ -32,8 +33,7 @@ namespace UmiHealth.Api.Controllers
             _tenantService = tenantService;
             _userInvitationService = userInvitationService;
         }
-
-        [HttpGet("dashboard")]
+[HttpGet("dashboard")]
         public async Task<IActionResult> GetDashboardStats([FromQuery] Guid tenantId, [FromQuery] Guid? branchId = null)
         {
             try
@@ -292,7 +292,6 @@ namespace UmiHealth.Api.Controllers
             }
             return Guid.Empty;
         }
-    }
 
     // Request DTOs
     public class AcceptInvitationRequest

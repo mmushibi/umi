@@ -1,9 +1,12 @@
 using Microsoft.Extensions.Logging;
+using Microsoft.EntityFrameworkCore;
 using System;
 using System.Threading.Tasks;
 using UmiHealth.Core.Interfaces;
-using UmiHealth.Infrastructure.Data;
+using UmiHealth.Persistence;
 using UmiHealth.Application.DTOs;
+using UmiHealth.Shared.DTOs;
+using UmiHealth.Domain.Entities;
 
 namespace UmiHealth.Application.Services
 {
@@ -189,25 +192,7 @@ namespace UmiHealth.Application.Services
     {
         public bool Success { get; set; }
         public string Message { get; set; } = string.Empty;
-        public UserDto? User { get; set; }
+        public UmiHealth.Core.Interfaces.IUserDto? User { get; set; }
         public string RedirectUrl { get; set; } = string.Empty;
-    }
-
-    // Entity for user invitations
-    public class UserInvitation
-    {
-        public Guid Id { get; set; }
-        public Guid TenantId { get; set; }
-        public Guid InvitedByUserId { get; set; }
-        public string Email { get; set; } = string.Empty;
-        public string FirstName { get; set; } = string.Empty;
-        public string LastName { get; set; } = string.Empty;
-        public string Role { get; set; } = string.Empty;
-        public Guid? BranchId { get; set; }
-        public string Token { get; set; } = string.Empty;
-        public DateTime ExpiresAt { get; set; }
-        public DateTime CreatedAt { get; set; }
-        public DateTime? AcceptedAt { get; set; }
-        public bool IsAccepted { get; set; }
     }
 }

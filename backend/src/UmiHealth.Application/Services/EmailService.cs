@@ -51,5 +51,26 @@ namespace UmiHealth.Application.Services
                 return false;
             }
         }
+
+        public async Task<bool> SendBulkEmailAsync(string[] recipients, string subject, string body, CancellationToken cancellationToken = default)
+        {
+            try
+            {
+                foreach (var to in recipients)
+                {
+                    var sent = await SendEmailAsync(to, subject, body, cancellationToken);
+                    if (!sent)
+                    {
+                        _logger.LogWarning("Bulk email send failed for recipient {To}", to);
+                    }
+                }
+                return true;
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Failed to send bulk email to {Count} recipients", recipients.Length);
+                return false;
+            }
+        }
     }
 }

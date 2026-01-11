@@ -1,6 +1,6 @@
 using Microsoft.AspNetCore.Mvc;
 using System.ComponentModel.DataAnnotations;
-
+using UmiHealth.Shared.DTOs;
 namespace UmiHealth.Api.Configuration
 {
     /// <summary>

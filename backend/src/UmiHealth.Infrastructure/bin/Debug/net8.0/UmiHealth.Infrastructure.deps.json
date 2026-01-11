@@ -909,6 +909,9 @@
         }
       },
       "UmiHealth.Core/1.0.0": {
+        "dependencies": {
+          "UmiHealth.Shared": "1.0.0"
+        },
         "runtime": {
           "UmiHealth.Core.dll": {
             "assemblyVersion": "1.0.0.0",

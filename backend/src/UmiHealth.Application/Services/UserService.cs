@@ -8,7 +8,10 @@ using Microsoft.Extensions.Logging;
 using UmiHealth.Core.Entities;
 using UmiHealth.Core.Interfaces;
 using UmiHealth.Application.DTOs;
+using UmiHealth.Shared.DTOs;
 using UmiHealth.Infrastructure.Data;
+using UmiHealth.Identity.Services;
+using UmiHealth.Application.Adapters;
 
 namespace UmiHealth.Application.Services
 {
@@ -25,7 +28,7 @@ namespace UmiHealth.Application.Services
             _passwordService = passwordService;
         }
 
-        public async Task<PagedResult<UserDto>> GetUsersAsync(Guid tenantId, int page = 1, int limit = 50, string? search = null, string? role = null, CancellationToken cancellationToken = default)
+        public async Task<IPagedResult<IUserDto>> GetUsersAsync(Guid tenantId, int page = 1, int limit = 50, string? search = null, string? role = null, CancellationToken cancellationToken = default)
         {
             try
             {
@@ -54,21 +57,24 @@ namespace UmiHealth.Application.Services
                     .ThenBy(u => u.LastName)
                     .Skip((page - 1) * limit)
                     .Take(limit)
-                    .Select(u => new UserDto
+                    .Select(u => new UserDtoAdapter
                     {
                         Id = u.Id,
-                        Name = $"{u.FirstName} {u.LastName}",
+                        FirstName = u.FirstName,
+                        LastName = u.LastName,
                         Email = u.Email,
-                        Role = u.UserRoles.FirstOrDefault()?.Role?.Name ?? "No Role",
-                        Status = u.IsActive ? "active" : "inactive",
-                        Phone = u.PhoneNumber ?? "",
-                        Tenant = u.Tenant?.Name ?? "",
-                        LastActive = u.LastLoginAt.ToString("yyyy-MM-dd HH:mm"),
-                        LastLogin = u.LastLoginAt
+                        PhoneNumber = u.PhoneNumber ?? "",
+                        TenantId = u.TenantId,
+                        TenantName = (u.Tenant != null ? u.Tenant.Name : ""),
+                        BranchId = u.BranchId,
+                        BranchName = (u.Branch != null ? u.Branch.Name : null),
+                        Roles = u.UserRoles.Select(ur => ur.Role.Name).ToList(),
+                        LastLoginAt = u.LastLoginAt ?? DateTime.UtcNow,
+                        IsActive = u.IsActive
                     })
                     .ToListAsync(cancellationToken);
 
-                return new PagedResult<UserDto>
+                return new PagedResultAdapter<IUserDto>
                 {
                     Data = users,
                     TotalCount = totalCount,
@@ -86,7 +92,7 @@ namespace UmiHealth.Application.Services
             }
         }
 
-        public async Task<UserDto?> GetUserByIdAsync(Guid userId, Guid tenantId, CancellationToken cancellationToken = default)
+        public async Task<IUserDto?> GetUserByIdAsync(Guid userId, Guid tenantId, CancellationToken cancellationToken = default)
         {
             try
             {
@@ -100,17 +106,20 @@ namespace UmiHealth.Application.Services
                 if (user == null)
                     return null;
 
-                return new UserDto
+                return new UserDtoAdapter
                 {
                     Id = user.Id,
-                    Name = $"{user.FirstName} {user.LastName}",
+                    FirstName = user.FirstName,
+                    LastName = user.LastName,
                     Email = user.Email,
-                    Role = user.UserRoles.FirstOrDefault()?.Role?.Name ?? "No Role",
-                    Status = user.IsActive ? "active" : "inactive",
-                    Phone = user.PhoneNumber ?? "",
-                    Tenant = user.Tenant?.Name ?? "",
-                    LastActive = user.LastLoginAt.ToString("yyyy-MM-dd HH:mm"),
-                    LastLogin = user.LastLoginAt
+                    PhoneNumber = user.PhoneNumber ?? "",
+                    TenantId = user.TenantId,
+                    TenantName = user.Tenant?.Name ?? "",
+                    BranchId = user.BranchId,
+                    BranchName = user.Branch?.Name,
+                    Roles = user.UserRoles.Select(ur => ur.Role.Name).ToList(),
+                    LastLoginAt = user.LastLoginAt ?? DateTime.UtcNow,
+                    IsActive = user.IsActive
                 };
             }
             catch (Exception ex)
@@ -120,7 +129,7 @@ namespace UmiHealth.Application.Services
             }
         }
 
-        public async Task<UserDto> CreateUserAsync(Guid tenantId, CreateUserRequest request, CancellationToken cancellationToken = default)
+        public async Task<IUserDto> CreateUserAsync(Guid tenantId, CreateUserRequest request, CancellationToken cancellationToken = default)
         {
             try
             {
@@ -163,8 +172,7 @@ namespace UmiHealth.Application.Services
                 {
                     user.UserRoles.Add(new UserRole
                     {
-                        RoleId = role.Id,
-                        AssignedAt = DateTime.UtcNow
+                        RoleId = role.Id
                     });
                 }
 
@@ -186,7 +194,7 @@ namespace UmiHealth.Application.Services
             }
         }
 
-        public async Task<UserDto> UpdateUserAsync(Guid userId, Guid tenantId, UpdateUserRequest request, CancellationToken cancellationToken = default)
+        public async Task<IUserDto> UpdateUserAsync(Guid userId, Guid tenantId, UpdateUserRequest request, CancellationToken cancellationToken = default)
         {
             try
             {
@@ -229,8 +237,7 @@ namespace UmiHealth.Application.Services
                     // Add new role
                     user.UserRoles.Add(new UserRole
                     {
-                        RoleId = newRole.Id,
-                        AssignedAt = DateTime.UtcNow
+                        RoleId = newRole.Id
                     });
                 }
 
@@ -302,7 +309,7 @@ namespace UmiHealth.Application.Services
             }
         }
 
-        public async Task<IEnumerable<UserDto>> GetUsersByRoleAsync(Guid tenantId, string role, CancellationToken cancellationToken = default)
+        public async Task<IEnumerable<IUserDto>> GetUsersByRoleAsync(Guid tenantId, string role, CancellationToken cancellationToken = default)
         {
             try
             {
@@ -310,17 +317,20 @@ namespace UmiHealth.Application.Services
                     .Where(u => u.TenantId == tenantId && u.UserRoles.Any(ur => ur.Role.Name == role))
                     .Include(u => u.UserRoles)
                     .ThenInclude(ur => ur.Role)
-                    .Select(u => new UserDto
+                    .Select(u => new UserDtoAdapter
                     {
                         Id = u.Id,
-                        Name = $"{u.FirstName} {u.LastName}",
+                        FirstName = u.FirstName,
+                        LastName = u.LastName,
                         Email = u.Email,
-                        Role = role,
-                        Status = u.IsActive ? "active" : "inactive",
-                        Phone = u.PhoneNumber ?? "",
-                        Tenant = u.Tenant?.Name ?? "",
-                        LastActive = u.LastLoginAt.ToString("yyyy-MM-dd HH:mm"),
-                        LastLogin = u.LastLoginAt
+                        PhoneNumber = u.PhoneNumber ?? "",
+                        TenantId = u.TenantId,
+                        TenantName = (u.Tenant != null ? u.Tenant.Name : ""),
+                        BranchId = u.BranchId,
+                        BranchName = (u.Branch != null ? u.Branch.Name : null),
+                        Roles = u.UserRoles.Select(ur => ur.Role.Name).ToList(),
+                        LastLoginAt = u.LastLoginAt ?? DateTime.UtcNow,
+                        IsActive = u.IsActive
                     })
                     .ToListAsync(cancellationToken);
 

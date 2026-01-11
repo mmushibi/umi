@@ -10,3 +10,7 @@ C:\Users\sepio\Desktop\Umi_Health\Umi_Health\Umi_Health\backend\src\UmiHealth.Co
 C:\Users\sepio\Desktop\Umi_Health\Umi_Health\Umi_Health\backend\src\UmiHealth.Core\obj\Release\net8.0\refint\UmiHealth.Core.dll
 C:\Users\sepio\Desktop\Umi_Health\Umi_Health\Umi_Health\backend\src\UmiHealth.Core\obj\Release\net8.0\UmiHealth.Core.pdb
 C:\Users\sepio\Desktop\Umi_Health\Umi_Health\Umi_Health\backend\src\UmiHealth.Core\obj\Release\net8.0\ref\UmiHealth.Core.dll
+C:\Users\sepio\Desktop\Umi_Health\Umi_Health\Umi_Health\backend\src\UmiHealth.Core\bin\Release\net8.0\UmiHealth.Shared.dll
+C:\Users\sepio\Desktop\Umi_Health\Umi_Health\Umi_Health\backend\src\UmiHealth.Core\bin\Release\net8.0\UmiHealth.Shared.pdb
+C:\Users\sepio\Desktop\Umi_Health\Umi_Health\Umi_Health\backend\src\UmiHealth.Core\obj\Release\net8.0\UmiHealth.Core.csproj.AssemblyReference.cache
+C:\Users\sepio\Desktop\Umi_Health\Umi_Health\Umi_Health\backend\src\UmiHealth.Core\obj\Release\net8.0\UmiHealt.EAEEB3C6.Up2Date

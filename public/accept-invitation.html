@@ -32,10 +32,11 @@
 
         .invitation-container {
             background: rgba(255, 255, 255, 0.1);
+            -webkit-backdrop-filter: blur(10px);
             backdrop-filter: blur(10px);
             border-radius: 20px;
-            padding: 3rem;
-            max-width: 500px;
+            padding: 2rem;
+            max-width: 400px;
             width: 100%;
             box-shadow: 0 20px 40px rgba(0, 0, 0, 0.3);
         }
@@ -53,7 +54,7 @@
 
         .form-container {
             background: white;
-            padding: 2rem;
+            padding: 1.5rem;
             border-radius: 15px;
             box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
         }
@@ -129,7 +130,7 @@
             display: inline-block;
             width: 20px;
             height: 20px;
-            border: 3px solid #f3f3f;
+            border: 3px solid #f3f3f3;
             border-radius: 50%;
             border-top-color: var(--color-primary-blue);
             animation: spin 1s linear infinite;
@@ -140,6 +141,72 @@
             0% { transform: rotate(0deg); }
             100% { transform: rotate(360deg); }
         }
+
+        .text-center {
+            text-align: center;
+        }
+
+        .mb-4 {
+            margin-bottom: 1rem;
+        }
+
+        .mb-6 {
+            margin-bottom: 1.5rem;
+        }
+
+        .mb-8 {
+            margin-bottom: 2rem;
+        }
+
+        .text-success {
+            color: #28a745;
+        }
+
+        .mx-auto {
+            margin-left: auto;
+            margin-right: auto;
+        }
+
+        .modal-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.5);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 1000;
+        }
+
+        .modal-content {
+            background: white;
+            padding: 2rem;
+            border-radius: 15px;
+            max-width: 400px;
+            width: 90%;
+            text-align: center;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.2);
+        }
+
+        .modal-overlay h2 {
+            color: #28a745;
+            margin-bottom: 1rem;
+        }
+
+        .modal-overlay p {
+            color: #666;
+            margin-bottom: 1.5rem;
+        }
+
+        .form-container h2 {
+            color: #333;
+        }
+
+        .form-container p {
+            color: #666;
+        }
     </style>
 </head>
 <body>
@@ -149,8 +216,8 @@
         </div>
 
         <div class="form-container" x-show="!loading && !accepted">
-            <h2 style="text-align: center; margin-bottom: 1.5rem; color: #333;">Accept Your Invitation</h2>
-            <p style="text-align: center; margin-bottom: 2rem; color: #666;">
+            <h2 class="text-center mb-4">Accept Your Invitation</h2>
+            <p class="text-center mb-6">
                 You've been invited to join Umi Health! Please set your password to activate your account.
             </p>
 
@@ -194,12 +261,13 @@
             </form>
         </div>
 
-        <div class="form-container" x-show="accepted">
-            <div style="text-align: center;">
-                <h2 style="color: #28a745; margin-bottom: 1rem;">✅ Invitation Accepted!</h2>
-                <p style="color: #666; margin-bottom: 1.5rem;">Your account has been created successfully.</p>
-                <p style="color: #666; margin-bottom: 2rem;">Redirecting you to your dashboard...</p>
-                <div class="loading-spinner" style="margin: 0 auto;"></div>
+        <!-- Success Modal -->
+        <div class="modal-overlay" x-show="accepted" x-transition>
+            <div class="modal-content">
+                <h2>✅ Invitation Accepted!</h2>
+                <p>Your account has been created successfully.</p>
+                <p>Redirecting you to your dashboard...</p>
+                <div class="loading-spinner mx-auto"></div>
             </div>
         </div>
     </div>

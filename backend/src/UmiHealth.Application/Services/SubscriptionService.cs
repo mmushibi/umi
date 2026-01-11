@@ -5,9 +5,9 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
-using UmiHealth.Core.Entities;
+using UmiHealth.Domain.Entities;
 using UmiHealth.Core.Interfaces;
-using UmiHealth.Infrastructure.Data;
+using UmiHealth.Persistence;
 
 namespace UmiHealth.Application.Services
 {
@@ -73,7 +73,7 @@ namespace UmiHealth.Application.Services
                 {
                     Id = Guid.NewGuid(),
                     TenantId = tenantId,
-                    Plan = plan,
+                    PlanType = plan,
                     StartDate = DateTime.UtcNow,
                     EndDate = DateTime.UtcNow.AddDays(30), // Default 30 days
                     IsActive = true,

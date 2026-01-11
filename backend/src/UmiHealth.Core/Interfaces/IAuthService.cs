@@ -1,3 +1,5 @@
+using UmiHealth.Shared.DTOs;
+
 namespace UmiHealth.Core.Interfaces;
 
 public interface IAuthService
@@ -69,19 +71,6 @@ public record AuthResponse(
     string? Token,
     string? RefreshToken,
     DateTime? ExpiresAt
-);
-
-public record UserDto(
-    Guid Id,
-    string Email,
-    string FirstName,
-    string LastName,
-    string PhoneNumber,
-    Guid TenantId,
-    string TenantName,
-    Guid? BranchId,
-    string? BranchName,
-    IList<string> Roles
 );
 
 public record UserProfile(

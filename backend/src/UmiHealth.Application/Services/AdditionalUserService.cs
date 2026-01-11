@@ -7,7 +7,8 @@ using System.Threading;
 using System.Threading.Tasks;
 using UmiHealth.Core.Entities;
 using UmiHealth.Core.Interfaces;
-using UmiHealth.Infrastructure.Data;
+using UmiHealth.Persistence;
+using UmiHealth.Domain.Entities;
 
 namespace UmiHealth.Application.Services
 {
@@ -15,8 +16,8 @@ namespace UmiHealth.Application.Services
     {
         Task<bool> AssignAdditionalUserAsync(Guid mainUserId, Guid additionalUserId, CancellationToken cancellationToken = default);
         Task<bool> RemoveAdditionalUserAsync(Guid mainUserId, Guid additionalUserId, CancellationToken cancellationToken = default);
-        Task<IEnumerable<User>> GetAdditionalUsersAsync(Guid mainUserId, CancellationToken cancellationToken = default);
-        Task<User?> GetMainUserAsync(Guid additionalUserId, CancellationToken cancellationToken = default);
+        Task<IEnumerable<UmiHealth.Domain.Entities.User>> GetAdditionalUsersAsync(Guid mainUserId, CancellationToken cancellationToken = default);
+        Task<UmiHealth.Domain.Entities.User?> GetMainUserAsync(Guid additionalUserId, CancellationToken cancellationToken = default);
         Task<bool> CanAccessUserDataAsync(Guid requestingUserId, Guid targetUserId, CancellationToken cancellationToken = default);
     }
 
@@ -118,7 +119,7 @@ namespace UmiHealth.Application.Services
             }
         }
 
-        public async Task<IEnumerable<User>> GetAdditionalUsersAsync(Guid mainUserId, CancellationToken cancellationToken = default)
+        public async Task<IEnumerable<UmiHealth.Domain.Entities.User>> GetAdditionalUsersAsync(Guid mainUserId, CancellationToken cancellationToken = default)
         {
             try
             {
@@ -132,11 +133,11 @@ namespace UmiHealth.Application.Services
             catch (Exception ex)
             {
                 _logger.LogError(ex, "Error getting additional users for main user {MainUserId}", mainUserId);
-                return Enumerable.Empty<User>();
+                return Enumerable.Empty<UmiHealth.Domain.Entities.User>();
             }
         }
 
-        public async Task<User?> GetMainUserAsync(Guid additionalUserId, CancellationToken cancellationToken = default)
+        public async Task<UmiHealth.Domain.Entities.User?> GetMainUserAsync(Guid additionalUserId, CancellationToken cancellationToken = default)
         {
             try
             {

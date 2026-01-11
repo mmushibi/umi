@@ -1,12 +1,12 @@
-using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Logging;
 using System;
 using System.Security.Claims;
 using System.Threading.Tasks;
+using Microsoft.EntityFrameworkCore;
 using UmiHealth.Infrastructure.Data;
 
-namespace UmiHealth.API.Middleware
+namespace UmiHealth.Api.Middleware
 {
     public class BranchAccessMiddleware
     {
@@ -21,7 +21,6 @@ namespace UmiHealth.API.Middleware
 
         public async Task InvokeAsync(HttpContext context, UmiHealthDbContext dbContext)
         {
-            // Skip middleware for anonymous endpoints
             var endpoint = context.GetEndpoint();
             if (endpoint?.Metadata?.Contains(MetadataKeys.AllowAnonymous) == true)
             {
@@ -29,7 +28,6 @@ namespace UmiHealth.API.Middleware
                 return;
             }
 
-            // Get user claims
             var userIdClaim = context.User.FindFirst(ClaimTypes.NameIdentifier);
             var tenantIdClaim = context.User.FindFirst("TenantId") ?? context.User.FindFirst("tenant_id");
             var branchIdClaim = context.User.FindFirst("BranchId") ?? context.User.FindFirst("branch_id");
@@ -40,27 +38,25 @@ namespace UmiHealth.API.Middleware
                 var tenantId = Guid.Parse(tenantIdClaim.Value);
                 var branchId = branchIdClaim?.Value != null ? Guid.Parse(branchIdClaim.Value) : (Guid?)null;
 
-                // Validate user has access to requested branch
                 if (branchId.HasValue)
                 {
                     var hasBranchAccess = await dbContext.Users
-                        .AnyAsync(u => u.Id == userId && 
-                                       u.TenantId == tenantId && 
+                        .AnyAsync(u => u.Id == userId &&
+                                       u.TenantId == tenantId &&
                                        (u.BranchId == branchId.Value || u.BranchId == null));
 
                     if (!hasBranchAccess)
                     {
                         _logger.LogWarning("User {UserId} attempted to access branch {BranchId} without permission", userId, branchId);
                         context.Response.StatusCode = 403;
-                        await context.Response.WriteAsJsonAsync(new { 
-                            success = false, 
-                            message = "Access denied: You don't have permission to access this branch" 
+                        await context.Response.WriteAsJsonAsync(new {
+                            success = false,
+                            message = "Access denied: You don't have permission to access this branch"
                         });
                         return;
                     }
                 }
 
-                // Add branch context to response headers for frontend
                 context.Response.Headers.Add("X-User-Branch-Id", branchId?.ToString() ?? "");
                 context.Response.Headers.Add("X-User-Tenant-Id", tenantId.ToString());
             }

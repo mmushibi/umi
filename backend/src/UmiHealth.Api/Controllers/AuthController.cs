@@ -4,10 +4,10 @@ using Microsoft.Extensions.Logging;
 using System;
 using System.Threading;
 using System.Threading.Tasks;
+using System.Linq;
 using UmiHealth.Identity;
 using UmiHealth.Identity.Services;
 using UmiHealth.Shared.DTOs;
-
 namespace UmiHealth.Api.Controllers
 {
     [ApiController]
@@ -57,7 +57,7 @@ namespace UmiHealth.Api.Controllers
                 _logger.LogInformation("User logged in successfully: {Email}", request.Email);
 
                 // Determine redirect URL based on user role
-                var redirectUrl = GetRoleBasedRedirectUrl(result.Roles?.FirstOrDefault());
+                var redirectUrl = GetRoleBasedRedirectUrl(result.Roles?.FirstOrDefault()?.Name);
 
                 return Ok(new
                 {
