@@ -69,7 +69,7 @@ namespace UmiHealth.Application.Services
                     Province = settings.GetValueOrDefault("province", "").ToString(),
                     City = settings.GetValueOrDefault("city", "").ToString(),
                     PostalCode = settings.GetValueOrDefault("postalCode", "").ToString(),
-                    OperatingHours = mainBranch?.OperatingHours,
+                    OperatingHours = new Dictionary<string, object>(),
                     ContactEmail = mainBranch?.Email,
                     PhoneNumber = mainBranch?.Phone,
                     EmergencyContact = settings.GetValueOrDefault("emergencyContact", "").ToString(),
@@ -144,7 +144,7 @@ namespace UmiHealth.Application.Services
                 if (mainBranch != null)
                 {
                     mainBranch.LicenseNumber = request.LicenseNumber;
-                    mainBranch.OperatingHours = request.OperatingHours;
+                    mainBranch.OperatingHours = request.OperatingHours ?? new Dictionary<string, object>();
                     mainBranch.Email = request.ContactEmail;
                     mainBranch.Phone = request.PhoneNumber;
                     mainBranch.UpdatedAt = DateTime.UtcNow;

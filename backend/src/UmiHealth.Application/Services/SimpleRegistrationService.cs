@@ -83,15 +83,12 @@ namespace UmiHealth.Application.Services
                 var branch = new Branch
                 {
                     Id = Guid.NewGuid(),
-                    TenantId = tenant.Id,
                     Name = request.PharmacyName,
                     Code = GenerateBranchCode(request.PharmacyName),
                     Phone = request.PhoneNumber,
                     Email = email,
                     IsMainBranch = true,
-                    Status = "active",
-                    CreatedAt = DateTime.UtcNow,
-                    UpdatedAt = DateTime.UtcNow
+                    IsActive = true
                 };
 
                 // Hash password
@@ -103,15 +100,15 @@ namespace UmiHealth.Application.Services
                     Id = Guid.NewGuid(),
                     TenantId = tenant.Id,
                     BranchId = branch.Id,
+                    UserName = email,
                     Email = email,
+                    PhoneNumber = request.PhoneNumber,
                     PasswordHash = passwordHash,
                     FirstName = request.PharmacyName,
                     LastName = "Admin",
                     Role = "admin",
                     IsActive = true,
-                    EmailVerified = false,
-                    CreatedAt = DateTime.UtcNow,
-                    UpdatedAt = DateTime.UtcNow
+                    EmailConfirmed = false
                 };
 
                 // Create trial subscription
