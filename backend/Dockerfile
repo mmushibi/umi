@@ -20,14 +20,14 @@ RUN echo '<?xml version="1.0" encoding="utf-8"?>' > /tmp/NuGet.Config && \
     echo '</configuration>' >> /tmp/NuGet.Config
 
 # Copy project files first for better caching
-COPY ["src/UmiHealth.API/UmiHealth.API.csproj", "src/UmiHealth.API/"]
-COPY ["src/UmiHealth.Core/UmiHealth.Core.csproj", "src/UmiHealth.Core/"]
-COPY ["src/UmiHealth.Infrastructure/UmiHealth.Infrastructure.csproj", "src/UmiHealth.Infrastructure/"]
-COPY ["src/UmiHealth.Application/UmiHealth.Application.csproj", "src/UmiHealth.Application/"]
-COPY ["src/UmiHealth.Domain/UmiHealth.Domain.csproj", "src/UmiHealth.Domain/"]
-COPY ["src/UmiHealth.Shared/UmiHealth.Shared.csproj", "src/UmiHealth.Shared/"]
-COPY ["src/UmiHealth.Identity/UmiHealth.Identity.csproj", "src/UmiHealth.Identity/"]
-COPY ["src/UmiHealth.Persistence/UmiHealth.Persistence.csproj", "src/UmiHealth.Persistence/"]
+COPY ["backend/src/UmiHealth.API/UmiHealth.API.csproj", "src/UmiHealth.API/"]
+COPY ["backend/src/UmiHealth.Core/UmiHealth.Core.csproj", "src/UmiHealth.Core/"]
+COPY ["backend/src/UmiHealth.Infrastructure/UmiHealth.Infrastructure.csproj", "src/UmiHealth.Infrastructure/"]
+COPY ["backend/src/UmiHealth.Application/UmiHealth.Application.csproj", "src/UmiHealth.Application/"]
+COPY ["backend/src/UmiHealth.Domain/UmiHealth.Domain.csproj", "src/UmiHealth.Domain/"]
+COPY ["backend/src/UmiHealth.Shared/UmiHealth.Shared.csproj", "src/UmiHealth.Shared/"]
+COPY ["backend/src/UmiHealth.Identity/UmiHealth.Identity.csproj", "src/UmiHealth.Identity/"]
+COPY ["backend/src/UmiHealth.Persistence/UmiHealth.Persistence.csproj", "src/UmiHealth.Persistence/"]
 
 # Restore with retry logic and custom config
 RUN dotnet restore src/UmiHealth.API/UmiHealth.API.csproj \
@@ -39,7 +39,7 @@ RUN dotnet restore src/UmiHealth.API/UmiHealth.API.csproj \
     --verbosity minimal
 
 # Copy the rest of the source code
-COPY src/ ./src/
+COPY backend/src/ ./src/
 
 # Build the application
 WORKDIR /src/src/UmiHealth.API
