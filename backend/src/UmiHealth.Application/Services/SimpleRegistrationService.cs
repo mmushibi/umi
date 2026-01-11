@@ -88,19 +88,20 @@ namespace UmiHealth.Application.Services
                     Phone = request.PhoneNumber,
                     Email = email,
                     IsMainBranch = true,
-                    IsActive = true
+                    IsActive = true,
+                    TenantId = tenant.Id
                 };
 
                 // Hash password
                 var passwordHash = _passwordService.HashPassword(request.Password);
 
                 // Create admin user
-                var user = new UmiHealth.Core.Entities.User
+                var user = new UmiHealth.Domain.Entities.User
                 {
                     Id = Guid.NewGuid(),
                     TenantId = tenant.Id,
                     BranchId = branch.Id,
-                    UserName = email,
+                    Username = email,
                     Email = email,
                     PhoneNumber = request.PhoneNumber,
                     PasswordHash = passwordHash,
@@ -108,7 +109,7 @@ namespace UmiHealth.Application.Services
                     LastName = "Admin",
                     Role = "admin",
                     IsActive = true,
-                    EmailConfirmed = false
+                    IsEmailVerified = false
                 };
 
                 // Create trial subscription
@@ -143,7 +144,7 @@ namespace UmiHealth.Application.Services
                     {
                         new System.Security.Claims.Claim(System.Security.Claims.ClaimTypes.NameIdentifier, user.Id.ToString()),
                         new System.Security.Claims.Claim(System.Security.Claims.ClaimTypes.Email, user.Email),
-                        new System.Security.Claims.Claim(System.Security.Claims.ClaimTypes.Name, user.UserName),
+                        new System.Security.Claims.Claim(System.Security.Claims.ClaimTypes.Name, user.Username),
                         new System.Security.Claims.Claim(System.Security.Claims.ClaimTypes.Role, user.Role),
                         new System.Security.Claims.Claim("TenantId", user.TenantId.ToString()),
                         new System.Security.Claims.Claim("BranchId", user.BranchId?.ToString() ?? "")
