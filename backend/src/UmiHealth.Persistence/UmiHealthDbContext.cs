@@ -1,7 +1,8 @@
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Storage;
 using Npgsql;
-using UmiHealth.Core.Entities;
+using CoreEntities = UmiHealth.Core.Entities;
+using DomainEntities = UmiHealth.Domain.Entities;
 
 namespace UmiHealth.Persistence
 {
@@ -30,47 +31,47 @@ namespace UmiHealth.Persistence
         }
 
         // Tenants
-        public DbSet<Tenant> Tenants { get; set; }
-        public DbSet<Branch> Branches { get; set; }
+        public DbSet<DomainEntities.Tenant> Tenants { get; set; }
+        public DbSet<DomainEntities.Branch> Branches { get; set; }
 
         // Users and Authentication
-        public DbSet<User> Users { get; set; }
-        public DbSet<Role> Roles { get; set; }
-        public DbSet<UserRole> UserRoles { get; set; }
-        public DbSet<RoleClaim> RoleClaims { get; set; }
-        public DbSet<UserClaim> UserClaims { get; set; }
-        public DbSet<RefreshToken> RefreshTokens { get; set; }
-        public DbSet<BlacklistedToken> BlacklistedTokens { get; set; }
-        public DbSet<UserInvitation> UserInvitations { get; set; }
+        public DbSet<CoreEntities.User> Users { get; set; }
+        public DbSet<CoreEntities.Role> Roles { get; set; }
+        public DbSet<CoreEntities.UserRole> UserRoles { get; set; }
+        public DbSet<CoreEntities.RoleClaim> RoleClaims { get; set; }
+        public DbSet<CoreEntities.UserClaim> UserClaims { get; set; }
+        public DbSet<CoreEntities.RefreshToken> RefreshTokens { get; set; }
+        public DbSet<CoreEntities.BlacklistedToken> BlacklistedTokens { get; set; }
+        public DbSet<DomainEntities.UserInvitation> UserInvitations { get; set; }
 
         // Subscriptions and Billing
-        public DbSet<Subscription> Subscriptions { get; set; }
-        public DbSet<SubscriptionTransaction> SubscriptionTransactions { get; set; }
+        public DbSet<DomainEntities.Subscription> Subscriptions { get; set; }
+        public DbSet<DomainEntities.SubscriptionTransaction> SubscriptionTransactions { get; set; }
 
         // Notifications
-        public DbSet<Notification> Notifications { get; set; }
+        public DbSet<DomainEntities.Notification> Notifications { get; set; }
 
         // Additional Users
-        public DbSet<UserAdditionalUser> UserAdditionalUsers { get; set; }
+        public DbSet<DomainEntities.UserAdditionalUser> UserAdditionalUsers { get; set; }
 
         // Products and Inventory
-        public DbSet<Product> Products { get; set; }
-        public DbSet<Supplier> Suppliers { get; set; }
-        public DbSet<Inventory> Inventories { get; set; }
-        public DbSet<StockTransaction> StockTransactions { get; set; }
-        public DbSet<PurchaseOrder> PurchaseOrders { get; set; }
-        public DbSet<PurchaseOrderItem> PurchaseOrderItems { get; set; }
+        public DbSet<DomainEntities.Product> Products { get; set; }
+        public DbSet<DomainEntities.Supplier> Suppliers { get; set; }
+        public DbSet<DomainEntities.Inventory> Inventories { get; set; }
+        public DbSet<DomainEntities.StockTransaction> StockTransactions { get; set; }
+        public DbSet<DomainEntities.PurchaseOrder> PurchaseOrders { get; set; }
+        public DbSet<DomainEntities.PurchaseOrderItem> PurchaseOrderItems { get; set; }
 
         // Patients and Prescriptions
-        public DbSet<Patient> Patients { get; set; }
-        public DbSet<Prescription> Prescriptions { get; set; }
-        public DbSet<PrescriptionItem> PrescriptionItems { get; set; }
+        public DbSet<DomainEntities.Patient> Patients { get; set; }
+        public DbSet<DomainEntities.Prescription> Prescriptions { get; set; }
+        public DbSet<DomainEntities.PrescriptionItem> PrescriptionItems { get; set; }
 
         // Sales and Payments
-        public DbSet<Sale> Sales { get; set; }
-        public DbSet<SaleItem> SaleItems { get; set; }
-        public DbSet<Payment> Payments { get; set; }
-        public DbSet<SaleReturn> SaleReturns { get; set; }
+        public DbSet<DomainEntities.Sale> Sales { get; set; }
+        public DbSet<DomainEntities.SaleItem> SaleItems { get; set; }
+        public DbSet<CoreEntities.Payment> Payments { get; set; }
+        public DbSet<DomainEntities.SaleReturn> SaleReturns { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
@@ -84,7 +85,7 @@ namespace UmiHealth.Persistence
             ConfigureTenant(modelBuilder);
             ConfigureBranch(modelBuilder);
             ConfigureUser(modelBuilder);
-            ConfigureInvitation(modelBuilder);
+            ConfigureUserInvitation(modelBuilder);
             ConfigureSubscription(modelBuilder);
             ConfigureNotification(modelBuilder);
             ConfigureAdditionalUser(modelBuilder);
@@ -103,7 +104,7 @@ namespace UmiHealth.Persistence
 
         private void ConfigureTenant(ModelBuilder modelBuilder)
         {
-            modelBuilder.Entity<Tenant>(entity =>
+            modelBuilder.Entity<CoreEntities.Tenant>(entity =>
             {
                 entity.HasKey(e => e.Id);
                 entity.Property(e => e.Id).HasDefaultValueSql("uuid_generate_v4()");
@@ -118,7 +119,7 @@ namespace UmiHealth.Persistence
 
         private void ConfigureBranch(ModelBuilder modelBuilder)
         {
-            modelBuilder.Entity<Branch>(entity =>
+            modelBuilder.Entity<DomainEntities.Branch>(entity =>
             {
                 entity.HasKey(e => e.Id);
                 entity.Property(e => e.Id).HasDefaultValueSql("uuid_generate_v4()");
@@ -135,7 +136,7 @@ namespace UmiHealth.Persistence
 
         private void ConfigureUser(ModelBuilder modelBuilder)
         {
-            modelBuilder.Entity<User>(entity =>
+            modelBuilder.Entity<CoreEntities.User>(entity =>
             {
                 entity.HasKey(e => e.Id);
                 entity.Property(e => e.Id).HasDefaultValueSql("uuid_generate_v4()");
@@ -144,8 +145,6 @@ namespace UmiHealth.Persistence
                 entity.Property(e => e.Email).IsRequired().HasMaxLength(255);
                 entity.Property(e => e.Phone).IsRequired().HasMaxLength(50);
                 entity.Property(e => e.UserName).IsRequired().HasMaxLength(100);
-                entity.HasOne(e => e.Tenant).WithMany(t => t.Users).HasForeignKey(e => e.TenantId);
-                entity.HasOne(e => e.Branch).WithMany(b => b.Users).HasForeignKey(e => e.BranchId);
                 entity.HasIndex(e => e.TenantId);
                 entity.HasIndex(e => e.Email);
                 entity.HasIndex(e => e.UserName);
@@ -154,18 +153,17 @@ namespace UmiHealth.Persistence
                 entity.HasIndex(e => new { e.TenantId, e.UserName }).IsUnique();
             });
 
-            modelBuilder.Entity<Role>(entity =>
+            modelBuilder.Entity<CoreEntities.Role>(entity =>
             {
                 entity.HasKey(e => e.Id);
                 entity.Property(e => e.Id).HasDefaultValueSql("uuid_generate_v4()");
                 entity.Property(e => e.Name).IsRequired().HasMaxLength(100);
                 entity.Property(e => e.NormalizedName).IsRequired().HasMaxLength(100);
-                entity.HasOne(e => e.Tenant).WithMany().HasForeignKey(e => e.TenantId);
                 entity.HasIndex(e => e.TenantId);
                 entity.HasIndex(e => new { e.TenantId, e.NormalizedName }).IsUnique();
             });
 
-            modelBuilder.Entity<UserRole>(entity =>
+            modelBuilder.Entity<CoreEntities.UserRole>(entity =>
             {
                 entity.HasKey(e => e.Id);
                 entity.Property(e => e.Id).HasDefaultValueSql("uuid_generate_v4()");
@@ -176,7 +174,7 @@ namespace UmiHealth.Persistence
                 entity.HasIndex(e => new { e.UserId, e.RoleId }).IsUnique();
             });
 
-            modelBuilder.Entity<UserInvitation>(entity =>
+            modelBuilder.Entity<DomainEntities.UserInvitation>(entity =>
             {
                 entity.HasKey(e => e.Id);
                 entity.Property(e => e.Id).HasDefaultValueSql("uuid_generate_v4()");
@@ -193,18 +191,17 @@ namespace UmiHealth.Persistence
                 entity.HasIndex(e => e.IsAccepted);
             });
 
-            modelBuilder.Entity<Subscription>(entity =>
+            modelBuilder.Entity<DomainEntities.Subscription>(entity =>
             {
                 entity.HasKey(e => e.Id);
                 entity.Property(e => e.Id).HasDefaultValueSql("uuid_generate_v4()");
-                entity.Property(e => e.Plan).IsRequired().HasMaxLength(50);
-                entity.HasOne(e => e.Tenant).WithMany(t => t.Subscriptions).HasForeignKey(e => e.TenantId);
+                entity.Property(e => e.PlanType).IsRequired().HasMaxLength(50);
                 entity.HasIndex(e => e.TenantId);
                 entity.HasIndex(e => e.EndDate);
                 entity.HasIndex(e => e.IsActive);
             });
 
-            modelBuilder.Entity<Notification>(entity =>
+            modelBuilder.Entity<DomainEntities.Notification>(entity =>
             {
                 entity.HasKey(e => e.Id);
                 entity.Property(e => e.Id).HasDefaultValueSql("uuid_generate_v4()");
@@ -217,7 +214,7 @@ namespace UmiHealth.Persistence
                 entity.HasIndex(e => e.CreatedAt);
             });
 
-            modelBuilder.Entity<UserAdditionalUser>(entity =>
+            modelBuilder.Entity<DomainEntities.UserAdditionalUser>(entity =>
             {
                 entity.HasKey(e => e.Id);
                 entity.Property(e => e.Id).HasDefaultValueSql("uuid_generate_v4()");
@@ -227,6 +224,11 @@ namespace UmiHealth.Persistence
                 entity.HasIndex(e => e.AdditionalUserId);
                 entity.HasIndex(e => new { e.MainUserId, e.AdditionalUserId }).IsUnique();
             });
+        }
+
+        private void ConfigureUserInvitation(ModelBuilder modelBuilder)
+        {
+            // Already configured above
         }
 
         private void ConfigureSubscription(ModelBuilder modelBuilder)
@@ -246,27 +248,25 @@ namespace UmiHealth.Persistence
 
         private void ConfigureProduct(ModelBuilder modelBuilder)
         {
-            modelBuilder.Entity<Product>(entity =>
+            modelBuilder.Entity<DomainEntities.Product>(entity =>
             {
                 entity.HasKey(e => e.Id);
                 entity.Property(e => e.Id).HasDefaultValueSql("uuid_generate_v4()");
                 entity.Property(e => e.Name).IsRequired().HasMaxLength(255);
                 entity.Property(e => e.Barcode).HasMaxLength(100);
                 entity.Property(e => e.UnitPrice).HasDefaultValue(0.00m);
-                entity.HasOne(e => e.Tenant).WithMany(t => t.Products).HasForeignKey(e => e.TenantId);
                 entity.HasIndex(e => e.TenantId);
                 entity.HasIndex(e => e.Barcode);
                 entity.HasIndex(e => e.IsActive);
             });
 
-            modelBuilder.Entity<Supplier>(entity =>
+            modelBuilder.Entity<DomainEntities.Supplier>(entity =>
             {
                 entity.HasKey(e => e.Id);
                 entity.Property(e => e.Id).HasDefaultValueSql("uuid_generate_v4()");
                 entity.Property(e => e.Name).IsRequired().HasMaxLength(255);
                 entity.Property(e => e.Phone).HasMaxLength(50);
                 entity.Property(e => e.Email).HasMaxLength(255);
-                entity.HasOne(e => e.Tenant).WithMany().HasForeignKey(e => e.TenantId);
                 entity.HasIndex(e => e.TenantId);
                 entity.HasIndex(e => e.IsActive);
             });
@@ -274,17 +274,15 @@ namespace UmiHealth.Persistence
 
         private void ConfigureInventory(ModelBuilder modelBuilder)
         {
-            modelBuilder.Entity<Inventory>(entity =>
+            modelBuilder.Entity<DomainEntities.Inventory>(entity =>
             {
                 entity.HasKey(e => e.Id);
                 entity.Property(e => e.Id).HasDefaultValueSql("uuid_generate_v4()");
                 entity.Property(e => e.QuantityOnHand).HasDefaultValue(0);
-                entity.Property(e => e.QuantityReserved).HasDefaultValue(0);
                 entity.Property(e => e.ReorderLevel).HasDefaultValue(0);
                 entity.Property(e => e.UnitCost).HasDefaultValue(0.00m);
                 entity.Property(e => e.UnitPrice).HasDefaultValue(0.00m);
-                entity.HasOne(e => e.Tenant).WithMany().HasForeignKey(e => e.TenantId);
-                entity.HasOne(e => e.Branch).WithMany(b => b.Inventories).HasForeignKey(e => e.BranchId);
+                entity.HasOne(e => e.Branch).WithMany().HasForeignKey(e => e.BranchId);
                 entity.HasOne(e => e.Product).WithMany(p => p.Inventories).HasForeignKey(e => e.ProductId);
                 entity.HasIndex(e => e.TenantId);
                 entity.HasIndex(e => e.BranchId);
@@ -293,14 +291,13 @@ namespace UmiHealth.Persistence
                 entity.HasIndex(e => new { e.TenantId, e.BranchId, e.ProductId, e.BatchNumber }).IsUnique();
             });
 
-            modelBuilder.Entity<StockTransaction>(entity =>
+            modelBuilder.Entity<DomainEntities.StockTransaction>(entity =>
             {
                 entity.HasKey(e => e.Id);
                 entity.Property(e => e.Id).HasDefaultValueSql("uuid_generate_v4()");
                 entity.Property(e => e.Quantity);
                 entity.Property(e => e.UnitCost).HasDefaultValue(0.00m);
                 entity.Property(e => e.TotalCost).HasDefaultValue(0.00m);
-                entity.HasOne(e => e.Tenant).WithMany().HasForeignKey(e => e.TenantId);
                 entity.HasOne(e => e.Inventory).WithMany(i => i.StockTransactions).HasForeignKey(e => e.InventoryId);
                 entity.HasOne(e => e.FromBranch).WithMany().HasForeignKey(e => e.FromBranchId);
                 entity.HasOne(e => e.ToBranch).WithMany().HasForeignKey(e => e.ToBranchId);
@@ -312,7 +309,7 @@ namespace UmiHealth.Persistence
 
         private void ConfigurePatient(ModelBuilder modelBuilder)
         {
-            modelBuilder.Entity<Patient>(entity =>
+            modelBuilder.Entity<DomainEntities.Patient>(entity =>
             {
                 entity.HasKey(e => e.Id);
                 entity.Property(e => e.Id).HasDefaultValueSql("uuid_generate_v4()");
@@ -321,7 +318,6 @@ namespace UmiHealth.Persistence
                 entity.Property(e => e.Phone).IsRequired().HasMaxLength(50);
                 entity.Property(e => e.Email).HasMaxLength(255);
                 entity.Property(e => e.NationalId).HasMaxLength(50);
-                entity.HasOne(e => e.Tenant).WithMany(t => t.Patients).HasForeignKey(e => e.TenantId);
                 entity.HasIndex(e => e.TenantId);
                 entity.HasIndex(e => e.Phone);
                 entity.HasIndex(e => e.IsActive);
@@ -330,14 +326,13 @@ namespace UmiHealth.Persistence
 
         private void ConfigurePrescription(ModelBuilder modelBuilder)
         {
-            modelBuilder.Entity<Prescription>(entity =>
+            modelBuilder.Entity<DomainEntities.Prescription>(entity =>
             {
                 entity.HasKey(e => e.Id);
                 entity.Property(e => e.Id).HasDefaultValueSql("uuid_generate_v4()");
                 entity.Property(e => e.PrescriptionNumber).IsRequired().HasMaxLength(100);
                 entity.Property(e => e.Diagnosis);
                 entity.Property(e => e.DoctorNotes);
-                entity.HasOne(e => e.Tenant).WithMany().HasForeignKey(e => e.TenantId);
                 entity.HasOne(e => e.Patient).WithMany(p => p.Prescriptions).HasForeignKey(e => e.PatientId);
                 entity.HasOne(e => e.Doctor).WithMany().HasForeignKey(e => e.DoctorId);
                 entity.HasOne(e => e.DispensedByUser).WithMany().HasForeignKey(e => e.DispensedBy);
@@ -348,7 +343,7 @@ namespace UmiHealth.Persistence
                 entity.HasIndex(e => new { e.TenantId, e.PrescriptionNumber }).IsUnique();
             });
 
-            modelBuilder.Entity<PrescriptionItem>(entity =>
+            modelBuilder.Entity<DomainEntities.PrescriptionItem>(entity =>
             {
                 entity.HasKey(e => e.Id);
                 entity.Property(e => e.Id).HasDefaultValueSql("uuid_generate_v4()");
@@ -358,7 +353,6 @@ namespace UmiHealth.Persistence
                 entity.Property(e => e.DurationUnit).HasDefaultValue("Days");
                 entity.Property(e => e.Quantity);
                 entity.Property(e => e.Instructions);
-                entity.HasOne(e => e.Tenant).WithMany().HasForeignKey(e => e.TenantId);
                 entity.HasOne(e => e.Prescription).WithMany(p => p.Items).HasForeignKey(e => e.PrescriptionId);
                 entity.HasOne(e => e.Product).WithMany(p => p.PrescriptionItems).HasForeignKey(e => e.ProductId);
                 entity.HasIndex(e => e.TenantId);
@@ -369,7 +363,7 @@ namespace UmiHealth.Persistence
 
         private void ConfigureSale(ModelBuilder modelBuilder)
         {
-            modelBuilder.Entity<Sale>(entity =>
+            modelBuilder.Entity<DomainEntities.Sale>(entity =>
             {
                 entity.HasKey(e => e.Id);
                 entity.Property(e => e.Id).HasDefaultValueSql("uuid_generate_v4()");
@@ -382,8 +376,7 @@ namespace UmiHealth.Persistence
                 entity.Property(e => e.ChangeAmount).HasDefaultValue(0.00m);
                 entity.Property(e => e.Notes);
                 entity.Property(e => e.PrescriptionNumber).HasMaxLength(100);
-                entity.HasOne(e => e.Tenant).WithMany(t => t.Sales).HasForeignKey(e => e.TenantId);
-                entity.HasOne(e => e.Branch).WithMany(b => b.Sales).HasForeignKey(e => e.BranchId);
+                entity.HasOne(e => e.Branch).WithMany().HasForeignKey(e => e.BranchId);
                 entity.HasOne(e => e.Patient).WithMany(p => p.Sales).HasForeignKey(e => e.PatientId);
                 entity.HasOne(e => e.Cashier).WithMany().HasForeignKey(e => e.CashierId);
                 entity.HasIndex(e => e.TenantId);
@@ -393,7 +386,7 @@ namespace UmiHealth.Persistence
                 entity.HasIndex(e => new { e.TenantId, e.SaleNumber }).IsUnique();
             });
 
-            modelBuilder.Entity<SaleItem>(entity =>
+            modelBuilder.Entity<DomainEntities.SaleItem>(entity =>
             {
                 entity.HasKey(e => e.Id);
                 entity.Property(e => e.Id).HasDefaultValueSql("uuid_generate_v4()");
@@ -405,7 +398,6 @@ namespace UmiHealth.Persistence
                 entity.Property(e => e.TaxAmount).HasDefaultValue(0.00m);
                 entity.Property(e => e.Total).HasDefaultValue(0.00m);
                 entity.Property(e => e.BatchNumber).HasMaxLength(100);
-                entity.HasOne(e => e.Tenant).WithMany().HasForeignKey(e => e.TenantId);
                 entity.HasOne(e => e.Sale).WithMany(s => s.Items).HasForeignKey(e => e.SaleId);
                 entity.HasOne(e => e.Product).WithMany(p => p.SaleItems).HasForeignKey(e => e.ProductId);
                 entity.HasIndex(e => e.TenantId);
@@ -413,7 +405,7 @@ namespace UmiHealth.Persistence
                 entity.HasIndex(e => e.ProductId);
             });
 
-            modelBuilder.Entity<Payment>(entity =>
+            modelBuilder.Entity<CoreEntities.Payment>(entity =>
             {
                 entity.HasKey(e => e.Id);
                 entity.Property(e => e.Id).HasDefaultValueSql("uuid_generate_v4()");
@@ -421,7 +413,6 @@ namespace UmiHealth.Persistence
                 entity.Property(e => e.TransactionReference).HasMaxLength(255);
                 entity.Property(e => e.CardLastFour).HasMaxLength(4);
                 entity.Property(e => e.MobileNumber).HasMaxLength(50);
-                entity.HasOne(e => e.Tenant).WithMany(t => t.Payments).HasForeignKey(e => e.TenantId);
                 entity.HasOne(e => e.Sale).WithMany(s => s.Payments).HasForeignKey(e => e.SaleId);
                 entity.HasIndex(e => e.TenantId);
                 entity.HasIndex(e => e.SaleId);
@@ -430,63 +421,48 @@ namespace UmiHealth.Persistence
 
         private void ApplySoftDeleteFilters(ModelBuilder modelBuilder)
         {
-            // Apply soft delete filters to all entities that inherit from BaseEntity
-            modelBuilder.Entity<Tenant>().HasQueryFilter(e => !e.IsDeleted);
-            modelBuilder.Entity<Branch>().HasQueryFilter(e => !e.IsDeleted);
-            modelBuilder.Entity<User>().HasQueryFilter(e => !e.IsDeleted);
-            modelBuilder.Entity<Role>().HasQueryFilter(e => !e.IsDeleted);
-            modelBuilder.Entity<UserRole>().HasQueryFilter(e => !e.IsDeleted);
-            modelBuilder.Entity<RoleClaim>().HasQueryFilter(e => !e.IsDeleted);
-            modelBuilder.Entity<UserClaim>().HasQueryFilter(e => !e.IsDeleted);
-            modelBuilder.Entity<RefreshToken>().HasQueryFilter(e => !e.IsDeleted);
-            modelBuilder.Entity<Product>().HasQueryFilter(e => !e.IsDeleted);
-            modelBuilder.Entity<Supplier>().HasQueryFilter(e => !e.IsDeleted);
-            modelBuilder.Entity<Inventory>().HasQueryFilter(e => !e.IsDeleted);
-            modelBuilder.Entity<StockTransaction>().HasQueryFilter(e => !e.IsDeleted);
-            modelBuilder.Entity<PurchaseOrder>().HasQueryFilter(e => !e.IsDeleted);
-            modelBuilder.Entity<PurchaseOrderItem>().HasQueryFilter(e => !e.IsDeleted);
-            modelBuilder.Entity<Patient>().HasQueryFilter(e => !e.IsDeleted);
-            modelBuilder.Entity<Prescription>().HasQueryFilter(e => !e.IsDeleted);
-            modelBuilder.Entity<PrescriptionItem>().HasQueryFilter(e => !e.IsDeleted);
-            modelBuilder.Entity<Sale>().HasQueryFilter(e => !e.IsDeleted);
-            modelBuilder.Entity<SaleItem>().HasQueryFilter(e => !e.IsDeleted);
-            modelBuilder.Entity<Payment>().HasQueryFilter(e => !e.IsDeleted);
-            modelBuilder.Entity<SaleReturn>().HasQueryFilter(e => !e.IsDeleted);
+            // Apply soft delete filters to all entities that inherit from CoreEntities.BaseEntity
+            modelBuilder.Entity<CoreEntities.Role>().HasQueryFilter(e => !e.IsDeleted);
+            modelBuilder.Entity<CoreEntities.UserRole>().HasQueryFilter(e => !e.IsDeleted);
+            modelBuilder.Entity<CoreEntities.RoleClaim>().HasQueryFilter(e => !e.IsDeleted);
+            modelBuilder.Entity<CoreEntities.UserClaim>().HasQueryFilter(e => !e.IsDeleted);
+            modelBuilder.Entity<CoreEntities.RefreshToken>().HasQueryFilter(e => !e.IsDeleted);
+            modelBuilder.Entity<CoreEntities.Payment>().HasQueryFilter(e => !e.IsDeleted);
         }
 
         private void ApplyTenantIsolationFilters(ModelBuilder modelBuilder)
         {
             if (_tenantId.HasValue)
             {
-                // Apply tenant isolation filters to all entities that inherit from TenantEntity
-                modelBuilder.Entity<Branch>().HasQueryFilter(e => e.TenantId == _tenantId.Value);
-                modelBuilder.Entity<User>().HasQueryFilter(e => e.TenantId == _tenantId.Value);
-                modelBuilder.Entity<Role>().HasQueryFilter(e => e.TenantId == _tenantId.Value);
-                modelBuilder.Entity<UserRole>().HasQueryFilter(e => e.TenantId == _tenantId.Value);
-                modelBuilder.Entity<RoleClaim>().HasQueryFilter(e => e.TenantId == _tenantId.Value);
-                modelBuilder.Entity<UserClaim>().HasQueryFilter(e => e.TenantId == _tenantId.Value);
-                modelBuilder.Entity<RefreshToken>().HasQueryFilter(e => e.TenantId == _tenantId.Value);
-                modelBuilder.Entity<Product>().HasQueryFilter(e => e.TenantId == _tenantId.Value);
-                modelBuilder.Entity<Supplier>().HasQueryFilter(e => e.TenantId == _tenantId.Value);
-                modelBuilder.Entity<Inventory>().HasQueryFilter(e => e.TenantId == _tenantId.Value);
-                modelBuilder.Entity<StockTransaction>().HasQueryFilter(e => e.TenantId == _tenantId.Value);
-                modelBuilder.Entity<PurchaseOrder>().HasQueryFilter(e => e.TenantId == _tenantId.Value);
-                modelBuilder.Entity<PurchaseOrderItem>().HasQueryFilter(e => e.TenantId == _tenantId.Value);
-                modelBuilder.Entity<Patient>().HasQueryFilter(e => e.TenantId == _tenantId.Value);
-                modelBuilder.Entity<Prescription>().HasQueryFilter(e => e.TenantId == _tenantId.Value);
-                modelBuilder.Entity<PrescriptionItem>().HasQueryFilter(e => e.TenantId == _tenantId.Value);
-                modelBuilder.Entity<Sale>().HasQueryFilter(e => e.TenantId == _tenantId.Value);
-                modelBuilder.Entity<SaleItem>().HasQueryFilter(e => e.TenantId == _tenantId.Value);
-                modelBuilder.Entity<Payment>().HasQueryFilter(e => e.TenantId == _tenantId.Value);
-                modelBuilder.Entity<SaleReturn>().HasQueryFilter(e => e.TenantId == _tenantId.Value);
+                // Apply tenant isolation filters to all entities that inherit from CoreEntities.TenantEntity
+                modelBuilder.Entity<DomainEntities.Branch>().HasQueryFilter(e => e.TenantId == _tenantId.Value);
+                modelBuilder.Entity<DomainEntities.User>().HasQueryFilter(e => e.TenantId == _tenantId.Value);
+                modelBuilder.Entity<CoreEntities.Role>().HasQueryFilter(e => e.TenantId == _tenantId.Value);
+                modelBuilder.Entity<CoreEntities.UserRole>().HasQueryFilter(e => e.TenantId == _tenantId.Value);
+                modelBuilder.Entity<CoreEntities.RoleClaim>().HasQueryFilter(e => e.TenantId == _tenantId.Value);
+                modelBuilder.Entity<CoreEntities.UserClaim>().HasQueryFilter(e => e.TenantId == _tenantId.Value);
+                modelBuilder.Entity<CoreEntities.RefreshToken>().HasQueryFilter(e => e.TenantId == _tenantId.Value);
+                modelBuilder.Entity<DomainEntities.Product>().HasQueryFilter(e => e.TenantId == _tenantId.Value);
+                modelBuilder.Entity<DomainEntities.Supplier>().HasQueryFilter(e => e.TenantId == _tenantId.Value);
+                modelBuilder.Entity<DomainEntities.Inventory>().HasQueryFilter(e => e.TenantId == _tenantId.Value);
+                modelBuilder.Entity<DomainEntities.StockTransaction>().HasQueryFilter(e => e.TenantId == _tenantId.Value);
+                modelBuilder.Entity<DomainEntities.PurchaseOrder>().HasQueryFilter(e => e.TenantId == _tenantId.Value);
+                modelBuilder.Entity<DomainEntities.PurchaseOrderItem>().HasQueryFilter(e => e.TenantId == _tenantId.Value);
+                modelBuilder.Entity<DomainEntities.Patient>().HasQueryFilter(e => e.TenantId == _tenantId.Value);
+                modelBuilder.Entity<DomainEntities.Prescription>().HasQueryFilter(e => e.TenantId == _tenantId.Value);
+                modelBuilder.Entity<DomainEntities.PrescriptionItem>().HasQueryFilter(e => e.TenantId == _tenantId.Value);
+                modelBuilder.Entity<DomainEntities.Sale>().HasQueryFilter(e => e.TenantId == _tenantId.Value);
+                modelBuilder.Entity<DomainEntities.SaleItem>().HasQueryFilter(e => e.TenantId == _tenantId.Value);
+                modelBuilder.Entity<CoreEntities.Payment>().HasQueryFilter(e => e.TenantId == _tenantId.Value);
+                modelBuilder.Entity<DomainEntities.SaleReturn>().HasQueryFilter(e => e.TenantId == _tenantId.Value);
             }
 
             // Apply branch-level filters for non-admin users
             if (_branchId.HasValue && !IsAdminUser())
             {
-                modelBuilder.Entity<User>().HasQueryFilter(e => e.BranchId == null || e.BranchId == _branchId.Value);
-                modelBuilder.Entity<Inventory>().HasQueryFilter(e => e.BranchId == _branchId.Value);
-                modelBuilder.Entity<Sale>().HasQueryFilter(e => e.BranchId == _branchId.Value);
+                modelBuilder.Entity<DomainEntities.User>().HasQueryFilter(e => e.BranchId == null || e.BranchId == _branchId.Value);
+                modelBuilder.Entity<DomainEntities.Inventory>().HasQueryFilter(e => e.BranchId == _branchId.Value);
+                modelBuilder.Entity<DomainEntities.Sale>().HasQueryFilter(e => e.BranchId == _branchId.Value);
             }
         }
 
@@ -511,7 +487,7 @@ namespace UmiHealth.Persistence
 
         private void UpdateTimestamps()
         {
-            var entries = ChangeTracker.Entries<BaseEntity>();
+            var entries = ChangeTracker.Entries<CoreEntities.BaseEntity>();
 
             foreach (var entry in entries)
             {
@@ -536,7 +512,7 @@ namespace UmiHealth.Persistence
         {
             if (_tenantId.HasValue)
             {
-                var entries = ChangeTracker.Entries<TenantEntity>()
+                var entries = ChangeTracker.Entries<CoreEntities.TenantEntity>()
                     .Where(e => e.State == EntityState.Added);
 
                 foreach (var entry in entries)

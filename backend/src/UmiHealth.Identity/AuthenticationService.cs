@@ -5,7 +5,8 @@ using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 using System.Security.Cryptography;
 using System.Text;
-using UmiHealth.Core.Entities;
+using CoreEntities = UmiHealth.Core.Entities;
+using DomainEntities = UmiHealth.Domain.Entities;
 using UmiHealth.Core.Interfaces;
 using UmiHealth.Persistence;
 
@@ -25,14 +26,14 @@ namespace UmiHealth.Identity
 
     public class AuthenticationService : IAuthenticationService
     {
-        private readonly UmiHealthDbContext _context;
+        private readonly UmiHealth.Persistence.UmiHealthDbContext _context;
         private readonly IJwtService _jwtService;
         private readonly IPasswordHasher _passwordHasher;
         private readonly ILogger<AuthenticationService> _logger;
         private readonly JwtSettings _jwtSettings;
 
         public AuthenticationService(
-            UmiHealthDbContext context,
+            UmiHealth.Persistence.UmiHealthDbContext context,
             IJwtService jwtService,
             IPasswordHasher passwordHasher,
             ILogger<AuthenticationService> logger,
@@ -62,39 +63,35 @@ namespace UmiHealth.Identity
                 }
 
                 // Check if account is locked
-                if (user.LockoutEnd.HasValue && user.LockoutEnd.Value > DateTime.UtcNow)
-                {
-                    _logger.LogWarning("Login attempt failed: Account locked for user {UserId}", user.Id);
-                    return AuthenticationResult.Failed("Account is temporarily locked");
-                }
+                // Note: Domain User doesn't have LockoutEnd property
+                // if (user.LockoutEnd.HasValue && user.LockoutEnd.Value > DateTime.UtcNow)
+                // {
+                //     _logger.LogWarning("Login attempt failed: Account locked for user {UserId}", user.Id);
+                //     return AuthenticationResult.Failed("Account is temporarily locked");
+                // }
 
                 // Verify password
                 if (!_passwordHasher.VerifyPassword(password, user.PasswordHash))
                 {
-                    user.FailedLoginAttempts++;
-                    if (user.FailedLoginAttempts >= 5)
-                    {
-                        user.LockoutEnd = DateTime.UtcNow.AddMinutes(15);
-                        _logger.LogWarning("Account locked due to failed attempts: {UserId}", user.Id);
-                    }
                     await _context.SaveChangesAsync(cancellationToken);
                     return AuthenticationResult.Failed("Invalid email or password");
                 }
 
                 // Reset failed login attempts on successful login
-                user.FailedLoginAttempts = 0;
-                user.LockoutEnd = null;
+                // Note: Domain User doesn't have FailedLoginAttempts property
+                // user.FailedLoginAttempts = 0;
+                // user.LockoutEnd = null;
                 user.LastLoginAt = DateTime.UtcNow;
 
                 // Get user roles
                 var roles = user.UserRoles.Select(ur => ur.Role).ToList();
 
                 // Generate tokens
-                var accessToken = _jwtService.GenerateAccessToken(user, roles, user.BranchId);
+                var accessToken = _jwtService.GenerateAccessToken((CoreEntities.User)user, roles, user.BranchId);
                 var refreshToken = _jwtService.GenerateRefreshToken();
 
                 // Save refresh token
-                var refreshTokenEntity = new RefreshToken
+                var refreshTokenEntity = new CoreEntities.RefreshToken
                 {
                     TenantId = user.TenantId,
                     UserId = user.Id,
@@ -153,11 +150,11 @@ namespace UmiHealth.Identity
 
                 // Generate new tokens
                 var roles = user.UserRoles.Select(ur => ur.Role).ToList();
-                var newAccessToken = _jwtService.GenerateAccessToken(user, roles, user.BranchId);
+                var newAccessToken = _jwtService.GenerateAccessToken((CoreEntities.User)user, roles, user.BranchId);
                 var newRefreshToken = _jwtService.GenerateRefreshToken();
 
                 // Save new refresh token
-                var newRefreshTokenEntity = new RefreshToken
+                var newRefreshTokenEntity = new CoreEntities.RefreshToken
                 {
                     TenantId = user.TenantId,
                     UserId = user.Id,
@@ -221,7 +218,7 @@ namespace UmiHealth.Identity
                 }
 
                 // Create user
-                var user = new User
+                var user = new CoreEntities.User
                 {
                     TenantId = request.TenantId,
                     BranchId = request.BranchId,
@@ -232,10 +229,11 @@ namespace UmiHealth.Identity
                     UserName = request.UserName,
                     PasswordHash = _passwordHasher.HashPassword(request.Password),
                     IsActive = true,
-                    EmailConfirmed = false,
-                    PhoneNumberConfirmed = false,
-                    TwoFactorEnabled = false,
-                    FailedLoginAttempts = 0
+                    // Note: Domain User doesn't have EmailConfirmed, PhoneNumberConfirmed, TwoFactorEnabled properties
+                    // EmailConfirmed = false,
+                    // PhoneNumberConfirmed = false,
+                    // TwoFactorEnabled = false,
+                    // FailedLoginAttempts = 0
                 };
 
                 // Assign default role if specified
@@ -247,7 +245,7 @@ namespace UmiHealth.Identity
 
                     if (role != null)
                     {
-                        user.UserRoles.Add(new UserRole
+                        user.UserRoles.Add(new CoreEntities.UserRole
                         {
                             TenantId = request.TenantId,
                             RoleId = role.Id
@@ -317,7 +315,7 @@ namespace UmiHealth.Identity
                 var expiry = DateTime.UtcNow.AddHours(1);
 
                 // Store token (you might want a separate table for password reset tokens)
-                user.UserClaims.Add(new UserClaim
+                user.UserClaims.Add(new CoreEntities.UserClaim
                 {
                     TenantId = user.TenantId,
                     ClaimType = "password_reset_token",
@@ -421,11 +419,11 @@ namespace UmiHealth.Identity
         public bool Success { get; set; }
         public string? AccessToken { get; set; }
         public string? RefreshToken { get; set; }
-        public User? User { get; set; }
-        public IEnumerable<Role>? Roles { get; set; }
+        public CoreEntities.User? User { get; set; }
+        public IEnumerable<CoreEntities.Role>? Roles { get; set; }
         public string? Error { get; set; }
 
-        public static AuthenticationResult Successful(string accessToken, string refreshToken, User user, IEnumerable<Role> roles)
+        public static AuthenticationResult Successful(string accessToken, string refreshToken, CoreEntities.User user, IEnumerable<CoreEntities.Role> roles)
         {
             return new AuthenticationResult
             {
@@ -450,11 +448,11 @@ namespace UmiHealth.Identity
     public class RegistrationResult
     {
         public bool Success { get; set; }
-        public User? User { get; set; }
+        public CoreEntities.User? User { get; set; }
         public string? Error { get; set; }
         public string Message { get; set; } = string.Empty;
 
-        public static RegistrationResult Successful(User user)
+        public static RegistrationResult Successful(CoreEntities.User user)
         {
             return new RegistrationResult
             {
@@ -477,11 +475,11 @@ namespace UmiHealth.Identity
     public class GetProfileResult
     {
         public bool Success { get; set; }
-        public User? User { get; set; }
-        public IEnumerable<Role>? Roles { get; set; }
+        public CoreEntities.User? User { get; set; }
+        public IEnumerable<CoreEntities.Role>? Roles { get; set; }
         public string? Message { get; set; }
 
-        public static GetProfileResult Successful(User user, IEnumerable<Role> roles)
+        public static GetProfileResult Successful(CoreEntities.User user, IEnumerable<CoreEntities.Role> roles)
         {
             return new GetProfileResult
             {

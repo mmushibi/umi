@@ -119,24 +119,14 @@ namespace UmiHealth.Infrastructure.Data
             });
 
             // Configure Patient entity
-            modelBuilder.Entity<Patient>(entity =>
+            modelBuilder.Entity<UmiHealth.Core.Entities.Patient>(entity =>
             {
                 entity.HasKey(e => e.Id);
                 entity.Property(e => e.FirstName).IsRequired().HasMaxLength(100);
                 entity.Property(e => e.LastName).IsRequired().HasMaxLength(100);
-                entity.Property(e => e.Email).HasMaxLength(255);
-                entity.Property(e => e.Phone).HasMaxLength(20);
-                entity.Property(e => e.CreatedAt).HasDefaultValueSql("CURRENT_TIMESTAMP");
-                
-                entity.HasOne(e => e.Tenant)
-                    .WithMany()
-                    .HasForeignKey(e => e.TenantId)
-                    .OnDelete(DeleteBehavior.Cascade);
-                    
-                entity.HasOne(e => e.Branch)
-                    .WithMany()
-                    .HasForeignKey(e => e.BranchId)
-                    .OnDelete(DeleteBehavior.SetNull);
+                entity.Property(e => e.Email).HasMaxLength(200);
+                entity.Property(e => e.Phone).HasMaxLength(50);
+                entity.HasOne(e => e.Tenant).WithMany().HasForeignKey(e => e.TenantId);
             });
 
             // Configure Product entity
@@ -201,30 +191,14 @@ namespace UmiHealth.Infrastructure.Data
             });
 
             // Configure Prescription entity
-            modelBuilder.Entity<Prescription>(entity =>
+            modelBuilder.Entity<UmiHealth.Core.Entities.Prescription>(entity =>
             {
                 entity.HasKey(e => e.Id);
-                entity.Property(e => e.CreatedAt).HasDefaultValueSql("CURRENT_TIMESTAMP");
-                
-                entity.HasOne(e => e.Tenant)
-                    .WithMany()
-                    .HasForeignKey(e => e.TenantId)
-                    .OnDelete(DeleteBehavior.Cascade);
-                    
-                entity.HasOne(e => e.Branch)
-                    .WithMany()
-                    .HasForeignKey(e => e.BranchId)
-                    .OnDelete(DeleteBehavior.SetNull);
-                    
-                entity.HasOne(e => e.Patient)
-                    .WithMany()
-                    .HasForeignKey(e => e.PatientId)
-                    .OnDelete(DeleteBehavior.SetNull);
-                    
-                entity.HasOne(e => e.Doctor)
-                    .WithMany()
-                    .HasForeignKey(e => e.DoctorId)
-                    .OnDelete(DeleteBehavior.SetNull);
+                entity.Property(e => e.PrescriptionNumber).IsRequired().HasMaxLength(50);
+                entity.HasOne(e => e.Patient).WithMany(p => p.Prescriptions).HasForeignKey(e => e.PatientId);
+                entity.HasOne(e => e.Doctor).WithMany().HasForeignKey(e => e.DoctorId);
+                entity.HasOne(e => e.DispensedByUser).WithMany().HasForeignKey(e => e.DispensedBy);
+                entity.HasOne(e => e.Tenant).WithMany().HasForeignKey(e => e.TenantId);
             });
 
             // Apply indexes for performance
