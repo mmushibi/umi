@@ -1,8 +1,10 @@
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.SignalR;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 using UmiHealth.Application.Models;
+using UmiHealth.Application.Services;
 using UmiHealth.Domain.Entities;
 using UmiHealth.Persistence.Data;
 using UmiHealth.API.Hubs;
@@ -302,15 +304,14 @@ namespace UmiHealth.API.Controllers
             await _hubContext.Clients.Group($"tenant_{payment.TenantId}").SendAsync("paymentApproved", new PaymentApprovalNotification
             {
                 paymentId = payment.Id,
-                paymentId = payment.Id,
                 tenantId = payment.TenantId,
-                status = "rejected",
-                approvedBy = payment.ApprovedBy,
-                approvalDate = payment.ApprovalDate,
+                status = "approved",
+                approvedBy = payment.ProcessedBy,
+                approvalDate = payment.ProcessedDate,
                 additionalNotes = payment.AdditionalNotes
             });
 
-            _logger.LogInformation("Payment rejection sent to tenant {TenantId} for payment {PaymentId}", 
+            _logger.LogInformation("Payment approval sent to tenant {TenantId} for payment {PaymentId}", 
                 payment.TenantId, payment.Id);
         }
 

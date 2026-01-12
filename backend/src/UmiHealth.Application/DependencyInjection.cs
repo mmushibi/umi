@@ -10,6 +10,9 @@ namespace UmiHealth.Application
             // Register application services
             services.AddScoped<ISimpleRegistrationService, SimpleRegistrationService>();
             services.AddScoped<IOnboardingService, OnboardingService>();
+            services.AddScoped<IDatabaseSecurityAuditService, DatabaseSecurityAuditService>();
+            services.AddScoped<DataSyncService>();
+            services.AddScoped<IPaymentNotificationService, PaymentNotificationService>();
             
             return services;
         }

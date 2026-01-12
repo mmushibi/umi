@@ -25,7 +25,7 @@ namespace UmiHealth.API.Controllers
         private readonly ISubscriptionService _subscriptionService;
         private readonly SharedDbContext _context;
         private readonly ILogger<AuthController> _logger;
-        private readonly ISecurityAuditService _securityAuditService;
+        private readonly IDatabaseSecurityAuditService _securityAuditService;
 
         public AuthController(
             IAuthenticationService authenticationService,
@@ -36,7 +36,7 @@ namespace UmiHealth.API.Controllers
             ISubscriptionService subscriptionService,
             SharedDbContext context,
             ILogger<AuthController> logger,
-            ISecurityAuditService securityAuditService)
+            IDatabaseSecurityAuditService securityAuditService)
         {
             _authenticationService = authenticationService;
             _jwtService = jwtService;

@@ -4,6 +4,7 @@ using System.ComponentModel.DataAnnotations.Schema;
 
 namespace UmiHealth.Domain.Entities
 {
+    [Table("payments")]
     public class PaymentRecord : ISoftDeletable
     {
         [Key]
