@@ -47,17 +47,17 @@ namespace UmiHealth.Application.Services
         {
             try
             {
-                var entity = new UmiHealth.Domain.Entities.SecurityEvent
+                var entity = new UmiHealth.Domain.Entities.SecurityAuditEvent
                 {
                     Id = Guid.NewGuid(),
-                    EventType = securityEvent.EventType.ToString(),
+                    EventType = securityEvent.EventType,
                     Description = securityEvent.Description,
                     IpAddress = securityEvent.IpAddress,
                     UserId = string.IsNullOrEmpty(securityEvent.UserId) ? null : Guid.Parse(securityEvent.UserId),
                     UserAgent = securityEvent.UserAgent,
                     RequestPath = securityEvent.RequestPath,
-                    RiskLevel = securityEvent.RiskLevel,
-                    Timestamp = DateTime.UtcNow,
+                    RiskLevel = e.RiskLevel,
+                    Timestamp = securityEvent.Timestamp,
                     Metadata = securityEvent.Metadata,
                     TenantId = securityEvent.TenantId
                 };
@@ -106,7 +106,7 @@ namespace UmiHealth.Application.Services
                     .Select(e => new SecurityEvent
                     {
                         Id = e.Id,
-                        EventType = Enum.Parse<SecurityEventType>(e.EventType),
+                        EventType = e.EventType,
                         Description = e.Description,
                         IpAddress = e.IpAddress,
                         UserId = e.UserId?.ToString(),
