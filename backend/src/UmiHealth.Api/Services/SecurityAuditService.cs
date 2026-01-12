@@ -5,7 +5,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 
-namespace UmiHealth.Api.Services
+namespace UmiHealth.API.Services
 {
     /// <summary>
     /// Service for security auditing and monitoring

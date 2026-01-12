@@ -2,9 +2,9 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
 using System.Threading.Tasks;
-using UmiHealth.Api.Services;
+using UmiHealth.API.Services;
 
-namespace UmiHealth.Api.Controllers
+namespace UmiHealth.API.Controllers
 {
     [ApiController]
     [Route("api/v1/[controller]")]

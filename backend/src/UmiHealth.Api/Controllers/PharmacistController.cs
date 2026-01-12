@@ -1,14 +1,14 @@
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.SignalR;
-using UmiHealth.Api.Hubs;
+using UmiHealth.API.Hubs;
 using UmiHealth.Core.Interfaces;
 using UmiHealth.Application.Services;
 using CoreIPharmacyService = UmiHealth.Core.Interfaces.IPharmacyService;
 using AppIPharmacyService = UmiHealth.Application.Services.IPharmacyService;
 using System.Linq;
 
-namespace UmiHealth.Api.Controllers
+namespace UmiHealth.API.Controllers
 {
     public class StatusUpdateRequest
     {

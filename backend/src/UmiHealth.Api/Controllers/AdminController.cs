@@ -8,7 +8,7 @@ using UmiHealth.API.Middleware;
 using System;
 using System.Threading.Tasks;
 using System.Linq;
-namespace UmiHealth.Api.Controllers
+namespace UmiHealth.API.Controllers
 {
     [ApiController]
     [Route("api/v1/admin")]

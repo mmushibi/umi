@@ -8,7 +8,7 @@ using System.Net.Http;
 using System.Threading;
 using System.Threading.Tasks;
 
-namespace UmiHealth.Api.Services
+namespace UmiHealth.API.Services
 {
     public interface IApiGatewayService
     {

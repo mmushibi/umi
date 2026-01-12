@@ -2,7 +2,7 @@ using Microsoft.AspNetCore.SignalR;
 using Microsoft.Extensions.Logging;
 using System.Threading.Tasks;
 
-namespace UmiHealth.Api.Hubs
+namespace UmiHealth.API.Hubs
 {
     /// <summary>
     /// Simple test hub for connection testing

@@ -1,7 +1,7 @@
 using Microsoft.Extensions.Configuration;
 using System.Security.Cryptography;
 
-namespace UmiHealth.Api.Services
+namespace UmiHealth.API.Services
 {
     public interface IRsaKeyService
     {

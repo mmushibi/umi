@@ -10,8 +10,8 @@ using UmiHealth.API.Middleware;
 using UmiHealth.Infrastructure;
 using UmiHealth.Persistence;
 using UmiHealth.Application;
-using UmiHealth.Api.Services;
-using UmiHealth.Api.Hubs;
+using UmiHealth.API.Services;
+using UmiHealth.API.Hubs;
 using UmiHealth.Core.Interfaces;
 using UmiHealth.Application.Services;
 using Microsoft.AspNetCore.Mvc.ApiExplorer;
@@ -19,7 +19,7 @@ using Microsoft.AspNetCore.Mvc;
 using Swashbuckle.AspNetCore.SwaggerGen;
 using UmiHealth.Infrastructure.Data;
 
-namespace UmiHealth.Api
+namespace UmiHealth.API
 {
     public class Program
     {

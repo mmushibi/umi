@@ -4,9 +4,9 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Threading.Tasks;
-using UmiHealth.Api.Services;
+using UmiHealth.API.Services;
 
-namespace UmiHealth.Api.Middleware
+namespace UmiHealth.API.Middleware
 {
     public class ApiGatewayMiddleware
     {

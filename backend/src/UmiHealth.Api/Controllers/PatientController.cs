@@ -3,7 +3,7 @@ using Microsoft.AspNetCore.Mvc;
 using UmiHealth.Core.Interfaces;
 using UmiHealth.Application.Services;
 
-namespace UmiHealth.Api.Controllers
+namespace UmiHealth.API.Controllers
 {
     [ApiController]
     [Route("api/v1/[controller]")]

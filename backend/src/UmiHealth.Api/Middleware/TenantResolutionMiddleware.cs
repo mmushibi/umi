@@ -5,7 +5,7 @@ using System;
 using System.Threading.Tasks;
 using UmiHealth.Application.Services;
 
-namespace UmiHealth.Api.Middleware
+namespace UmiHealth.API.Middleware
 {
     public class TenantResolutionMiddleware
     {

@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 using Microsoft.EntityFrameworkCore;
 using UmiHealth.Infrastructure.Data;
 
-namespace UmiHealth.Api.Middleware
+namespace UmiHealth.API.Middleware
 {
     public class BranchAccessMiddleware
     {

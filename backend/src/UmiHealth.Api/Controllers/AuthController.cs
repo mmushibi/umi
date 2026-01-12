@@ -11,7 +11,7 @@ using UmiHealth.Identity.Services;
 using UmiHealth.Shared.DTOs;
 using UmiHealth.Application.Services;
 using UmiHealth.Persistence.Data;
-namespace UmiHealth.Api.Controllers
+namespace UmiHealth.API.Controllers
 {
     [ApiController]
     [Route("api/v1/[controller]")]

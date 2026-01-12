@@ -4,7 +4,7 @@ using Microsoft.Extensions.Logging;
 using UmiHealth.Core.Entities;
 using UmiHealth.Persistence;
 
-namespace UmiHealth.Api.Middleware
+namespace UmiHealth.API.Middleware
 {
     public class TenantMiddleware
     {

@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 using UmiHealth.Application.Services;
 using UmiHealth.Application.DTOs;
 
-namespace UmiHealth.Api.Controllers
+namespace UmiHealth.API.Controllers
 {
     [ApiController]
     [Route("api/v1/superadmin")]

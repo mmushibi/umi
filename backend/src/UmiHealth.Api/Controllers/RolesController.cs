@@ -4,7 +4,7 @@ using Microsoft.EntityFrameworkCore;
 using UmiHealth.Core.Entities;
 using UmiHealth.Persistence;
 
-namespace UmiHealth.Api.Controllers
+namespace UmiHealth.API.Controllers
 {
     [ApiController]
     [Route("api/v1/[controller]")]

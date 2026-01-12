@@ -1,7 +1,7 @@
 using Microsoft.AspNetCore.Mvc;
 using System.ComponentModel.DataAnnotations;
 using UmiHealth.Shared.DTOs;
-namespace UmiHealth.Api.Configuration
+namespace UmiHealth.API.Configuration
 {
     /// <summary>
     /// Standard API response wrapper for consistent response format

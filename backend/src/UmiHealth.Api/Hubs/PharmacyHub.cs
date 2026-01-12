@@ -4,7 +4,7 @@ using Microsoft.Extensions.Logging;
 using System;
 using System.Threading.Tasks;
 
-namespace UmiHealth.Api.Hubs
+namespace UmiHealth.API.Hubs
 {
     [Authorize]
     public class PharmacyHub : Hub

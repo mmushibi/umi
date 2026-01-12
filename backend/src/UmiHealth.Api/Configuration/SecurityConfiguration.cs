@@ -1,4 +1,4 @@
-namespace UmiHealth.Api.Configuration
+namespace UmiHealth.API.Configuration
 {
     /// <summary>
     /// Security configuration settings

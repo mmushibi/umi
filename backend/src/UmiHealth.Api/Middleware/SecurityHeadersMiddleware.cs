@@ -5,7 +5,7 @@ using Microsoft.Extensions.DependencyInjection;
 using System;
 using System.Threading.Tasks;
 
-namespace UmiHealth.Api.Middleware
+namespace UmiHealth.API.Middleware
 {
     /// <summary>
     /// Enhanced middleware to add comprehensive security headers to all responses

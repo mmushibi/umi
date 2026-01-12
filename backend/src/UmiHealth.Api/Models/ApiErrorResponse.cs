@@ -2,7 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Text.Json.Serialization;
 
-namespace UmiHealth.Api.Models
+namespace UmiHealth.API.Models
 {
     /// <summary>
     /// Standardized API error response model for all error scenarios

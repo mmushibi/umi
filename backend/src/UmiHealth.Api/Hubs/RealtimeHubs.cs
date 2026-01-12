@@ -5,7 +5,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using UmiHealth.Core.Entities;
 
-namespace UmiHealth.Api.Hubs
+namespace UmiHealth.API.Hubs
 {
     /// <summary>
     /// SignalR Hub for real-time inventory updates

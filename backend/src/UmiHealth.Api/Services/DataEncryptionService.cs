@@ -5,7 +5,7 @@ using System.IO;
 using System.Security.Cryptography;
 using System.Text;
 
-namespace UmiHealth.Api.Services
+namespace UmiHealth.API.Services
 {
     /// <summary>
     /// Service for data encryption and decryption
