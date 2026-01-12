@@ -22,6 +22,25 @@ jobs:
         uses: actions/setup-dotnet@v4
         with:
           dotnet-version: '8.0.404'
+      
+      - name: Verify .NET Version
+        run: |
+          echo "DOTNET_ROOT: $DOTNET_ROOT"
+          echo "DOTNET version:"
+          dotnet --version
+          echo "Available SDKs:"
+          dotnet --list-sdks
+      
+      - name: Verify File Structure
+        run: |
+          echo "Current directory:"
+          pwd
+          echo "Backend directory contents:"
+          ls -la backend/
+          echo "Solution file:"
+          cat backend/UmiHealth.sln | head -20
+          echo "API project file check:"
+          ls -la backend/src/UmiHealth.API/
 
       - name: Restore
         run: dotnet restore backend/UmiHealth.sln
