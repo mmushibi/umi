@@ -1,0 +1,6 @@
+@UmiHealth.Identity_HostAddress = http://localhost:5070
+
+GET {{UmiHealth.Identity_HostAddress}}/weatherforecast/
+Accept: application/json
+
+###
