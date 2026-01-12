@@ -76,7 +76,7 @@ namespace UmiHealth.API.Controllers
                         u.IsActive,
                         u.IsEmailVerified,
                         u.CreatedAt,
-                        u.LastLogin
+                        u.LastLoginAt
                     }),
                     Subscriptions = tenant.Subscriptions.Select(s => new
                     {
@@ -88,8 +88,8 @@ namespace UmiHealth.API.Controllers
                         s.StartDate,
                         s.EndDate,
                         s.CreatedAt,
-                        Features = s.Features ?? new Dictionary<string, object>(),
-                        Limits = s.Limits ?? new Dictionary<string, object>()
+                        Features = s.Features,
+                        Limits = s.Limits
                     }),
                     Branches = tenant.Branches.Select(b => new
                     {
@@ -147,7 +147,7 @@ namespace UmiHealth.API.Controllers
                         u.IsActive,
                         u.IsEmailVerified,
                         u.CreatedAt,
-                        u.LastLogin,
+                        u.LastLoginAt,
                         Branch = u.Branch != null ? new
                         {
                             u.Branch.Id,
@@ -171,7 +171,7 @@ namespace UmiHealth.API.Controllers
                         CashierUsers = users.Count(u => u.Role == "cashier"),
                         PharmacistUsers = users.Count(u => u.Role == "pharmacist"),
                         OperationsUsers = users.Count(u => u.Role == "operations"),
-                        UsersWithRecentLogin = users.Count(u => u.LastLogin.HasValue && u.LastLogin >= DateTime.UtcNow.AddDays(-7)),
+                        UsersWithRecentLogin = users.Count(u => u.LastLoginAt.HasValue && u.LastLoginAt >= DateTime.UtcNow.AddDays(-7)),
                         UnverifiedUsers = users.Count(u => !u.IsEmailVerified)
                     },
                     RoleDistribution = users
@@ -208,7 +208,6 @@ namespace UmiHealth.API.Controllers
 
                 var tenant = await _context.Tenants
                     .Include(t => t.Subscriptions)
-                    .Include(t => t.SubscriptionTransactions)
                     .FirstOrDefaultAsync(t => t.Id == tenantId);
 
                 if (tenant == null)
@@ -221,6 +220,23 @@ namespace UmiHealth.API.Controllers
                     .OrderByDescending(s => s.CreatedAt)
                     .FirstOrDefault();
 
+                var transactions = await _context.SubscriptionTransactions
+                    .Where(t => t.TenantId == tenantId)
+                    .OrderByDescending(t => t.CreatedAt)
+                    .Select(t => new
+                    {
+                        t.Id,
+                        t.TransactionId,
+                        t.Type,
+                        t.Amount,
+                        t.Currency,
+                        t.Status,
+                        t.PlanFrom,
+                        t.PlanTo,
+                        t.CreatedAt
+                    })
+                    .ToListAsync();
+
                 var subscriptionManagement = new
                 {
                     CurrentSubscription = currentSubscription != null ? new
@@ -232,11 +248,9 @@ namespace UmiHealth.API.Controllers
                         currentSubscription.Currency,
                         currentSubscription.StartDate,
                         currentSubscription.EndDate,
-                        DaysRemaining = currentSubscription.EndDate.HasValue 
-                            ? Math.Max(0, (currentSubscription.EndDate.Value - DateTime.UtcNow).Days)
-                            : 0,
-                        Features = currentSubscription.Features ?? new Dictionary<string, object>(),
-                        Limits = currentSubscription.Limits ?? new Dictionary<string, object>()
+                        DaysRemaining = Math.Max(0, (currentSubscription.EndDate - DateTime.UtcNow).Days),
+                        Features = currentSubscription.Features,
+                        Limits = currentSubscription.Limits
                     } : null,
                     SubscriptionHistory = tenant.Subscriptions
                         .OrderByDescending(s => s.CreatedAt)
@@ -250,21 +264,7 @@ namespace UmiHealth.API.Controllers
                             s.EndDate,
                             s.CreatedAt
                         }),
-                    Transactions = tenant.SubscriptionTransactions
-                        .OrderByDescending(t => t.CreatedAt)
-                        .Select(t => new
-                        {
-                            t.Id,
-                            t.TransactionId,
-                            t.Type,
-                            t.Amount,
-                            t.Currency,
-                            t.Status,
-                            t.PlanFrom,
-                            t.PlanTo,
-                            t.CreatedAt,
-                            t.ApprovedAt
-                        }),
+                    Transactions = transactions,
                     TrialStatus = new
                     {
                         IsTrial = tenant.SubscriptionPlan == "trial",
@@ -382,7 +382,7 @@ namespace UmiHealth.API.Controllers
 
                 // Get security events
                 var securityEvents = await _context.SecurityEvents
-                    .Where(e => e.TenantId == tenantId && e.CreatedAt >= cutoffDate)
+                    .Where(e => e.TenantId == tenantId.ToString() && e.CreatedAt >= cutoffDate)
                     .OrderByDescending(e => e.CreatedAt)
                     .Select(e => new
                     {
@@ -492,7 +492,7 @@ namespace UmiHealth.API.Controllers
                 Pharmacist = userList.Count(u => u.Role == "pharmacist"),
                 Operations = userList.Count(u => u.Role == "operations"),
                 EmailVerified = userList.Count(u => u.IsEmailVerified),
-                RecentLogins = userList.Count(u => u.LastLogin.HasValue && u.LastLogin >= DateTime.UtcNow.AddDays(-7))
+                RecentLogins = userList.Count(u => u.LastLoginAt.HasValue && u.LastLoginAt >= DateTime.UtcNow.AddDays(-7))
             };
         }
 
@@ -521,7 +521,7 @@ namespace UmiHealth.API.Controllers
             if (!user.IsEmailVerified)
                 return "Pending Verification";
             
-            if (user.LastLogin.HasValue && user.LastLogin >= DateTime.UtcNow.AddDays(-7))
+            if (user.LastLoginAt.HasValue && user.LastLoginAt >= DateTime.UtcNow.AddDays(-7))
                 return "Active";
             
             return "Inactive";

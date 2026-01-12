@@ -45,7 +45,7 @@ namespace UmiHealth.API.Controllers
             try
             {
                 var pendingPayments = await _context.Payments
-                    .Where(p => p.Status == PaymentStatusType.Pending)
+                    .Where(p => p.Status == PaymentStatusType.Pending.ToString().ToLowerInvariant())
                     .Include(p => p.Tenant)
                     .OrderByDescending(p => p.RequestDate)
                     .Select(p => new
@@ -94,17 +94,17 @@ namespace UmiHealth.API.Controllers
                     return NotFound(new { success = false, message = "Payment not found" });
                 }
 
-                if (payment.Status != PaymentStatusType.Pending)
+                if (payment.Status != PaymentStatusType.Pending.ToString().ToLowerInvariant())
                 {
                     return BadRequest(new { success = false, message = "Payment already processed" });
                 }
 
                 // Update payment status
-                payment.Status = PaymentStatusType.Approved;
+                payment.Status = PaymentStatusType.Approved.ToString().ToLowerInvariant();
                 payment.ApprovalDate = DateTime.UtcNow;
                 payment.ApprovedBy = User.Identity?.Name ?? "Unknown";
                 payment.TransactionId = request.TransactionId;
-                payment.ConfirmationNumber = GenerateConfirmationNumber();
+                payment.ConfirmationNumber = Guid.NewGuid().ToString("N")[..10].ToUpperInvariant();
 
                 _context.Payments.Update(payment);
                 await _context.SaveChangesAsync();
@@ -116,14 +116,13 @@ namespace UmiHealth.API.Controllers
                 await _hubContext.Clients.All.SendAsync("paymentApproved", new PaymentApprovalNotification
                 {
                     PaymentId = payment.Id,
-                    TenantId = payment.TenantId,
-                    Success = true,
-                    Message = "Payment approved successfully",
+                    TenantId = payment.TenantId.ToString(),
+                    Status = "approved",
                     ApprovedBy = payment.ApprovedBy,
-                    ApprovalDate = payment.ApprovalDate,
-                    TransactionId = payment.TransactionId,
-                    ConfirmationNumber = payment.ConfirmationNumber
+                    ApprovalDate = payment.ApprovalDate
                 });
+
+                return Ok(new { success = true, message = "Payment approved successfully" });
             }
             catch (Exception ex)
             {
@@ -153,13 +152,13 @@ namespace UmiHealth.API.Controllers
                     return NotFound(new { success = false, message = "Payment not found" });
                 }
 
-                if (payment.Status != PaymentStatusType.Pending)
+                if (payment.Status != PaymentStatusType.Pending.ToString().ToLowerInvariant())
                 {
                     return BadRequest(new { success = false, message = "Payment already processed" });
                 }
 
                 // Update payment status
-                payment.Status = PaymentStatusType.Rejected;
+                payment.Status = PaymentStatusType.Rejected.ToString().ToLowerInvariant();
                 payment.ApprovalDate = DateTime.UtcNow;
                 payment.ApprovedBy = User.Identity?.Name ?? "Unknown";
                 payment.AdditionalNotes = request.AdditionalNotes;
@@ -168,7 +167,7 @@ namespace UmiHealth.API.Controllers
                 await _context.SaveChangesAsync();
 
                 // Send rejection notification to tenant
-                await _notificationService.SendPaymentRejectionAsync(payment.TenantId, payment.Id, payment.AdditionalNotes);
+                await _notificationService.SendPaymentRejectionAsync(payment.TenantId.ToString(), payment.Id, payment.AdditionalNotes);
                 _logger.LogInformation("Payment rejection sent to tenant {TenantId} for payment {PaymentId}", 
                     payment.TenantId, payment.Id);
 
@@ -249,7 +248,8 @@ namespace UmiHealth.API.Controllers
                 var tenant = await _context.Tenants.FindAsync(limitRequest.TenantId);
                 if (tenant != null)
                 {
-                    tenant.MaxUsers = limitRequest.RequestedUsers;
+                    // Persist approved limit to settings (tenant entity does not have MaxUsers)
+                    tenant.Settings = $"maxUsers={limitRequest.RequestedUsers}";
                     _context.Tenants.Update(tenant);
                 }
 
@@ -258,7 +258,7 @@ namespace UmiHealth.API.Controllers
                 _logger.LogInformation("User limit request {RequestId} approved for tenant {TenantId}", 
                     request.RequestId, limitRequest.TenantId);
                 
-                await _notificationService.SendUserLimitApprovalAsync(limitRequest.TenantId, limitRequest.Id, limitRequest.RequestedUsers);
+                await _notificationService.SendUserLimitApprovalAsync(limitRequest.TenantId.ToString(), limitRequest.Id, limitRequest.RequestedUsers);
 
                 return Ok(new { success = true, message = "User limit approved successfully" });
             }
@@ -304,7 +304,7 @@ namespace UmiHealth.API.Controllers
             await _hubContext.Clients.Group($"tenant_{payment.TenantId}").SendAsync("paymentApproved", new PaymentApprovalNotification
             {
                 PaymentId = payment.Id,
-                TenantId = payment.TenantId,
+                TenantId = payment.TenantId.ToString(),
                 Status = "approved",
                 ApprovedBy = payment.ApprovedBy,
                 ApprovalDate = payment.ApprovalDate,

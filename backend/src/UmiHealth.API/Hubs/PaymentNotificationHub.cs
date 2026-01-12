@@ -77,7 +77,7 @@ namespace UmiHealth.API.Hubs
         /// </summary>
         public async Task JoinTenantGroup(string tenantId)
         {
-            await Groups.AddToGroupAsync($"tenant_{tenantId}");
+            await Groups.AddToGroupAsync(Context.ConnectionId, $"tenant_{tenantId}");
             _logger.LogInformation("Client joined tenant group: {TenantId}", tenantId);
         }
 
@@ -86,7 +86,7 @@ namespace UmiHealth.API.Hubs
         /// </summary>
         public async Task LeaveTenantGroup(string tenantId)
         {
-            await Groups.RemoveFromGroupAsync($"tenant_{tenantId}");
+            await Groups.RemoveFromGroupAsync(Context.ConnectionId, $"tenant_{tenantId}");
             _logger.LogInformation("Client left tenant group: {TenantId}", tenantId);
         }
     }

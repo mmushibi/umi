@@ -95,9 +95,9 @@ namespace UmiHealth.API.Controllers
                     return BadRequest(new { success = false, message = "IP address is required" });
                 }
 
-                var duration = request.DurationHours.HasValue 
+                TimeSpan? duration = request.DurationHours.HasValue 
                     ? TimeSpan.FromHours(request.DurationHours.Value) 
-                    : null;
+                    : (TimeSpan?)null;
 
                 await _securityAuditService.BlockIpAddressAsync(
                     request.IpAddress, 

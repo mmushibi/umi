@@ -96,7 +96,28 @@ namespace UmiHealth.API.Controllers
                     .CountAsync(u => u.TenantId == tenantId.Value);
 
                 var tenant = await _context.Tenants.FindAsync(tenantId.Value);
-                var maxUsers = tenant?.MaxUsers ?? 0;
+                var maxUsers = 0;
+                if (tenant != null && !string.IsNullOrEmpty(tenant.Settings))
+                {
+                    try
+                    {
+                        // Support settings stored as json
+                        var settings = System.Text.Json.JsonSerializer.Deserialize<Dictionary<string, object>>(tenant.Settings);
+                        if (settings != null && settings.TryGetValue("maxUsers", out var maxUsersObj) && maxUsersObj != null)
+                        {
+                            int.TryParse(maxUsersObj.ToString(), out maxUsers);
+                        }
+                    }
+                    catch
+                    {
+                        // Support simple fallback format: "maxUsers=10"
+                        var parts = tenant.Settings.Split('=', 2, StringSplitOptions.TrimEntries);
+                        if (parts.Length == 2 && parts[0].Equals("maxUsers", StringComparison.OrdinalIgnoreCase))
+                        {
+                            int.TryParse(parts[1], out maxUsers);
+                        }
+                    }
+                }
 
                 return Ok(new
                 {

@@ -1,6 +1,10 @@
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Logging;
+using UmiHealth.Application.Models;
 using UmiHealth.Application.Services;
+using UmiHealth.Domain.Entities;
 using UmiHealth.Persistence.Data;
 using System;
 using System.Threading.Tasks;
@@ -182,7 +186,7 @@ namespace UmiHealth.API.Controllers
                     PaymentMethod = request.PaymentMethod,
                     TransactionReference = request.TransactionReference,
                     PaymentReceipt = request.PaymentReceipt,
-                    Status = PaymentStatusType.Pending,
+                    Status = PaymentStatusType.Pending.ToString().ToLowerInvariant(),
                     RequestDate = DateTime.UtcNow,
                     AdditionalNotes = request.AdditionalNotes
                 };
@@ -201,7 +205,7 @@ namespace UmiHealth.API.Controllers
                     Success = true,
                     Message = "Payment submitted for approval",
                     PaymentId = paymentId,
-                    Status = PaymentStatusType.Pending,
+                    Status = PaymentStatusType.Pending.ToString().ToLowerInvariant(),
                     EstimatedApprovalTime = DateTime.UtcNow.AddHours(2) // Estimate 2 hours for approval
                 });
             }

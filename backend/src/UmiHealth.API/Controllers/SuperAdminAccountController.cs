@@ -111,7 +111,7 @@ namespace UmiHealth.API.Controllers
                         u.IsActive,
                         u.IsEmailVerified,
                         u.CreatedAt,
-                        u.LastLogin
+                        u.LastLoginAt
                     }),
                     Subscriptions = tenant.Subscriptions.Select(s => new
                     {
@@ -123,8 +123,8 @@ namespace UmiHealth.API.Controllers
                         s.StartDate,
                         s.EndDate,
                         s.CreatedAt,
-                        Features = s.Features ?? new Dictionary<string, object>(),
-                        Limits = s.Limits ?? new Dictionary<string, object>()
+                        Features = s.Features,
+                        Limits = s.Limits
                     }),
                     Branches = tenant.Branches.Select(b => new
                     {
@@ -293,7 +293,7 @@ namespace UmiHealth.API.Controllers
 
                 // Get security events
                 var securityEvents = await _context.SecurityEvents
-                    .Where(e => e.TenantId == tenantId && e.CreatedAt >= cutoffDate)
+                    .Where(e => e.TenantId == tenantId.ToString() && e.CreatedAt >= cutoffDate)
                     .OrderBy(e => e.CreatedAt)
                     .Select(e => new
                     {
@@ -407,15 +407,15 @@ namespace UmiHealth.API.Controllers
             var last24Hours = DateTime.UtcNow.AddHours(-24);
             
             var securityEvents = await _context.SecurityEvents
-                .Where(e => e.TenantId == tenantId && e.CreatedAt >= last24Hours)
+                .Where(e => e.TenantId == tenantId.ToString() && e.CreatedAt >= last24Hours)
                 .ToListAsync();
 
             return new
             {
                 EventsLast24Hours = securityEvents.Count,
-                FailedLogins = securityEvents.Count(e => e.EventType == "LoginFailure"),
-                SuccessfulLogins = securityEvents.Count(e => e.EventType == "LoginSuccess"),
-                HighRiskEvents = securityEvents.Count(e => e.RiskLevel >= 3),
+                FailedLogins = securityEvents.Count(e => e.EventType == SecurityEventType.LoginFailure),
+                SuccessfulLogins = securityEvents.Count(e => e.EventType == SecurityEventType.LoginSuccess),
+                HighRiskEvents = securityEvents.Count(e => e.RiskLevel >= SecurityRiskLevel.High),
                 UniqueIpAddresses = securityEvents.Select(e => e.IpAddress).Distinct().Count()
             };
         }
@@ -432,7 +432,7 @@ namespace UmiHealth.API.Controllers
             {
                 TotalUsers = users.Count,
                 ActiveUsers = users.Count(u => u.IsActive),
-                UsersWithRecentLogin = users.Count(u => u.LastLogin.HasValue && u.LastLogin >= last30Days),
+                UsersWithRecentLogin = users.Count(u => u.LastLoginAt.HasValue && u.LastLoginAt >= last30Days),
                 AdminUsers = users.Count(u => u.Role == "admin"),
                 CashierUsers = users.Count(u => u.Role == "cashier"),
                 PharmacistUsers = users.Count(u => u.Role == "pharmacist"),
