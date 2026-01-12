@@ -87,11 +87,9 @@ namespace UmiHealth.API
             // builder.Services.AddIdentity(builder.Configuration);
 
             // Register application services
-            builder.Services.AddScoped<IPaymentNotificationService, PaymentNotificationService>();
             builder.Services.AddScoped<IEmailService, EmailService>();
             builder.Services.AddScoped<IUserInvitationService, UserInvitationService>();
             builder.Services.AddScoped<IUserService, UserService>();
-            builder.Services.AddScoped<IPaymentNotificationService, PaymentNotificationService>();
             
             // Add Security Audit Service
             builder.Services.AddSecurityAudit();
