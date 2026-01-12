@@ -1,0 +1,22 @@
+# Ignore .NET build artifacts
+**/bin/
+**/obj/
+**/*.user
+**/*.suo
+**/*.vspscc
+**/*.vssscc
+**/.vs/
+**/.vscode/
+
+# Ignore node_modules
+node_modules/
+
+# Ignore git files
+.git/
+.gitignore
+README.md
+
+# Ignore Docker files
+Dockerfile*
+docker-compose*
+.dockerignore

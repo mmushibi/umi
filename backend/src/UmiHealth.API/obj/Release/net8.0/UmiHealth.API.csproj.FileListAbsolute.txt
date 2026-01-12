@@ -1,0 +1,9 @@
+C:\Users\sepio\Desktop\Umi_Health\Umi_Health\Umi_Health\backend\src\UmiHealth.API\obj\Release\net8.0\UmiHealth.API.csproj.AssemblyReference.cache
+C:\Users\sepio\Desktop\Umi_Health\Umi_Health\Umi_Health\backend\src\UmiHealth.API\obj\Release\net8.0\rpswa.dswa.cache.json
+C:\Users\sepio\Desktop\Umi_Health\Umi_Health\Umi_Health\backend\src\UmiHealth.API\obj\Release\net8.0\UmiHealth.API.GeneratedMSBuildEditorConfig.editorconfig
+C:\Users\sepio\Desktop\Umi_Health\Umi_Health\Umi_Health\backend\src\UmiHealth.API\obj\Release\net8.0\UmiHealth.API.AssemblyInfoInputs.cache
+C:\Users\sepio\Desktop\Umi_Health\Umi_Health\Umi_Health\backend\src\UmiHealth.API\obj\Release\net8.0\UmiHealth.API.AssemblyInfo.cs
+C:\Users\sepio\Desktop\Umi_Health\Umi_Health\Umi_Health\backend\src\UmiHealth.API\obj\Release\net8.0\UmiHealth.API.csproj.CoreCompileInputs.cache
+C:\Users\sepio\Desktop\Umi_Health\Umi_Health\Umi_Health\backend\src\UmiHealth.API\obj\Release\net8.0\UmiHealth.API.MvcApplicationPartsAssemblyInfo.cs
+C:\Users\sepio\Desktop\Umi_Health\Umi_Health\Umi_Health\backend\src\UmiHealth.API\obj\Release\net8.0\UmiHealth.API.MvcApplicationPartsAssemblyInfo.cache
+C:\Users\sepio\Desktop\Umi_Health\Umi_Health\Umi_Health\backend\src\UmiHealth.API\obj\Release\net8.0\UmiHealth.API.sourcelink.json

@@ -7,25 +7,18 @@ EXPOSE 8080
 FROM mcr.microsoft.com/dotnet/sdk:8.0 AS build
 WORKDIR /src
 
-# Copy csproj files and restore as distinct layers
+# Copy the API project file and restore
 COPY ["src/UmiHealth.API/UmiHealth.API.csproj", "src/UmiHealth.API/"]
-COPY ["src/UmiHealth.Application/UmiHealth.Application.csproj", "src/UmiHealth.Application/"]
-COPY ["src/UmiHealth.Core/UmiHealth.Core.csproj", "src/UmiHealth.Core/"]
-COPY ["src/UmiHealth.Domain/UmiHealth.Domain.csproj", "src/UmiHealth.Domain/"]
-COPY ["src/UmiHealth.Infrastructure/UmiHealth.Infrastructure.csproj", "src/UmiHealth.Infrastructure/"]
-COPY ["src/UmiHealth.Persistence/UmiHealth.Persistence.csproj", "src/UmiHealth.Persistence/"]
-COPY ["src/UmiHealth.Shared/UmiHealth.Shared.csproj", "src/UmiHealth.Shared/"]
-
 RUN dotnet restore "src/UmiHealth.API/UmiHealth.API.csproj"
 
 # Copy everything else and build
 COPY . .
 WORKDIR "/src/src/UmiHealth.API"
-RUN dotnet build "UmiHealth.API.csproj" -c Release -o /app/build
+RUN dotnet build "UmiHealth.API.csproj" -c Release -o /app/build --no-restore
 
 # Build runtime image
 FROM build AS publish
-RUN dotnet publish "UmiHealth.API.csproj" -c Release -o /app/publish /p:UseAppHost=false
+RUN dotnet publish "UmiHealth.API.csproj" -c Release -o /app/publish /p:UseAppHost=false --no-restore
 
 # Build final image
 FROM base AS final
