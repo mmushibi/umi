@@ -88,12 +88,4 @@ namespace UmiHealth.Application.Models
         public string? PaymentReceipt { get; set; } // Base64 encoded receipt
         public string? AdditionalNotes { get; set; }
     }
-
-    public enum PaymentStatusType
-    {
-        Pending = "pending",
-        Approved = "approved", 
-        Rejected = "rejected",
-        Processing = "processing"
-    }
 }

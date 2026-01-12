@@ -344,30 +344,30 @@
       </div>
     </div>
 
-    <nav class="nav-menu">
+     <nav class="nav-menu">
       <a href="home.html" class="nav-item">
         <span class="material-symbols-rounded nav-icon">home</span>
         <span>Home</span>
       </a>
-      <a href="account.html" class="nav-item active">
-        <span class="material-symbols-rounded nav-icon">person</span>
-        <span>Account</span>
-      </a>
-      <a href="branches.html" class="nav-item">
-        <span class="material-symbols-rounded nav-icon">business</span>
-        <span>Branches</span>
+      <a href="point-of-sale.html" class="nav-item">
+        <span class="material-symbols-rounded nav-icon">point_of_sale</span>
+        <span>Point of Sale</span>
       </a>
       <a href="inventory.html" class="nav-item">
-        <span class="material-symbols-rounded nav-icon">inventory</span>
+        <span class="material-symbols-rounded nav-icon">inventory_2</span>
         <span>Inventory</span>
+      </a>
+      <a href="prescriptions.html" class="nav-item">
+        <span class="material-symbols-rounded nav-icon">prescriptions</span>
+        <span>Prescriptions</span>
       </a>
       <a href="patients.html" class="nav-item">
         <span class="material-symbols-rounded nav-icon">people</span>
         <span>Patients</span>
       </a>
-      <a href="prescriptions.html" class="nav-item">
-        <span class="material-symbols-rounded nav-icon">prescriptions</span>
-        <span>Prescriptions</span>
+      <a href="sales.html" class="nav-item">
+        <span class="material-symbols-rounded nav-icon">receipt_long</span>
+        <span>Sales</span>
       </a>
       <a href="payments.html" class="nav-item">
         <span class="material-symbols-rounded nav-icon">payments</span>
@@ -379,10 +379,18 @@
       </a>
       <a href="user-management.html" class="nav-item">
         <span class="material-symbols-rounded nav-icon">admin_panel_settings</span>
-        <span>Users</span>
+        <span>User Management</span>
+      </a>
+      <!-- Branch navigation - always visible for all users -->
+      <a href="branches.html" class="nav-item">
+        <span class="material-symbols-rounded nav-icon">business</span>
+        <span>Branches</span>
+      </a>
+      <a href="account.html" class="nav-item active">
+        <span class="material-symbols-rounded nav-icon">settings</span>
+        <span>Account</span>
       </a>
     </nav>
-
     <div class="logout-section" style="padding: 1rem; border-top: 1px solid rgba(255, 255, 255, 0.1); margin-top: auto;">
       <button class="logout-button" @click="handleLogout()" style="display: flex; align-items: center; gap: 0.75rem; padding: 0.75rem 1.25rem; color: rgba(255, 255, 255, 0.8); text-decoration: none; transition: all 0.2s ease; cursor: pointer; font-size: 0.8rem; font-weight: 500; width: 100%; border: none; background: transparent; text-align: left;">
         <span class="material-symbols-rounded">logout</span>
@@ -452,6 +460,12 @@
                   class="tab-button">
             <span class="material-symbols-rounded" style="font-size: 1rem; margin-right: 0.5rem;">notifications</span>
             Notifications
+          </button>
+          <button @click="activeSection = 'subscription'" 
+                  :class="{'active': activeSection === 'subscription'}" 
+                  class="tab-button">
+            <span class="material-symbols-rounded" style="font-size: 1rem; margin-right: 0.5rem;">credit_card</span>
+            Subscription
           </button>
         </div>
 
@@ -644,6 +658,312 @@
         </div>
       </form>
     </div>
+
+    <!-- Subscription Section -->
+    <div x-show="activeSection === 'subscription'" class="form-section">
+      <h2 class="text-xl font-semibold mb-4">Subscription Management</h2>
+      
+      <!-- Current Subscription Status -->
+      <div class="card mb-6">
+        <div class="card-header">
+          <h3 class="card-title">Current Plan</h3>
+          <div class="card-description">Manage your subscription and billing</div>
+        </div>
+        
+        <div x-show="subscriptionLoading" class="text-center py-4">
+          <div class="inline-block animate-spin rounded-full h-6 w-6 border-b-2 border-gray-900"></div>
+          <div class="mt-2 text-gray-600">Loading subscription information...</div>
+        </div>
+        
+        <div x-show="!subscriptionLoading && subscriptionStatus" class="space-y-4">
+          <!-- Trial Status -->
+          <div x-show="subscriptionStatus.isInTrial" class="p-4 bg-blue-50 border border-blue-200 rounded-lg">
+            <div class="flex items-center justify-between">
+              <div>
+                <div class="font-semibold text-blue-900">Free Trial Active</div>
+                <div class="text-blue-700 text-sm" x-text="`${subscriptionStatus.trialDaysRemaining} days remaining`"></div>
+              </div>
+              <div class="text-blue-600">
+                <span class="material-symbols-rounded" style="font-size: 2rem;">timer</span>
+              </div>
+            </div>
+          </div>
+          
+          <!-- Active Subscription -->
+          <div x-show="subscriptionStatus.hasActiveSubscription && !subscriptionStatus.isInTrial" class="p-4 bg-green-50 border border-green-200 rounded-lg">
+            <div class="flex items-center justify-between">
+              <div>
+                <div class="font-semibold text-green-900" x-text="subscriptionStatus.subscription.planType + ' Plan'"></div>
+                <div class="text-green-700 text-sm">Active until <span x-text="formatDate(subscriptionStatus.subscription.endDate)"></span></div>
+              </div>
+              <div class="text-green-600">
+                <span class="material-symbols-rounded" style="font-size: 2rem;">check_circle</span>
+              </div>
+            </div>
+          </div>
+          
+          <!-- Expired Subscription -->
+          <div x-show="!subscriptionStatus.hasActiveSubscription && !subscriptionStatus.isInTrial" class="p-4 bg-red-50 border border-red-200 rounded-lg">
+            <div class="flex items-center justify-between">
+              <div>
+                <div class="font-semibold text-red-900">No Active Subscription</div>
+                <div class="text-red-700 text-sm">Subscribe to continue using all features</div>
+              </div>
+              <div class="text-red-600">
+                <span class="material-symbols-rounded" style="font-size: 2rem;">warning</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Available Plans -->
+      <div class="card">
+        <div class="card-header">
+          <h3 class="card-title">Available Plans</h3>
+          <div class="card-description">Choose the plan that fits your needs</div>
+        </div>
+        
+        <div x-show="plansLoading" class="text-center py-4">
+          <div class="inline-block animate-spin rounded-full h-6 w-6 border-b-2 border-gray-900"></div>
+          <div class="mt-2 text-gray-600">Loading available plans...</div>
+        </div>
+        
+        <div x-show="!plansLoading && availablePlans.length > 0" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+          <template x-for="plan in availablePlans" :key="plan.id">
+            <div class="border rounded-lg p-4 hover:shadow-lg transition-shadow"
+                 :class="{
+                   'border-blue-500 bg-blue-50': subscriptionStatus.subscription?.planType === plan.id,
+                   'border-gray-200': subscriptionStatus.subscription?.planType !== plan.id
+                 }">
+              <div class="text-center">
+                <h4 class="font-semibold text-lg mb-2" x-text="plan.name"></h4>
+                <div class="text-2xl font-bold mb-1">
+                  <span x-text="plan.promoPrice || plan.regularPrice"></span>
+                  <span class="text-sm text-gray-600">/month</span>
+                </div>
+                <div x-show="plan.promoPrice && plan.promoPrice !== plan.regularPrice" class="text-sm text-gray-500 line-through mb-3">
+                  <span x-text="plan.regularPrice"></span>
+                </div>
+                <div class="text-left space-y-2 mb-4">
+                  <template x-for="feature in plan.features" :key="feature">
+                    <div class="flex items-center text-sm">
+                      <span class="material-symbols-rounded text-green-500 mr-2" style="font-size: 1rem;">check</span>
+                      <span x-text="feature"></span>
+                    </div>
+                  </template>
+                </div>
+                <div class="text-xs text-gray-600 mb-3">
+                  <div><strong>Users:</strong> <span x-text="plan.maxUsers"></span></div>
+                  <div><strong>Branches:</strong> <span x-text="plan.maxBranches"></span></div>
+                </div>
+                <button @click="subscribeToPlan(plan.id)" 
+                        :disabled="processing"
+                        :class="{
+                          'btn-primary': subscriptionStatus.subscription?.planType !== plan.id,
+                          'btn-secondary': subscriptionStatus.subscription?.planType === plan.id
+                        }"
+                        class="w-full">
+                  <span x-show="!processing" x-text="subscriptionStatus.subscription?.planType === plan.id ? 'Current Plan' : 'Subscribe Now'"></span>
+                  <span x-show="processing" class="flex items-center justify-center">
+                    <div class="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2"></div>
+                    Processing...
+                  </span>
+                </button>
+              </div>
+            </div>
+          </template>
+        </div>
+      </div>
+
+      <!-- Payment Methods Section -->
+      <div class="card mt-6" x-show="showPaymentModal">
+        <div class="card-header">
+          <h3 class="card-title">Complete Your Subscription</h3>
+          <div class="card-description">Choose your preferred payment method</div>
+        </div>
+        
+        <div class="space-y-6">
+          <!-- Payment Method Selection -->
+          <div>
+            <label class="form-label">Payment Method</label>
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+              <label class="border rounded-lg p-4 cursor-pointer hover:bg-gray-50"
+                     :class="{'border-blue-500 bg-blue-50': selectedPaymentMethod === 'mobile_money'}">
+                <input type="radio" name="paymentMethod" value="mobile_money" x-model="selectedPaymentMethod" class="sr-only">
+                <div class="text-center">
+                  <span class="material-symbols-rounded text-2xl mb-2" style="color: #14B8A6;">smartphone</span>
+                  <div class="font-semibold">Mobile Money</div>
+                  <div class="text-sm text-gray-600">Airtel Money, MTN Mobile Money</div>
+                </div>
+              </label>
+              
+              <label class="border rounded-lg p-4 cursor-pointer hover:bg-gray-50"
+                     :class="{'border-blue-500 bg-blue-50': selectedPaymentMethod === 'bank_transfer'}">
+                <input type="radio" name="paymentMethod" value="bank_transfer" x-model="selectedPaymentMethod" class="sr-only">
+                <div class="text-center">
+                  <span class="material-symbols-rounded text-2xl mb-2" style="color: #2563EB;">account_balance</span>
+                  <div class="font-semibold">Bank Transfer</div>
+                  <div class="text-sm text-gray-600">Direct bank deposit</div>
+                </div>
+              </label>
+              
+              <label class="border rounded-lg p-4 cursor-pointer hover:bg-gray-50"
+                     :class="{'border-blue-500 bg-blue-50': selectedPaymentMethod === 'cash'}">
+                <input type="radio" name="paymentMethod" value="cash" x-model="selectedPaymentMethod" class="sr-only">
+                <div class="text-center">
+                  <span class="material-symbols-rounded text-2xl mb-2" style="color: #22c55e;">payments</span>
+                  <div class="font-semibold">Cash</div>
+                  <div class="text-sm text-gray-600">In-person payment</div>
+                </div>
+              </label>
+            </div>
+          </div>
+
+          <!-- Payment Details -->
+          <div x-show="selectedPaymentMethod">
+            <!-- Mobile Money Details -->
+            <div x-show="selectedPaymentMethod === 'mobile_money'" class="space-y-4">
+              <div class="bg-blue-50 border border-blue-200 rounded-lg p-4">
+                <h4 class="font-semibold text-blue-900 mb-2">Mobile Money Details</h4>
+                <div class="space-y-2 text-sm">
+                  <div><strong>Airtel Money:</strong> +260 977 123 456</div>
+                  <div><strong>MTN Mobile Money:</strong> +260 966 123 456</div>
+                  <div><strong>Account Name:</strong> UMI Health Systems Ltd</div>
+                </div>
+              </div>
+              <div class="form-group">
+                <label class="form-label">Transaction Reference</label>
+                <input type="text" class="form-input" x-model="paymentForm.transactionReference" 
+                       placeholder="Enter transaction ID/reference">
+              </div>
+            </div>
+
+            <!-- Bank Transfer Details -->
+            <div x-show="selectedPaymentMethod === 'bank_transfer'" class="space-y-4">
+              <div class="bg-blue-50 border border-blue-200 rounded-lg p-4">
+                <h4 class="font-semibold text-blue-900 mb-2">Bank Transfer Details</h4>
+                <div class="space-y-2 text-sm">
+                  <div><strong>Bank:</strong> Zanaco</div>
+                  <div><strong>Account Name:</strong> UMI Health Systems Ltd</div>
+                  <div><strong>Account Number:</strong> 1234567890</div>
+                  <div><strong>Branch:</strong> Lusaka Main Branch</div>
+                  <div><strong>Swift Code:</strong> ZANCOZMLXXX</div>
+                </div>
+              </div>
+              <div class="form-group">
+                <label class="form-label">Transaction Reference</label>
+                <input type="text" class="form-input" x-model="paymentForm.transactionReference" 
+                       placeholder="Enter deposit slip number">
+              </div>
+            </div>
+
+            <!-- Cash Payment Details -->
+            <div x-show="selectedPaymentMethod === 'cash'" class="space-y-4">
+              <div class="bg-green-50 border border-green-200 rounded-lg p-4">
+                <h4 class="font-semibold text-green-900 mb-2">Cash Payment Instructions</h4>
+                <div class="space-y-2 text-sm">
+                  <div>Visit our office at:</div>
+                  <div><strong>Address:</strong> Plot 1234, Great East Road, Lusaka</div>
+                  <div><strong>Hours:</strong> Monday - Friday, 8:00 AM - 5:00 PM</div>
+                  <div><strong>Contact:</strong> +260 211 123 456</div>
+                </div>
+              </div>
+              <div class="form-group">
+                <label class="form-label">Receipt Number</label>
+                <input type="text" class="form-input" x-model="paymentForm.transactionReference" 
+                       placeholder="Enter receipt number">
+              </div>
+            </div>
+
+            <!-- Payment Receipt Upload -->
+            <div x-show="selectedPaymentMethod !== 'cash'" class="form-group">
+              <label class="form-label">Payment Receipt (Screenshot)</label>
+              <input type="file" class="form-input" accept="image/*" @change="handlePaymentReceipt($event)">
+              <div class="text-sm text-gray-600 mt-1">
+                Upload a screenshot of your payment confirmation (mobile money) or deposit slip (bank transfer)
+              </div>
+              <div x-show="paymentForm.receiptPreview" class="mt-2">
+                <img :src="paymentForm.receiptPreview" class="max-w-xs rounded border" alt="Payment receipt">
+              </div>
+            </div>
+
+            <!-- Additional Notes -->
+            <div class="form-group">
+              <label class="form-label">Additional Notes</label>
+              <textarea class="form-input form-textarea" x-model="paymentForm.additionalNotes" 
+                        placeholder="Any additional information about your payment..."></textarea>
+            </div>
+          </div>
+
+          <!-- Action Buttons -->
+          <div class="flex gap-2">
+            <button @click="submitPayment()" :disabled="!selectedPaymentMethod || paymentProcessing" 
+                    class="btn btn-primary">
+              <span x-show="!paymentProcessing">Submit Payment</span>
+              <span x-show="paymentProcessing" class="flex items-center">
+                <div class="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2"></div>
+                Processing...
+              </span>
+            </button>
+            <button @click="showPaymentModal = false; resetPaymentForm()" class="btn btn-secondary">
+              Cancel
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <!-- User Limit Request Section -->
+      <div class="card mt-6">
+        <div class="card-header">
+          <h3 class="card-title">User Limit Management</h3>
+          <div class="card-description">Request additional users beyond your plan limit</div>
+        </div>
+        
+        <div class="space-y-4">
+          <div class="bg-yellow-50 border border-yellow-200 rounded-lg p-4">
+            <div class="flex items-center">
+              <span class="material-symbols-rounded text-yellow-600 mr-2" style="font-size: 1.5rem;">info</span>
+              <div class="text-sm">
+                <strong>Additional Users:</strong> ZMW 50 per user per month
+                <br>Requests require approval from operations or super admin
+              </div>
+            </div>
+          </div>
+          
+          <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+            <div class="form-group">
+              <label class="form-label">Current Users</label>
+              <input type="number" class="form-input" x-model="userLimitForm.currentUsers" readonly>
+            </div>
+            <div class="form-group">
+              <label class="form-label">Requested Users</label>
+              <input type="number" class="form-input" x-model="userLimitForm.requestedUsers" 
+                     :min="userLimitForm.currentUsers" @input="calculateAdditionalCost()">
+            </div>
+            <div class="form-group">
+              <label class="form-label">Additional Cost</label>
+              <input type="text" class="form-input" :value="`ZMW ${userLimitForm.additionalCost}`" readonly>
+            </div>
+          </div>
+          
+          <div class="form-group">
+            <label class="form-label">Reason for Increase</label>
+            <textarea class="form-input form-textarea" x-model="userLimitForm.reason" 
+                      placeholder="Explain why you need additional users..."></textarea>
+          </div>
+          
+          <button @click="submitUserLimitRequest()" :disabled="userLimitProcessing" 
+                  class="btn btn-primary">
+            <span x-show="!userLimitProcessing">Submit Request</span>
+            <span x-show="userLimitProcessing" class="flex items-center">
+              <div class="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2"></div>
+              Processing...
+            </span>
+          </button>
+        </div>
+      </div>
+    </div>
   </div>
 
   <script>
@@ -704,6 +1024,43 @@
         passwordInfo: {
           lastChanged: null
         },
+        
+        // Subscription data
+        subscriptionLoading: false,
+        plansLoading: false,
+        processing: false,
+        subscriptionStatus: {
+          isInTrial: false,
+          hasActiveSubscription: false,
+          trialDaysRemaining: 0,
+          trialEndDate: null,
+          subscription: null
+        },
+        availablePlans: [],
+        
+        // Payment data
+        showPaymentModal: false,
+        selectedPaymentMethod: '',
+        paymentProcessing: false,
+        paymentForm: {
+          planType: '',
+          amount: 0,
+          transactionReference: '',
+          receiptPreview: '',
+          receiptBase64: '',
+          additionalNotes: ''
+        },
+        
+        // User limit request data
+        userLimitProcessing: false,
+        userLimitForm: {
+          currentUsers: 0,
+          requestedUsers: 0,
+          additionalUsers: 0,
+          additionalCost: 0,
+          reason: ''
+        },
+        
         twoFactorEnabled: false,
         
         // Password modal
@@ -740,7 +1097,10 @@
             await Promise.all([
               this.loadUserProfile(),
               this.loadPharmacySettings(),
-              this.loadSecuritySettings()
+              this.loadSecuritySettings(),
+              this.loadSubscriptionStatus(),
+              this.loadAvailablePlans(),
+              this.loadUserStats()
             ]);
           } catch (error) {
             console.error('Error loading account data:', error);
@@ -982,6 +1342,250 @@
           } catch (error) {
             console.error('Logout error:', error);
             window.location.href = '/public/signin.html';
+          }
+        },
+        
+        // Load user statistics
+        async loadUserStats() {
+          try {
+            if (!this.apiClient) return;
+            
+            const response = await this.apiClient.request('/user-management/user-stats');
+            
+            if (response.success && response.data) {
+              this.userLimitForm.currentUsers = response.data.currentUsers;
+              this.userLimitForm.requestedUsers = response.data.currentUsers;
+            }
+          } catch (error) {
+            console.error('Error loading user stats:', error);
+            this.backendHelper?.showNotification('Failed to load user statistics', 'error');
+          }
+        },
+        
+        // Load subscription status
+        async loadSubscriptionStatus() {
+          try {
+            if (!this.apiClient) return;
+            
+            this.subscriptionLoading = true;
+            const response = await this.apiClient.request('/subscription/status');
+            
+            if (response.success && response.data) {
+              this.subscriptionStatus = {
+                isInTrial: response.data.isInTrial,
+                hasActiveSubscription: response.data.hasActiveSubscription,
+                trialDaysRemaining: response.data.trialDaysRemaining,
+                trialEndDate: response.data.trialEndDate,
+                subscription: response.data.subscription
+              };
+            }
+          } catch (error) {
+            console.error('Error loading subscription status:', error);
+            this.backendHelper?.showNotification('Failed to load subscription status', 'error');
+          } finally {
+            this.subscriptionLoading = false;
+          }
+        },
+        
+        // Load available plans
+        async loadAvailablePlans() {
+          try {
+            if (!this.apiClient) return;
+            
+            this.plansLoading = true;
+            const response = await this.apiClient.request('/subscription/plans');
+            
+            if (response.success && response.data) {
+              this.availablePlans = response.data;
+            }
+          } catch (error) {
+            console.error('Error loading available plans:', error);
+            this.backendHelper?.showNotification('Failed to load available plans', 'error');
+          } finally {
+            this.plansLoading = false;
+          }
+        },
+        
+        // Subscribe to plan
+        async subscribeToPlan(planType) {
+          try {
+            if (!this.apiClient) {
+              this.backendHelper?.showNotification('API client not available', 'error');
+              return;
+            }
+            
+            // Check if this is already the current plan
+            if (this.subscriptionStatus.subscription?.planType === planType) {
+              this.backendHelper?.showNotification('You are already on this plan', 'info');
+              return;
+            }
+            
+            // Get plan details
+            const plan = this.availablePlans.find(p => p.id === planType);
+            if (!plan) {
+              this.backendHelper?.showNotification('Plan not found', 'error');
+              return;
+            }
+            
+            // Show payment modal
+            this.paymentForm.planType = planType;
+            this.paymentForm.amount = parseFloat(plan.promoPrice?.replace('ZMW ', '') || plan.regularPrice?.replace('ZMW ', ''));
+            this.showPaymentModal = true;
+          } catch (error) {
+            console.error('Error preparing subscription:', error);
+            this.backendHelper?.showNotification('Failed to prepare subscription', 'error');
+          }
+        },
+        
+        // Handle payment receipt upload
+        handlePaymentReceipt(event) {
+          const file = event.target.files[0];
+          if (file) {
+            const reader = new FileReader();
+            reader.onload = (e) => {
+              this.paymentForm.receiptPreview = e.target.result;
+              this.paymentForm.receiptBase64 = e.target.result.split(',')[1]; // Remove data:image/...;base64, prefix
+            };
+            reader.readAsDataURL(file);
+          }
+        },
+        
+        // Reset payment form
+        resetPaymentForm() {
+          this.paymentForm = {
+            planType: '',
+            amount: 0,
+            transactionReference: '',
+            receiptPreview: '',
+            receiptBase64: '',
+            additionalNotes: ''
+          };
+          this.selectedPaymentMethod = '';
+        },
+        
+        // Submit payment
+        async submitPayment() {
+          try {
+            if (!this.selectedPaymentMethod) {
+              this.backendHelper?.showNotification('Please select a payment method', 'error');
+              return;
+            }
+            
+            if (!this.paymentForm.transactionReference) {
+              this.backendHelper?.showNotification('Please provide transaction reference', 'error');
+              return;
+            }
+            
+            if (this.selectedPaymentMethod !== 'cash' && !this.paymentForm.receiptBase64) {
+              this.backendHelper?.showNotification('Please upload payment receipt', 'error');
+              return;
+            }
+            
+            this.paymentProcessing = true;
+            
+            const paymentData = {
+              planType: this.paymentForm.planType,
+              paymentMethod: this.selectedPaymentMethod,
+              amount: this.paymentForm.amount,
+              transactionReference: this.paymentForm.transactionReference,
+              paymentReceipt: this.paymentForm.receiptBase64,
+              additionalNotes: this.paymentForm.additionalNotes
+            };
+            
+            const response = await this.apiClient.request('/subscription/submit-payment', {
+              method: 'POST',
+              body: JSON.stringify(paymentData)
+            });
+            
+            if (response.success) {
+              this.backendHelper?.showNotification('Payment submitted successfully! Awaiting approval.', 'success');
+              this.showPaymentModal = false;
+              this.resetPaymentForm();
+              // Start checking payment status
+              this.checkPaymentStatus(response.paymentId);
+            } else {
+              throw new Error(response.message || 'Failed to submit payment');
+            }
+          } catch (error) {
+            console.error('Error submitting payment:', error);
+            this.backendHelper?.showNotification('Failed to submit payment', 'error');
+          } finally {
+            this.paymentProcessing = false;
+          }
+        },
+        
+        // Check payment status
+        async checkPaymentStatus(paymentId) {
+          try {
+            const checkStatus = async () => {
+              const response = await this.apiClient.request(`/subscription/payment-status/${paymentId}`);
+              
+              if (response.success && response.data.status === 'approved') {
+                this.backendHelper?.showNotification('Payment approved! Subscription activated.', 'success');
+                await this.loadSubscriptionStatus();
+              } else if (response.data.status === 'rejected') {
+                this.backendHelper?.showNotification('Payment rejected. Please contact support.', 'error');
+              } else {
+                // Still pending, check again in 30 seconds
+                setTimeout(checkStatus, 30000);
+              }
+            };
+            
+            // Start checking after 5 seconds
+            setTimeout(checkStatus, 5000);
+          } catch (error) {
+            console.error('Error checking payment status:', error);
+          }
+        },
+        
+        // Calculate additional cost
+        calculateAdditionalCost() {
+          const additionalUsers = this.userLimitForm.requestedUsers - this.userLimitForm.currentUsers;
+          this.userLimitForm.additionalUsers = Math.max(0, additionalUsers);
+          this.userLimitForm.additionalCost = this.userLimitForm.additionalUsers * 50;
+        },
+        
+        // Submit user limit request
+        async submitUserLimitRequest() {
+          try {
+            if (this.userLimitForm.requestedUsers <= this.userLimitForm.currentUsers) {
+              this.backendHelper?.showNotification('Requested users must be greater than current users', 'error');
+              return;
+            }
+            
+            if (!this.userLimitForm.reason) {
+              this.backendHelper?.showNotification('Please provide a reason for the increase', 'error');
+              return;
+            }
+            
+            this.userLimitProcessing = true;
+            
+            const requestData = {
+              currentUsers: this.userLimitForm.currentUsers,
+              requestedUsers: this.userLimitForm.requestedUsers,
+              reason: this.userLimitForm.reason
+            };
+            
+            const response = await this.apiClient.request('/user-management/request-user-limit', {
+              method: 'POST',
+              body: JSON.stringify(requestData)
+            });
+            
+            if (response.success) {
+              this.backendHelper?.showNotification('User limit request submitted for approval', 'success');
+              // Reset form
+              this.userLimitForm.reason = '';
+              this.userLimitForm.requestedUsers = this.userLimitForm.currentUsers;
+              this.userLimitForm.additionalUsers = 0;
+              this.userLimitForm.additionalCost = 0;
+            } else {
+              throw new Error(response.message || 'Failed to submit request');
+            }
+          } catch (error) {
+            console.error('Error submitting user limit request:', error);
+            this.backendHelper?.showNotification('Failed to submit user limit request', 'error');
+          } finally {
+            this.userLimitProcessing = false;
           }
         },
         

@@ -87,12 +87,11 @@ namespace UmiHealth.API
             // builder.Services.AddIdentity(builder.Configuration);
 
             // Register application services
-            builder.Services.AddScoped<IPatientService, PatientService>();
+            builder.Services.AddScoped<IPaymentNotificationService, PaymentNotificationService>();
+            builder.Services.AddScoped<IEmailService, EmailService>();
             builder.Services.AddScoped<IUserInvitationService, UserInvitationService>();
             builder.Services.AddScoped<IUserService, UserService>();
-            builder.Services.AddScoped<IEmailService, EmailService>();
-            builder.Services.AddScoped<ISubscriptionService, SubscriptionService>();
-            builder.Services.AddScoped<ISubscriptionFeatureService, SubscriptionFeatureService>();
+            builder.Services.AddScoped<IPaymentNotificationService, PaymentNotificationService>();
             
             // Add Security Audit Service
             builder.Services.AddSecurityAudit();
@@ -118,6 +117,7 @@ namespace UmiHealth.API
             app.MapHub<SalesHub>("/salesHub");
             app.MapHub<NotificationHub>("/notificationHub");
             app.MapHub<TestHub>("/testHub");
+            app.MapHub<PaymentNotificationHub>("/paymentNotificationHub");
 
             app.UseAuthorization();
 

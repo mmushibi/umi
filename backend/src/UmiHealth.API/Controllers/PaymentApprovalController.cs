@@ -5,6 +5,7 @@ using Microsoft.Extensions.Logging;
 using UmiHealth.Application.Models;
 using UmiHealth.Domain.Entities;
 using UmiHealth.Persistence.Data;
+using UmiHealth.API.Hubs;
 using System;
 using System.Linq;
 using System.Threading.Tasks;
@@ -18,13 +19,19 @@ namespace UmiHealth.API.Controllers
     {
         private readonly SharedDbContext _context;
         private readonly ILogger<PaymentApprovalController> _logger;
+        private readonly IHubContext<PaymentNotificationHub> _hubContext;
+        private readonly IPaymentNotificationService _notificationService;
 
         public PaymentApprovalController(
             SharedDbContext context,
-            ILogger<PaymentApprovalController> logger)
+            ILogger<PaymentApprovalController> logger,
+            IHubContext<PaymentNotificationHub> hubContext,
+            IPaymentNotificationService notificationService)
         {
             _context = context;
             _logger = logger;
+            _hubContext = hubContext;
+            _notificationService = notificationService;
         }
 
         /// <summary>
@@ -99,18 +106,15 @@ namespace UmiHealth.API.Controllers
 
                 _context.Payments.Update(payment);
                 await _context.SaveChangesAsync();
-
                 // Activate subscription
                 await ActivateSubscription(payment.TenantId, payment.PlanType);
 
                 // Send confirmation to tenant
                 await SendConfirmationToTenant(payment);
-
-                _logger.LogInformation("Payment {PaymentId} approved by {User}", 
-                    request.PaymentId, User.Identity?.Name);
-
-                return Ok(new PaymentApprovalResponse
+                await _hubContext.Clients.All.SendAsync("paymentApproved", new PaymentApprovalNotification
                 {
+                    PaymentId = payment.Id,
+                    TenantId = payment.TenantId,
                     Success = true,
                     Message = "Payment approved successfully",
                     ApprovedBy = payment.ApprovedBy,
@@ -162,10 +166,9 @@ namespace UmiHealth.API.Controllers
                 await _context.SaveChangesAsync();
 
                 // Send rejection notification to tenant
-                await SendRejectionToTenant(payment);
-
-                _logger.LogInformation("Payment {PaymentId} rejected by {User}", 
-                    request.PaymentId, User.Identity?.Name);
+                await _notificationService.SendPaymentRejectionAsync(payment.TenantId, payment.Id, payment.AdditionalNotes);
+                _logger.LogInformation("Payment rejection sent to tenant {TenantId} for payment {PaymentId}", 
+                    payment.TenantId, payment.Id);
 
                 return Ok(new
                 {
@@ -252,6 +255,8 @@ namespace UmiHealth.API.Controllers
 
                 _logger.LogInformation("User limit request {RequestId} approved for tenant {TenantId}", 
                     request.RequestId, limitRequest.TenantId);
+                
+                await _notificationService.SendUserLimitApprovalAsync(limitRequest.TenantId, limitRequest.Id, limitRequest.RequestedUsers);
 
                 return Ok(new { success = true, message = "User limit approved successfully" });
             }
@@ -294,21 +299,32 @@ namespace UmiHealth.API.Controllers
 
         private async Task SendConfirmationToTenant(PaymentRecord payment)
         {
-            // TODO: Implement email/SMS notification
-            _logger.LogInformation("Payment confirmation sent to tenant {TenantId} for payment {PaymentId}", 
-                payment.TenantId, payment.Id);
-        }
+            await _hubContext.Clients.Group($"tenant_{payment.TenantId}").SendAsync("paymentApproved", new PaymentApprovalNotification
+            {
+                paymentId = payment.Id,
+                paymentId = payment.Id,
+                tenantId = payment.TenantId,
+                status = "rejected",
+                approvedBy = payment.ApprovedBy,
+                approvalDate = payment.ApprovalDate,
+                additionalNotes = payment.AdditionalNotes
+            });
 
-        private async Task SendRejectionToTenant(PaymentRecord payment)
-        {
-            // TODO: Implement email/SMS notification
             _logger.LogInformation("Payment rejection sent to tenant {TenantId} for payment {PaymentId}", 
                 payment.TenantId, payment.Id);
         }
 
-        private string GenerateConfirmationNumber()
+        private async Task NotifyUserLimitRequest(string requestId, string status, string? approvedBy = null)
         {
-            return $"UMI-{DateTime.UtcNow:yyyyMMdd}-{new Random().Next(1000, 9999)}";
+            await _hubContext.Clients.Group($"tenant_{requestId}").SendAsync("userLimitRequestUpdate", new
+            {
+                requestId = requestId,
+                status = status,
+                approvedBy = approvedBy,
+                updatedAt = DateTime.UtcNow
+            });
+
+            _logger.LogInformation("User limit request update sent: {RequestId} - {Status}", requestId, status);
         }
     }
 
