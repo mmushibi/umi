@@ -18,6 +18,8 @@ using Microsoft.AspNetCore.Mvc.ApiExplorer;
 using Microsoft.AspNetCore.Mvc;
 using Swashbuckle.AspNetCore.SwaggerGen;
 using UmiHealth.Infrastructure.Data;
+using UmiHealth.API.Middleware;
+using UmiHealth.API.Hubs;
 
 namespace UmiHealth.API
 {

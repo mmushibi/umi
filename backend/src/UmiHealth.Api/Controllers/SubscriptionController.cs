@@ -185,7 +185,7 @@ namespace UmiHealth.API.Controllers
                     PaymentMethod = request.PaymentMethod,
                     TransactionReference = request.TransactionReference,
                     PaymentReceipt = request.PaymentReceipt,
-                    Status = PaymentStatusType.Pending,
+                    Status = PaymentStatusType.Pending.ToString(),
                     RequestDate = DateTime.UtcNow,
                     AdditionalNotes = request.AdditionalNotes
                 };
@@ -204,7 +204,7 @@ namespace UmiHealth.API.Controllers
                     Success = true,
                     Message = "Payment submitted for approval",
                     PaymentId = paymentId,
-                    Status = PaymentStatusType.Pending,
+                    Status = PaymentStatusType.Pending.ToString(),
                     EstimatedApprovalTime = DateTime.UtcNow.AddHours(2) // Estimate 2 hours for approval
                 });
             }
