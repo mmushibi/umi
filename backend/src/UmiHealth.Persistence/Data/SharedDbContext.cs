@@ -59,6 +59,10 @@ namespace UmiHealth.Persistence.Data
         public DbSet<Domain.Entities.SystemNotification> SystemNotifications { get; set; }
         public DbSet<Domain.Entities.BackupRecord> BackupRecords { get; set; }
         public DbSet<Domain.Entities.ApiKey> ApiKeys { get; set; }
+        public DbSet<Domain.Entities.BlockedIpAddress> BlockedIpAddresses { get; set; }
+        public DbSet<Domain.Entities.SecurityIncident> SecurityIncidents { get; set; }
+        public DbSet<Domain.Entities.SecurityMetric> SecurityMetrics { get; set; }
+        public DbSet<Domain.Entities.SecurityAuditEvent> SecurityAuditEvents { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {

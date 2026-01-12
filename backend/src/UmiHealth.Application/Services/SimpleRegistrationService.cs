@@ -156,7 +156,7 @@ namespace UmiHealth.Application.Services
                     await transaction.CommitAsync(cancellationToken);
 
                     _logger.LogInformation("Successfully registered pharmacy {PharmacyName} with tenant ID {TenantId}", 
-                        request.PharmacyName, tenant.Id);
+                    request.PharmacyName, tenant.Id);
 
                     return new SimpleRegistrationResult
                     {

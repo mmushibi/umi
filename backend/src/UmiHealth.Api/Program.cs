@@ -93,6 +93,9 @@ namespace UmiHealth.API
             builder.Services.AddScoped<IEmailService, EmailService>();
             builder.Services.AddScoped<ISubscriptionService, SubscriptionService>();
             builder.Services.AddScoped<ISubscriptionFeatureService, SubscriptionFeatureService>();
+            
+            // Add Security Audit Service
+            builder.Services.AddSecurityAudit();
 
             var app = builder.Build();
 
@@ -105,6 +108,9 @@ namespace UmiHealth.API
 
             app.UseHttpsRedirection();
             app.UseCors("AllowAll");
+
+            // Add Security Audit Middleware (before auth)
+            app.UseMiddleware<SecurityAuditMiddleware>();
 
             // Configure SignalR hubs (must be before UseAuthorization)
             app.MapHub<PharmacyHub>("/pharmacyHub");
