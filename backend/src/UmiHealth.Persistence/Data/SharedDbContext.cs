@@ -999,6 +999,54 @@ namespace UmiHealth.Persistence.Data
                 entity.HasIndex(e => e.Prefix);
             });
 
+            // Configure Role entity to fix ambiguous relationship
+            modelBuilder.Entity<Core.Entities.Role>(entity =>
+            {
+                entity.ToTable("roles", "shared");
+                entity.HasKey(e => e.Id);
+
+                entity.Property(e => e.Name)
+                    .IsRequired()
+                    .HasMaxLength(100);
+
+                entity.Property(e => e.NormalizedName)
+                    .IsRequired()
+                    .HasMaxLength(100);
+
+                entity.Property(e => e.Description)
+                    .HasMaxLength(500);
+
+                // Explicitly configure the relationship with Tenant - don't use Roles collection to avoid ambiguity
+                entity.HasOne<Domain.Entities.Tenant>()
+                    .WithMany()
+                    .HasForeignKey(e => e.TenantId)
+                    .OnDelete(DeleteBehavior.Cascade);
+
+                entity.HasIndex(e => e.TenantId);
+                entity.HasIndex(e => e.NormalizedName);
+            });
+
+            // Configure UserRole entity to fix ambiguous relationship
+            modelBuilder.Entity<Core.Entities.UserRole>(entity =>
+            {
+                entity.ToTable("user_roles", "shared");
+                entity.HasKey(e => e.Id);
+
+                entity.HasOne(e => e.User)
+                    .WithMany()
+                    .HasForeignKey(e => e.UserId)
+                    .OnDelete(DeleteBehavior.Cascade);
+
+                entity.HasOne(e => e.Role)
+                    .WithMany()
+                    .HasForeignKey(e => e.RoleId)
+                    .OnDelete(DeleteBehavior.Cascade);
+
+                entity.HasIndex(e => e.UserId);
+                entity.HasIndex(e => e.RoleId);
+                entity.HasIndex(e => new { e.UserId, e.RoleId }).IsUnique();
+            });
+
             // Apply soft deletes globally
             ApplySoftDeletes(modelBuilder);
         }
