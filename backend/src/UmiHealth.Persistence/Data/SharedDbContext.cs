@@ -23,6 +23,8 @@ namespace UmiHealth.Persistence.Data
         public DbSet<Domain.Entities.NotificationSettings> NotificationSettings { get; set; }
         public DbSet<Domain.Entities.PaymentTransaction> PaymentTransactions { get; set; }
         public DbSet<Domain.Entities.RefundRequestEntity> RefundRequests { get; set; }
+        public DbSet<PaymentRecord> Payments { get; set; }
+        public DbSet<UserLimitRequest> UserLimitRequests { get; set; }
         
         // Multi-tenancy entities
         public DbSet<Domain.Entities.StockTransfer> StockTransfers { get; set; }
@@ -32,7 +34,7 @@ namespace UmiHealth.Persistence.Data
         public DbSet<Domain.Entities.Patient> Patients { get; set; }
         public DbSet<Domain.Entities.Prescription> Prescriptions { get; set; }
         public DbSet<Domain.Entities.Sale> Sales { get; set; }
-        public DbSet<Core.Entities.Payment> Payments { get; set; }
+        public DbSet<Core.Entities.Payment> CorePayments { get; set; }
         public DbSet<Domain.Entities.AuditLog> AuditLogs { get; set; }
         public DbSet<Domain.Entities.BranchPermission> BranchPermissions { get; set; }
         public DbSet<Domain.Entities.ProcurementRequest> ProcurementRequests { get; set; }
