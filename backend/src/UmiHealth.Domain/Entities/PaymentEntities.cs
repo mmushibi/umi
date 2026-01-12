@@ -81,5 +81,10 @@ namespace UmiHealth.Domain.Entities
         public bool IsProcessed { get; set; } = false;
         public DateTime? ProcessedDate { get; set; }
         public string? ProcessedBy { get; set; }
+        
+        // Additional properties for API compatibility
+        public string Status { get; set; } = string.Empty;
+        public string? ApprovedBy { get; set; }
+        public DateTime? ApprovalDate { get; set; }
     }
 }

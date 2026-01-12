@@ -303,12 +303,12 @@ namespace UmiHealth.API.Controllers
         {
             await _hubContext.Clients.Group($"tenant_{payment.TenantId}").SendAsync("paymentApproved", new PaymentApprovalNotification
             {
-                paymentId = payment.Id,
-                tenantId = payment.TenantId,
-                status = "approved",
-                approvedBy = payment.ProcessedBy,
-                approvalDate = payment.ProcessedDate,
-                additionalNotes = payment.AdditionalNotes
+                PaymentId = payment.Id,
+                TenantId = payment.TenantId,
+                Status = "approved",
+                ApprovedBy = payment.ApprovedBy,
+                ApprovalDate = payment.ApprovalDate,
+                AdditionalNotes = payment.AdditionalNotes
             });
 
             _logger.LogInformation("Payment approval sent to tenant {TenantId} for payment {PaymentId}", 
