@@ -23,6 +23,7 @@
           "UmiHealth.Core": "1.0.0",
           "UmiHealth.Identity": "1.0.0",
           "UmiHealth.Infrastructure": "1.0.0",
+          "UmiHealth.Persistence": "1.0.0",
           "UmiHealth.Shared": "1.0.0"
         },
         "runtime": {
