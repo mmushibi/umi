@@ -176,18 +176,20 @@ namespace UmiHealth.Application.Services
                 status.LastSyncAttempt = DateTime.UtcNow;
                 status.CurrentOperation = "Syncing Payments";
 
+                // Use TenantId and RequestDate because PaymentRecord does not have BranchId/DeletedAt/UpdatedAt
                 var payments = await _context.Payments
-                    .Where(p => p.BranchId == branchId && p.DeletedAt == null)
-                    .OrderByDescending(p => p.UpdatedAt)
+                    .Where(p => p.TenantId == tenantId)
+                    .OrderByDescending(p => p.RequestDate)
                     .ToListAsync();
 
-                var cacheKey = $"payments_{tenantId}_{branchId}";
+                // Cache at tenant-level for now (branch not available on PaymentRecord)
+                var cacheKey = $"payments_{tenantId}";
                 _cache.Set(cacheKey, payments, TimeSpan.FromMinutes(5));
 
                 status.LastSyncSuccess = DateTime.UtcNow;
                 status.SyncErrors.Clear();
-                _logger.LogInformation("Successfully synced {Count} payments for tenant {TenantId}, branch {BranchId}", 
-                    payments.Count, tenantId, branchId);
+                _logger.LogInformation("Successfully synced {Count} payments for tenant {TenantId}", 
+                    payments.Count, tenantId);
             }
             catch (Exception ex)
             {
