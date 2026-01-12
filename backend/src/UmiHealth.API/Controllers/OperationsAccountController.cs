@@ -179,7 +179,7 @@ namespace UmiHealth.API.Controllers
                         .ToDictionary(g => g.Key, g => g.Count()),
                     BranchDistribution = users
                         .Where(u => u.Branch != null)
-                        .GroupBy(u => u.Branch.Name)
+                        .GroupBy(u => u.Branch!.Name)
                         .ToDictionary(g => g.Key, g => g.Count())
                 };
 
@@ -453,7 +453,7 @@ namespace UmiHealth.API.Controllers
                 IsCompleted = settings.ContainsKey("onboardingCompleted") && 
                               bool.TryParse(settings["onboardingCompleted"].ToString(), out var completed) && completed,
                 CompletedAt = settings.ContainsKey("onboardingCompletedAt") 
-                    ? settings["onboardingCompletedAt"] 
+                    ? settings["onboardingCompletedAt"]?.ToString()
                     : null,
                 PharmacyType = settings.ContainsKey("pharmacyType") ? settings["pharmacyType"] : null,
                 HasLicense = settings.ContainsKey("zamraNumber") && !string.IsNullOrEmpty(settings["zamraNumber"].ToString()),

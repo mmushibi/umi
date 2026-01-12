@@ -57,8 +57,8 @@ namespace UmiHealth.API.Middleware
                     }
                 }
 
-                context.Response.Headers.Add("X-User-Branch-Id", branchId?.ToString() ?? "");
-                context.Response.Headers.Add("X-User-Tenant-Id", tenantId.ToString());
+                context.Response.Headers["X-User-Branch-Id"] = branchId?.ToString() ?? "";
+                context.Response.Headers["X-User-Tenant-Id"] = tenantId.ToString();
             }
 
             await _next(context);

@@ -167,7 +167,7 @@ namespace UmiHealth.API.Controllers
                 await _context.SaveChangesAsync();
 
                 // Send rejection notification to tenant
-                await _notificationService.SendPaymentRejectionAsync(payment.TenantId.ToString(), payment.Id, payment.AdditionalNotes);
+                await _notificationService.SendPaymentRejectionAsync(payment.TenantId.ToString(), payment.Id, payment.AdditionalNotes ?? "No reason provided");
                 _logger.LogInformation("Payment rejection sent to tenant {TenantId} for payment {PaymentId}", 
                     payment.TenantId, payment.Id);
 

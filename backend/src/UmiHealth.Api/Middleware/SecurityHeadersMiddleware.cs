@@ -39,19 +39,19 @@ namespace UmiHealth.API.Middleware
                     "base-uri 'self'; " +
                     "upgrade-insecure-requests";
 
-                context.Response.Headers.Add("Content-Security-Policy", csp);
+                context.Response.Headers["Content-Security-Policy"] = csp;
 
                 // Prevent clickjacking
-                context.Response.Headers.Add("X-Frame-Options", "DENY");
+                context.Response.Headers["X-Frame-Options"] = "DENY";
 
                 // Prevent MIME type sniffing
-                context.Response.Headers.Add("X-Content-Type-Options", "nosniff");
+                context.Response.Headers["X-Content-Type-Options"] = "nosniff";
 
                 // XSS Protection
-                context.Response.Headers.Add("X-XSS-Protection", "1; mode=block");
+                context.Response.Headers["X-XSS-Protection"] = "1; mode=block";
 
                 // Referrer Policy
-                context.Response.Headers.Add("Referrer-Policy", "strict-origin-when-cross-origin");
+                context.Response.Headers["Referrer-Policy"] = "strict-origin-when-cross-origin";
 
                 // Enhanced Permissions Policy
                 var permissionsPolicy = _configuration["SecurityHeaders:PermissionsPolicy"] ??
@@ -65,7 +65,7 @@ namespace UmiHealth.API.Middleware
                     "accelerometer=(), " +
                     "interest-cohort=()";
 
-                context.Response.Headers.Add("Permissions-Policy", permissionsPolicy);
+                context.Response.Headers["Permissions-Policy"] = permissionsPolicy;
 
                 // HSTS (only in production with HTTPS)
                 if (context.Request.IsHttps)
@@ -80,21 +80,21 @@ namespace UmiHealth.API.Middleware
                     if (bool.Parse(preload))
                         hsts += "; preload";
 
-                    context.Response.Headers.Add("Strict-Transport-Security", hsts);
+                    context.Response.Headers["Strict-Transport-Security"] = hsts;
                 }
 
                 // Remove server information
                 context.Response.Headers.Remove("Server");
-                context.Response.Headers.Add("Server", string.Empty);
+                context.Response.Headers["Server"] = string.Empty;
 
                 // Cache control for sensitive endpoints
                 if (context.Request.Path.StartsWithSegments("/api/auth") ||
                     context.Request.Path.StartsWithSegments("/api/users") ||
                     context.Request.Path.StartsWithSegments("/admin"))
                 {
-                    context.Response.Headers.Add("Cache-Control", "no-store, no-cache, must-revalidate, proxy-revalidate");
-                    context.Response.Headers.Add("Pragma", "no-cache");
-                    context.Response.Headers.Add("Expires", "0");
+                    context.Response.Headers["Cache-Control"] = "no-store, no-cache, must-revalidate, proxy-revalidate";
+                    context.Response.Headers["Pragma"] = "no-cache";
+                    context.Response.Headers["Expires"] = "0";
                 }
             }
 

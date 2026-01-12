@@ -41,7 +41,7 @@ namespace UmiHealth.API.Middleware
                 context.Items["TenantId"] = tenantId;
                 
                 // Add tenant header for service communication
-                context.Request.Headers.Add("X-Tenant-ID", tenantId);
+                context.Request.Headers["X-Tenant-ID"] = tenantId;
 
                 _logger.LogDebug("Tenant resolved: {TenantId} for request: {RequestPath}", tenantId, context.Request.Path);
             }

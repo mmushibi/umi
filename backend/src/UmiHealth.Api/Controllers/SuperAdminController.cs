@@ -815,11 +815,11 @@ namespace UmiHealth.API.Controllers
         {
             try
             {
-                var apiKey = await _superAdminService.ToggleApiKeyStatusAsync(id);
-                if (apiKey == null)
+                var result = await _superAdminService.ToggleApiKeyStatusAsync(id);
+                if (!result)
                     return NotFound();
 
-                return Ok(apiKey);
+                return Ok(new { success = true });
             }
             catch (Exception ex)
             {
@@ -833,11 +833,11 @@ namespace UmiHealth.API.Controllers
         {
             try
             {
-                var apiKey = await _superAdminService.RegenerateApiKeyAsync(id);
-                if (apiKey == null)
+                var result = await _superAdminService.RegenerateApiKeyAsync(id);
+                if (!result)
                     return NotFound();
 
-                return Ok(apiKey);
+                return Ok(new { success = true });
             }
             catch (Exception ex)
             {
