@@ -10,7 +10,6 @@ using UmiHealth.Identity;
 using UmiHealth.Identity.Services;
 using UmiHealth.Shared.DTOs;
 using UmiHealth.Application.Services;
-using UmiHealth.Domain.Entities;
 using UmiHealth.Persistence.Data;
 namespace UmiHealth.API.Controllers
 {
@@ -26,7 +25,7 @@ namespace UmiHealth.API.Controllers
         private readonly ISubscriptionService _subscriptionService;
         private readonly SharedDbContext _context;
         private readonly ILogger<AuthController> _logger;
-        private readonly IDatabaseSecurityAuditService _securityAuditService;
+        private readonly ISecurityAuditService _securityAuditService;
 
         public AuthController(
             IAuthenticationService authenticationService,
@@ -37,7 +36,7 @@ namespace UmiHealth.API.Controllers
             ISubscriptionService subscriptionService,
             SharedDbContext context,
             ILogger<AuthController> logger,
-            IDatabaseSecurityAuditService securityAuditService)
+            ISecurityAuditService securityAuditService)
         {
             _authenticationService = authenticationService;
             _jwtService = jwtService;
