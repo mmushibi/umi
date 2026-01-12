@@ -27,7 +27,7 @@ namespace UmiHealth.Application.Models
     public class SecurityEvent
     {
         public string Id { get; set; } = Guid.NewGuid().ToString();
-        public string EventType { get; set; } = string.Empty;
+        public SecurityEventType EventType { get; set; }
         public string UserId { get; set; } = string.Empty;
         public string TenantId { get; set; } = string.Empty;
         public string Description { get; set; } = string.Empty;
@@ -36,6 +36,7 @@ namespace UmiHealth.Application.Models
         public DateTime Timestamp { get; set; } = DateTime.UtcNow;
         public SecurityRiskLevel RiskLevel { get; set; } = SecurityRiskLevel.Low;
         public Dictionary<string, object> Metadata { get; set; } = new();
+        public string RequestPath { get; set; } = string.Empty;
         
         public int EventCode { get; set; } = 0;
         public string EventCodeString => EventCode.ToString("D2");

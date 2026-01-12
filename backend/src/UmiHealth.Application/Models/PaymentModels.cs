@@ -9,7 +9,7 @@ namespace UmiHealth.Application.Models
         public string PlanType { get; set; } = string.Empty;
         
         [Required]
-        public PaymentMethod PaymentMethod { get; set; }
+        public string PaymentMethod { get; set; } = string.Empty;
         
         [Required]
         public decimal Amount { get; set; }
@@ -25,6 +25,13 @@ namespace UmiHealth.Application.Models
         public const string MobileMoney = "mobile_money";
         public const string BankTransfer = "bank_transfer";
         public const string Cash = "cash";
+    }
+
+    public enum PaymentStatusType
+    {
+        Pending = 1,
+        Approved = 2,
+        Rejected = 3
     }
 
     public class PaymentResponse

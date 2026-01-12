@@ -1,5 +1,6 @@
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 using UmiHealth.Application.Services;
 using UmiHealth.Application.Models;
 using UmiHealth.Domain.Entities;

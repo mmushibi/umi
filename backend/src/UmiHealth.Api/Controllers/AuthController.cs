@@ -10,6 +10,7 @@ using UmiHealth.Identity;
 using UmiHealth.Identity.Services;
 using UmiHealth.Shared.DTOs;
 using UmiHealth.Application.Services;
+using UmiHealth.Domain.Entities;
 using UmiHealth.Persistence.Data;
 namespace UmiHealth.API.Controllers
 {

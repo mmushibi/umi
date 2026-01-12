@@ -3,6 +3,22 @@ using System.Collections.Generic;
 
 namespace UmiHealth.Domain.Entities
 {
+    public enum SecurityEventType
+    {
+        Login = 1,
+        LoginSuccess = 2,
+        LoginFailure = 3,
+        Logout = 4,
+        PasswordChange = 5,
+        PaymentApproval = 6,
+        PaymentRejection = 7,
+        UserLimitRequest = 8,
+        UnauthorizedAccess = 9,
+        SuspiciousActivity = 10,
+        SecurityViolation = 11,
+        RateLimitExceeded = 12
+    }
+
     public enum SecurityRiskLevel
     {
         Low = 1,
@@ -61,7 +77,7 @@ namespace UmiHealth.Domain.Entities
     public class SecurityEvent
     {
         public Guid Id { get; set; }
-        public string EventType { get; set; } = string.Empty; // login, logout, failed_login, permission_denied, data_access
+        public SecurityEventType EventType { get; set; }
         public string? UserId { get; set; }
         public string? TenantId { get; set; }
         public string Description { get; set; } = string.Empty;
@@ -77,7 +93,12 @@ namespace UmiHealth.Domain.Entities
         
         // For compatibility with Application.Models.SecurityEvent
         public DateTime Timestamp => CreatedAt;
-        public Dictionary<string, object> Metadata => Details;
+        public Dictionary<string, object> Metadata 
+        { 
+            get => Details; 
+            set => Details = value ?? new Dictionary<string, object>(); 
+        }
+        public string RequestPath { get; set; } = string.Empty;
     }
 
     public class SystemSetting
