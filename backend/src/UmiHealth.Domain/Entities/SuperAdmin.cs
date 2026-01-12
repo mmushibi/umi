@@ -3,6 +3,14 @@ using System.Collections.Generic;
 
 namespace UmiHealth.Domain.Entities
 {
+    public enum SecurityRiskLevel
+    {
+        Low = 1,
+        Medium = 2,
+        High = 3,
+        Critical = 4
+    }
+
     public class SuperAdminLog
     {
         public Guid Id { get; set; }
@@ -54,9 +62,9 @@ namespace UmiHealth.Domain.Entities
     {
         public Guid Id { get; set; }
         public string EventType { get; set; } = string.Empty; // login, logout, failed_login, permission_denied, data_access
-        public string Severity { get; set; } = string.Empty; // low, medium, high, critical
         public string? UserId { get; set; }
         public string? TenantId { get; set; }
+        public string Description { get; set; } = string.Empty;
         public string? IpAddress { get; set; }
         public string? UserAgent { get; set; }
         public string? Resource { get; set; }
@@ -65,6 +73,11 @@ namespace UmiHealth.Domain.Entities
         public string? FailureReason { get; set; }
         public Dictionary<string, object> Details { get; set; } = new();
         public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
+        public SecurityRiskLevel RiskLevel { get; set; } = SecurityRiskLevel.Low;
+        
+        // For compatibility with Application.Models.SecurityEvent
+        public DateTime Timestamp => CreatedAt;
+        public Dictionary<string, object> Metadata => Details;
     }
 
     public class SystemSetting

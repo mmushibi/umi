@@ -2,20 +2,26 @@ namespace UmiHealth.Application.Models
 {
     public enum SecurityEventType
     {
-        Login = "login",
-        Logout = "logout",
-        PasswordChange = "password_change",
-        PaymentApproval = "payment_approval",
-        PaymentRejection = "payment_rejection",
-        UserLimitRequest = "user_limit_request"
+        Login = 1,
+        LoginSuccess = 2,
+        LoginFailure = 3,
+        Logout = 4,
+        PasswordChange = 5,
+        PaymentApproval = 6,
+        PaymentRejection = 7,
+        UserLimitRequest = 8,
+        UnauthorizedAccess = 9,
+        SuspiciousActivity = 10,
+        SecurityViolation = 11,
+        RateLimitExceeded = 12
     }
 
     public enum SecurityRiskLevel
     {
-        Low = "low",
-        Medium = "medium",
-        High = "high",
-        Critical = "critical"
+        Low = 1,
+        Medium = 2,
+        High = 3,
+        Critical = 4
     }
 
     public class SecurityEvent

@@ -738,7 +738,7 @@ namespace UmiHealth.Persistence.Data
                     .IsRequired()
                     .HasMaxLength(50);
 
-                entity.Property(e => e.Severity)
+                entity.Property(e => e.RiskLevel)
                     .IsRequired()
                     .HasMaxLength(20);
 
@@ -771,7 +771,7 @@ namespace UmiHealth.Persistence.Data
 
                 entity.HasIndex(e => e.CreatedAt);
                 entity.HasIndex(e => e.EventType);
-                entity.HasIndex(e => e.Severity);
+                entity.HasIndex(e => e.RiskLevel);
                 entity.HasIndex(e => e.UserId);
                 entity.HasIndex(e => e.TenantId);
             });
