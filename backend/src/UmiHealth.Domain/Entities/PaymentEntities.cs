@@ -4,13 +4,16 @@ using System.ComponentModel.DataAnnotations.Schema;
 
 namespace UmiHealth.Domain.Entities
 {
-    public class PaymentRecord
+    public class PaymentRecord : ISoftDeletable
     {
         [Key]
         public string Id { get; set; } = string.Empty;
         
         [Required]
         public Guid TenantId { get; set; }
+
+        // Make branch optional to avoid forcing a DB default during migration
+        public Guid? BranchId { get; set; }
         
         [Required]
         [MaxLength(50)]
@@ -49,6 +52,12 @@ namespace UmiHealth.Domain.Entities
         
         [MaxLength(500)]
         public string? AdditionalNotes { get; set; }
+
+        // Track last update (used by sync ordering)
+        public DateTime UpdatedAt { get; set; } = DateTime.UtcNow;
+
+        // Soft delete support (ApplySoftDeletes will use ISoftDeletable)
+        public DateTime? DeletedAt { get; set; }
         
         // Navigation properties
         public virtual Tenant Tenant { get; set; } = null!;
