@@ -25,6 +25,7 @@ namespace UmiHealth.API.Controllers
         private readonly ISubscriptionService _subscriptionService;
         private readonly SharedDbContext _context;
         private readonly ILogger<AuthController> _logger;
+        private readonly ISecurityAuditService _securityAuditService;
 
         public AuthController(
             IAuthenticationService authenticationService,
@@ -34,7 +35,8 @@ namespace UmiHealth.API.Controllers
             IOnboardingService onboardingService,
             ISubscriptionService subscriptionService,
             SharedDbContext context,
-            ILogger<AuthController> logger)
+            ILogger<AuthController> logger,
+            ISecurityAuditService securityAuditService)
         {
             _authenticationService = authenticationService;
             _jwtService = jwtService;
@@ -44,6 +46,7 @@ namespace UmiHealth.API.Controllers
             _subscriptionService = subscriptionService;
             _context = context;
             _logger = logger;
+            _securityAuditService = securityAuditService;
         }
 
         /// <summary>
@@ -69,9 +72,43 @@ namespace UmiHealth.API.Controllers
 
                 if (!result.Success)
                 {
+                    // Log failed login attempt
+                    await _securityAuditService.LogSecurityEventAsync(new SecurityEvent
+                    {
+                        EventType = SecurityEventType.LoginFailure,
+                        Description = $"Login failed for identifier: {identifier}",
+                        IpAddress = GetClientIpAddress(),
+                        UserId = null,
+                        UserAgent = Request.Headers["User-Agent"].ToString(),
+                        RequestPath = "/api/v1/auth/login",
+                        RiskLevel = SecurityRiskLevel.Medium,
+                        Metadata = new Dictionary<string, object>
+                        {
+                            ["Identifier"] = identifier,
+                            ["Reason"] = result.Error
+                        }
+                    });
+
                     _logger.LogWarning("Login failed for identifier: {Identifier}", identifier);
                     return Unauthorized(new { success = false, message = result.Error });
                 }
+
+                // Log successful login
+                await _securityAuditService.LogSecurityEventAsync(new SecurityEvent
+                {
+                    EventType = SecurityEventType.LoginSuccess,
+                    Description = $"User logged in successfully: {identifier}",
+                    IpAddress = GetClientIpAddress(),
+                    UserId = result.User?.Id.ToString(),
+                    UserAgent = Request.Headers["User-Agent"].ToString(),
+                    RequestPath = "/api/v1/auth/login",
+                    RiskLevel = SecurityRiskLevel.Low,
+                    Metadata = new Dictionary<string, object>
+                    {
+                        ["Identifier"] = identifier,
+                        ["Roles"] = result.Roles?.Select(r => r.Name).ToList()
+                    }
+                });
 
                 _logger.LogInformation("User logged in successfully: {Identifier}", identifier);
 
@@ -762,16 +799,33 @@ namespace UmiHealth.API.Controllers
         private string? ExtractTokenFromHeader()
         {
             var authHeader = HttpContext.Request.Headers["Authorization"].ToString();
-            if (string.IsNullOrEmpty(authHeader) || !authHeader.StartsWith("Bearer "))
+            if (authHeader.StartsWith("Bearer ", StringComparison.OrdinalIgnoreCase))
             {
-                return null;
+                return authHeader.Substring("Bearer ".Length).Trim();
             }
-            return authHeader.Substring("Bearer ".Length).Trim();
+            return null;
+        }
+
+        private string GetClientIpAddress()
+        {
+            var xForwardedFor = HttpContext.Request.Headers["X-Forwarded-For"].FirstOrDefault();
+            if (!string.IsNullOrEmpty(xForwardedFor))
+            {
+                return xForwardedFor.Split(',')[0].Trim();
+            }
+
+            var xRealIp = HttpContext.Request.Headers["X-Real-IP"].FirstOrDefault();
+            if (!string.IsNullOrEmpty(xRealIp))
+            {
+                return xRealIp;
+            }
+
+            return HttpContext.Connection.RemoteIpAddress?.ToString() ?? "unknown";
         }
 
         private Guid GetUserIdFromClaims()
         {
-            var userIdClaim = User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value;
+            var userIdClaim = User.FindFirst("sub")?.Value ?? User.FindFirst("userId")?.Value;
             if (Guid.TryParse(userIdClaim, out var userId))
             {
                 return userId;

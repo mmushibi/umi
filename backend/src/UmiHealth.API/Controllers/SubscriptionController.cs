@@ -105,7 +105,8 @@ namespace UmiHealth.API.Controllers
                     return BadRequest(new { success = false, message = "Invalid request data", errors = ModelState });
                 }
 
-                // Create new subscription with proper expiration date
+                // For now, create subscription without payment (existing behavior)
+                // TODO: Integrate with payment system when ready
                 var subscription = await _subscriptionService.CreateSubscriptionAsync(tenantId.Value, request.PlanType);
                 
                 // Set subscription to expire in 30 days (or based on plan)
@@ -139,6 +140,122 @@ namespace UmiHealth.API.Controllers
             {
                 _logger.LogError(ex, "Error creating subscription");
                 return StatusCode(500, new { success = false, message = "Error creating subscription" });
+            }
+        }
+
+        /// <summary>
+        /// Submit payment for subscription with receipt
+        /// </summary>
+        [HttpPost("submit-payment")]
+        public async Task<IActionResult> SubmitPayment([FromBody] PaymentRequest request)
+        {
+            try
+            {
+                var tenantId = GetTenantId();
+                if (!tenantId.HasValue)
+                {
+                    return Unauthorized(new { success = false, message = "Tenant not found" });
+                }
+
+                if (!ModelState.IsValid)
+                {
+                    return BadRequest(new { success = false, message = "Invalid payment data", errors = ModelState });
+                }
+
+                // Validate payment amount matches plan price
+                var expectedAmount = GetPlanPrice(request.PlanType);
+                if (request.Amount != expectedAmount)
+                {
+                    return BadRequest(new { success = false, message = $"Payment amount {request.Amount} does not match plan price {expectedAmount}" });
+                }
+
+                // Generate payment ID
+                var paymentId = Guid.NewGuid().ToString("N")[..8].ToUpper();
+                
+                // Create payment record
+                var payment = new PaymentRecord
+                {
+                    Id = paymentId,
+                    TenantId = tenantId.Value,
+                    PlanType = request.PlanType,
+                    Amount = request.Amount,
+                    PaymentMethod = request.PaymentMethod,
+                    TransactionReference = request.TransactionReference,
+                    PaymentReceipt = request.PaymentReceipt,
+                    Status = PaymentStatusType.Pending,
+                    RequestDate = DateTime.UtcNow,
+                    AdditionalNotes = request.AdditionalNotes
+                };
+
+                _context.Payments.Add(payment);
+                await _context.SaveChangesAsync();
+
+                // Send real-time notification to operations and super admin
+                await NotifyPaymentApprovalRequest(payment);
+
+                _logger.LogInformation("Payment submitted {PaymentId} for tenant {TenantId}, plan {Plan}, amount {Amount}", 
+                    paymentId, tenantId.Value, request.PlanType, request.Amount);
+
+                return Ok(new PaymentResponse
+                {
+                    Success = true,
+                    Message = "Payment submitted for approval",
+                    PaymentId = paymentId,
+                    Status = PaymentStatusType.Pending,
+                    EstimatedApprovalTime = DateTime.UtcNow.AddHours(2) // Estimate 2 hours for approval
+                });
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error submitting payment");
+                return StatusCode(500, new { success = false, message = "Error submitting payment" });
+            }
+        }
+
+        /// <summary>
+        /// Get payment status
+        /// </summary>
+        [HttpGet("payment-status/{paymentId}")]
+        public async Task<IActionResult> GetPaymentStatus(string paymentId)
+        {
+            try
+            {
+                if (string.IsNullOrEmpty(paymentId))
+                {
+                    return BadRequest(new { success = false, message = "Payment ID required" });
+                }
+
+                var payment = await _context.Payments
+                    .FirstOrDefaultAsync(p => p.Id == paymentId);
+
+                if (payment == null)
+                {
+                    return NotFound(new { success = false, message = "Payment not found" });
+                }
+
+                return Ok(new
+                {
+                    success = true,
+                    data = new
+                    {
+                        paymentId = payment.Id,
+                        status = payment.Status,
+                        planType = payment.PlanType,
+                        amount = payment.Amount,
+                        paymentMethod = payment.PaymentMethod,
+                        requestDate = payment.RequestDate,
+                        approvalDate = payment.ApprovalDate,
+                        approvedBy = payment.ApprovedBy,
+                        transactionId = payment.TransactionId,
+                        confirmationNumber = payment.ConfirmationNumber,
+                        paymentReceipt = payment.PaymentReceipt
+                    }
+                });
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error getting payment status");
+                return StatusCode(500, new { success = false, message = "Error retrieving payment status" });
             }
         }
 
@@ -246,6 +363,53 @@ namespace UmiHealth.API.Controllers
             };
 
             return Ok(new { success = true, data = plans });
+        }
+
+        private decimal GetPlanPrice(string planType)
+        {
+            return planType.ToLower() switch
+            {
+                "starter" => 249m, // ZMW 249
+                "professional" => 449m, // ZMW 449
+                "business" => 849m, // ZMW 849
+                "enterprise" => 1549m, // ZMW 1549
+                _ => 249m
+            };
+        }
+
+        private async Task NotifyPaymentApprovalRequest(PaymentRecord payment)
+        {
+            // Create notification for operations and super admin users
+            var notification = new PaymentApprovalRequest
+            {
+                PaymentId = payment.Id,
+                TenantId = payment.TenantId.ToString(),
+                TenantName = await GetTenantName(payment.TenantId),
+                PlanType = payment.PlanType,
+                Amount = payment.Amount,
+                PaymentMethod = payment.PaymentMethod,
+                TransactionReference = payment.TransactionReference,
+                PaymentReceipt = payment.PaymentReceipt,
+                AdditionalNotes = payment.AdditionalNotes,
+                RequestedBy = await GetRequestingUser(payment.TenantId)
+            };
+
+            // Send to SignalR hub for real-time notifications
+            // This would be implemented with a SignalR hub
+            _logger.LogInformation("Payment approval request sent for payment {PaymentId}", payment.Id);
+        }
+
+        private async Task<string> GetTenantName(Guid tenantId)
+        {
+            var tenant = await _context.Tenants.FindAsync(tenantId);
+            return tenant?.Name ?? "Unknown Tenant";
+        }
+
+        private async Task<string> GetRequestingUser(Guid tenantId)
+        {
+            var user = await _context.Users
+                .FirstOrDefaultAsync(u => u.TenantId == tenantId);
+            return user?.Email ?? "Unknown User";
         }
 
         private Guid? GetTenantId()
