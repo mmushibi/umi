@@ -51,13 +51,16 @@ jobs:
           ls -la backend/src/UmiHealth.API/
 
       - name: Restore
-        run: dotnet restore backend/UmiHealth.sln
+        run: dotnet restore UmiHealth.sln
+        working-directory: backend
 
       - name: Build
-        run: dotnet build backend/UmiHealth.sln --configuration Release --no-restore
+        run: dotnet build UmiHealth.sln --configuration Release --no-restore
+        working-directory: backend
 
       - name: Test
-        run: dotnet test backend/UmiHealth.sln --no-build --verbosity normal
+        run: dotnet test UmiHealth.sln --no-build --verbosity normal
+        working-directory: backend
 
   build-and-push:
     needs: build-test
@@ -200,12 +203,12 @@ jobs:
         run: |
           echo "Running EF Core migrations using connection from secret DATABASE_CONNECTION"
           git clone --depth 1 https://github.com/${{ github.repository }} .
-          cd backend
           dotnet tool restore
           dotnet restore
           dotnet build --configuration Release
           # Run migrations for the UmiHealth project
           dotnet ef database update --project src/UmiHealth.Infrastructure --startup-project src/UmiHealth.API --connection "$DB_CONN"
+        working-directory: backend
 
       - name: Smoke test
         run: |
