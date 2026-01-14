@@ -1,0 +1,12 @@
+C:\Users\sepio\Desktop\Umi_Health\Umi_Health\Umi_Health\backend\src\UmiHealth.Domain\bin\Release\net8.0\UmiHealth.Domain.deps.json
+C:\Users\sepio\Desktop\Umi_Health\Umi_Health\Umi_Health\backend\src\UmiHealth.Domain\bin\Release\net8.0\UmiHealth.Domain.dll
+C:\Users\sepio\Desktop\Umi_Health\Umi_Health\Umi_Health\backend\src\UmiHealth.Domain\bin\Release\net8.0\UmiHealth.Domain.pdb
+C:\Users\sepio\Desktop\Umi_Health\Umi_Health\Umi_Health\backend\src\UmiHealth.Domain\obj\Release\net8.0\UmiHealth.Domain.GeneratedMSBuildEditorConfig.editorconfig
+C:\Users\sepio\Desktop\Umi_Health\Umi_Health\Umi_Health\backend\src\UmiHealth.Domain\obj\Release\net8.0\UmiHealth.Domain.AssemblyInfoInputs.cache
+C:\Users\sepio\Desktop\Umi_Health\Umi_Health\Umi_Health\backend\src\UmiHealth.Domain\obj\Release\net8.0\UmiHealth.Domain.AssemblyInfo.cs
+C:\Users\sepio\Desktop\Umi_Health\Umi_Health\Umi_Health\backend\src\UmiHealth.Domain\obj\Release\net8.0\UmiHealth.Domain.csproj.CoreCompileInputs.cache
+C:\Users\sepio\Desktop\Umi_Health\Umi_Health\Umi_Health\backend\src\UmiHealth.Domain\obj\Release\net8.0\UmiHealth.Domain.sourcelink.json
+C:\Users\sepio\Desktop\Umi_Health\Umi_Health\Umi_Health\backend\src\UmiHealth.Domain\obj\Release\net8.0\UmiHealth.Domain.dll
+C:\Users\sepio\Desktop\Umi_Health\Umi_Health\Umi_Health\backend\src\UmiHealth.Domain\obj\Release\net8.0\refint\UmiHealth.Domain.dll
+C:\Users\sepio\Desktop\Umi_Health\Umi_Health\Umi_Health\backend\src\UmiHealth.Domain\obj\Release\net8.0\UmiHealth.Domain.pdb
+C:\Users\sepio\Desktop\Umi_Health\Umi_Health\Umi_Health\backend\src\UmiHealth.Domain\obj\Release\net8.0\ref\UmiHealth.Domain.dll

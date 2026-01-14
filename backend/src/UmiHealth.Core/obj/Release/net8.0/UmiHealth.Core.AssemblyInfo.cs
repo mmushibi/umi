@@ -13,7 +13,7 @@ using System.Reflection;
 [assembly: System.Reflection.AssemblyCompanyAttribute("UmiHealth.Core")]
 [assembly: System.Reflection.AssemblyConfigurationAttribute("Release")]
 [assembly: System.Reflection.AssemblyFileVersionAttribute("1.0.0.0")]
-[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+f6ccd6f305fad5a22019f06be029f01b1eacb9ee")]
+[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+64158e4c21e7f55dc4b74bf622dbb6e8bb73c55c")]
 [assembly: System.Reflection.AssemblyProductAttribute("UmiHealth.Core")]
 [assembly: System.Reflection.AssemblyTitleAttribute("UmiHealth.Core")]
 [assembly: System.Reflection.AssemblyVersionAttribute("1.0.0.0")]

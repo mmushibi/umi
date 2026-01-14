@@ -1,0 +1,11 @@
+{
+  "Version": 1,
+  "Hash": "O7OVrvoQJ30CSLmZCEPXvh8emTJBhjQYOcOjkaa4NHc=",
+  "Source": "UmiHealth.Identity",
+  "BasePath": "_content/UmiHealth.Identity",
+  "Mode": "Default",
+  "ManifestType": "Build",
+  "ReferencedProjectsConfiguration": [],
+  "DiscoveryPatterns": [],
+  "Assets": []
+}
