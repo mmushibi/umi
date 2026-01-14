@@ -49,6 +49,7 @@ jobs:
           cat UmiHealth.sln | head -20
           echo "API project file check:"
           ls -la src/UmiHealth.API/
+        working-directory: backend
 
       - name: Restore
         run: dotnet restore UmiHealth.sln
