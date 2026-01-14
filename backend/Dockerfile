@@ -8,20 +8,20 @@ FROM mcr.microsoft.com/dotnet/sdk:8.0 AS build
 WORKDIR /src
 
 # Copy the API project file and restore
-COPY ["src/UmiHealth.API/UmiHealth.API.csproj", "src/UmiHealth.API/"]
-RUN dotnet restore "src/UmiHealth.API/UmiHealth.API.csproj"
+COPY ["UmiHealth.MinimalApi/UmiHealth.MinimalApi.csproj", "UmiHealth.MinimalApi/"]
+RUN dotnet restore "UmiHealth.MinimalApi/UmiHealth.MinimalApi.csproj"
 
 # Copy everything else and build
 COPY . .
-WORKDIR "/src/src/UmiHealth.API"
-RUN dotnet build "UmiHealth.API.csproj" -c Release -o /app/build --no-restore
+WORKDIR "/src/UmiHealth.MinimalApi"
+RUN dotnet build "UmiHealth.MinimalApi.csproj" -c Release -o /app/build --no-restore
 
 # Build runtime image
 FROM build AS publish
-RUN dotnet publish "UmiHealth.API.csproj" -c Release -o /app/publish /p:UseAppHost=false --no-restore
+RUN dotnet publish "UmiHealth.MinimalApi.csproj" -c Release -o /app/publish /p:UseAppHost=false --no-restore
 
 # Build final image
 FROM base AS final
 WORKDIR /app
 COPY --from=publish /app/publish .
-ENTRYPOINT ["dotnet", "UmiHealth.API.dll"]
+ENTRYPOINT ["dotnet", "UmiHealth.MinimalApi.dll"]
