@@ -48,7 +48,7 @@ jobs:
           echo "Solution file:"
           cat UmiHealth.sln | head -20
           echo "API project file check:"
-          ls -la src/UmiHealth.API/
+          ls -la ../UmiHealth.MinimalApi/
         working-directory: backend
 
       - name: Restore
