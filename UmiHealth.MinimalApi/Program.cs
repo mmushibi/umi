@@ -4,7 +4,8 @@ using UmiHealth.MinimalApi.Middleware;
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
-builder.Services.AddOpenApi();
+builder.Services.AddEndpointsApiExplorer();
+builder.Services.AddSwaggerGen();
 builder.Services.AddCors();
 
 // Add in-memory database for demo
@@ -13,15 +14,16 @@ builder.Services.AddSingleton(new Dictionary<string, object>());
 // Tier service (scaffolding)
 builder.Services.AddSingleton<ITierService, TierService>();
 
-// JWT service
-builder.Services.AddSingleton<IJwtService, JwtService>();
+// Audit service
+builder.Services.AddSingleton<IAuditService, AuditService>();
 
 var app = builder.Build();
 
 // Configure the HTTP request pipeline.
 if (app.Environment.IsDevelopment())
 {
-    app.MapOpenApi();
+    app.UseSwagger();
+    app.UseSwaggerUI();
 }
 
 app.UseHttpsRedirection();
@@ -101,7 +103,7 @@ app.MapPost("/api/v1/auth/register", async (HttpRequest request) =>
 });
 
 // Login endpoint with role-based authentication
-app.MapPost("/api/v1/auth/login", async (HttpRequest request, Dictionary<string, object> usersDb, Dictionary<string, object> tenantsDb, IJwtService jwtService) =>
+app.MapPost("/api/v1/auth/login", async (HttpRequest request, Dictionary<string, object> usersDb, Dictionary<string, object> tenantsDb) =>
 {
     try
     {
@@ -162,10 +164,6 @@ app.MapPost("/api/v1/auth/login", async (HttpRequest request, Dictionary<string,
             redirectUrl = "/portals/admin/home.html";
         }
 
-        // Generate real JWT tokens
-        var accessToken = jwtService.GenerateAccessToken(user.id.ToString(), user.email, user.role?.ToString(), tenantId);
-        var refreshToken = jwtService.GenerateRefreshToken(user.id.ToString());
-
         return Results.Ok(new { 
             success = true, 
             message = "Login successful!",
@@ -175,9 +173,7 @@ app.MapPost("/api/v1/auth/login", async (HttpRequest request, Dictionary<string,
                 email = user.email,
                 role = user.role,
                 tenantId = tenantId,
-                tenant = tenant,
-                accessToken = accessToken,
-                refreshToken = refreshToken
+                tenant = tenant
             },
             redirectUrl = redirectUrl
         });
@@ -750,6 +746,9 @@ app.MapGet("/weatherforecast", () =>
     return forecast;
 })
 .WithName("GetWeatherForecast");
+
+// Register super-admin endpoints
+SuperAdminEndpoints.RegisterSuperAdminEndpoints(app);
 
 app.Run();
 

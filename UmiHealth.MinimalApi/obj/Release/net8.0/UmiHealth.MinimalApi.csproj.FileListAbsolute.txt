@@ -1,0 +1,8 @@
+C:\Users\sepio\Desktop\Umi_Health\Umi_Health\Umi_Health\UmiHealth.MinimalApi\obj\Release\net8.0\UmiHealth.MinimalApi.csproj.AssemblyReference.cache
+C:\Users\sepio\Desktop\Umi_Health\Umi_Health\Umi_Health\UmiHealth.MinimalApi\obj\Release\net8.0\UmiHealth.MinimalApi.GeneratedMSBuildEditorConfig.editorconfig
+C:\Users\sepio\Desktop\Umi_Health\Umi_Health\Umi_Health\UmiHealth.MinimalApi\obj\Release\net8.0\UmiHealth.MinimalApi.AssemblyInfoInputs.cache
+C:\Users\sepio\Desktop\Umi_Health\Umi_Health\Umi_Health\UmiHealth.MinimalApi\obj\Release\net8.0\UmiHealth.MinimalApi.AssemblyInfo.cs
+C:\Users\sepio\Desktop\Umi_Health\Umi_Health\Umi_Health\UmiHealth.MinimalApi\obj\Release\net8.0\UmiHealth.MinimalApi.csproj.CoreCompileInputs.cache
+C:\Users\sepio\Desktop\Umi_Health\Umi_Health\Umi_Health\UmiHealth.MinimalApi\obj\Release\net8.0\UmiHealth.MinimalApi.MvcApplicationPartsAssemblyInfo.cs
+C:\Users\sepio\Desktop\Umi_Health\Umi_Health\Umi_Health\UmiHealth.MinimalApi\obj\Release\net8.0\UmiHealth.MinimalApi.MvcApplicationPartsAssemblyInfo.cache
+C:\Users\sepio\Desktop\Umi_Health\Umi_Health\Umi_Health\UmiHealth.MinimalApi\obj\Release\net8.0\UmiHealth.MinimalApi.sourcelink.json
