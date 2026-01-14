@@ -13,7 +13,7 @@ using System.Reflection;
 [assembly: System.Reflection.AssemblyCompanyAttribute("UmiHealth.MinimalApi")]
 [assembly: System.Reflection.AssemblyConfigurationAttribute("Release")]
 [assembly: System.Reflection.AssemblyFileVersionAttribute("1.0.0.0")]
-[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+a8633aceae67112d308748fd9cbf6db0b49b68b0")]
+[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+d7d987e6fa50ea21bbab006a4f32c8d225423be6")]
 [assembly: System.Reflection.AssemblyProductAttribute("UmiHealth.MinimalApi")]
 [assembly: System.Reflection.AssemblyTitleAttribute("UmiHealth.MinimalApi")]
 [assembly: System.Reflection.AssemblyVersionAttribute("1.0.0.0")]

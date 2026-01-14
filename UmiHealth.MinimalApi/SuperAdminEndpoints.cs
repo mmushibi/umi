@@ -82,12 +82,12 @@ public static class SuperAdminEndpoints
                 var tenantData = await request.ReadFromJsonAsync<Dictionary<string, object>>();
                 if (tenantData == null)
                 {
-                    return Results.BadRequest(new { success = false, message = "Invalid tenant data" });
+                    return Results.BadRequest(new { success = false, message = "Invalid request data" });
                 }
 
                 var existing = (dynamic)tenantsDb[tenantId];
                 var updated = new {
-                    id = tenantId,
+                    id = existing.id,
                     name = tenantData.ContainsKey("name") ? tenantData["name"] : existing.name,
                     email = tenantData.ContainsKey("email") ? tenantData["email"] : existing.email,
                     status = tenantData.ContainsKey("status") ? tenantData["status"] : existing.status,
@@ -127,7 +127,7 @@ public static class SuperAdminEndpoints
             return Results.Ok(new { success = true, data = tenantUsers, total = tenantUsers.Count });
         });
 
-        // Super-admin: Force disable/enable user
+        // Super-admin: Update user status
         app.MapPut("/api/v1/superadmin/users/{userId}/status", async (string userId, HttpRequest request, Dictionary<string, object> usersDb, IAuditService auditService) =>
         {
             try
@@ -139,11 +139,15 @@ public static class SuperAdminEndpoints
                 }
 
                 var statusData = await request.ReadFromJsonAsync<Dictionary<string, string>>();
-                var newStatus = statusData?.ContainsKey("status") == true ? statusData["status"] : "active";
+                if (statusData == null || !statusData.ContainsKey("status"))
+                {
+                    return Results.BadRequest(new { success = false, message = "Status is required" });
+                }
 
+                var newStatus = statusData["status"];
                 var existing = (dynamic)usersDb[userId];
                 var updated = new {
-                    id = userId,
+                    id = existing.id,
                     username = existing.username,
                     email = existing.email,
                     password = existing.password,
