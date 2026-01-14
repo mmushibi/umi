@@ -44,11 +44,11 @@ jobs:
           echo "Current directory:"
           pwd
           echo "Backend directory contents:"
-          ls -la backend/
+          ls -la .
           echo "Solution file:"
-          cat backend/UmiHealth.sln | head -20
+          cat UmiHealth.sln | head -20
           echo "API project file check:"
-          ls -la backend/src/UmiHealth.API/
+          ls -la src/UmiHealth.API/
 
       - name: Restore
         run: dotnet restore UmiHealth.sln
