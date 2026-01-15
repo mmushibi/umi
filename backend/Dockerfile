@@ -12,7 +12,7 @@ COPY ["UmiHealth.MinimalApi/UmiHealth.MinimalApi.csproj", "UmiHealth.MinimalApi/
 RUN dotnet restore "UmiHealth.MinimalApi/UmiHealth.MinimalApi.csproj"
 
 # Copy everything else and build
-COPY . .
+COPY UmiHealth.MinimalApi/. ./UmiHealth.MinimalApi/
 WORKDIR "/src/UmiHealth.MinimalApi"
 RUN dotnet build "UmiHealth.MinimalApi.csproj" -c Release -o /app/build --no-restore
 
