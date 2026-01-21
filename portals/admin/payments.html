@@ -2240,23 +2240,23 @@
                 console.error('Error loading payments:', error);
                 this.showError('Failed to load payments. Please try again.');
                 this.loading = false;
-                // Fallback to mock data
-                this.loadSampleData();
+                // No fallback - API required
               });
           } else {
-            // Fallback to mock data
-            this.loadSampleData();
+            // No fallback - API required
+            this.showError('API not available - payments cannot be loaded');
             this.loading = false;
           }
         },
 
         loadSampleData() {
-          // Initialize empty arrays - real data will be loaded from API
+          // Mock data removed - API required for real data
           this.invoices = [];
           this.quotations = [];
           this.creditNotes = [];
           this.claims = [];
           this.updatePaymentStats();
+          console.warn('Mock data removed - API required for real payment data');
         },
 
         convertToInvoice(quotation) {

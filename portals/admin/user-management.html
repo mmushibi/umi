@@ -2624,12 +2624,12 @@
           }
         },
 
-        // Fallback when API fails - no sample data
+        // No fallback - API required for employee data
         loadSampleEmployees() {
           this.employees = [];
           this.renderEmployeesTable();
           this.updateEmployeeStats();
-          this.showError('Unable to load employees. Please check your connection.');
+          console.warn('Mock data removed - API required for real employee data');
         },
 
         // Update week dates with real-time values

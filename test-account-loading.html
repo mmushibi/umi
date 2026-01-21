@@ -1,0 +1,137 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Account Test</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://unpkg.com/alpinejs@3.x.x/dist/cdn.min.js" defer></script>
+</head>
+<body class="bg-gray-100 p-8">
+    <div x-data="testSystem()" class="max-w-4xl mx-auto">
+        <h1 class="text-2xl font-bold mb-6">Admin Account Loading Test</h1>
+        
+        <div class="bg-white p-6 rounded-lg shadow mb-6">
+            <h2 class="text-lg font-semibold mb-4">Test Results</h2>
+            
+            <div class="space-y-4">
+                <div class="flex items-center justify-between p-3 border rounded">
+                    <span>Authentication Check:</span>
+                    <span :class="authStatus ? 'text-green-600' : 'text-red-600'" x-text="authStatus ? '✅ Pass' : '❌ Fail'"></span>
+                </div>
+                
+                <div class="flex items-center justify-between p-3 border rounded">
+                    <span>API Client Available:</span>
+                    <span :class="apiStatus ? 'text-green-600' : 'text-red-600'" x-text="apiStatus ? '✅ Pass' : '❌ Fail'"></span>
+                </div>
+                
+                <div class="flex items-center justify-between p-3 border rounded">
+                    <span>Loading State:</span>
+                    <span :class="!loading ? 'text-green-600' : 'text-red-600'" x-text="!loading ? '✅ Ready' : '⏳ Loading...'"></span>
+                </div>
+                
+                <div class="flex items-center justify-between p-3 border rounded">
+                    <span>Error State:</span>
+                    <span :class="!error ? 'text-green-600' : 'text-red-600'" x-text="!error ? '✅ Clear' : '❌ Error'"></span>
+                </div>
+            </div>
+            
+            <div x-show="error" class="mt-4 p-3 bg-red-100 border border-red-300 rounded text-red-700">
+                <strong>Error:</strong> <span x-text="error"></span>
+            </div>
+        </div>
+        
+        <div class="bg-white p-6 rounded-lg shadow">
+            <h2 class="text-lg font-semibold mb-4">Actions</h2>
+            <div class="space-x-4">
+                <button @click="testAuthentication()" class="px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600">
+                    Test Authentication
+                </button>
+                <button @click="testAPIClient()" class="px-4 py-2 bg-green-500 text-white rounded hover:bg-green-600">
+                    Test API Client
+                </button>
+                <button @click="clearError()" class="px-4 py-2 bg-gray-500 text-white rounded hover:bg-gray-600">
+                    Clear Error
+                </button>
+                <button @click="simulateLoading()" class="px-4 py-2 bg-yellow-500 text-white rounded hover:bg-yellow-600">
+                    Simulate Loading
+                </button>
+            </div>
+        </div>
+        
+        <div class="mt-6 p-4 bg-blue-50 border border-blue-200 rounded">
+            <h3 class="font-semibold mb-2">Instructions:</h3>
+            <ol class="list-decimal list-inside space-y-1 text-sm">
+                <li>Open browser developer tools (F12)</li>
+                <li>Check the Console tab for any errors</li>
+                <li>Click the test buttons to verify functionality</li>
+                <li>All tests should show "✅ Pass" or "✅ Ready"</li>
+                <li>If any test fails, check the console for detailed error messages</li>
+            </ol>
+        </div>
+    </div>
+
+    <script>
+        // Mock the required global objects for testing
+        window.apiClient = {
+            isAuthenticated: () => !!localStorage.getItem('umi_access_token'),
+            getProfile: async () => ({ success: true, data: { firstName: 'Test', lastName: 'User', email: 'test@example.com' } })
+        };
+        
+        window.authManager = {
+            isAuthenticated: () => !!localStorage.getItem('umi_access_token'),
+            getCurrentUser: () => ({ id: 'test-user', branchId: 'test-branch' })
+        };
+        
+        window.backendHelper = {
+            showNotification: (message, type) => console.log(`[${type.toUpperCase()}] ${message}`)
+        };
+        
+        function testSystem() {
+            return {
+                authStatus: false,
+                apiStatus: false,
+                loading: false,
+                error: null,
+                
+                init() {
+                    this.testAuthentication();
+                    this.testAPIClient();
+                },
+                
+                testAuthentication() {
+                    try {
+                        this.authStatus = window.authManager?.isAuthenticated() || false;
+                        console.log('Authentication test result:', this.authStatus);
+                    } catch (error) {
+                        this.error = 'Authentication test failed: ' + error.message;
+                        console.error('Authentication test error:', error);
+                    }
+                },
+                
+                testAPIClient() {
+                    try {
+                        this.apiStatus = !!window.apiClient;
+                        console.log('API Client test result:', this.apiStatus);
+                    } catch (error) {
+                        this.error = 'API Client test failed: ' + error.message;
+                        console.error('API Client test error:', error);
+                    }
+                },
+                
+                clearError() {
+                    this.error = null;
+                    this.loading = false;
+                },
+                
+                simulateLoading() {
+                    this.loading = true;
+                    setTimeout(() => {
+                        this.loading = false;
+                    }, 2000);
+                }
+            };
+        }
+    </script>
+</body>
+</html>

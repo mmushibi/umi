@@ -1984,8 +1984,9 @@
         },
 
         get prescriptionCount() {
-          // Mock data - would come from prescriptions API
-          return Math.floor(Math.random() * 50) + 100;
+          // This should come from prescriptions API
+          // Return 0 to indicate no mock data
+          return 0;
         },
 
         viewPatient(patient) {

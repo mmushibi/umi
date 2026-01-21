@@ -626,8 +626,8 @@
           const data = result.data || {};
           return {
             success: true,
-            accessToken: data.accessToken || 'mock-token',
-            refreshToken: data.refreshToken || 'mock-refresh',
+            accessToken: data.accessToken,
+            refreshToken: data.refreshToken,
             user: { 
               id: data.id || 1, 
               name: data.username || data.email || identifier, 

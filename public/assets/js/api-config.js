@@ -1,14 +1,14 @@
 // API Configuration for Umi Health Demo System
 window.ApiConfig = {
-    baseUrl: window.location.origin,
+    baseUrl: 'http://localhost:5001',
     endpoints: {
-        auth: '/api/auth',
-        users: '/api/users',
-        products: '/api/products',
-        customers: '/api/customers',
-        sales: '/api/sales',
-        inventory: '/api/inventory',
-        reports: '/api/reports'
+        auth: '/api/v1/auth',
+        users: '/api/v1/users',
+        products: '/api/v1/products',
+        customers: '/api/v1/customers',
+        sales: '/api/v1/sales',
+        inventory: '/api/v1/inventory',
+        reports: '/api/v1/reports'
     },
     timeout: 10000,
     retries: 3

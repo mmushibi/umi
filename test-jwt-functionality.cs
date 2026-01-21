@@ -28,9 +28,9 @@ public class JwtFunctionalityTest
         var jwtIssuer = configuration["Jwt:Issuer"] ?? configuration["JWT_ISSUER"] ?? "UmiHealth";
         var jwtAudience = configuration["Jwt:Audience"] ?? configuration["JWT_AUDIENCE"] ?? "UmiHealthUsers";
         
-        if (string.IsNullOrEmpty(jwtKey) || jwtKey == "CHANGE_ME_TO_SECURE_RANDOM_STRING_MIN_32_CHARS")
+        if (string.IsNullOrEmpty(jwtKey))
         {
-            Console.WriteLine("⚠️  Warning: Using default JWT key. Please set JWT_SECRET environment variable or update appsettings.json");
+            Console.WriteLine("⚠️  Warning: JWT key not found in configuration. Please set JWT_SECRET environment variable or update appsettings.json");
             jwtKey = "umi_health_jwt_secret_key_2024_very_long_and_secure_default_for_development";
         }
         

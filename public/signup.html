@@ -3,967 +3,297 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Sign Up | Umi Health Pharmacy</title>
   <link rel="icon" href="../logo.png" type="image/png">
-  <title>Sign Up | UmiHealthInformationSystems</title>
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@100;400;700&family=Varela+Round&family=Nunito:wght@400;600;700&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Nunito:wght@400;600;700&display=swap" rel="stylesheet">
   <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Rounded:wght@300;400;500;600;700&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="assets/css/tailwind.output.css">
+  <script src="https://cdn.tailwindcss.com"></script>
   <style>
     :root {
       --color-primary-blue: #2563EB;
       --color-accent-teal: #14B8A6;
       --color-text-white: #FFFFFF;
-      --color-subtle-blue: #EFF6FF;
       --font-primary: 'Inter', sans-serif;
-    }
-
-    * {
-      box-sizing: border-box;
-      margin: 0;
-      padding: 0;
     }
 
     body {
       background: linear-gradient(135deg, var(--color-primary-blue) 0%, var(--color-accent-teal) 100%);
       color: var(--color-text-white);
-      font-family: 'Nunito', 'Varela Round', sans-serif;
-      line-height: 1.5;
+      font-family: 'Nunito', sans-serif;
       min-height: 100vh;
-      position: relative;
-    }
-
-    .auth-container {
-      display: flex;
-      min-height: 100vh;
-    }
-
-    .auth-left {
-      flex: 1;
       display: flex;
       align-items: center;
       justify-content: center;
-      padding: 2rem;
     }
 
-    .auth-right {
-      flex: 1;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      padding: 2rem;
-      background: rgba(255, 255, 255, 0.05);
-      -webkit-backdrop-filter: blur(10px);
-      backdrop-filter: blur(10px);
-    }
-
-    .auth-card {
+    .signup-container {
       width: 100%;
-      max-width: 500px;
+      max-width: 450px;
       background: rgba(255, 255, 255, 0.1);
       -webkit-backdrop-filter: blur(10px);
       backdrop-filter: blur(10px);
       border: 1px solid rgba(255, 255, 255, 0.2);
       border-radius: 20px;
-      padding: 1.25rem;
+      padding: 2rem;
       box-shadow: 0 20px 40px rgba(0, 0, 0, 0.2);
-      max-height: 95vh;
-      overflow-y: auto;
-      margin: 0 auto;
-    }
-
-    .auth-header {
-      text-align: center;
-      margin-bottom: 1rem;
-    }
-
-    .auth-title {
-      font-size: 1.5rem;
-      font-weight: 700;
-      font-family: 'Nunito', 'Varela Round', sans-serif;
-      margin-bottom: 0.375rem;
-    }
-
-    .auth-subtitle {
-      opacity: 0.8;
-      font-size: 0.8rem;
-      font-family: 'Varela Round', sans-serif;
     }
 
     .form-group {
-      margin-bottom: 0.75rem;
-    }
-
-    .form-section {
       margin-bottom: 1.5rem;
-    }
-
-    .tab-bar {
-      display: grid;
-      grid-template-columns: repeat(3, minmax(0, 1fr));
-      gap: 0.5rem;
-      margin-bottom: 1rem;
-      justify-content: center;
-      width: 100%;
-      max-width: auto;
-      margin-left: auto;
-      margin-right: auto;
-    }
-
-    .tab-button {
-      padding: 0.5rem 0.75rem;
-      border-radius: 12px;
-      border: 1px solid rgba(255, 255, 255, 0.3);
-      background: rgba(255, 255, 255, 0.05);
-      color: var(--color-text-white);
-      font-size: 0.75rem;
-      font-weight: 600;
-      text-align: center;
-      cursor: pointer;
-      transition: all 0.2s ease;
-      text-transform: uppercase;
-      letter-spacing: 0.05em;
-    }
-
-    .tab-button.active {
-      background: rgba(20, 184, 166, 0.25);
-      border-color: var(--color-accent-teal);
-    }
-
-    .section-heading {
-      font-size: 1rem;
-      font-weight: 700;
-      margin-bottom: 0.75rem;
-      font-family: 'Nunito', 'Varela Round', sans-serif;
-    }
-
-    .optional-label {
-      font-size: 0.7rem;
-      opacity: 0.65;
-      margin-left: 0.25rem;
-    }
-
-    .form-row {
-      display: grid;
-      grid-template-columns: 1fr 1fr;
-      gap: 1rem;
     }
 
     .form-label {
       display: block;
-      margin-bottom: 0.375rem;
-      font-size: 0.8rem;
-      font-weight: 600;
-      font-family: 'Varela Round', sans-serif;
-      opacity: 0.9;
-    }
-
-    .form-label .required {
-      color: #FCA5A5;
-      margin-left: 0.25rem;
+      margin-bottom: 0.5rem;
+      font-weight: 500;
+      font-size: 0.9rem;
     }
 
     .form-input {
       width: 100%;
-      padding: 0.75rem;
-      background: rgba(255, 255, 255, 0.1);
+      padding: 0.75rem 1rem;
       border: 1px solid rgba(255, 255, 255, 0.3);
-      border-radius: 12px;
-      color: var(--color-text-white);
-      font-size: 0.85rem;
-      font-family: 'Varela Round', sans-serif;
+      border-radius: 10px;
+      background: rgba(255, 255, 255, 0.1);
+      color: white;
+      font-size: 1rem;
       transition: all 0.3s ease;
-    }
-
-    .form-input::placeholder {
-      color: rgba(255, 255, 255, 0.5);
     }
 
     .form-input:focus {
       outline: none;
+      border-color: var(--color-accent-teal);
       background: rgba(255, 255, 255, 0.15);
-      border-color: rgba(255, 255, 255, 0.5);
+      box-shadow: 0 0 0 3px rgba(20, 184, 166, 0.2);
     }
 
-    .form-input.error {
-      border-color: #FCA5A5;
-    }
-
-    .form-select {
-      width: 100%;
-      padding: 0.75rem;
-      background: rgba(255, 255, 255, 0.1);
-      border: 1px solid rgba(255, 255, 255, 0.3);
-      border-radius: 12px;
-      color: var(--color-text-white);
-      font-size: 0.85rem;
-      font-family: 'Varela Round', sans-serif;
-      transition: all 0.3s ease;
-      cursor: pointer;
-    }
-
-    .form-select option {
-      background: var(--color-primary-blue);
-      color: var(--color-text-white);
-    }
-
-    .password-input-wrapper {
-      position: relative;
-    }
-
-    .password-toggle {
-      position: absolute;
-      right: 1rem;
-      top: 50%;
-      transform: translateY(-50%);
-      background: none;
-      border: none;
-      color: rgba(255, 255, 255, 0.7);
-      cursor: pointer;
-      padding: 0.25rem;
-      border-radius: 4px;
-      transition: all 0.3s ease;
-    }
-
-    .password-toggle:hover {
-      color: var(--color-text-white);
-      background: rgba(255, 255, 255, 0.1);
-    }
-
-    .field-error {
-      color: #FCA5A5;
-      font-size: 0.75rem;
-      margin-top: 0.25rem;
-    }
-
-    .password-strength {
-      margin-top: 0.5rem;
-      height: 4px;
-      background: rgba(255, 255, 255, 0.2);
-      border-radius: 2px;
-      overflow: hidden;
-    }
-
-    .password-strength-bar {
-      height: 100%;
-      transition: all 0.3s ease;
-      border-radius: 2px;
-    }
-
-    .password-strength-bar.weak {
-      width: 33%;
-      background: #FCA5A5;
-    }
-
-    .password-strength-bar.medium {
-      width: 66%;
-      background: #FCD34D;
-    }
-
-    .password-strength-bar.strong {
-      width: 100%;
-      background: #10B981;
-    }
-
-    .password-requirements {
-      margin-top: 0.375rem;
-      font-size: 0.75rem;
-      opacity: 0.7;
-    }
-
-    .password-requirements ul {
-      list-style: none;
-      padding: 0;
-      margin: 0.25rem 0 0 0;
-    }
-
-    .password-requirements li {
-      margin: 0.25rem 0;
-      display: flex;
-      align-items: center;
-      gap: 0.5rem;
-    }
-
-    .password-requirements li.met {
-      opacity: 1;
-      color: #10B981;
-    }
-
-    .checkbox-wrapper {
-      display: flex;
-      align-items: flex-start;
-      gap: 0.5rem;
-      margin-bottom: 0.75rem;
-    }
-
-    .checkbox-wrapper input[type="checkbox"] {
-      width: auto;
-      margin: 0;
-      margin-top: 0.125rem;
-    }
-
-    .checkbox-wrapper label {
-      font-size: 0.8rem;
-      line-height: 1.4;
-      opacity: 0.9;
-      font-family: 'Varela Round', sans-serif;
-    }
-
-    .checkbox-wrapper label a {
-      color: var(--color-text-white);
-      text-decoration: underline;
-      opacity: 1;
+    .form-input::placeholder {
+      color: rgba(255, 255, 255, 0.6);
     }
 
     .submit-button {
       width: 100%;
-      padding: 0.625rem;
-      background: var(--color-text-white);
-      color: var(--color-primary-blue);
+      padding: 1rem;
+      background: var(--color-accent-teal);
+      color: white;
       border: none;
-      border-radius: 12px;
-      font-size: 0.85rem;
-      font-weight: 700;
-      font-family: 'Nunito', 'Varela Round', sans-serif;
+      border-radius: 10px;
+      font-size: 1rem;
+      font-weight: 600;
       cursor: pointer;
       transition: all 0.3s ease;
-      margin-bottom: 0.75rem;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 0.5rem;
     }
 
-    .submit-button:hover {
+    .submit-button:hover:not(:disabled) {
+      background: #0d9488;
       transform: translateY(-2px);
       box-shadow: 0 10px 20px rgba(0, 0, 0, 0.2);
     }
 
     .submit-button:disabled {
-      opacity: 0.6;
+      opacity: 0.5;
       cursor: not-allowed;
       transform: none;
     }
 
-    .divider {
-      text-align: center;
-      margin: 0.75rem 0;
-      position: relative;
-    }
-
-    .divider::before {
-      content: '';
-      position: absolute;
-      top: 50%;
-      left: 0;
-      right: 0;
-      height: 1px;
-      background: rgba(255, 255, 255, 0.3);
-    }
-
-    .divider span {
-      background: rgba(255, 255, 255, 0.1);
-      padding: 0 0.75rem;
-      position: relative;
-      font-size: 0.8rem;
-      opacity: 0.8;
-    }
-
-    .signin-link {
-      text-align: center;
-      font-size: 0.8rem;
-      opacity: 0.9;
-    }
-
-    .signin-link a {
-      color: var(--color-text-white);
-      text-decoration: none;
-      font-weight: 600;
-      opacity: 1;
-    }
-
-    .back-to-home {
-      position: absolute;
-      top: 2rem;
-      left: 2rem;
-      display: flex;
-      align-items: center;
-      gap: 0.5rem;
-      color: var(--color-text-white);
-      text-decoration: none;
-      opacity: 0.8;
-      transition: opacity 0.3s ease;
-      font-size: 0.9rem;
-    }
-
-    .back-to-home:hover {
-      opacity: 1;
-    }
-
     .error-message {
-      background: rgba(244, 76, 76, 0.2);
-      border: 1px solid rgba(244, 76, 76, 0.5);
-      color: #FCA5A5;
+      background: rgba(239, 68, 68, 0.1);
+      border: 1px solid rgba(239, 68, 68, 0.3);
+      color: #fca5a5;
       padding: 0.75rem;
       border-radius: 8px;
-      font-size: 0.9rem;
       margin-bottom: 1rem;
-      display: none;
-    }
-
-    .error-message.show {
-      display: block;
+      font-size: 0.9rem;
     }
 
     .success-message {
-      background: rgba(16, 185, 129, 0.2);
-      border: 1px solid rgba(16, 185, 129, 0.5);
-      color: #10B981;
+      background: rgba(34, 197, 94, 0.1);
+      border: 1px solid rgba(34, 197, 94, 0.3);
+      color: #86efac;
       padding: 0.75rem;
       border-radius: 8px;
+      margin-bottom: 1rem;
       font-size: 0.9rem;
-      margin-bottom: 1rem;
-      display: none;
     }
 
-    .success-message.show {
-      display: block;
-    }
-
-    .plan-selector {
-      display: grid;
-      grid-template-columns: repeat(3, 1fr);
-      gap: 0.375rem;
-      margin-bottom: 0.75rem;
-    }
-
-    .plan-option {
-      padding: 0.375rem;
-      background: rgba(255, 255, 255, 0.1);
-      border: 1px solid rgba(255, 255, 255, 0.3);
-      border-radius: 8px;
-      text-align: center;
-      cursor: pointer;
-      transition: all 0.3s ease;
-      font-family: 'Varela Round', sans-serif;
-    }
-
-    .plan-option:hover {
-      background: rgba(255, 255, 255, 0.15);
-    }
-
-    .plan-option.selected {
-      background: rgba(20, 184, 166, 0.3);
-      border-color: var(--color-accent-teal);
-    }
-
-    .plan-option .plan-name {
-      font-weight: 600;
-      font-size: 0.8rem;
-      font-family: 'Nunito', 'Varela Round', sans-serif;
-      margin-bottom: 0.2rem;
-    }
-
-    .plan-option .plan-price {
-      font-size: 0.75rem;
-      opacity: 0.8;
-    }
-
-    .plan-option .plan-details {
-      font-size: 0.7rem;
-      opacity: 0.7;
-      margin-top: 0.25rem;
-    }
-
-    /* Trial content styles */
-    .trial-content {
-      padding: 2rem;
-      max-width: 400px;
-      margin: 0 auto;
-    }
-
-    .trial-title {
-      font-size: 1.5rem;
-      font-weight: 700;
-      margin-bottom: 1rem;
-      color: var(--color-text-white);
-      text-align: center;
-    }
-
-    .trial-description {
-      font-size: 0.9rem;
-      opacity: 0.9;
-      margin-bottom: 2rem;
-      text-align: center;
-      line-height: 1.5;
-    }
-
-    .trial-features {
-      margin-bottom: 2rem;
-    }
-
-    .trial-features h3 {
-      font-size: 1.1rem;
-      font-weight: 600;
-      margin-bottom: 1rem;
-      color: var(--color-text-white);
+    .checkbox-wrapper {
       display: flex;
       align-items: center;
       gap: 0.5rem;
+      margin-bottom: 1.5rem;
     }
 
-    .trial-features ul {
+    .checkbox-wrapper input[type="checkbox"] {
+      width: 1.2rem;
+      height: 1.2rem;
+      accent-color: var(--color-accent-teal);
+    }
+
+    .checkbox-wrapper label {
+      font-size: 0.9rem;
+      cursor: pointer;
+    }
+
+    .checkbox-wrapper a {
+      color: var(--color-accent-teal);
+      text-decoration: none;
+    }
+
+    .checkbox-wrapper a:hover {
+      text-decoration: underline;
+    }
+
+    .loading-spinner {
+      width: 1rem;
+      height: 1rem;
+      border: 2px solid rgba(255, 255, 255, 0.3);
+      border-top: 2px solid white;
+      border-radius: 50%;
+      animation: spin 1s linear infinite;
+    }
+
+    @keyframes spin {
+      0% { transform: rotate(0deg); }
+      100% { transform: rotate(360deg); }
+    }
+
+    .password-requirements {
+      margin-top: 0.5rem;
+      font-size: 0.8rem;
+      opacity: 0.8;
+    }
+
+    .password-requirements ul {
       list-style: none;
       padding: 0;
-      margin: 0;
     }
 
-    .trial-features li {
-      display: flex;
-      align-items: center;
-      gap: 0.75rem;
-      margin-bottom: 0.75rem;
-      font-size: 0.85rem;
-      opacity: 0.9;
-    }
-
-    .trial-icon {
-      color: var(--color-accent-teal);
-      font-size: 1.2rem;
-    }
-
-    .feature-grid {
-      display: grid;
-      grid-template-columns: repeat(2, 1fr);
-      gap: 1rem;
-      margin-bottom: 2rem;
-    }
-
-    .feature-item {
-      display: flex;
-      align-items: center;
-      gap: 0.5rem;
-      font-size: 0.8rem;
-      opacity: 0.8;
-      margin-bottom: 0.5rem;
-    }
-
-    .trial-cta {
-      margin-top: 2rem;
-      padding-top: 1.5rem;
-      border-top: 1px solid rgba(255, 255, 255, 0.1);
-    }
-
-    .trial-cta h3 {
-      font-size: 1.1rem;
-      font-weight: 600;
-      margin-bottom: 0.5rem;
-      color: var(--color-text-white);
-    }
-
-    .trial-cta p {
-      font-size: 0.8rem;
-      opacity: 0.8;
-      margin-bottom: 1rem;
-    }
-
-    .trial-stats {
-      display: flex;
-      gap: 1.5rem;
-      justify-content: center;
-    }
-
-    .stat {
-      text-align: center;
-    }
-
-    .stat-number {
-      display: block;
-      font-size: 1.2rem;
-      font-weight: 700;
-      color: var(--color-accent-teal);
+    .password-requirements li {
       margin-bottom: 0.25rem;
+      padding-left: 1rem;
+      position: relative;
     }
 
-    .stat-label {
-      display: block;
-      font-size: 0.7rem;
-      opacity: 0.7;
+    .password-requirements li.met {
+      color: #86efac;
     }
 
-    @media (max-width: 768px) {
-      .auth-container {
-        flex-direction: column;
-      }
+    .password-requirements li.met::before {
+      content: "✓";
+      position: absolute;
+      left: 0;
+    }
 
-      .auth-right {
-        display: none;
-      }
-
-      .auth-card {
-        max-width: 100%;
-        padding: 2rem 1.5rem;
-        max-height: none;
-      }
-
-      .back-to-home {
-        position: static;
-        margin-bottom: 2rem;
-        justify-content: center;
-      }
-
-      .form-row {
-        grid-template-columns: 1fr;
-      }
-
-      .plan-selector {
-        grid-template-columns: 1fr;
-      }
+    .password-requirements li:not(.met)::before {
+      content: "○";
+      position: absolute;
+      left: 0;
     }
   </style>
 </head>
 <body>
- <a href="./index.html" class="back-to-home">
-    <span class="material-symbols-rounded">arrow_back</span>
-    Back to Home
-  </a>
-
-
-  <div class="auth-container">
-    <div class="auth-left">
-      <div class="auth-card">
-        <div class="auth-header">
-          <h1 class="auth-title">Create Your Pharmacy Account</h1>
-         </div>
-
-        <div class="error-message" x-show="errorMessage" x-text="errorMessage"></div>
-        <div class="success-message" x-show="successMessage" x-text="successMessage"></div>
-
-        <form @submit.prevent="handleSignUp">
-          <div class="form-section">
-            <h2 class="section-heading">Pharmacy Details</h2>
-            <div class="form-group">
-              <label class="form-label" for="pharmacyName">Pharmacy Name <span class="required">*</span></label>
-              <input type="text" id="pharmacyName" class="form-input" placeholder="Enter your pharmacy name" x-model="signupForm.pharmacyName" required>
-              <div class="field-error" x-show="fieldErrors.pharmacyName" x-text="fieldErrors.pharmacyName"></div>
-            </div>
-            <div class="form-group">
-              <label class="form-label" for="phoneNumber">Phone Number <span class="required">*</span></label>
-              <input type="tel" id="phoneNumber" class="form-input" placeholder="+260..." x-model="signupForm.phoneNumber" required>
-              <div class="field-error" x-show="fieldErrors.phoneNumber" x-text="fieldErrors.phoneNumber"></div>
-            </div>
-            <div class="form-group">
-              <label class="form-label" for="password">Password <span class="required">*</span></label>
-              <div class="password-input-wrapper">
-                <input type="password" id="password" class="form-input" placeholder="Create a strong password" x-model="signupForm.password" @input="checkPasswordStrength" required>
-                <button type="button" class="password-toggle" @click="showPassword = !showPassword">
-                  <span class="material-symbols-rounded" x-show="!showPassword">visibility</span>
-                  <span class="material-symbols-rounded" x-show="showPassword">visibility_off</span>
-                </button>
-              </div>
-              <div class="password-strength" x-show="signupForm.password">
-                <div class="password-strength-bar" :class="passwordStrengthClass"></div>
-              </div>
-              <div class="password-requirements" x-show="signupForm.password">
-                <p>Password must contain:</p>
-                <ul class="password-requirements">
-                  <li :class="{ 'met': passwordRequirements.hasMinLength }">At least 8 characters</li>
-                  <li :class="{ 'met': passwordRequirements.hasLetter }">At least 1 letter</li>
-                  <li :class="{ 'met': passwordRequirements.hasNumber }">At least 1 number</li>
-                </ul>
-              </div>
-            </div>
-            <div class="checkbox-wrapper">
-              <label class="flex items-center gap-2 cursor-pointer">
-                <input type="checkbox" x-model="signupForm.acceptTerms" class="w-4 h-4 text-accent-teal rounded border-gray-300 focus:ring-accent-teal">
-                <span class="text-sm">
-                  I agree to the <a href="#" @click.prevent="showTermsModal = true" class="text-accent-teal hover:underline">Terms and Conditions</a> and <a href="#" @click.prevent="showPrivacyModal = true" class="text-accent-teal hover:underline">Privacy Policy</a>
-                </span>
-              </label>
-            </div>
-          </div>
-          <button type="submit" class="submit-button" :disabled="loading || !isFormValid" x-text="loading ? 'Creating Account...' : 'Create Account'" title="Create Account">
-          </button>
-        </form>
-
-        <div class="divider">
-          <span>Already have an account?</span>
-        </div>
-
-        <div class="signin-link">
-          <a href="./signin.html">Sign in to your existing account</a>
-        </div>
-      </div>
+  <div class="signup-container">
+    <div class="text-center mb-8">
+      <h1 class="text-3xl font-bold mb-2">Create Pharmacy Account</h1>
+      <p class="opacity-80">Join Umi Health Pharmacy Management System</p>
     </div>
 
-  </div>
+    <form @submit.prevent="handleSignup">
+      <div class="form-group">
+        <label class="form-label" for="pharmacyName">Pharmacy Name</label>
+        <input 
+          type="text" 
+          id="pharmacyName"
+          class="form-input" 
+          x-model="form.pharmacyName"
+          placeholder="Enter your pharmacy name"
+          required
+          @blur="checkPharmacyName"
+        >
+        <div x-show="fieldErrors.pharmacyName" class="text-red-300 text-sm mt-1" x-text="fieldErrors.pharmacyName"></div>
+      </div>
 
-  <!-- Terms of Service Modal -->
-  <div x-show="showTermsModal" 
-       x-transition:enter="transition ease-out duration-300"
-       x-transition:enter-start="opacity-0"
-       x-transition:enter-end="opacity-100"
-       x-transition:leave="transition ease-in duration-200"
-       x-transition:leave-start="opacity-100"
-       x-transition:leave-end="opacity-0"
-       @click.away="showTermsModal = false"
-       class="fixed inset-0 z-50 flex items-center justify-center bg-black/70 p-4">
-    <div class="max-w-4xl w-full max-h-[80vh] bg-gray-900/95 rounded-lg shadow-xl flex flex-col">
-      <div class="bg-accent-teal text-white p-4 rounded-t-lg flex items-center justify-between">
-        <div class="flex items-center gap-2">
-          <span class="material-symbols-rounded">description</span>
-          <h3 class="text-xl font-bold">Terms of Service</h3>
-        </div>
-        <button @click="showTermsModal = false" class="text-white hover:bg-white/20 p-1 rounded" aria-label="Close Terms of Service modal">
-          <span class="material-symbols-rounded">close</span>
-        </button>
+      <div class="form-group">
+        <label class="form-label" for="email">Email Address</label>
+        <input 
+          type="email" 
+          id="email"
+          class="form-input" 
+          x-model="form.email"
+          placeholder="Enter your email"
+          required
+        >
+        <div x-show="fieldErrors.email" class="text-red-300 text-sm mt-1" x-text="fieldErrors.email"></div>
       </div>
-      
-      <div class="flex-1 p-6 overflow-y-auto text-white">
-        <div class="space-y-6">
-          <div>
-            <h4 class="text-lg font-semibold mb-3">1. Acceptance of Terms</h4>
-            <p class="opacity-90">By accessing and using UmiHealthInformationSystems Pharmacy Management System, you accept and agree to be bound by the terms and provision of this agreement.</p>
-          </div>
-          
-          <div>
-            <h4 class="text-lg font-semibold mb-3">2. Use License</h4>
-            <p class="opacity-90">Permission is granted to temporarily use UmiHealthInformationSystems for personal, non-commercial transitory viewing only. This is the grant of a license, not a transfer of title.</p>
-          </div>
-          
-          <div>
-            <h4 class="text-lg font-semibold mb-3">3. Pharmacy Data</h4>
-            <p class="opacity-90">You retain ownership of all pharmacy data entered into UmiHealthInformationSystems. We provide secure storage and backup services for your data.</p>
-          </div>
-          
-          <div>
-            <h4 class="text-lg font-semibold mb-3">4. ZAMRA Compliance</h4>
-            <p class="opacity-90">Users must ensure all pharmacy operations comply with Zambian Medicines Regulatory Authority (ZAMRA) regulations and guidelines.</p>
-          </div>
-          
-          <div>
-            <h4 class="text-lg font-semibold mb-3">5. Payment Terms</h4>
-            <p class="opacity-90">Subscription fees are billed monthly or annually. All fees are non-refundable except as required by law.</p>
-          </div>
-          
-          <div>
-            <h4 class="text-lg font-semibold mb-3">6. Account Security</h4>
-            <p class="opacity-90">You are responsible for maintaining the confidentiality of your account and password. Notify us immediately of any unauthorized use.</p>
-          </div>
-          
-          <div>
-            <h4 class="text-lg font-semibold mb-3">7. Service Availability</h4>
-            <p class="opacity-90">We strive for 99.9% uptime but cannot guarantee uninterrupted service. Scheduled maintenance may occur with advance notice.</p>
-          </div>
-          
-          <div>
-            <h4 class="text-lg font-semibold mb-3">8. Limitation of Liability</h4>
-            <p class="opacity-90">UmiHealthInformationSystems shall not be liable for any indirect, incidental, special, consequential, or punitive damages.</p>
-          </div>
-          
-          <div>
-            <h4 class="text-lg font-semibold mb-3">9. Termination</h4>
-            <p class="opacity-90">We may terminate or suspend access to our service immediately, without prior notice or liability, for any reason.</p>
-          </div>
-          
-          <div>
-            <h4 class="text-lg font-semibold mb-3">10. Governing Law</h4>
-            <p class="opacity-90">These terms shall be governed by and construed in accordance with the laws of Zambia.</p>
-          </div>
-        </div>
-      </div>
-      
-      <div class="p-4 border-t border-white/20 rounded-b-lg">
-        <button @click="showTermsModal = false" class="w-full bg-accent-teal text-white py-2 rounded-lg hover:bg-teal-600 transition-colors">
-          I Understand
-        </button>
-      </div>
-    </div>
-  </div>
 
-  <!-- Privacy Policy Modal -->
-  <div x-show="showPrivacyModal" 
-       x-transition:enter="transition ease-out duration-300"
-       x-transition:enter-start="opacity-0"
-       x-transition:enter-end="opacity-100"
-       x-transition:leave="transition ease-in duration-200"
-       x-transition:leave-start="opacity-100"
-       x-transition:leave-end="opacity-0"
-       @click.away="showPrivacyModal = false"
-       class="fixed inset-0 z-50 flex items-center justify-center bg-black/70 p-4">
-    <div class="max-w-4xl w-full max-h-[80vh] bg-gray-900/95 rounded-lg shadow-xl flex flex-col">
-      <div class="bg-accent-teal text-white p-4 rounded-t-lg flex items-center justify-between">
-        <div class="flex items-center gap-2">
-          <span class="material-symbols-rounded">privacy_tip</span>
-          <h3 class="text-xl font-bold">Privacy Policy</h3>
-        </div>
-        <button @click="showPrivacyModal = false" class="text-white hover:bg-white/20 p-1 rounded" aria-label="Close Privacy Policy modal">
-          <span class="material-symbols-rounded">close</span>
-        </button>
+      <div class="form-group">
+        <label class="form-label" for="phoneNumber">Phone Number</label>
+        <input 
+          type="tel" 
+          id="phoneNumber"
+          class="form-input" 
+          x-model="form.phoneNumber"
+          placeholder="Enter your phone number"
+          required
+        >
+        <div x-show="fieldErrors.phoneNumber" class="text-red-300 text-sm mt-1" x-text="fieldErrors.phoneNumber"></div>
       </div>
-      
-      <div class="flex-1 p-6 overflow-y-auto text-white">
-        <div class="space-y-6">
-          <div>
-            <h4 class="text-lg font-semibold mb-3">1. Information We Collect</h4>
-            <p class="opacity-90">We collect information you provide directly to us, such as when you create an account, use our services, or contact us for support.</p>
-          </div>
-          
-          <div>
-            <h4 class="text-lg font-semibold mb-3">2. Pharmacy Data</h4>
-            <p class="opacity-90">Your pharmacy data including inventory, sales, prescriptions, and customer information is stored securely and used only to provide our services.</p>
-          </div>
-          
-          <div>
-            <h4 class="text-lg font-semibold mb-3">3. Data Security</h4>
-            <p class="opacity-90">We implement appropriate technical and organizational measures to protect your data against unauthorized access, alteration, disclosure, or destruction.</p>
-          </div>
-          
-          <div>
-            <h4 class="text-lg font-semibold mb-3">4. Data Usage</h4>
-            <p class="opacity-90">Your data is used to provide and improve our services, process transactions, generate reports, and ensure regulatory compliance.</p>
-          </div>
-          
-          <div>
-            <h4 class="text-lg font-semibold mb-3">5. Data Sharing</h4>
-            <p class="opacity-90">We do not sell, trade, or otherwise transfer your personal information to third parties without your consent, except as required by law.</p>
-          </div>
-          
-          <div>
-            <h4 class="text-lg font-semibold mb-3">6. Regulatory Compliance</h4>
-            <p class="opacity-90">We comply with Zambian data protection laws and healthcare privacy regulations including ZAMRA requirements.</p>
-          </div>
-          
-          <div>
-            <h4 class="text-lg font-semibold mb-3">7. Cookies and Tracking</h4>
-            <p class="opacity-90">We use cookies and similar technologies to enhance your experience, analyze usage, and provide personalized features.</p>
-          </div>
-          
-          <div>
-            <h4 class="text-lg font-semibold mb-3">8. Data Retention</h4>
-            <p class="opacity-90">We retain your data only as long as necessary to provide our services and comply with legal obligations.</p>
-          </div>
-          
-          <div>
-            <h4 class="text-lg font-semibold mb-3">9. Your Rights</h4>
-            <p class="opacity-90">You have the right to access, update, or delete your personal information. Contact us to exercise these rights.</p>
-          </div>
-          
-          <div>
-            <h4 class="text-lg font-semibold mb-3">10. Contact Information</h4>
-            <p class="opacity-90">For privacy questions or concerns, contact our Data Protection Officer at privacy@UmiHealthInformationSystems.zm</p>
-          </div>
-        </div>
+
+      <div class="form-group">
+        <label class="form-label" for="password">Password</label>
+        <input 
+          type="password" 
+          id="password"
+          class="form-input" 
+          x-model="form.password"
+          placeholder="Create a strong password"
+          required
+          @input="checkPasswordStrength"
+        >
+        <div x-show="fieldErrors.password" class="text-red-300 text-sm mt-1" x-text="fieldErrors.password"></div>
       </div>
-      
-      <div class="p-4 border-t border-white/20 rounded-b-lg">
-        <button @click="showPrivacyModal = false" class="w-full bg-accent-teal text-white py-2 rounded-lg hover:bg-teal-600 transition-colors">
-          I Understand
-        </button>
+
+      <div class="checkbox-wrapper">
+        <input 
+          type="checkbox" 
+          id="acceptTerms"
+          x-model="form.acceptTerms"
+          required
+        >
+        <label for="acceptTerms">
+          I agree to the <a href="#" @click.prevent="showTerms = true">Terms of Service</a> and <a href="#" @click.prevent="showPrivacy = true">Privacy Policy</a>
+        </label>
       </div>
+
+      <button 
+        type="submit" 
+        class="submit-button"
+        :disabled="loading || !isFormValid"
+        title="Create Account"
+      >
+        <div x-show="loading" class="loading-spinner"></div>
+        <span x-text="loading ? 'Creating Account...' : 'Create Account'"></span>
+      </button>
+    </form>
+
+    <div class="text-center mt-6">
+      <p class="opacity-80">
+        Already have an account? 
+        <a href="signin.html" class="text-accent-teal hover:underline">Sign In</a>
+      </p>
     </div>
   </div>
 
   <script>
-    // Real API configuration
-    window.authAPI = {
-      register: async (data) => {
-        try {
-          const result = await fetch('http://localhost:5000/api/v1/auth/simple-register', {
-            method: 'POST',
-            mode: 'cors',
-            headers: {
-              'Content-Type': 'application/json',
-            },
-            body: JSON.stringify({
-              pharmacyName: data.pharmacyName,
-              phoneNumber: data.phoneNumber,
-              email: data.email,
-              password: data.password
-            })
-          });
-
-          const response = await response.json();
-
-          if (response.ok && result.success) {
-            const data = result.data || {};
-            return {
-              success: true,
-              accessToken: data.accessToken || 'mock-token',
-              refreshToken: data.refreshToken || 'mock-refresh',
-              user: {
-                id: data.id || 1,
-                name: data.username || `${data.firstName} ${data.lastName}`,
-                email: data.email
-              },
-              tenant: {
-                id: data.tenantId || 1,
-                name: data.pharmacyName
-              },
-              subscription: { plan: 'Care', status: 'Trial' },
-              redirectUrl: result.redirectUrl || '/portals/admin/home.html'
-            };
-          } else {
-            return {
-              success: false,
-              message: result.message || 'Registration failed'
-            };
-          }
-        } catch (error) {
-          console.error('Registration error:', error);
-          
-          // Handle CORS error specifically
-          if (error.message && error.message.includes('CORS')) {
-            return {
-              success: false,
-              message: 'CORS Error: Backend server is not configured to allow requests from this domain. Please contact administrator.'
-            };
-          }
-          
-          // Handle network errors
-          if (error.message && error.message.includes('Failed to fetch')) {
-            return {
-              success: false,
-              message: 'Network Error: Unable to connect to backend server. Please ensure backend is running on http://localhost:5001'
-            };
-          }
-          
-          return {
-            success: false,
-            message: 'Network error. Please try again.'
-          };
-        }
-      }
-    };
-
-    // Real API for pharmacy name checking
-    window.UmiHealthInformationSystemsAPI = {
-      get: async (url) => {
-        try {
-          const response = await fetch(url);
-          const result = await response.json();
-          return result;
-        } catch (error) {
-          console.error('API error:', error);
-          return { success: true }; // Return success for now to prevent blocking
-        }
-      }
-    };
-
     function signup() {
       return {
-        showPassword: false,
-        loading: false,
-        errorMessage: '',
-        successMessage: '',
-        showTermsModal: false,
-        showPrivacyModal: false,
-        activeTab: 'pharmacy',
-        passwordMessage: '',
-        passwordMessageColor: 'rgba(255, 255, 255, 0.7)',
-        fieldErrors: {},
-        pharmacyNameChecking: false,
-        tabOrder: ['pharmacy', 'admin', 'account'],
-        usernameTouched: false,
-        signupForm: {
+        form: {
           pharmacyName: '',
+          email: '',
           phoneNumber: '',
           password: '',
           acceptTerms: false
@@ -973,243 +303,118 @@
           hasLetter: false,
           hasNumber: false
         },
-        get passwordStrengthClass() {
-          const metRequirements = Object.values(this.passwordRequirements).filter(Boolean).length;
-          if (metRequirements === 3) return 'strong';
-          if (metRequirements === 2) return 'medium';
-          if (metRequirements === 1) return 'weak';
-          return '';
-        },
-        generateEmail() {
-          return this.signupForm.pharmacyName.trim().toLowerCase().replace(/\s+/g, '.') + '@pharmacy.local';
-        },
+        fieldErrors: {},
+        loading: false,
+        errorMessage: '',
+        successMessage: '',
+        showTerms: false,
+        showPrivacy: false,
 
         get isFormValid() {
-          const requiredFields = [
-            'pharmacyName',
-            'phoneNumber',
-            'password'
-          ];
-
-          const allFilled = requiredFields.every(field => Boolean(this.signupForm[field]));
-
+          const requiredFields = ['pharmacyName', 'email', 'phoneNumber', 'password'];
+          const allFilled = requiredFields.every(field => Boolean(this.form[field]));
+          
           return allFilled &&
-                 this.signupForm.acceptTerms &&
-                 this.passwordRequirements.hasMinLength &&
-                 this.passwordRequirements.hasLetter &&
-                 this.passwordRequirements.hasNumber &&
+                 this.form.acceptTerms &&
+                 this.form.password.length >= 6 &&
                  Object.keys(this.fieldErrors).length === 0;
         },
 
-        generatePharmacyCode() {
-          const timestamp = Date.now().toString(36).toUpperCase();
-          const random = Math.random().toString(36).substring(2, 6).toUpperCase();
-          return `PHM-${timestamp}-${random}`;
+        checkPasswordStrength() {
+          const password = this.form.password;
+          
+          this.passwordRequirements = {
+            hasMinLength: password.length >= 6,
+            hasLetter: /[a-zA-Z]/.test(password),
+            hasNumber: /\d/.test(password)
+          };
         },
 
         async checkPharmacyName() {
-          if (!this.signupForm.pharmacyName || this.signupForm.pharmacyName.length < 3) {
+          if (!this.form.pharmacyName || this.form.pharmacyName.length < 3) {
             this.fieldErrors.pharmacyName = '';
             return;
           }
 
-          this.pharmacyNameChecking = true;
-          this.fieldErrors.pharmacyName = '';
-
           try {
-            if (!window.UmiHealthInformationSystemsAPI) {
-              throw new Error('API configuration not loaded');
-            }
-
-            const result = await window.UmiHealthInformationSystemsAPI.get(
-              `http://localhost:5001/api/auth/check-pharmacy-name/${encodeURIComponent(this.signupForm.pharmacyName)}`
-            );
-
-            if (!result.success) {
-              this.fieldErrors.pharmacyName = result.message;
+            const response = await fetch(`http://localhost:5001/api/v1/auth/check-pharmacy-name/${encodeURIComponent(this.form.pharmacyName)}`);
+            const result = await response.json();
+            
+            if (!result.success || !result.available) {
+              this.fieldErrors.pharmacyName = result.message || 'Pharmacy name not available';
+            } else {
+              this.fieldErrors.pharmacyName = '';
             }
           } catch (error) {
             console.error('Error checking pharmacy name:', error);
-          } finally {
-            this.pharmacyNameChecking = false;
+            this.fieldErrors.pharmacyName = '';
           }
         },
 
-        checkPasswordStrength() {
-          const password = this.signupForm.password;
-          
-          // Reset requirements
-          this.passwordRequirements = {
-            hasMinLength: false,
-            hasLetter: false,
-            hasNumber: false
-          };
-
-          if (password.length === 0) {
-            this.passwordMessage = '';
-            this.passwordMessageColor = 'rgba(255, 255, 255, 0.7)';
-            return;
-          }
-
-          // Check each requirement
-          this.passwordRequirements.hasMinLength = password.length >= 6;
-          this.passwordRequirements.hasLetter = /[a-zA-Z]/.test(password);
-          this.passwordRequirements.hasNumber = /\d/.test(password);
-
-          // Update message
-          const metRequirements = Object.values(this.passwordRequirements).filter(Boolean).length;
-          
-          if (metRequirements === 3) {
-            this.passwordMessage = 'Password meets requirements';
-            this.passwordMessageColor = '#10B981';
-          } else {
-            this.passwordMessage = 'Password must have at least 6 characters, 1 letter, and 1 number';
-            this.passwordMessageColor = '#FCA5A5';
-          }
-        },
-
-        validateForm() {
-          this.fieldErrors = {};
-
-          // Validate password
-          if (!this.signupForm.password) {
-            this.fieldErrors.password = 'Password is required';
-          } else if (!this.passwordRequirements.hasMinLength || !this.passwordRequirements.hasLetter || !this.passwordRequirements.hasNumber) {
-            this.fieldErrors.password = 'Password must have at least 6 characters, 1 letter, and 1 number';
-          } else if (!this.signupForm.pharmacyName) {
-            this.fieldErrors.pharmacyName = 'Pharmacy name is required';
-          } else if (!this.signupForm.phoneNumber) {
-            this.fieldErrors.phoneNumber = 'Phone number is required';
-          } else if (!this.signupForm.acceptTerms) {
-            this.fieldErrors.acceptTerms = 'You must agree to Terms of Service';
-          }
-
-          return Object.keys(this.fieldErrors).length === 0;
-        },
-
-        tryAdvance(section) {
-          if (this.activeTab !== section) {
-            return;
-          }
-
-          if (!this.isSectionComplete(section)) {
-            return;
-          }
-
-          const currentIndex = this.tabOrder.indexOf(section);
-          if (currentIndex === -1 || currentIndex === this.tabOrder.length - 1) {
-            return;
-          }
-
-          this.activeTab = this.tabOrder[currentIndex + 1];
-        },
-
-        isSectionComplete(section) {
-          if (section === 'pharmacy') {
-            return this.signupForm.pharmacyName.trim() &&
-                   this.signupForm.physicalAddress.trim() &&
-                   this.signupForm.province;
-          }
-
-          if (section === 'admin') {
-            return this.signupForm.adminFullName.trim() &&
-                   this.signupForm.phoneNumber.trim();
-          }
-
-          return true;
-        },
-
-        generateUsernameSuggestion() {
-          const nameParts = this.signupForm.adminFullName
-            .trim()
-            .split(/\s+/)
-            .filter(Boolean);
-
-          if (!nameParts.length) {
-            return '';
-          }
-
-          const first = nameParts[0].toLowerCase().replace(/[^a-z]/g, '');
-          const last = nameParts.length > 1 ? nameParts[nameParts.length - 1].toLowerCase().replace(/[^a-z]/g, '') : '';
-          const suffix = Math.floor(Math.random() * 900) + 100;
-          if (first && last) {
-            return `${first}.${last}${suffix}`;
-          }
-
-          return `${first}${suffix}`;
-        },
-
-        handleAdminNameInput() {
-          if (!this.usernameTouched) {
-            const suggestion = this.generateUsernameSuggestion();
-            if (suggestion) {
-              this.signupForm.username = suggestion;
-            }
-          }
-          this.tryAdvance('admin');
-        },
-
-        acceptSuggestedUsername() {
-          this.usernameTouched = true;
-        },
-
-        async handleSignUp() {
-          if (!this.validateForm()) {
-            this.errorMessage = 'Please fix the errors below';
-            return;
-          }
-
+        async handleSignup() {
+          console.log('Starting signup process...');
           this.loading = true;
           this.errorMessage = '';
           this.successMessage = '';
 
           try {
-            // Generate email from pharmacy name for simplicity
-            const generatedEmail = this.signupForm.pharmacyName.trim().toLowerCase().replace(/\s+/g, '.') + '@pharmacy.local';
-            const requestData = {
-              pharmacyName: this.signupForm.pharmacyName.trim(),
-              phoneNumber: this.signupForm.phoneNumber.trim(),
-              email: generatedEmail,
-              password: this.signupForm.password
-            };
+            console.log('Sending signup request:', {
+              pharmacyName: this.form.pharmacyName,
+              adminFullName: this.form.pharmacyName,
+              email: this.form.email,
+              phoneNumber: this.form.phoneNumber,
+              password: this.form.password
+            });
+            
+            const response = await fetch('http://localhost:5001/api/v1/auth/register', {
+              method: 'POST',
+              headers: {
+                'Content-Type': 'application/json',
+              },
+              body: JSON.stringify({
+                pharmacyName: this.form.pharmacyName,
+                adminFullName: this.form.pharmacyName, // Use pharmacy name as admin name for simplicity
+                email: this.form.email,
+                phoneNumber: this.form.phoneNumber,
+                password: this.form.password
+              })
+            });
 
-            console.log('Sending signup request:', requestData);
+            if (!response.ok) {
+              const errorData = await response.json();
+              console.error('API Error:', errorData);
+              throw new Error(errorData.message || 'Registration failed');
+            }
 
-            const result = await window.authAPI.register(requestData);
+            const result = await response.json();
+            console.log('API Response:', result);
 
             if (result.success) {
-              this.successMessage = 'Welcome to Umi Health! Your pharmacy account has been created successfully.';
+              this.successMessage = 'Account created successfully! Setting up your pharmacy...';
               
               // Store auth data
-              localStorage.setItem('umi_access_token', result.data.accessToken);
-              localStorage.setItem('umi_refresh_token', result.data.refreshToken);
-              localStorage.setItem('umi_current_user', JSON.stringify(result.data.user));
-              localStorage.setItem('umi_current_tenant', JSON.stringify(result.data.tenant));
-              localStorage.setItem('umi_tenant_id', result.data.tenant.id);
+              localStorage.setItem('umi_access_token', result.accessToken);
+              localStorage.setItem('umi_refresh_token', result.refreshToken);
+              localStorage.setItem('umi_current_user', JSON.stringify(result.user));
+              localStorage.setItem('umi_current_tenant', JSON.stringify(result.tenant));
+              localStorage.setItem('umi_tenant_id', result.tenant.id);
               
-              // Redirect to onboarding or admin portal
+              // Always redirect to onboarding first for new users
               setTimeout(() => {
-                if (result.data.requiresOnboarding) {
-                  window.location.href = '/public/onboarding.html';
-                } else {
-                  window.location.href = '/portals/admin/home.html';
-                }
-              }, 2000);
+                window.location.href = '/public/onboarding.html';
+              }, 1500);
             } else {
               this.errorMessage = result.message || 'Registration failed. Please try again.';
             }
           } catch (error) {
             console.error('Registration error:', error);
-            this.errorMessage = 'Registration failed. Please try again.';
+            this.errorMessage = 'Network error. Please check your connection and try again.';
           } finally {
             this.loading = false;
           }
-        },
+        }
       }
     }
   </script>
-  <script src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
 </body>
 </html>
-
-

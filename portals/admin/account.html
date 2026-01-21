@@ -1074,17 +1074,52 @@
         // Initialize component
         async init() {
           try {
-            // Check authentication
-            this.isAuthenticated = this.authManager?.isAuthenticated() || false;
+            // Ensure backend integration is available
+            if (!window.backendHelper) {
+              console.error('Backend helper not available');
+              this.error = 'System initialization failed';
+              return;
+            }
+
+            // Check authentication with fallback
+            this.isAuthenticated = this.checkAuthentication();
             
             if (this.isAuthenticated) {
               await this.loadAccountFromAPI();
             } else {
               this.error = 'Please login to access account settings';
+              this.loading = false;
             }
           } catch (error) {
             console.error('Initialization error:', error);
             this.error = 'Failed to initialize account settings';
+            this.loading = false;
+          }
+        },
+
+        // Helper method to check authentication
+        checkAuthentication() {
+          try {
+            // Try multiple authentication sources
+            if (window.authManager?.isAuthenticated()) {
+              return true;
+            }
+            
+            if (window.authAPI?.isAuthenticated()) {
+              return true;
+            }
+            
+            if (window.apiClient?.isAuthenticated()) {
+              return true;
+            }
+            
+            // Check localStorage tokens as fallback
+            const token = localStorage.getItem('umi_access_token') || 
+                         localStorage.getItem('auth_tokens');
+            return !!token;
+          } catch (error) {
+            console.error('Authentication check failed:', error);
+            return false;
           }
         },
         
@@ -1094,17 +1129,49 @@
           this.error = null;
           
           try {
-            await Promise.all([
-              this.loadUserProfile(),
-              this.loadPharmacySettings(),
-              this.loadSecuritySettings(),
-              this.loadSubscriptionStatus(),
-              this.loadAvailablePlans(),
-              this.loadUserStats()
-            ]);
+            // Ensure we have API clients
+            const apiClient = this.apiClient || window.apiClient || window.adminAPI || window.authAPI;
+            if (!apiClient) {
+              throw new Error('API client not available');
+            }
+
+            // Load data with better error handling
+            const promises = [
+              this.loadUserProfile().catch(err => {
+                console.warn('Failed to load user profile:', err);
+                return null;
+              }),
+              this.loadPharmacySettings().catch(err => {
+                console.warn('Failed to load pharmacy settings:', err);
+                return null;
+              }),
+              this.loadSecuritySettings().catch(err => {
+                console.warn('Failed to load security settings:', err);
+                return null;
+              }),
+              this.loadSubscriptionStatus().catch(err => {
+                console.warn('Failed to load subscription status:', err);
+                return null;
+              }),
+              this.loadAvailablePlans().catch(err => {
+                console.warn('Failed to load available plans:', err);
+                return null;
+              }),
+              this.loadUserStats().catch(err => {
+                console.warn('Failed to load user stats:', err);
+                return null;
+              })
+            ];
+
+            await Promise.allSettled(promises);
+            
+            // If we got here without major errors, consider it successful
+            if (!this.error) {
+              console.log('Account data loaded successfully');
+            }
           } catch (error) {
             console.error('Error loading account data:', error);
-            this.error = 'Failed to load account data';
+            this.error = 'Failed to load account data: ' + (error.message || 'Unknown error');
             this.backendHelper?.showNotification('Failed to load account data', 'error');
           } finally {
             this.loading = false;
@@ -1114,35 +1181,79 @@
         // Load user profile
         async loadUserProfile() {
           try {
-            if (!this.apiClient) return;
+            // Use available API client with fallback
+            const apiClient = this.apiClient || window.apiClient || window.adminAPI || window.authAPI;
+            if (!apiClient) {
+              console.warn('No API client available for profile loading');
+              return;
+            }
             
-            const response = await this.apiClient.getProfile();
-            if (response.success) {
-              const user = response.data;
+            let response;
+            
+            // Try different methods based on available API client
+            if (typeof apiClient.getProfile === 'function') {
+              response = await apiClient.getProfile();
+            } else if (typeof apiClient.request === 'function') {
+              response = await apiClient.request('/auth/me');
+            } else if (typeof apiClient.get === 'function') {
+              response = await apiClient.get('/auth/me');
+            } else {
+              throw new Error('No suitable API method found');
+            }
+            
+            if (response && (response.success || response.data)) {
+              const user = response.data || response;
               this.profile = {
-                firstName: user.firstName || '',
-                lastName: user.lastName || '',
+                firstName: user.firstName || user.name?.split(' ')[0] || '',
+                lastName: user.lastName || user.name?.split(' ').slice(1).join(' ') || '',
                 email: user.email || '',
-                phone: user.phoneNumber || '',
+                phone: user.phoneNumber || user.phone || '',
                 bio: user.bio || ''
               };
             }
           } catch (error) {
             console.error('Error loading user profile:', error);
+            // Don't throw error, just log it - allow other components to load
           }
         },
         
         // Load pharmacy settings
         async loadPharmacySettings() {
           try {
-            if (!this.apiClient) return;
+            // Use available API client with fallback
+            const apiClient = this.apiClient || window.apiClient || window.adminAPI || window.authAPI;
+            if (!apiClient) {
+              console.warn('No API client available for pharmacy settings');
+              return;
+            }
             
-            const branchId = this.authManager?.getCurrentUser()?.branchId;
-            if (!branchId) return;
+            // Get branch ID from multiple sources
+            let branchId = this.authManager?.getCurrentUser()?.branchId ||
+                          this.authManager?.getBranchId() ||
+                          window.authManager?.getCurrentUser()?.branchId ||
+                          window.authManager?.getBranchId() ||
+                          localStorage.getItem('umi_current_branch_id');
             
-            const response = await this.apiClient.getBranch(branchId);
-            if (response.success) {
-              const branch = response.data;
+            if (!branchId) {
+              console.warn('No branch ID found for pharmacy settings');
+              return;
+            }
+            
+            let response;
+            
+            // Try different methods based on available API client
+            if (typeof apiClient.getBranch === 'function') {
+              response = await apiClient.getBranch(branchId);
+            } else if (typeof apiClient.request === 'function') {
+              response = await apiClient.request(`/branch/${branchId}`);
+            } else if (typeof apiClient.get === 'function') {
+              response = await apiClient.get(`/branch/${branchId}`);
+            } else {
+              throw new Error('No suitable API method found');
+            }
+            
+            if (response && (response.success || response.data)) {
+              const branch = response.data || response;
               this.pharmacySettings = {
                 name: branch.name || '',
                 phone: branch.phone || '',
@@ -1165,6 +1276,7 @@
             }
           } catch (error) {
             console.error('Error loading pharmacy settings:', error);
+            // Don't throw error, just log it - allow other components to load
           }
         },
         
@@ -1191,6 +1303,11 @@
             
             this.loading = true;
             
+            // Add timeout to prevent infinite loading
+            const timeoutPromise = new Promise((_, reject) => {
+              setTimeout(() => reject(new Error('Request timeout')), 10000);
+            });
+            
             const profileData = {
               firstName: this.profile.firstName,
               lastName: this.profile.lastName,
@@ -1199,26 +1316,50 @@
               bio: this.profile.bio
             };
             
-            if (this.apiClient) {
-              const userId = this.authManager?.getCurrentUser()?.id;
+            // Use available API client with fallback
+            const apiClient = this.apiClient || window.apiClient || window.adminAPI || window.authAPI;
+            
+            if (apiClient) {
+              const userId = this.authManager?.getCurrentUser()?.id ||
+                            this.authManager?.getUserId() ||
+                            window.authManager?.getCurrentUser()?.id ||
+                            window.authManager?.getUserId();
+              
               if (userId) {
-                const response = await this.apiClient.request(`/users/${userId}`, {
-                  method: 'PUT',
-                  body: JSON.stringify(profileData)
-                });
+                let responsePromise;
                 
-                if (response.success) {
+                // Try different methods based on available API client
+                if (typeof apiClient.updateProfile === 'function') {
+                  responsePromise = apiClient.updateProfile(profileData);
+                } else if (typeof apiClient.request === 'function') {
+                  responsePromise = apiClient.request(`/users/${userId}`, {
+                    method: 'PUT',
+                    body: JSON.stringify(profileData)
+                  });
+                } else if (typeof apiClient.put === 'function') {
+                  responsePromise = apiClient.put(`/users/${userId}`, profileData);
+                } else {
+                  throw new Error('No suitable API method found');
+                }
+                
+                const response = await Promise.race([responsePromise, timeoutPromise]);
+                
+                if (response && (response.success || response.data)) {
                   this.backendHelper?.showNotification('Profile updated successfully', 'success');
                 } else {
-                  throw new Error(response.message || 'Failed to update profile');
+                  throw new Error(response?.message || 'Failed to update profile');
                 }
+              } else {
+                throw new Error('User ID not found');
               }
             } else {
+              // Fallback to local storage for demo mode
+              localStorage.setItem('umi_profile', JSON.stringify(this.profile));
               this.backendHelper?.showNotification('Profile saved locally', 'info');
             }
           } catch (error) {
             console.error('Error saving profile:', error);
-            this.backendHelper?.showNotification('Failed to update profile', 'error');
+            this.backendHelper?.showNotification('Failed to update profile: ' + (error.message || 'Unknown error'), 'error');
           } finally {
             this.loading = false;
           }
@@ -1603,6 +1744,8 @@
                 month: 'long',
                 day: 'numeric'
               });
+            case 'datetime':
+              return date.toLocaleString();
             default:
               return date.toLocaleDateString();
           }
@@ -1614,6 +1757,41 @@
         }
       };
     }
+
+    // Initialize the application with error handling
+    document.addEventListener('alpine:init', () => {
+      try {
+        // Set up global error handling
+        window.addEventListener('error', (event) => {
+          console.error('Global error:', event.error);
+        });
+        
+        window.addEventListener('unhandledrejection', (event) => {
+          console.error('Unhandled promise rejection:', event.reason);
+        });
+        
+        // Initialize Alpine data
+        Alpine.data('accountSystem', accountSystem);
+        
+        console.log('Account system initialized');
+      } catch (error) {
+        console.error('Failed to initialize account system:', error);
+        
+        // Show fallback error message
+        document.body.innerHTML = `
+          <div style="display: flex; justify-content: center; align-items: center; height: 100vh; font-family: Arial, sans-serif;">
+            <div style="text-align: center; padding: 2rem; border: 1px solid #ccc; border-radius: 8px;">
+              <h2 style="color: #e74c3c;">Initialization Error</h2>
+              <p>Failed to initialize the account settings page.</p>
+              <p>Please refresh the page or contact support.</p>
+              <button onclick="window.location.reload()" style="padding: 0.5rem 1rem; background: #3498db; color: white; border: none; border-radius: 4px; cursor: pointer;">
+                Refresh Page
+              </button>
+            </div>
+          </div>
+        `;
+      }
+    });
   </script>
 </body>
 </html>

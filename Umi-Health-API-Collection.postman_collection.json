@@ -1,0 +1,870 @@
+{
+	"info": {
+		"_postman_id": "umi-health-api-collection",
+		"name": "Umi Health API Collection",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+		"_exporter_id": "umi-health-exporter"
+	},
+	"item": [
+		{
+			"name": "Authentication",
+			"item": [
+				{
+					"name": "Register User/Tenant",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"pharmacyName\": \"Test Pharmacy\",\n    \"email\": \"test@example.com\",\n    \"password\": \"Test123!\",\n    \"adminFullName\": \"Test Admin\",\n    \"phoneNumber\": \"+1234567890\"\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/api/v1/auth/register",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"auth",
+								"register"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Login",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"username\": \"test@example.com\",\n    \"password\": \"Test123!\"\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/api/v1/auth/login",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"auth",
+								"login"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Check Pharmacy Name",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/api/auth/check-pharmacy-name/{{pharmacyName}}",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"auth",
+								"check-pharmacy-name",
+								"{{pharmacyName}}"
+							]
+						}
+					},
+					"response": []
+				}
+			],
+			"description": "Authentication endpoints for user registration and login"
+		},
+		{
+			"name": "User Management",
+			"item": [
+				{
+					"name": "Get All Users",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{accessToken}}"
+							}
+						],
+						"url": {
+							"raw": "{{baseUrl}}/api/v1/users",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"users"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Create User",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{accessToken}}"
+							},
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"username\": \"newuser\",\n    \"email\": \"newuser@example.com\",\n    \"password\": \"Password123!\",\n    \"firstName\": \"New\",\n    \"lastName\": \"User\",\n    \"phoneNumber\": \"+1234567890\",\n    \"role\": \"cashier\",\n    \"status\": \"active\"\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/api/v1/users",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"users"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Update User",
+					"request": {
+						"method": "PUT",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{accessToken}}"
+							},
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"username\": \"updateduser\",\n    \"email\": \"updated@example.com\",\n    \"firstName\": \"Updated\",\n    \"lastName\": \"User\",\n    \"phoneNumber\": \"+1234567890\",\n    \"role\": \"admin\",\n    \"status\": \"active\"\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/api/v1/users/{{userId}}",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"users",
+								"{{userId}}"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Delete User",
+					"request": {
+						"method": "DELETE",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{accessToken}}"
+							}
+						],
+						"url": {
+							"raw": "{{baseUrl}}/api/v1/users/{{userId}}",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"users",
+								"{{userId}}"
+							]
+						}
+					},
+					"response": []
+				}
+			],
+			"description": "User management endpoints for admin operations"
+		},
+		{
+			"name": "Patient Management",
+			"item": [
+				{
+					"name": "Get All Patients",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{accessToken}}"
+							}
+						],
+						"url": {
+							"raw": "{{baseUrl}}/api/v1/patients",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"patients"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Create Patient",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{accessToken}}"
+							},
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"firstName\": \"John\",\n    \"lastName\": \"Doe\",\n    \"email\": \"john.doe@example.com\",\n    \"phoneNumber\": \"+1234567890\",\n    \"dateOfBirth\": \"1990-01-01\",\n    \"gender\": \"Male\",\n    \"address\": \"123 Main St\",\n    \"emergencyContact\": \"Jane Doe\",\n    \"emergencyPhone\": \"+1234567891\",\n    \"bloodType\": \"O+\",\n    \"allergies\": \"None\",\n    \"medicalHistory\": \"No significant medical history\"\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/api/v1/patients",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"patients"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Update Patient",
+					"request": {
+						"method": "PUT",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{accessToken}}"
+							},
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"firstName\": \"John\",\n    \"lastName\": \"Doe\",\n    \"email\": \"john.updated@example.com\",\n    \"phoneNumber\": \"+1234567890\",\n    \"dateOfBirth\": \"1990-01-01\",\n    \"gender\": \"Male\",\n    \"address\": \"456 Updated St\",\n    \"emergencyContact\": \"Jane Doe\",\n    \"emergencyPhone\": \"+1234567891\",\n    \"bloodType\": \"O+\",\n    \"allergies\": \"Penicillin\",\n    \"medicalHistory\": \"Updated medical history\"\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/api/v1/patients/{{patientId}}",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"patients",
+								"{{patientId}}"
+							]
+						}
+					},
+					"response": []
+				}
+			],
+			"description": "Patient management endpoints"
+		},
+		{
+			"name": "Inventory Management",
+			"item": [
+				{
+					"name": "Get All Inventory",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{accessToken}}"
+							}
+						],
+						"url": {
+							"raw": "{{baseUrl}}/api/v1/inventory",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"inventory"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Create Inventory Item",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{accessToken}}"
+							},
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"productName\": \"Test Medicine\",\n    \"genericName\": \"Test Generic\",\n    \"category\": \"Antibiotics\",\n    \"productCode\": \"MED001\",\n    \"barcode\": \"1234567890\",\n    \"currentStock\": 100,\n    \"minStockLevel\": 10,\n    \"maxStockLevel\": 200,\n    \"unitPrice\": 10.50,\n    \"sellingPrice\": 15.75,\n    \"unit\": \"tablets\",\n    \"manufacturer\": \"Test Pharma\",\n    \"supplier\": \"Test Supplier\",\n    \"expiryDate\": \"2025-12-31\",\n    \"description\": \"Test medication for testing purposes\"\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/api/v1/inventory",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"inventory"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Update Inventory Item",
+					"request": {
+						"method": "PUT",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{accessToken}}"
+							},
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"productName\": \"Updated Medicine\",\n    \"genericName\": \"Updated Generic\",\n    \"category\": \"Antibiotics\",\n    \"productCode\": \"MED001\",\n    \"barcode\": \"1234567890\",\n    \"currentStock\": 150,\n    \"minStockLevel\": 10,\n    \"maxStockLevel\": 200,\n    \"unitPrice\": 12.00,\n    \"sellingPrice\": 18.00,\n    \"unit\": \"tablets\",\n    \"manufacturer\": \"Updated Pharma\",\n    \"supplier\": \"Updated Supplier\",\n    \"expiryDate\": \"2025-12-31\",\n    \"description\": \"Updated medication description\"\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/api/v1/inventory/{{inventoryId}}",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"inventory",
+								"{{inventoryId}}"
+							]
+						}
+					},
+					"response": []
+				}
+			],
+			"description": "Inventory management endpoints"
+		},
+		{
+			"name": "Sales Management",
+			"item": [
+				{
+					"name": "Get All Sales",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{accessToken}}"
+							}
+						],
+						"url": {
+							"raw": "{{baseUrl}}/api/v1/sales?startDate={{startDate}}&endDate={{endDate}}",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"sales"
+							],
+							"query": [
+								{
+									"key": "startDate",
+									"value": "{{startDate}}",
+									"description": "Filter by start date (optional)"
+								},
+								{
+									"key": "endDate",
+									"value": "{{endDate}}",
+									"description": "Filter by end date (optional)"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Create Sale",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{accessToken}}"
+							},
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"patientId\": \"{{patientId}}\",\n    \"subtotal\": 50.00,\n    \"taxAmount\": 5.00,\n    \"discountAmount\": 0.00,\n    \"totalAmount\": 55.00,\n    \"amountPaid\": 55.00,\n    \"changeAmount\": 0.00,\n    \"paymentMethod\": \"cash\",\n    \"paymentReference\": \"\",\n    \"status\": \"completed\",\n    \"notes\": \"Test sale\",\n    \"items\": [\n        {\n            \"inventoryId\": \"{{inventoryId}}\",\n            \"productName\": \"Test Medicine\",\n            \"quantity\": 2,\n            \"unitPrice\": 25.00,\n            \"discountPercentage\": 0,\n            \"totalPrice\": 50.00\n        }\n    ]\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/api/v1/sales",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"sales"
+							]
+						}
+					},
+					"response": []
+				}
+			],
+			"description": "Sales management endpoints"
+		},
+		{
+			"name": "Payment Processing",
+			"item": [
+				{
+					"name": "Get All Payments",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{accessToken}}"
+							}
+						],
+						"url": {
+							"raw": "{{baseUrl}}/api/v1/payments?startDate={{startDate}}&endDate={{endDate}}",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"payments"
+							],
+							"query": [
+								{
+									"key": "startDate",
+									"value": "{{startDate}}",
+									"description": "Filter by start date (optional)"
+								},
+								{
+									"key": "endDate",
+									"value": "{{endDate}}",
+									"description": "Filter by end date (optional)"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Create Payment",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{accessToken}}"
+							},
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"patientId\": \"{{patientId}}\",\n    \"saleId\": \"{{saleId}}\",\n    \"amount\": 55.00,\n    \"paymentMethod\": \"cash\",\n    \"paymentReference\": \"\",\n    \"transactionId\": \"\",\n    \"status\": \"completed\",\n    \"notes\": \"Test payment\"\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/api/v1/payments",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"payments"
+							]
+						}
+					},
+					"response": []
+				}
+			],
+			"description": "Payment processing endpoints"
+		},
+		{
+			"name": "Prescription Management",
+			"item": [
+				{
+					"name": "Get All Prescriptions",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{accessToken}}"
+							}
+						],
+						"url": {
+							"raw": "{{baseUrl}}/api/v1/prescriptions",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"prescriptions"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Create Prescription",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{accessToken}}"
+							},
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"patientId\": \"{{patientId}}\",\n    \"diagnosis\": \"Hypertension\",\n    \"notes\": \"Patient needs regular monitoring\",\n    \"status\": \"active\",\n    \"items\": [\n        {\n            \"inventoryId\": \"{{inventoryId}}\",\n            \"medicationName\": \"Test Medicine\",\n            \"dosage\": \"10mg\",\n            \"frequency\": \"Once daily\",\n            \"duration\": \"30 days\",\n            \"quantity\": 30,\n            \"price\": 25.00,\n            \"instructions\": \"Take with food\"\n        }\n    ]\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/api/v1/prescriptions",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"prescriptions"
+							]
+						}
+					},
+					"response": []
+				}
+			],
+			"description": "Prescription management endpoints"
+		},
+		{
+			"name": "Reports",
+			"item": [
+				{
+					"name": "Get All Reports",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{accessToken}}"
+							}
+						],
+						"url": {
+							"raw": "{{baseUrl}}/api/v1/reports",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"reports"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Generate Report",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{accessToken}}"
+							},
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"reportName\": \"Monthly Sales Report\",\n    \"reportType\": \"sales\",\n    \"startDate\": \"2024-01-01\",\n    \"endDate\": \"2024-01-31\",\n    \"description\": \"Monthly sales summary for January 2024\",\n    \"parameters\": \"{\\\"includeDetails\\\": true, \\\"groupBy\\\": \\\"category\\\"}\"\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/api/v1/reports",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"reports"
+							]
+						}
+					},
+					"response": []
+				}
+			],
+			"description": "Report generation and management endpoints"
+		},
+		{
+			"name": "Dashboard & Analytics",
+			"item": [
+				{
+					"name": "Get Dashboard Summary",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{accessToken}}"
+							}
+						],
+						"url": {
+							"raw": "{{baseUrl}}/api/v1/dashboard/summary",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"dashboard",
+								"summary"
+							]
+						}
+					},
+					"response": []
+				}
+			],
+			"description": "Dashboard and analytics endpoints"
+		},
+		{
+			"name": "Search",
+			"item": [
+				{
+					"name": "Search Patients",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{accessToken}}"
+							}
+						],
+						"url": {
+							"raw": "{{baseUrl}}/api/v1/search/patients?query={{searchQuery}}",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"search",
+								"patients"
+							],
+							"query": [
+								{
+									"key": "query",
+									"value": "{{searchQuery}}"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Search Inventory",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{accessToken}}"
+							}
+						],
+						"url": {
+							"raw": "{{baseUrl}}/api/v1/search/inventory?query={{searchQuery}}",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"search",
+								"inventory"
+							],
+							"query": [
+								{
+									"key": "query",
+									"value": "{{searchQuery}}"
+								}
+							]
+						}
+					},
+					"response": []
+				}
+			],
+			"description": "Search endpoints for patients and inventory"
+		},
+		{
+			"name": "System",
+			"item": [
+				{
+					"name": "Health Check",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/health",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"health"
+							]
+						}
+					},
+					"response": []
+				}
+			],
+			"description": "System health and utility endpoints"
+		}
+	],
+	"event": [
+		{
+			"listen": "prerequest",
+			"script": {
+				"type": "text/javascript",
+				"exec": [
+					""
+				]
+			}
+		},
+		{
+			"listen": "test",
+			"script": {
+				"type": "text/javascript",
+				"exec": [
+					""
+				]
+			}
+		}
+	],
+	"variable": [
+		{
+			"key": "baseUrl",
+			"value": "http://localhost:5001",
+			"type": "string"
+		},
+		{
+			"key": "accessToken",
+			"value": "",
+			"type": "string"
+		},
+		{
+			"key": "userId",
+			"value": "",
+			"type": "string"
+		},
+		{
+			"key": "patientId",
+			"value": "",
+			"type": "string"
+		},
+		{
+			"key": "inventoryId",
+			"value": "",
+			"type": "string"
+		},
+		{
+			"key": "saleId",
+			"value": "",
+			"type": "string"
+		},
+		{
+			"key": "pharmacyName",
+			"value": "Test Pharmacy",
+			"type": "string"
+		},
+		{
+			"key": "searchQuery",
+			"value": "test",
+			"type": "string"
+		},
+		{
+			"key": "startDate",
+			"value": "2024-01-01",
+			"type": "string"
+		},
+		{
+			"key": "endDate",
+			"value": "2024-12-31",
+			"type": "string"
+		}
+	]
+}

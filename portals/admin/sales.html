@@ -1114,15 +1114,9 @@
             },
             
             loadLocalSalesData() {
-              // Fallback to local storage data
-              const localSales = window.dataSync.get('sales') || [];
-              this.sales = localSales.map(s => ({
-                id: s.id,
-                receiptNumber: s.receiptNumber || `RCP-${s.id}`,
-                customer: s.customerName || 'Walk-in Customer',
-                date: s.saleDate ? new Date(s.saleDate).toLocaleDateString() : new Date().toLocaleDateString(),
-                items: s.items ? s.items.length : 1,
-                paymentMethod: s.paymentMethod || 'Cash',
+              // No fallback - API required for real data
+              this.sales = [];
+              console.warn('Local storage fallback removed - API required');
                 status: s.status || 'completed',
                 amount: s.totalAmount || s.amount || 0
               }));

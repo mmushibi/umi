@@ -2916,8 +2916,8 @@
               this.showError('Failed to refresh revenue chart.');
             });
           } else {
-            console.log('Refreshing revenue chart...');
-            this.showWarning('Admin API not available - using mock data');
+            console.log('Admin API not available - cannot refresh revenue chart');
+            this.showWarning('Admin API not available - real data required');
           }
         },
 
@@ -2970,8 +2970,8 @@
                 this.showError('Failed to refresh inventory metrics.');
               });
           } else {
-            console.log('Refreshing inventory metrics...');
-            this.showWarning('Admin API not available - using mock data');
+            console.log('Admin API not available - cannot refresh inventory metrics');
+            this.showWarning('Admin API not available - real data required');
           }
         },
 
@@ -2995,8 +2995,8 @@
               this.showError('Failed to refresh customer insights.');
             });
           } else {
-            console.log('Refreshing customer insights...');
-            this.showWarning('Admin API not available - using mock data');
+            console.log('Admin API not available - cannot refresh customer insights');
+            this.showWarning('Admin API not available - real data required');
           }
         },
 

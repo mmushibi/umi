@@ -1,17 +1,17 @@
 {
   "format": 1,
   "restore": {
-    "C:\\Users\\sepio\\Desktop\\Umi_Health\\Umi_Health\\Umi_Health\\UmiHealth.MinimalApi\\UmiHealth.MinimalApi.csproj": {}
+    "C:\\Users\\sepio\\Desktop\\Umi_Health\\UmiHealth.MinimalApi\\UmiHealth.MinimalApi.csproj": {}
   },
   "projects": {
-    "C:\\Users\\sepio\\Desktop\\Umi_Health\\Umi_Health\\Umi_Health\\UmiHealth.MinimalApi\\UmiHealth.MinimalApi.csproj": {
+    "C:\\Users\\sepio\\Desktop\\Umi_Health\\UmiHealth.MinimalApi\\UmiHealth.MinimalApi.csproj": {
       "version": "1.0.0",
       "restore": {
-        "projectUniqueName": "C:\\Users\\sepio\\Desktop\\Umi_Health\\Umi_Health\\Umi_Health\\UmiHealth.MinimalApi\\UmiHealth.MinimalApi.csproj",
+        "projectUniqueName": "C:\\Users\\sepio\\Desktop\\Umi_Health\\UmiHealth.MinimalApi\\UmiHealth.MinimalApi.csproj",
         "projectName": "UmiHealth.MinimalApi",
-        "projectPath": "C:\\Users\\sepio\\Desktop\\Umi_Health\\Umi_Health\\Umi_Health\\UmiHealth.MinimalApi\\UmiHealth.MinimalApi.csproj",
+        "projectPath": "C:\\Users\\sepio\\Desktop\\Umi_Health\\UmiHealth.MinimalApi\\UmiHealth.MinimalApi.csproj",
         "packagesPath": "C:\\Users\\sepio\\.nuget\\packages\\",
-        "outputPath": "C:\\Users\\sepio\\Desktop\\Umi_Health\\Umi_Health\\Umi_Health\\UmiHealth.MinimalApi\\obj\\",
+        "outputPath": "C:\\Users\\sepio\\Desktop\\Umi_Health\\UmiHealth.MinimalApi\\obj\\",
         "projectStyle": "PackageReference",
         "configFilePaths": [
           "C:\\Users\\sepio\\AppData\\Roaming\\NuGet\\NuGet.Config"
@@ -44,13 +44,35 @@
         "net8.0": {
           "targetAlias": "net8.0",
           "dependencies": {
+            "Microsoft.AspNetCore.Authentication.JwtBearer": {
+              "target": "Package",
+              "version": "[8.0.10, )"
+            },
             "Microsoft.AspNetCore.OpenApi": {
               "target": "Package",
               "version": "[8.0.10, )"
             },
+            "Microsoft.EntityFrameworkCore.Design": {
+              "include": "Runtime, Build, Native, ContentFiles, Analyzers, BuildTransitive",
+              "suppressParent": "All",
+              "target": "Package",
+              "version": "[8.0.10, )"
+            },
+            "Microsoft.EntityFrameworkCore.Sqlite": {
+              "target": "Package",
+              "version": "[8.0.8, )"
+            },
+            "Microsoft.EntityFrameworkCore.Tools": {
+              "target": "Package",
+              "version": "[8.0.8, )"
+            },
             "Swashbuckle.AspNetCore": {
               "target": "Package",
               "version": "[6.6.2, )"
+            },
+            "System.IdentityModel.Tokens.Jwt": {
+              "target": "Package",
+              "version": "[8.0.1, )"
             }
           },
           "imports": [

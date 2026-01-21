@@ -3223,28 +3223,15 @@
 
     // Patient Profile Integration
     function loadPatientProfile(patientName) {
-      // Mock patient data - in real system, this would come from patient database
-      const patientProfiles = {
-        'Moses Mushibi': {
-          allergies: ['Penicillin', 'Sulfa drugs'],
-          conditions: ['Hypertension', 'Diabetes Type 2'],
-          currentMedications: ['Lisinopril 10mg', 'Metformin 500mg'],
-          lastVisit: '2024-12-15'
-        },
-        'Janet Mushibi': {
-          allergies: ['Aspirin'],
-          conditions: ['Asthma'],
-          currentMedications: ['Albuterol inhaler'],
-          lastVisit: '2024-12-10'
-        }
-      };
+      // Load patient profile from API
+      if (!window.dataSync) {
+        console.error('Data sync not available');
+        return null;
+      }
       
-      return patientProfiles[patientName] || {
-        allergies: [],
-        conditions: [],
-        currentMedications: [],
-        lastVisit: null
-      };
+      // In a real implementation, this would call the patient API
+      // For now, return null to indicate no mock data
+      return null;
     }
 
     // Show Interaction Alerts Function

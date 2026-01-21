@@ -74,34 +74,38 @@ class AuthService {
     // Login method (for demo purposes - in production, this would call an API)
     async login(credentials) {
         try {
-            // This is a mock login for demonstration
-            // In production, this would call your authentication API
+            // Call the real authentication API
+            const response = await fetch((window.API_BASE || 'http://localhost:5000') + '/api/v1/auth/login', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({
+                    username: credentials.email,
+                    password: credentials.password
+                })
+            });
             
-            if (credentials.email === 'pharmacist@umihealth.com' && credentials.password === 'demo123') {
-                const mockResponse = {
-                    token: 'mock.jwt.token.' + Date.now(),
-                    tenantId: '00000000-0000-0000-0000-000000000001',
-                    branchId: '00000000-0000-0000-0000-000000000001',
-                    user: {
-                        id: 'pharmacist-001',
-                        name: 'Dr. Sarah Johnson',
-                        firstName: 'Sarah',
-                        lastName: 'Johnson',
-                        email: 'pharmacist@umihealth.com',
-                        role: 'Senior Pharmacist'
-                    }
-                };
-
+            const result = await response.json();
+            
+            if (result.success) {
+                const user = result.data;
+                
                 this.setAuthData(
-                    mockResponse.token,
-                    mockResponse.tenantId,
-                    mockResponse.branchId,
-                    mockResponse.user
+                    result.accessToken,
+                    user.tenantId,
+                    user.branchId || user.tenantId, // Use tenantId as fallback for branchId
+                    user
                 );
 
-                return { success: true, user: mockResponse.user };
+                // Store refresh token
+                if (result.refreshToken) {
+                    localStorage.setItem('umi_refresh_token', result.refreshToken);
+                }
+
+                return { success: true, user: user };
             } else {
-                throw new Error('Invalid credentials');
+                throw new Error(result.message || 'Login failed');
             }
         } catch (error) {
             console.error('Login error:', error);

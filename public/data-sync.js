@@ -166,7 +166,7 @@ class DataSyncService {
 
   // Get auth token
   getAuthToken() {
-    return localStorage.getItem('umi_access_token') || 'mock-token';
+    return localStorage.getItem('umi_access_token');
   }
 
   // Event system
