@@ -5,7 +5,7 @@
  */
 
 class ApiClient {
-    constructor(baseUrl = 'http://localhost:5000/api/v1') {
+    constructor(baseUrl = 'http://localhost:5001/api/v1') {
         this.baseUrl = baseUrl;
         this.accessToken = null;
         this.refreshToken = null;
@@ -22,11 +22,22 @@ class ApiClient {
      */
     loadTokens() {
         try {
+            // Try new format first (from onboarding)
             const storedTokens = localStorage.getItem('auth_tokens');
             if (storedTokens) {
                 const { accessToken, refreshToken } = JSON.parse(storedTokens);
                 this.accessToken = accessToken;
                 this.refreshToken = refreshToken;
+            } else {
+                // Fallback to legacy format (from signup)
+                const legacyToken = localStorage.getItem('umi_access_token');
+                const legacyRefresh = localStorage.getItem('umi_refresh_token');
+                if (legacyToken) {
+                    this.accessToken = legacyToken;
+                    this.refreshToken = legacyRefresh;
+                    // Migrate to new format
+                    this.saveTokens(legacyToken, legacyRefresh);
+                }
             }
         } catch (error) {
             console.error('Failed to load tokens from storage:', error);

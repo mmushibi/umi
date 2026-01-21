@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Simple Integration Test</title>
+</head>
+<body>
+    <h1>Signup-Onboarding Integration Test</h1>
+    <div id="results"></div>
+    
+    <script>
+        async function testFlow() {
+            const results = document.getElementById('results');
+            results.innerHTML = '<h2>Testing...</h2>';
+            
+            try {
+                // Step 1: Test Registration
+                const regResponse = await fetch('http://localhost:5001/api/v1/auth/register', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        pharmacyName: "Simple Test Pharmacy",
+                        email: "simpletest@example.com",
+                        phoneNumber: "+1234567890",
+                        password: "testpassword123",
+                        adminFullName: "Simple Test User"
+                    })
+                });
+                
+                const regResult = await regResponse.json();
+                
+                if (regResult.success) {
+                    results.innerHTML += '<h3>✅ Registration Successful</h3>';
+                    results.innerHTML += `<p>User ID: ${regResult.user.id}</p>`;
+                    results.innerHTML += `<p>Tenant ID: ${regResult.tenant.id}</p>`;
+                    results.innerHTML += `<p>Token: ${regResult.accessToken.substring(0, 50)}...</p>`;
+                    
+                    // Step 2: Test Onboarding Status (should be false initially)
+                    const statusResponse = await fetch('http://localhost:5001/api/v1/pharmacy/onboarding/status', {
+                        method: 'GET',
+                        headers: {
+                            'Authorization': `Bearer ${regResult.accessToken}`,
+                            'X-Tenant-ID': regResult.tenant.id
+                        }
+                    });
+                    
+                    const statusResult = await statusResponse.json();
+                    
+                    if (statusResponse.ok && statusResult.success) {
+                        results.innerHTML += '<h3>✅ Onboarding Status Retrieved</h3>';
+                        results.innerHTML += `<p>Onboarding Completed: ${statusResult.data.onboardingCompleted}</p>`;
+                        results.innerHTML += `<p>Pharmacy: ${statusResult.data.pharmacyName}</p>`;
+                        
+                        // Step 3: Complete Onboarding
+                        const onboardResponse = await fetch('http://localhost:5001/api/v1/pharmacy/onboarding', {
+                            method: 'POST',
+                            headers: {
+                                'Content-Type': 'application/json',
+                                'Authorization': `Bearer ${regResult.accessToken}`,
+                                'X-Tenant-ID': regResult.tenant.id
+                            },
+                            body: JSON.stringify({
+                                pharmacyLicense: "SIMPLE-LIC-001",
+                                pharmacyAddress: "123 Simple Street",
+                                pharmacyPhone: "+1234567890",
+                                operatingHours: "9AM-5PM",
+                                pharmacyType: "retail",
+                                yearsInBusiness: 3,
+                                staffCount: 5,
+                                features: ["inventory", "patients"]
+                            })
+                        });
+                        
+                        const onboardResult = await onboardResponse.json();
+                        
+                        if (onboardResponse.ok && onboardResult.success) {
+                            results.innerHTML += '<h3>✅ Onboarding Completed Successfully!</h3>';
+                            results.innerHTML += `<p>Message: ${onboardResult.message}</p>`;
+                            results.innerHTML += `<p>Features: ${onboardResult.data.features.join(', ')}</p>`;
+                        } else {
+                            results.innerHTML += '<h3>❌ Onboarding Failed</h3>';
+                            results.innerHTML += `<p>Error: ${onboardResult.message}</p>`;
+                        }
+                    } else {
+                        results.innerHTML += '<h3>❌ Onboarding Status Failed</h3>';
+                        results.innerHTML += `<p>Error: ${statusResult.message}</p>`;
+                    }
+                } else {
+                    results.innerHTML += '<h3>❌ Registration Failed</h3>';
+                    results.innerHTML += `<p>Error: ${regResult.message}</p>`;
+                }
+            } catch (error) {
+                results.innerHTML += '<h3>❌ Test Failed</h3>';
+                results.innerHTML += `<p>Error: ${error.message}</p>`;
+            }
+        }
+        
+        // Auto-run test
+        testFlow();
+    </script>
+</body>
+</html>

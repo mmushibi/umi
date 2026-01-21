@@ -1,0 +1,302 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Test Signup-Onboarding Flow</title>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 20px; }
+        .test-section { margin: 20px 0; padding: 15px; border: 1px solid #ccc; }
+        .result { margin: 10px 0; padding: 10px; }
+        .success { background-color: #d4edda; color: #155724; }
+        .error { background-color: #f8d7da; color: #721c24; }
+        button { padding: 10px 20px; margin: 5px; cursor: pointer; }
+    </style>
+</head>
+<body>
+    <h1>Signup-Onboarding Integration Test</h1>
+    
+    <div class="test-section">
+        <h2>Step 1: Test Registration</h2>
+        <button onclick="testRegistration()">Test Registration</button>
+        <div id="registration-result"></div>
+    </div>
+
+    <div class="test-section">
+        <h2>Step 2: Test Onboarding Status</h2>
+        <button onclick="testOnboardingStatus()">Check Onboarding Status</button>
+        <div id="onboarding-status-result"></div>
+    </div>
+
+    <div class="test-section">
+        <h2>Step 3: Test Complete Onboarding</h2>
+        <button onclick="testOnboarding()">Complete Onboarding</button>
+        <div id="onboarding-result"></div>
+    </div>
+
+    <div class="test-section">
+        <h2>Step 4: Check Data Persistence</h2>
+        <button onclick="checkDatabaseState()">Check Database State</button>
+        <div id="database-result"></div>
+    </div>
+
+    <script>
+        let authToken = '';
+        let tenantId = '';
+        let userId = '';
+
+        async function testRegistration() {
+            const resultDiv = document.getElementById('registration-result');
+            
+            const testData = {
+                pharmacyName: "Test Pharmacy " + Date.now(),
+                email: "test" + Date.now() + "@example.com",
+                phoneNumber: "+1234567890",
+                password: "testpassword123",
+                confirmPassword: "testpassword123",
+                adminFullName: "Test Admin User"
+            };
+
+            try {
+                const response = await fetch('http://localhost:5001/api/v1/auth/register', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify(testData)
+                });
+
+                const result = await response.json();
+                
+                if (result.success) {
+                    authToken = result.accessToken;
+                    tenantId = result.tenant.id;
+                    userId = result.user.id;
+                    
+                    // Store tokens for testing
+                    localStorage.setItem('test_access_token', authToken);
+                    localStorage.setItem('test_tenant_id', tenantId);
+                    localStorage.setItem('test_user_id', userId);
+                    
+                    resultDiv.innerHTML = `
+                        <div class="result success">
+                            <strong>✅ Registration Successful!</strong><br>
+                            User ID: ${result.user.id}<br>
+                            Tenant ID: ${result.tenant.id}<br>
+                            Pharmacy: ${result.tenant.name}<br>
+                            Token: ${authToken.substring(0, 20)}...
+                        </div>
+                    `;
+                } else {
+                    resultDiv.innerHTML = `
+                        <div class="result error">
+                            <strong>❌ Registration Failed:</strong> ${result.message}
+                        </div>
+                    `;
+                }
+            } catch (error) {
+                resultDiv.innerHTML = `
+                    <div class="result error">
+                        <strong>❌ Network Error:</strong> ${error.message}
+                    </div>
+                `;
+            }
+        }
+
+        async function testOnboardingStatus() {
+            const resultDiv = document.getElementById('onboarding-status-result');
+            const token = localStorage.getItem('test_access_token') || authToken;
+            const tenant = localStorage.getItem('test_tenant_id') || tenantId;
+
+            if (!token || !tenant) {
+                resultDiv.innerHTML = `
+                    <div class="result error">
+                        <strong>❌ No authentication data</strong><br>
+                        Please run registration test first
+                    </div>
+                `;
+                return;
+            }
+
+            try {
+                const response = await fetch('http://localhost:5001/api/v1/pharmacy/onboarding/status', {
+                    method: 'GET',
+                    headers: {
+                        'Authorization': `Bearer ${token}`,
+                        'X-Tenant-ID': tenant
+                    }
+                });
+
+                const result = await response.json();
+                
+                if (response.ok && result.success) {
+                    resultDiv.innerHTML = `
+                        <div class="result success">
+                            <strong>✅ Onboarding Status Retrieved</strong><br>
+                            Completed: ${result.data.onboardingCompleted}<br>
+                            Pharmacy: ${result.data.pharmacyName}<br>
+                            Type: ${result.data.pharmacyType || 'Not set'}<br>
+                            Features: ${result.data.features.join(', ') || 'None'}
+                        </div>
+                    `;
+                } else {
+                    resultDiv.innerHTML = `
+                        <div class="result error">
+                            <strong>❌ Status Check Failed:</strong> ${result.message || 'Unknown error'}
+                        </div>
+                    `;
+                }
+            } catch (error) {
+                resultDiv.innerHTML = `
+                    <div class="result error">
+                        <strong>❌ Network Error:</strong> ${error.message}
+                    </div>
+                `;
+            }
+        }
+
+        async function testOnboarding() {
+            const resultDiv = document.getElementById('onboarding-result');
+            const token = localStorage.getItem('test_access_token') || authToken;
+            const tenant = localStorage.getItem('test_tenant_id') || tenantId;
+
+            if (!token || !tenant) {
+                resultDiv.innerHTML = `
+                    <div class="result error">
+                        <strong>❌ No authentication data</strong><br>
+                        Please run registration test first
+                    </div>
+                `;
+                return;
+            }
+
+            const onboardingData = {
+                pharmacyLicense: "TEST-LIC-" + Date.now(),
+                pharmacyAddress: "123 Test Street, Test City, TC 12345",
+                pharmacyPhone: "+1234567890",
+                operatingHours: "Mon-Fri: 8AM-8PM, Sat: 9AM-6PM",
+                pharmacyType: "retail",
+                yearsInBusiness: 5,
+                staffCount: 10,
+                pharmacySystem: "None",
+                features: ["inventory", "prescriptions", "billing", "patients"],
+                enableNotifications: true
+            };
+
+            try {
+                const response = await fetch('http://localhost:5001/api/v1/pharmacy/onboarding', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${token}`,
+                        'X-Tenant-ID': tenant
+                    },
+                    body: JSON.stringify(onboardingData)
+                });
+
+                const result = await response.json();
+                
+                if (response.ok && result.success) {
+                    resultDiv.innerHTML = `
+                        <div class="result success">
+                            <strong>✅ Onboarding Completed!</strong><br>
+                            Message: ${result.message}<br>
+                            Tenant ID: ${result.data.tenantId}<br>
+                            Pharmacy: ${result.data.pharmacyName}<br>
+                            Completed At: ${result.data.completedAt}<br>
+                            Features: ${result.data.features.join(', ')}
+                        </div>
+                    `;
+                } else {
+                    resultDiv.innerHTML = `
+                        <div class="result error">
+                            <strong>❌ Onboarding Failed:</strong> ${result.message || 'Unknown error'}
+                        </div>
+                    `;
+                }
+            } catch (error) {
+                resultDiv.innerHTML = `
+                    <div class="result error">
+                        <strong>❌ Network Error:</strong> ${error.message}
+                    </div>
+                `;
+            }
+        }
+
+        async function checkDatabaseState() {
+            const resultDiv = document.getElementById('database-result');
+            const token = localStorage.getItem('test_access_token') || authToken;
+            const tenant = localStorage.getItem('test_tenant_id') || tenantId;
+
+            if (!token || !tenant) {
+                resultDiv.innerHTML = `
+                    <div class="result error">
+                        <strong>❌ No authentication data</strong><br>
+                        Please run registration test first
+                    </div>
+                `;
+                return;
+            }
+
+            try {
+                // Check tenant data
+                const tenantResponse = await fetch(`http://localhost:5001/api/v1/superadmin/tenants/${tenant}`, {
+                    headers: {
+                        'Authorization': `Bearer ${token}`
+                    }
+                });
+
+                // Check inventory (should have default categories if inventory feature was selected)
+                const inventoryResponse = await fetch('http://localhost:5001/api/v1/inventory', {
+                    headers: {
+                        'Authorization': `Bearer ${token}`,
+                        'X-Tenant-ID': tenant
+                    }
+                });
+
+                const tenantData = tenantResponse.ok ? await tenantResponse.json() : null;
+                const inventoryData = inventoryResponse.ok ? await inventoryResponse.json() : null;
+
+                let html = '<div class="result success"><strong>✅ Database State:</strong><br>';
+                
+                if (tenantData && tenantData.success) {
+                    const t = tenantData.data;
+                    html += `Tenant: ${t.name}<br>`;
+                    html += `License: ${t.licenseNumber || 'Not set'}<br>`;
+                    html += `Address: ${t.address || 'Not set'}<br>`;
+                    html += `Type: ${t.pharmacyType || 'Not set'}<br>`;
+                    html += `Onboarding: ${t.onboardingCompleted ? 'Completed' : 'Pending'}<br>`;
+                    html += `Features: ${t.enabledFeatures || 'None'}<br>`;
+                }
+
+                if (inventoryData && inventoryData.success) {
+                    html += `<br><strong>Inventory Categories (${inventoryData.data.length}):</strong><br>`;
+                    inventoryData.data.forEach(item => {
+                        html += `- ${item.productName} (${item.category})<br>`;
+                    });
+                }
+
+                html += '</div>';
+                resultDiv.innerHTML = html;
+
+            } catch (error) {
+                resultDiv.innerHTML = `
+                    <div class="result error">
+                        <strong>❌ Database Check Error:</strong> ${error.message}
+                    </div>
+                `;
+            }
+        }
+
+        // Clear test data
+        function clearTestData() {
+            localStorage.removeItem('test_access_token');
+            localStorage.removeItem('test_tenant_id');
+            localStorage.removeItem('test_user_id');
+            authToken = '';
+            tenantId = '';
+            userId = '';
+        }
+    </script>
+</body>
+</html>

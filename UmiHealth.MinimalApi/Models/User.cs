@@ -43,6 +43,10 @@ namespace UmiHealth.MinimalApi.Models
         [Required]
         public string TenantId { get; set; } = string.Empty;
         
+        public bool OnboardingCompleted { get; set; } = false;
+        
+        public DateTime? UpdatedAt { get; set; }
+        
         // Navigation property
         public Tenant Tenant { get; set; } = null!;
     }
@@ -69,6 +73,40 @@ namespace UmiHealth.MinimalApi.Models
         public string SubscriptionPlan { get; set; } = "Care";
         
         public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
+        
+        // Onboarding fields
+        [MaxLength(50)]
+        public string? LicenseNumber { get; set; }
+        
+        [MaxLength(500)]
+        public string? Address { get; set; }
+        
+        [MaxLength(20)]
+        public string? PhoneNumber { get; set; }
+        
+        [MaxLength(200)]
+        public string? OperatingHours { get; set; }
+        
+        [MaxLength(50)]
+        public string? PharmacyType { get; set; }
+        
+        public int? YearsInBusiness { get; set; }
+        
+        public int? StaffCount { get; set; }
+        
+        [MaxLength(100)]
+        public string? CurrentSystem { get; set; }
+        
+        [MaxLength(500)]
+        public string? EnabledFeatures { get; set; }
+        
+        public bool EnableNotifications { get; set; } = true;
+        
+        public bool OnboardingCompleted { get; set; } = false;
+        
+        public DateTime? OnboardingCompletedAt { get; set; }
+        
+        public DateTime? UpdatedAt { get; set; }
         
         // Navigation property
         public ICollection<User> Users { get; set; } = new List<User>();

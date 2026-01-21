@@ -1,0 +1,7 @@
+{
+  "pharmacyName": "Integration Test Pharmacy",
+  "email": "integrationtest@example.com",
+  "phoneNumber": "+1234567890",
+  "password": "testpassword123",
+  "adminFullName": "Integration Test User"
+}

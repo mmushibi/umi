@@ -22,6 +22,7 @@
   <script src="../shared/js/role-based-access.js"></script>
   <script src="../shared/js/feature-protection.js"></script>
   <script src="../shared/js/portal-data-sync.js"></script>
+  <script src="../shared/js/admin-api-client-init.js"></script>
   <script src="js/admin-api.js"></script>
   <style>
     :root {
@@ -2741,33 +2742,33 @@
             console.error('Error loading pharmacy info:', error);
           }
         },
-            const savedPharmacy = localStorage.getItem('pharmacyInfo');
-            if (savedPharmacy) {
-              this.pharmacyInfo = JSON.parse(savedPharmacy);
+        
+        init() {
+          // Load saved data from localStorage
+          const savedPharmacy = localStorage.getItem('pharmacyInfo');
+          if (savedPharmacy) {
+            this.pharmacyInfo = JSON.parse(savedPharmacy);
+          }
+          
+          const savedUser = localStorage.getItem('userInfo');
+          if (savedUser) {
+            this.userInfo = JSON.parse(savedUser);
+          }
+          
+          // Load user info from token if available
+          const accessToken = this.getAccessToken();
+          if (accessToken && !this.userInfo.name) {
+            // Parse JWT token to get user info (simplified)
+            try {
+              const payload = JSON.parse(atob(accessToken.split('.')[1]));
+              this.userInfo = {
+                name: payload.name || payload.email || 'Admin',
+                role: payload.role || 'Admin',
+                initials: (payload.name || 'Admin').split(' ').map(n => n[0]).join('').toUpperCase().slice(0, 2)
+              };
+            } catch (e) {
+              console.warn('Could not parse user token:', e);
             }
-            
-            const savedUser = localStorage.getItem('userInfo');
-            if (savedUser) {
-              this.userInfo = JSON.parse(savedUser);
-            }
-            
-            // Load user info from token if available
-            const accessToken = this.getAccessToken();
-            if (accessToken && !this.userInfo.name) {
-              // Parse JWT token to get user info (simplified)
-              try {
-                const payload = JSON.parse(atob(accessToken.split('.')[1]));
-                this.userInfo = {
-                  name: payload.name || payload.email || 'Admin',
-                  role: payload.role || 'Admin',
-                  initials: (payload.name || 'Admin').split(' ').map(n => n[0]).join('').toUpperCase().slice(0, 2)
-                };
-              } catch (e) {
-                console.warn('Could not parse user token:', e);
-              }
-            }
-          } catch (error) {
-            console.error('Failed to load pharmacy info:', error);
           }
         },
         

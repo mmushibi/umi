@@ -16,6 +16,7 @@
   <script src="../../js/auth-manager.js"></script>
   <script src="../shared/js/backend-integration-helper.js"></script>
   <script src="../shared/js/page-integration-template.js"></script>
+  <script src="../shared/js/admin-api-client-init.js"></script>
   <style>
     :root {
       --color-primary: #000000;
@@ -1074,13 +1075,9 @@
         // Initialize component
         async init() {
           try {
-            // Ensure backend integration is available
-            if (!window.backendHelper) {
-              console.error('Backend helper not available');
-              this.error = 'System initialization failed';
-              return;
-            }
-
+            // Wait for API client to be initialized
+            await this.waitForAPIClient();
+            
             // Check authentication with fallback
             this.isAuthenticated = this.checkAuthentication();
             
@@ -1097,26 +1094,46 @@
           }
         },
 
+        // Wait for API client to be ready
+        async waitForAPIClient() {
+          let attempts = 0;
+          const maxAttempts = 50; // 5 seconds max wait
+          
+          while ((!window.apiClient || !window.authManager) && attempts < maxAttempts) {
+            await new Promise(resolve => setTimeout(resolve, 100));
+            attempts++;
+          }
+          
+          if (!window.apiClient) {
+            console.error('API Client not available after waiting');
+            throw new Error('API Client initialization failed');
+          }
+          
+          console.log('API Client is ready:', window.apiClient);
+        },
+
         // Helper method to check authentication
         checkAuthentication() {
           try {
-            // Try multiple authentication sources
-            if (window.authManager?.isAuthenticated()) {
-              return true;
+            // Use the global API client authentication
+            if (window.apiClient) {
+              const authStatus = window.apiClient.getAuthStatus();
+              if (authStatus.isAuthenticated) {
+                console.log('User authenticated via API client');
+                return true;
+              }
             }
             
-            if (window.authAPI?.isAuthenticated()) {
-              return true;
-            }
-            
-            if (window.apiClient?.isAuthenticated()) {
-              return true;
-            }
-            
-            // Check localStorage tokens as fallback
+            // Fallback to localStorage check
             const token = localStorage.getItem('umi_access_token') || 
                          localStorage.getItem('auth_tokens');
-            return !!token;
+            const tenant = localStorage.getItem('umi_tenant_id');
+            const user = localStorage.getItem('umi_current_user');
+            
+            const isAuth = !!(token && tenant && user);
+            console.log('Authentication check via localStorage:', isAuth);
+            return isAuth;
+            
           } catch (error) {
             console.error('Authentication check failed:', error);
             return false;
@@ -1129,9 +1146,8 @@
           this.error = null;
           
           try {
-            // Ensure we have API clients
-            const apiClient = this.apiClient || window.apiClient || window.adminAPI || window.authAPI;
-            if (!apiClient) {
+            // Use the global API client
+            if (!window.apiClient) {
               throw new Error('API client not available');
             }
 
