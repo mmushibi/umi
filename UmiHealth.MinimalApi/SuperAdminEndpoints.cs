@@ -1,5 +1,7 @@
 using UmiHealth.MinimalApi.Services;
 
+namespace UmiHealth.MinimalApi.Endpoints
+{
 /// <summary>
 /// Super-admin tenant management endpoints.
 /// All endpoints in this section require "superadmin" or "operations" role in production.
@@ -27,13 +29,13 @@ public static class SuperAdminEndpoints
         app.MapGet("/api/v1/superadmin/tenants/{tenantId}", (string tenantId, Dictionary<string, object> tenantsDb, IAuditService auditService) =>
         {
             // TODO: Check user role is super-admin or operations
-            if (!tenantsDb.ContainsKey(tenantId))
+            if (!tenantsDb.TryGetValue(tenantId, out var existingTenant))
             {
                 auditService.LogSuperAdminAction("super-admin-user", tenantId, "GET_TENANT", "tenants", new Dictionary<string, object> { { "status", "NOT_FOUND" } });
                 return Results.NotFound(new { success = false, message = "Tenant not found" });
             }
             auditService.LogSuperAdminAction("super-admin-user", tenantId, "GET_TENANT", "tenants");
-            return Results.Ok(new { success = true, data = tenantsDb[tenantId] });
+            return Results.Ok(new { success = true, data = existingTenant });
         });
 
         // Super-admin: Create tenant
@@ -43,7 +45,7 @@ public static class SuperAdminEndpoints
             {
                 // TODO: Check user role is super-admin or operations
                 var tenantData = await request.ReadFromJsonAsync<Dictionary<string, string>>();
-                if (tenantData == null || !tenantData.ContainsKey("name"))
+                if (tenantData == null || !tenantData.TryGetValue("name", out var tenantName))
                 {
                     return Results.BadRequest(new { success = false, message = "Tenant name is required" });
                 }
@@ -51,14 +53,14 @@ public static class SuperAdminEndpoints
                 var tenantId = Guid.NewGuid().ToString();
                 var tenant = new {
                     id = tenantId,
-                    name = tenantData["name"],
-                    email = tenantData.ContainsKey("email") ? tenantData["email"] : "",
-                    status = tenantData.ContainsKey("status") ? tenantData["status"] : "active",
-                    subscriptionPlan = tenantData.ContainsKey("subscriptionPlan") ? tenantData["subscriptionPlan"] : "Care",
+                    name = tenantName,
+                    email = tenantData.TryGetValue("email", out var tenantEmail) ? tenantEmail : "",
+                    status = tenantData.TryGetValue("status", out var tenantStatus) ? tenantStatus : "active",
+                    subscriptionPlan = tenantData.TryGetValue("subscriptionPlan", out var tenantSubscriptionPlan) ? tenantSubscriptionPlan : "Care",
                     createdAt = DateTime.UtcNow
                 };
                 tenantsDb[tenantId] = tenant;
-                auditService.LogSuperAdminAction("super-admin-user", tenantId, "CREATE_TENANT", "tenants", new Dictionary<string, object> { { "name", tenantData["name"] } });
+                auditService.LogSuperAdminAction("super-admin-user", tenantId, "CREATE_TENANT", "tenants", new Dictionary<string, object> { { "name", tenantName } });
                 return Results.Ok(new { success = true, data = tenant, message = "Tenant created" });
             }
             catch (Exception ex)
@@ -74,7 +76,7 @@ public static class SuperAdminEndpoints
             try
             {
                 // TODO: Check user role is super-admin or operations
-                if (!tenantsDb.ContainsKey(tenantId))
+                if (!tenantsDb.TryGetValue(tenantId, out var existingTenantForUpdate))
                 {
                     return Results.NotFound(new { success = false, message = "Tenant not found" });
                 }
@@ -85,13 +87,13 @@ public static class SuperAdminEndpoints
                     return Results.BadRequest(new { success = false, message = "Invalid request data" });
                 }
 
-                var existing = (dynamic)tenantsDb[tenantId];
+                var existing = (dynamic)existingTenantForUpdate;
                 var updated = new {
                     id = existing.id,
-                    name = tenantData.ContainsKey("name") ? tenantData["name"] : existing.name,
-                    email = tenantData.ContainsKey("email") ? tenantData["email"] : existing.email,
-                    status = tenantData.ContainsKey("status") ? tenantData["status"] : existing.status,
-                    subscriptionPlan = tenantData.ContainsKey("subscriptionPlan") ? tenantData["subscriptionPlan"] : existing.subscriptionPlan,
+                    name = tenantData.TryGetValue("name", out var updateName) ? updateName : existing.name,
+                    email = tenantData.TryGetValue("email", out var updateEmail) ? updateEmail : existing.email,
+                    status = tenantData.TryGetValue("status", out var updateStatus) ? updateStatus : existing.status,
+                    subscriptionPlan = tenantData.TryGetValue("subscriptionPlan", out var updateSubscriptionPlan) ? updateSubscriptionPlan : existing.subscriptionPlan,
                     createdAt = existing.createdAt,
                     updatedAt = DateTime.UtcNow
                 };
@@ -133,19 +135,18 @@ public static class SuperAdminEndpoints
             try
             {
                 // TODO: Check user role is super-admin or operations
-                if (!usersDb.ContainsKey(userId))
+                if (!usersDb.TryGetValue(userId, out var existingUserForStatusUpdate))
                 {
                     return Results.NotFound(new { success = false, message = "User not found" });
                 }
 
                 var statusData = await request.ReadFromJsonAsync<Dictionary<string, string>>();
-                if (statusData == null || !statusData.ContainsKey("status"))
+                if (statusData == null || !statusData.TryGetValue("status", out var newStatus))
                 {
                     return Results.BadRequest(new { success = false, message = "Status is required" });
                 }
 
-                var newStatus = statusData["status"];
-                var existing = (dynamic)usersDb[userId];
+                var existing = (dynamic)existingUserForStatusUpdate;
                 var updated = new {
                     id = existing.id,
                     username = existing.username,
@@ -177,4 +178,5 @@ public static class SuperAdminEndpoints
             return Results.Ok(new { success = true, data = auditLog.ToList(), total = auditLog.Count });
         });
     }
+}
 }

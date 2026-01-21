@@ -9,6 +9,7 @@ using Microsoft.AspNetCore.Authentication.JwtBearer;
 using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 using System.Text;
+using System.Text.Json;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -126,7 +127,9 @@ app.MapPost("/api/v1/auth/register", async (HttpRequest request, UmiHealthDbCont
     {
         var formData = await request.ReadFromJsonAsync<Dictionary<string, string>>();
         
-        if (formData == null || !formData.ContainsKey("email") || !formData.ContainsKey("pharmacyName"))
+        if (formData == null || 
+            !formData.TryGetValue("email", out var email) || 
+            !formData.TryGetValue("pharmacyName", out var pharmacyName))
         {
             return Results.BadRequest(new { 
                 success = false, 
@@ -135,7 +138,7 @@ app.MapPost("/api/v1/auth/register", async (HttpRequest request, UmiHealthDbCont
         }
         
         // Check if email already exists
-        var existingUser = await context.Users.FirstOrDefaultAsync(u => u.Email == formData["email"]);
+        var existingUser = await context.Users.FirstOrDefaultAsync(u => u.Email == email);
         if (existingUser != null)
         {
             return Results.BadRequest(new { 
@@ -145,7 +148,7 @@ app.MapPost("/api/v1/auth/register", async (HttpRequest request, UmiHealthDbCont
         }
         
         // Check if pharmacy name already exists
-        var existingTenant = await context.Tenants.FirstOrDefaultAsync(t => t.Name == formData["pharmacyName"]);
+        var existingTenant = await context.Tenants.FirstOrDefaultAsync(t => t.Name == pharmacyName);
         if (existingTenant != null)
         {
             return Results.BadRequest(new { 
@@ -161,23 +164,28 @@ app.MapPost("/api/v1/auth/register", async (HttpRequest request, UmiHealthDbCont
         var tenant = new Tenant
         {
             Id = tenantId,
-            Name = formData["pharmacyName"],
-            Email = formData["email"],
+            Name = pharmacyName,
+            Email = email,
             Status = "active",
             SubscriptionPlan = "Care",
             CreatedAt = DateTime.UtcNow
         };
         
+        // Extract form data values
+        formData.TryGetValue("password", out var password);
+        formData.TryGetValue("adminFullName", out var adminFullName);
+        formData.TryGetValue("phoneNumber", out var phoneNumber);
+        
         // Create user with admin role for signup
         var user = new User
         {
             Id = userId,
-            Username = formData.ContainsKey("username") ? formData["username"] : (formData["email"]?.Split('@')[0] ?? "user"),
-            Email = formData["email"],
-            Password = formData["password"], // In production, hash this
-            FirstName = formData["adminFullName"]?.Split(' ')[0] ?? "Admin",
-            LastName = formData["adminFullName"]?.Split(' ').Length > 1 ? string.Join(" ", formData["adminFullName"]?.Split(' ').Skip(1)) : "User",
-            PhoneNumber = formData["phoneNumber"],
+            Username = formData.TryGetValue("username", out var username) ? username : (email?.Split('@')[0] ?? "user"),
+            Email = email ?? "unknown@example.com",
+            Password = password ?? "defaultPassword", // In production, hash this
+            FirstName = adminFullName?.Split(' ')[0] ?? "Admin",
+            LastName = adminFullName?.Split(' ').Length > 1 ? string.Join(" ", adminFullName?.Split(' ').Skip(1) ?? []) : "User",
+            PhoneNumber = phoneNumber,
             Role = "admin", // Users who sign up become tenant admins
             Status = "active",
             CreatedAt = DateTime.UtcNow,
@@ -190,7 +198,7 @@ app.MapPost("/api/v1/auth/register", async (HttpRequest request, UmiHealthDbCont
         await context.SaveChangesAsync();
         
             // Generate real JWT tokens
-            var accessToken = GenerateJwtToken(user.Id, user.Email, user.Role, user.TenantId);
+            var accessToken = GenerateJwtToken(user.Id, user.Email ?? "unknown@example.com", user.Role, user.TenantId);
             var refreshToken = GenerateRefreshToken();
             
             return Results.Ok(new { 
@@ -211,8 +219,8 @@ app.MapPost("/api/v1/auth/register", async (HttpRequest request, UmiHealthDbCont
                     email = tenant.Email,
                     subscriptionPlan = tenant.SubscriptionPlan
                 },
-                accessToken = accessToken,
-                refreshToken = refreshToken,
+                accessToken,
+                refreshToken,
                 redirectUrl = "/portals/admin/home.html"
             });
     }
@@ -233,8 +241,8 @@ app.MapPost("/api/v1/auth/login", async (HttpRequest request, UmiHealthDbContext
         var loginData = await request.ReadFromJsonAsync<Dictionary<string, string>>();
         
         if (loginData == null || 
-            !loginData.ContainsKey("username") || 
-            !loginData.ContainsKey("password"))
+            !loginData.TryGetValue("username", out var loginUsername) || 
+            !loginData.TryGetValue("password", out var loginPassword))
         {
             return Results.BadRequest(new { 
                 success = false, 
@@ -248,7 +256,7 @@ app.MapPost("/api/v1/auth/login", async (HttpRequest request, UmiHealthDbContext
         // Find user in database
         var user = await context.Users
             .Include(u => u.Tenant)
-            .FirstOrDefaultAsync(u => u.Username == username || u.Email == username);
+            .FirstOrDefaultAsync(u => u.Username == loginUsername || u.Email == loginUsername);
         
         if (user == null)
         {
@@ -259,7 +267,7 @@ app.MapPost("/api/v1/auth/login", async (HttpRequest request, UmiHealthDbContext
         }
         
         // Verify password (simple check for demo - in production, use proper hashing)
-        if (user.Password != password)
+        if (user.Password != loginPassword)
         {
             return Results.BadRequest(new { 
                 success = false, 
@@ -302,9 +310,9 @@ app.MapPost("/api/v1/auth/login", async (HttpRequest request, UmiHealthDbContext
                     subscriptionPlan = user.Tenant.SubscriptionPlan
                 }
             },
-            accessToken = accessToken,
-            refreshToken = refreshToken,
-            redirectUrl = redirectUrl
+            accessToken,
+            refreshToken,
+            redirectUrl
         });
     }
     catch (Exception ex)
@@ -321,7 +329,7 @@ app.MapGet("/api/auth/check-pharmacy-name/{pharmacyName}", async (string pharmac
 {
     // Check if pharmacy name already exists
     var existingTenant = await context.Tenants
-        .FirstOrDefaultAsync(t => t.Name.ToLower() == pharmacyName.ToLower());
+        .FirstOrDefaultAsync(t => t.Name.Equals(pharmacyName, StringComparison.OrdinalIgnoreCase));
     
     return Results.Ok(new { 
         success = true, 
@@ -335,7 +343,7 @@ app.MapGet("/api/v1/auth/check-pharmacy-name/{pharmacyName}", async (string phar
 {
     // Check if pharmacy name already exists
     var existingTenant = await context.Tenants
-        .FirstOrDefaultAsync(t => t.Name.ToLower() == pharmacyName.ToLower());
+        .FirstOrDefaultAsync(t => t.Name.Equals(pharmacyName, StringComparison.OrdinalIgnoreCase));
     
     return Results.Ok(new { 
         success = true, 
@@ -343,6 +351,224 @@ app.MapGet("/api/v1/auth/check-pharmacy-name/{pharmacyName}", async (string phar
         message = existingTenant == null ? "Pharmacy name is available" : "Pharmacy name already exists"
     });
 });
+
+// Pharmacy onboarding endpoint with real-time sync
+app.MapPost("/api/v1/pharmacy/onboarding", async (HttpRequest request, UmiHealthDbContext context, ClaimsPrincipal user) =>
+{
+    try
+    {
+        var tenantId = GetCurrentTenantId(user);
+        var userId = GetCurrentUserId(user);
+        
+        if (string.IsNullOrEmpty(tenantId) || string.IsNullOrEmpty(userId))
+        {
+            return Results.Unauthorized();
+        }
+
+        var onboardingData = await request.ReadFromJsonAsync<Dictionary<string, object>>();
+        if (onboardingData == null)
+        {
+            return Results.BadRequest(new { success = false, message = "Invalid onboarding data" });
+        }
+
+        // Get tenant and user
+        var tenant = await context.Tenants.FirstOrDefaultAsync(t => t.Id == tenantId);
+        var currentUser = await context.Users.FirstOrDefaultAsync(u => u.Id == userId && u.TenantId == tenantId);
+        
+        if (tenant == null || currentUser == null)
+        {
+            return Results.NotFound(new { success = false, message = "Tenant or user not found" });
+        }
+
+        // Update tenant with onboarding information
+        if (onboardingData.TryGetValue("pharmacyLicense", out var pharmacyLicense))
+            tenant.LicenseNumber = pharmacyLicense?.ToString();
+        
+        if (onboardingData.TryGetValue("pharmacyAddress", out var pharmacyAddress))
+            tenant.Address = pharmacyAddress?.ToString();
+        
+        if (onboardingData.TryGetValue("pharmacyPhone", out var pharmacyPhone))
+            tenant.PhoneNumber = pharmacyPhone?.ToString();
+        
+        if (onboardingData.TryGetValue("operatingHours", out var operatingHours))
+            tenant.OperatingHours = operatingHours?.ToString();
+        
+        if (onboardingData.TryGetValue("pharmacyType", out var pharmacyType))
+            tenant.PharmacyType = pharmacyType?.ToString();
+        
+        if (onboardingData.TryGetValue("yearsInBusiness", out var yearsInBusiness))
+        {
+            if (int.TryParse(yearsInBusiness?.ToString(), out int years))
+                tenant.YearsInBusiness = years;
+        }
+        
+        if (onboardingData.TryGetValue("staffCount", out var staffCount))
+        {
+            if (int.TryParse(staffCount?.ToString(), out int staff))
+                tenant.StaffCount = staff;
+        }
+        
+        if (onboardingData.TryGetValue("pharmacySystem", out var pharmacySystem))
+            tenant.CurrentSystem = pharmacySystem?.ToString();
+        
+        // Handle features selection
+        if (onboardingData.TryGetValue("features", out var features))
+        {
+            var featuresJson = features?.ToString() ?? string.Empty;
+            var featuresList = JsonSerializer.Deserialize<List<string>>(featuresJson);
+            if (featuresList != null)
+            {
+                tenant.EnabledFeatures = string.Join(",", featuresList);
+            }
+        }
+        
+        if (onboardingData.TryGetValue("enableNotifications", out var enableNotifications))
+        {
+            tenant.EnableNotifications = bool.Parse(enableNotifications?.ToString() ?? "false");
+        }
+        
+        // Mark onboarding as completed
+        tenant.OnboardingCompleted = true;
+        tenant.OnboardingCompletedAt = DateTime.UtcNow;
+        tenant.UpdatedAt = DateTime.UtcNow;
+
+        // Update user status to reflect onboarding completion
+        currentUser.OnboardingCompleted = true;
+        currentUser.UpdatedAt = DateTime.UtcNow;
+
+        // Save changes to database
+        await context.SaveChangesAsync();
+
+        // Sync to superadmin operations portal (audit log)
+        if (app.Services.GetService<IAuditService>() is { } auditService)
+        {
+            auditService.LogSuperAdminAction(
+                currentUser.Email, 
+                tenantId, 
+                "COMPLETE_ONBOARDING", 
+                "tenant", 
+                new Dictionary<string, object> { 
+                    { "pharmacyName", tenant.Name },
+                    { "pharmacyType", tenant.PharmacyType ?? string.Empty },
+                    { "features", tenant.EnabledFeatures ?? string.Empty },
+                    { "completedAt", tenant.OnboardingCompletedAt }
+                }
+            );
+        }
+
+        // Create initial inventory categories based on pharmacy type
+        if (onboardingData.TryGetValue("features", out var featuresForInventory))
+        {
+            var featuresJson = featuresForInventory?.ToString() ?? string.Empty;
+            var featuresList = JsonSerializer.Deserialize<List<string>>(featuresJson);
+            if (featuresList != null && featuresList.Contains("inventory"))
+            {
+                // Create default inventory categories
+                var defaultCategories = new[] { "Prescription Drugs", "OTC Medications", "Medical Supplies", "Personal Care", "Vitamins & Supplements" };
+                
+                foreach (var category in defaultCategories)
+                {
+                    var existingCategory = await context.Inventory
+                        .FirstOrDefaultAsync(i => i.TenantId == tenantId && i.Category == category && i.ProductName == category);
+                    
+                    if (existingCategory == null)
+                    {
+                        var categoryItem = new Inventory
+                        {
+                            Id = Guid.NewGuid().ToString(),
+                            TenantId = tenantId,
+                            ProductName = category,
+                            GenericName = category,
+                            Category = category,
+                            ProductCode = $"CAT-{category.Replace(" ", "-").ToUpper()}",
+                            CurrentStock = 0,
+                            MinStockLevel = 0,
+                            MaxStockLevel = 0,
+                            UnitPrice = 0,
+                            SellingPrice = 0,
+                            Unit = "category",
+                            Status = "active",
+                            CreatedAt = DateTime.UtcNow
+                        };
+                        context.Inventory.Add(categoryItem);
+                    }
+                }
+                await context.SaveChangesAsync();
+            }
+        }
+
+        return Results.Ok(new { 
+            success = true, 
+            message = "Onboarding completed successfully! Your pharmacy has been configured.",
+            data = new {
+                tenantId = tenant.Id,
+                pharmacyName = tenant.Name,
+                onboardingCompleted = tenant.OnboardingCompleted,
+                completedAt = tenant.OnboardingCompletedAt,
+                features = tenant.EnabledFeatures?.Split(",") ?? []
+            }
+        });
+    }
+    catch (Exception ex)
+    {
+        return Results.BadRequest(new { 
+            success = false, 
+            message = "Onboarding failed: " + ex.Message 
+        });
+    }
+})
+.RequireAuthorization();
+
+// Get onboarding status endpoint
+app.MapGet("/api/v1/pharmacy/onboarding/status", async (ClaimsPrincipal user, UmiHealthDbContext context) =>
+{
+    try
+    {
+        var tenantId = GetCurrentTenantId(user);
+        var userId = GetCurrentUserId(user);
+        
+        if (string.IsNullOrEmpty(tenantId) || string.IsNullOrEmpty(userId))
+        {
+            return Results.Unauthorized();
+        }
+
+        var tenant = await context.Tenants.FirstOrDefaultAsync(t => t.Id == tenantId);
+        if (tenant == null)
+        {
+            return Results.NotFound(new { success = false, message = "Tenant not found" });
+        }
+
+        return Results.Ok(new { 
+            success = true, 
+            data = new {
+                onboardingCompleted = tenant.OnboardingCompleted,
+                completedAt = tenant.OnboardingCompletedAt,
+                pharmacyName = tenant.Name,
+                pharmacyType = tenant.PharmacyType,
+                features = tenant.EnabledFeatures?.Split(",") ?? []
+            }
+        });
+    }
+    catch (Exception ex)
+    {
+        return Results.BadRequest(new { 
+            success = false, 
+            message = "Failed to get onboarding status: " + ex.Message 
+        });
+    }
+})
+.RequireAuthorization();
+
+// Helper methods for the onboarding endpoint
+static string GetCurrentTenantId(ClaimsPrincipal user)
+{
+    return user.FindFirst("tenant_id")?.Value ?? string.Empty;
+}
+
+static string GetCurrentUserId(ClaimsPrincipal user)
+{
+    return user.FindFirst(ClaimTypes.NameIdentifier)?.Value ?? string.Empty;
+}
 
 // Health check endpoint
 app.MapGet("/health", () => Results.Ok(new { status = "healthy", timestamp = DateTime.UtcNow }));
