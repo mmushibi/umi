@@ -14,7 +14,7 @@ using System.Reflection;
 [assembly: System.Reflection.AssemblyCompanyAttribute("UmiHealth.Jobs")]
 [assembly: System.Reflection.AssemblyConfigurationAttribute("Debug")]
 [assembly: System.Reflection.AssemblyFileVersionAttribute("1.0.0.0")]
-[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+849c77f400c2116a8da16d96d9f35a36e3d099f4")]
+[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+b8ffe8388288f4cd26cd9c5f472c2b9299176667")]
 [assembly: System.Reflection.AssemblyProductAttribute("UmiHealth.Jobs")]
 [assembly: System.Reflection.AssemblyTitleAttribute("UmiHealth.Jobs")]
 [assembly: System.Reflection.AssemblyVersionAttribute("1.0.0.0")]

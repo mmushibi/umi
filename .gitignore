@@ -115,6 +115,8 @@ temp/
 # Backend
 backend/bin/
 backend/obj/
+UmiHealth.MinimalApi/bin/
+UmiHealth.MinimalApi/obj/
 backend/*.UserSecrets.json
 
 # Database
