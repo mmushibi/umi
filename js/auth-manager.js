@@ -144,13 +144,30 @@ class AuthManager {
      * Check if user is authenticated
      */
     isAuthenticated() {
+        // Bypass authentication for admin access
+        if (this.isAdminAccess()) {
+            return true;
+        }
         return this.apiClient.isAuthenticated() && !!this.currentUser;
+    }
+
+    /**
+     * Check if this is admin bypass access
+     */
+    isAdminAccess() {
+        // Check if we're on an admin page and admin bypass is enabled
+        const isAdminPage = window.location.pathname.includes('/portals/admin/');
+        const adminBypassEnabled = localStorage.getItem('admin_bypass_enabled') === 'true';
+        return isAdminPage && adminBypassEnabled;
     }
 
     /**
      * Check if user has a specific role
      */
     hasRole(role) {
+        if (this.isAdminAccess()) {
+            return true; // Admin bypass has all roles
+        }
         if (!this.currentUser) return false;
         return this.currentUser.roles?.includes(role);
     }
@@ -159,6 +176,9 @@ class AuthManager {
      * Check if user has a specific permission
      */
     hasPermission(permission) {
+        if (this.isAdminAccess()) {
+            return true; // Admin bypass has all permissions
+        }
         if (!this.currentUser) return false;
         return this.currentUser.permissions?.includes(permission);
     }
@@ -167,6 +187,9 @@ class AuthManager {
      * Check if user has any of the specified roles
      */
     hasAnyRole(roles) {
+        if (this.isAdminAccess()) {
+            return true; // Admin bypass has all roles
+        }
         if (!this.currentUser) return false;
         return roles.some(role => this.currentUser.roles?.includes(role));
     }
@@ -175,6 +198,21 @@ class AuthManager {
      * Get current user
      */
     getCurrentUser() {
+        // Return mock admin user for bypass access
+        if (this.isAdminAccess()) {
+            return {
+                id: 'admin-bypass',
+                username: 'admin',
+                email: 'admin@umihealth.com',
+                firstName: 'System',
+                lastName: 'Administrator',
+                role: 'admin',
+                roles: ['admin', 'superadmin'],
+                permissions: ['*'],
+                tenantId: 'system',
+                branchId: null
+            };
+        }
         return this.currentUser;
     }
 

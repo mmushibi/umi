@@ -2523,11 +2523,13 @@
         
         async init() {
           try {
-            // Enable admin bypass for direct access
-            localStorage.setItem('admin_bypass_enabled', 'true');
-            
             // Check authentication
             this.isAuthenticated = this.authManager?.isAuthenticated() || false;
+            
+            if (!this.isAuthenticated) {
+              window.location.href = '/public/admin-signin.html';
+              return;
+            }
             
             // Check for onboarding completion and display welcome message
             this.checkOnboardingCompletion();
@@ -2638,27 +2640,27 @@
         getInitialDataConfig() {
           return {
             dashboardStats: {
-              endpoint: '/admin/analytics/dashboard',
+              endpoint: '/analytics/dashboard',
               method: 'GET'
             },
             users: {
-              endpoint: '/admin/users',
+              endpoint: '/users?page=1&pageSize=10',
               method: 'GET'
             },
             branches: {
-              endpoint: '/admin/branches',
+              endpoint: '/branch?page=1&pageSize=10',
               method: 'GET'
             },
             sales: {
-              endpoint: '/admin/sales',
+              endpoint: '/pos/sales?page=1&pageSize=10',
               method: 'GET'
             },
             prescriptions: {
-              endpoint: '/admin/prescriptions',
+              endpoint: '/prescriptions?page=1&pageSize=10',
               method: 'GET'
             },
             inventory: {
-              endpoint: '/admin/inventory',
+              endpoint: '/inventory/low-stock',
               method: 'GET'
             }
           };

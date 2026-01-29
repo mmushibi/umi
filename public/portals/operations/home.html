@@ -1,0 +1,984 @@
+<!DOCTYPE html>
+<html lang="en" x-data="operationsDashboard()" x-init="init()">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Operations Dashboard - Umi Health Information Systems</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@100;400;500;600;700&family=Varela+Round&family=Nunito:wght@400;600;700&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Rounded:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <link rel="stylesheet" href="../../shared/css/shared-styles.css">
+  <style>
+    :root {
+      --color-primary: #000000;
+      --color-accent: #14B8A6;
+      --color-success: #22c55e;
+      --color-warning: #ef4444;
+      --color-text-primary: #000000;
+      --color-text-secondary: #6b7280;
+      --color-text-muted: #9ca3af;
+      --color-background: #ffffff;
+      --color-surface: #f9fafb;
+      --color-border: #e5e7eb;
+      --font-primary: 'Inter', sans-serif;
+      --sidebar-width: 280px;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      background: var(--color-background);
+      color: var(--color-text-primary);
+      font-family: 'Nunito', 'Varela Round', sans-serif;
+      font-size: 13px;
+      line-height: 1.4;
+      overflow-x: hidden;
+    }
+
+    /* Sidebar Styles */
+    .sidebar {
+      position: fixed;
+      left: 0;
+      top: 0;
+      width: var(--sidebar-width);
+      height: 100vh;
+      background: var(--color-text-primary);
+      color: var(--color-accent);
+      z-index: 1000;
+      transition: transform 0.3s ease;
+      display: flex;
+      flex-direction: column;
+      overflow-y: auto;
+      overflow-x: hidden;
+    }
+
+    .sidebar-header {
+      padding: 1.5rem;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+    }
+
+    .logo-section {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+    }
+
+    .logo-icon {
+      width: 32px;
+      height: 32px;
+      background: rgba(255, 255, 255, 0.2);
+      border-radius: 8px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.2rem;
+    }
+
+    .logo-text {
+      font-size: 1rem;
+      font-weight: 600;
+      font-family: 'Inter', sans-serif;
+    }
+
+    .nav-menu {
+      padding: 1rem 0;
+      flex: 1;
+      overflow-y: auto;
+    }
+
+    .nav-item {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+      padding: 0.75rem 1.25rem;
+      color: rgba(255, 255, 255, 0.8);
+      text-decoration: none;
+      transition: all 0.2s ease;
+      cursor: pointer;
+      font-size: 0.8rem;
+      font-weight: 500;
+    }
+
+    .nav-item:hover {
+      background: rgba(255, 255, 255, 0.1);
+      color: var(--color-accent);
+    }
+
+    .nav-item.active {
+      background: rgba(255, 255, 255, 0.15);
+      color: var(--color-accent);
+      border-left: 3px solid var(--color-accent);
+    }
+
+    .nav-icon {
+      font-size: 1rem;
+    }
+
+    /* Main Content Area */
+    .main-content {
+      margin-left: var(--sidebar-width);
+      min-height: 100vh;
+      transition: margin-left 0.3s ease;
+    }
+
+    /* Header Styles */
+    .header {
+      background: white;
+      border-bottom: 1px solid #e2e8f0;
+      padding: 1rem 2rem;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      position: sticky;
+      top: 0;
+      z-index: 100;
+    }
+
+    .header-left {
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+    }
+
+    .page-title-section {
+      margin-right: 2rem;
+    }
+
+    .page-title-section .page-title {
+      font-size: 1.25rem;
+      font-weight: 600;
+      color: var(--color-text-primary);
+      margin: 0;
+      font-family: 'Inter', sans-serif;
+    }
+
+    .mobile-menu-toggle {
+      display: none;
+      background: none;
+      border: none;
+      font-size: 1.25rem;
+      color: var(--color-text-secondary);
+      cursor: pointer;
+    }
+
+    .search-bar {
+      position: relative;
+      width: 400px;
+    }
+
+    .search-input {
+      width: 100%;
+      padding: 0.5rem 0.875rem 0.5rem 2.25rem;
+      border: 1px solid var(--color-border);
+      border-radius: 12px;
+      font-size: 0.75rem;
+      transition: all 0.3s ease;
+    }
+
+    .search-input:focus {
+      outline: none;
+      border-color: var(--color-primary);
+      box-shadow: 0 0 0 4px rgba(0, 0, 0, 0.1);
+    }
+
+    .search-icon {
+      position: absolute;
+      left: 0.75rem;
+      top: 50%;
+      transform: translateY(-50%);
+      color: var(--color-text-muted);
+      font-size: 0.875rem;
+    }
+
+    .header-right {
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+    }
+
+    .create-button {
+      background: var(--color-primary);
+      color: var(--color-accent);
+      border: none;
+      padding: 0.625rem 1.25rem;
+      border-radius: 16px;
+      font-size: 0.875rem;
+      font-weight: 600;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      transition: all 0.3s ease;
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+    }
+
+    .create-button:hover {
+      background: var(--color-text-secondary);
+      transform: translateY(-2px);
+      box-shadow: 0 8px 24px rgba(0, 0, 0, 0.2);
+    }
+
+    .notification-button {
+      position: relative;
+      background: none;
+      border: none;
+      font-size: 1.25rem;
+      color: var(--color-text-secondary);
+      cursor: pointer;
+      padding: 0.5rem;
+      border-radius: 16px;
+      transition: all 0.3s ease;
+    }
+
+    .notification-button:hover {
+      background: var(--color-surface);
+      color: var(--color-text-primary);
+    }
+
+    .notification-badge {
+      position: absolute;
+      top: 0.25rem;
+      right: 0.25rem;
+      width: 8px;
+      height: 8px;
+      background: var(--color-warning);
+      border-radius: 50%;
+    }
+
+    .user-profile {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+      padding: 0.5rem;
+      border-radius: 16px;
+      cursor: pointer;
+      transition: all 0.3s ease;
+    }
+
+    .user-profile:hover {
+      background: var(--color-surface);
+    }
+
+    .user-avatar {
+      width: 36px;
+      height: 36px;
+      background: var(--color-text-primary);
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: var(--color-accent);
+      font-weight: 600;
+      font-size: 0.875rem;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+    }
+
+    .user-info {
+      display: flex;
+      flex-direction: column;
+    }
+
+    .user-name {
+      font-size: 0.875rem;
+      font-weight: 600;
+      color: var(--color-text-primary);
+    }
+
+    .user-role {
+      font-size: 0.75rem;
+      color: var(--color-text-secondary);
+    }
+
+    /* Dashboard Content */
+    .dashboard-content {
+      padding: 2rem;
+    }
+
+    .page-title {
+      font-size: 1.25rem;
+      font-weight: 700;
+      color: var(--color-text-primary);
+      margin-bottom: 0.5rem;
+      font-family: 'Inter', sans-serif;
+    }
+
+    .page-subtitle {
+      color: var(--color-text-secondary);
+      font-size: 0.875rem;
+      margin-bottom: 2rem;
+    }
+
+    /* Stats Grid */
+    .stats-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+      gap: 1.5rem;
+      margin-bottom: 2rem;
+    }
+
+    .stat-card {
+      background: var(--color-background);
+      border-radius: 10px;
+      padding: 0.875rem;
+      border: 1px solid var(--color-border);
+      transition: all 0.3s ease;
+      box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04);
+    }
+
+    .stat-card:hover {
+      transform: translateY(-4px);
+      box-shadow: 0 8px 24px rgba(0, 0, 0, 0.12);
+    }
+
+    .stat-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 1rem;
+    }
+
+    .stat-icon {
+      width: 32px;
+      height: 32px;
+      border-radius: 8px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1rem;
+    }
+
+    .stat-icon.primary {
+      background: rgba(0, 0, 0, 0.1);
+      color: var(--color-primary);
+    }
+
+    .stat-icon.success {
+      background: rgba(34, 197, 94, 0.1);
+      color: var(--color-success);
+    }
+
+    .stat-icon.warning {
+      background: rgba(239, 68, 68, 0.1);
+      color: var(--color-warning);
+    }
+
+    .stat-value {
+      font-size: 1.5rem;
+      font-weight: 700;
+      color: var(--color-text-primary);
+      margin-bottom: 0.25rem;
+      font-family: 'Inter', sans-serif;
+    }
+
+    .stat-label {
+      color: var(--color-text-secondary);
+      font-size: 0.75rem;
+      margin-bottom: 0.5rem;
+    }
+
+    .stat-change {
+      font-size: 0.625rem;
+      font-weight: 600;
+      display: flex;
+      align-items: center;
+      gap: 0.25rem;
+    }
+
+    .stat-change.positive {
+      color: var(--color-success);
+    }
+
+    .stat-change.negative {
+      color: var(--color-warning);
+    }
+
+    /* Widget Grid */
+    .widget-grid {
+      display: grid;
+      grid-template-columns: 2fr 1fr;
+      gap: 1.5rem;
+      margin-bottom: 2rem;
+    }
+
+    .widget {
+      background: var(--color-background);
+      border-radius: 12px;
+      border: 1px solid var(--color-border);
+      overflow: hidden;
+      transition: all 0.3s ease;
+      box-shadow: 0 1px 6px rgba(0, 0, 0, 0.04);
+    }
+
+    .widget:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 8px 24px rgba(0, 0, 0, 0.12);
+    }
+
+    .widget-title {
+      font-size: 1rem;
+      font-weight: 600;
+      color: var(--color-text-primary);
+      font-family: 'Inter', sans-serif;
+    }
+
+    .widget-action {
+      color: var(--color-text-secondary);
+      text-decoration: none;
+      font-size: 0.75rem;
+      font-weight: 500;
+      transition: all 0.2s ease;
+    }
+
+    .widget-action:hover {
+      color: var(--color-primary);
+    }
+
+    .widget-content {
+      padding: 0.875rem;
+    }
+
+    /* Tenant List */
+    .tenant-list {
+      display: flex;
+      flex-direction: column;
+      gap: 1rem;
+    }
+
+    .tenant-item {
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+      padding: 0.875rem;
+      border-radius: 10px;
+      transition: all 0.3s ease;
+    }
+
+    .tenant-item:hover {
+      background: var(--color-surface);
+      transform: translateX(4px);
+    }
+
+    .tenant-avatar {
+      width: 32px;
+      height: 32px;
+      border-radius: 50%;
+      background: var(--color-text-primary);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: var(--color-accent);
+      font-weight: 600;
+      font-size: 0.75rem;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+    }
+
+    .tenant-info {
+      flex: 1;
+    }
+
+    .tenant-name {
+      font-weight: 600;
+      color: var(--color-text-primary);
+      margin-bottom: 0.125rem;
+      font-size: 0.875rem;
+    }
+
+    .tenant-email {
+      font-size: 0.625rem;
+      color: var(--color-text-secondary);
+    }
+
+    .tenant-date {
+      font-size: 0.5rem;
+      color: var(--color-text-muted);
+    }
+
+    /* Quick Actions */
+    .quick-actions {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: 1rem;
+    }
+
+    .quick-action-button {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 0.75rem;
+      padding: 1rem;
+      background: var(--color-background);
+      border: 1px solid var(--color-border);
+      border-radius: 10px;
+      text-decoration: none;
+      color: inherit;
+      transition: all 0.3s ease;
+      cursor: pointer;
+    }
+
+    .quick-action-button:hover {
+      background: var(--color-primary);
+      color: var(--color-accent);
+      transform: translateY(-4px);
+      box-shadow: 0 8px 24px rgba(0, 0, 0, 0.12);
+    }
+
+    .quick-action-icon {
+      width: 32px;
+      height: 32px;
+      background: var(--color-surface);
+      border-radius: 8px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1rem;
+      color: var(--color-primary);
+    }
+
+    .quick-action-button:hover .quick-action-icon {
+      background: rgba(255, 255, 255, 0.2);
+      color: var(--color-accent);
+    }
+
+    .quick-action-title {
+      font-weight: 600;
+      color: var(--color-text-primary);
+      text-align: center;
+      font-size: 0.75rem;
+    }
+
+    .quick-action-button:hover .quick-action-title {
+      color: var(--color-accent);
+    }
+
+    /* Logout Section */
+    .logout-section {
+      padding: 1rem;
+      border-top: 1px solid rgba(255, 255, 255, 0.1);
+      margin-top: auto;
+    }
+
+    .logout-button {
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+      padding: 0.875rem 1.5rem;
+      color: rgba(255, 255, 255, 0.8);
+      text-decoration: none;
+      transition: all 0.2s ease;
+      cursor: pointer;
+      font-size: 0.8rem;
+      font-weight: 500;
+      width: 100%;
+      border: none;
+      background: transparent;
+      text-align: left;
+    }
+
+    .logout-button:hover {
+      background: rgba(239, 68, 68, 0.1);
+      color: var(--color-warning);
+    }
+
+    .logout-icon {
+      font-size: 1rem;
+    }
+
+    /* Responsive Design */
+    .widget-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 0.75rem;
+    }
+
+    .widget-title-margin {
+      margin-bottom: 0.75rem;
+    }
+
+    @media (max-width: 768px) {
+      .sidebar {
+        transform: translateX(-100%);
+      }
+
+      .sidebar.open {
+        transform: translateX(0);
+      }
+
+      .main-content {
+        margin-left: 0;
+      }
+
+      .mobile-menu-toggle {
+        display: block;
+      }
+
+      .page-title-section {
+        display: none;
+      }
+
+      .search-bar {
+        width: 200px;
+      }
+
+      .user-info {
+        display: none;
+      }
+
+      .stats-grid {
+        grid-template-columns: 1fr;
+      }
+
+      .dashboard-content {
+        padding: 1rem;
+      }
+
+      .widget-grid {
+        grid-template-columns: 1fr;
+      }
+    }
+  </style>
+
+    <!-- Backend Integration Libraries -->
+    <script src="../../js/api-client.js"></script>
+    <script src="../../js/auth-manager.js"></script>
+    <script src="../shared/js/backend-integration-helper.js"></script>
+    <script src="../shared/js/page-integration-template.js"></script>
+    <script src="https://unpkg.com/alpinejs@3.x.x/dist/cdn.min.js" defer></script></head>
+<body>
+  <div class="dashboard-container">
+    <!-- Sidebar -->
+    <aside class="sidebar" :class="{ 'open': mobileMenuOpen }">
+      <div class="sidebar-header">
+        <div class="logo-section">
+          <div class="logo-icon">
+            <img src="../../logo.png" alt="Umi Health Logo">
+          </div>
+          <div class="logo-text">Operations</div>
+        </div>
+      </div>
+
+      
+      <nav class="nav-menu">
+        <a href="#" class="nav-item active" @click.prevent="setActiveMenu('dashboard')">
+          <span class="material-symbols-rounded nav-icon">dashboard</span>
+          Dashboard
+        </a>
+        <a href="tenants.html" class="nav-item" @click.prevent="setActiveMenu('tenants')">
+          <span class="material-symbols-rounded nav-icon">apartment</span>
+          Tenant Management
+        </a>
+        <a href="subscriptions.html" class="nav-item" @click.prevent="setActiveMenu('subscriptions')">
+          <span class="material-symbols-rounded nav-icon">credit_card</span>
+          Subscriptions
+        </a>
+        <a href="users.html" class="nav-item" @click.prevent="setActiveMenu('users')">
+          <span class="material-symbols-rounded nav-icon">people</span>
+          User Management
+        </a>
+        <a href="transactions.html" class="nav-item" @click.prevent="setActiveMenu('transactions')">
+          <span class="material-symbols-rounded nav-icon">receipt_long</span>
+          Transactions
+        </a>
+        <a href="account.html" class="nav-item" @click.prevent="setActiveMenu('account')">
+          <span class="material-symbols-rounded nav-icon">account_circle</span>
+          Account
+        </a>
+      </nav>
+      
+      <div class="logout-section">
+        <a href="../../signin.html" class="logout-button" @click.prevent="handleLogout">
+          <span class="material-symbols-rounded logout-icon">logout</span>
+          Sign Out
+        </a>
+      </div>
+    </aside>
+
+    <!-- Main Content -->
+    <main class="main-content">
+      <!-- Header -->
+      <header class="header">
+        <div class="header-left">
+          <button class="mobile-menu-toggle" @click="mobileMenuOpen = !mobileMenuOpen">
+            <span class="material-symbols-rounded">menu</span>
+          </button>
+          <div class="page-title-section">
+            <h1 class="page-title">Operations Dashboard</h1>
+          </div>
+        </div>
+        
+        <div class="header-right">
+          <div class="search-bar">
+            <input type="text" class="search-input" placeholder="Search tenants, users...">
+            <span class="material-symbols-rounded search-icon">search</span>
+          </div>
+          
+          <button class="create-button" @click="createNewTenant">
+            <span class="material-symbols-rounded">add</span>
+            New Tenant
+          </button>
+        </div>
+      </header>
+
+      <!-- Dashboard Content -->
+      <div class="dashboard-content">
+        <h2 class="page-title">Welcome to Operations</h2>
+        <p class="page-subtitle">Manage tenants, subscriptions, and users across the platform</p>
+
+        <!-- Stats Grid -->
+        <div class="stats-grid">
+          <div class="stat-card">
+            <div class="stat-header">
+              <div class="stat-icon primary">
+                <span class="material-symbols-rounded">apartment</span>
+              </div>
+              <div class="stat-change positive">
+                <span class="material-symbols-rounded">trending_up</span>
+                
+              </div>
+            </div>
+            <div class="stat-value" x-text="stats.totalTenants"></div>
+            <div class="stat-label">Total Tenants</div>
+          </div>
+          
+          <div class="stat-card">
+            <div class="stat-header">
+              <div class="stat-icon success">
+                <span class="material-symbols-rounded">credit_card</span>
+              </div>
+              <div class="stat-change positive">
+                <span class="material-symbols-rounded">trending_up</span>
+                
+              </div>
+            </div>
+            <div class="stat-value" x-text="stats.activeSubscriptions"></div>
+            <div class="stat-label">Active Subscriptions</div>
+          </div>
+          
+          <div class="stat-card">
+            <div class="stat-header">
+              <div class="stat-icon primary">
+                <span class="material-symbols-rounded">people</span>
+              </div>
+              <div class="stat-change positive">
+                <span class="material-symbols-rounded">trending_up</span>
+                +15%
+              </div>
+            </div>
+            <div class="stat-value" x-text="stats.totalUsers"></div>
+            <div class="stat-label">Total Users</div>
+          </div>
+          
+          <div class="stat-card">
+            <div class="stat-header">
+              <div class="stat-icon warning">
+                <span class="material-symbols-rounded">warning</span>
+              </div>
+              <div class="stat-change negative">
+                <span class="material-symbols-rounded">trending_down</span>
+                -3%
+              </div>
+            </div>
+            <div class="stat-value" x-text="stats.expiringSoon"></div>
+            <div class="stat-label">Expiring Soon</div>
+          </div>
+        </div>
+
+        <!-- Widget Grid -->
+        <div class="widget-grid">
+          <!-- Recent Tenants -->
+          <div class="widget">
+            <div class="widget-content">
+              <div class="widget-header">
+                <h3 class="widget-title">Recent Tenants</h3>
+                <a href="tenants.html" class="widget-action">View All</a>
+              </div>
+              <div class="tenant-list">
+                <template x-for="tenant in recentTenants" :key="tenant.id">
+                  <div class="tenant-item">
+                    <div class="tenant-avatar" x-text="tenant.name.charAt(0)"></div>
+                    <div class="tenant-info">
+                      <div class="tenant-name" x-text="tenant.name"></div>
+                      <div class="tenant-email" x-text="tenant.email"></div>
+                    </div>
+                    <div class="tenant-date" x-text="tenant.createdDate"></div>
+                  </div>
+                </template>
+              </div>
+            </div>
+          </div>
+
+          <!-- Quick Actions -->
+          <div class="widget">
+            <div class="widget-content">
+              <h3 class="widget-title widget-title-margin">Quick Actions</h3>
+              <div class="quick-actions">
+                <a href="tenants.html" class="quick-action-button" @click.prevent="createNewTenant">
+                  <div class="quick-action-icon">
+                    <span class="material-symbols-rounded">add_business</span>
+                  </div>
+                  <div class="quick-action-title">Create Tenant</div>
+                </a>
+                <a href="subscriptions.html" class="quick-action-button">
+                  <div class="quick-action-icon">
+                    <span class="material-symbols-rounded">upgrade</span>
+                  </div>
+                  <div class="quick-action-title">Upgrade Plan</div>
+                </a>
+                <a href="users.html" class="quick-action-button">
+                  <div class="quick-action-icon">
+                    <span class="material-symbols-rounded">person_add</span>
+                  </div>
+                  <div class="quick-action-title">Add User</div>
+                </a>
+                <a href="transactions.html" class="quick-action-button">
+                  <div class="quick-action-icon">
+                    <span class="material-symbols-rounded">receipt</span>
+                  </div>
+                  <div class="quick-action-title">View Transactions</div>
+                </a>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </main>
+  </div>
+
+  <script src="../../shared/js/operations-api.js"></script>
+  <script>
+    function operationsDashboard() {
+      return {
+        // Initialize backend integration
+        const pageIntegration = new PageIntegrationTemplate('operations-home', {
+            requireAuth: true,
+            enableRealTime: true,
+            enableCaching: true
+        });
+        
+        return {
+            ...pageIntegration,
+            backendHelper: window.backendHelper,
+            apiClient: window.apiClient,
+            authManager: window.authManager,
+            isAuthenticated: false,
+            loading: false,
+            error: null,
+        mobileMenuOpen: false,
+        activeMenu: 'dashboard',
+        loading: true,
+        stats: {
+          totalTenants: 0,
+          activeSubscriptions: 0,
+          totalUsers: 0,
+          expiringSoon: 0
+        },
+        recentTenants: [],
+        
+        async async init() {
+            try {
+                // Check authentication
+                this.isAuthenticated = this.authManager?.isAuthenticated() || false;
+                
+                if (!this.isAuthenticated) {
+                    this.error = 'Please login to access this page';
+                    return;
+                }
+                
+                // Initialize backend integration
+                await this.backendHelper.initPage('operations-home', {
+                    enableRealTime: true,
+                    initialData: this.getInitialDataConfig()
+                });
+                
+                // Load page data
+                await this.loadPageData();
+                
+                // Set up event listeners
+                this.setupEventListeners();
+                
+                console.log('operations-home page initialized with backend integration');
+            } catch (error) {
+                console.error('Failed to initialize operations-home page:', error);
+                this.error = 'Failed to initialize page';
+            }
+        },,
+        
+        async loadDashboardData() {
+          try {
+            this.loading = true;
+            
+            // Load dashboard stats
+            const statsResponse = await window.operationsAPI.getDashboardStats();
+            this.stats = statsResponse;
+            
+            // Load recent tenants
+            const tenantsResponse = await window.operationsAPI.getRecentTenants();
+            this.recentTenants = tenantsResponse.map(tenant => ({
+              id: tenant.id,
+              name: tenant.name,
+              email: tenant.email,
+              createdDate: this.formatRelativeTime(tenant.createdDate)
+            }));
+            
+          } catch (error) {
+            console.error('Failed to load dashboard data:', error);
+            // Fallback to mock data if API fails
+            this.stats = {
+              totalTenants: 156,
+              activeSubscriptions: 142,
+              totalUsers: 2847,
+              expiringSoon: 8
+            };
+            this.recentTenants = [
+              { id: 1, name: 'MedCare Pharmacy', email: 'admin@medcare.com', createdDate: '2 days ago' },
+              { id: 2, name: 'HealthPlus Drugs', email: 'contact@healthplus.com', createdDate: '5 days ago' },
+              { id: 3, name: 'QuickMeds', email: 'info@quickmeds.com', createdDate: '1 week ago' },
+              { id: 4, name: 'City Pharmacy', email: 'admin@citypharmacy.com', createdDate: '2 weeks ago' }
+            ];
+          } finally {
+            this.loading = false;
+          }
+        },
+        
+        formatRelativeTime(dateString) {
+          const date = new Date(dateString);
+          const now = new Date();
+          const diffTime = Math.abs(now - date);
+          const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+          
+          if (diffDays === 1) return '1 day ago';
+          if (diffDays < 7) return `${diffDays} days ago`;
+          if (diffDays < 30) return `${Math.floor(diffDays / 7)} week${Math.floor(diffDays / 7) > 1 ? 's' : ''} ago`;
+          return `${Math.floor(diffDays / 30)} month${Math.floor(diffDays / 30) > 1 ? 's' : ''} ago`;
+        },
+        
+        setActiveMenu(menu) {
+          this.activeMenu = menu;
+        },
+        
+        createNewTenant() {
+          window.location.href = 'tenants.html?action=create';
+        },
+        
+        handleLogout() {
+          if (confirm('Are you sure you want to sign out?')) {
+            window.operationsAPI.clearAuthToken();
+            window.location.href = '../../signin.html';
+          }
+        }
+      }
+    }
+  </script>
+
+  <!-- Include API and Data Sync Services -->
+  <script src="../../shared/js/operations-api.js"></script>
+
+</body>
+</html>

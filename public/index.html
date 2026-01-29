@@ -1194,7 +1194,7 @@
       return {
         mobileMenuOpen: false,
         currentYear: new Date().getFullYear(),
-        yearsInOperation: new Date().getFullYear() - 2024,
+        yearsInOperation: new Date().getFullYear() - 2026,
         showAdminMenu: false,
         showFeatures: false,
         showPricing: false,
@@ -1205,7 +1205,7 @@
         init() {
           // Auto-advance years for timeline effect
           setInterval(() => {
-            const years = [2024, new Date().getFullYear()];
+            const years = [2026, new Date().getFullYear()];
             const currentIndex = years.indexOf(this.currentYear);
             const nextIndex = (currentIndex + 1) % years.length;
             this.currentYear = years[nextIndex];

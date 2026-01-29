@@ -1,0 +1,642 @@
+<!DOCTYPE html>
+<html lang="en" x-data="subscriptionManager()">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Subscription Required | Umi Health</title>
+    <link rel="icon" href="../../logo.png" type="image/png">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@100;400;500;600;700&family=Varela+Round&family=Nunito:wght@400;600;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Rounded:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="../../assets/css/tailwind.output.css">
+    <script src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js" defer></script>
+    <!-- Backend Integration Libraries -->
+    <script src="../../js/api-client.js"></script>
+    <script src="../../js/auth-manager.js"></script>
+    <script src="../shared/js/backend-integration-helper.js"></script>
+    <script src="../shared/js/page-integration-template.js"></script>
+    <script src="../shared/js/admin-api-client-init.js"></script>
+    <style>
+        :root {
+            --color-primary-blue: #2563EB;
+            --color-accent-teal: #14B8A6;
+            --color-warning: #f59e0b;
+            --color-danger: #ef4444;
+            --color-text-primary: #1f2937;
+            --color-text-secondary: #6b7280;
+            --color-text-white: #ffffff;
+            --color-background: #f8fafc;
+            --color-surface: #ffffff;
+            --color-border: #e5e7eb;
+            --font-primary: 'Nunito', 'Varela Round', sans-serif;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            background: linear-gradient(135deg, var(--color-primary-blue) 0%, var(--color-accent-teal) 100%);
+            color: var(--color-text-primary);
+            font-family: 'Nunito', 'Varela Round', sans-serif;
+            line-height: 1.5;
+            min-height: 100vh;
+        }
+
+        .main-container {
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 1rem;
+        }
+
+        .subscription-card {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            border-radius: 20px;
+            padding: 2rem;
+            box-shadow: 0 25px 50px rgba(0, 0, 0, 0.2);
+            max-width: 1200px;
+            width: 100%;
+            max-height: 95vh;
+            overflow-y: auto;
+        }
+
+        .logo-section {
+            text-align: center;
+            margin-bottom: 1.5rem;
+        }
+
+        .logo-image {
+            width: 60px;
+            height: 60px;
+            border-radius: 50%;
+            object-fit: cover;
+            margin-bottom: 0.75rem;
+            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
+        }
+
+        .page-title {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: var(--color-text-primary);
+            margin-bottom: 0.5rem;
+        }
+
+        .page-subtitle {
+            color: var(--color-text-secondary);
+            font-size: 0.95rem;
+            margin-bottom: 1.5rem;
+        }
+
+        .expired-notice {
+            background: linear-gradient(135deg, #fef2f2, #fee2e2);
+            border: 1px solid #fecaca;
+            border-radius: 12px;
+            padding: 1rem;
+            margin-bottom: 1.5rem;
+            text-align: center;
+        }
+
+        .expired-notice h3 {
+            color: #991b1b;
+            font-size: 1.1rem;
+            font-weight: 600;
+            margin-bottom: 0.25rem;
+        }
+
+        .expired-notice p {
+            color: #7f1d1d;
+            margin: 0;
+            font-size: 0.9rem;
+        }
+
+        .plan-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 1rem;
+            margin-bottom: 1.5rem;
+        }
+
+        .plan-card {
+            background: var(--color-surface);
+            border: 2px solid var(--color-border);
+            border-radius: 12px;
+            padding: 1.25rem;
+            text-align: center;
+            transition: all 0.3s ease;
+            position: relative;
+        }
+
+        .plan-card:hover {
+            border-color: var(--color-accent-teal);
+            transform: translateY(-2px);
+            box-shadow: 0 8px 20px rgba(20, 184, 166, 0.15);
+        }
+
+        .plan-card.featured {
+            border-color: var(--color-accent-teal);
+            background: linear-gradient(135deg, rgba(20, 184, 166, 0.05), rgba(20, 184, 166, 0.02));
+        }
+
+        .plan-badge {
+            position: absolute;
+            top: -10px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: var(--color-accent-teal);
+            color: white;
+            padding: 0.2rem 0.75rem;
+            border-radius: 9999px;
+            font-size: 0.65rem;
+            font-weight: 600;
+            text-transform: uppercase;
+        }
+
+        .plan-name {
+            font-size: 1.1rem;
+            font-weight: 700;
+            color: var(--color-text-primary);
+            margin-bottom: 0.25rem;
+        }
+
+        .plan-price {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: var(--color-accent-teal);
+            margin-bottom: 0.25rem;
+        }
+
+        .plan-price .regular-price {
+            font-size: 0.9rem;
+            color: var(--color-text-secondary);
+            font-weight: 400;
+            text-decoration: line-through;
+            opacity: 0.7;
+        }
+
+        .plan-price .promo-price {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: var(--color-accent-teal);
+        }
+
+        .plan-price span {
+            font-size: 0.8rem;
+            color: var(--color-text-secondary);
+            font-weight: 400;
+        }
+
+        .plan-description {
+            color: var(--color-text-secondary);
+            margin-bottom: 1rem;
+            font-size: 0.8rem;
+        }
+
+        .plan-features {
+            list-style: none;
+            padding: 0;
+            margin-bottom: 1rem;
+            text-align: left;
+        }
+
+        .plan-features li {
+            padding: 0.25rem 0;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            color: var(--color-text-secondary);
+            font-size: 0.75rem;
+        }
+
+        .plan-features li::before {
+            content: '✓';
+            display: inline-block;
+            width: 16px;
+            height: 16px;
+            background: var(--color-accent-teal);
+            color: white;
+            border-radius: 50%;
+            text-align: center;
+            line-height: 16px;
+            font-size: 0.6rem;
+            flex-shrink: 0;
+        }
+
+        .plan-limits {
+            font-size: 0.7rem;
+            color: var(--color-text-secondary);
+            margin-bottom: 1rem;
+        }
+
+        .btn {
+            padding: 0.625rem 1.25rem;
+            border: none;
+            border-radius: 8px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-family: 'Nunito', sans-serif;
+            font-size: 0.85rem;
+            width: 100%;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, var(--color-accent-teal), #0d9488);
+            color: white;
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(20, 184, 166, 0.3);
+        }
+
+        .btn-secondary {
+            background: var(--color-surface);
+            color: var(--color-text-primary);
+            border: 2px solid var(--color-border);
+        }
+
+        .btn-secondary:hover {
+            background: var(--color-border);
+        }
+
+        .btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .loading-spinner {
+            display: inline-block;
+            width: 20px;
+            height: 20px;
+            border: 3px solid rgba(255, 255, 255, 0.3);
+            border-radius: 50%;
+            border-top-color: white;
+            animation: spin 1s ease-in-out infinite;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        .alert {
+            padding: 1rem;
+            border-radius: 12px;
+            margin-bottom: 1rem;
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+        }
+
+        .alert-success {
+            background: #d1fae5;
+            color: #065f46;
+            border: 1px solid #a7f3d0;
+        }
+
+        .alert-error {
+            background: #fee2e2;
+            color: #991b1b;
+            border: 1px solid #fecaca;
+        }
+
+        .alert-warning {
+            background: #fef3c7;
+            color: #92400e;
+            border: 1px solid #fde68a;
+        }
+
+        .back-link {
+            position: absolute;
+            top: 2rem;
+            left: 2rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            color: var(--color-text-white);
+            text-decoration: none;
+            font-weight: 500;
+            transition: all 0.3s ease;
+        }
+
+        .back-link:hover {
+            color: rgba(255, 255, 255, 0.8);
+            transform: translateX(-4px);
+        }
+
+        @media (max-width: 768px) {
+            .subscription-card {
+                padding: 2rem;
+                margin: 1rem;
+            }
+            
+            .plan-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="main-container">
+        <!-- Back to Login Link -->
+        <a href="/public/signin.html" class="back-link">
+            <span class="material-symbols-rounded">arrow_back</span>
+            Back to Login
+        </a>
+
+        <div class="subscription-card">
+            <!-- Logo Section -->
+            <div class="logo-section">
+                <img src="../../logo.png" alt="Umi Health" class="logo-image">
+                <h1 class="page-title">Subscription Required</h1>
+                <p class="page-subtitle">Your trial period has ended. Choose a plan to continue using Umi Health</p>
+            </div>
+
+            <!-- Loading State -->
+            <div x-show="loading" class="text-center py-8">
+                <div class="loading-spinner"></div>
+                <p class="text-gray-600 mt-4">Loading subscription options...</p>
+            </div>
+
+            <!-- Expired Notice -->
+            <div x-show="!loading && !subscriptionStatus.hasActiveSubscription && !subscriptionStatus.isInTrial" class="expired-notice">
+                <span class="material-symbols-rounded" style="font-size: 2rem;">warning</span>
+                <h3>Your Trial Period Has Ended</h3>
+                <p>Subscribe to one of our plans to continue managing your pharmacy with Umi Health</p>
+            </div>
+
+            <!-- Current Subscription (if active) -->
+            <div x-show="!loading && (subscriptionStatus.hasActiveSubscription || subscriptionStatus.isInTrial)" class="mb-6">
+                <div class="alert alert-success">
+                    <span class="material-symbols-rounded">check_circle</span>
+                    <div>
+                        <strong x-text="subscriptionStatus.isInTrial ? 'Trial Active' : 'Subscription Active'"></strong>
+                        <p x-text="subscriptionStatus.isInTrial ? 
+                            `Full access until ${new Date(subscriptionStatus.trialEndDate).toLocaleDateString()}` : 
+                            `Plan: ${subscriptionStatus.subscription?.planType}`"></p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Plans Grid -->
+            <div x-show="!loading" class="plan-grid">
+                <template x-for="plan in availablePlans" :key="plan.id">
+                    <div class="plan-card" 
+                         :class="plan.id === 'professional' ? 'featured' : ''">
+                        <div x-show="plan.id === 'professional'" class="plan-badge">Most Popular</div>
+                        
+                        <h3 class="plan-name" x-text="plan.name"></h3>
+                        <div class="plan-price">
+                            <div x-show="plan.regularPrice" class="regular-price">
+                                <span x-text="plan.regularPrice"></span>
+                            </div>
+                            <div class="promo-price">
+                                <span x-text="plan.promoPrice"></span>
+                            </div>
+                            <span>/month</span>
+                        </div>
+                        <p class="plan-description" x-text="plan.description"></p>
+                        
+                        <ul class="plan-features">
+                            <template x-for="feature in plan.features">
+                                <li x-text="feature"></li>
+                            </template>
+                        </ul>
+                        
+                        <div class="plan-limits">
+                            <strong>Users:</strong> <span x-text="plan.maxUsers === 999999 ? 'Unlimited' : plan.maxUsers"></span> • 
+                            <strong>Branches:</strong> <span x-text="plan.maxBranches === 999999 ? 'Unlimited' : plan.maxBranches"></span>
+                        </div>
+                        
+                        <button @click="subscribeToPlan(plan.id)" 
+                                :disabled="processing"
+                                class="btn btn-primary">
+                            <span x-show="!processing">Subscribe Now</span>
+                            <span x-show="processing">
+                                <div class="loading-spinner"></div>
+                            </span>
+                        </button>
+                    </div>
+                </template>
+            </div>
+
+            <!-- Messages -->
+            <div x-show="message" class="alert" :class="messageType">
+                <span class="material-symbols-rounded" x-text="messageType === 'success' ? 'check_circle' : messageType === 'error' ? 'error' : 'warning'"></span>
+                <span x-text="message"></span>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        function subscriptionManager() {
+            return {
+                loading: true,
+                processing: false,
+                message: '',
+                messageType: '',
+                subscriptionStatus: {
+                    isInTrial: false,
+                    hasActiveSubscription: false,
+                    trialDaysRemaining: 0,
+                    trialEndDate: null,
+                    subscription: null
+                },
+                availablePlans: [],
+
+                async init() {
+                    await this.loadSubscriptionStatus();
+                    await this.loadAvailablePlans();
+                },
+
+                async loadSubscriptionStatus() {
+                    try {
+                        const token = localStorage.getItem('umi_access_token');
+                        if (!token) {
+                            // No token, show expired status
+                            this.loading = false;
+                            return;
+                        }
+
+                        const response = await fetch('/api/v1/subscription/status', {
+                            headers: {
+                                'Authorization': `Bearer ${token}`
+                            }
+                        });
+
+                        const result = await response.json();
+                        if (result.success) {
+                            this.subscriptionStatus = result.data;
+                        } else {
+                            // If API fails, assume expired
+                            this.subscriptionStatus = {
+                                isInTrial: false,
+                                hasActiveSubscription: false,
+                                trialDaysRemaining: 0,
+                                trialEndDate: null,
+                                subscription: null
+                            };
+                        }
+                    } catch (error) {
+                        console.error('Error loading subscription status:', error);
+                        // Assume expired on error
+                        this.subscriptionStatus = {
+                            isInTrial: false,
+                            hasActiveSubscription: false,
+                            trialDaysRemaining: 0,
+                            trialEndDate: null,
+                            subscription: null
+                        };
+                    } finally {
+                        this.loading = false;
+                    }
+                },
+
+                async loadAvailablePlans() {
+                    try {
+                        const response = await fetch('/api/v1/subscription/plans');
+                        const result = await response.json();
+                        if (result.success) {
+                            this.availablePlans = result.data;
+                        }
+                    } catch (error) {
+                        console.error('Error loading plans:', error);
+                        // Fallback plans matching original app tiers with dual pricing
+                        this.availablePlans = [
+                            {
+                                id: 'starter',
+                                name: 'Starter',
+                                description: 'Perfect for small pharmacies',
+                                regularPrice: 'ZMW 300',
+                                promoPrice: 'ZMW 249',
+                                maxUsers: 3,
+                                maxBranches: 1,
+                                features: ['Core pharmacy management', 'Inventory tracking', 'Basic reports', 'Email support']
+                            },
+                            {
+                                id: 'professional',
+                                name: 'Professional',
+                                description: 'Ideal for growing pharmacies',
+                                regularPrice: 'ZMW 500',
+                                promoPrice: 'ZMW 449',
+                                maxUsers: 10,
+                                maxBranches: 3,
+                                features: ['All Starter features', 'Advanced analytics', 'Multi-branch support', 'Priority support', 'API access']
+                            },
+                            {
+                                id: 'business',
+                                name: 'Business',
+                                description: 'For established pharmacies',
+                                regularPrice: 'ZMW 1000',
+                                promoPrice: 'ZMW 849',
+                                maxUsers: 25,
+                                maxBranches: 5,
+                                features: ['All Professional features', 'Custom integrations', 'Dedicated support', 'Advanced security', 'Priority updates']
+                            },
+                            {
+                                id: 'enterprise',
+                                name: 'Enterprise',
+                                description: 'For large pharmacy chains',
+                                regularPrice: 'ZMW 1800',
+                                promoPrice: 'ZMW 1549',
+                                maxUsers: 50,
+                                maxBranches: 10,
+                                features: ['All Business features', 'Unlimited storage', '24/7 phone support', 'Custom development', 'White-label options']
+                            }
+                        ];
+                    }
+                },
+
+                async subscribeToPlan(planType) {
+                    this.processing = true;
+                    this.message = '';
+                    
+                    try {
+                        const token = localStorage.getItem('umi_access_token');
+                        if (!token) {
+                            this.showMessage('Please log in to subscribe', 'error');
+                            window.location.href = '/public/signin.html';
+                            return;
+                        }
+
+                        const response = await fetch('/api/v1/subscription/subscribe', {
+                            method: 'POST',
+                            headers: {
+                                'Content-Type': 'application/json',
+                                'Authorization': `Bearer ${token}`
+                            },
+                            body: JSON.stringify({ planType })
+                        });
+
+                        const result = await response.json();
+                        if (result.success) {
+                            this.showMessage('Subscription activated successfully! Redirecting...', 'success');
+                            
+                            // Store subscription info for dashboard
+                            localStorage.setItem('umi_subscription_info', JSON.stringify({
+                                planType: result.data.planType,
+                                endDate: result.data.endDate,
+                                maxUsers: result.data.maxUsers,
+                                maxBranches: result.data.maxBranches,
+                                isActive: result.data.isActive
+                            }));
+                            
+                            // Redirect to appropriate portal based on user role
+                            setTimeout(() => {
+                                // Get user role from token or redirect to admin by default
+                                const userRole = this.getUserRoleFromToken(token);
+                                const redirectUrl = this.getRoleBasedRedirectUrl(userRole);
+                                window.location.href = redirectUrl;
+                            }, 2000);
+                        } else {
+                            this.showMessage(result.message || 'Error activating subscription', 'error');
+                        }
+                    } catch (error) {
+                        console.error('Error subscribing:', error);
+                        this.showMessage('Error activating subscription. Please try again.', 'error');
+                    } finally {
+                        this.processing = false;
+                    }
+                },
+
+                getUserRoleFromToken(token) {
+                    try {
+                        const payload = JSON.parse(atob(token.split('.')[1]));
+                        const roles = payload.roles || payload.role || [];
+                        return Array.isArray(roles) ? roles[0] : roles;
+                    } catch (e) {
+                        console.warn('Could not parse user role from token:', e);
+                        return 'admin'; // Default to admin
+                    }
+                },
+
+                getRoleBasedRedirectUrl(role) {
+                    return role?.toLowerCase() switch
+                    {
+                        "admin" => "/portals/admin/home.html",
+                        "pharmacist" => "/portals/pharmacist/home.html",
+                        "cashier" => "/portals/cashier/home.html",
+                        "operations" => "/portals/operations/home.html",
+                        _ => "/portals/admin/home.html" // Default fallback
+                    };
+                },
+
+                showMessage(text, type) {
+                    this.message = text;
+                    this.messageType = `alert-${type}`;
+                    setTimeout(() => {
+                        this.message = '';
+                    }, 5000);
+                }
+            }
+        }
+    </script>
+</body>
+</html>

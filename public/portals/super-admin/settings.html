@@ -1,0 +1,2872 @@
+<!DOCTYPE html>
+<html lang="en" x-data="settings()">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>System Settings | UmiHealthInformationSystems Pharmacy Management</title>
+  <link rel="icon" href="../../logo.png" type="image/png">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Glacial+Indifference:wght@400;500;600;700&family=Material+Symbols+Rounded:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Glacial+Indifference:wght@400;500;600;700&family=Material+Symbols+Rounded:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="../../assets/css/tailwind.output.css">
+  <style>
+    :root {
+      --color-primary-blue: #2563EB;
+      --color-accent-teal: #14B8A6;
+      --color-text-white: #FFFFFF;
+      --color-subtle-blue: #EFF6FF;
+      --font-primary: 'Glacial Indifference', sans-serif;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      background: #0a0a0a;
+      color: var(--color-text-white);
+      font-family: 'Glacial Indifference', sans-serif;
+      line-height: 1.5;
+      min-height: 100vh;
+      position: relative;
+      background-image: 
+        linear-gradient(rgba(255, 255, 255, 0.03) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(255, 255, 255, 0.03) 1px, transparent 1px);
+      background-size: 50px 50px;
+    }
+
+    /* Custom scrollbar styles */
+    ::-webkit-scrollbar {
+      width: 8px;
+    }
+
+    ::-webkit-scrollbar-track {
+      background: rgba(255, 255, 255, 0.05);
+      border-radius: 4px;
+    }
+
+    ::-webkit-scrollbar-thumb {
+      background: rgba(255, 255, 255, 0.2);
+      border-radius: 4px;
+    }
+
+    ::-webkit-scrollbar-thumb:hover {
+      background: rgba(255, 255, 255, 0.3);
+    }
+
+    /* Firefox scrollbar */
+    * {
+      scrollbar-width: thin;
+      scrollbar-color: rgba(255, 255, 255, 0.2) rgba(255, 255, 255, 0.05);
+    }
+
+    .dashboard-container {
+      display: flex;
+      min-height: 100vh;
+    }
+
+    /* Sidebar Styles */
+    .sidebar {
+      width: 280px;
+      background: rgba(255, 255, 255, 0.1);
+      -webkit-backdrop-filter: blur(10px);
+      backdrop-filter: blur(10px);
+      border-right: 1px solid rgba(255, 255, 255, 0.2);
+      display: flex;
+      flex-direction: column;
+      position: fixed;
+      height: 100vh;
+      left: 0;
+      top: 0;
+      z-index: 1000;
+    }
+
+    .sidebar-header {
+      padding: 1.5rem;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.2);
+      text-align: center;
+    }
+
+    .sidebar-title {
+      font-size: 1.2rem;
+      font-weight: 700;
+      font-family: 'Glacial Indifference', sans-serif;
+      color: var(--color-accent-teal);
+    }
+
+    .sidebar-search {
+      display: none;
+      padding: 1rem;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.2);
+    }
+
+    .sidebar-search .search-container {
+      width: 100%;
+    }
+
+    .sidebar-menu {
+      flex: 1;
+      padding: 1rem 0;
+      overflow-y: auto;
+    }
+
+    .menu-section {
+      margin-bottom: 2rem;
+    }
+
+    .menu-title {
+      font-size: 0.75rem;
+      font-weight: 600;
+      text-transform: uppercase;
+      opacity: 0.6;
+      padding: 0 1.5rem;
+      margin-bottom: 0.5rem;
+      font-family: 'Glacial Indifference', sans-serif;
+    }
+
+    .menu-item {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+      padding: 0.75rem 1.5rem;
+      color: var(--color-text-white);
+      text-decoration: none;
+      transition: all 0.3s ease;
+      font-family: 'Glacial Indifference', sans-serif;
+      font-size: 0.9rem;
+      opacity: 0.8;
+    }
+
+    .menu-item:hover {
+      background: rgba(255, 255, 255, 0.1);
+      opacity: 1;
+    }
+
+    .menu-item.active {
+      background: rgba(20, 184, 166, 0.2);
+      border-left: 3px solid var(--color-accent-teal);
+      opacity: 1;
+    }
+
+    .menu-icon {
+      font-size: 1.25rem;
+      color: var(--color-accent-teal);
+    }
+
+    .sidebar-footer {
+      padding: 1rem 1.5rem;
+      border-top: 1px solid rgba(255, 255, 255, 0.2);
+    }
+
+    /* Main Content Area */
+    .main-content {
+      flex: 1;
+      margin-left: 280px;
+      display: flex;
+      flex-direction: column;
+    }
+
+    /* Header Styles */
+    .header {
+      height: 70px;
+      background: rgba(10, 10, 10, 0.95);
+      -webkit-backdrop-filter: blur(10px);
+      backdrop-filter: blur(10px);
+      border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0 2rem;
+      position: sticky;
+      top: 0;
+      z-index: 999;
+    }
+
+    .header-left {
+      display: flex;
+      align-items: center;
+      gap: 2rem;
+    }
+
+    .header-logo {
+      display: flex;
+      align-items: center;
+    }
+
+    .header-logo img {
+      width: 100px;
+      height: 100px;
+      object-fit: contain;
+    }
+
+    .page-title {
+      font-size: 1.5rem;
+      font-weight: 700;
+      font-family: 'Glacial Indifference', sans-serif;
+    }
+
+    .header-right {
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+    }
+
+    .user-menu {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+      padding: 0.5rem 1rem;
+      background: rgba(255, 255, 255, 0.1);
+      border: 1px solid rgba(255, 255, 255, 0.2);
+      border-radius: 12px;
+      cursor: pointer;
+      transition: all 0.3s ease;
+    }
+
+    .user-menu:hover {
+      background: rgba(255, 255, 255, 0.15);
+    }
+
+    .user-avatar {
+      width: 35px;
+      height: 35px;
+      background: var(--color-accent-teal);
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1rem;
+    }
+
+    .user-info {
+      display: flex;
+      flex-direction: column;
+    }
+
+    .user-name {
+      font-weight: 600;
+      font-size: 0.9rem;
+      font-family: 'Glacial Indifference', sans-serif;
+    }
+
+    .user-role {
+      font-size: 0.75rem;
+      opacity: 0.8;
+      font-family: 'Glacial Indifference', sans-serif;
+    }
+
+    /* Search Container Styles */
+    .search-container {
+      position: relative;
+      width: 300px;
+    }
+
+    .search-input-wrapper {
+      position: relative;
+      display: flex;
+      align-items: center;
+    }
+
+    .search-input {
+      width: 100%;
+      padding: 0.75rem 1rem 0.75rem 2.5rem;
+      background: rgba(255, 255, 255, 0.1);
+      border: 1px solid rgba(255, 255, 255, 0.3);
+      border-radius: 12px;
+      color: var(--color-text-white);
+      font-size: 0.9rem;
+      font-family: 'Glacial Indifference', sans-serif;
+      transition: all 0.3s ease;
+    }
+
+    .search-input::placeholder {
+      color: rgba(255, 255, 255, 0.5);
+    }
+
+    .search-input:focus {
+      outline: none;
+      background: rgba(255, 255, 255, 0.15);
+      border-color: var(--color-accent-teal);
+      box-shadow: 0 0 0 2px rgba(20, 184, 166, 0.2);
+    }
+
+    .search-icon {
+      position: absolute;
+      left: 0.75rem;
+      color: rgba(255, 255, 255, 0.6);
+      font-size: 1.2rem;
+      pointer-events: none;
+    }
+
+    .search-suggestions {
+      position: absolute;
+      top: 100%;
+      left: 0;
+      right: 0;
+      background: rgba(10, 10, 10, 0.95);
+      -webkit-backdrop-filter: blur(10px);
+      backdrop-filter: blur(10px);
+      border: 1px solid rgba(255, 255, 255, 0.2);
+      border-radius: 12px;
+      margin-top: 0.5rem;
+      max-height: 300px;
+      overflow-y: auto;
+      z-index: 1000;
+      box-shadow: 0 10px 25px rgba(0, 0, 0, 0.3);
+    }
+
+    .suggestion-item {
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+      padding: 1rem;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+    }
+
+    .suggestion-item:last-child {
+      border-bottom: none;
+    }
+
+    .suggestion-item:hover {
+      background: rgba(255, 255, 255, 0.1);
+    }
+
+    .suggestion-icon {
+      width: 40px;
+      height: 40px;
+      background: rgba(20, 184, 166, 0.2);
+      border-radius: 10px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.2rem;
+      color: var(--color-accent-teal);
+    }
+
+    .suggestion-content {
+      flex: 1;
+    }
+
+    .suggestion-title {
+      font-weight: 600;
+      font-size: 0.9rem;
+      font-family: 'Glacial Indifference', sans-serif;
+      margin-bottom: 0.25rem;
+    }
+
+    .suggestion-description {
+      font-size: 0.8rem;
+      opacity: 0.7;
+      font-family: 'Glacial Indifference', sans-serif;
+    }
+
+    .suggestion-type {
+      padding: 0.25rem 0.75rem;
+      background: rgba(255, 255, 255, 0.1);
+      border: 1px solid rgba(255, 255, 255, 0.3);
+      border-radius: 20px;
+      font-size: 0.75rem;
+      font-weight: 600;
+      font-family: 'Glacial Indifference', sans-serif;
+      text-transform: uppercase;
+    }
+
+    /* Tabs Container */
+    .tabs-container {
+      width: 100%;
+    }
+
+    .tabs-header {
+      display: flex;
+      gap: 0.5rem;
+      margin-bottom: 2rem;
+      overflow-x: auto;
+      padding-bottom: 0.5rem;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+    }
+
+    .tab-button {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      padding: 0.75rem 1rem;
+      background: rgba(255, 255, 255, 0.05);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      border-radius: 12px;
+      color: rgba(255, 255, 255, 0.7);
+      font-size: 0.9rem;
+      font-weight: 500;
+      font-family: 'Glacial Indifference', sans-serif;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      white-space: nowrap;
+    }
+
+    .tab-button:hover {
+      background: rgba(255, 255, 255, 0.1);
+      color: var(--color-text-white);
+    }
+
+    .tab-button.active {
+      background: var(--color-accent-teal);
+      color: white;
+      border-color: var(--color-accent-teal);
+    }
+
+    .tabs-content {
+      width: 100%;
+    }
+
+    .tab-panel {
+      animation: fadeIn 0.3s ease;
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(10px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    /* Payment Gateway Styles */
+    .payment-gateway {
+      background: rgba(255, 255, 255, 0.05);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      border-radius: 12px;
+      margin-bottom: 1.5rem;
+      overflow: hidden;
+    }
+
+    .gateway-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 1rem 1.5rem;
+      background: rgba(255, 255, 255, 0.05);
+      border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+    }
+
+    .gateway-info h5 {
+      font-size: 1.1rem;
+      font-weight: 600;
+      margin-bottom: 0.25rem;
+      font-family: 'Glacial Indifference', sans-serif;
+    }
+
+    .gateway-status {
+      padding: 0.25rem 0.75rem;
+      border-radius: 20px;
+      font-size: 0.75rem;
+      font-weight: 600;
+      font-family: 'Glacial Indifference', sans-serif;
+    }
+
+    .gateway-status.active {
+      background: rgba(16, 185, 129, 0.2);
+      color: #10B981;
+    }
+
+    .gateway-status.inactive {
+      background: rgba(244, 76, 76, 0.2);
+      color: #FCA5A5;
+    }
+
+    .gateway-settings {
+      padding: 1.5rem;
+    }
+
+    /* Form Switch */
+    .form-switch {
+      position: relative;
+      display: inline-block;
+      width: 50px;
+      height: 24px;
+    }
+
+    .form-switch input {
+      opacity: 0;
+      width: 0;
+      height: 0;
+    }
+
+    .switch {
+      position: absolute;
+      cursor: pointer;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background-color: rgba(255, 255, 255, 0.2);
+      transition: .4s;
+      border-radius: 34px;
+    }
+
+    .switch:before {
+      position: absolute;
+      content: "";
+      height: 18px;
+      width: 18px;
+      left: 3px;
+      bottom: 3px;
+      background-color: white;
+      transition: .4s;
+      border-radius: 50%;
+    }
+
+    input:checked + .switch {
+      background-color: var(--color-accent-teal);
+    }
+
+    input:checked + .switch:before {
+      transform: translateX(26px);
+    }
+
+    /* Roles & Permissions Styles */
+    .roles-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+      gap: 1.5rem;
+      margin-bottom: 2rem;
+    }
+
+    .role-card {
+      background: rgba(255, 255, 255, 0.05);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      border-radius: 12px;
+      padding: 1.5rem;
+      transition: all 0.3s ease;
+    }
+
+    .role-card:hover {
+      background: rgba(255, 255, 255, 0.08);
+      transform: translateY(-2px);
+    }
+
+    .role-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      margin-bottom: 1rem;
+    }
+
+    .role-info h5 {
+      font-size: 1.1rem;
+      font-weight: 600;
+      margin-bottom: 0.25rem;
+      font-family: 'Glacial Indifference', sans-serif;
+    }
+
+    .role-count {
+      font-size: 0.8rem;
+      opacity: 0.7;
+      font-family: 'Glacial Indifference', sans-serif;
+    }
+
+    .role-badge {
+      padding: 0.25rem 0.75rem;
+      border-radius: 20px;
+      font-size: 0.75rem;
+      font-weight: 600;
+      font-family: 'Glacial Indifference', sans-serif;
+    }
+
+    .role-badge.admin {
+      background: rgba(59, 130, 246, 0.2);
+      color: #60A5FA;
+    }
+
+    .role-badge.standard {
+      background: rgba(156, 163, 175, 0.2);
+      color: #9CA3AF;
+    }
+
+    .role-description {
+      font-size: 0.9rem;
+      opacity: 0.8;
+      margin-bottom: 1rem;
+      font-family: 'Glacial Indifference', sans-serif;
+    }
+
+    .role-permissions {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.5rem;
+    }
+
+    .permission-tag {
+      padding: 0.25rem 0.75rem;
+      background: rgba(20, 184, 166, 0.2);
+      color: var(--color-accent-teal);
+      border-radius: 20px;
+      font-size: 0.75rem;
+      font-weight: 500;
+      font-family: 'Glacial Indifference', sans-serif;
+    }
+
+    .permission-matrix {
+      background: rgba(255, 255, 255, 0.05);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      border-radius: 12px;
+      overflow: hidden;
+    }
+
+    .matrix-table {
+      width: 100%;
+      border-collapse: collapse;
+    }
+
+    .matrix-table th {
+      background: rgba(255, 255, 255, 0.05);
+      padding: 1rem;
+      text-align: left;
+      font-weight: 600;
+      font-family: 'Glacial Indifference', sans-serif;
+      font-size: 0.9rem;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+    }
+
+    .matrix-table td {
+      padding: 0.75rem 1rem;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+      font-size: 0.9rem;
+      font-family: 'Glacial Indifference', sans-serif;
+    }
+
+    .check {
+      color: #10B981;
+      font-weight: bold;
+    }
+
+    .cross {
+      color: #FCA5A5;
+      font-weight: bold;
+    }
+
+    /* Form Groups */
+    .form-group {
+      margin-bottom: 1.5rem;
+    }
+
+    .form-label {
+      display: block;
+      margin-bottom: 0.5rem;
+      font-weight: 500;
+      font-family: 'Glacial Indifference', sans-serif;
+    }
+
+    .form-input {
+      width: 100%;
+      padding: 0.75rem;
+      background: rgba(255, 255, 255, 0.1);
+      border: 1px solid rgba(255, 255, 255, 0.3);
+      border-radius: 8px;
+      color: var(--color-text-white);
+      font-size: 0.9rem;
+      font-family: 'Glacial Indifference', sans-serif;
+    }
+
+    .form-input:focus {
+      outline: none;
+      background: rgba(255, 255, 255, 0.15);
+      border-color: var(--color-accent-teal);
+    }
+
+    .form-select {
+      width: 100%;
+      padding: 0.75rem;
+      background: rgba(255, 255, 255, 0.1);
+      border: 1px solid rgba(255, 255, 255, 0.3);
+      border-radius: 8px;
+      color: var(--color-text-white);
+      font-size: 0.9rem;
+      font-family: 'Glacial Indifference', sans-serif;
+    }
+
+    .form-select option {
+      background: #0a0a0a;
+      color: var(--color-text-white);
+    }
+
+    .form-checkbox {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      cursor: pointer;
+    }
+
+    .form-checkbox input {
+      width: 18px;
+      height: 18px;
+      accent-color: var(--color-accent-teal);
+    }
+
+    .form-actions {
+      display: flex;
+      gap: 1rem;
+      flex-wrap: wrap;
+    }
+
+    .input-group {
+      display: flex;
+      gap: 0.5rem;
+    }
+
+    .input-group .form-input {
+      flex: 1;
+    }
+
+    /* Content Area */
+    .content {
+      flex: 1;
+      padding: 2rem;
+      overflow-y: auto;
+    }
+
+    /* Settings Sections */
+    .settings-container {
+      display: grid;
+      gap: 2rem;
+    }
+
+    .settings-section {
+      background: rgba(255, 255, 255, 0.1);
+      -webkit-backdrop-filter: blur(10px);
+      backdrop-filter: blur(10px);
+      border: 1px solid rgba(255, 255, 255, 0.2);
+      border-radius: 16px;
+      padding: 1.5rem;
+    }
+
+    .section-header {
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+      margin-bottom: 1.5rem;
+    }
+
+    .section-icon {
+      width: 40px;
+      height: 40px;
+      background: rgba(20, 184, 166, 0.2);
+      border-radius: 10px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.25rem;
+      color: var(--color-accent-teal);
+    }
+
+    .section-title {
+      font-size: 1.2rem;
+      font-weight: 700;
+      font-family: 'Glacial Indifference', sans-serif;
+    }
+
+    .section-description {
+      opacity: 0.8;
+      margin-bottom: 1.5rem;
+    }
+
+    /* Form Styles */
+    .form-group {
+      margin-bottom: 1.5rem;
+    }
+
+    .form-label {
+      display: block;
+      margin-bottom: 0.5rem;
+      font-weight: 600;
+      font-family: 'Glacial Indifference', sans-serif;
+    }
+
+    .form-input {
+      width: 100%;
+      padding: 0.75rem;
+      background: rgba(255, 255, 255, 0.1);
+      border: 1px solid rgba(255, 255, 255, 0.3);
+      border-radius: 12px;
+      color: var(--color-text-white);
+      font-size: 0.9rem;
+      font-family: 'Glacial Indifference', sans-serif;
+    }
+
+    .form-input::placeholder {
+      color: rgba(255, 255, 255, 0.5);
+    }
+
+    .form-input:focus {
+      outline: none;
+      background: rgba(255, 255, 255, 0.15);
+      border-color: rgba(255, 255, 255, 0.5);
+    }
+
+    .form-select {
+      width: 100%;
+      padding: 0.75rem;
+      background: rgba(255, 255, 255, 0.1);
+      border: 1px solid rgba(255, 255, 255, 0.3);
+      border-radius: 12px;
+      color: var(--color-text-white);
+      font-size: 0.9rem;
+      font-family: 'Glacial Indifference', sans-serif;
+    }
+
+    .form-select:focus {
+      outline: none;
+      background: rgba(255, 255, 255, 0.15);
+      border-color: rgba(255, 255, 255, 0.5);
+    }
+
+    .form-select option {
+      background: #0a0a0a;
+      color: var(--color-text-white);
+    }
+
+    .form-checkbox {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+      cursor: pointer;
+    }
+
+    .form-checkbox input[type="checkbox"] {
+      width: 20px;
+      height: 20px;
+      accent-color: var(--color-accent-teal);
+    }
+
+    .btn {
+      padding: 0.75rem 1.5rem;
+      border: none;
+      border-radius: 12px;
+      font-size: 0.9rem;
+      font-weight: 600;
+      font-family: 'Glacial Indifference', sans-serif;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      display: inline-flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+
+    .btn-primary {
+      background: var(--color-accent-teal);
+      color: white;
+    }
+
+    .btn-primary:hover {
+      background: #0d9486;
+      transform: translateY(-2px);
+    }
+
+    .btn-secondary {
+      background: rgba(255, 255, 255, 0.1);
+      color: var(--color-text-white);
+      border: 1px solid rgba(255, 255, 255, 0.3);
+    }
+
+    .btn-secondary:hover {
+      background: rgba(255, 255, 255, 0.2);
+    }
+
+    .btn-danger {
+      background: rgba(244, 76, 76, 0.2);
+      color: #FCA5A5;
+      border: 1px solid rgba(244, 76, 76, 0.3);
+    }
+
+    .btn-danger:hover {
+      background: rgba(244, 76, 76, 0.3);
+    }
+
+    /* Mobile Responsiveness */
+    .mobile-menu-toggle {
+      display: none;
+      background: none;
+      border: none;
+      color: var(--color-text-white);
+      font-size: 1.5rem;
+      cursor: pointer;
+    }
+
+    @media (max-width: 768px) {
+      .sidebar {
+        transform: translateX(-100%);
+        transition: transform 0.3s ease;
+        width: 280px;
+      }
+
+      .sidebar.open {
+        transform: translateX(0);
+      }
+
+      .main-content {
+        margin-left: 0;
+      }
+
+      .mobile-menu-toggle {
+        display: block;
+      }
+
+      .header {
+        padding: 0 1rem;
+        justify-content: center;
+        position: relative;
+      }
+
+      .header-left {
+        gap: 1rem;
+        position: absolute;
+        left: 1rem;
+        top: 50%;
+        transform: translateY(-50%);
+      }
+
+      .header-logo {
+        position: absolute;
+        left: 50%;
+        transform: translateX(-50%);
+      }
+
+      .header-logo img {
+        width: 80px;
+        height: 80px;
+      }
+
+      .page-title {
+        display: none;
+      }
+
+      .header-right {
+        display: none;
+      }
+
+      .sidebar-search {
+        display: block;
+        padding: 1rem;
+        border-bottom: 1px solid rgba(255, 255, 255, 0.2);
+      }
+
+      .content {
+        padding: 1rem;
+      }
+
+      .tabs-header {
+        flex-wrap: wrap;
+        gap: 0.25rem;
+      }
+
+      .tab-button {
+        padding: 0.5rem 0.75rem;
+        font-size: 0.8rem;
+      }
+
+      .tab-button span {
+        display: none;
+      }
+
+      .roles-grid {
+        grid-template-columns: 1fr;
+      }
+
+      .payment-gateway {
+        margin-bottom: 1rem;
+      }
+
+      .form-actions {
+        flex-direction: column;
+      }
+
+      .permission-matrix {
+        overflow-x: auto;
+      }
+    }
+  </style>
+
+    <!-- Backend Integration Libraries -->
+    <script src="../../js/api-client.js"></script>
+    <script src="../../js/auth-manager.js"></script>
+    <script src="../shared/js/backend-integration-helper.js"></script>
+    <script src="../shared/js/page-integration-template.js"></script>
+    <script src="https://unpkg.com/alpinejs@3.x.x/dist/cdn.min.js" defer></script></head>
+<body>
+  <div class="dashboard-container">
+    <!-- Sidebar -->
+    <aside class="sidebar" :class="{ 'open': mobileMenuOpen }">
+      <div class="sidebar-header">
+        <div class="sidebar-title">Umi Admin</div>
+      </div>
+      
+      <!-- Mobile Search Bar -->
+      <div class="sidebar-search">
+        <div class="search-container" x-data="searchComponent()">
+          <div class="search-input-wrapper">
+            <input 
+              type="text" 
+              class="search-input" 
+              placeholder="Search settings..."
+              x-model="query"
+              @input="handleSearch"
+              @focus="showSuggestions = true"
+              @blur="hideSuggestions"
+            >
+            <span class="material-symbols-rounded search-icon">search</span>
+          </div>
+          
+          <!-- Search Suggestions Dropdown -->
+          <div 
+            class="search-suggestions" 
+            x-show="showSuggestions && suggestions.length > 0"
+            x-transition
+          >
+            <template x-for="suggestion in suggestions" :key="suggestion.id">
+              <div class="suggestion-item" @click="selectSuggestion(suggestion)">
+                <div class="suggestion-icon">
+                  <span class="material-symbols-rounded" x-text="suggestion.icon"></span>
+                </div>
+                <div class="suggestion-content">
+                  <div class="suggestion-title" x-text="suggestion.title"></div>
+                  <div class="suggestion-description" x-text="suggestion.description"></div>
+                </div>
+                <div class="suggestion-type" x-text="suggestion.type"></div>
+              </div>
+            </template>
+          </div>
+        </div>
+      </div>
+      
+      <nav class="sidebar-menu">
+        <div class="menu-section">
+          <div class="menu-title">Main</div>
+          <a href="home.html" class="menu-item">
+            <span class="material-symbols-rounded menu-icon">dashboard</span>
+            Home
+          </a>
+          <a href="pharmacies.html" class="menu-item">
+            <span class="material-symbols-rounded menu-icon">store</span>
+            Pharmacies
+          </a>
+          <a href="users.html" class="menu-item">
+            <span class="material-symbols-rounded menu-icon">people</span>
+            Users
+          </a>
+          <a href="transactions.html" class="menu-item">
+            <span class="material-symbols-rounded menu-icon">receipt_long</span>
+            Transactions
+          </a>
+        </div>
+        
+        <div class="menu-section">
+          <div class="menu-title">Management</div>
+          <a href="analytics.html" class="menu-item">
+            <span class="material-symbols-rounded menu-icon">analytics</span>
+            Analytics
+          </a>
+          <a href="reports.html" class="menu-item">
+            <span class="material-symbols-rounded menu-icon">assessment</span>
+            Reports
+          </a>
+          <a href="settings.html" class="menu-item active">
+            <span class="material-symbols-rounded menu-icon">account_circle</span>
+            Account
+          </a>
+          <a href="security.html" class="menu-item">
+            <span class="material-symbols-rounded menu-icon">security</span>
+            Security
+          </a>
+        </div>
+        
+        <div class="menu-section">
+          <div class="menu-title">Support</div>
+          <a href="help.html" class="menu-item">
+            <span class="material-symbols-rounded menu-icon">help_center</span>
+            Help Center
+          </a>
+          <a href="logs.html" class="menu-item">
+            <span class="material-symbols-rounded menu-icon">history</span>
+            System Logs
+          </a>
+        </div>
+      </nav>
+      
+      <div class="sidebar-footer">
+        <a href="../auth/signin.html" class="menu-item" @click.prevent="handleLogout">
+          <span class="material-symbols-rounded menu-icon">logout</span>
+          Sign Out
+        </a>
+      </div>
+    </aside>
+
+    <!-- Main Content -->
+    <main class="main-content">
+      <!-- Header -->
+      <header class="header">
+        <div class="header-left">
+          <button class="mobile-menu-toggle" @click="mobileMenuOpen = !mobileMenuOpen">
+            <span class="material-symbols-rounded">menu</span>
+          </button>
+          <div class="header-logo">
+            <!-- Logo removed per request -->
+          </div>
+          <h1 class="page-title">System Settings</h1>
+        </div>
+        
+        <div class="header-right">
+          <div class="search-container" x-data="searchComponent()">
+            <div class="search-input-wrapper">
+              <input 
+                type="text" 
+                class="search-input" 
+                placeholder="Search settings..."
+                x-model="query"
+                @input="handleSearch"
+                @focus="showSuggestions = true"
+                @blur="hideSuggestions"
+              >
+              <span class="material-symbols-rounded search-icon">search</span>
+            </div>
+            
+            <!-- Search Suggestions Dropdown -->
+            <div 
+              class="search-suggestions" 
+              x-show="showSuggestions && suggestions.length > 0"
+              x-transition
+            >
+              <template x-for="suggestion in suggestions" :key="suggestion.id">
+                <div class="suggestion-item" @click="selectSuggestion(suggestion)">
+                  <div class="suggestion-icon">
+                    <span class="material-symbols-rounded" x-text="suggestion.icon"></span>
+                  </div>
+                  <div class="suggestion-content">
+                    <div class="suggestion-title" x-text="suggestion.title"></div>
+                    <div class="suggestion-description" x-text="suggestion.description"></div>
+                  </div>
+                  <div class="suggestion-type" x-text="suggestion.type"></div>
+                </div>
+              </template>
+            </div>
+          </div>
+        </div>
+      </header>
+
+      <!-- Content Area -->
+      <div class="content">
+        <!-- Tabs Menu -->
+        <div class="tabs-container">
+          <div class="tabs-header">
+            <button 
+              class="tab-button" 
+              :class="{ 'active': activeTab === 'general' }"
+              @click="activeTab = 'general'"
+            >
+              <span class="material-symbols-rounded">settings</span>
+              General
+            </button>
+            <button 
+              class="tab-button" 
+              :class="{ 'active': activeTab === 'backup' }"
+              @click="activeTab = 'backup'"
+            >
+              <span class="material-symbols-rounded">backup</span>
+              Backup
+            </button>
+            <button 
+              class="tab-button" 
+              :class="{ 'active': activeTab === 'email' }"
+              @click="activeTab = 'email'"
+            >
+              <span class="material-symbols-rounded">email</span>
+              Email
+            </button>
+            <button 
+              class="tab-button" 
+              :class="{ 'active': activeTab === 'payments' }"
+              @click="activeTab = 'payments'"
+            >
+              <span class="material-symbols-rounded">payments</span>
+              Payments
+            </button>
+            <button 
+              class="tab-button" 
+              :class="{ 'active': activeTab === 'api' }"
+              @click="activeTab = 'api'"
+            >
+              <span class="material-symbols-rounded">api</span>
+              API
+            </button>
+            <button 
+              class="tab-button" 
+              :class="{ 'active': activeTab === 'roles' }"
+              @click="activeTab = 'roles'"
+            >
+              <span class="material-symbols-rounded">admin_panel_settings</span>
+              Roles & Permissions
+            </button>
+            <button 
+              class="tab-button" 
+              :class="{ 'active': activeTab === 'security' }"
+              @click="activeTab = 'security'"
+            >
+              <span class="material-symbols-rounded">security</span>
+              Security
+            </button>
+            <button 
+              class="tab-button" 
+              :class="{ 'active': activeTab === 'maintenance' }"
+              @click="activeTab = 'maintenance'"
+            >
+              <span class="material-symbols-rounded">build</span>
+              Maintenance
+            </button>
+          </div>
+
+          <div class="tabs-content">
+            <!-- General Settings Tab -->
+            <div class="tab-panel" x-show="activeTab === 'general'" x-transition>
+              <div class="settings-section" id="general">
+                <div class="section-header">
+                  <div class="section-icon">
+                    <span class="material-symbols-rounded">settings</span>
+                  </div>
+                  <div class="section-title">General Settings</div>
+                </div>
+                <div class="section-description">
+                  Basic system configuration and preferences.
+                </div>
+                
+                <div class="form-group">
+                  <label class="form-label">System Name</label>
+                  <input type="text" class="form-input" x-model="generalSettings.systemName">
+                </div>
+                
+                <div class="form-group">
+                  <label class="form-label">Default Language</label>
+                  <select class="form-select" x-model="generalSettings.defaultLanguage">
+                    <option value="English">English</option>
+                    <option value="Bemba">Bemba</option>
+                    <option value="Nyanja">Nyanja</option>
+                  </select>
+                </div>
+                
+                <div class="form-group">
+                  <label class="form-label">Time Zone</label>
+                  <select class="form-select" x-model="generalSettings.timeZone">
+                    <option value="Africa/Lusaka">CAT - Central Africa Time</option>
+                    <option value="UTC">UTC - Coordinated Universal Time</option>
+                  </select>
+                </div>
+                
+                <div class="form-group">
+                  <label class="form-checkbox">
+                    <input type="checkbox" x-model="generalSettings.enableSystemNotifications">
+                    <span>Enable system notifications</span>
+                  </label>
+                </div>
+                
+                <button class="btn btn-primary" @click="saveGeneralSettings" :disabled="savingGeneralSettings">
+                  <span class="material-symbols-rounded">save</span>
+                  Save General Settings
+                </button>
+              </div>
+            </div>
+
+            <!-- Backup Settings Tab -->
+            <div class="tab-panel" x-show="activeTab === 'backup'" x-transition>
+              <div class="settings-section" id="backup">
+                <div class="section-header">
+                  <div class="section-icon">
+                    <span class="material-symbols-rounded">backup</span>
+                  </div>
+                  <div class="section-title">System Backup</div>
+                </div>
+                <div class="section-description">
+                  Configure automatic backups and data recovery options.
+                </div>
+                
+                <div class="form-group">
+                  <label class="form-label">Backup Frequency</label>
+                  <select class="form-select" x-model="backupSettings.frequency">
+                    <option value="Daily">Daily</option>
+                    <option value="Weekly">Weekly</option>
+                    <option value="Monthly">Monthly</option>
+                  </select>
+                </div>
+                
+                <div class="form-group">
+                  <label class="form-label">Backup Location</label>
+                  <input type="text" class="form-input" x-model="backupSettings.location">
+                </div>
+                
+                <div class="form-group">
+                  <label class="form-label">Retention Period (days)</label>
+                  <input type="number" class="form-input" x-model="backupSettings.retentionDays">
+                </div>
+                
+                <div class="form-group">
+                  <label class="form-checkbox">
+                    <input type="checkbox" x-model="backupSettings.enableAutoBackups">
+                    <span>Enable automatic backups</span>
+                  </label>
+                </div>
+                
+                <div class="form-actions">
+                  <button class="btn btn-primary" @click="saveBackupSettings">
+                    <span class="material-symbols-rounded">save</span>
+                    Save Backup Settings
+                  </button>
+                  <button class="btn btn-secondary" @click="createBackup">
+                    <span class="material-symbols-rounded">backup</span>
+                    Create Backup Now
+                  </button>
+                  <button class="btn btn-secondary" @click="restoreBackup">
+                    <span class="material-symbols-rounded">restore</span>
+                    Restore Backup
+                  </button>
+                </div>
+              </div>
+            </div>
+
+            <!-- Email Settings Tab -->
+            <div class="tab-panel" x-show="activeTab === 'email'" x-transition>
+              <div class="settings-section" id="email">
+                <div class="section-header">
+                  <div class="section-icon">
+                    <span class="material-symbols-rounded">email</span>
+                  </div>
+                  <div class="section-title">Email Configuration</div>
+                </div>
+                <div class="section-description">
+                  Configure SMTP settings and email templates.
+                </div>
+                
+                <div class="form-group">
+                  <label class="form-label">SMTP Server</label>
+                  <input type="text" class="form-input" x-model="emailSettings.smtpServer">
+                </div>
+                
+                <div class="form-group">
+                  <label class="form-label">Port</label>
+                  <input type="number" class="form-input" x-model="emailSettings.port">
+                </div>
+                
+                <div class="form-group">
+                  <label class="form-label">Username</label>
+                  <input type="email" class="form-input" x-model="emailSettings.username">
+                </div>
+                
+                <div class="form-group">
+                  <label class="form-label">Password</label>
+                  <input type="password" class="form-input" placeholder="••••••••" x-model="emailSettings.password">
+                </div>
+                
+                <div class="form-group">
+                  <label class="form-checkbox">
+                    <input type="checkbox" x-model="emailSettings.useSsl">
+                    <span>Use SSL/TLS</span>
+                  </label>
+                </div>
+                
+                <div class="form-actions">
+                  <button class="btn btn-primary" @click="saveEmailSettings">
+                    <span class="material-symbols-rounded">save</span>
+                    Save Email Settings
+                  </button>
+                  <button class="btn btn-secondary" @click="testEmailSettings">
+                    <span class="material-symbols-rounded">send</span>
+                    Send Test Email
+                  </button>
+                </div>
+              </div>
+            </div>
+
+            <!-- Payment Gateways Tab -->
+            <div class="tab-panel" x-show="activeTab === 'payments'" x-transition>
+              <div class="settings-section" id="payments">
+                <div class="section-header">
+                  <div class="section-icon">
+                    <span class="material-symbols-rounded">payments</span>
+                  </div>
+                  <div class="section-title">Payment Configuration</div>
+                </div>
+                <div class="section-description">
+                  Configure multiple payment gateways and billing settings.
+                </div>
+
+                <!-- Currency Settings -->
+                <h4 style="margin: 1.5rem 0 1rem; color: var(--color-accent-teal);">Currency Settings</h4>
+                <div class="form-group">
+                  <label class="form-label">Default Currency</label>
+                  <select class="form-select" x-model="paymentSettings.defaultCurrency">
+                    <option value="ZMW">ZMW - Zambian Kwacha</option>
+                    <option value="USD">USD - US Dollar</option>
+                    <option value="EUR">EUR - Euro</option>
+                  </select>
+                </div>
+
+                <!-- Payment Gateways -->
+                <h4 style="margin: 1.5rem 0 1rem; color: var(--color-accent-teal);">Payment Gateways</h4>
+                
+                <!-- MTN Mobile Money -->
+                <div class="payment-gateway">
+                  <div class="gateway-header">
+                    <div class="gateway-info">
+                      <h5>MTN Mobile Money</h5>
+                      <span class="gateway-status active">Active</span>
+                    </div>
+                    <label class="form-switch">
+                      <input type="checkbox" x-model="paymentSettings.mtn.enabled">
+                      <span class="switch"></span>
+                    </label>
+                  </div>
+                  <div class="gateway-settings">
+                    <div class="form-group">
+                      <label class="form-label">API Key</label>
+                      <input type="text" class="form-input" placeholder="Enter MTN API Key" x-model="paymentSettings.mtn.apiKey">
+                    </div>
+                    <div class="form-group">
+                      <label class="form-label">Secret Key</label>
+                      <input type="password" class="form-input" placeholder="Enter MTN Secret Key" x-model="paymentSettings.mtn.secretKey">
+                    </div>
+                    <div class="form-group">
+                      <label class="form-label">Environment</label>
+                      <select class="form-select" x-model="paymentSettings.mtn.environment">
+                        <option value="Sandbox">Sandbox</option>
+                        <option value="Production">Production</option>
+                      </select>
+                    </div>
+                  </div>
+                </div>
+
+                <!-- Airtel Money -->
+                <div class="payment-gateway">
+                  <div class="gateway-header">
+                    <div class="gateway-info">
+                      <h5>Airtel Money</h5>
+                      <span class="gateway-status inactive">Inactive</span>
+                    </div>
+                    <label class="form-switch">
+                      <input type="checkbox" x-model="paymentSettings.airtel.enabled">
+                      <span class="switch"></span>
+                    </label>
+                  </div>
+                  <div class="gateway-settings">
+                    <div class="form-group">
+                      <label class="form-label">API Key</label>
+                      <input type="text" class="form-input" placeholder="Enter Airtel API Key" x-model="paymentSettings.airtel.apiKey">
+                    </div>
+                    <div class="form-group">
+                      <label class="form-label">Secret Key</label>
+                      <input type="password" class="form-input" placeholder="Enter Airtel Secret Key" x-model="paymentSettings.airtel.secretKey">
+                    </div>
+                    <div class="form-group">
+                      <label class="form-label">Environment</label>
+                      <select class="form-select" x-model="paymentSettings.airtel.environment">
+                        <option value="Sandbox">Sandbox</option>
+                        <option value="Production">Production</option>
+                      </select>
+                    </div>
+                  </div>
+                </div>
+
+                <!-- Zamtel Kwacha -->
+                <div class="payment-gateway">
+                  <div class="gateway-header">
+                    <div class="gateway-info">
+                      <h5>Zamtel Kwacha</h5>
+                      <span class="gateway-status inactive">Inactive</span>
+                    </div>
+                    <label class="form-switch">
+                      <input type="checkbox" x-model="paymentSettings.zamtel.enabled">
+                      <span class="switch"></span>
+                    </label>
+                  </div>
+                  <div class="gateway-settings">
+                    <div class="form-group">
+                      <label class="form-label">API Key</label>
+                      <input type="text" class="form-input" placeholder="Enter Zamtel API Key" x-model="paymentSettings.zamtel.apiKey">
+                    </div>
+                    <div class="form-group">
+                      <label class="form-label">Secret Key</label>
+                      <input type="password" class="form-input" placeholder="Enter Zamtel Secret Key" x-model="paymentSettings.zamtel.secretKey">
+                    </div>
+                    <div class="form-group">
+                      <label class="form-label">Environment</label>
+                      <select class="form-select" x-model="paymentSettings.zamtel.environment">
+                        <option value="Sandbox">Sandbox</option>
+                        <option value="Production">Production</option>
+                      </select>
+                    </div>
+                  </div>
+                </div>
+
+                <!-- Bank Transfer -->
+                <div class="payment-gateway">
+                  <div class="gateway-header">
+                    <div class="gateway-info">
+                      <h5>Bank Transfer</h5>
+                      <span class="gateway-status active">Active</span>
+                    </div>
+                    <label class="form-switch">
+                      <input type="checkbox" x-model="paymentSettings.bank.enabled">
+                      <span class="switch"></span>
+                    </label>
+                  </div>
+                  <div class="gateway-settings">
+                    <div class="form-group">
+                      <label class="form-label">Bank Name</label>
+                      <input type="text" class="form-input" x-model="paymentSettings.bank.bankName">
+                    </div>
+                    <div class="form-group">
+                      <label class="form-label">Account Number</label>
+                      <input type="text" class="form-input" placeholder="Enter bank account number" x-model="paymentSettings.bank.accountNumber">
+                    </div>
+                    <div class="form-group">
+                      <label class="form-label">Account Name</label>
+                      <input type="text" class="form-input" placeholder="Enter account name" x-model="paymentSettings.bank.accountName">
+                    </div>
+                  </div>
+                </div>
+
+                <div class="form-actions">
+                  <button class="btn btn-primary" @click="savePaymentSettings">
+                    <span class="material-symbols-rounded">save</span>
+                    Save Payment Settings
+                  </button>
+                  <button class="btn btn-secondary" @click="testPaymentGateways">
+                    <span class="material-symbols-rounded">credit_card</span>
+                    Test Gateways
+                  </button>
+                </div>
+              </div>
+            </div>
+
+            <!-- API Settings Tab -->
+            <div class="tab-panel" x-show="activeTab === 'api'" x-transition>
+              <div class="settings-section" id="api">
+                <div class="section-header">
+                  <div class="section-icon">
+                    <span class="material-symbols-rounded">api</span>
+                  </div>
+                  <div class="section-title">API Configuration</div>
+                </div>
+                <div class="section-description">
+                  Configure API keys, webhooks, and rate limiting.
+                </div>
+                
+                <div class="form-group">
+                  <label class="form-label">API Key</label>
+                  <div class="input-group">
+                    <input type="text" class="form-input" x-model="apiSettings.apiKey" readonly>
+                    <button class="btn btn-secondary" @click="regenerateApiKey">
+                      <span class="material-symbols-rounded">refresh</span>
+                      Regenerate
+                    </button>
+                  </div>
+                </div>
+                
+                <div class="form-group">
+                  <label class="form-label">Rate Limit (requests per minute)</label>
+                  <input type="number" class="form-input" x-model="apiSettings.rateLimit">
+                </div>
+                
+                <div class="form-group">
+                  <label class="form-label">Webhook URL</label>
+                  <input type="url" class="form-input" placeholder="https://your-domain.com/webhook" x-model="apiSettings.webhookUrl">
+                </div>
+                
+                <div class="form-group">
+                  <label class="form-checkbox">
+                    <input type="checkbox" x-model="apiSettings.enableApiAccess">
+                    <span>Enable API access</span>
+                  </label>
+                </div>
+                
+                <div class="form-actions">
+                  <button class="btn btn-primary" @click="saveApiSettings">
+                    <span class="material-symbols-rounded">save</span>
+                    Save API Settings
+                  </button>
+                  <button class="btn btn-secondary" @click="regenerateApiKey">
+                    <span class="material-symbols-rounded">refresh</span>
+                    Regenerate API Key
+                  </button>
+                </div>
+              </div>
+            </div>
+
+            <!-- Roles & Permissions Tab -->
+            <div class="tab-panel" x-show="activeTab === 'roles'" x-transition>
+              <div class="settings-section" id="roles">
+                <div class="section-header">
+                  <div class="section-icon">
+                    <span class="material-symbols-rounded">admin_panel_settings</span>
+                  </div>
+                  <div class="section-title">Roles & Permissions</div>
+                </div>
+                <div class="section-description">
+                  Manage user roles and assign permissions.
+                </div>
+
+                <!-- Roles Management -->
+                <h4 style="margin: 1.5rem 0 1rem; color: var(--color-accent-teal);">System Roles</h4>
+                
+                <div class="roles-grid">
+                  <!-- Super Admin Role -->
+                  <div class="role-card">
+                    <div class="role-header">
+                      <div class="role-info">
+                        <h5>Super Admin</h5>
+                        <span class="role-count">2 users</span>
+                      </div>
+                      <span class="role-badge admin">System</span>
+                    </div>
+                    <div class="role-description">
+                      Full system access with all permissions
+                    </div>
+                    <div class="role-permissions">
+                      <span class="permission-tag">All Access</span>
+                    </div>
+                  </div>
+
+                  <!-- Admin Role -->
+                  <div class="role-card">
+                    <div class="role-header">
+                      <div class="role-info">
+                        <h5>Admin</h5>
+                        <span class="role-count">5 users</span>
+                      </div>
+                      <span class="role-badge admin">Management</span>
+                    </div>
+                    <div class="role-description">
+                      Manage pharmacies, users, and transactions
+                    </div>
+                    <div class="role-permissions">
+                      <span class="permission-tag">Pharmacies</span>
+                      <span class="permission-tag">Users</span>
+                      <span class="permission-tag">Reports</span>
+                    </div>
+                  </div>
+
+                  <!-- Manager Role -->
+                  <div class="role-card">
+                    <div class="role-header">
+                      <div class="role-info">
+                        <h5>Manager</h5>
+                        <span class="role-count">12 users</span>
+                      </div>
+                      <span class="role-badge standard">Staff</span>
+                    </div>
+                    <div class="role-description">
+                      Manage pharmacy operations and inventory
+                    </div>
+                    <div class="role-permissions">
+                      <span class="permission-tag">Inventory</span>
+                      <span class="permission-tag">Sales</span>
+                      <span class="permission-tag">Reports</span>
+                    </div>
+                  </div>
+
+                  <!-- Cashier Role -->
+                  <div class="role-card">
+                    <div class="role-header">
+                      <div class="role-info">
+                        <h5>Cashier</h5>
+                        <span class="role-count">28 users</span>
+                      </div>
+                      <span class="role-badge standard">Staff</span>
+                    </div>
+                    <div class="role-description">
+                      Process sales and manage daily transactions
+                    </div>
+                    <div class="role-permissions">
+                      <span class="permission-tag">Sales</span>
+                      <span class="permission-tag">Customer Info</span>
+                    </div>
+                  </div>
+                </div>
+
+                <!-- Permission Matrix -->
+                <h4 style="margin: 2rem 0 1rem; color: var(--color-accent-teal);">Permission Matrix</h4>
+                <div class="permission-matrix">
+                  <table class="matrix-table">
+                    <thead>
+                      <tr>
+                        <th>Permission</th>
+                        <th>Super Admin</th>
+                        <th>Admin</th>
+                        <th>Manager</th>
+                        <th>Cashier</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      <tr>
+                        <td>Dashboard</td>
+                        <td><span class="check">✓</span></td>
+                        <td><span class="check">✓</span></td>
+                        <td><span class="check">✓</span></td>
+                        <td><span class="check">✓</span></td>
+                      </tr>
+                      <tr>
+                        <td>Pharmacies</td>
+                        <td><span class="check">✓</span></td>
+                        <td><span class="check">✓</span></td>
+                        <td><span class="check">✓</span></td>
+                        <td><span class="check">✓</span></td>
+                      </tr>
+                      <tr>
+                        <td>Users</td>
+                        <td><span class="check">✓</span></td>
+                        <td><span class="check">✓</span></td>
+                        <td><span class="check">✓</span></td>
+                        <td><span class="cross">✗</span></td>
+                      </tr>
+                      <tr>
+                        <td>Transactions</td>
+                        <td><span class="check">✓</span></td>
+                        <td><span class="check">✓</span></td>
+                        <td><span class="check">✓</span></td>
+                        <td><span class="check">✓</span></td>
+                      </tr>
+                      <tr>
+                        <td>Reports</td>
+                        <td><span class="check">✓</span></td>
+                        <td><span class="check">✓</span></td>
+                        <td><span class="check">✓</span></td>
+                        <td><span class="cross">✗</span></td>
+                      </tr>
+                      <tr>
+                        <td>Settings</td>
+                        <td><span class="check">✓</span></td>
+                        <td><span class="cross">✗</span></td>
+                        <td><span class="cross">✗</span></td>
+                        <td><span class="cross">✗</span></td>
+                      </tr>
+                      <tr>
+                        <td>Security</td>
+                        <td><span class="check">✓</span></td>
+                        <td><span class="cross">✗</span></td>
+                        <td><span class="cross">✗</span></td>
+                        <td><span class="cross">✗</span></td>
+                      </tr>
+                    </tbody>
+                  </table>
+                </div>
+
+                <div class="form-actions">
+                  <button class="btn btn-primary" @click="saveRoleSettings">
+                    <span class="material-symbols-rounded">save</span>
+                    Save Role Settings
+                  </button>
+                  <button class="btn btn-secondary" @click="createRole">
+                    <span class="material-symbols-rounded">add</span>
+                    Create New Role
+                  </button>
+                </div>
+              </div>
+            </div>
+
+            <!-- Security Settings Tab -->
+            <div class="tab-panel" x-show="activeTab === 'security'" x-transition>
+              <div class="settings-section" id="security">
+                <div class="section-header">
+                  <div class="section-icon">
+                    <span class="material-symbols-rounded">security</span>
+                  </div>
+                  <div class="section-title">Security Configuration</div>
+                </div>
+                <div class="section-description">
+                  Configure security policies and access control.
+                </div>
+                
+                <div class="form-group">
+                  <label class="form-label">Session Timeout (minutes)</label>
+                  <input type="number" class="form-input" x-model="securitySettings.sessionTimeoutMinutes">
+                </div>
+                
+                <div class="form-group">
+                  <label class="form-label">Password Policy</label>
+                  <select class="form-select" x-model="securitySettings.passwordPolicy">
+                    <option value="Strong (8+ chars, uppercase, numbers, symbols)">Strong (8+ chars, uppercase, numbers, symbols)</option>
+                    <option value="Medium (6+ chars, uppercase, numbers)">Medium (6+ chars, uppercase, numbers)</option>
+                    <option value="Basic (6+ characters)">Basic (6+ characters)</option>
+                  </select>
+                </div>
+                
+                <div class="form-group">
+                  <label class="form-label">Maximum Login Attempts</label>
+                  <input type="number" class="form-input" x-model="securitySettings.maxLoginAttempts">
+                </div>
+                
+                <div class="form-group">
+                  <label class="form-checkbox">
+                    <input type="checkbox" x-model="securitySettings.enableTwoFactorAuth">
+                    <span>Enable two-factor authentication</span>
+                  </label>
+                </div>
+                
+                <div class="form-group">
+                  <label class="form-checkbox">
+                    <input type="checkbox" x-model="securitySettings.requirePasswordChange">
+                    <span>Require password change every 90 days</span>
+                  </label>
+                </div>
+                
+                <div class="form-actions">
+                  <button class="btn btn-primary" @click="saveSecuritySettings">
+                    <span class="material-symbols-rounded">save</span>
+                    Save Security Settings
+                  </button>
+                  <button class="btn btn-secondary" @click="testSecuritySettings">
+                    <span class="material-symbols-rounded">security</span>
+                    Test Security
+                  </button>
+                </div>
+              </div>
+            </div>
+
+            <!-- Maintenance Tab -->
+            <div class="tab-panel" x-show="activeTab === 'maintenance'" x-transition>
+              <div class="settings-section" id="maintenance">
+                <div class="section-header">
+                  <div class="section-icon">
+                    <span class="material-symbols-rounded">build</span>
+                  </div>
+                  <div class="section-title">System Maintenance</div>
+                </div>
+                <div class="section-description">
+                  Configure maintenance tasks and system cleanup.
+                </div>
+                
+                <div class="form-group">
+                  <label class="form-label">Maintenance Window</label>
+                  <select class="form-select" x-model="maintenanceSettings.maintenanceWindow">
+                    <option value="02:00 - 04:00 CAT">02:00 - 04:00 CAT</option>
+                    <option value="00:00 - 02:00 CAT">00:00 - 02:00 CAT</option>
+                    <option value="04:00 - 06:00 CAT">04:00 - 06:00 CAT</option>
+                  </select>
+                </div>
+                
+                <div class="form-group">
+                  <label class="form-label">Log Retention (days)</label>
+                  <input type="number" class="form-input" x-model="maintenanceSettings.logRetentionDays">
+                </div>
+                
+                <div class="form-group">
+                  <label class="form-checkbox">
+                    <input type="checkbox" x-model="maintenanceSettings.enableAutoCleanup">
+                    <span>Enable automatic cleanup</span>
+                  </label>
+                </div>
+                
+                <div class="form-group">
+                  <label class="form-checkbox">
+                    <input type="checkbox" x-model="maintenanceSettings.enableSystemMonitoring">
+                    <span>Enable system monitoring</span>
+                  </label>
+                </div>
+                
+                <div class="form-actions">
+                  <button class="btn btn-primary" @click="saveMaintenanceSettings">
+                    <span class="material-symbols-rounded">save</span>
+                    Save Maintenance Settings
+                  </button>
+                  <button class="btn btn-secondary" @click="runMaintenance">
+                    <span class="material-symbols-rounded">build</span>
+                    Run Maintenance Now
+                  </button>
+                  <button class="btn btn-secondary" @click="clearCache">
+                    <span class="material-symbols-rounded">delete_sweep</span>
+                    Clear Cache
+                  </button>
+                  <button class="btn btn-secondary" @click="optimizeDatabase">
+                    <span class="material-symbols-rounded">tune</span>
+                    Optimize Database
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+        </div>
+      </div>
+    </main>
+  </div>
+
+  <script>
+    function searchComponent() {
+      return {
+        // Initialize backend integration
+        const pageIntegration = new PageIntegrationTemplate('super-admin-settings', {
+            requireAuth: true,
+            enableRealTime: false,
+            enableCaching: true
+        });
+        
+        return {
+            ...pageIntegration,
+            backendHelper: window.backendHelper,
+            apiClient: window.apiClient,
+            authManager: window.authManager,
+            isAuthenticated: false,
+            loading: false,
+            error: null,
+        query: '',
+        showSuggestions: false,
+        suggestions: [],
+        
+        async init() {
+            try {
+                // Check authentication
+                this.isAuthenticated = this.authManager?.isAuthenticated() || false;
+                
+                if (!this.isAuthenticated) {
+                    this.error = 'Please login to access this page';
+                    return;
+                }
+                
+                // Initialize backend integration
+                await this.backendHelper.initPage('super-admin-settings', {
+                    enableRealTime: false,
+                    initialData: this.getInitialDataConfig()
+                });
+                
+                // Load page data
+                await this.loadPageData();
+                
+                // Set up event listeners
+                this.setupEventListeners();
+                
+                console.log('super-admin-settings page initialized with backend integration');
+            } catch (error) {
+                console.error('Failed to initialize super-admin-settings page:', error);
+                this.error = 'Failed to initialize page';
+            }
+        },,
+            {
+              id: 2,
+              title: 'System Backup',
+              description: 'Backup configuration and management',
+              type: 'setting',
+              icon: 'backup'
+            },
+            {
+              id: 3,
+              title: 'Email Configuration',
+              description: 'SMTP and email settings',
+              type: 'setting',
+              icon: 'email'
+            },
+            {
+              id: 4,
+              title: 'API Configuration',
+              description: 'API keys and webhooks',
+              type: 'setting',
+              icon: 'api'
+            },
+            {
+              id: 5,
+              title: 'Payment Settings',
+              description: 'Payment gateway configuration',
+              type: 'setting',
+              icon: 'payments'
+            },
+            {
+              id: 6,
+              title: 'Security Settings',
+              description: 'Security policies and access control',
+              type: 'setting',
+              icon: 'security'
+            }
+          ];
+        },
+        
+        handleSearch() {
+          if (this.query.length < 2) {
+            this.suggestions = [];
+            return;
+          }
+          
+          console.log('Searching settings for:', this.query);
+          
+          // Filter existing suggestions based on query
+          this.suggestions = this.suggestions.filter(s => 
+            s.title.toLowerCase().includes(this.query.toLowerCase()) ||
+            s.description.toLowerCase().includes(this.query.toLowerCase())
+          );
+        },
+        
+        selectSuggestion(suggestion) {
+          console.log('Selected setting:', suggestion);
+          this.query = suggestion.title;
+          this.showSuggestions = false;
+          
+          // Scroll to the selected setting section
+          const element = document.getElementById(suggestion.title.toLowerCase().replace(' ', '-'));
+          if (element) {
+            element.scrollIntoView({ behavior: 'smooth' });
+          }
+        },
+        
+        hideSuggestions() {
+          setTimeout(() => {
+            this.showSuggestions = false;
+          }, 200);
+        }
+      }
+    }
+
+    function settings() {
+      return {
+        userName: '',
+        userEmail: '',
+        mobileMenuOpen: false,
+        showUserMenu: false,
+        activeTab: 'general',
+        generalSettings: {
+          systemName: 'UmiHealthInformationSystems Pharmacy Management',
+          defaultLanguage: 'English',
+          timeZone: 'Africa/Lusaka',
+          enableSystemNotifications: true
+        },
+        savingGeneralSettings: false,
+
+        backupSettings: {
+          frequency: 'Daily',
+          location: '/backups/UmiHealthInformationSystems',
+          retentionDays: 30,
+          enableAutoBackups: true
+        },
+
+        emailSettings: {
+          smtpServer: 'smtp.gmail.com',
+          port: 587,
+          username: 'noreply@UmiHealthInformationSystems.zm',
+          password: '',
+          useSsl: true
+        },
+
+        paymentSettings: {
+          defaultCurrency: 'ZMW',
+          mtn: {
+            enabled: true,
+            apiKey: '',
+            secretKey: '',
+            environment: 'Sandbox'
+          },
+          airtel: {
+            enabled: false,
+            apiKey: '',
+            secretKey: '',
+            environment: 'Sandbox'
+          },
+          zamtel: {
+            enabled: false,
+            apiKey: '',
+            secretKey: '',
+            environment: 'Sandbox'
+          },
+          bank: {
+            enabled: true,
+            bankName: 'Zanaco',
+            accountNumber: '',
+            accountName: ''
+          }
+        },
+
+        apiSettings: {
+          apiKey: 'UmiHealthInformationSystems_prod_2024_abc123xyz',
+          rateLimit: 1000,
+          webhookUrl: '',
+          enableApiAccess: true
+        },
+
+        securitySettings: {
+          sessionTimeoutMinutes: 30,
+          passwordPolicy: 'Strong (8+ chars, uppercase, numbers, symbols)',
+          maxLoginAttempts: 5,
+          enableTwoFactorAuth: true,
+          requirePasswordChange: true
+        },
+
+        maintenanceSettings: {
+          maintenanceWindow: '02:00 - 04:00 CAT',
+          logRetentionDays: 90,
+          enableAutoCleanup: true,
+          enableSystemMonitoring: true
+        },
+
+        async init() {
+          // Get user info from session
+          this.userName = sessionStorage.getItem('userName') || 'Super Admin';
+          this.userEmail = sessionStorage.getItem('userEmail') || 'admin@UmiHealthInformationSystems.zm';
+          
+          // Check for backup anchor in URL
+          if (window.location.hash === '#backup') {
+            setTimeout(() => {
+              document.getElementById('backup').scrollIntoView({ behavior: 'smooth' });
+            }, 100);
+          }
+          
+          // Close mobile menu when clicking outside
+          document.addEventListener('click', (e) => {
+            if (!e.target.closest('.sidebar') && !e.target.closest('.mobile-menu-toggle')) {
+              this.mobileMenuOpen = false;
+            }
+            if (!e.target.closest('.user-menu')) {
+              this.showUserMenu = false;
+            }
+          });
+
+          await Promise.all([
+            this.loadGeneralSettings(),
+            this.loadBackupSettings(),
+            this.loadEmailSettings(),
+            this.loadPaymentSettings(),
+            this.loadApiSettings(),
+            this.loadSecuritySettings(),
+            this.loadMaintenanceSettings()
+          ]);
+        },
+
+        getAuthToken() {
+          return localStorage.getItem('UmiHealthInformationSystems_auth_token') || localStorage.getItem('authToken');
+        },
+
+        parseBoolean(raw) {
+          return raw === true || raw === 'true' || raw === 1 || raw === '1';
+        },
+
+        async getCategorySettingsMap(category) {
+          try {
+            if (!window.UmiHealthInformationSystemsAPI) {
+              return {};
+            }
+
+            const token = this.getAuthToken();
+            if (!token) {
+              return {};
+            }
+
+            const response = await window.UmiHealthInformationSystemsAPI.get(`/api/setting/category/${encodeURIComponent(category)}`);
+
+            if (!response || response.success !== true || !Array.isArray(response.data)) {
+              return {};
+            }
+
+            const map = {};
+            response.data.forEach(item => {
+              const key = item?.key ?? item?.Key;
+              const value = item?.value ?? item?.Value;
+              if (key) {
+                map[key] = value;
+              }
+            });
+
+            return map;
+          } catch (error) {
+            return {};
+          }
+        },
+
+        async saveSettingsBatch(category, updates) {
+          if (!window.UmiHealthInformationSystemsAPI) {
+            this.showError('API client not available.');
+            return false;
+          }
+
+          const token = this.getAuthToken();
+          if (!token) {
+            this.showError('You are not authenticated. Please sign in again.');
+            return false;
+          }
+
+          const requests = updates.map(update => window.UmiHealthInformationSystemsAPI.put(`/api/setting/${update.key}`, {
+            value: update.value,
+            category
+          }));
+
+          const results = await Promise.allSettled(requests);
+
+          const failures = results.filter(result =>
+            result.status !== 'fulfilled' || !result.value || result.value.success !== true
+          );
+
+          if (failures.length > 0) {
+            const rejected = failures.find(failure => failure.status === 'rejected');
+            const message = rejected?.reason?.message || `Failed to save ${category.toLowerCase()} settings.`;
+            this.showError(message);
+            return false;
+          }
+
+          return true;
+        },
+
+        async loadGeneralSettings() {
+          try {
+            if (!window.UmiHealthInformationSystemsAPI) {
+              return;
+            }
+
+            const token = this.getAuthToken();
+            if (!token) {
+              return;
+            }
+
+            const [appNameResult, timeZoneResult, languageResult, notificationsResult] = await Promise.allSettled([
+              window.UmiHealthInformationSystemsAPI.get('/api/setting/application_name'),
+              window.UmiHealthInformationSystemsAPI.get('/api/setting/timezone'),
+              window.UmiHealthInformationSystemsAPI.get('/api/setting/default_language'),
+              window.UmiHealthInformationSystemsAPI.get('/api/setting/enable_push_notifications')
+            ]);
+
+            if (appNameResult.status === 'fulfilled' && appNameResult.value?.success && appNameResult.value.data?.value !== undefined) {
+              this.generalSettings.systemName = appNameResult.value.data.value || this.generalSettings.systemName;
+            }
+
+            if (timeZoneResult.status === 'fulfilled' && timeZoneResult.value?.success && timeZoneResult.value.data?.value) {
+              this.generalSettings.timeZone = timeZoneResult.value.data.value;
+            }
+
+            if (languageResult.status === 'fulfilled' && languageResult.value?.success && languageResult.value.data?.value) {
+              this.generalSettings.defaultLanguage = languageResult.value.data.value;
+            }
+
+            if (notificationsResult.status === 'fulfilled' && notificationsResult.value?.success && notificationsResult.value.data?.value !== undefined) {
+              const raw = notificationsResult.value.data.value;
+              this.generalSettings.enableSystemNotifications = raw === true || raw === 'true' || raw === 1 || raw === '1';
+            }
+          } catch (error) {
+            console.warn('Failed to load general settings', error);
+          }
+        },
+
+        async loadBackupSettings() {
+          try {
+            const map = await this.getCategorySettingsMap('Backup');
+
+            if (map.backup_frequency) {
+              this.backupSettings.frequency = map.backup_frequency;
+            }
+            if (map.backup_location) {
+              this.backupSettings.location = map.backup_location;
+            }
+            if (map.backup_retention_days && !isNaN(parseInt(map.backup_retention_days, 10))) {
+              this.backupSettings.retentionDays = parseInt(map.backup_retention_days, 10);
+            }
+            if (map.backup_auto_enabled !== undefined) {
+              this.backupSettings.enableAutoBackups = this.parseBoolean(map.backup_auto_enabled);
+            }
+          } catch (error) {
+            console.warn('Failed to load backup settings', error);
+          }
+        },
+
+        async loadEmailSettings() {
+          try {
+            const map = await this.getCategorySettingsMap('Email');
+
+            if (map.smtp_server) {
+              this.emailSettings.smtpServer = map.smtp_server;
+            }
+            if (map.smtp_port && !isNaN(parseInt(map.smtp_port, 10))) {
+              this.emailSettings.port = parseInt(map.smtp_port, 10);
+            }
+            if (map.smtp_username) {
+              this.emailSettings.username = map.smtp_username;
+            }
+            if (map.smtp_password !== undefined) {
+              this.emailSettings.password = map.smtp_password;
+            }
+            if (map.smtp_use_ssl !== undefined) {
+              this.emailSettings.useSsl = this.parseBoolean(map.smtp_use_ssl);
+            }
+          } catch (error) {
+            console.warn('Failed to load email settings', error);
+          }
+        },
+
+        async loadPaymentSettings() {
+          try {
+            const map = await this.getCategorySettingsMap('Payments');
+
+            if (map.default_currency) {
+              this.paymentSettings.defaultCurrency = map.default_currency;
+            }
+
+            if (map.mtn_enabled !== undefined) {
+              this.paymentSettings.mtn.enabled = this.parseBoolean(map.mtn_enabled);
+            }
+            if (map.mtn_api_key !== undefined) {
+              this.paymentSettings.mtn.apiKey = map.mtn_api_key;
+            }
+            if (map.mtn_secret_key !== undefined) {
+              this.paymentSettings.mtn.secretKey = map.mtn_secret_key;
+            }
+            if (map.mtn_environment) {
+              this.paymentSettings.mtn.environment = map.mtn_environment;
+            }
+
+            if (map.airtel_enabled !== undefined) {
+              this.paymentSettings.airtel.enabled = this.parseBoolean(map.airtel_enabled);
+            }
+            if (map.airtel_api_key !== undefined) {
+              this.paymentSettings.airtel.apiKey = map.airtel_api_key;
+            }
+            if (map.airtel_secret_key !== undefined) {
+              this.paymentSettings.airtel.secretKey = map.airtel_secret_key;
+            }
+            if (map.airtel_environment) {
+              this.paymentSettings.airtel.environment = map.airtel_environment;
+            }
+
+            if (map.zamtel_enabled !== undefined) {
+              this.paymentSettings.zamtel.enabled = this.parseBoolean(map.zamtel_enabled);
+            }
+            if (map.zamtel_api_key !== undefined) {
+              this.paymentSettings.zamtel.apiKey = map.zamtel_api_key;
+            }
+            if (map.zamtel_secret_key !== undefined) {
+              this.paymentSettings.zamtel.secretKey = map.zamtel_secret_key;
+            }
+            if (map.zamtel_environment) {
+              this.paymentSettings.zamtel.environment = map.zamtel_environment;
+            }
+
+            if (map.bank_transfer_enabled !== undefined) {
+              this.paymentSettings.bank.enabled = this.parseBoolean(map.bank_transfer_enabled);
+            }
+            if (map.bank_name !== undefined) {
+              this.paymentSettings.bank.bankName = map.bank_name;
+            }
+            if (map.bank_account_number !== undefined) {
+              this.paymentSettings.bank.accountNumber = map.bank_account_number;
+            }
+            if (map.bank_account_name !== undefined) {
+              this.paymentSettings.bank.accountName = map.bank_account_name;
+            }
+          } catch (error) {
+            console.warn('Failed to load payment settings', error);
+          }
+        },
+
+        async loadApiSettings() {
+          try {
+            const map = await this.getCategorySettingsMap('API');
+
+            if (map.api_key) {
+              this.apiSettings.apiKey = map.api_key;
+            }
+            if (map.api_rate_limit && !isNaN(parseInt(map.api_rate_limit, 10))) {
+              this.apiSettings.rateLimit = parseInt(map.api_rate_limit, 10);
+            }
+            if (map.api_webhook_url !== undefined) {
+              this.apiSettings.webhookUrl = map.api_webhook_url;
+            }
+            if (map.api_enabled !== undefined) {
+              this.apiSettings.enableApiAccess = this.parseBoolean(map.api_enabled);
+            }
+          } catch (error) {
+            console.warn('Failed to load API settings', error);
+          }
+        },
+
+        async loadSecuritySettings() {
+          try {
+            const map = await this.getCategorySettingsMap('Security');
+
+            if (map.session_timeout_minutes && !isNaN(parseInt(map.session_timeout_minutes, 10))) {
+              this.securitySettings.sessionTimeoutMinutes = parseInt(map.session_timeout_minutes, 10);
+            }
+            if (map.password_policy) {
+              this.securitySettings.passwordPolicy = map.password_policy;
+            }
+            if (map.max_login_attempts && !isNaN(parseInt(map.max_login_attempts, 10))) {
+              this.securitySettings.maxLoginAttempts = parseInt(map.max_login_attempts, 10);
+            }
+            if (map.enable_two_factor_auth !== undefined) {
+              this.securitySettings.enableTwoFactorAuth = this.parseBoolean(map.enable_two_factor_auth);
+            }
+            if (map.require_password_change !== undefined) {
+              this.securitySettings.requirePasswordChange = this.parseBoolean(map.require_password_change);
+            }
+          } catch (error) {
+            console.warn('Failed to load security settings', error);
+          }
+        },
+
+        async loadMaintenanceSettings() {
+          try {
+            const map = await this.getCategorySettingsMap('Maintenance');
+
+            if (map.maintenance_window) {
+              this.maintenanceSettings.maintenanceWindow = map.maintenance_window;
+            }
+            if (map.log_retention_days && !isNaN(parseInt(map.log_retention_days, 10))) {
+              this.maintenanceSettings.logRetentionDays = parseInt(map.log_retention_days, 10);
+            }
+            if (map.enable_auto_cleanup !== undefined) {
+              this.maintenanceSettings.enableAutoCleanup = this.parseBoolean(map.enable_auto_cleanup);
+            }
+            if (map.enable_system_monitoring !== undefined) {
+              this.maintenanceSettings.enableSystemMonitoring = this.parseBoolean(map.enable_system_monitoring);
+            }
+          } catch (error) {
+            console.warn('Failed to load maintenance settings', error);
+          }
+        },
+
+        // General Settings Functions
+        async saveGeneralSettings() {
+          try {
+            this.savingGeneralSettings = true;
+
+            if (!window.UmiHealthInformationSystemsAPI) {
+              this.showError('API client not available.');
+              return;
+            }
+
+            if (!this.generalSettings.systemName || !this.generalSettings.systemName.trim()) {
+              this.showError('System name is required.');
+              return;
+            }
+
+            const updates = [
+              window.UmiHealthInformationSystemsAPI.put('/api/setting/application_name', {
+                value: this.generalSettings.systemName.trim(),
+                category: 'General'
+              }),
+              window.UmiHealthInformationSystemsAPI.put('/api/setting/timezone', {
+                value: this.generalSettings.timeZone,
+                category: 'General'
+              }),
+              window.UmiHealthInformationSystemsAPI.put('/api/setting/default_language', {
+                value: this.generalSettings.defaultLanguage,
+                category: 'General'
+              }),
+              window.UmiHealthInformationSystemsAPI.put('/api/setting/enable_push_notifications', {
+                value: this.generalSettings.enableSystemNotifications ? 'true' : 'false',
+                category: 'Notifications'
+              })
+            ];
+
+            const results = await Promise.allSettled(updates);
+
+            const failures = results.filter(result =>
+              result.status !== 'fulfilled' || !result.value || result.value.success !== true
+            );
+
+            if (failures.length > 0) {
+              const rejected = failures.find(failure => failure.status === 'rejected');
+              const message = rejected?.reason?.message || 'Failed to save general settings.';
+              this.showError(message);
+              return;
+            }
+
+            this.showSuccess('General settings saved successfully!');
+          } catch (error) {
+            console.error('Error saving general settings:', error);
+            this.showError(error.message || 'Failed to save general settings.');
+          } finally {
+            this.savingGeneralSettings = false;
+          }
+        },
+
+        // Backup Settings Functions
+        async saveBackupSettings() {
+          try {
+            const ok = await this.saveSettingsBatch('Backup', [
+              { key: 'backup_frequency', value: this.backupSettings.frequency },
+              { key: 'backup_location', value: (this.backupSettings.location || '').trim() },
+              { key: 'backup_retention_days', value: String(this.backupSettings.retentionDays ?? 30) },
+              { key: 'backup_auto_enabled', value: this.backupSettings.enableAutoBackups ? 'true' : 'false' }
+            ]);
+
+            if (!ok) {
+              return;
+            }
+
+            this.showSuccess('Backup settings saved successfully!');
+          } catch (error) {
+            console.error('Error saving backup settings:', error);
+            this.showError(error.message || 'Failed to save backup settings.');
+          }
+        },
+
+        async createBackup() {
+          console.log('Creating system backup...');
+          if (!confirm('Are you sure you want to create a system backup? This may take several minutes.')) {
+            return;
+          }
+
+          try {
+            const ok = await this.saveSettingsBatch('Backup', [
+              { key: 'backup_manual_request', value: new Date().toISOString() }
+            ]);
+            if (!ok) {
+              return;
+            }
+            this.showInfo('System backup initiated. You will be notified when complete.');
+          } catch (error) {
+            console.error('Error initiating backup:', error);
+            this.showError(error.message || 'Failed to initiate backup.');
+          }
+        },
+
+        async restoreBackup() {
+          console.log('Restoring system backup...');
+          if (!confirm('WARNING: Restoring a backup will overwrite current data. Are you sure you want to continue?')) {
+            return;
+          }
+
+          try {
+            const ok = await this.saveSettingsBatch('Backup', [
+              { key: 'backup_restore_request', value: new Date().toISOString() }
+            ]);
+            if (!ok) {
+              return;
+            }
+            this.showWarning('Backup restoration initiated. System will be temporarily unavailable.');
+          } catch (error) {
+            console.error('Error initiating restore:', error);
+            this.showError(error.message || 'Failed to initiate backup restore.');
+          }
+        },
+
+        // Email Settings Functions
+        async saveEmailSettings() {
+          try {
+            const ok = await this.saveSettingsBatch('Email', [
+              { key: 'smtp_server', value: (this.emailSettings.smtpServer || '').trim() },
+              { key: 'smtp_port', value: String(this.emailSettings.port ?? 587) },
+              { key: 'smtp_username', value: (this.emailSettings.username || '').trim() },
+              { key: 'smtp_password', value: String(this.emailSettings.password ?? '') },
+              { key: 'smtp_use_ssl', value: this.emailSettings.useSsl ? 'true' : 'false' }
+            ]);
+
+            if (!ok) {
+              return;
+            }
+
+            this.showSuccess('Email settings saved successfully!');
+          } catch (error) {
+            console.error('Error saving email settings:', error);
+            this.showError(error.message || 'Failed to save email settings.');
+          }
+        },
+
+        async testEmailSettings() {
+          console.log('Sending test email...');
+          try {
+            const ok = await this.saveSettingsBatch('Email', [
+              { key: 'email_test_request', value: new Date().toISOString() }
+            ]);
+
+            if (!ok) {
+              return;
+            }
+
+            this.showInfo('Test email request sent for ' + this.userEmail);
+          } catch (error) {
+            console.error('Error sending test email request:', error);
+            this.showError(error.message || 'Failed to send test email request.');
+          }
+        },
+
+        // Payment Settings Functions
+        async savePaymentSettings() {
+          try {
+            const ok = await this.saveSettingsBatch('Payments', [
+              { key: 'default_currency', value: String(this.paymentSettings.defaultCurrency ?? 'ZMW') },
+              { key: 'mtn_enabled', value: this.paymentSettings.mtn.enabled ? 'true' : 'false' },
+              { key: 'mtn_api_key', value: String(this.paymentSettings.mtn.apiKey ?? '') },
+              { key: 'mtn_secret_key', value: String(this.paymentSettings.mtn.secretKey ?? '') },
+              { key: 'mtn_environment', value: String(this.paymentSettings.mtn.environment ?? 'Sandbox') },
+              { key: 'airtel_enabled', value: this.paymentSettings.airtel.enabled ? 'true' : 'false' },
+              { key: 'airtel_api_key', value: String(this.paymentSettings.airtel.apiKey ?? '') },
+              { key: 'airtel_secret_key', value: String(this.paymentSettings.airtel.secretKey ?? '') },
+              { key: 'airtel_environment', value: String(this.paymentSettings.airtel.environment ?? 'Sandbox') },
+              { key: 'zamtel_enabled', value: this.paymentSettings.zamtel.enabled ? 'true' : 'false' },
+              { key: 'zamtel_api_key', value: String(this.paymentSettings.zamtel.apiKey ?? '') },
+              { key: 'zamtel_secret_key', value: String(this.paymentSettings.zamtel.secretKey ?? '') },
+              { key: 'zamtel_environment', value: String(this.paymentSettings.zamtel.environment ?? 'Sandbox') },
+              { key: 'bank_transfer_enabled', value: this.paymentSettings.bank.enabled ? 'true' : 'false' },
+              { key: 'bank_name', value: String(this.paymentSettings.bank.bankName ?? '') },
+              { key: 'bank_account_number', value: String(this.paymentSettings.bank.accountNumber ?? '') },
+              { key: 'bank_account_name', value: String(this.paymentSettings.bank.accountName ?? '') }
+            ]);
+
+            if (!ok) {
+              return;
+            }
+
+            this.showSuccess('Payment settings saved successfully!');
+          } catch (error) {
+            console.error('Error saving payment settings:', error);
+            this.showError(error.message || 'Failed to save payment settings.');
+          }
+        },
+
+        async testPaymentGateways() {
+          console.log('Testing payment gateways...');
+          try {
+            const ok = await this.saveSettingsBatch('Payments', [
+              { key: 'payments_test_request', value: new Date().toISOString() }
+            ]);
+
+            if (!ok) {
+              return;
+            }
+
+            this.showInfo('Payment gateway test request initiated. Check logs for results.');
+          } catch (error) {
+            console.error('Error initiating payment gateway test:', error);
+            this.showError(error.message || 'Failed to initiate payment gateway test.');
+          }
+        },
+
+        // API Settings Functions
+        async saveApiSettings() {
+          try {
+            const ok = await this.saveSettingsBatch('API', [
+              { key: 'api_key', value: String(this.apiSettings.apiKey ?? '') },
+              { key: 'api_rate_limit', value: String(this.apiSettings.rateLimit ?? 1000) },
+              { key: 'api_webhook_url', value: String(this.apiSettings.webhookUrl ?? '') },
+              { key: 'api_enabled', value: this.apiSettings.enableApiAccess ? 'true' : 'false' }
+            ]);
+
+            if (!ok) {
+              return;
+            }
+
+            this.showSuccess('API settings saved successfully!');
+          } catch (error) {
+            console.error('Error saving API settings:', error);
+            this.showError(error.message || 'Failed to save API settings.');
+          }
+        },
+
+        async regenerateApiKey() {
+          console.log('Regenerating API key...');
+          if (!confirm('Are you sure you want to regenerate the API key? This will invalidate the current key.')) {
+            return;
+          }
+
+          const randomPart = Math.random().toString(36).slice(2, 12);
+          this.apiSettings.apiKey = `UmiHealthInformationSystems_${Date.now()}_${randomPart}`;
+
+          await this.saveApiSettings();
+        },
+
+        // Roles & Permissions Functions
+        async saveRoleSettings() {
+          try {
+            if (!window.UmiHealthInformationSystemsAPI) {
+              this.showError('API client not available.');
+              return;
+            }
+
+            const token = this.getAuthToken();
+            if (!token) {
+              this.showError('You are not authenticated. Please sign in again.');
+              return;
+            }
+
+            const response = await window.UmiHealthInformationSystemsAPI.get('/api/settings/roles');
+            if (!response || response.success !== true) {
+              this.showError(response?.message || 'Failed to load roles.');
+              return;
+            }
+
+            this.showSuccess('Role settings synced successfully!');
+          } catch (error) {
+            console.error('Error syncing roles:', error);
+            this.showError(error.message || 'Failed to sync role settings.');
+          }
+        },
+
+        createRole() {
+          console.log('Creating new role...');
+          alert('Create role modal coming soon!');
+        },
+
+        // Security Settings Functions
+        async saveSecuritySettings() {
+          try {
+            const ok = await this.saveSettingsBatch('Security', [
+              { key: 'session_timeout_minutes', value: String(this.securitySettings.sessionTimeoutMinutes ?? 30) },
+              { key: 'password_policy', value: String(this.securitySettings.passwordPolicy ?? '') },
+              { key: 'max_login_attempts', value: String(this.securitySettings.maxLoginAttempts ?? 5) },
+              { key: 'enable_two_factor_auth', value: this.securitySettings.enableTwoFactorAuth ? 'true' : 'false' },
+              { key: 'require_password_change', value: this.securitySettings.requirePasswordChange ? 'true' : 'false' }
+            ]);
+
+            if (!ok) {
+              return;
+            }
+
+            this.showSuccess('Security settings saved successfully!');
+          } catch (error) {
+            console.error('Error saving security settings:', error);
+            this.showError(error.message || 'Failed to save security settings.');
+          }
+        },
+
+        async testSecuritySettings() {
+          console.log('Testing security settings...');
+          try {
+            const ok = await this.saveSettingsBatch('Security', [
+              { key: 'security_test_request', value: new Date().toISOString() }
+            ]);
+
+            if (!ok) {
+              return;
+            }
+
+            this.showInfo('Security test request initiated. Check logs for results.');
+          } catch (error) {
+            console.error('Error initiating security test:', error);
+            this.showError(error.message || 'Failed to initiate security test.');
+          }
+        },
+
+        // System Maintenance Functions
+        async saveMaintenanceSettings() {
+          try {
+            const ok = await this.saveSettingsBatch('Maintenance', [
+              { key: 'maintenance_window', value: String(this.maintenanceSettings.maintenanceWindow ?? '') },
+              { key: 'log_retention_days', value: String(this.maintenanceSettings.logRetentionDays ?? 90) },
+              { key: 'enable_auto_cleanup', value: this.maintenanceSettings.enableAutoCleanup ? 'true' : 'false' },
+              { key: 'enable_system_monitoring', value: this.maintenanceSettings.enableSystemMonitoring ? 'true' : 'false' }
+            ]);
+
+            if (!ok) {
+              return;
+            }
+
+            this.showSuccess('Maintenance settings saved successfully!');
+          } catch (error) {
+            console.error('Error saving maintenance settings:', error);
+            this.showError(error.message || 'Failed to save maintenance settings.');
+          }
+        },
+
+        async runMaintenance() {
+          console.log('Running system maintenance...');
+          if (!confirm('System maintenance will temporarily affect performance. Continue?')) {
+            return;
+          }
+
+          try {
+            const ok = await this.saveSettingsBatch('Maintenance', [
+              { key: 'maintenance_run_request', value: new Date().toISOString() }
+            ]);
+
+            if (!ok) {
+              return;
+            }
+
+            this.showInfo('System maintenance started. You will be notified when complete.');
+          } catch (error) {
+            console.error('Error initiating maintenance:', error);
+            this.showError(error.message || 'Failed to start maintenance.');
+          }
+        },
+
+        async clearCache() {
+          console.log('Clearing system cache...');
+          if (!confirm('Clearing cache may temporarily affect performance. Continue?')) {
+            return;
+          }
+
+          try {
+            const ok = await this.saveSettingsBatch('Maintenance', [
+              { key: 'maintenance_clear_cache_request', value: new Date().toISOString() }
+            ]);
+
+            if (!ok) {
+              return;
+            }
+
+            this.showSuccess('System cache clear request recorded successfully.');
+          } catch (error) {
+            console.error('Error recording cache clear:', error);
+            this.showError(error.message || 'Failed to clear cache.');
+          }
+        },
+
+        async optimizeDatabase() {
+          console.log('Optimizing database...');
+          if (!confirm('Database optimization will temporarily affect system availability. Continue?')) {
+            return;
+          }
+
+          try {
+            const ok = await this.saveSettingsBatch('Maintenance', [
+              { key: 'maintenance_optimize_db_request', value: new Date().toISOString() }
+            ]);
+
+            if (!ok) {
+              return;
+            }
+
+            this.showInfo('Database optimization started. This may take several minutes.');
+          } catch (error) {
+            console.error('Error recording database optimization:', error);
+            this.showError(error.message || 'Failed to optimize database.');
+          }
+        },
+
+        // Utility Functions
+        showSuccess(message) {
+          console.log('SUCCESS:', message);
+          alert('✅ ' + message);
+        },
+
+        showInfo(message) {
+          console.log('INFO:', message);
+          alert('ℹ️ ' + message);
+        },
+
+        showWarning(message) {
+          console.log('WARNING:', message);
+          alert('⚠️ ' + message);
+        },
+
+        showError(message) {
+          console.log('ERROR:', message);
+          alert('❌ ' + message);
+        },
+
+        handleLogout() {
+          if (confirm('Are you sure you want to sign out?')) {
+            // Clear session
+            sessionStorage.clear();
+            
+            // Redirect to signin
+            window.location.href = '../auth/signin.html';
+          }
+        }
+      }
+    }
+  </script>
+
+  <!-- Include API and Data Sync Services -->
+  <script src="../shared/js/data-sync.js"></script>
+  <script src="../shared/js/role-based-access.js"></script>
+  <script src="../admin/js/admin-api.js"></script>
+  <script src="js/super-admin-api.js"></script>
+
+  <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
+</body>
+</html>
+
+
+
+

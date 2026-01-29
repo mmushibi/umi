@@ -1,0 +1,974 @@
+<!DOCTYPE html>
+<html lang="en" x-data="transactionsManagement()">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Transactions - Operations Portal</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@100;400;500;600;700&family=Varela+Round&family=Nunito:wght@400;600;700&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Rounded:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="../shared/js/data-sync.js"></script>
+  <script src="../shared/js/role-based-access.js"></script>
+  <script src="../admin/js/admin-api.js"></script>
+  <script src="js/operations-api.js"></script>
+  <link rel="stylesheet" href="../../shared/css/cashier-notifications.css">
+  <link rel="stylesheet" href="../../shared/css/shared-styles.css">
+  <style>
+    :root {
+      --color-primary: #000000;
+      --color-accent: #14B8A6;
+      --color-success: #22c55e;
+      --color-warning: #ef4444;
+      --color-info: #3b82f6;
+      --color-text-primary: #000000;
+      --color-text-secondary: #6b7280;
+      --color-text-muted: #9ca3af;
+      --color-background: #ffffff;
+      --color-surface: #f9fafb;
+      --color-border: #e5e7eb;
+      --font-primary: 'Inter', sans-serif;
+      --sidebar-width: 280px;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      background: var(--color-background);
+      color: var(--color-text-primary);
+      font-family: 'Nunito', 'Varela Round', sans-serif;
+      font-size: 13px;
+      line-height: 1.4;
+      overflow-x: hidden;
+    }
+
+    .sidebar {
+      position: fixed;
+      left: 0;
+      top: 0;
+      width: var(--sidebar-width);
+      height: 100vh;
+      background: var(--color-text-primary);
+      color: var(--color-accent);
+      z-index: 1000;
+      transition: transform 0.3s ease;
+      display: flex;
+      flex-direction: column;
+      overflow-y: auto;
+      overflow-x: hidden;
+    }
+
+    .sidebar-header {
+      padding: 1.5rem;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+    }
+
+    .logo-section {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+    }
+
+    .logo-icon {
+      width: 32px;
+      height: 32px;
+      background: rgba(255, 255, 255, 0.2);
+      border-radius: 8px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.2rem;
+    }
+
+    .logo-text {
+      font-size: 1rem;
+      font-weight: 600;
+      font-family: 'Inter', sans-serif;
+    }
+
+    .nav-menu {
+      padding: 1rem 0;
+      flex: 1;
+      overflow-y: auto;
+    }
+
+    .nav-item {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+      padding: 0.75rem 1.25rem;
+      color: rgba(255, 255, 255, 0.8);
+      text-decoration: none;
+      transition: all 0.2s ease;
+      cursor: pointer;
+      font-size: 0.8rem;
+      font-weight: 500;
+    }
+
+    .nav-item:hover {
+      background: rgba(255, 255, 255, 0.1);
+      color: var(--color-accent);
+    }
+
+    .nav-item.active {
+      background: rgba(255, 255, 255, 0.15);
+      color: var(--color-accent);
+      border-left: 3px solid var(--color-accent);
+    }
+
+    .nav-icon {
+      font-size: 1rem;
+    }
+
+    .main-content {
+      margin-left: var(--sidebar-width);
+      min-height: 100vh;
+      transition: margin-left 0.3s ease;
+    }
+
+    .header {
+      background: white;
+      border-bottom: 1px solid #e2e8f0;
+      padding: 1rem 2rem;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      position: sticky;
+      top: 0;
+      z-index: 100;
+    }
+
+    .header-left {
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+    }
+
+    .page-title-section {
+      margin-right: 2rem;
+    }
+
+    .page-title-section .page-title {
+      font-size: 1.5rem;
+      font-weight: 700;
+      color: var(--color-text-primary);
+      margin: 0;
+      font-family: 'Inter', sans-serif;
+    }
+
+    .mobile-menu-toggle {
+      display: none;
+      background: none;
+      border: none;
+      font-size: 1.5rem;
+      color: var(--color-text-secondary);
+      cursor: pointer;
+    }
+
+    .header-right {
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+    }
+
+    .user-profile {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+      padding: 0.5rem;
+      border-radius: 16px;
+      cursor: pointer;
+      transition: all 0.3s ease;
+    }
+
+    .user-profile:hover {
+      background: var(--color-surface);
+    }
+
+    .user-avatar {
+      width: 36px;
+      height: 36px;
+      background: var(--color-text-primary);
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: var(--color-accent);
+      font-weight: 600;
+      font-size: 0.875rem;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+    }
+
+    .user-info {
+      display: flex;
+      flex-direction: column;
+    }
+
+    .user-name {
+      font-size: 0.875rem;
+      font-weight: 600;
+      color: var(--color-text-primary);
+    }
+
+    .user-role {
+      font-size: 0.75rem;
+      color: var(--color-text-secondary);
+    }
+
+    .content {
+      padding: 2rem;
+    }
+
+    .page-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 2rem;
+    }
+
+    .page-title {
+      font-size: 1.875rem;
+      font-weight: 700;
+      color: var(--color-text-primary);
+      margin: 0;
+      font-family: 'Inter', sans-serif;
+    }
+
+    .page-subtitle {
+      color: var(--color-text-secondary);
+      font-size: 0.875rem;
+      margin-top: 0.25rem;
+    }
+
+    .controls-section {
+      display: flex;
+      gap: 1rem;
+      margin-bottom: 2rem;
+      flex-wrap: wrap;
+    }
+
+    .search-bar {
+      position: relative;
+      flex: 1;
+      min-width: 300px;
+    }
+
+    .search-input {
+      width: 100%;
+      padding: 0.625rem 1rem 0.625rem 2.5rem;
+      border: 1px solid var(--color-border);
+      border-radius: 16px;
+      font-size: 0.875rem;
+      transition: all 0.3s ease;
+    }
+
+    .search-input:focus {
+      outline: none;
+      border-color: var(--color-primary);
+      box-shadow: 0 0 0 4px rgba(0, 0, 0, 0.1);
+    }
+
+    .search-icon {
+      position: absolute;
+      left: 0.75rem;
+      top: 50%;
+      transform: translateY(-50%);
+      color: var(--color-text-muted);
+      font-size: 1.125rem;
+    }
+
+    .filter-dropdown {
+      position: relative;
+    }
+
+    .filter-button {
+      background: white;
+      border: 1px solid var(--color-border);
+      padding: 0.625rem 1.25rem;
+      border-radius: 16px;
+      font-size: 0.875rem;
+      font-weight: 500;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      transition: all 0.3s ease;
+    }
+
+    .filter-button:hover {
+      background: var(--color-surface);
+    }
+
+    .table-container {
+      background: white;
+      border-radius: 20px;
+      border: 1px solid var(--color-border);
+      overflow: hidden;
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
+    }
+
+    .table {
+      width: 100%;
+      border-collapse: collapse;
+    }
+
+    .table th {
+      background: var(--color-surface);
+      padding: 1rem;
+      text-align: left;
+      font-weight: 600;
+      color: var(--color-text-primary);
+      font-size: 0.875rem;
+      border-bottom: 1px solid var(--color-border);
+    }
+
+    .table td {
+      padding: 1rem;
+      border-bottom: 1px solid var(--color-border);
+      font-size: 0.875rem;
+    }
+
+    .table tr:hover {
+      background: var(--color-surface);
+    }
+
+    .transaction-id {
+      font-weight: 600;
+      color: var(--color-text-primary);
+      font-family: 'Inter', sans-serif;
+    }
+
+    .tenant-name {
+      font-weight: 600;
+      color: var(--color-text-primary);
+    }
+
+    .tenant-email {
+      color: var(--color-text-secondary);
+      font-size: 0.75rem;
+    }
+
+    .status-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.25rem;
+      padding: 0.25rem 0.75rem;
+      border-radius: 12px;
+      font-size: 0.75rem;
+      font-weight: 600;
+    }
+
+    .status-badge.completed {
+      background: rgba(34, 197, 94, 0.1);
+      color: var(--color-success);
+    }
+
+    .status-badge.pending {
+      background: rgba(245, 158, 11, 0.1);
+      color: #f59e0b;
+    }
+
+    .status-badge.failed {
+      background: rgba(239, 68, 68, 0.1);
+      color: var(--color-warning);
+    }
+
+    .status-badge.refunded {
+      background: rgba(59, 130, 246, 0.1);
+      color: var(--color-info);
+    }
+
+    .amount {
+      font-weight: 600;
+      color: var(--color-success);
+    }
+
+    .amount.failed {
+      color: var(--color-warning);
+    }
+
+    .action-buttons {
+      display: flex;
+      gap: 0.5rem;
+    }
+
+    .action-button {
+      background: none;
+      border: none;
+      padding: 0.5rem;
+      border-radius: 8px;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      color: var(--color-text-secondary);
+    }
+
+    .action-button:hover {
+      background: var(--color-surface);
+      color: var(--color-text-primary);
+    }
+
+    .pagination {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 1rem;
+      border-top: 1px solid var(--color-border);
+    }
+
+    .pagination-info {
+      color: var(--color-text-secondary);
+      font-size: 0.875rem;
+    }
+
+    .pagination-controls {
+      display: flex;
+      gap: 0.5rem;
+    }
+
+    .pagination-button {
+      background: white;
+      border: 1px solid var(--color-border);
+      padding: 0.5rem 0.75rem;
+      border-radius: 8px;
+      font-size: 0.875rem;
+      cursor: pointer;
+      transition: all 0.2s ease;
+    }
+
+    .pagination-button:hover:not(:disabled) {
+      background: var(--color-surface);
+    }
+
+    .pagination-button:disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
+    }
+
+    .pagination-button.active {
+      background: var(--color-primary);
+      color: white;
+      border-color: var(--color-primary);
+    }
+
+    .logout-section {
+      padding: 1rem;
+      border-top: 1px solid rgba(255, 255, 255, 0.1);
+      margin-top: auto;
+    }
+
+    .logout-button {
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+      padding: 0.875rem 1.5rem;
+      color: rgba(255, 255, 255, 0.8);
+      text-decoration: none;
+      transition: all 0.2s ease;
+      cursor: pointer;
+      font-size: 0.9rem;
+      font-weight: 500;
+      width: 100%;
+      border: none;
+      background: transparent;
+      text-align: left;
+    }
+
+    .logout-button:hover {
+      background: rgba(239, 68, 68, 0.1);
+      color: var(--color-warning);
+    }
+
+    .logout-icon {
+      font-size: 1.25rem;
+    }
+
+    @media (max-width: 768px) {
+      .sidebar {
+        transform: translateX(-100%);
+      }
+
+      .sidebar.open {
+        transform: translateX(0);
+      }
+
+      .main-content {
+        margin-left: 0;
+      }
+
+      .mobile-menu-toggle {
+        display: block;
+      }
+
+      .page-title-section {
+        display: none;
+      }
+
+      .user-info {
+        display: none;
+      }
+
+      .content {
+        padding: 1rem;
+      }
+
+      .page-header {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 1rem;
+      }
+
+      .controls-section {
+        flex-direction: column;
+      }
+
+      .search-bar {
+        min-width: auto;
+      }
+
+      .table-container {
+        overflow-x: auto;
+      }
+
+      .table {
+        min-width: 800px;
+      }
+    }
+  </style>
+
+    <!-- Backend Integration Libraries -->
+    <script src="../../js/api-client.js"></script>
+    <script src="../../js/auth-manager.js"></script>
+    <script src="../shared/js/backend-integration-helper.js"></script>
+    <script src="../shared/js/page-integration-template.js"></script>
+    <script src="https://unpkg.com/alpinejs@3.x.x/dist/cdn.min.js" defer></script></head>
+<body>
+  <div class="dashboard-container">
+    <aside class="sidebar" :class="{ 'open': mobileMenuOpen }">
+      <div class="sidebar-header">
+        <div class="logo-section">
+          <div class="logo-icon">
+            <img src="../../logo.png" alt="Umi Health Logo">
+          </div>
+          <div class="logo-text">Operations</div>
+        </div>
+      </div>
+      
+      <nav class="nav-menu">
+        <a href="home.html" class="nav-item">
+          <span class="material-symbols-rounded nav-icon">dashboard</span>
+          Dashboard
+        </a>
+        <a href="tenants.html" class="nav-item">
+          <span class="material-symbols-rounded nav-icon">apartment</span>
+          Tenant Management
+        </a>
+        <a href="subscriptions.html" class="nav-item">
+          <span class="material-symbols-rounded nav-icon">credit_card</span>
+          Subscriptions
+        </a>
+        <a href="users.html" class="nav-item">
+          <span class="material-symbols-rounded nav-icon">people</span>
+          User Management
+        </a>
+        <a href="#" class="nav-item active">
+          <span class="material-symbols-rounded nav-icon">receipt_long</span>
+          Transactions
+        </a>
+        <a href="account.html" class="nav-item">
+          <span class="material-symbols-rounded nav-icon">account_circle</span>
+          Account
+        </a>
+      </nav>
+      
+      <div class="logout-section">
+        <a href="../../signin.html" class="logout-button" @click.prevent="handleLogout">
+          <span class="material-symbols-rounded logout-icon">logout</span>
+          Sign Out
+        </a>
+      </div>
+    </aside>
+
+    <main class="main-content">
+      <header class="header">
+        <div class="header-left">
+          <button class="mobile-menu-toggle" @click="mobileMenuOpen = !mobileMenuOpen">
+            <span class="material-symbols-rounded">menu</span>
+          </button>
+          <div class="page-title-section">
+            <h1 class="page-title">Transactions</h1>
+          </div>
+        </div>
+      </header>
+
+      <div class="content">
+        <div class="page-header">
+          <div>
+            <h2 class="page-title">Transaction History</h2>
+            <p class="page-subtitle">View and monitor all tenant transactions across the platform</p>
+          </div>
+        </div>
+
+        <div class="controls-section">
+          <div class="search-bar">
+            <input 
+              type="text" 
+              class="search-input" 
+              placeholder="Search transactions by ID, tenant, amount..."
+              x-model="searchQuery"
+              @input="filterTransactions"
+            >
+            <span class="material-symbols-rounded search-icon">search</span>
+          </div>
+          
+          <div class="filter-dropdown">
+            <button class="filter-button" @click="showFilterDropdown = !showFilterDropdown">
+              <span class="material-symbols-rounded">filter_list</span>
+              Status
+              <span class="material-symbols-rounded">arrow_drop_down</span>
+            </button>
+          </div>
+        </div>
+
+        <div class="table-container">
+          <table class="table">
+            <thead>
+              <tr>
+                <th>Transaction ID</th>
+                <th>Tenant</th>
+                <th>Type</th>
+                <th>Amount</th>
+                <th>Date</th>
+                <th>Status</th>
+                <th>Actions</th>
+              </tr>
+            </thead>
+            <tbody>
+              <template x-for="transaction in filteredTransactions" :key="transaction.id">
+                <tr>
+                  <td>
+                    <div class="transaction-id" x-text="transaction.id"></div>
+                  </td>
+                  <td>
+                    <div class="tenant-name" x-text="transaction.tenantName"></div>
+                    <div class="tenant-email" x-text="transaction.tenantDomain"></div>
+                  </td>
+                  <td x-text="transaction.type"></td>
+                  <td>
+                    <span class="amount" :class="transaction.status.toLowerCase()" x-text="'$' + transaction.amount"></span>
+                  </td>
+                  <td x-text="transaction.date"></td>
+                  <td>
+                    <span class="status-badge" :class="transaction.status.toLowerCase()" x-text="transaction.status"></span>
+                  </td>
+                  <td>
+                    <div class="action-buttons">
+                      <button class="action-button" @click="viewTransaction(transaction)" title="View Details">
+                        <span class="material-symbols-rounded">visibility</span>
+                      </button>
+                      <button class="action-button" @click="downloadReceipt(transaction)" title="Download Receipt">
+                        <span class="material-symbols-rounded">download</span>
+                      </button>
+                    </div>
+                  </td>
+                </tr>
+              </template>
+            </tbody>
+          </table>
+          
+          <div class="pagination">
+            <div class="pagination-info">
+              Showing <span x-text="paginatedTransactions.length"></span> of <span x-text="filteredTransactions.length"></span> transactions
+            </div>
+            <div class="pagination-controls">
+              <button class="pagination-button" @click="previousPage" :disabled="currentPage === 1">
+                <span class="material-symbols-rounded">chevron_left</span>
+              </button>
+              <template x-for="page in visiblePages" :key="page">
+                <button class="pagination-button" 
+                        :class="{ active: page === currentPage }"
+                        @click="goToPage(page)"
+                        x-text="page"></button>
+              </template>
+              <button class="pagination-button" @click="nextPage" :disabled="currentPage === totalPages">
+                <span class="material-symbols-rounded">chevron_right</span>
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </main>
+  </div>
+
+  <script>
+    function transactionsManagement() {
+      return {
+        // Initialize backend integration
+        const pageIntegration = new PageIntegrationTemplate('operations-transactions', {
+            requireAuth: true,
+            enableRealTime: false,
+            enableCaching: true
+        });
+        
+        return {
+            ...pageIntegration,
+            backendHelper: window.backendHelper,
+            apiClient: window.apiClient,
+            authManager: window.authManager,
+            isAuthenticated: false,
+            loading: false,
+            error: null,
+        mobileMenuOpen: false,
+        searchQuery: '',
+        showFilterDropdown: false,
+        currentPage: 1,
+        itemsPerPage: 10,
+        transactions: [],
+        loading: false,
+        
+        async init() {
+            try {
+                // Check authentication
+                this.isAuthenticated = this.authManager?.isAuthenticated() || false;
+                
+                if (!this.isAuthenticated) {
+                    this.error = 'Please login to access this page';
+                    return;
+                }
+                
+                // Initialize backend integration
+                await this.backendHelper.initPage('operations-transactions', {
+                    enableRealTime: false,
+                    initialData: this.getInitialDataConfig()
+                });
+                
+                // Load page data
+                await this.loadPageData();
+                
+                // Set up event listeners
+                this.setupEventListeners();
+                
+                console.log('operations-transactions page initialized with backend integration');
+            } catch (error) {
+                console.error('Failed to initialize operations-transactions page:', error);
+                this.error = 'Failed to initialize page';
+            }
+        },,
+
+        loadTransactionsFromAPI() {
+          this.loading = true;
+          try {
+            window.operationsDataSync.getData('transactions', {
+              page: this.currentPage,
+              pageSize: this.itemsPerPage,
+              startDate: new Date(Date.now() - 30 * 24 * 60 * 60 * 1000).toISOString()
+            })
+            .then(transactions => {
+              this.transactions = transactions.map(t => ({
+                id: t.id || t.saleNumber,
+                tenantId: t.branchId,
+                tenantName: `Tenant ${t.branchId}`,
+                tenantDomain: `tenant${t.branchId}.umihealth.com`,
+                type: t.paymentMethod || 'Sale',
+                amount: t.totalAmount || 0,
+                date: t.saleDate ? new Date(t.saleDate).toLocaleDateString() : '',
+                status: t.status || 'Completed',
+                items: t.items || [],
+                payments: t.payments || []
+              }));
+              this.loading = false;
+            })
+            .catch(error => {
+              console.error('Error loading transactions:', error);
+              this.showError('Failed to load transactions. Please try again.');
+              this.loading = false;
+            });
+          } catch (error) {
+            console.error('Data sync not available:', error);
+            this.loading = false;
+          }
+        },
+
+        setupEventListeners() {
+          if (window.operationsDataSync) {
+            window.operationsDataSync.on('transactions-updated', (transactions) => {
+              this.transactions = transactions.map(t => ({
+                id: t.id || t.saleNumber,
+                tenantId: t.branchId,
+                tenantName: `Tenant ${t.branchId}`,
+                tenantDomain: `tenant${t.branchId}.umihealth.com`,
+                type: t.paymentMethod || 'Sale',
+                amount: t.totalAmount || 0,
+                date: t.saleDate ? new Date(t.saleDate).toLocaleDateString() : '',
+                status: t.status || 'Completed',
+                items: t.items || [],
+                payments: t.payments || []
+              }));
+            });
+
+            window.operationsDataSync.on('sync-error', (error) => {
+              console.error('Sync error:', error);
+              this.showWarning('Data synchronization error occurred');
+            });
+          }
+        },
+        
+        get filteredTransactions() {
+          let filtered = this.transactions;
+          
+          if (this.searchQuery) {
+            const query = this.searchQuery.toLowerCase();
+            filtered = filtered.filter(transaction => 
+              transaction.id.toLowerCase().includes(query) ||
+              transaction.tenantName.toLowerCase().includes(query) ||
+              transaction.type.toLowerCase().includes(query) ||
+              transaction.amount.toString().includes(query) ||
+              transaction.status.toLowerCase().includes(query)
+            );
+          }
+          
+          return filtered;
+        },
+        
+        get paginatedTransactions() {
+          const start = (this.currentPage - 1) * this.itemsPerPage;
+          const end = start + this.itemsPerPage;
+          return this.filteredTransactions.slice(start, end);
+        },
+        
+        get totalPages() {
+          return Math.ceil(this.filteredTransactions.length / this.itemsPerPage);
+        },
+        
+        get visiblePages() {
+          const pages = [];
+          const maxVisible = 5;
+          let start = Math.max(1, this.currentPage - Math.floor(maxVisible / 2));
+          let end = Math.min(this.totalPages, start + maxVisible - 1);
+          
+          if (end - start < maxVisible - 1) {
+            start = Math.max(1, end - maxVisible + 1);
+          }
+          
+          for (let i = start; i <= end; i++) {
+            pages.push(i);
+          }
+          
+          return pages;
+        },
+        
+        filterTransactions() {
+          this.currentPage = 1;
+        },
+        
+        viewTransaction(transaction) {
+          const details = `
+Transaction Details:
+
+ID: ${transaction.id}
+Tenant: ${transaction.tenantName} (${transaction.tenantDomain})
+Type: ${transaction.type}
+Amount: $${transaction.amount}
+Date: ${transaction.date}
+Status: ${transaction.status}
+
+Payment Method: Credit Card ending in 4242
+Billing Address: 123 Business St, Suite 100
+Invoice Number: INV-${transaction.id.slice(-6)}
+          `.trim();
+          
+          alert(details);
+        },
+        
+        downloadReceipt(transaction) {
+          const receiptContent = `
+RECEIPT
+
+Transaction ID: ${transaction.id}
+Date: ${transaction.date}
+Tenant: ${transaction.tenantName}
+Amount: $${transaction.amount}
+Status: ${transaction.status}
+
+Thank you for your business!
+          `.trim();
+          
+          const blob = new Blob([receiptContent], { type: 'text/plain' });
+          const url = window.URL.createObjectURL(blob);
+          const a = document.createElement('a');
+          a.href = url;
+          a.download = `receipt-${transaction.id}.txt`;
+          document.body.appendChild(a);
+          a.click();
+          document.body.removeChild(a);
+          window.URL.revokeObjectURL(url);
+          
+          alert(`Receipt downloaded for transaction ${transaction.id}`);
+        },
+
+        // Notification methods
+        showSuccess(message) {
+          this.showNotification(message, 'success');
+        },
+
+        showError(message) {
+          this.showNotification(message, 'error');
+        },
+
+        showWarning(message) {
+          this.showNotification(message, 'warning');
+        },
+
+        showNotification(message, type = 'info') {
+          // Create notification element
+          const notification = document.createElement('div');
+          notification.className = `notification notification-${type}`;
+          notification.textContent = message;
+          document.body.appendChild(notification);
+
+          // Animate in
+          setTimeout(() => {
+            notification.classList.add('show');
+          }, 100);
+
+          // Remove after 5 seconds
+          setTimeout(() => {
+            notification.classList.remove('show');
+            setTimeout(() => {
+              if (notification.parentNode) {
+                document.body.removeChild(notification);
+              }
+            }, 300);
+          }, 5000);
+        },
+        
+        goToPage(page) {
+          this.currentPage = page;
+        },
+        
+        previousPage() {
+          if (this.currentPage > 1) {
+            this.currentPage--;
+          }
+        },
+        
+        nextPage() {
+          if (this.currentPage < this.totalPages) {
+            this.currentPage++;
+          }
+        },
+        
+        handleLogout() {
+          if (confirm('Are you sure you want to sign out?')) {
+            window.location.href = '../../signin.html';
+          }
+        }
+      }
+    }
+  </script>
+</body>
+</html>
