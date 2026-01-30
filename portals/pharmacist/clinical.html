@@ -219,20 +219,6 @@
       background: var(--color-primary);
     }
 
-    /* Demo Indicator */
-    .demo-indicator {
-      display: flex;
-      align-items: center;
-      gap: 0.5rem;
-      padding: 0.5rem 1rem;
-      background: var(--color-warning);
-      color: white;
-      border-radius: 20px;
-      font-size: 0.75rem;
-      font-weight: 600;
-      margin-right: 1rem;
-    }
-
     /* Sync Indicator */
     .sync-indicator {
       display: flex;
@@ -319,61 +305,6 @@
 
     .toast-info {
       background: var(--color-primary);
-    }
-
-    .toast-demo {
-      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-    }
-
-    .toast-auth-required {
-      background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
-    }
-
-    /* Demo Mode Banner */
-    .demo-banner {
-      position: fixed;
-      top: 0;
-      left: 0;
-      right: 0;
-      background: linear-gradient(90deg, #667eea 0%, #764ba2 100%);
-      color: white;
-      padding: 0.5rem 1rem;
-      text-align: center;
-      font-size: 0.875rem;
-      font-weight: 500;
-      z-index: 10001;
-      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
-    }
-
-    .demo-banner .close-btn {
-      position: absolute;
-      right: 1rem;
-      top: 50%;
-      transform: translateY(-50%);
-      background: none;
-      border: none;
-      color: white;
-      font-size: 1.25rem;
-      cursor: pointer;
-      opacity: 0.8;
-      transition: opacity 0.2s;
-    }
-
-    .demo-banner .close-btn:hover {
-      opacity: 1;
-    }
-
-    .demo-mode-indicator {
-      display: inline-flex;
-      align-items: center;
-      gap: 0.5rem;
-      padding: 0.25rem 0.75rem;
-      background: rgba(102, 126, 234, 0.1);
-      color: #667eea;
-      border-radius: 20px;
-      font-size: 0.75rem;
-      font-weight: 600;
-      margin-left: 0.5rem;
     }
 
     .auth-required-overlay {
@@ -760,19 +691,6 @@
     <script src="../shared/js/page-integration-template.js"></script>
     <script src="https://unpkg.com/alpinejs@3.x.x/dist/cdn.min.js" defer></script></head>
 <body>
-  <div x-show="!isAuthenticated" class="demo-banner" x-transition>
-    <span>🔒 Authentication Required: Please login to access clinical decision support tools</span>
-    <button class="close-btn" @click="window.location.href='/public/signin.html'">
-      sign in
-    </button>
-  </div>
-
-  <!-- Sidebar -->
-  <aside class="sidebar" :class="sidebarOpen ? 'open' : ''">
-    <div class="sidebar-header">
-      <div class="logo-section">
-        <div class="logo-icon">
-          <span class="material-symbols-rounded">medication</span>
         </div>
         <div class="logo-text">Umi Health</div>
       </div>
@@ -942,19 +860,7 @@
         </div>
 
         <!-- Dosage Calculator -->
-        <div class="clinical-tool-card" style="position: relative;">
-          <div class="auth-required-overlay" :class="{ 'show': !isAuthenticated && !isDemoMode }">
-            <div class="auth-required-content">
-              <span class="material-symbols-rounded">lock</span>
-              <div>Login Required</div>
-              <div style="font-size: 0.75rem; opacity: 0.8; margin-top: 0.5rem;">
-                Please login to access dosage calculator
-              </div>
-              <button class="login-prompt-btn" @click="redirectToLogin()">
-                Login Now
-              </button>
-            </div>
-          </div>
+        <div class="clinical-tool-card">
           <div class="tool-header">
             <div class="tool-icon dosage">
               <span class="material-symbols-rounded">calculate</span>
@@ -968,7 +874,7 @@
             <form @submit.prevent="calculateDosage">
               <div class="form-group">
                 <label class="form-label">Medication</label>
-                <select class="form-select" x-model="dosage.medication" :disabled="!isAuthenticated && !isDemoMode">
+                <select class="form-select" x-model="dosage.medication" :disabled="!isAuthenticated">
                   <option value="">Select medication...</option>
                   <template x-for="drug in medications" :key="drug.id">
                     <option :value="drug.id" x-text="drug.name"></option>
@@ -978,14 +884,14 @@
               <div class="form-row">
                 <div class="form-group">
                   <label class="form-label">Weight (kg)</label>
-                  <input type="number" class="form-input" x-model="dosage.weight" placeholder="Enter weight" :disabled="!isAuthenticated && !isDemoMode">
+                  <input type="number" class="form-input" x-model="dosage.weight" placeholder="Enter weight" :disabled="!isAuthenticated">
                 </div>
                 <div class="form-group">
                   <label class="form-label">Age</label>
-                  <input type="number" class="form-input" x-model="dosage.age" placeholder="Enter age" :disabled="!isAuthenticated && !isDemoMode">
+                  <input type="number" class="form-input" x-model="dosage.age" placeholder="Enter age" :disabled="!isAuthenticated">
                 </div>
               </div>
-              <button type="submit" class="btn btn-primary" :disabled="loading || (!isAuthenticated && !isDemoMode)">
+              <button type="submit" class="btn btn-primary" :disabled="loading || !isAuthenticated" @click="!isAuthenticated ? authManager.requireAuth('dosage calculator') : null">
                 <span class="material-symbols-rounded" x-show="!loading">calculate</span>
                 <span x-text="loading ? 'Calculating...' : 'Calculate Dosage'"></span>
               </button>
@@ -997,19 +903,7 @@
         </div>
 
         <!-- Allergy Checker -->
-        <div class="clinical-tool-card" style="position: relative;">
-          <div class="auth-required-overlay" :class="{ 'show': !isAuthenticated && !isDemoMode }">
-            <div class="auth-required-content">
-              <span class="material-symbols-rounded">lock</span>
-              <div>Login Required</div>
-              <div style="font-size: 0.75rem; opacity: 0.8; margin-top: 0.5rem;">
-                Please login to access allergy checker
-              </div>
-              <button class="login-prompt-btn" @click="redirectToLogin()">
-                Login Now
-              </button>
-            </div>
-          </div>
+        <div class="clinical-tool-card">
           <div class="tool-header">
             <div class="tool-icon allergy">
               <span class="material-symbols-rounded">health_and_safety</span>
@@ -1023,18 +917,18 @@
             <form @submit.prevent="checkAllergies">
               <div class="form-group">
                 <label class="form-label">Patient ID</label>
-                <input type="text" class="form-input" x-model="allergy.patientId" placeholder="Enter patient ID" :disabled="!isAuthenticated && !isDemoMode">
+                <input type="text" class="form-input" x-model="allergy.patientId" placeholder="Enter patient ID" :disabled="!isAuthenticated">
               </div>
               <div class="form-group">
                 <label class="form-label">Medication</label>
-                <select class="form-select" x-model="allergy.medication" :disabled="!isAuthenticated && !isDemoMode">
+                <select class="form-select" x-model="allergy.medication" :disabled="!isAuthenticated">
                   <option value="">Select medication...</option>
                   <template x-for="drug in medications" :key="drug.id">
                     <option :value="drug.id" x-text="drug.name"></option>
                   </template>
                 </select>
               </div>
-              <button type="submit" class="btn btn-primary" :disabled="loading || (!isAuthenticated && !isDemoMode)">
+              <button type="submit" class="btn btn-primary" :disabled="loading || !isAuthenticated" @click="!isAuthenticated ? authManager.requireAuth('allergy checker') : null">
                 <span class="material-symbols-rounded" x-show="!loading">search</span>
                 <span x-text="loading ? 'Checking...' : 'Check Allergies'"></span>
               </button>
@@ -1048,31 +942,76 @@
     </div>
   </main>
 
-      async init() {
-        try {
-          // Check authentication
-          this.isAuthenticated = this.authManager?.isAuthenticated() || false;
+  <script>
+    function clinicalSystem() {
+      return {
+        // Initialize backend integration
+        backendHelper: window.backendHelper,
+        apiClient: window.apiClient,
+        authManager: window.authManager,
+        isAuthenticated: false,
+        loading: false,
+        error: null,
+        sidebarOpen: false,
+        medications: [],
+        selectedPatient: null,
+        patientSearchQuery: '',
+        patientSearchResults: [],
+        showPatientResults: false,
+        
+        // Clinical tools data
+        interaction: {
+          drug1: '',
+          drug2: '',
+          result: null
+        },
+        
+        dosage: {
+          medication: '',
+          weight: '',
+          age: '',
+          result: null
+        },
+        
+        allergy: {
+          patientId: '',
+          medication: '',
+          result: null
+        },
 
-          // Initialize backend integration
-          await this.backendHelper.initPage('pharmacist-clinical', {
-            enableRealTime: false,
-            initialData: this.getInitialDataConfig()
-          // Determine if we're in demo mode
-          this.isDemoMode = !this.isAuthenticated;
-          
-          console.log('Authentication status:', {
-            isAuthenticated: this.isAuthenticated,
-            isDemoMode: this.isDemoMode,
-            hasToken: !!this.apiClient.token,
-            userId: this.apiClient.userId,
-            tenantId: this.apiClient.tenantId
-          });
+        async init() {
+          try {
+            // Check authentication
+            this.isAuthenticated = this.authManager?.isAuthenticated() || false;
+            
+            if (!this.isAuthenticated) {
+              this.error = 'Please login to access this page';
+              return;
+            }
+            
+            // Initialize backend integration
+            await this.backendHelper.initPage('pharmacist-clinical', {
+              enableRealTime: false,
+              initialData: this.getInitialDataConfig()
+            });
+            
+            // Load page data
+            await this.loadPageData();
+            
+            // Set up event listeners
+            this.setupEventListeners();
+            
+            console.log('pharmacist-clinical page initialized with backend integration');
+          } catch (error) {
+            console.error('Failed to initialize pharmacist-clinical page:', error);
+            this.error = 'Failed to initialize page';
+          }
         },
 
         setupRealTimeSync() {
           // Set up periodic sync indicator for authenticated users
           setInterval(() => {
-            if (this.isAuthenticated && !this.isDemoMode) {
+            if (this.isAuthenticated) {
               this.showRealTimeIndicator = true;
               setTimeout(() => {
                 this.showRealTimeIndicator = false;
@@ -1083,20 +1022,11 @@
 
         async loadInitialData() {
           try {
-            if (this.isAuthenticated && !this.isDemoMode) {
-              // Load real data from backend
-              await this.loadMedicationsFromBackend();
-            } else {
-              // Demo mode: load from localStorage or use empty array
-              this.loadDemoData();
-            }
+            // Load real data from backend
+            await this.loadMedicationsFromBackend();
           } catch (error) {
             console.error('Failed to load initial data:', error);
             this.showToast('Failed to load medications', 'error');
-            
-            // Fallback to demo mode
-            this.isDemoMode = true;
-            this.loadDemoData();
           }
         },
 
@@ -1111,33 +1041,6 @@
           }
         },
 
-        loadDemoData() {
-          // Try to load from localStorage first
-          const savedMedications = localStorage.getItem('demo_medications');
-          if (savedMedications) {
-            try {
-              this.medications = JSON.parse(savedMedications);
-              console.log('Loaded medications from localStorage:', this.medications.length);
-              return;
-            } catch (error) {
-              console.error('Failed to parse saved medications:', error);
-            }
-          }
-          
-          // Start with empty array - no sample data
-          this.medications = [];
-          this.saveDemoData();
-          
-          // Show demo toast
-          this.showToast('Demo Mode: No medications available. Add medications through inventory.', 'demo');
-        },
-
-        saveDemoData() {
-          if (this.isDemoMode) {
-            localStorage.setItem('demo_medications', JSON.stringify(this.medications));
-          }
-        },
-
         // Patient search and selection
         async searchPatients() {
           if (this.patientSearchQuery.length < 2) {
@@ -1146,42 +1049,13 @@
           }
 
           try {
-            if (this.isAuthenticated && !this.isDemoMode) {
-              // Real backend search
-              const response = await this.apiClient.clinical.searchPatients(this.patientSearchQuery, 10);
-              this.patientSearchResults = response.data || [];
-            } else {
-              // Demo mode: search localStorage or return empty
-              this.searchDemoPatients();
-            }
+            // Real backend search
+            const response = await this.apiClient.clinical.searchPatients(this.patientSearchQuery, 10);
+            this.patientSearchResults = response.data || [];
           } catch (error) {
             console.error('Failed to search patients:', error);
             this.showToast('Failed to search patients', 'error');
             this.patientSearchResults = [];
-          }
-        },
-
-        searchDemoPatients() {
-          // Demo mode: search from localStorage or return empty
-          const savedPatients = localStorage.getItem('demo_patients');
-          let patients = [];
-          
-          if (savedPatients) {
-            try {
-              patients = JSON.parse(savedPatients);
-            } catch (error) {
-              console.error('Failed to parse saved patients:', error);
-            }
-          }
-          
-          this.patientSearchResults = patients.filter(patient => 
-            patient.firstName.toLowerCase().includes(this.patientSearchQuery.toLowerCase()) ||
-            patient.lastName.toLowerCase().includes(this.patientSearchQuery.toLowerCase()) ||
-            patient.id.toLowerCase().includes(this.patientSearchQuery.toLowerCase())
-          );
-          
-          if (this.patientSearchResults.length === 0) {
-            this.showToast('Demo Mode: No patients found. Add patients through the Patients page.', 'demo');
           }
         },
 
@@ -1195,20 +1069,11 @@
           this.allergy.patientId = patient.id;
           
           this.showToast(`Selected patient: ${patient.firstName} ${patient.lastName}`, 'success');
-          
-          // Save to demo storage
-          if (this.isDemoMode) {
-            localStorage.setItem('demo_selected_patient', JSON.stringify(patient));
-          }
         },
 
         clearPatient() {
           this.selectedPatient = null;
           this.allergy.patientId = '';
-          
-          if (this.isDemoMode) {
-            localStorage.removeItem('demo_selected_patient');
-          }
           
           this.showToast('Patient selection cleared', 'info');
         },
@@ -1220,40 +1085,34 @@
             return;
           }
 
-          if (!this.isAuthenticated && !this.isDemoMode) {
+          if (!this.isAuthenticated) {
             this.showToast('Login required to check drug interactions', 'auth-required');
             return;
           }
 
           this.loading = true;
           try {
-            if (this.isAuthenticated && !this.isDemoMode) {
-              // Real backend API call
-              const response = await this.apiClient.clinical.checkDrugInteractions(
-                this.interaction.drug1, 
-                this.interaction.drug2
-              );
-              
-              // Get severity scoring
-              const severityResponse = await this.apiClient.clinical.getInteractionSeverity(
-                this.interaction.drug1, 
-                this.interaction.drug2
-              );
-              
-              this.interaction.result = this.formatInteractionResult(response.data, severityResponse.data);
-              
-              // Save clinical decision
-              await this.saveClinicalDecision('drug_interaction', {
-                drug1: this.interaction.drug1,
-                drug2: this.interaction.drug2,
-                result: response.data,
-                severity: severityResponse.data
-              });
-              
-            } else {
-              // Demo mode: simulate with localStorage
-              this.simulateInteractionCheck();
-            }
+            // Real backend API call
+            const response = await this.apiClient.clinical.checkDrugInteractions(
+              this.interaction.drug1, 
+              this.interaction.drug2
+            );
+            
+            // Get severity scoring
+            const severityResponse = await this.apiClient.clinical.getInteractionSeverity(
+              this.interaction.drug1, 
+              this.interaction.drug2
+            );
+            
+            this.interaction.result = this.formatInteractionResult(response.data, severityResponse.data);
+            
+            // Save clinical decision
+            await this.saveClinicalDecision('drug_interaction', {
+              drug1: this.interaction.drug1,
+              drug2: this.interaction.drug2,
+              result: response.data,
+              severity: severityResponse.data
+            });
             
             this.showToast('Interaction check completed', 'success');
           } catch (error) {

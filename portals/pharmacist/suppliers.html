@@ -487,40 +487,6 @@
       font-size: 1.25rem;
     }
 
-    /* Demo Mode Banner */
-    .demo-banner {
-      position: fixed;
-      top: 0;
-      left: 0;
-      right: 0;
-      background: linear-gradient(90deg, #667eea 0%, #764ba2 100%);
-      color: white;
-      padding: 0.5rem 1rem;
-      text-align: center;
-      font-size: 0.875rem;
-      font-weight: 500;
-      z-index: 10001;
-      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
-    }
-
-    .demo-banner .close-btn {
-      position: absolute;
-      right: 1rem;
-      top: 50%;
-      transform: translateY(-50%);
-      background: none;
-      border: none;
-      color: white;
-      font-size: 1.25rem;
-      cursor: pointer;
-      opacity: 0.8;
-      transition: opacity 0.2s;
-    }
-
-    .demo-banner .close-btn:hover {
-      opacity: 1;
-    }
-
     @media (max-width: 768px) {
       .sidebar {
         transform: translateX(-100%);
@@ -567,12 +533,6 @@
     <script src="../shared/js/page-integration-template.js"></script>
     <script src="https://unpkg.com/alpinejs@3.x.x/dist/cdn.min.js" defer></script></head>
 <body>
-  <div x-show="!isAuthenticated" class="demo-banner" x-transition>
-    <span>🔒 Authentication Required: Please login to access supplier management</span>
-    <button class="close-btn" @click="window.location.href='/public/signin.html'">
-      sign in
-    </button>
-  </div>
   <!-- Sidebar -->
   <aside class="sidebar" :class="sidebarOpen ? 'open' : ''">
     <div class="sidebar-header">
@@ -1414,191 +1374,71 @@
             }
         },
 
-      showToast(message, type = 'info') {
-        const toast = document.createElement('div');
-        toast.className = `fixed top-4 right-4 p-4 rounded-lg shadow-lg z-50 max-w-sm ${
-          type === 'success' ? 'bg-green-500 text-white' : 
-          type === 'error' ? 'bg-red-500 text-white' : 
-          type === 'warning' ? 'bg-yellow-500 text-white' :
-          'bg-blue-500 text-white'
-        }`;
-        
-        toast.innerHTML = `<div>${message}</div>`;
-        
-        document.body.appendChild(toast);
-        
-        setTimeout(() => {
-          toast.style.transition = 'opacity 0.3s';
-          toast.style.opacity = '0';
-          setTimeout(() => toast.remove(), 300);
-        }, 3000);
-      }
-
-      async simulateApiCall(endpoint, data = null, method = 'GET') {
-        throw new Error('API calls require authentication and real backend connection');
-      }
-
-      getEnhancedFeatures() {
-        if (this.isDemoMode) {
-          return {
-            dataPersistence: false,
-            fullUIFunctionality: false,
-            sampleData: true,
-            clearNotifications: false,
-            dataPersistence: true,
-            fullUIFunctionality: true,
-            sampleData: false,
-            clearNotifications: true,
-            multiTenantSupport: false,
-            serverSync: false,
-            advancedFeatures: false
-          };
-        } else {
-          return {
-            dataPersistence: true,
-            fullUIFunctionality: true,
-            sampleData: false,
-            clearNotifications: false,
-            multiTenantSupport: true,
-            serverSync: true,
-            advancedFeatures: true
-          };
-        }
-      }
-
-      showFeatureComparison() {
-        const features = this.getEnhancedFeatures();
-        const demoMode = this.isDemoMode;
-        
-        let message = demoMode ? 
-          '🎯 Demo Mode Features:\n• Local Data Persistence ✓\n• Full UI Functionality ✓\n• Sample Data (when empty) ✓\n• Clear Notifications ✓\n\n⚠️ Requires Login:\n• Multi-tenant Support\n• Server Synchronization\n• Advanced Features' :
-          '🔐 Authenticated Mode Features:\n• Real Backend Integration ✓\n• Multi-tenant Support ✓\n• Server Synchronization ✓\n• Advanced Features ✓\n• All Premium Features ✓';
-        
-        this.showToast(message, 'info');
-      }
-
-      handleDemoApiCall(endpoint, data, method) {
-        const demoData = this.getDemoData();
-        
-        switch(endpoint) {
-          case '/suppliers':
-            if (method === 'GET') {
-              return { data: demoData.suppliers || [] };
-            } else if (method === 'POST' && data) {
-              const newSupplier = {
-                ...data,
-                id: Date.now().toString(),
-                createdAt: new Date().toISOString(),
-                productCount: 0
-              };
-              demoData.suppliers.push(newSupplier);
-              this.saveDemoData(demoData);
-              return { data: newSupplier };
-            }
-            break;
-            
-          case '/suppliers/stats':
-            return { data: demoData.stats || {} };
-            
-          default:
-            if (endpoint.startsWith('/suppliers/') && method === 'DELETE') {
-              const id = endpoint.split('/')[2];
-              demoData.suppliers = demoData.suppliers.filter(s => s.id !== id);
-              this.saveDemoData(demoData);
-              return { success: true };
-            }
-            return { data: null };
-        }
-      }
-    }
-
     function supplierSystem() {
-      const demoManager = new DemoModeManager();
       return {
         // Initialize backend integration
-        const pageIntegration = new PageIntegrationTemplate('pharmacist-suppliers', {
-            requireAuth: true,
-            enableRealTime: false,
-            enableCaching: true
-        });
+        backendHelper: window.backendHelper,
+        apiClient: window.apiClient,
+        authManager: window.authManager,
         
-        return {
-            ...pageIntegration,
-            backendHelper: window.backendHelper,
-            apiClient: window.apiClient,
-            authManager: window.authManager,
-            isAuthenticated: false,
-            loading: false,
-            error: null,
+        // State
         sidebarOpen: false,
-        showCreateModal: false,
-        showEditModal: false,
-        showViewModal: false,
-        showOrderHistoryModal: false,
-        showDocumentsModal: false,
-        showUploadDocument: false,
-        showBulkStatusModal: false,
-        showAdvancedFilters: false,
-        showBulkActions: false,
-        showFilters: false,
-        searchQuery: '',
+        isAuthenticated: false,
         loading: false,
         error: null,
-        pharmacyInfo: {
-          name: '',
-          location: ''
-        },
+        suppliers: [],
+        searchQuery: '',
+        filteredSuppliers: [],
         stats: {
           totalSuppliers: 0,
           activeSuppliers: 0,
           pendingOrders: 0,
           totalProducts: 0
         },
-        suppliers: [],
-        selectedSuppliers: [],
+        
+        // Modal states
+        showCreateModal: false,
+        showEditModal: false,
         currentSupplier: null,
-        orderHistory: [],
-        orderStats: {
-          totalOrders: 0,
-          completedOrders: 0,
-          pendingOrders: 0,
-          totalValue: '$0'
-        },
-        documents: {
-          contracts: [],
-          licenses: [],
-          other: []
-        },
-        allDocuments: [],
-        filters: {
-          status: '',
-          productRange: '',
-          rating: ''
-        },
         supplierForm: {
           name: '',
           contactPerson: '',
-          phone: '',
           email: '',
+          phone: '',
           address: '',
-          status: 'Active',
-          notes: '',
-          rating: 0
+          status: 'active'
         },
-        documentForm: {
-          name: '',
-          type: '',
-          file: null
-        },
-        bulkStatus: '',
         
         init() {
-          this.loadPharmacyInfo();
-          this.loadSuppliers();
-          this.loadStats();
+          try {
+            // Check authentication
+            this.isAuthenticated = this.authManager?.isAuthenticated() || false;
+            
+            if (!this.isAuthenticated) {
+              this.error = 'Please login to access this page';
+              return;
+            }
+            
+            // Initialize backend integration
+            this.backendHelper.initPage('pharmacist-suppliers', {
+              enableRealTime: false,
+              initialData: this.getInitialDataConfig()
+            });
+            
+            // Load page data
+            this.loadPageData();
+            
+            // Set up event listeners
+            this.setupEventListeners();
+            
+            console.log('pharmacist-suppliers page initialized with backend integration');
+          } catch (error) {
+            console.error('Failed to initialize pharmacist-suppliers page:', error);
+            this.error = 'Failed to initialize page';
+          }
         },
-
-        async loadPharmacyInfo() {
+        
+        loadPharmacyInfo() {
           try {
             const user = JSON.parse(localStorage.getItem('umi_currentUser') || '{}');
             this.pharmacyInfo = {
@@ -1609,12 +1449,12 @@
             console.error('Failed to load pharmacy info:', error);
           }
         },
-
-        async loadSuppliers() {
+        
+        loadSuppliers() {
           this.loading = true;
           this.error = null;
           try {
-            const response = await window.pharmacistApi.suppliers.getSuppliers();
+            const response = window.pharmacistApi.suppliers.getSuppliers();
             this.suppliers = response.data || [];
           } catch (error) {
             console.error('Failed to load suppliers:', error);
