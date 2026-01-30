@@ -504,7 +504,7 @@
               </button>
               <button type="button" @click="loadUserProfile()" class="btn btn-secondary">
                 <span class="material-symbols-rounded">refresh</span>
-                <span>Cancel</span>
+                <span>Reset</span>
               </button>
             </div>
           </form>
@@ -586,7 +586,7 @@
               </button>
               <button type="button" @click="loadPharmacySettings()" class="btn btn-secondary">
                 <span class="material-symbols-rounded">refresh</span>
-                <span>Cancel</span>
+                <span>Reset</span>
               </button>
             </div>
           </form>
@@ -977,7 +977,7 @@
         
         // Component state
         sidebarOpen: false,
-        activeSection: 'profile', // Default to profile tab
+        activeSection: localStorage.getItem('umi_active_tab') || 'profile',
         loading: false,
         error: null,
         isAuthenticated: false,
@@ -1075,9 +1075,6 @@
         // Initialize component
         async init() {
           try {
-            // Enable admin bypass for direct access
-            localStorage.setItem('admin_bypass_enabled', 'true');
-            
             // Wait for API client to be initialized
             await this.waitForAPIClient();
             
@@ -1118,13 +1115,6 @@
         // Helper method to check authentication
         checkAuthentication() {
           try {
-            // Check for admin bypass first
-            const adminBypassEnabled = localStorage.getItem('admin_bypass_enabled') === 'true';
-            if (adminBypassEnabled) {
-              console.log('Admin bypass enabled - allowing access');
-              return true;
-            }
-            
             // Use the global API client authentication
             if (window.apiClient) {
               const authStatus = window.apiClient.getAuthStatus();
@@ -1220,9 +1210,9 @@
             if (typeof apiClient.getProfile === 'function') {
               response = await apiClient.getProfile();
             } else if (typeof apiClient.request === 'function') {
-              response = await apiClient.request('/admin/auth/me');
+              response = await apiClient.request('/auth/me');
             } else if (typeof apiClient.get === 'function') {
-              response = await apiClient.get('/admin/auth/me');
+              response = await apiClient.get('/auth/me');
             } else {
               throw new Error('No suitable API method found');
             }
@@ -1246,32 +1236,6 @@
         // Load pharmacy settings
         async loadPharmacySettings() {
           try {
-            // Load from onboarding data first
-            const onboardingData = localStorage.getItem('umi_onboarding_data');
-            if (onboardingData) {
-              const parsed = JSON.parse(onboardingData);
-              this.pharmacySettings = {
-                name: parsed.pharmacyName || '',
-                phone: parsed.phoneNumber || '',
-                email: parsed.email || '',
-                website: '',
-                address: parsed.address || '',
-                city: parsed.city || '',
-                province: parsed.province || '',
-                postalCode: parsed.postalCode || '',
-                receiptHeader: '',
-                receiptFooter: '',
-                taxRate: 0,
-                currency: 'USD',
-                reportLogo: '',
-                reportSignature: '',
-                paymentTerms: '',
-                invoicePrefix: '',
-                receiptPrefix: ''
-              };
-              return;
-            }
-            
             // Use available API client with fallback
             const apiClient = this.apiClient || window.apiClient || window.adminAPI || window.authAPI;
             if (!apiClient) {
@@ -1279,37 +1243,51 @@
               return;
             }
             
-            // Try admin endpoint for pharmacy settings
+            // Get branch ID from multiple sources
+            let branchId = this.authManager?.getCurrentUser()?.branchId ||
+                          this.authManager?.getBranchId() ||
+                          window.authManager?.getCurrentUser()?.branchId ||
+                          window.authManager?.getBranchId() ||
+                          localStorage.getItem('umi_current_branch_id');
+            
+            if (!branchId) {
+              console.warn('No branch ID found for pharmacy settings');
+              return;
+            }
+            
             let response;
             
-            if (typeof apiClient.request === 'function') {
-              response = await apiClient.request('/admin/pharmacy/settings');
+            // Try different methods based on available API client
+            if (typeof apiClient.getBranch === 'function') {
+              response = await apiClient.getBranch(branchId);
+            } else if (typeof apiClient.request === 'function') {
+              response = await apiClient.request(`/branch/${branchId}`);
             } else if (typeof apiClient.get === 'function') {
-              response = await apiClient.get('/admin/pharmacy/settings');
+              response = await apiClient.get(`/branch/${branchId}`);
             } else {
               throw new Error('No suitable API method found');
             }
             
             if (response && (response.success || response.data)) {
-              const settings = response.data || response;
+              const branch = response.data || response;
               this.pharmacySettings = {
-                name: settings.name || '',
-                phone: settings.phone || '',
-                email: settings.email || '',
-                website: settings.website || '',
-                address: settings.address || '',
-                city: settings.city || '',
-                province: settings.province || '',
-                postalCode: settings.postalCode || '',
-                receiptHeader: settings.receiptHeader || '',
-                receiptFooter: settings.receiptFooter || '',
-                taxRate: settings.taxRate || 0,
-                currency: settings.currency || 'USD',
-                reportLogo: settings.reportLogo || '',
-                reportSignature: settings.reportSignature || '',
-                paymentTerms: settings.paymentTerms || '',
-                invoicePrefix: settings.invoicePrefix || '',
-                receiptPrefix: settings.receiptPrefix || ''
+                name: branch.name || '',
+                phone: branch.phone || '',
+                email: branch.email || '',
+                website: branch.website || '',
+                address: branch.address || '',
+                city: branch.city || '',
+                province: branch.province || '',
+                postalCode: branch.postalCode || '',
+                receiptHeader: branch.receiptHeader || '',
+                receiptFooter: branch.receiptFooter || '',
+                taxRate: branch.taxRate || 0,
+                currency: branch.currency || 'USD',
+                reportLogo: branch.reportLogo || '',
+                reportSignature: branch.reportSignature || '',
+                paymentTerms: branch.paymentTerms || '',
+                invoicePrefix: branch.invoicePrefix || '',
+                receiptPrefix: branch.receiptPrefix || ''
               };
             }
           } catch (error) {
@@ -1390,6 +1368,10 @@
               } else {
                 throw new Error('User ID not found');
               }
+            } else {
+              // Fallback to local storage for demo mode
+              localStorage.setItem('umi_profile', JSON.stringify(this.profile));
+              this.backendHelper?.showNotification('Profile saved locally', 'info');
             }
           } catch (error) {
             console.error('Error saving profile:', error);
@@ -1403,6 +1385,11 @@
         async savePharmacySettings() {
           try {
             this.loading = true;
+            
+            const branchId = this.authManager?.getCurrentUser()?.branchId;
+            if (!branchId) {
+              throw new Error('No branch ID found');
+            }
             
             const settingsData = {
               name: this.pharmacySettings.name,
@@ -1425,7 +1412,7 @@
             };
             
             if (this.apiClient) {
-              const response = await this.apiClient.request('/admin/pharmacy/settings', {
+              const response = await this.apiClient.request(`/branch/${branchId}`, {
                 method: 'PUT',
                 body: JSON.stringify(settingsData)
               });
@@ -1449,37 +1436,12 @@
         // Save notification settings
         async saveNotificationSettings() {
           try {
-            this.loading = true;
-            
-            const notificationData = {
-              email: this.notifications.email,
-              push: this.notifications.push,
-              sales: this.notifications.sales,
-              inventory: this.notifications.inventory,
-              prescriptions: this.notifications.prescriptions
-            };
-            
-            if (this.apiClient) {
-              const response = await this.apiClient.request('/admin/notification/settings', {
-                method: 'PUT',
-                body: JSON.stringify(notificationData)
-              });
-              
-              if (response.success) {
-                this.backendHelper?.showNotification('Notification settings saved successfully', 'success');
-              } else {
-                throw new Error(response.message || 'Failed to save notification settings');
-              }
-            } else {
-              // Fallback to localStorage
-              localStorage.setItem('umi_notification_settings', JSON.stringify(this.notifications));
-              this.backendHelper?.showNotification('Notification settings saved locally', 'info');
-            }
+            // Save to localStorage for now
+            localStorage.setItem('umi_notification_settings', JSON.stringify(this.notifications));
+            this.backendHelper?.showNotification('Notification settings saved', 'success');
           } catch (error) {
             console.error('Error saving notification settings:', error);
             this.backendHelper?.showNotification('Failed to save notification settings', 'error');
-          } finally {
-            this.loading = false;
           }
         },
         
@@ -1493,16 +1455,13 @@
             
             this.loading = true;
             
-            const userId = this.authManager?.getCurrentUser()?.id || 'admin-bypass';
             const passwordData = {
-              userId: userId,
               currentPassword: this.passwordForm.currentPassword,
-              newPassword: this.passwordForm.newPassword,
-              confirmPassword: this.passwordForm.confirmPassword
+              newPassword: this.passwordForm.newPassword
             };
             
             if (this.apiClient) {
-              const response = await this.apiClient.request('/admin/auth/change-password', {
+              const response = await this.apiClient.request('/auth/change-password', {
                 method: 'POST',
                 body: JSON.stringify(passwordData)
               });
@@ -1519,6 +1478,8 @@
               } else {
                 throw new Error(response.message || 'Failed to change password');
               }
+            } else {
+              this.backendHelper?.showNotification('Password change not available in demo mode', 'warning');
             }
           } catch (error) {
             console.error('Error changing password:', error);
@@ -1534,10 +1495,10 @@
             if (this.authManager) {
               await this.authManager.logout();
             }
-            window.location.href = '../../public/signin.html';
+            window.location.href = '/public/signin.html';
           } catch (error) {
             console.error('Logout error:', error);
-            window.location.href = '../../public/signin.html';
+            window.location.href = '/public/signin.html';
           }
         },
         
@@ -1546,11 +1507,11 @@
           try {
             if (!this.apiClient) return;
             
-            const response = await this.apiClient.request('/admin/stats');
+            const response = await this.apiClient.request('/user-management/user-stats');
             
             if (response.success && response.data) {
-              this.userLimitForm.currentUsers = response.data.totalUsers;
-              this.userLimitForm.requestedUsers = response.data.totalUsers;
+              this.userLimitForm.currentUsers = response.data.currentUsers;
+              this.userLimitForm.requestedUsers = response.data.currentUsers;
             }
           } catch (error) {
             console.error('Error loading user stats:', error);
@@ -1564,7 +1525,7 @@
             if (!this.apiClient) return;
             
             this.subscriptionLoading = true;
-            const response = await this.apiClient.request('/admin/subscription/status');
+            const response = await this.apiClient.request('/subscription/status');
             
             if (response.success && response.data) {
               this.subscriptionStatus = {
@@ -1589,7 +1550,7 @@
             if (!this.apiClient) return;
             
             this.plansLoading = true;
-            const response = await this.apiClient.request('/admin/subscription/plans');
+            const response = await this.apiClient.request('/subscription/plans');
             
             if (response.success && response.data) {
               this.availablePlans = response.data;

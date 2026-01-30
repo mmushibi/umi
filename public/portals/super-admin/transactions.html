@@ -1,0 +1,1277 @@
+<!DOCTYPE html>
+<html lang="en" x-data="transactions()">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Transaction History | UmiHealthInformationSystems Pharmacy Management</title>
+  <link rel="icon" href="../../logo.png" type="image/png">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Glacial+Indifference:wght@400;500;600;700&family=Material+Symbols+Rounded:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="../../assets/css/tailwind.output.css">
+  <!-- Include API and Data Sync Services -->
+  <script src="../shared/js/data-sync.js"></script>
+  <script src="../shared/js/role-based-access.js"></script>
+  <script src="../shared/js/super-admin-data-sync.js"></script>
+  <script src="../shared/js/realtime-sync.js"></script>
+  <script src="../admin/js/admin-api.js"></script>
+  <style>
+    :root {
+      --color-primary-blue: #2563EB;
+      --color-accent-teal: #14B8A6;
+      --color-text-white: #FFFFFF;
+      --color-subtle-blue: #EFF6FF;
+      --font-primary: 'Glacial Indifference', sans-serif;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      background: #0a0a0a;
+      color: var(--color-text-white);
+      font-family: 'Glacial Indifference', sans-serif;
+      line-height: 1.5;
+      min-height: 100vh;
+      position: relative;
+      background-image: 
+        linear-gradient(rgba(255, 255, 255, 0.03) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(255, 255, 255, 0.03) 1px, transparent 1px);
+      background-size: 50px 50px;
+    }
+
+    /* Custom scrollbar styles */
+    ::-webkit-scrollbar {
+      width: 8px;
+    }
+
+    ::-webkit-scrollbar-track {
+      background: rgba(255, 255, 255, 0.05);
+      border-radius: 4px;
+    }
+
+    ::-webkit-scrollbar-thumb {
+      background: rgba(255, 255, 255, 0.2);
+      border-radius: 4px;
+    }
+
+    ::-webkit-scrollbar-thumb:hover {
+      background: rgba(255, 255, 255, 0.3);
+    }
+
+    /* Firefox scrollbar */
+    * {
+      scrollbar-width: thin;
+      scrollbar-color: rgba(255, 255, 255, 0.2) rgba(255, 255, 255, 0.05);
+    }
+
+    /* Fallback for browsers that don't support scrollbar styling */
+    *::-webkit-scrollbar {
+      width: 8px;
+    }
+    
+    *::-webkit-scrollbar-track {
+      background: rgba(255, 255, 255, 0.05);
+      border-radius: 4px;
+    }
+    
+    *::-webkit-scrollbar-thumb {
+      background: rgba(255, 255, 255, 0.2);
+      border-radius: 4px;
+    }
+    
+    *::-webkit-scrollbar-thumb:hover {
+      background: rgba(255, 255, 255, 0.3);
+    }
+
+    .dashboard-container {
+      display: flex;
+      min-height: 100vh;
+    }
+
+    /* Sidebar Styles */
+    .sidebar {
+      width: 280px;
+      background: rgba(255, 255, 255, 0.1);
+      -webkit-backdrop-filter: blur(10px);
+      backdrop-filter: blur(10px);
+      border-right: 1px solid rgba(255, 255, 255, 0.2);
+      display: flex;
+      flex-direction: column;
+      position: fixed;
+      height: 100vh;
+      left: 0;
+      top: 0;
+      z-index: 1000;
+    }
+
+    .sidebar-header {
+      padding: 1.5rem;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.2);
+      text-align: center;
+    }
+
+    .sidebar-title {
+      font-size: 1.2rem;
+      font-weight: 700;
+      font-family: 'Glacial Indifference', sans-serif;
+      color: var(--color-accent-teal);
+    }
+
+    .sidebar-menu {
+      flex: 1;
+      padding: 1rem 0;
+      overflow-y: auto;
+    }
+
+    .menu-section {
+      margin-bottom: 2rem;
+    }
+
+    .menu-title {
+      font-size: 0.75rem;
+      font-weight: 600;
+      text-transform: uppercase;
+      opacity: 0.6;
+      padding: 0 1.5rem;
+      margin-bottom: 0.5rem;
+      font-family: 'Glacial Indifference', sans-serif;
+    }
+
+    .menu-item {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+      padding: 0.75rem 1.5rem;
+      color: var(--color-text-white);
+      text-decoration: none;
+      transition: all 0.3s ease;
+      font-family: 'Glacial Indifference', sans-serif;
+      font-size: 0.9rem;
+      opacity: 0.8;
+    }
+
+    .menu-item:hover {
+      background: rgba(255, 255, 255, 0.1);
+      opacity: 1;
+    }
+
+    .menu-item.active {
+      background: rgba(20, 184, 166, 0.2);
+      border-left: 3px solid var(--color-accent-teal);
+      opacity: 1;
+    }
+
+    .menu-icon {
+      font-size: 1.25rem;
+      color: var(--color-accent-teal);
+    }
+
+    .sidebar-footer {
+      padding: 1rem 1.5rem;
+      border-top: 1px solid rgba(255, 255, 255, 0.2);
+    }
+
+    /* Main Content Area */
+    .main-content {
+      flex: 1;
+      margin-left: 280px;
+      display: flex;
+      flex-direction: column;
+    }
+
+    /* Header Styles */
+    .header {
+      height: 70px;
+      background: rgba(10, 10, 10, 0.95);
+      -webkit-backdrop-filter: blur(10px);
+      backdrop-filter: blur(10px);
+      border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0 2rem;
+      position: sticky;
+      top: 0;
+      z-index: 999;
+    }
+
+    .header-left {
+      display: flex;
+      align-items: center;
+      gap: 2rem;
+    }
+
+    .header-logo {
+      display: flex;
+      align-items: center;
+    }
+
+    .header-logo img {
+      width: 100px;
+      height: 100px;
+      object-fit: contain;
+    }
+
+    .page-title {
+      font-size: 1.5rem;
+      font-weight: 700;
+      font-family: 'Glacial Indifference', sans-serif;
+    }
+
+    .header-right {
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+    }
+
+    .user-menu {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+      padding: 0.5rem 1rem;
+      background: rgba(255, 255, 255, 0.1);
+      border: 1px solid rgba(255, 255, 255, 0.2);
+      border-radius: 12px;
+      cursor: pointer;
+      transition: all 0.3s ease;
+    }
+
+    .user-menu:hover {
+      background: rgba(255, 255, 255, 0.15);
+    }
+
+    .user-avatar {
+      width: 35px;
+      height: 35px;
+      background: var(--color-accent-teal);
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1rem;
+    }
+
+    .user-info {
+      display: flex;
+      flex-direction: column;
+    }
+
+    .user-name {
+      font-weight: 600;
+      font-size: 0.9rem;
+      font-family: 'Glacial Indifference', sans-serif;
+    }
+
+    .user-role {
+      font-size: 0.75rem;
+      opacity: 0.8;
+      font-family: 'Glacial Indifference', sans-serif;
+    }
+
+    .search-container {
+      position: relative;
+      width: 350px;
+    }
+
+    .search-input-wrapper {
+      position: relative;
+      display: flex;
+      align-items: center;
+    }
+
+    .search-container .search-input {
+      width: 100%;
+      padding: 0.75rem 1rem 0.75rem 2.5rem;
+      background: rgba(255, 255, 255, 0.1);
+      border: 1px solid rgba(255, 255, 255, 0.3);
+      border-radius: 12px;
+      color: var(--color-text-white);
+      font-size: 0.9rem;
+      font-family: 'Glacial Indifference', sans-serif;
+      transition: all 0.3s ease;
+    }
+
+    .search-container .search-input::placeholder {
+      color: rgba(255, 255, 255, 0.5);
+    }
+
+    .search-container .search-input:focus {
+      outline: none;
+      background: rgba(255, 255, 255, 0.15);
+      border-color: var(--color-accent-teal);
+      box-shadow: 0 0 0 2px rgba(20, 184, 166, 0.2);
+    }
+
+    .search-icon {
+      position: absolute;
+      left: 0.75rem;
+      color: rgba(255, 255, 255, 0.6);
+      font-size: 1.2rem;
+      pointer-events: none;
+    }
+
+    .search-suggestions {
+      position: absolute;
+      top: 100%;
+      left: 0;
+      right: 0;
+      background: rgba(10, 10, 10, 0.95);
+      -webkit-backdrop-filter: blur(10px);
+      backdrop-filter: blur(10px);
+      border: 1px solid rgba(255, 255, 255, 0.2);
+      border-radius: 12px;
+      margin-top: 0.5rem;
+      max-height: 400px;
+      overflow-y: auto;
+      z-index: 1000;
+      box-shadow: 0 10px 25px rgba(0, 0, 0, 0.3);
+    }
+
+    .suggestion-item {
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+      padding: 1rem;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+    }
+
+    .suggestion-item:last-child {
+      border-bottom: none;
+    }
+
+    .suggestion-item:hover {
+      background: rgba(255, 255, 255, 0.1);
+    }
+
+    .suggestion-icon {
+      width: 40px;
+      height: 40px;
+      background: rgba(20, 184, 166, 0.2);
+      border-radius: 10px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.2rem;
+      color: var(--color-accent-teal);
+    }
+
+    .suggestion-content {
+      flex: 1;
+    }
+
+    .suggestion-title {
+      font-weight: 600;
+      font-size: 0.9rem;
+      font-family: 'Glacial Indifference', sans-serif;
+      margin-bottom: 0.25rem;
+    }
+
+    .suggestion-description {
+      font-size: 0.8rem;
+      opacity: 0.7;
+      font-family: 'Glacial Indifference', sans-serif;
+    }
+
+    .suggestion-type {
+      padding: 0.25rem 0.75rem;
+      background: rgba(255, 255, 255, 0.1);
+      border: 1px solid rgba(255, 255, 255, 0.3);
+      border-radius: 20px;
+      font-size: 0.75rem;
+      font-weight: 600;
+      font-family: 'Glacial Indifference', sans-serif;
+      text-transform: uppercase;
+    }
+
+    /* Content Area */
+    .content {
+      flex: 1;
+      padding: 2rem;
+      overflow-y: auto;
+    }
+
+    /* Page Header */
+    .page-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 2rem;
+    }
+
+    .page-actions {
+      display: flex;
+      gap: 1rem;
+    }
+
+    .btn {
+      padding: 0.75rem 1.5rem;
+      border: none;
+      border-radius: 12px;
+      font-size: 0.9rem;
+      font-weight: 600;
+      font-family: 'Glacial Indifference', sans-serif;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      text-decoration: none;
+    }
+
+    .btn-primary {
+      background: var(--color-accent-teal);
+      color: white;
+    }
+
+    .btn-primary:hover {
+      background: #0d9486;
+      transform: translateY(-2px);
+    }
+
+    .btn-secondary {
+      background: rgba(255, 255, 255, 0.1);
+      color: var(--color-text-white);
+      border: 1px solid rgba(255, 255, 255, 0.3);
+    }
+
+    .btn-secondary:hover {
+      background: rgba(255, 255, 255, 0.2);
+    }
+
+    /* Search and Filters */
+    .filters-section {
+      background: rgba(255, 255, 255, 0.1);
+      -webkit-backdrop-filter: blur(10px);
+      backdrop-filter: blur(10px);
+      border: 1px solid rgba(255, 255, 255, 0.2);
+      border-radius: 16px;
+      padding: 1.5rem;
+      margin-bottom: 2rem;
+    }
+
+    .search-bar {
+      display: flex;
+      gap: 1rem;
+      margin-bottom: 1rem;
+    }
+
+    .search-input {
+      flex: 1;
+      padding: 0.75rem;
+      background: rgba(255, 255, 255, 0.1);
+      border: 1px solid rgba(255, 255, 255, 0.3);
+      border-radius: 12px;
+      color: var(--color-text-white);
+      font-size: 0.9rem;
+      font-family: 'Glacial Indifference', sans-serif;
+    }
+
+    .search-input::placeholder {
+      color: rgba(255, 255, 255, 0.5);
+    }
+
+    .search-input:focus {
+      outline: none;
+      background: rgba(255, 255, 255, 0.15);
+      border-color: rgba(255, 255, 255, 0.5);
+    }
+
+    .date-filters {
+      display: flex;
+      gap: 1rem;
+      margin-bottom: 1rem;
+    }
+
+    .date-input {
+      flex: 1;
+      padding: 0.75rem;
+      background: rgba(255, 255, 255, 0.1);
+      border: 1px solid rgba(255, 255, 255, 0.3);
+      border-radius: 12px;
+      color: var(--color-text-white);
+      font-size: 0.9rem;
+      font-family: 'Glacial Indifference', sans-serif;
+    }
+
+    .date-input:focus {
+      outline: none;
+      background: rgba(255, 255, 255, 0.15);
+      border-color: rgba(255, 255, 255, 0.5);
+    }
+
+    .filter-tags {
+      display: flex;
+      gap: 0.5rem;
+      flex-wrap: wrap;
+    }
+
+    .filter-tag {
+      padding: 0.5rem 1rem;
+      background: rgba(255, 255, 255, 0.1);
+      border: 1px solid rgba(255, 255, 255, 0.3);
+      border-radius: 20px;
+      font-size: 0.8rem;
+      font-family: 'Glacial Indifference', sans-serif;
+      cursor: pointer;
+      transition: all 0.3s ease;
+    }
+
+    .filter-tag:hover,
+    .filter-tag.active {
+      background: var(--color-accent-teal);
+      border-color: var(--color-accent-teal);
+    }
+
+    /* Table Styles */
+    .table-container {
+      background: rgba(255, 255, 255, 0.1);
+      -webkit-backdrop-filter: blur(10px);
+      backdrop-filter: blur(10px);
+      border: 1px solid rgba(255, 255, 255, 0.2);
+      border-radius: 16px;
+      overflow: hidden;
+    }
+
+    .data-table {
+      width: 100%;
+      border-collapse: collapse;
+    }
+
+    .data-table th {
+      background: rgba(255, 255, 255, 0.05);
+      padding: 1rem;
+      text-align: left;
+      font-weight: 600;
+      font-family: 'Glacial Indifference', sans-serif;
+      font-size: 0.9rem;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+    }
+
+    .data-table td {
+      padding: 1rem;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+      font-size: 0.9rem;
+      font-family: 'Glacial Indifference', sans-serif;
+    }
+
+    .data-table tr:hover {
+      background: rgba(255, 255, 255, 0.05);
+    }
+
+    .status-badge {
+      padding: 0.25rem 0.75rem;
+      border-radius: 20px;
+      font-size: 0.8rem;
+      font-weight: 600;
+      font-family: 'Glacial Indifference', sans-serif;
+    }
+
+    .status-completed {
+      background: rgba(16, 185, 129, 0.2);
+      color: #10B981;
+    }
+
+    .status-pending {
+      background: rgba(251, 191, 36, 0.2);
+      color: #FCD34D;
+    }
+
+    .status-failed {
+      background: rgba(244, 76, 76, 0.2);
+      color: #FCA5A5;
+    }
+
+    .status-refunded {
+      background: rgba(139, 92, 246, 0.2);
+      color: #C4B5FD;
+    }
+
+    .amount {
+      font-weight: 600;
+      font-family: 'Glacial Indifference', sans-serif;
+    }
+
+    .amount-positive {
+      color: #10B981;
+    }
+
+    .amount-negative {
+      color: #FCA5A5;
+    }
+
+    .table-actions {
+      display: flex;
+      gap: 0.5rem;
+    }
+
+    .action-btn {
+      padding: 0.5rem;
+      background: rgba(255, 255, 255, 0.1);
+      border: 1px solid rgba(255, 255, 255, 0.3);
+      border-radius: 8px;
+      color: var(--color-text-white);
+      cursor: pointer;
+      transition: all 0.3s ease;
+      font-size: 1rem;
+    }
+
+    .action-btn:hover {
+      background: rgba(255, 255, 255, 0.2);
+    }
+
+    /* Loading State */
+    .loading-state {
+      text-align: center;
+      padding: 3rem;
+      opacity: 0.7;
+    }
+
+    .loading-spinner {
+      font-size: 2rem;
+      margin-bottom: 1rem;
+      color: var(--color-accent-teal);
+    }
+
+    /* Mobile Responsiveness */
+    .mobile-menu-toggle {
+      display: none;
+      background: none;
+      border: none;
+      color: var(--color-text-white);
+      font-size: 1.5rem;
+      cursor: pointer;
+    }
+
+    @media (max-width: 768px) {
+      .sidebar {
+        transform: translateX(-100%);
+        transition: transform 0.3s ease;
+      }
+
+      .sidebar.open {
+        transform: translateX(0);
+      }
+
+      .main-content {
+        margin-left: 0;
+      }
+
+      .mobile-menu-toggle {
+        display: block;
+      }
+
+      .header {
+        padding: 0 1rem;
+      }
+
+      .content {
+        padding: 1rem;
+      }
+
+      .page-header {
+        flex-direction: column;
+        gap: 1rem;
+        align-items: flex-start;
+      }
+
+      .search-bar,
+      .date-filters {
+        flex-direction: column;
+      }
+
+      .table-container {
+        overflow-x: auto;
+      }
+    }
+  </style>
+
+    <!-- Backend Integration Libraries -->
+    <script src="../../js/api-client.js"></script>
+    <script src="../../js/auth-manager.js"></script>
+    <script src="../shared/js/backend-integration-helper.js"></script>
+    <script src="../shared/js/page-integration-template.js"></script>
+    <script src="https://unpkg.com/alpinejs@3.x.x/dist/cdn.min.js" defer></script></head>
+<body>
+  <div class="dashboard-container">
+    <!-- Sidebar -->
+    <aside class="sidebar" :class="{ 'open': mobileMenuOpen }">
+      <div class="sidebar-header">
+        <div class="sidebar-title">Umi Admin</div>
+      </div>
+      
+      <nav class="sidebar-menu">
+        <div class="menu-section">
+          <div class="menu-title">Main</div>
+          <a href="home.html" class="menu-item">
+            <span class="material-symbols-rounded menu-icon">dashboard</span>
+            Home
+          </a>
+          <a href="pharmacies.html" class="menu-item">
+            <span class="material-symbols-rounded menu-icon">store</span>
+            Pharmacies
+          </a>
+          <a href="users.html" class="menu-item">
+            <span class="material-symbols-rounded menu-icon">people</span>
+            Users
+          </a>
+          <a href="transactions.html" class="menu-item active">
+            <span class="material-symbols-rounded menu-icon">receipt_long</span>
+            Transactions
+          </a>
+        </div>
+        
+        <div class="menu-section">
+          <div class="menu-title">Management</div>
+          <a href="analytics.html" class="menu-item">
+            <span class="material-symbols-rounded menu-icon">analytics</span>
+            Analytics
+          </a>
+          <a href="reports.html" class="menu-item">
+            <span class="material-symbols-rounded menu-icon">assessment</span>
+            Reports
+          </a>
+          <a href="settings.html" class="menu-item">
+            <span class="material-symbols-rounded menu-icon">account_circle</span>
+            Account
+          </a>
+          <a href="security.html" class="menu-item">
+            <span class="material-symbols-rounded menu-icon">security</span>
+            Security
+          </a>
+        </div>
+        
+        <div class="menu-section">
+          <div class="menu-title">Support</div>
+          <a href="help.html" class="menu-item">
+            <span class="material-symbols-rounded menu-icon">help_center</span>
+            Help Center
+          </a>
+          <a href="logs.html" class="menu-item">
+            <span class="material-symbols-rounded menu-icon">history</span>
+            System Logs
+          </a>
+        </div>
+      </nav>
+      
+      <div class="sidebar-footer">
+        <a href="../auth/signin.html" class="menu-item" @click.prevent="handleLogout">
+          <span class="material-symbols-rounded menu-icon">logout</span>
+          Sign Out
+        </a>
+      </div>
+    </aside>
+
+    <!-- Main Content -->
+    <main class="main-content">
+      <!-- Header -->
+      <header class="header">
+        <div class="header-left">
+          <button class="mobile-menu-toggle" @click="mobileMenuOpen = !mobileMenuOpen">
+            <span class="material-symbols-rounded">menu</span>
+          </button>
+          <div class="header-logo">
+            <!-- Logo removed per request -->
+          </div>
+          <h1 class="page-title">Transaction History</h1>
+        </div>
+        
+        <div class="header-right">
+          <div class="search-container" x-data="searchComponent()">
+            <div class="search-input-wrapper">
+              <input 
+                type="text" 
+                class="search-input" 
+                placeholder="Search pharmacies, users, transactions..."
+                x-model="query"
+                @input="handleSearch"
+                @focus="showSuggestions = true"
+                @blur="hideSuggestions"
+              >
+              <span class="material-symbols-rounded search-icon">search</span>
+            </div>
+            
+            <!-- Search Suggestions Dropdown -->
+            <div 
+              class="search-suggestions" 
+              x-show="showSuggestions && suggestions.length > 0"
+              x-transition
+            >
+              <template x-for="suggestion in suggestions" :key="suggestion.id">
+                <div class="suggestion-item" @click="selectSuggestion(suggestion)">
+                  <div class="suggestion-icon">
+                    <span class="material-symbols-rounded" x-text="suggestion.icon"></span>
+                  </div>
+                  <div class="suggestion-content">
+                    <div class="suggestion-title" x-text="suggestion.title"></div>
+                    <div class="suggestion-description" x-text="suggestion.description"></div>
+                  </div>
+                  <div class="suggestion-type" x-text="suggestion.type"></div>
+                </div>
+              </template>
+            </div>
+          </div>
+        </div>
+      </header>
+
+      <!-- Content Area -->
+      <div class="content">
+        <!-- Page Header -->
+        <div class="page-header">
+          <div>
+            <h2 class="page-title">Transaction History</h2>
+            <p style="opacity: 0.8; margin-top: 0.5rem;">View and manage all transactions across the UmiHealthInformationSystems platform</p>
+          </div>
+          <div class="page-actions">
+            <button class="btn btn-secondary" @click="exportTransactions">
+              <span class="material-symbols-rounded">download</span>
+              Export
+            </button>
+            <button class="btn btn-primary" @click="generateReport">
+              <span class="material-symbols-rounded">summarize</span>
+              Generate Report
+            </button>
+          </div>
+        </div>
+
+        <!-- Search and Filters -->
+        <div class="filters-section">
+          <div class="search-bar">
+            <input 
+              type="text" 
+              class="search-input" 
+              placeholder="Search transactions by ID, pharmacy, or patient..."
+              x-model="searchQuery"
+              @input="filterTransactions"
+            >
+            <button class="btn btn-secondary" @click="resetFilters">
+              <span class="material-symbols-rounded">refresh</span>
+              Reset
+            </button>
+          </div>
+          
+          <div class="date-filters">
+            <input 
+              type="date" 
+              class="date-input" 
+              placeholder="Start Date"
+              x-model="startDate"
+              @change="filterTransactions"
+            >
+            <input 
+              type="date" 
+              class="date-input" 
+              placeholder="End Date"
+              x-model="endDate"
+              @change="filterTransactions"
+            >
+          </div>
+          
+          <div class="filter-tags">
+            <div 
+              class="filter-tag" 
+              :class="{ 'active': activeFilter === 'all' }"
+              @click="setFilter('all')"
+            >
+              All Transactions
+            </div>
+            <div 
+              class="filter-tag" 
+              :class="{ 'active': activeFilter === 'completed' }"
+              @click="setFilter('completed')"
+            >
+              Completed
+            </div>
+            <div 
+              class="filter-tag" 
+              :class="{ 'active': activeFilter === 'pending' }"
+              @click="setFilter('pending')"
+            >
+              Pending
+            </div>
+            <div 
+              class="filter-tag" 
+              :class="{ 'active': activeFilter === 'failed' }"
+              @click="setFilter('failed')"
+            >
+              Failed
+            </div>
+            <div 
+              class="filter-tag" 
+              :class="{ 'active': activeFilter === 'refunded' }"
+              @click="setFilter('refunded')"
+            >
+              Refunded
+            </div>
+          </div>
+        </div>
+
+        <!-- Transactions Table -->
+        <div class="table-container">
+          <table class="data-table">
+            <thead>
+              <tr>
+                <th>Transaction ID</th>
+                <th>Date & Time</th>
+                <th>Pharmacy</th>
+                <th>Patient</th>
+                <th>Type</th>
+                <th>Amount</th>
+                <th>Status</th>
+                <th>Actions</th>
+              </tr>
+            </thead>
+            <tbody>
+              <!-- Loading State -->
+              <tr x-show="loading">
+                <td colspan="8">
+                  <div class="loading-state">
+                    <div class="loading-spinner">
+                      <span class="material-symbols-rounded">refresh</span>
+                    </div>
+                    <div>Loading transactions...</div>
+                  </div>
+                </td>
+              </tr>
+              
+              <!-- Empty State -->
+              <tr x-show="!loading && filteredTransactions.length === 0">
+                <td colspan="8">
+                  <div class="loading-state">
+                    <div style="font-size: 2rem; margin-bottom: 1rem; opacity: 0.5;">
+                      <span class="material-symbols-rounded">receipt_long</span>
+                    </div>
+                    <div>No transactions found</div>
+                    <div style="font-size: 0.9rem; opacity: 0.6; margin-top: 0.5rem;">
+                      Try adjusting your search or filters
+                    </div>
+                  </div>
+                </td>
+              </tr>
+              
+              <!-- Transaction Rows -->
+              <template x-for="transaction in filteredTransactions" :key="transaction.id">
+                <tr>
+                  <td>
+                    <div style="font-weight: 600; font-family: monospace;" x-text="transaction.id"></div>
+                  </td>
+                  <td>
+                    <div>
+                      <div x-text="transaction.date"></div>
+                      <div style="font-size: 0.8rem; opacity: 0.7;" x-text="transaction.time"></div>
+                    </div>
+                  </td>
+                  <td x-text="transaction.pharmacy"></td>
+                  <td>
+                    <div>
+                      <div x-text="transaction.patient"></div>
+                      <div style="font-size: 0.8rem; opacity: 0.7;" x-text="transaction.patientPhone"></div>
+                    </div>
+                  </td>
+                  <td x-text="transaction.type"></td>
+                  <td>
+                    <div class="amount" :class="transaction.amount > 0 ? 'amount-positive' : 'amount-negative'" x-text="formatAmount(transaction.amount)"></div>
+                  </td>
+                  <td>
+                    <span class="status-badge" :class="`status-${transaction.status}`" x-text="transaction.status"></span>
+                  </td>
+                  <td>
+                    <div class="table-actions">
+                      <button class="action-btn" @click="viewTransaction(transaction)" title="View Details">
+                        <span class="material-symbols-rounded">visibility</span>
+                      </button>
+                      <button class="action-btn" @click="downloadReceipt(transaction)" title="Download Receipt">
+                        <span class="material-symbols-rounded">download</span>
+                      </button>
+                      <button class="action-btn" @click="processRefund(transaction)" title="Process Refund" x-show="transaction.status === 'completed'">
+                        <span class="material-symbols-rounded">refund</span>
+                      </button>
+                    </div>
+                  </td>
+                </tr>
+              </template>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </main>
+  </div>
+
+  <script>
+    function searchComponent() {
+      return {
+        // Initialize backend integration
+        const pageIntegration = new PageIntegrationTemplate('super-admin-transactions', {
+            requireAuth: true,
+            enableRealTime: false,
+            enableCaching: true
+        });
+        
+        return {
+            ...pageIntegration,
+            backendHelper: window.backendHelper,
+            apiClient: window.apiClient,
+            authManager: window.authManager,
+            isAuthenticated: false,
+            loading: false,
+            error: null,
+        query: '',
+        showSuggestions: false,
+        suggestions: [],
+        allSuggestions: [
+          { id: 1, title: 'Pharmacies', description: 'Manage pharmacy tenants', type: 'page', icon: 'store', url: 'pharmacies.html' },
+          { id: 2, title: 'Users', description: 'User management', type: 'page', icon: 'people', url: 'users.html' },
+          { id: 3, title: 'Transactions', description: 'Transaction history', type: 'page', icon: 'receipt_long', url: 'transactions.html' },
+          { id: 4, title: 'Analytics', description: 'System analytics', type: 'page', icon: 'analytics', url: 'analytics.html' },
+          { id: 5, title: 'Reports', description: 'Reports & insights', type: 'page', icon: 'assessment', url: 'reports.html' },
+          { id: 6, title: 'Security', description: 'Security center', type: 'page', icon: 'security', url: 'security.html' },
+          { id: 7, title: 'Settings', description: 'Account & system settings', type: 'page', icon: 'settings', url: 'settings.html' },
+          { id: 8, title: 'Help Center', description: 'Support and documentation', type: 'page', icon: 'help_center', url: 'help.html' },
+          { id: 9, title: 'System Logs', description: 'System activity logs', type: 'page', icon: 'history', url: 'logs.html' }
+        ],
+
+        handleSearch() {
+          const q = (this.query || '').trim().toLowerCase();
+          if (q.length < 2) {
+            this.suggestions = [];
+            return;
+          }
+
+          this.suggestions = this.allSuggestions
+            .filter(s =>
+              (s.title && s.title.toLowerCase().includes(q)) ||
+              (s.description && s.description.toLowerCase().includes(q)) ||
+              (s.type && s.type.toLowerCase().includes(q))
+            )
+            .slice(0, 8);
+        },
+
+        selectSuggestion(suggestion) {
+          this.query = suggestion.title;
+          this.showSuggestions = false;
+          if (suggestion && suggestion.url) {
+            window.location.href = suggestion.url;
+          }
+        },
+
+        hideSuggestions() {
+          setTimeout(() => {
+            this.showSuggestions = false;
+          }, 200);
+        }
+      }
+    }
+
+    function transactions() {
+      return {
+        userName: '',
+        userEmail: '',
+        mobileMenuOpen: false,
+        showUserMenu: false,
+        loading: true,
+        searchQuery: '',
+        startDate: '',
+        endDate: '',
+        activeFilter: 'all',
+        transactions: [],
+        filteredTransactions: [],
+
+        async init() {
+            try {
+                // Check authentication
+                this.isAuthenticated = this.authManager?.isAuthenticated() || false;
+                
+                if (!this.isAuthenticated) {
+                    this.error = 'Please login to access this page';
+                    return;
+                }
+                
+                // Initialize backend integration
+                await this.backendHelper.initPage('super-admin-transactions', {
+                    enableRealTime: false,
+                    initialData: this.getInitialDataConfig()
+                });
+                
+                // Load page data
+                await this.loadPageData();
+                
+                // Set up event listeners
+                this.setupEventListeners();
+                
+                console.log('super-admin-transactions page initialized with backend integration');
+            } catch (error) {
+                console.error('Failed to initialize super-admin-transactions page:', error);
+                this.error = 'Failed to initialize page';
+            }
+        },
+          
+          // Load transactions
+          this.loadTransactions();
+          
+          // Set up real-time updates
+          window.superAdminDataSync.subscribe('/transactions', (data) => {
+            this.loadTransactions();
+          });
+          
+          // Set up event listeners
+          window.superAdminDataSync.addEventListener('error', (message) => {
+            this.showError(message);
+          });
+          
+          window.superAdminDataSync.addEventListener('success', (message) => {
+            this.showSuccess(message);
+          });
+          
+          // Close mobile menu when clicking outside
+          document.addEventListener('click', (e) => {
+            if (!e.target.closest('.sidebar') && !e.target.closest('.mobile-menu-toggle')) {
+              this.mobileMenuOpen = false;
+            }
+            if (!e.target.closest('.user-menu')) {
+              this.showUserMenu = false;
+            }
+          });
+        },
+
+        async loadTransactions() {
+          this.loading = true;
+          try {
+            console.log('Fetching transactions from super admin API...');
+            
+            // Use the super admin data sync service
+            const response = await window.superAdminDataSync.request('/transactions');
+            
+            this.transactions = response.data || [];
+            this.filteredTransactions = [...this.transactions];
+            
+            console.log(`Loaded ${this.transactions.length} transactions`);
+            
+          } catch (error) {
+            console.error('Failed to load transactions:', error);
+            this.transactions = [];
+            this.filteredTransactions = [];
+            window.superAdminDataSync.notifyError('Failed to load transactions');
+          } finally {
+            this.loading = false;
+          }
+        },
+
+        filterTransactions() {
+          let filtered = [...this.transactions];
+          
+          // Apply search filter
+          if (this.searchQuery) {
+            const query = this.searchQuery.toLowerCase();
+            filtered = filtered.filter(transaction => 
+              transaction.id.toLowerCase().includes(query) ||
+              transaction.pharmacy.toLowerCase().includes(query) ||
+              transaction.patient.toLowerCase().includes(query) ||
+              transaction.patientPhone.toLowerCase().includes(query)
+            );
+          }
+          
+          // Apply date filter
+          if (this.startDate) {
+            filtered = filtered.filter(transaction => 
+              new Date(transaction.date) >= new Date(this.startDate)
+            );
+          }
+          
+          if (this.endDate) {
+            filtered = filtered.filter(transaction => 
+              new Date(transaction.date) <= new Date(this.endDate)
+            );
+          }
+          
+          // Apply status filter
+          if (this.activeFilter !== 'all') {
+            filtered = filtered.filter(transaction => transaction.status === this.activeFilter);
+          }
+          
+          this.filteredTransactions = filtered;
+        },
+
+        setFilter(filter) {
+          this.activeFilter = filter;
+          this.filterTransactions();
+        },
+
+        resetFilters() {
+          this.searchQuery = '';
+          this.startDate = '';
+          this.endDate = '';
+          this.activeFilter = 'all';
+          this.filterTransactions();
+        },
+
+        formatAmount(amount) {
+          return new Intl.NumberFormat('en-ZM', {
+            style: 'currency',
+            currency: 'ZMW'
+          }).format(amount);
+        },
+
+        viewTransaction(transaction) {
+          console.log('Viewing transaction:', transaction);
+          // This would open a modal with transaction details
+          alert(`Viewing transaction ${transaction.id} details`);
+        },
+
+        downloadReceipt(transaction) {
+          console.log('Downloading receipt for:', transaction);
+          // This would generate and download a PDF receipt
+          alert(`Downloading receipt for transaction ${transaction.id}`);
+        },
+
+        processRefund(transaction) {
+          if (confirm(`Are you sure you want to process a refund for transaction ${transaction.id}?`)) {
+            console.log(`Processing refund for: ${transaction.id}`);
+            // This would make an API call to process the refund
+            alert(`Refund processed for transaction ${transaction.id}`);
+          }
+        },
+
+        exportTransactions() {
+          console.log('Exporting transaction data...');
+          // This would generate and download a CSV/Excel file
+          alert('Export feature coming soon!');
+        },
+
+        generateReport() {
+          console.log('Generating transaction report...');
+          // This would generate a comprehensive report
+          alert('Report generation feature coming soon!');
+        },
+
+        handleLogout() {
+          if (confirm('Are you sure you want to sign out?')) {
+            // Clear session
+            sessionStorage.clear();
+            
+            // Redirect to signin
+            window.location.href = '../auth/signin.html';
+          }
+        }
+      }
+    }
+  </script>
+
+  <!-- Include API and Data Sync Services -->
+  <script src="../shared/js/data-sync.js"></script>
+  <script src="../shared/js/role-based-access.js"></script>
+  <script src="../shared/js/super-admin-data-sync.js"></script>
+  <script src="../admin/js/admin-api.js"></script>
+  <script src="js/super-admin-api.js"></script>
+
+  <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
+</body>
+</html>
+
+
+
+

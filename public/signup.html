@@ -30,13 +30,14 @@
       color: var(--color-text-white);
       font-family: 'Nunito', 'Varela Round', sans-serif;
       line-height: 1.5;
-      min-height: 100vh;
+      height: 100vh;
+      overflow: hidden;
       position: relative;
     }
 
     .auth-container {
       display: flex;
-      min-height: 100vh;
+      height: 100vh;
     }
 
     .auth-left {
@@ -60,28 +61,30 @@
 
     .auth-card {
       width: 100%;
-      max-width: 400px;
+      max-width: 600px;
       background: rgba(255, 255, 255, 0.1);
       -webkit-backdrop-filter: blur(10px);
       backdrop-filter: blur(10px);
       border: 1px solid rgba(255, 255, 255, 0.2);
       border-radius: 20px;
-      padding: 1.75rem;
+      padding: 1.25rem;
       box-shadow: 0 20px 40px rgba(0, 0, 0, 0.2);
+      max-height: 90vh;
+      overflow-y: auto;
     }
 
     .auth-header {
       text-align: center;
-      margin-bottom: 2rem;
+      margin-bottom: 1.25rem;
     }
 
     .logo-container {
       text-align: center;
-      margin-bottom: 1.5rem;
+      margin-bottom: 1rem;
     }
 
     .umi-logo {
-      max-width: 120px;
+      max-width: 100px;
       height: auto;
       border-radius: 8px;
       box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
@@ -106,7 +109,7 @@
     }
 
     .form-group {
-      margin-bottom: 1rem;
+      margin-bottom: 0.75rem;
     }
 
     .form-label {
@@ -120,7 +123,7 @@
 
     .form-input {
       width: 100%;
-      padding: 0.75rem;
+      padding: 0.625rem;
       background: rgba(255, 255, 255, 0.1);
       border: 1px solid rgba(255, 255, 255, 0.3);
       border-radius: 12px;
@@ -165,7 +168,7 @@
 
     .submit-button {
       width: 100%;
-      padding: 0.75rem;
+      padding: 0.625rem;
       background: var(--color-text-white);
       color: var(--color-primary-blue);
       border: none;
@@ -175,7 +178,7 @@
       font-family: 'Nunito', 'Varela Round', sans-serif;
       cursor: pointer;
       transition: all 0.3s ease;
-      margin-bottom: 1.25rem;
+      margin-bottom: 0.875rem;
     }
 
     .submit-button:hover {
@@ -355,20 +358,58 @@
     @media (max-width: 768px) {
       .auth-container {
         flex-direction: column;
+        height: 100vh;
       }
 
       .auth-right {
         display: none;
       }
 
+      .auth-left {
+        padding: 1rem;
+      }
+
       .auth-card {
         max-width: 100%;
-        padding: 2rem 1.5rem;
+        padding: 0.75rem;
+        max-height: 80vh;
+        overflow-y: auto;
+        scrollbar-width: none; /* Firefox */
+        -ms-overflow-style: none; /* IE and Edge */
+      }
+
+      .auth-card::-webkit-scrollbar {
+        display: none; /* Chrome, Safari, Opera */
+      }
+
+      .auth-header {
+        margin-bottom: 0.75rem;
+      }
+
+      .logo-container {
+        margin-bottom: 0.5rem;
+      }
+
+      .umi-logo {
+        max-width: 70px;
+      }
+
+      .form-group {
+        margin-bottom: 0.4rem;
+      }
+
+      .form-input {
+        padding: 0.4rem;
+      }
+
+      .submit-button {
+        padding: 0.4rem;
+        margin-bottom: 0.5rem;
       }
 
       .back-to-home {
         position: static;
-        margin-bottom: 2rem;
+        margin-bottom: 0.75rem;
         justify-content: center;
       }
     }
@@ -475,7 +516,7 @@
 
           try {
             // Real API call for user registration
-            const response = await fetch('http://localhost:5001/api/v1/auth/register', {
+            const response = await fetch('http://localhost:5000/api/v1/auth/register', {
               method: 'POST',
               headers: {
                 'Content-Type': 'application/json',

@@ -1,0 +1,4045 @@
+<!DOCTYPE html>
+<html lang="en" x-data="userManagementSystem()">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>User Management - Umi Health Information Systems</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@100;400;500;600;700&family=Varela+Round&family=Nunito:wght@400;600;700&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Rounded:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+  <link rel="stylesheet" href="../../shared/css/shared-styles.css">
+  <script src="../../shared/js/data-sync.js"></script>
+  <script src="../../shared/js/role-based-access.js"></script>
+  <script src="../../shared/js/feature-protection.js"></script>
+  <script src="js/admin-api.js"></script>
+  <style>
+    :root {
+      --color-primary: #000000;
+      --color-accent: #14B8A6;
+      --color-success: #22c55e;
+      --color-warning: #ef4444;
+      --color-text-primary: #000000;
+      --color-text-secondary: #6b7280;
+      --color-text-muted: #9ca3af;
+      --color-background: #ffffff;
+      --color-surface: #f9fafb;
+      --color-border: #e5e7eb;
+      --font-primary: 'Inter', sans-serif;
+      --sidebar-width: 280px;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      background: var(--color-background);
+      color: var(--color-text-primary);
+      font-family: 'Nunito', 'Varela Round', sans-serif;
+      line-height: 1.5;
+      overflow-x: hidden;
+    }
+
+    /* Sidebar Styles */
+    .sidebar {
+      position: fixed;
+      left: 0;
+      top: 0;
+      width: var(--sidebar-width);
+      height: 100vh;
+      background: var(--color-text-primary);
+      color: var(--color-accent);
+      z-index: 1000;
+      transition: transform 0.3s ease;
+      display: flex;
+      flex-direction: column;
+      overflow-y: auto;
+      overflow-x: hidden;
+    }
+
+    .sidebar-header {
+      padding: 1.5rem;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+    }
+
+    .logo-section {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+    }
+
+    .logo-icon {
+      width: 32px;
+      height: 32px;
+      background: rgba(255, 255, 255, 0.2);
+      border-radius: 8px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.2rem;
+    }
+
+    .logo-icon img {
+      width: 40px;
+      height: 40px;
+      border-radius: 8px;
+      object-fit: contain;
+    }
+
+    .logo-text {
+      font-size: 1rem;
+      font-weight: 600;
+      font-family: 'Inter', sans-serif;
+    }
+
+
+    .nav-menu {
+      padding: 1rem 0;
+      flex: 1;
+      overflow-y: auto;
+    }
+
+    .nav-item {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+      padding: 0.75rem 1.25rem;
+      color: rgba(255, 255, 255, 0.8);
+      text-decoration: none;
+      transition: all 0.2s ease;
+      cursor: pointer;
+      font-size: 0.8rem;
+      font-weight: 500;
+    }
+
+    .nav-item:hover {
+      background: rgba(255, 255, 255, 0.1);
+      color: var(--color-accent);
+    }
+
+    .nav-item.active {
+      background: rgba(255, 255, 255, 0.15);
+      color: var(--color-accent);
+      border-left: 3px solid var(--color-accent);
+    }
+
+    .nav-icon {
+      font-size: 1rem;
+    }
+
+    /* Main Content Area */
+    .main-content {
+      margin-left: var(--sidebar-width);
+      min-height: 100vh;
+      transition: margin-left 0.3s ease;
+    }
+
+    /* Header Styles */
+    .header {
+      background: white;
+      border-bottom: 1px solid #e2e8f0;
+      padding: 1rem 2rem;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      position: sticky;
+      top: 0;
+      z-index: 100;
+    }
+
+    .header-left {
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+    }
+
+    .page-title-section {
+      margin-right: 2rem;
+    }
+
+    .page-title-section .page-title {
+      font-size: 1.5rem;
+      font-weight: 700;
+      color: var(--color-text-primary);
+      margin: 0;
+      font-family: 'Inter', sans-serif;
+    }
+
+    .mobile-menu-toggle {
+      display: none;
+      background: none;
+      border: none;
+      font-size: 1.5rem;
+      color: var(--color-text-secondary);
+      cursor: pointer;
+    }
+
+    .header-right {
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+    }
+
+    .create-button {
+      background: var(--color-primary);
+      color: var(--color-accent);
+      border: none;
+      padding: 0.625rem 1.25rem;
+      border-radius: 16px;
+      font-size: 0.875rem;
+      font-weight: 600;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      transition: all 0.3s ease;
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+    }
+
+    .create-button:hover {
+      background: var(--color-text-secondary);
+      transform: translateY(-2px);
+      box-shadow: 0 8px 24px rgba(0, 0, 0, 0.2);
+    }
+
+    .user-profile {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+      padding: 0.5rem;
+      border-radius: 16px;
+      cursor: pointer;
+      transition: all 0.3s ease;
+    }
+
+    .user-profile:hover {
+      background: var(--color-surface);
+    }
+
+    .user-avatar {
+      width: 36px;
+      height: 36px;
+      background: var(--color-text-primary);
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: var(--color-accent);
+      font-weight: 600;
+      font-size: 0.875rem;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+    }
+
+    .user-info {
+      display: flex;
+      flex-direction: column;
+    }
+
+    .user-name {
+      font-size: 0.875rem;
+      font-weight: 600;
+      color: var(--color-text-primary);
+    }
+
+    .user-role {
+      font-size: 0.75rem;
+      color: var(--color-text-secondary);
+    }
+
+    /* User Management Content */
+    .users-content {
+      padding: 2rem;
+    }
+
+    .stats-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+      gap: 1.5rem;
+      margin-bottom: 2rem;
+    }
+
+    .stat-card {
+      background: var(--color-background);
+      border-radius: 20px;
+      padding: 1.5rem;
+      border: 1px solid var(--color-border);
+      transition: all 0.3s ease;
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
+    }
+
+    .stat-card:hover {
+      transform: translateY(-4px);
+      box-shadow: 0 8px 24px rgba(0, 0, 0, 0.12);
+    }
+
+    .stat-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 1rem;
+    }
+
+    .stat-icon {
+      width: 48px;
+      height: 48px;
+      border-radius: 16px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.5rem;
+    }
+
+    .stat-icon.primary {
+      background: rgba(0, 0, 0, 0.1);
+      color: var(--color-primary);
+    }
+
+    .stat-icon.success {
+      background: rgba(34, 197, 94, 0.1);
+      color: var(--color-success);
+    }
+
+    .stat-icon.warning {
+      background: rgba(239, 68, 68, 0.1);
+      color: var(--color-warning);
+    }
+
+    .stat-value {
+      font-size: 2rem;
+      font-weight: 700;
+      color: var(--color-text-primary);
+      margin-bottom: 0.25rem;
+      font-family: 'Inter', sans-serif;
+    }
+
+    .stat-label {
+      color: var(--color-text-secondary);
+      font-size: 0.875rem;
+      margin-bottom: 0.5rem;
+    }
+
+    .stat-change {
+      font-size: 0.75rem;
+      font-weight: 600;
+      display: flex;
+      align-items: center;
+      gap: 0.25rem;
+    }
+
+    .stat-change.positive {
+      color: var(--color-success);
+    }
+
+    .stat-change.negative {
+      color: var(--color-warning);
+    }
+
+    /* Users Table */
+    .users-section {
+      background: var(--color-background);
+      border-radius: 20px;
+      border: 1px solid var(--color-border);
+      overflow: hidden;
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
+    }
+
+    .section-header {
+      padding: 1.5rem;
+      border-bottom: 1px solid var(--color-border);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .section-title {
+      font-size: 1.125rem;
+      font-weight: 600;
+      color: var(--color-text-primary);
+      font-family: 'Inter', sans-serif;
+    }
+
+    .controls-bar {
+      display: flex;
+      gap: 1rem;
+      align-items: center;
+    }
+
+    .search-bar {
+      position: relative;
+    }
+
+    .search-input {
+      width: 300px;
+      padding: 0.5rem 1rem 0.5rem 2.5rem;
+      border: 1px solid var(--color-border);
+      border-radius: 8px;
+      font-size: 0.875rem;
+      transition: all 0.3s ease;
+    }
+
+    .search-input:focus {
+      outline: none;
+      border-color: var(--color-primary);
+      box-shadow: 0 0 0 4px rgba(0, 0, 0, 0.1);
+    }
+
+    .search-icon {
+      position: absolute;
+      left: 0.75rem;
+      top: 50%;
+      transform: translateY(-50%);
+      color: var(--color-text-muted);
+      font-size: 1rem;
+    }
+
+    .filter-dropdown {
+      position: relative;
+    }
+
+    .filter-button {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      padding: 0.5rem 1rem;
+      border: 1px solid var(--color-border);
+      background: var(--color-background);
+      border-radius: 8px;
+      cursor: pointer;
+      font-size: 0.875rem;
+      transition: all 0.2s ease;
+    }
+
+    .filter-button:hover {
+      background: var(--color-surface);
+    }
+
+    .table-container {
+      overflow-x: auto;
+      border: 1px solid var(--color-border);
+      border-radius: 8px;
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+    }
+
+    .users-table {
+      width: 100%;
+      border-collapse: separate;
+      border-spacing: 0;
+      background: white;
+    }
+
+    .users-table th {
+      background: linear-gradient(to bottom, #f8f9fa, #e9ecef);
+      padding: 1rem 1.25rem;
+      text-align: left;
+      font-weight: 600;
+      font-size: 0.875rem;
+      color: var(--color-text-primary);
+      border-bottom: 2px solid var(--color-border);
+      border-right: 1px solid var(--color-border);
+      position: sticky;
+      top: 0;
+      z-index: 10;
+      white-space: nowrap;
+      font-family: 'Inter', sans-serif;
+    }
+
+    .users-table th:last-child {
+      border-right: none;
+    }
+
+    .users-table th:first-child {
+      border-top-left-radius: 8px;
+    }
+
+    .users-table th:last-child {
+      border-top-right-radius: 8px;
+    }
+
+    .users-table td {
+      padding: 0.875rem 1.25rem;
+      border-bottom: 1px solid #e8eaed;
+      border-right: 1px solid #e8eaed;
+      font-size: 0.875rem;
+      vertical-align: middle;
+      white-space: nowrap;
+    }
+
+    .users-table td:last-child {
+      border-right: none;
+    }
+
+    .users-table tbody tr {
+      transition: all 0.15s ease;
+    }
+
+    .users-table tbody tr:hover {
+      background: #f8f9ff;
+      box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+    }
+
+    .users-table tbody tr:nth-child(even) {
+      background: #fafbfc;
+    }
+
+    .users-table tbody tr:nth-child(even):hover {
+      background: #f8f9ff;
+    }
+
+    /* Spreadsheet-style employee directory table */
+    .product-table {
+      width: 100%;
+      border-collapse: separate;
+      border-spacing: 0;
+      background: white;
+      font-size: 0.875rem;
+    }
+
+    .product-table thead {
+      position: sticky;
+      top: 0;
+      z-index: 10;
+    }
+
+    .product-table th {
+      background: linear-gradient(to bottom, #f8f9fa, #e9ecef);
+      padding: 1rem 1.25rem;
+      text-align: left;
+      font-weight: 600;
+      color: var(--color-text-primary);
+      border-bottom: 2px solid var(--color-border);
+      border-right: 1px solid var(--color-border);
+      white-space: nowrap;
+      font-family: 'Inter', sans-serif;
+      font-size: 0.875rem;
+      position: relative;
+    }
+
+    .product-table th:last-child {
+      border-right: none;
+    }
+
+    .product-table th:first-child {
+      border-top-left-radius: 8px;
+    }
+
+    .product-table th:last-child {
+      border-top-right-radius: 8px;
+    }
+
+    .product-table td {
+      padding: 0.875rem 1.25rem;
+      border-bottom: 1px solid #e8eaed;
+      border-right: 1px solid #e8eaed;
+      vertical-align: middle;
+      white-space: nowrap;
+    }
+
+    .product-table td:last-child {
+      border-right: none;
+    }
+
+    .product-table tbody tr {
+      transition: all 0.15s ease;
+    }
+
+    .product-table tbody tr:hover {
+      background: #f8f9ff;
+      box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+    }
+
+    .product-table tbody tr:nth-child(even) {
+      background: #fafbfc;
+    }
+
+    .product-table tbody tr:nth-child(even):hover {
+      background: #f8f9ff;
+    }
+
+    /* Enhanced employee info cell */
+    .employee-info {
+      display: flex;
+      align-items: center;
+      gap: 0.875rem;
+      padding: 0.25rem 0;
+    }
+
+    .employee-avatar {
+      width: 36px;
+      height: 36px;
+      border-radius: 50%;
+      background: linear-gradient(135deg, var(--color-primary), #333);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: white;
+      font-weight: 600;
+      font-size: 0.8rem;
+      flex-shrink: 0;
+      border: 2px solid #fff;
+      box-shadow: 0 2px 6px rgba(0, 0, 0, 0.15);
+      transition: all 0.2s ease;
+    }
+
+    .employee-avatar:hover {
+      transform: scale(1.05);
+      box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+    }
+
+    .employee-details {
+      display: flex;
+      flex-direction: column;
+      gap: 0.125rem;
+      min-width: 0;
+      flex: 1;
+    }
+
+    .employee-name {
+      font-weight: 600;
+      color: var(--color-text-primary);
+      font-size: 0.875rem;
+      font-family: 'Inter', sans-serif;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .employee-email {
+      color: var(--color-text-secondary);
+      font-size: 0.75rem;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      font-family: 'Inter', sans-serif;
+    }
+
+    /* Enhanced status badges */
+    .status-badge {
+      display: inline-flex;
+      align-items: center;
+      padding: 0.25rem 0.625rem;
+      border-radius: 6px;
+      font-size: 0.75rem;
+      font-weight: 600;
+      text-transform: capitalize;
+      border: 1px solid;
+      transition: all 0.15s ease;
+      font-family: 'Inter', sans-serif;
+      letter-spacing: 0.25px;
+      white-space: nowrap;
+    }
+
+    .status-badge.active {
+      background: rgba(34, 197, 94, 0.1);
+      color: #15803d;
+      border-color: rgba(34, 197, 94, 0.3);
+    }
+
+    .status-badge.inactive {
+      background: rgba(107, 114, 128, 0.1);
+      color: #374151;
+      border-color: rgba(107, 114, 128, 0.3);
+    }
+
+    .status-badge.on-leave {
+      background: rgba(245, 158, 11, 0.1);
+      color: #92400e;
+      border-color: rgba(245, 158, 11, 0.3);
+    }
+
+    .status-badge.suspended {
+      background: rgba(239, 68, 68, 0.1);
+      color: #991b1b;
+      border-color: rgba(239, 68, 68, 0.3);
+    }
+
+    .status-badge.terminated {
+      background: rgba(107, 114, 128, 0.2);
+      color: #4b5563;
+      border-color: rgba(107, 114, 128, 0.4);
+    }
+
+    /* Enhanced role badges */
+    .role-badge {
+      display: inline-flex;
+      align-items: center;
+      padding: 0.25rem 0.625rem;
+      border-radius: 6px;
+      font-size: 0.75rem;
+      font-weight: 600;
+      border: 1px solid;
+      transition: all 0.15s ease;
+      font-family: 'Inter', sans-serif;
+      white-space: nowrap;
+    }
+
+    .role-badge.admin {
+      background: rgba(239, 68, 68, 0.1);
+      color: #991b1b;
+      border-color: rgba(239, 68, 68, 0.3);
+    }
+
+    .role-badge.pharmacist {
+      background: rgba(34, 197, 94, 0.1);
+      color: #15803d;
+      border-color: rgba(34, 197, 94, 0.3);
+    }
+
+    .role-badge.cashier {
+      background: rgba(0, 0, 0, 0.1);
+      color: #374151;
+      border-color: rgba(0, 0, 0, 0.3);
+    }
+
+    .role-badge.manager {
+      background: rgba(59, 130, 246, 0.1);
+      color: #1e40af;
+      border-color: rgba(59, 130, 246, 0.3);
+    }
+
+    .role-badge.technician {
+      background: rgba(168, 85, 247, 0.1);
+      color: #6b21a8;
+      border-color: rgba(168, 85, 247, 0.3);
+    }
+
+    .role-badge.assistant {
+      background: rgba(251, 146, 60, 0.1);
+      color: #9a3412;
+      border-color: rgba(251, 146, 60, 0.3);
+    }
+
+    /* Enhanced department badges */
+    .department-badge {
+      display: inline-flex;
+      align-items: center;
+      padding: 0.25rem 0.625rem;
+      border-radius: 6px;
+      font-size: 0.75rem;
+      font-weight: 600;
+      border: 1px solid;
+      transition: all 0.15s ease;
+      font-family: 'Inter', sans-serif;
+      white-space: nowrap;
+    }
+
+    .department-badge.pharmacy {
+      background: rgba(34, 197, 94, 0.1);
+      color: #15803d;
+      border-color: rgba(34, 197, 94, 0.3);
+    }
+
+    .department-badge.retail {
+      background: rgba(59, 130, 246, 0.1);
+      color: #1e40af;
+      border-color: rgba(59, 130, 246, 0.3);
+    }
+
+    .department-badge.administration {
+      background: rgba(168, 85, 247, 0.1);
+      color: #6b21a8;
+      border-color: rgba(168, 85, 247, 0.3);
+    }
+
+    /* Branch badges */
+    .branch-badge {
+      display: inline-flex;
+      align-items: center;
+      padding: 0.25rem 0.625rem;
+      border-radius: 6px;
+      font-size: 0.75rem;
+      font-weight: 600;
+      font-family: 'Inter', sans-serif;
+      white-space: nowrap;
+      transition: all 0.15s ease;
+    }
+
+    .branch-badge:hover {
+      transform: scale(1.05);
+      box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    }
+
+    /* Enhanced contact cell */
+    .contact-info {
+      display: flex;
+      flex-direction: column;
+      gap: 0.125rem;
+      font-family: 'Inter', sans-serif;
+    }
+
+    .contact-email {
+      color: var(--color-text-primary);
+      font-size: 0.8125rem;
+      font-weight: 500;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .contact-phone {
+      color: var(--color-text-secondary);
+      font-size: 0.75rem;
+      font-weight: 400;
+    }
+
+    /* Enhanced shift info */
+    .shift-info {
+      display: flex;
+      align-items: center;
+      gap: 0.375rem;
+      color: var(--color-text-primary);
+      font-size: 0.8125rem;
+      font-weight: 500;
+      font-family: 'Inter', sans-serif;
+    }
+
+    .shift-info .material-symbols-rounded {
+      font-size: 0.875rem;
+      color: var(--color-text-muted);
+    }
+
+    /* Enhanced date cell */
+    .date-cell {
+      color: var(--color-text-primary);
+      font-size: 0.8125rem;
+      font-weight: 500;
+      font-family: 'Inter', sans-serif;
+    }
+
+    /* Enhanced actions cell */
+    .actions-cell {
+      display: flex;
+      align-items: center;
+      gap: 0.25rem;
+      padding: 0.125rem 0;
+    }
+
+    .action-btn {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      width: 28px;
+      height: 28px;
+      border: 1px solid transparent;
+      border-radius: 4px;
+      cursor: pointer;
+      transition: all 0.15s ease;
+      background: transparent;
+      position: relative;
+    }
+
+    .action-btn:hover {
+      background: var(--color-surface);
+      border-color: var(--color-border);
+    }
+
+    .action-btn .material-symbols-rounded {
+      font-size: 1rem;
+      color: var(--color-text-muted);
+      transition: color 0.15s ease;
+    }
+
+    .action-btn:hover .material-symbols-rounded {
+      color: var(--color-text-primary);
+    }
+
+    .action-btn.view:hover .material-symbols-rounded {
+      color: #3b82f6;
+    }
+
+    .action-btn.edit:hover .material-symbols-rounded {
+      color: #059669;
+    }
+
+    .action-btn.delete:hover .material-symbols-rounded {
+      color: #dc2626;
+    }
+
+    .action-btn.save:hover .material-symbols-rounded {
+      color: #7c3aed;
+    }
+
+    .action-btn.approve:hover .material-symbols-rounded {
+      color: #059669;
+    }
+
+    .action-btn.reject:hover .material-symbols-rounded {
+      color: #dc2626;
+    }
+
+    /* Enhanced table scroll */
+    .table-scroll {
+      overflow-x: auto;
+      border: 1px solid var(--color-border);
+      border-radius: 8px;
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+      background: white;
+      position: relative;
+    }
+
+    /* Spreadsheet-style enhancements */
+    .table-controls {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 1rem 1.5rem;
+      background: linear-gradient(to right, #f8f9fa, #ffffff);
+      border-bottom: 2px solid var(--color-border);
+      gap: 1rem;
+      flex-wrap: wrap;
+    }
+
+    .control-group {
+      display: flex;
+      gap: 1rem;
+      align-items: center;
+      flex-wrap: wrap;
+    }
+
+    .table-search {
+      position: relative;
+      display: flex;
+      align-items: center;
+    }
+
+    .table-search .material-symbols-rounded {
+      position: absolute;
+      left: 0.75rem;
+      color: var(--color-text-muted);
+      font-size: 1.125rem;
+      z-index: 1;
+    }
+
+    .table-search input {
+      padding: 0.625rem 1rem 0.625rem 2.5rem;
+      border: 1px solid var(--color-border);
+      border-radius: 8px;
+      background: white;
+      font-size: 0.875rem;
+      min-width: 250px;
+      transition: all 0.2s ease;
+    }
+
+    .table-search input:focus {
+      outline: none;
+      border-color: var(--color-primary);
+      box-shadow: 0 0 0 3px rgba(0, 0, 0, 0.1);
+    }
+
+    .control-group label {
+      display: flex;
+      flex-direction: column;
+      gap: 0.25rem;
+      font-size: 0.75rem;
+      font-weight: 600;
+      color: var(--color-text-secondary);
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+
+    .control-group select {
+      padding: 0.5rem 2rem 0.5rem 0.75rem;
+      border: 1px solid var(--color-border);
+      border-radius: 6px;
+      background: white;
+      font-size: 0.875rem;
+      min-width: 120px;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%23333' d='M6 9L1 4h10z'/%3E%3C/svg%3E");
+      background-repeat: no-repeat;
+      background-position: right 0.5rem center;
+      appearance: none;
+    }
+
+    .control-group select:focus {
+      outline: none;
+      border-color: var(--color-primary);
+      box-shadow: 0 0 0 2px rgba(0, 0, 0, 0.1);
+    }
+
+    .icon-button {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      width: 36px;
+      height: 36px;
+      border: 1px solid var(--color-border);
+      background: white;
+      border-radius: 6px;
+      cursor: pointer;
+      transition: all 0.2s ease;
+    }
+
+    .icon-button:hover {
+      background: var(--color-surface);
+      border-color: var(--color-primary);
+    }
+
+    .icon-button .material-symbols-rounded {
+      font-size: 1.125rem;
+      color: var(--color-text-secondary);
+    }
+
+    /* Enhanced product table for spreadsheet look */
+    .product-table {
+      width: 100%;
+      border-collapse: separate;
+      border-spacing: 0;
+      background: white;
+      font-size: 0.875rem;
+      font-family: 'Inter', sans-serif;
+    }
+
+    .product-table thead {
+      position: sticky;
+      top: 0;
+      z-index: 20;
+      background: linear-gradient(to bottom, #f8f9fa, #e9ecef);
+    }
+
+    .product-table th {
+      background: linear-gradient(to bottom, #f8f9fa, #e9ecef);
+      padding: 1rem 0.875rem;
+      text-align: left;
+      font-weight: 600;
+      color: var(--color-text-primary);
+      border-bottom: 2px solid var(--color-border);
+      border-right: 1px solid #dee2e6;
+      white-space: nowrap;
+      font-size: 0.8rem;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      position: relative;
+      user-select: none;
+    }
+
+    .product-table th:last-child {
+      border-right: none;
+    }
+
+    .product-table th:first-child {
+      border-top-left-radius: 8px;
+    }
+
+    .product-table th:last-child {
+      border-top-right-radius: 8px;
+    }
+
+    .product-table td {
+      padding: 0.75rem 0.875rem;
+      border-bottom: 1px solid #e8eaed;
+      border-right: 1px solid #e8eaed;
+      vertical-align: middle;
+      white-space: nowrap;
+      font-size: 0.875rem;
+      background: white;
+      transition: all 0.15s ease;
+    }
+
+    .product-table td:last-child {
+      border-right: none;
+    }
+
+    .product-table tbody tr {
+      transition: all 0.15s ease;
+    }
+
+    .product-table tbody tr:hover {
+      background: linear-gradient(to right, #f8f9ff, #ffffff);
+      box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+    }
+
+    .product-table tbody tr:hover td {
+      background: transparent;
+    }
+
+    .product-table tbody tr:nth-child(even) {
+      background: #fafbfc;
+    }
+
+    .product-table tbody tr:nth-child(even):hover {
+      background: linear-gradient(to right, #f8f9ff, #ffffff);
+    }
+
+    .product-table tbody tr:nth-child(even):hover td {
+      background: transparent;
+    }
+
+    /* Pagination enhancements */
+    .pagination {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 1rem 1.5rem;
+      background: linear-gradient(to right, #f8f9fa, #ffffff);
+      border-top: 1px solid var(--color-border);
+      font-size: 0.875rem;
+    }
+
+    .pagination-info {
+      color: var(--color-text-secondary);
+      font-weight: 500;
+    }
+
+    .pagination-controls {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+
+    .pagination-prev,
+    .pagination-next {
+      padding: 0.5rem 1rem;
+      border: 1px solid var(--color-border);
+      background: white;
+      border-radius: 6px;
+      cursor: pointer;
+      font-size: 0.875rem;
+      font-weight: 500;
+      transition: all 0.2s ease;
+    }
+
+    .pagination-prev:hover:not(:disabled),
+    .pagination-next:hover:not(:disabled) {
+      background: var(--color-primary);
+      color: var(--color-accent);
+      border-color: var(--color-primary);
+    }
+
+    .pagination-prev:disabled,
+    .pagination-next:disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
+    }
+
+    .pagination-numbers {
+      display: flex;
+      gap: 0.25rem;
+    }
+
+    .page-number {
+      width: 32px;
+      height: 32px;
+      border: 1px solid var(--color-border);
+      background: white;
+      border-radius: 4px;
+      cursor: pointer;
+      font-size: 0.875rem;
+      font-weight: 500;
+      transition: all 0.2s ease;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .page-number:hover {
+      background: var(--color-surface);
+      border-color: var(--color-primary);
+    }
+
+    .page-number.active {
+      background: var(--color-primary);
+      color: var(--color-accent);
+      border-color: var(--color-primary);
+    }
+
+    /* Product list container enhancements */
+    .product-list-container {
+      background: white;
+      border-radius: 12px;
+      border: 1px solid var(--color-border);
+      overflow: hidden;
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
+    }
+
+    .product-list-header {
+      padding: 1.5rem;
+      background: linear-gradient(to right, #f8f9fa, #ffffff);
+      border-bottom: 2px solid var(--color-border);
+    }
+
+    .product-list-header h2 {
+      margin: 0 0 0.25rem 0;
+      font-size: 1.25rem;
+      font-weight: 700;
+      color: var(--color-text-primary);
+      font-family: 'Inter', sans-serif;
+    }
+
+    .product-list-header span {
+      color: var(--color-text-secondary);
+      font-size: 0.875rem;
+    }
+
+    /* Checkbox styling */
+    .employee-checkbox {
+      width: 18px;
+      height: 18px;
+      border: 2px solid var(--color-border);
+      border-radius: 4px;
+      cursor: pointer;
+      transition: all 0.15s ease;
+    }
+
+    .employee-checkbox:checked {
+      background: var(--color-primary);
+      border-color: var(--color-primary);
+    }
+
+    .employee-checkbox:hover {
+      border-color: var(--color-primary);
+    }
+
+    .user-info-cell {
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+    }
+
+    .user-avatar-cell {
+      width: 40px;
+      height: 40px;
+      background: var(--color-text-primary);
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: var(--color-accent);
+      font-weight: 600;
+      font-size: 0.875rem;
+    }
+
+    .user-details {
+      flex: 1;
+    }
+
+    .user-name-cell {
+      font-weight: 600;
+      color: var(--color-text-primary);
+      margin-bottom: 0.125rem;
+    }
+
+    .user-email {
+      font-size: 0.75rem;
+      color: var(--color-text-muted);
+    }
+
+    .role-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.25rem;
+      padding: 0.25rem 0.75rem;
+      border-radius: 12px;
+      font-size: 0.75rem;
+      font-weight: 600;
+    }
+
+    .role-badge.admin {
+      background: rgba(239, 68, 68, 0.1);
+      color: var(--color-warning);
+    }
+
+    .role-badge.pharmacist {
+      background: rgba(34, 197, 94, 0.1);
+      color: var(--color-success);
+    }
+
+    .role-badge.cashier {
+      background: rgba(0, 0, 0, 0.1);
+      color: var(--color-text-secondary);
+    }
+
+    .role-badge.manager {
+      background: rgba(59, 130, 246, 0.1);
+      color: #3b82f6;
+    }
+
+    .status-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.25rem;
+      padding: 0.25rem 0.75rem;
+      border-radius: 12px;
+      font-size: 0.75rem;
+      font-weight: 600;
+    }
+
+    .status-badge.active {
+      background: rgba(34, 197, 94, 0.1);
+      color: var(--color-success);
+    }
+
+    .status-badge.inactive {
+      background: rgba(0, 0, 0, 0.1);
+      color: var(--color-text-secondary);
+    }
+
+    .action-buttons {
+      display: flex;
+      gap: 0.5rem;
+    }
+
+    .action-btn {
+      width: 32px;
+      height: 32px;
+      border: 1px solid var(--color-border);
+      background: var(--color-background);
+      border-radius: 6px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      font-size: 0.875rem;
+      transition: all 0.2s ease;
+    }
+
+    .action-btn:hover {
+      background: var(--color-surface);
+    }
+
+    .action-btn.edit {
+      color: var(--color-primary);
+    }
+
+    .action-btn.delete {
+      color: var(--color-warning);
+    }
+
+    .action-btn.view {
+      color: var(--color-text-secondary);
+    }
+
+    .logout-section {
+      padding: 1rem;
+      border-top: 1px solid rgba(255, 255, 255, 0.1);
+      margin-top: auto;
+    }
+
+    .logout-button {
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+      padding: 0.875rem 1.5rem;
+      color: rgba(255, 255, 255, 0.8);
+      text-decoration: none;
+      transition: all 0.2s ease;
+      cursor: pointer;
+      font-size: 0.9rem;
+      font-weight: 500;
+      width: 100%;
+      border: none;
+      background: transparent;
+      text-align: left;
+    }
+
+    .logout-button:hover {
+      background: rgba(239, 68, 68, 0.1);
+      color: var(--color-warning);
+    }
+
+    .logout-icon {
+      font-size: 1.25rem;
+    }
+
+    @media (max-width: 768px) {
+      .sidebar {
+        transform: translateX(-100%);
+      }
+
+      .sidebar.open {
+        transform: translateX(0);
+      }
+
+      .main-content {
+        margin-left: 0;
+      }
+
+      .mobile-menu-toggle {
+        display: block;
+      }
+
+      .page-title-section {
+        display: block;
+        flex: 1;
+        margin-right: 0;
+      }
+
+      .page-title-section .page-title {
+        font-size: 1.125rem;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+      }
+
+      .header-left {
+        flex-direction: row;
+        align-items: center;
+        gap: 0.5rem;
+        width: 100%;
+      }
+
+      .search-bar {
+        flex: 0 0 auto;
+        width: auto;
+        min-width: 150px;
+      }
+
+      .users-content {
+        padding: 1rem;
+      }
+
+      .stats-grid {
+        grid-template-columns: 1fr;
+      }
+
+      .controls-bar {
+        flex-direction: column;
+        align-items: stretch;
+      }
+
+      .search-input {
+        width: 100%;
+      }
+
+      .table-container {
+        font-size: 0.75rem;
+      }
+
+      .users-table th,
+      .users-table td {
+        padding: 0.5rem;
+      }
+    }
+
+    /* Employee Management Styles */
+    .content-area {
+      padding: 2rem;
+      background: var(--color-background);
+      min-height: 100vh;
+    }
+
+    .content-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      gap: 2rem;
+      margin-bottom: 2rem;
+      flex-wrap: wrap;
+    }
+
+    .quick-stats {
+      display: flex;
+      gap: 1rem;
+      flex-wrap: wrap;
+    }
+
+    .stat-button {
+      background: var(--color-surface);
+      border: 1px solid var(--color-border);
+      border-radius: 12px;
+      padding: 1rem;
+      cursor: pointer;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 0.5rem;
+      min-width: 120px;
+      transition: all 0.2s ease;
+    }
+
+    .stat-button:hover {
+      background: var(--color-primary);
+      color: var(--color-accent);
+      border-color: var(--color-primary);
+    }
+
+    .stat-button .material-symbols-rounded {
+      font-size: 1.5rem;
+    }
+
+    .stat-button span {
+      font-size: 0.875rem;
+      color: var(--color-text-secondary);
+    }
+
+    .stat-button strong {
+      font-size: 1.25rem;
+      font-weight: 600;
+    }
+
+    .header-actions {
+      display: flex;
+      gap: 0.75rem;
+      align-items: center;
+      flex-wrap: wrap;
+    }
+
+    .secondary-btn {
+      background: var(--color-surface);
+      border: 1px solid var(--color-border);
+      border-radius: 8px;
+      padding: 0.75rem 1rem;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      font-size: 0.875rem;
+      color: var(--color-text-primary);
+      transition: all 0.2s ease;
+    }
+
+    .secondary-btn:hover {
+      background: var(--color-background);
+    }
+
+    .add-product-btn {
+      background: var(--color-primary);
+      border: 1px solid var(--color-primary);
+      border-radius: 8px;
+      padding: 0.75rem 1rem;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      font-size: 0.875rem;
+      color: var(--color-accent);
+      transition: all 0.2s ease;
+    }
+
+    .add-product-btn:hover {
+      background: var(--color-primary-dark);
+    }
+
+    /* Employee Management Tabs */
+    .employee-management-tabs {
+      margin-top: 2rem;
+    }
+
+    .tabs-header {
+      margin-bottom: 1.5rem;
+    }
+
+    .tabs-header h2 {
+      margin: 0;
+      font-size: 1.5rem;
+      font-weight: 600;
+      color: var(--color-text-primary);
+    }
+
+    .tabs-content {
+      background: var(--color-surface);
+      border: 1px solid var(--color-border);
+      border-radius: 12px;
+      overflow: hidden;
+    }
+
+    .tab-pane {
+      display: none;
+      padding: 1.5rem;
+    }
+
+    .tab-pane.active {
+      display: block;
+    }
+
+    /* Schedule Calendar */
+    .schedule-controls {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 1.5rem;
+      gap: 1rem;
+      flex-wrap: wrap;
+    }
+
+    .schedule-calendar {
+      border: 1px solid var(--color-border);
+      border-radius: 8px;
+      overflow: hidden;
+    }
+
+    .calendar-body {
+      display: grid;
+      grid-template-columns: repeat(7, 1fr);
+      gap: 0;
+    }
+
+    .day-column {
+      border-right: 1px solid var(--color-border);
+    }
+
+    .day-column:last-child {
+      border-right: none;
+    }
+
+    .day-header {
+      background: var(--color-background);
+      padding: 1rem 0.5rem;
+      text-align: center;
+      font-weight: 600;
+      border-bottom: 1px solid var(--color-border);
+    }
+
+    .shift-slots {
+      min-height: 200px;
+      padding: 0.5rem;
+    }
+
+    .shift-slot {
+      background: var(--color-surface);
+      border: 1px solid var(--color-border);
+      border-radius: 0.375rem;
+      padding: 0.5rem;
+      margin-bottom: 0.5rem;
+      transition: all 0.2s ease;
+    }
+
+    .shift-slot:hover {
+      border-color: var(--color-primary);
+      box-shadow: 0 2px 4px rgba(99, 102, 241, 0.1);
+    }
+
+    .shift-slot.empty {
+      opacity: 0.6;
+      text-align: center;
+      font-style: italic;
+      color: var(--color-text-muted);
+    }
+
+    .shift-employee {
+      font-weight: 500;
+      font-size: 0.8125rem;
+      color: var(--color-text-primary);
+    }
+
+    .shift-time {
+      font-size: 0.75rem;
+      color: var(--color-text-muted);
+      margin-top: 0.25rem;
+    }
+
+    .shift-date {
+      font-size: 0.75rem;
+      color: var(--color-primary);
+      font-weight: 500;
+      margin-top: 0.25rem;
+    }
+
+    .shift-branch {
+      font-size: 0.75rem;
+      color: var(--color-text-muted);
+      font-style: italic;
+      margin-top: 0.25rem;
+    }
+
+    /* Attendance Controls */
+    .attendance-controls,
+    .leave-controls,
+    .performance-controls {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 1.5rem;
+      gap: 1rem;
+      flex-wrap: wrap;
+    }
+
+    /* Modal Styles */
+    .modal {
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background: rgba(0, 0, 0, 0.5);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      z-index: 1000;
+    }
+
+    .modal-content {
+      background: var(--color-surface);
+      border-radius: 12px;
+      max-width: 600px;
+      max-height: 90vh;
+      overflow-y: auto;
+      width: 100%;
+      margin: 1rem;
+    }
+
+    .modal-header {
+      padding: 1.5rem;
+      border-bottom: 1px solid var(--color-border);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .modal-header h2 {
+      margin: 0;
+      color: var(--color-text-primary);
+    }
+
+    .modal-close {
+      background: none;
+      border: none;
+      font-size: 1.5rem;
+      cursor: pointer;
+      color: var(--color-text-secondary);
+      padding: 0.25rem;
+      border-radius: 4px;
+    }
+
+    .modal-close:hover {
+      background: var(--color-background);
+    }
+
+    .modal-body {
+      padding: 1.5rem;
+    }
+
+    .modal-footer {
+      padding: 1.5rem;
+      border-top: 1px solid var(--color-border);
+      display: flex;
+      justify-content: flex-end;
+      gap: 0.75rem;
+    }
+
+    /* Form Styles */
+    .form-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+      gap: 1rem;
+    }
+
+    .form-grid label {
+      display: flex;
+      flex-direction: column;
+      gap: 0.5rem;
+      font-size: 0.875rem;
+      font-weight: 500;
+      color: var(--color-text-primary);
+    }
+
+    .form-grid input,
+    .form-grid select,
+    .form-grid textarea {
+      padding: 0.75rem;
+      border: 1px solid var(--color-border);
+      border-radius: 6px;
+      background: var(--color-background);
+      color: var(--color-text-primary);
+      font-size: 0.875rem;
+    }
+
+    .form-grid input:focus,
+    .form-grid select:focus,
+    .form-grid textarea:focus {
+      outline: none;
+      border-color: var(--color-primary);
+      box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.1);
+    }
+
+    /* Status Badge Styles */
+    .status-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.25rem;
+      padding: 0.25rem 0.75rem;
+      border-radius: 12px;
+      font-size: 0.75rem;
+      font-weight: 500;
+    }
+
+    .status-badge.success {
+      background: rgba(34, 197, 94, 0.1);
+      color: #22c55e;
+    }
+
+    .status-badge.warning {
+      background: rgba(245, 158, 11, 0.1);
+      color: #f59e0b;
+    }
+
+    .status-badge.danger {
+      background: rgba(239, 68, 68, 0.1);
+      color: #ef4444;
+    }
+
+    .status-badge.secondary {
+      background: rgba(107, 114, 128, 0.1);
+      color: #6b7280;
+    }
+
+    /* Responsive Design */
+    @media (max-width: 768px) {
+      .content-header {
+        flex-direction: column;
+        align-items: stretch;
+        gap: 1rem;
+      }
+
+      .quick-stats {
+        grid-template-columns: repeat(2, 1fr);
+      }
+
+      .header-actions {
+        justify-content: stretch;
+      }
+
+      .header-actions button {
+        flex: 1;
+        min-width: 120px;
+      }
+
+      .calendar-body {
+        grid-template-columns: 1fr;
+      }
+
+      .day-column {
+        border-right: none;
+        border-bottom: 1px solid var(--color-border);
+      }
+
+      .modal-content {
+        margin: 0;
+        border-radius: 0;
+        max-height: 100vh;
+      }
+    }
+  </style>
+
+    <!-- Backend Integration Libraries -->
+    <script src="../../js/api-client.js"></script>
+    <script src="../../js/auth-manager.js"></script>
+    <script src="../shared/js/backend-integration-helper.js"></script>
+    <script src="../shared/js/page-integration-template.js"></script>
+    <script src="../shared/js/admin-api-client-init.js"></script>
+    <script src="https://unpkg.com/alpinejs@3.x.x/dist/cdn.min.js" defer></script></head>
+<body>
+  <!-- Sidebar -->
+  <aside class="sidebar" :class="sidebarOpen ? 'open' : ''">
+    <div class="sidebar-header">
+      <div class="logo-section">
+        <div class="logo-icon">
+          <img src="../../umi.png" alt="Umi Health Logo">
+        </div>
+        <div class="logo-text">Umi Health</div>
+      </div>
+    </div>
+
+
+    <nav class="nav-menu">
+      <a href="home.html" class="nav-item">
+        <span class="material-symbols-rounded nav-icon">home</span>
+        <span>Home</span>
+      </a>
+      <a href="point-of-sale.html" class="nav-item">
+        <span class="material-symbols-rounded nav-icon">point_of_sale</span>
+        <span>Point of Sale</span>
+      </a>
+      <a href="inventory.html" class="nav-item">
+        <span class="material-symbols-rounded nav-icon">inventory_2</span>
+        <span>Inventory</span>
+      </a>
+      <a href="prescriptions.html" class="nav-item">
+        <span class="material-symbols-rounded nav-icon">prescriptions</span>
+        <span>Prescriptions</span>
+      </a>
+      <a href="patients.html" class="nav-item">
+        <span class="material-symbols-rounded nav-icon">people</span>
+        <span>Patients</span>
+      </a>
+      <a href="sales.html" class="nav-item">
+        <span class="material-symbols-rounded nav-icon">receipt_long</span>
+        <span>Sales</span>
+      </a>
+      <a href="payments.html" class="nav-item">
+        <span class="material-symbols-rounded nav-icon">payments</span>
+        <span>Payments</span>
+      </a>
+      <a href="reports.html" class="nav-item">
+        <span class="material-symbols-rounded nav-icon">analytics</span>
+        <span>Reports</span>
+      </a>
+      <a href="user-management.html" class="nav-item active">
+        <span class="material-symbols-rounded nav-icon">admin_panel_settings</span>
+        <span>User Management</span>
+      </a>
+      <!-- Branch navigation - always visible for all users -->
+      <a href="branches.html" class="nav-item">
+        <span class="material-symbols-rounded nav-icon">business</span>
+        <span>Branches</span>
+      </a>
+      <a href="account.html" class="nav-item">
+        <span class="material-symbols-rounded nav-icon">settings</span>
+        <span>Account</span>
+      </a>
+    </nav>
+    
+    <div class="logout-section">
+      <button class="logout-button" @click="logout()">
+        <span class="material-symbols-rounded logout-icon">logout</span>
+        <span>Logout</span>
+      </button>
+    </div>
+  </aside>
+
+  <!-- Main Content -->
+  <main class="main-content">
+    <!-- Header -->
+    <header class="header">
+      <div class="header-left">
+        <button class="mobile-menu-toggle" @click="sidebarOpen = !sidebarOpen">
+          <span class="material-symbols-rounded">menu</span>
+        </button>
+        
+        <div class="page-title-section">
+          <h1 class="page-title">User Management</h1>
+        </div>
+      </div>
+
+      <div class="header-right">
+        <!-- Header elements removed per request -->
+      </div>
+    </header>
+
+    <section class="content-area">
+        <div class="content-header">
+          <div>
+            <span>Manage pharmacy staff, roles, shifts, and attendance.</span>
+          </div>
+          <div class="quick-stats">
+            <button class="stat-button" data-stat="total-employees">
+              <span class="material-symbols-rounded">groups</span>
+              <span>Total Employees</span>
+              <strong id="totalEmployeesCount">0</strong>
+            </button>
+            <button class="stat-button" data-stat="on-duty">
+              <span class="material-symbols-rounded">schedule</span>
+              <span>On Duty</span>
+              <strong id="onDutyCount">0</strong>
+            </button>
+            <button class="stat-button" data-stat="on-leave">
+              <span class="material-symbols-rounded">event_busy</span>
+              <span>On Leave</span>
+              <strong id="onLeaveCount">0</strong>
+            </button>
+            <button class="stat-button" data-stat="pending-approval">
+              <span class="material-symbols-rounded">approval</span>
+              <span>Pending Approvals</span>
+              <strong id="pendingApprovalCount">0</strong>
+            </button>
+          </div>
+          <div class="header-actions">
+            <button class="secondary-btn" id="manageShiftsBtn" type="button">
+              <span class="material-symbols-rounded">calendar_month</span>
+              Manage Shifts
+            </button>
+            <button class="secondary-btn" id="exportEmployees" type="button">
+              <span class="material-symbols-rounded">download</span>
+              Export
+            </button>
+            <button class="add-product-btn" id="addEmployeeBtn" type="button">
+              <span class="material-symbols-rounded">add</span>
+              Add Employee
+            </button>
+          </div>
+        </div>
+      <article class="product-list-container">
+          <header class="product-list-header">
+            <div>
+              <h2>Employee Directory</h2>
+              <span>Manage staff profiles, roles, and status</span>
+            </div>
+          </header>
+
+          <div class="table-controls">
+            <div class="control-group">
+              <label class="table-search">
+                <span class="material-symbols-rounded" aria-hidden="true">search</span>
+                <input id="employeeSearchInput" type="search" placeholder="Search employees by name or email" autocomplete="off">
+              </label>
+            </div>
+            <div class="control-group">
+              <label>
+                <span>Role</span>
+                <select id="roleFilter">
+                  <option value="">All roles</option>
+                  <option value="pharmacist">Pharmacist</option>
+                  <option value="cashier">Cashier</option>
+                  <option value="technician">Technician</option>
+                  <option value="assistant">Assistant</option>
+                  <option value="manager">Manager</option>
+                </select>
+              </label>
+              <label>
+                <span>Status</span>
+                <select id="statusFilter">
+                  <option value="">All statuses</option>
+                  <option value="active">Active</option>
+                  <option value="on-leave">On Leave</option>
+                  <option value="suspended">Suspended</option>
+                  <option value="terminated">Terminated</option>
+                </select>
+              </label>
+              <label>
+                <span>Department</span>
+                <select id="departmentFilter">
+                  <option value="">All departments</option>
+                  <option value="pharmacy">Pharmacy</option>
+                  <option value="retail">Retail</option>
+                  <option value="administration">Administration</option>
+                </select>
+              </label>
+              <button class="icon-button" id="resetFilters" type="button" title="Reset filters">
+                <span class="material-symbols-rounded" aria-hidden="true">filter_alt_off</span>
+              </button>
+            </div>
+          </div>
+
+          <div class="table-scroll">
+            <table class="product-table" id="employeesTable" aria-live="polite">
+              <thead>
+                <tr>
+                  <th scope="col">
+                    <input type="checkbox" id="selectAllEmployees" aria-label="Select all employees">
+                  </th>
+                  <th scope="col">Employee</th>
+                  <th scope="col">Role</th>
+                  <th scope="col">Department</th>
+                  <th scope="col">Branch</th>
+                  <th scope="col">Contact</th>
+                  <th scope="col">Status</th>
+                  <th scope="col">Default Shift</th>
+                  <th scope="col">Hire Date</th>
+                  <th scope="col">Actions</th>
+                </tr>
+              </thead>
+              <tbody id="employeesTableBody"></tbody>
+            </table>
+          </div>
+
+          <footer class="pagination" id="employeePagination">
+            <div class="pagination-info" id="paginationInfo"></div>
+            <div class="pagination-controls">
+              <button class="pagination-prev" id="prevPage" type="button">Previous</button>
+              <div class="pagination-numbers" id="paginationNumbers"></div>
+              <button class="pagination-next" id="nextPage" type="button">Next</button>
+            </div>
+          </footer>
+        </article>
+
+      <section class="employee-management-tabs">
+          <header class="tabs-header">
+            <h2>Shifts, Attendance &amp; Performance</h2>
+          </header>
+
+          <div class="tabs-content">
+            <section id="schedule-tab" class="tab-pane active">
+              <div class="schedule-controls">
+                <label>
+                  <span>Week</span>
+                  <select id="weekSelector">
+                    <option value="previous">Previous week</option>
+                    <option value="current" selected>Current week</option>
+                    <option value="next">Next week</option>
+                  </select>
+                </label>
+                <button class="secondary-btn" id="generateSchedule" type="button">
+                  <span class="material-symbols-rounded">auto_schedule</span>
+                  Generate Schedule
+                </button>
+              </div>
+              <div class="schedule-calendar">
+                <div class="calendar-body">
+                  <div class="day-column">
+                    <div class="day-header">Mon <span class="day-date"></span></div>
+                    <div class="shift-slots"></div>
+                  </div>
+                  <div class="day-column">
+                    <div class="day-header">Tue <span class="day-date"></span></div>
+                    <div class="shift-slots"></div>
+                  </div>
+                  <div class="day-column">
+                    <div class="day-header">Wed <span class="day-date"></span></div>
+                    <div class="shift-slots"></div>
+                  </div>
+                  <div class="day-column">
+                    <div class="day-header">Thu <span class="day-date"></span></div>
+                    <div class="shift-slots"></div>
+                  </div>
+                  <div class="day-column">
+                    <div class="day-header">Fri <span class="day-date"></span></div>
+                    <div class="shift-slots"></div>
+                  </div>
+                  <div class="day-column">
+                    <div class="day-header">Sat <span class="day-date"></span></div>
+                    <div class="shift-slots"></div>
+                  </div>
+                  <div class="day-column">
+                    <div class="day-header">Sun <span class="day-date"></span></div>
+                    <div class="shift-slots"></div>
+                  </div>
+                </div>
+              </div>
+            </section>
+
+            <section id="attendance-tab" class="tab-pane">
+              <div class="attendance-controls">
+                <label>
+                  <span>Date</span>
+                  <input type="date" id="attendanceDate">
+                </label>
+                <button class="secondary-btn" id="markAttendance" type="button">
+                  <span class="material-symbols-rounded">check_circle</span>
+                  Mark Attendance
+                </button>
+              </div>
+              <div class="table-scroll">
+                <table class="product-table" aria-label="Employee attendance table">
+                  <thead>
+                    <tr>
+                      <th scope="col">Employee</th>
+                      <th scope="col">Check In</th>
+                      <th scope="col">Check Out</th>
+                      <th scope="col">Hours</th>
+                      <th scope="col">Status</th>
+                      <th scope="col">Notes</th>
+                      <th scope="col">Actions</th>
+                    </tr>
+                  </thead>
+                  <tbody id="attendanceTableBody"></tbody>
+                </table>
+              </div>
+            </section>
+
+            <section id="leave-tab" class="tab-pane">
+              <div class="leave-controls">
+                <label>
+                  <span>Status</span>
+                  <select id="leaveStatusFilter">
+                    <option value="">All statuses</option>
+                    <option value="pending">Pending</option>
+                    <option value="approved">Approved</option>
+                    <option value="rejected">Rejected</option>
+                  </select>
+                </label>
+                <button class="secondary-btn" id="approveLeaveBtn" type="button">
+                  <span class="material-symbols-rounded">refresh</span>
+                  Refresh Requests
+                </button>
+              </div>
+              <div class="table-scroll">
+                <table class="product-table" aria-label="Employee leave requests">
+                  <thead>
+                    <tr>
+                      <th scope="col">Employee</th>
+                      <th scope="col">Type</th>
+                      <th scope="col">Start</th>
+                      <th scope="col">End</th>
+                      <th scope="col">Days</th>
+                      <th scope="col">Reason</th>
+                      <th scope="col">Status</th>
+                      <th scope="col">Actions</th>
+                    </tr>
+                  </thead>
+                  <tbody id="leaveRequestsBody"></tbody>
+                </table>
+              </div>
+            </section>
+
+            <section id="performance-tab" class="tab-pane">
+              <div class="performance-controls">
+                <label>
+                  <span>Period</span>
+                  <select id="performancePeriod">
+                    <option value="week">This Week</option>
+                    <option value="month" selected>This Month</option>
+                    <option value="quarter">This Quarter</option>
+                  </select>
+                </label>
+                <button class="secondary-btn" id="generatePerformanceReport" type="button">
+                  <span class="material-symbols-rounded">file_download</span>
+                  Export Performance
+                </button>
+              </div>
+              <div class="table-scroll">
+                <table class="product-table" aria-label="Employee performance reviews">
+                  <thead>
+                    <tr>
+                      <th scope="col">Employee</th>
+                      <th scope="col">Period</th>
+                      <th scope="col">Score</th>
+                      <th scope="col">Strengths</th>
+                      <th scope="col">Improvements</th>
+                      <th scope="col">Reviewer</th>
+                      <th scope="col">Actions</th>
+                    </tr>
+                  </thead>
+                  <tbody id="performanceReviewsBody"></tbody>
+                </table>
+              </div>
+            </section>
+          </div>
+        </section>
+      </section>
+    </div>
+  </div>
+
+  <div class="overlay" id="modalOverlay" hidden></div>
+
+  <section class="modal" id="employeeModal" role="dialog" aria-modal="true" aria-labelledby="employeeModalTitle" hidden>
+    <div class="modal-content">
+      <header class="modal-header">
+        <h2 id="employeeModalTitle">Add Employee</h2>
+        <button type="button" class="modal-close" data-close="employeeModal" aria-label="Close employee form">
+          <span class="material-symbols-rounded" aria-hidden="true">close</span>
+        </button>
+      </header>
+      <form id="employeeForm" class="modal-body">
+        <div class="form-grid">
+          <label>
+            <span>Employee ID</span>
+            <input type="text" id="formEmployeeId" name="employeeId" readonly>
+          </label>
+          <label>
+            <span>First Name</span>
+            <input type="text" id="formFirstName" name="firstName" required>
+          </label>
+          <label>
+            <span>Last Name</span>
+            <input type="text" id="formLastName" name="lastName" required>
+          </label>
+          <label>
+            <span>Email</span>
+            <input type="email" id="formEmail" name="email" required>
+          </label>
+          <label>
+            <span>Phone</span>
+            <input type="tel" id="formPhone" name="phone" required>
+          </label>
+          <label>
+            <span>Password</span>
+            <input type="password" id="formPassword" name="password" required placeholder="Enter initial password">
+          </label>
+          <label>
+            <span>Confirm Password</span>
+            <input type="password" id="formConfirmPassword" name="confirmPassword" required placeholder="Confirm password">
+          </label>
+          <label>
+            <span>Branch Assignment</span>
+            <div style="display: flex; gap: 0.5rem; align-items: center;">
+              <select id="formBranch" name="branch" required>
+                <option value="">Loading branches...</option>
+              </select>
+              <button type="button" @click="refreshBranches()" title="Refresh branch data" style="padding: 0.5rem; border: 1px solid var(--color-border); background: var(--color-surface); border-radius: 4px; cursor: pointer;">
+                <span class="material-symbols-rounded" style="font-size: 1rem; color: var(--color-text-secondary);">refresh</span>
+              </button>
+            </div>
+          </label>
+          <label>
+            <span>Date of Birth</span>
+            <input type="date" id="formDateOfBirth" name="dateOfBirth">
+          </label>
+          <label>
+            <span>NRC</span>
+            <input type="text" id="formNRC" name="nrc">
+          </label>
+          <label>
+            <span>Role</span>
+            <select id="formRole" name="role" required>
+              <option value="">Select role</option>
+              <option value="pharmacist">Pharmacist</option>
+              <option value="cashier">Cashier</option>
+              <option value="technician">Technician</option>
+              <option value="assistant">Assistant</option>
+              <option value="manager">Manager</option>
+            </select>
+          </label>
+          <label>
+            <span>Department</span>
+            <select id="formDepartment" name="department" required>
+              <option value="">Select department</option>
+              <option value="pharmacy">Pharmacy</option>
+              <option value="retail">Retail</option>
+              <option value="administration">Administration</option>
+            </select>
+          </label>
+          <label>
+            <span>Hire Date</span>
+            <input type="date" id="formHireDate" name="hireDate">
+          </label>
+          <label>
+            <span>Employment Type</span>
+            <select id="formEmploymentType" name="employmentType">
+              <option value="full-time">Full-time</option>
+              <option value="part-time">Part-time</option>
+              <option value="casual">Casual</option>
+            </select>
+          </label>
+          <label>
+            <span>Salary (ZMW)</span>
+            <input type="number" id="formSalary" name="salary" min="0" step="0.01">
+          </label>
+          <label>
+            <span>License Number</span>
+            <input type="text" id="formLicenseNumber" name="licenseNumber">
+          </label>
+          <label>
+            <span>License Expiry</span>
+            <input type="date" id="formLicenseExpiry" name="licenseExpiry">
+          </label>
+          <label>
+            <span>Qualifications</span>
+            <input type="text" id="formQualifications" name="qualifications">
+          </label>
+          <label>
+            <span>Experience (years)</span>
+            <input type="number" id="formExperience" name="experience" min="0" step="1">
+          </label>
+          <label>
+            <span>Default Shift</span>
+            <select id="formDefaultShift" name="defaultShift">
+              <option value="morning">Morning</option>
+              <option value="afternoon">Afternoon</option>
+              <option value="night">Night</option>
+              <option value="flexible">Flexible</option>
+            </select>
+          </label>
+          <label>
+            <span>Work Days</span>
+            <select id="formWorkDays" name="workDays">
+              <option value="weekdays">Weekdays</option>
+              <option value="weekends">Weekends</option>
+              <option value="all">All days</option>
+            </select>
+          </label>
+        </div>
+      </form>
+      <footer class="modal-footer">
+        <button type="button" class="secondary" data-close="employeeModal">Cancel</button>
+        <button type="submit" form="employeeForm" class="primary" id="submitEmployee">Save Employee</button>
+      </footer>
+    </div>
+  </section>
+
+  <section class="modal" id="employeeDetailsModal" role="dialog" aria-modal="true" aria-labelledby="employeeDetailsTitle" hidden>
+    <div class="modal-content">
+      <header class="modal-header">
+        <h2 id="employeeDetailsTitle">Employee Details</h2>
+        <button type="button" class="modal-close" data-close="employeeDetailsModal" aria-label="Close employee details">
+          <span class="material-symbols-rounded" aria-hidden="true">close</span>
+        </button>
+      </header>
+      <div class="modal-body" id="employeeDetailsBody"></div>
+      <footer class="modal-footer">
+        <button type="button" class="secondary" data-close="employeeDetailsModal">Close</button>
+      </footer>
+    </div>
+  </section>
+  </main>
+
+  <!-- Alpine.js Component -->
+  <script>
+    function userManagementSystem() {
+      return {
+        // Initialize backend integration
+        pageIntegration: new PageIntegrationTemplate('admin-user-management', {
+            requireAuth: true,
+            enableRealTime: false,
+            enableCaching: true
+        }),
+        
+        sidebarOpen: false,
+        searchQuery: '',
+        showFilterMenu: false,
+        loading: false,
+        
+        // Data properties
+        employees: [],
+        branches: [],
+        attendanceRecords: [],
+        leaveRequests: [],
+        performanceReviews: [],
+        
+        // UI state
+        currentPage: 1,
+        itemsPerPage: 10,
+        selectedEmployees: [],
+        currentTab: 'schedule',
+        
+        // User and pharmacy info
+        pharmacyInfo: {
+          name: 'Umi Health',
+          location: 'Lusaka, Zambia'
+        },
+        userInfo: {
+          name: 'Admin User',
+          role: 'Admin',
+          initials: 'AU'
+        },
+        
+        // API client
+        api: null,
+
+        // Initialize the system
+        async init() {
+            try {
+                // Check authentication
+                this.isAuthenticated = this.authManager?.isAuthenticated() || false;
+                
+                if (!this.isAuthenticated) {
+                    this.error = 'Please login to access this page';
+                    return;
+                }
+                
+                // Initialize backend integration
+                await this.backendHelper.initPage('admin-user-management', {
+                    enableRealTime: false,
+                    initialData: this.getInitialDataConfig()
+                });
+                
+                // Load page data
+                await this.loadPageData();
+                
+                // Set up event listeners
+                this.setupEventListeners();
+                
+                console.log('admin-user-management page initialized with backend integration');
+            } catch (error) {
+                console.error('Failed to initialize admin-user-management page:', error);
+                this.error = 'Failed to initialize page';
+            }
+        },
+
+        // Load pharmacy info from localStorage
+        loadPharmacyInfo() {
+          try {
+            const currentTenant = localStorage.getItem('umi_current_tenant');
+            if (currentTenant) {
+              const tenant = JSON.parse(currentTenant);
+              this.pharmacyInfo = {
+                name: tenant.name || 'Umi Health',
+                location: `${tenant.city || 'Lusaka'}, ${tenant.province || 'Zambia'}`
+              };
+            }
+          } catch (error) {
+            console.error('Error loading pharmacy info:', error);
+          }
+        },
+
+        // Load branches from API with enhanced fallback to branches/account pages
+        async loadBranches() {
+          try {
+            this.loading = true;
+            
+            // First try to get branches from localStorage (shared with branches page)
+            await this.loadBranchesFromStorage();
+            
+            // If no branches in storage, try to load from account page data
+            if (this.branches.length === 0) {
+              await this.loadBranchesFromAccount();
+            }
+            
+            // Then try to load from API to get fresh data
+            try {
+              const response = await this.api.getBranches();
+              const apiBranches = response.data || response;
+              
+              if (apiBranches && apiBranches.length > 0) {
+                this.branches = apiBranches;
+                // Store branches in localStorage for sharing with other pages
+                localStorage.setItem('umi_branches', JSON.stringify(this.branches));
+              }
+            } catch (apiError) {
+              console.warn('API branches fetch failed, using stored data:', apiError);
+              // Continue with stored branches if API fails
+            }
+            
+            // Final fallback - ensure we have at least the main branch
+            if (this.branches.length === 0) {
+              await this.createMainBranchFromAccount();
+            }
+            
+            this.populateBranchSelect();
+          } catch (error) {
+            console.error('Error loading branches:', error);
+            // Ultimate fallback
+            this.loadSampleBranches();
+            this.showError('Unable to load branches. Please check your connection.');
+          } finally {
+            this.loading = false;
+          }
+        },
+
+        // Load branches from localStorage (shared with branches page)
+        async loadBranchesFromStorage() {
+          try {
+            const storedBranches = localStorage.getItem('umi_branches');
+            if (storedBranches) {
+              this.branches = JSON.parse(storedBranches);
+              this.populateBranchSelect();
+            }
+          } catch (error) {
+            console.error('Error loading branches from storage:', error);
+          }
+        },
+
+        // Load branches from account page data (tenant information)
+        async loadBranchesFromAccount() {
+          try {
+            const tenant = JSON.parse(localStorage.getItem('umi_current_tenant') || '{}');
+            if (tenant && tenant.name) {
+              // Check if we already have this branch in our list
+              const existingMainBranch = this.branches.find(b => b.isMain || b.id === 'main_branch');
+              if (!existingMainBranch) {
+                const mainBranch = {
+                  id: 'main_branch',
+                  name: tenant.name || 'Main Pharmacy',
+                  code: 'MAIN',
+                  phone: tenant.phone || '',
+                  email: tenant.email || '',
+                  address: tenant.address || '',
+                  city: tenant.city || 'Lusaka',
+                  country: 'Zambia',
+                  isActive: true,
+                  isMain: true
+                };
+                this.branches.push(mainBranch);
+                localStorage.setItem('umi_branches', JSON.stringify(this.branches));
+              }
+            }
+          } catch (error) {
+            console.error('Error loading branches from account data:', error);
+          }
+        },
+
+        // Create main branch from account data as ultimate fallback
+        async createMainBranchFromAccount() {
+          try {
+            const tenant = JSON.parse(localStorage.getItem('umi_current_tenant') || '{}');
+            const subscription = JSON.parse(localStorage.getItem('umi_subscription') || '{}');
+            
+            const pharmacyName = tenant.name || subscription.pharmacyName || 'Main Pharmacy';
+            const location = tenant.city || subscription.location || 'Lusaka';
+            
+            const mainBranch = {
+              id: 'main_branch',
+              name: pharmacyName,
+              code: 'MAIN',
+              phone: tenant.phone || '',
+              email: tenant.email || '',
+              address: tenant.address || '',
+              city: location,
+              country: 'Zambia',
+              isActive: true,
+              isMain: true
+            };
+            
+            this.branches = [mainBranch];
+            localStorage.setItem('umi_branches', JSON.stringify(this.branches));
+            
+            console.log('Created main branch from account data:', mainBranch);
+          } catch (error) {
+            console.error('Error creating main branch from account:', error);
+          }
+        },
+
+        // Load sample branches as fallback
+        loadSampleBranches() {
+          this.branches = [];
+          this.populateBranchSelect();
+          this.showError('Unable to load branches. Please check your connection.');
+        },
+
+        // Load employees from API
+        async loadEmployees() {
+          try {
+            this.loading = true;
+            
+            // First try to load from localStorage for immediate display
+            const hasLocalData = this.loadEmployeesFromStorage();
+            
+            // Then try to load from API for fresh data
+            const response = await this.api.getUsers();
+            this.employees = response.data || response;
+            
+            // Save fresh data to localStorage
+            this.saveEmployeesToStorage();
+            
+            // Sync any pending local changes
+            await this.syncPendingChanges();
+            
+            this.renderEmployeesTable();
+            this.updateEmployeeStats();
+          } catch (error) {
+            console.error('Error loading employees:', error);
+            
+            // Fallback to localStorage if API fails
+            if (!this.loadEmployeesFromStorage()) {
+              // If no local data either, show error
+              this.employees = [];
+              this.renderEmployeesTable();
+              this.updateEmployeeStats();
+              this.showError('Unable to load employees. Please check your connection.');
+            } else {
+              this.showWarning('Using cached employee data. Some features may be limited.');
+            }
+          } finally {
+            this.loading = false;
+          }
+        },
+
+        // Load account data from localStorage (shared with account page)
+        async loadAccountData() {
+          try {
+            const currentTenant = localStorage.getItem('umi_current_tenant');
+            const currentUser = localStorage.getItem('umi_current_user');
+            
+            if (currentTenant) {
+              const tenant = JSON.parse(currentTenant);
+              this.pharmacyInfo = {
+                name: tenant.name || 'Umi Health',
+                location: `${tenant.city || 'Lusaka'}, ${tenant.province || 'Zambia'}`
+              };
+            }
+            
+            if (currentUser) {
+              const user = JSON.parse(currentUser);
+              this.userInfo = {
+                name: user.name || user.firstName + ' ' + user.lastName,
+                role: user.role || 'Admin',
+                initials: (user.name || user.firstName + ' ' + user.lastName).split(' ').map(n => n[0]).join('').toUpperCase()
+              };
+            }
+          } catch (error) {
+            console.error('Error loading account data:', error);
+          }
+        },
+
+        // No fallback - API required for employee data
+        loadSampleEmployees() {
+          this.employees = [];
+          this.renderEmployeesTable();
+          this.updateEmployeeStats();
+          console.warn('Mock data removed - API required for real employee data');
+        },
+
+        // Update week dates with real-time values
+        updateWeekDates(weekType) {
+          const today = new Date();
+          const currentDay = today.getDay(); // 0 = Sunday, 1 = Monday, etc.
+          const mondayOffset = currentDay === 0 ? -6 : 1 - currentDay; // Adjust for Sunday
+          
+          let monday;
+          switch (weekType) {
+            case 'previous':
+              monday = new Date(today);
+              monday.setDate(today.getDate() + mondayOffset - 7);
+              break;
+            case 'next':
+              monday = new Date(today);
+              monday.setDate(today.getDate() + mondayOffset + 7);
+              break;
+            case 'current':
+            default:
+              monday = new Date(today);
+              monday.setDate(today.getDate() + mondayOffset);
+              break;
+          }
+
+          const weekDays = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
+          const dayElements = document.querySelectorAll('.day-date');
+          
+          weekDays.forEach((day, index) => {
+            const currentDate = new Date(monday);
+            currentDate.setDate(monday.getDate() + index);
+            
+            if (dayElements[index]) {
+              const formattedDate = currentDate.toLocaleDateString('en-US', {
+                month: 'short',
+                day: 'numeric'
+              });
+              dayElements[index].textContent = formattedDate;
+            }
+          });
+
+          // Store current week dates for shift assignments
+          this.currentWeekDates = [];
+          for (let i = 0; i < 7; i++) {
+            const date = new Date(monday);
+            date.setDate(monday.getDate() + i);
+            this.currentWeekDates.push(date.toISOString().split('T')[0]);
+          }
+        },
+
+        // Setup real-time synchronization
+        setupRealtimeSync() {
+          // Listen for real-time updates
+          if (window.DataSync) {
+            window.DataSync.subscribe('employee_updates', (data) => {
+              this.handleRealtimeUpdate(data);
+            });
+            
+            window.DataSync.subscribe('branch_updates', (data) => {
+              this.handleBranchUpdate(data);
+            });
+          }
+
+          // Listen for localStorage changes from other pages (branches page, account page)
+          window.addEventListener('storage', (e) => {
+            if (e.key === 'umi_branches') {
+              // Branch data was updated from another page
+              console.log('Branch data updated from another page');
+              this.loadBranchesFromStorage();
+              this.populateBranchSelect();
+              this.showNotification('Branch data updated', 'info');
+            }
+            
+            if (e.key === 'umi_current_tenant') {
+              // Account/tenant data was updated from account page, reload branches
+              console.log('Tenant data updated, refreshing branches');
+              this.loadBranchesFromAccount();
+              this.populateBranchSelect();
+            }
+          });
+
+          // Listen for page visibility events for branch updates
+          document.addEventListener('visibilitychange', () => {
+            if (!document.hidden) {
+              // Page became visible again, check for updated branch data
+              this.loadBranchesFromStorage();
+            }
+          });
+
+          // Set up periodic sync to check for branch data updates
+          setInterval(() => {
+            const currentStoredBranches = localStorage.getItem('umi_branches');
+            if (currentStoredBranches) {
+              try {
+                const storedBranches = JSON.parse(currentStoredBranches);
+                // Check if branches have changed
+                if (JSON.stringify(storedBranches) !== JSON.stringify(this.branches)) {
+                  console.log('Branch data changed, updating...');
+                  this.branches = storedBranches;
+                  this.populateBranchSelect();
+                }
+              } catch (error) {
+                console.error('Error checking branch updates:', error);
+              }
+            }
+          }, 30000); // Check every 30 seconds
+        },
+
+        // Handle real-time employee updates
+        handleRealtimeUpdate(data) {
+          const { type, employee, userId } = data;
+          
+          switch (type) {
+            case 'created':
+              this.employees.push(employee);
+              break;
+            case 'updated':
+              const index = this.employees.findIndex(emp => emp.id === employee.id);
+              if (index !== -1) {
+                this.employees[index] = { ...this.employees[index], ...employee };
+              }
+              break;
+            case 'deleted':
+              this.employees = this.employees.filter(emp => emp.id !== employee.id);
+              break;
+          }
+          
+          // Only refresh if not the current user making the change
+          if (userId !== this.getCurrentUserId()) {
+            this.renderEmployeesTable();
+            this.updateEmployeeStats();
+            this.loadShiftAssignments(); // Refresh shift assignments
+            this.showNotification(`Employee ${type} successfully`, 'info');
+          }
+        },
+
+        // Handle branch updates
+        handleBranchUpdate(data) {
+          console.log('Branch update received:', data);
+          const { type, branch } = data;
+          
+          switch (type) {
+            case 'created':
+              this.branches.push(branch);
+              break;
+            case 'updated':
+              const index = this.branches.findIndex(br => br.id === branch.id);
+              if (index !== -1) {
+                this.branches[index] = { ...this.branches[index], ...branch };
+              }
+              break;
+            case 'deleted':
+              this.branches = this.branches.filter(br => br.id !== branch.id);
+              break;
+          }
+          
+          this.populateBranchSelect();
+          // Refresh shift assignments to show updated branch info
+          this.loadShiftAssignments();
+        },
+
+        // Populate branch select dropdown
+        populateBranchSelect() {
+          const select = document.getElementById('formBranch');
+          if (!select) return;
+          
+          // Show loading state if branches are empty
+          if (this.branches.length === 0) {
+            select.innerHTML = '<option value="">Loading branches...</option>';
+            return;
+          }
+          
+          select.innerHTML = '<option value="">Select branch</option>';
+          
+          // Sort branches by name, putting main branch first
+          const sortedBranches = [...this.branches].sort((a, b) => {
+            if (a.isMain) return -1;
+            if (b.isMain) return 1;
+            return a.name.localeCompare(b.name);
+          });
+          
+          sortedBranches.forEach(branch => {
+            const option = document.createElement('option');
+            option.value = branch.id;
+            option.textContent = branch.name + (branch.isMain ? ' (Main)' : '');
+            select.appendChild(option);
+          });
+        },
+
+        // Refresh branch data on demand
+        async refreshBranches() {
+          console.log('Refreshing branch data...');
+          await this.loadBranches();
+          this.showNotification('Branch data refreshed', 'success');
+        },
+
+        get totalUsers() {
+          return this.users.length;
+        },
+
+        get activeUsers() {
+          return this.users.filter(user => user.status === 'active').length;
+        },
+
+        get adminUsers() {
+          return this.users.filter(user => user.role === 'Admin').length;
+        },
+
+        get recentLogins() {
+          const sevenDaysAgo = new Date();
+          sevenDaysAgo.setDate(sevenDaysAgo.getDate() - 7);
+          
+          return this.users.filter(user => {
+            const lastLoginDate = new Date(user.lastLogin);
+            return lastLoginDate >= sevenDaysAgo;
+          }).length;
+        },
+
+        viewUser(user) {
+          console.log('View user:', user);
+          // Implement view functionality
+        },
+
+        formatCurrency(amount) {
+          return new Intl.NumberFormat('en-ZM', {
+            style: 'currency',
+            currency: 'ZMW'
+          }).format(amount);
+        },
+
+        logout() {
+          if (confirm('Are you sure you want to logout?')) {
+            window.location.href = 'index.html';
+          }
+        },
+
+        // Employee Management Properties
+        employees: [],
+        currentPage: 1,
+        itemsPerPage: 10,
+        selectedEmployees: [],
+        currentTab: 'schedule',
+        attendanceRecords: [],
+        leaveRequests: [],
+        performanceReviews: [],
+
+        // Employee Management Methods
+        openModal(modalId) {
+          document.getElementById(modalId).hidden = false;
+          document.getElementById('modalOverlay').hidden = false;
+          document.body.style.overflow = 'hidden';
+        },
+
+        closeModal(modalId) {
+          document.getElementById(modalId).hidden = true;
+          document.getElementById('modalOverlay').hidden = true;
+          document.body.style.overflow = '';
+        },
+
+        generateEmployeeId() {
+          return 'EMP' + Date.now().toString().slice(-6);
+        },
+
+        async submitSaveEmployee(event) {
+          event.preventDefault();
+          
+          if (!event.target) {
+            console.error('Form not available');
+            return;
+          }
+          
+          // Check if API is available
+          if (!this.api) {
+            console.error('API client is not initialized!');
+            this.showError('API client not initialized. Please refresh the page.');
+            return;
+          }
+          
+          const formData = new FormData(event.target);
+          const password = formData.get('password');
+          const confirmPassword = formData.get('confirmPassword');
+          
+          // Validate passwords match
+          if (password !== confirmPassword) {
+            this.showError('Passwords do not match. Please try again.');
+            return;
+          }
+          
+          // Validate password strength
+          if (password.length < 6) {
+            this.showError('Password must be at least 6 characters long.');
+            return;
+          }
+          
+          // Validate required fields
+          const requiredFields = ['firstName', 'lastName', 'email', 'phone', 'branch'];
+          const missingFields = requiredFields.filter(field => !formData.get(field));
+          if (missingFields.length > 0) {
+            this.showError(`Please fill in all required fields: ${missingFields.join(', ')}`);
+            return;
+          }
+          
+          const employeeData = {
+            employeeId: formData.get('employeeId'),
+            firstName: formData.get('firstName'),
+            lastName: formData.get('lastName'),
+            email: formData.get('email'),
+            phone: formData.get('phone'),
+            password: password, // Include password for new users
+            branch: formData.get('branch'),
+            dateOfBirth: formData.get('dateOfBirth'),
+            nrc: formData.get('nrc'),
+            role: formData.get('role'),
+            department: formData.get('department'),
+            hireDate: formData.get('hireDate'),
+            employmentType: formData.get('employmentType'),
+            salary: formData.get('salary'),
+            licenseNumber: formData.get('licenseNumber'),
+            licenseExpiry: formData.get('licenseExpiry'),
+            qualifications: formData.get('qualifications'),
+            experience: formData.get('experience'),
+            defaultShift: formData.get('defaultShift'),
+            workDays: formData.get('workDays'),
+            // Add tenant and branch isolation properties
+            tenantId: this.getCurrentTenantId(),
+            branchId: formData.get('branch'),
+            permissions: this.getRolePermissions(formData.get('role'))
+          };
+          
+          try {
+            const userPayload = {
+              firstName: employeeData.firstName,
+              lastName: employeeData.lastName,
+              email: employeeData.email,
+              phone: employeeData.phone,
+              role: employeeData.role,
+              department: employeeData.department,
+              branchId: employeeData.branch,
+              status: 'active',
+              hireDate: employeeData.hireDate,
+              salary: parseFloat(employeeData.salary) || 0,
+              employmentType: employeeData.employmentType,
+              defaultShift: employeeData.defaultShift,
+              workDays: employeeData.workDays,
+              nrc: employeeData.nrc,
+              licenseNumber: employeeData.licenseNumber,
+              licenseExpiry: employeeData.licenseExpiry,
+              qualifications: employeeData.qualifications,
+              experience: parseInt(employeeData.experience) || 0,
+              password: employeeData.password
+            };
+
+            let response;
+            if (employeeData.employeeId) {
+              // Update existing user
+              response = await this.api.updateUser(employeeData.employeeId, userPayload);
+              const index = this.employees.findIndex(emp => emp.id === employeeData.employeeId);
+              if (index !== -1) {
+                this.employees[index] = { ...this.employees[index], ...response, updatedAt: new Date().toISOString() };
+              }
+              this.broadcastUpdate('updated', response);
+              this.showSuccess('Employee updated successfully!');
+            } else {
+              // Create new user
+              response = await this.api.createUser(userPayload);
+              const newEmployee = {
+                id: response.id || this.generateEmployeeId(),
+                ...response,
+                createdAt: new Date().toISOString()
+              };
+              this.employees.push(newEmployee);
+              this.broadcastUpdate('created', newEmployee);
+              this.showSuccess('Employee created successfully!');
+            }
+
+            // Save to localStorage for offline support and data persistence
+            this.saveEmployeesToStorage();
+            
+            // Close modal and reset form
+            this.closeModal('employeeModal');
+            event.target.reset();
+            
+            // Update UI
+            this.renderEmployeesTable();
+            this.updateEmployeeStats();
+            
+            // Show success notification with additional actions
+            this.showSuccessWithActions('Employee saved successfully!', [
+              {
+                text: 'View Employee',
+                action: () => this.viewEmployee(newEmployee?.id || response?.id)
+              },
+              {
+                text: 'Add Another',
+                action: () => this.openAddEmployeeModal()
+              }
+            ]);
+            
+          } catch (error) {
+            console.error('Error saving employee:', error);
+            
+            // Enhanced error handling with fallback to local storage
+            if (error.status === 404 || error.status === 0) {
+              // API unavailable - save to localStorage as fallback
+              this.saveEmployeeLocally(employeeData, userPayload);
+              this.showWarning('Employee saved locally. Will sync when connection is available.');
+            } else {
+              this.showError(`Failed to save employee: ${error.message || 'Unknown error'}`);
+            }
+          }
+        },
+
+        // Save employees to localStorage for persistence
+        saveEmployeesToStorage() {
+          try {
+            const employeesData = {
+              employees: this.employees,
+              lastUpdated: new Date().toISOString(),
+              tenantId: this.getCurrentTenantId()
+            };
+            localStorage.setItem('umi_employees', JSON.stringify(employeesData));
+            console.log('Employees saved to localStorage:', this.employees.length);
+          } catch (error) {
+            console.error('Error saving employees to localStorage:', error);
+          }
+        },
+
+        // Load employees from localStorage
+        loadEmployeesFromStorage() {
+          try {
+            const stored = localStorage.getItem('umi_employees');
+            if (stored) {
+              const data = JSON.parse(stored);
+              if (data.tenantId === this.getCurrentTenantId()) {
+                this.employees = data.employees || [];
+                console.log('Loaded employees from localStorage:', this.employees.length);
+                return true;
+              }
+            }
+          } catch (error) {
+            console.error('Error loading employees from localStorage:', error);
+          }
+          return false;
+        },
+
+        // Save employee locally when API is unavailable
+        saveEmployeeLocally(employeeData, userPayload) {
+          const localEmployee = {
+            id: employeeData.employeeId || this.generateEmployeeId(),
+            ...userPayload,
+            createdAt: new Date().toISOString(),
+            isLocal: true,
+            needsSync: true
+          };
+
+          this.employees.push(localEmployee);
+          this.saveEmployeesToStorage();
+          this.renderEmployeesTable();
+          this.updateEmployeeStats();
+        },
+
+        // Sync pending local changes when API is available
+        async syncPendingChanges() {
+          try {
+            const pendingEmployees = this.employees.filter(emp => emp.needsSync);
+            
+            for (const employee of pendingEmployees) {
+              try {
+                const response = await this.api.createUser(employee);
+                // Update local record with server response
+                const index = this.employees.findIndex(emp => emp.id === employee.id);
+                if (index !== -1) {
+                  this.employees[index] = {
+                    ...response,
+                    createdAt: employee.createdAt,
+                    isLocal: false,
+                    needsSync: false
+                  };
+                }
+              } catch (error) {
+                console.error('Failed to sync employee:', employee.id, error);
+              }
+            }
+            
+            this.saveEmployeesToStorage();
+            this.renderEmployeesTable();
+            
+            if (pendingEmployees.length > 0) {
+              this.showSuccess(`Synced ${pendingEmployees.length} pending employee(s)`);
+            }
+          } catch (error) {
+            console.error('Error during sync:', error);
+          }
+        },
+
+        // Enhanced success notification with actions
+        showSuccessWithActions(message, actions = []) {
+          const notification = document.createElement('div');
+          notification.className = 'notification notification-success';
+          
+          const content = document.createElement('div');
+          content.innerHTML = `
+            <div class="notification-message">${message}</div>
+            ${actions.length > 0 ? '<div class="notification-actions"></div>' : ''}
+          `;
+          
+          notification.appendChild(content);
+          document.body.appendChild(notification);
+
+          // Add action buttons
+          if (actions.length > 0) {
+            const actionsContainer = content.querySelector('.notification-actions');
+            actions.forEach(action => {
+              const button = document.createElement('button');
+              button.className = 'notification-action-btn';
+              button.textContent = action.text;
+              button.onclick = () => {
+                action.action();
+                notification.remove();
+              };
+              actionsContainer.appendChild(button);
+            });
+          }
+
+          // Animate in
+          setTimeout(() => {
+            notification.classList.add('show');
+          }, 100);
+
+          // Auto-remove after 8 seconds (longer for actions)
+          setTimeout(() => {
+            notification.classList.remove('show');
+            setTimeout(() => {
+              if (notification.parentNode) {
+                document.body.removeChild(notification);
+              }
+            }, 300);
+          }, 8000);
+        },
+
+        // View employee details
+        viewEmployee(employeeId) {
+          const employee = this.employees.find(emp => emp.id === employeeId);
+          if (employee) {
+            this.editEmployee(employeeId);
+          }
+        },
+
+        // Open add employee modal
+        openAddEmployeeModal() {
+          this.openModal('employeeModal');
+          document.getElementById('employeeModalTitle').textContent = 'Add Employee';
+          document.getElementById('formEmployeeId').value = '';
+        },
+
+        // Helper methods
+        getCurrentUserId() {
+          const currentUser = JSON.parse(localStorage.getItem('umi_currentUser') || '{}');
+          return currentUser.id || 'anonymous';
+        },
+
+        getCurrentTenantId() {
+          return localStorage.getItem('umi_tenant_id') || 'umi-health-tenant-1';
+        },
+
+        getCurrentBranchId() {
+          return localStorage.getItem('umi_branch_id') || 'main';
+        },
+
+        getFilters() {
+          const filters = {};
+          const searchTerm = document.getElementById('employeeSearchInput')?.value;
+          if (searchTerm) filters.search = searchTerm;
+          
+          const roleFilter = document.getElementById('roleFilter')?.value;
+          if (roleFilter) filters.role = roleFilter;
+          
+          const statusFilter = document.getElementById('statusFilter')?.value;
+          if (statusFilter) filters.status = statusFilter;
+          
+          const departmentFilter = document.getElementById('departmentFilter')?.value;
+          if (departmentFilter) filters.department = departmentFilter;
+          
+          return filters;
+        },
+
+        showNotification(message, type = 'info') {
+          // Create notification element
+          const notification = document.createElement('div');
+          notification.className = `notification notification-${type}`;
+          notification.textContent = message;
+          document.body.appendChild(notification);
+
+          // Animate in
+          setTimeout(() => {
+            notification.classList.add('show');
+          }, 100);
+
+          // Remove after 5 seconds
+          setTimeout(() => {
+            notification.classList.remove('show');
+            setTimeout(() => {
+              if (notification.parentNode) {
+                document.body.removeChild(notification);
+              }
+            }, 300);
+          }, 5000);
+        },
+
+        renderEmployeesTable() {
+          const tbody = document.getElementById('employeesTableBody');
+          const filteredEmployees = this.getFilteredEmployees();
+          const startIndex = (this.currentPage - 1) * this.itemsPerPage;
+          const endIndex = startIndex + this.itemsPerPage;
+          const pageEmployees = filteredEmployees.slice(startIndex, endIndex);
+          
+          tbody.innerHTML = pageEmployees.map(employee => {
+            const statusBadge = this.getStatusBadge(employee.status);
+            
+            return `
+              <tr>
+                <td>
+                  <input type="checkbox" class="employee-checkbox" value="${employee.id}">
+                </td>
+                <td>
+                  <div class="employee-info">
+                    <div class="employee-avatar">
+                      ${employee.firstName.charAt(0)}${employee.lastName.charAt(0)}
+                    </div>
+                    <div class="employee-details">
+                      <div class="employee-name">${employee.firstName} ${employee.lastName}</div>
+                      <div class="employee-email">${employee.email}</div>
+                    </div>
+                  </div>
+                </td>
+                <td>${this.formatRole(employee.role)}</td>
+                <td>${this.formatDepartment(employee.department)}</td>
+                <td>${this.formatBranch(employee.branchId || employee.branch)}</td>
+                <td>
+                  <div class="contact-info">
+                    <div class="contact-phone">${employee.phone}</div>
+                    <div class="contact-email">${employee.email}</div>
+                  </div>
+                </td>
+                <td>${statusBadge}</td>
+                <td>${this.formatShift(employee.defaultShift)}</td>
+                <td><div class="date-cell">${employee.hireDate || '-'}</div></td>
+                <td>
+                  <div class="action-buttons">
+                    <button class="action-btn view" onclick="userManagementSystem.viewEmployeeDetails('${employee.id}')">
+                      <span class="material-symbols-rounded">visibility</span>
+                    </button>
+                    <button class="action-btn edit" onclick="userManagementSystem.editEmployee('${employee.id}')">
+                      <span class="material-symbols-rounded">edit</span>
+                    </button>
+                    <button class="action-btn delete" onclick="userManagementSystem.deleteEmployee('${employee.id}')">
+                      <span class="material-symbols-rounded">delete</span>
+                    </button>
+                  </div>
+                </td>
+              </tr>
+            `;
+          }).join('');
+          
+          this.updatePagination(filteredEmployees.length);
+        },
+
+        getFilteredEmployees() {
+          // First apply branch/tenant filtering
+          let filtered = this.filterEmployeesByBranch();
+          
+          // Search filter
+          const searchTerm = document.getElementById('employeeSearchInput')?.value.toLowerCase();
+          if (searchTerm) {
+            filtered = filtered.filter(emp => 
+              emp.firstName.toLowerCase().includes(searchTerm) ||
+              emp.lastName.toLowerCase().includes(searchTerm) ||
+              emp.email.toLowerCase().includes(searchTerm)
+            );
+          }
+          
+          // Role filter
+          const roleFilter = document.getElementById('roleFilter')?.value;
+          if (roleFilter) {
+            filtered = filtered.filter(emp => emp.role === roleFilter);
+          }
+          
+          // Status filter
+          const statusFilter = document.getElementById('statusFilter')?.value;
+          if (statusFilter) {
+            filtered = filtered.filter(emp => emp.status === statusFilter);
+          }
+          
+          // Department filter
+          const departmentFilter = document.getElementById('departmentFilter')?.value;
+          if (departmentFilter) {
+            filtered = filtered.filter(emp => emp.department === departmentFilter);
+          }
+          
+          // Branch filter (only for admins)
+          const currentUserRole = sessionStorage.getItem('userRole') || 'assistant';
+          const permissions = this.getRolePermissions(currentUserRole);
+          if (permissions.canViewAllBranches) {
+            const branchFilter = document.getElementById('branchFilter')?.value;
+            if (branchFilter) {
+              filtered = filtered.filter(emp => emp.branchId === branchFilter);
+            }
+          }
+          
+          return filtered;
+        },
+
+        updatePagination(totalItems) {
+          const totalPages = Math.ceil(totalItems / this.itemsPerPage);
+          const paginationNumbers = document.getElementById('paginationNumbers');
+          const paginationInfo = document.getElementById('paginationInfo');
+          
+          // Update info
+          const startItem = (this.currentPage - 1) * this.itemsPerPage + 1;
+          const endItem = Math.min(this.currentPage * this.itemsPerPage, totalItems);
+          paginationInfo.textContent = `Showing ${startItem}-${endItem} of ${totalItems} employees`;
+          
+          // Update page numbers
+          let paginationHTML = '';
+          for (let i = 1; i <= totalPages; i++) {
+            const isActive = i === this.currentPage ? 'active' : '';
+            paginationHTML += `<button class="page-number ${isActive}" onclick="userManagementSystem.goToPage(${i})">${i}</button>`;
+          }
+          paginationNumbers.innerHTML = paginationHTML;
+          
+          // Update prev/next buttons
+          document.getElementById('prevPage').disabled = this.currentPage === 1;
+          document.getElementById('nextPage').disabled = this.currentPage === totalPages;
+        },
+
+        goToPage(page) {
+          this.currentPage = page;
+          this.renderEmployeesTable();
+        },
+
+        updateEmployeeStats() {
+          const totalEmployees = this.employees.length;
+          const onDutyEmployees = this.employees.filter(emp => emp.status === 'active').length;
+          const onLeaveEmployees = this.employees.filter(emp => emp.status === 'on-leave').length;
+          const pendingApprovals = this.leaveRequests.filter(req => req.status === 'pending').length;
+          
+          document.getElementById('totalEmployeesCount').textContent = totalEmployees;
+          document.getElementById('onDutyCount').textContent = onDutyEmployees;
+          document.getElementById('onLeaveCount').textContent = onLeaveEmployees;
+          document.getElementById('pendingApprovalCount').textContent = pendingApprovals;
+        },
+
+        viewEmployeeDetails(employeeId) {
+          const employee = this.employees.find(emp => emp.id === employeeId);
+          if (!employee) return;
+          
+          const detailsHTML = `
+            <div class="employee-details">
+              <div class="detail-header">
+                <div class="employee-avatar-large">
+                  ${employee.firstName.charAt(0)}${employee.lastName.charAt(0)}
+                </div>
+                <div class="employee-info">
+                  <h3>${employee.firstName} ${employee.lastName}</h3>
+                  <p>${this.formatRole(employee.role)} - ${this.formatDepartment(employee.department)}</p>
+                  <span class="status-badge ${employee.status}">${employee.status}</span>
+                </div>
+              </div>
+              <div class="detail-grid">
+                <div class="detail-section">
+                  <h4>Contact Information</h4>
+                  <p><strong>Email:</strong> ${employee.email}</p>
+                  <p><strong>Phone:</strong> ${employee.phone}</p>
+                  <p><strong>NRC:</strong> ${employee.nrc || '-'}</p>
+                </div>
+                <div class="detail-section">
+                  <h4>Employment Details</h4>
+                  <p><strong>Employee ID:</strong> ${employee.id}</p>
+                  <p><strong>Hire Date:</strong> ${employee.hireDate || '-'}</p>
+                  <p><strong>Employment Type:</strong> ${this.formatEmploymentType(employee.employmentType)}</p>
+                  <p><strong>Salary:</strong> ${this.formatCurrency(employee.salary || 0)}</p>
+                </div>
+                <div class="detail-section">
+                  <h4>Work Schedule</h4>
+                  <p><strong>Default Shift:</strong> ${this.formatShift(employee.defaultShift)}</p>
+                  <p><strong>Work Days:</strong> ${this.formatWorkDays(employee.workDays)}</p>
+                </div>
+                ${employee.licenseNumber ? `
+                  <div class="detail-section">
+                    <h4>License Information</h4>
+                    <p><strong>License Number:</strong> ${employee.licenseNumber}</p>
+                    <p><strong>License Expiry:</strong> ${employee.licenseExpiry || '-'}</p>
+                    <p><strong>Qualifications:</strong> ${employee.qualifications || '-'}</p>
+                    <p><strong>Experience:</strong> ${employee.experience || 0} years</p>
+                  </div>
+                ` : ''}
+              </div>
+            </div>
+          `;
+          
+          document.getElementById('employeeDetailsBody').innerHTML = detailsHTML;
+          this.openModal('employeeDetailsModal');
+        },
+
+        editEmployee(employeeId) {
+          const employee = this.employees.find(emp => emp.id === employeeId);
+          if (!employee) return;
+          
+          // Populate form with employee data
+          const form = document.getElementById('employeeForm');
+          Object.keys(employee).forEach(key => {
+            const input = form.querySelector(`[name="${key}"]`);
+            if (input) {
+              input.value = employee[key];
+            }
+          });
+          
+          document.getElementById('employeeModalTitle').textContent = 'Edit Employee';
+          this.openModal('employeeModal');
+        },
+
+        deleteEmployee(employeeId) {
+          if (confirm('Are you sure you want to delete this employee? This action cannot be undone.')) {
+            // Use adminAPI for backend integration
+            if (window.adminAPI) {
+              window.adminAPI.deleteUser(employeeId)
+                .then(response => {
+                  this.employees = this.employees.filter(emp => emp.id !== employeeId);
+                  this.renderEmployeesTable();
+                  this.updateEmployeeStats();
+                  this.showSuccess('Employee deleted successfully!');
+                })
+                .catch(error => {
+                  console.error('Error deleting employee:', error);
+                  this.showError('Failed to delete employee. Please try again.');
+                });
+            } else {
+              // Fallback to local storage
+              this.employees = this.employees.filter(emp => emp.id !== employeeId);
+              this.renderEmployeesTable();
+              this.updateEmployeeStats();
+              this.showSuccess('Employee deleted successfully!');
+            }
+          }
+        },
+
+        // Tab Management
+        switchTab(tabId) {
+          document.querySelectorAll('.tab-pane').forEach(tab => tab.classList.remove('active'));
+          document.getElementById(tabId + '-tab').classList.add('active');
+          this.currentTab = tabId;
+          
+          // Load tab-specific data
+          switch(tabId) {
+            case 'schedule':
+              this.loadScheduleData();
+              break;
+            case 'attendance':
+              this.loadAttendanceData();
+              break;
+            case 'leave':
+              this.loadLeaveData();
+              break;
+            case 'performance':
+              this.loadPerformanceData();
+              break;
+          }
+        },
+
+        loadScheduleData() {
+          // Generate calendar dates
+          const today = new Date();
+          const currentWeek = this.getWeekDates(today);
+          
+          document.querySelectorAll('.day-date').forEach((element, index) => {
+            const date = currentWeek[index];
+            element.textContent = date.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+          });
+          
+          // Load shift assignments
+          this.loadShiftAssignments();
+        },
+
+        loadShiftAssignments() {
+          // Use real employee data for shift assignments
+          const shiftSlots = document.querySelectorAll('.shift-slots');
+          
+          shiftSlots.forEach((slot, index) => {
+            const currentDate = this.currentWeekDates ? this.currentWeekDates[index] : new Date().toISOString().split('T')[0];
+            
+            // Get employees assigned to this day (simplified - in real app this would come from API)
+            const dayEmployees = this.employees.filter((employee, empIndex) => empIndex % 7 === index);
+            
+            if (dayEmployees.length > 0) {
+              slot.innerHTML = dayEmployees.map(employee => {
+                const branch = this.branches.find(b => b.id === employee.branchId);
+                const branchName = branch ? branch.name : 'Unassigned';
+                
+                return `
+                  <div class="shift-slot">
+                    <div class="shift-employee">${employee.firstName} ${employee.lastName}</div>
+                    <div class="shift-time">${this.formatShift(employee.defaultShift || 'morning')}</div>
+                    <div class="shift-branch">${branchName}</div>
+                    <div class="shift-date">${currentDate}</div>
+                  </div>
+                `;
+              }).join('');
+            } else {
+              slot.innerHTML = `
+                <div class="shift-slot empty">
+                  <div class="shift-date">${currentDate}</div>
+                  <div class="shift-employee">No shift assigned</div>
+                </div>
+              `;
+            }
+          });
+        },
+
+        generateSchedule() {
+          if (this.employees.length === 0) {
+            this.showError('No employees available to generate schedule');
+            return;
+          }
+          
+          // Simple schedule generation - distribute employees across the week
+          const shiftSlots = document.querySelectorAll('.shift-slots');
+          
+          shiftSlots.forEach((slot, index) => {
+            const currentDate = this.currentWeekDates ? this.currentWeekDates[index] : new Date().toISOString().split('T')[0];
+            
+            // Assign employees to this day (round-robin distribution)
+            const dayEmployees = this.employees.filter((employee, empIndex) => empIndex % 7 === index);
+            
+            if (dayEmployees.length > 0) {
+              slot.innerHTML = dayEmployees.map(employee => {
+                const branch = this.branches.find(b => b.id === employee.branchId);
+                const branchName = branch ? branch.name : 'Unassigned';
+                
+                return `
+                  <div class="shift-slot">
+                    <div class="shift-employee">${employee.firstName} ${employee.lastName}</div>
+                    <div class="shift-time">${this.formatShift(employee.defaultShift || 'morning')}</div>
+                    <div class="shift-branch">${branchName}</div>
+                    <div class="shift-date">${currentDate}</div>
+                  </div>
+                `;
+              }).join('');
+            } else {
+              slot.innerHTML = `
+                <div class="shift-slot empty">
+                  <div class="shift-date">${currentDate}</div>
+                  <div class="shift-employee">No shift assigned</div>
+                </div>
+              `;
+            }
+          });
+          
+          this.showSuccess('Schedule generated successfully!');
+        },
+
+        loadLeaveData() {
+          const tbody = document.getElementById('leaveRequestsBody');
+          
+          tbody.innerHTML = this.leaveRequests.map(request => `
+            <tr>
+              <td>${request.employeeName}</td>
+              <td>${request.type}</td>
+              <td>${request.startDate}</td>
+              <td>${request.endDate}</td>
+              <td>${request.days}</td>
+              <td>${request.reason}</td>
+              <td>${this.getStatusBadge(request.status)}</td>
+              <td>
+                <div class="action-buttons">
+                  <button class="action-btn approve" onclick="employeeSystem.approveLeave('${request.id}')">
+                    <span class="material-symbols-rounded">check</span>
+                  </button>
+                  <button class="action-btn reject" onclick="employeeSystem.rejectLeave('${request.id}')">
+                    <span class="material-symbols-rounded">close</span>
+                  </button>
+                </div>
+              </td>
+            </tr>
+          `).join('');
+        },
+
+        loadPerformanceData() {
+          const tbody = document.getElementById('performanceReviewsBody');
+          
+          tbody.innerHTML = this.performanceReviews.map(review => `
+            <tr>
+              <td>${review.employeeName}</td>
+              <td>${review.period}</td>
+              <td>${review.score}/100</td>
+              <td>${review.strengths}</td>
+              <td>${review.improvements}</td>
+              <td>${review.reviewer}</td>
+              <td>
+                <div class="action-buttons">
+                  <button class="action-btn view" onclick="employeeSystem.viewPerformance('${review.id}')">
+                    <span class="material-symbols-rounded">visibility</span>
+                  </button>
+                </div>
+              </td>
+            </tr>
+          `).join('');
+        },
+
+        // Tenant and Branch Isolation Methods
+        getCurrentTenantId() {
+          // Get current tenant from session or context
+          return sessionStorage.getItem('tenantId') || 'umi-health-tenant-1';
+        },
+
+        getCurrentBranchId() {
+          // Get current user's branch from session
+          return sessionStorage.getItem('branchId') || 'branch-a';
+        },
+
+        getRolePermissions(role) {
+          const permissions = {
+            'admin': {
+              canViewAllBranches: true,
+              canManageAllUsers: true,
+              canAccessAllModules: true,
+              canViewReports: true,
+              canManageInventory: true,
+              canManageSales: true,
+              canManagePrescriptions: true
+            },
+            'manager': {
+              canViewAllBranches: false,
+              canManageAllUsers: false,
+              canAccessAllModules: true,
+              canViewReports: true,
+              canManageInventory: true,
+              canManageSales: true,
+              canManagePrescriptions: false
+            },
+            'pharmacist': {
+              canViewAllBranches: false,
+              canManageAllUsers: false,
+              canAccessAllModules: false,
+              canViewReports: false,
+              canManageInventory: true,
+              canManageSales: false,
+              canManagePrescriptions: true
+            },
+            'cashier': {
+              canViewAllBranches: false,
+              canManageAllUsers: false,
+              canAccessAllModules: false,
+              canViewReports: false,
+              canManageInventory: false,
+              canManageSales: true,
+              canManagePrescriptions: false
+            },
+            'technician': {
+              canViewAllBranches: false,
+              canManageAllUsers: false,
+              canAccessAllModules: false,
+              canViewReports: false,
+              canManageInventory: true,
+              canManageSales: false,
+              canManagePrescriptions: false
+            },
+            'assistant': {
+              canViewAllBranches: false,
+              canManageAllUsers: false,
+              canAccessAllModules: false,
+              canViewReports: false,
+              canManageInventory: false,
+              canManageSales: true,
+              canManagePrescriptions: false
+            }
+          };
+          
+          return permissions[role] || permissions['assistant'];
+        },
+
+        filterEmployeesByBranch() {
+          // Filter employees based on current user's branch and permissions
+          const currentBranchId = this.getCurrentBranchId();
+          const currentUserRole = sessionStorage.getItem('userRole') || 'assistant';
+          const permissions = this.getRolePermissions(currentUserRole);
+          
+          if (permissions.canViewAllBranches) {
+            // Admin can see all employees
+            return this.employees;
+          } else {
+            // Non-admin users can only see employees from their branch
+            return this.employees.filter(emp => emp.branchId === currentBranchId);
+          }
+        },
+
+        // Enhanced save method with tenant isolation
+        saveEmployeeWithIsolation(employeeData) {
+          // Add tenant and branch isolation
+          const isolatedEmployee = {
+            ...employeeData,
+            tenantId: this.getCurrentTenantId(),
+            branchId: employeeData.branch,
+            permissions: this.getRolePermissions(employeeData.role),
+            loginCredentials: {
+              email: employeeData.email,
+              phone: employeeData.phone,
+              password: employeeData.password
+            },
+            accessLevel: employeeData.role === 'admin' ? 'tenant' : 'branch'
+          };
+          
+          return isolatedEmployee;
+        },
+
+        // Store user credentials for authentication
+        storeUserCredentials(employee) {
+          const credentials = {
+            userId: employee.id,
+            email: employee.email,
+            phone: employee.phone,
+            password: employee.password,
+            role: employee.role,
+            branchId: employee.branchId,
+            tenantId: employee.tenantId,
+            permissions: employee.permissions,
+            accessLevel: employee.accessLevel
+          };
+          
+          // Store in localStorage for authentication (in production, this should be in a secure database)
+          const existingCredentials = JSON.parse(localStorage.getItem('userCredentials') || '[]');
+          const credentialIndex = existingCredentials.findIndex(cred => cred.userId === employee.userId);
+          
+          if (credentialIndex !== -1) {
+            existingCredentials[credentialIndex] = credentials;
+          } else {
+            existingCredentials.push(credentials);
+          }
+          
+          localStorage.setItem('userCredentials', JSON.stringify(existingCredentials));
+        },
+
+        // Verify user login credentials
+        verifyUserLogin(emailOrPhone, password) {
+          const credentials = JSON.parse(localStorage.getItem('userCredentials') || '[]');
+          const user = credentials.find(cred => 
+            (cred.email === emailOrPhone || cred.phone === emailOrPhone) && 
+            cred.password === password
+          );
+          
+          if (user) {
+            // Return user info without password for session
+            return {
+              userId: user.userId,
+              email: user.email,
+              phone: user.phone,
+              role: user.role,
+              branchId: user.branchId,
+              tenantId: user.tenantId,
+              permissions: user.permissions,
+              accessLevel: user.accessLevel
+            };
+          }
+          
+          return null;
+        },
+
+        // Utility Methods
+        formatRole(role) {
+          const formattedRole = role.charAt(0).toLowerCase() + role.slice(1);
+          return `<span class="role-badge ${formattedRole}">${role.charAt(0).toUpperCase() + role.slice(1)}</span>`;
+        },
+
+        formatDepartment(department) {
+          const formattedDept = department.charAt(0).toLowerCase() + department.slice(1);
+          return `<span class="department-badge ${formattedDept}">${department.charAt(0).toUpperCase() + department.slice(1)}</span>`;
+        },
+
+        formatBranch(branchId) {
+          if (!branchId) return '<span class="branch-badge">Unassigned</span>';
+          
+          const branch = this.branches.find(b => b.id === branchId);
+          if (!branch) return `<span class="branch-badge">${branchId}</span>`;
+          
+          // Generate consistent color based on branch ID
+          const colors = ['#3b82f6', '#10b981', '#f59e0b', '#ef4444', '#8b5cf6', '#ec4899'];
+          const colorIndex = branch.id.split('').reduce((acc, char) => acc + char.charCodeAt(0), 0) % colors.length;
+          const color = colors[colorIndex];
+          
+          return `<span class="branch-badge" style="background: ${color}20; color: ${color}; border: 1px solid ${color}40;">${branch.name}</span>`;
+        },
+
+        formatShift(shift) {
+          const shiftIcons = {
+            'morning': 'schedule',
+            'afternoon': 'wb_sunny',
+            'night': 'nights_stay',
+            'flexible': 'update'
+          };
+          const icon = shiftIcons[shift] || 'schedule';
+          return `<div class="shift-info"><span class="material-symbols-rounded">${icon}</span>${shift.charAt(0).toUpperCase() + shift.slice(1)}</div>`;
+        },
+
+        formatEmploymentType(type) {
+          return type.split('-').map(word => word.charAt(0).toUpperCase() + word.slice(1)).join(' ');
+        },
+
+        formatWorkDays(days) {
+          return days.charAt(0).toUpperCase() + days.slice(1);
+        },
+
+        getStatusBadge(status) {
+          const formattedStatus = status.replace('-', '-');
+          return `<span class="status-badge ${formattedStatus}">${status.charAt(0).toUpperCase() + status.slice(1).replace('-', ' ')}</span>`;
+        },
+
+        getWeekDates(date) {
+          const week = [];
+          const startOfWeek = new Date(date);
+          const day = startOfWeek.getDay();
+          const diff = startOfWeek.getDate() - day + (day === 0 ? -6 : 1);
+          startOfWeek.setDate(diff);
+          
+          for (let i = 0; i < 7; i++) {
+            week.push(new Date(startOfWeek));
+            startOfWeek.setDate(startOfWeek.getDate() + 1);
+          }
+          
+          return week;
+        },
+
+        exportEmployees() {
+          const csvContent = [
+            'Employee ID,First Name,Last Name,Email,Phone,Role,Department,Status,Hire Date,Salary',
+            ...this.employees.map(emp => 
+              `${emp.id},${emp.firstName},${emp.lastName},${emp.email},${emp.phone},${emp.role},${emp.department},${emp.status},${emp.hireDate},${emp.salary || 0}`
+            )
+          ].join('\n');
+          
+          const blob = new Blob([csvContent], { type: 'text/csv' });
+          const url = window.URL.createObjectURL(blob);
+          const a = document.createElement('a');
+          a.href = url;
+          a.download = `employees_export_${new Date().toISOString().split('T')[0]}.csv`;
+          a.click();
+          window.URL.revokeObjectURL(url);
+        },
+
+        
+        
+        setupEventListeners() {
+          // Modal close buttons
+          document.querySelectorAll('[data-close]').forEach(btn => {
+            btn.addEventListener('click', (e) => {
+              const modalId = e.target.closest('[data-close]').getAttribute('data-close');
+              this.closeModal(modalId);
+            });
+          });
+
+          // Form submission
+          document.getElementById('employeeForm').addEventListener('submit', (e) => this.submitSaveEmployee(e));
+
+          // Search and filters
+          document.getElementById('employeeSearchInput')?.addEventListener('input', () => this.renderEmployeesTable());
+          document.getElementById('roleFilter')?.addEventListener('change', () => this.renderEmployeesTable());
+          document.getElementById('statusFilter')?.addEventListener('change', () => this.renderEmployeesTable());
+          document.getElementById('departmentFilter')?.addEventListener('change', () => this.renderEmployeesTable());
+          document.getElementById('resetFilters')?.addEventListener('click', () => this.resetFilters());
+
+          // Action buttons
+          document.getElementById('addEmployeeBtn')?.addEventListener('click', () => this.openAddEmployeeModal());
+          document.getElementById('exportEmployees')?.addEventListener('click', () => this.exportEmployees());
+          document.getElementById('manageShiftsBtn')?.addEventListener('click', () => {
+            this.switchTab('schedule');
+          });
+
+          // Week selector for schedule
+          document.getElementById('weekSelector')?.addEventListener('change', (e) => {
+            this.updateWeekDates(e.target.value);
+          });
+
+          // Generate schedule button
+          document.getElementById('generateSchedule')?.addEventListener('click', () => {
+            this.generateSchedule();
+          });
+
+          // Initialize week dates
+          this.updateWeekDates('current');
+
+          // Tab switching
+          document.querySelectorAll('.tab-pane').forEach(tab => {
+            const tabId = tab.id.replace('-tab', '');
+            tab.addEventListener('click', () => this.switchTab(tabId));
+          });
+
+          // Pagination
+          document.getElementById('prevPage')?.addEventListener('click', () => {
+            if (this.currentPage > 1) {
+              this.goToPage(this.currentPage - 1);
+            }
+          });
+          document.getElementById('nextPage')?.addEventListener('click', () => {
+            const totalPages = Math.ceil(this.getFilteredEmployees().length / this.itemsPerPage);
+            if (this.currentPage < totalPages) {
+              this.goToPage(this.currentPage + 1);
+            }
+          });
+        },
+
+        openAddEmployeeModal() {
+          document.getElementById('employeeForm').reset();
+          document.getElementById('formEmployeeId').value = '';
+          document.getElementById('employeeModalTitle').textContent = 'Add Employee';
+          this.openModal('employeeModal');
+        },
+
+        // Notification methods
+        showSuccess(message) {
+          this.showNotification(message, 'success');
+        },
+
+        showError(message) {
+          this.showNotification(message, 'error');
+        },
+
+        showWarning(message) {
+          this.showNotification(message, 'warning');
+        },
+
+        // Broadcast updates for real-time sync
+        broadcastUpdate(type, data) {
+          // Send update via DataSync if available
+          if (window.DataSync) {
+            window.DataSync.broadcast('employee_updates', {
+              type: type,
+              employee: data,
+              userId: this.getCurrentUserId(),
+              timestamp: new Date().toISOString()
+            });
+          }
+          
+          // Also update localStorage for cross-tab communication
+          const updateKey = `umi_employee_update_${Date.now()}`;
+          localStorage.setItem(updateKey, JSON.stringify({
+            type: type,
+            employee: data,
+            userId: this.getCurrentUserId(),
+            timestamp: new Date().toISOString()
+          }));
+          
+          // Remove old update keys to prevent localStorage bloat
+          setTimeout(() => {
+            localStorage.removeItem(updateKey);
+          }, 60000); // Remove after 1 minute
+        },
+
+        showNotification(message, type = 'info') {
+          // Create notification element
+          const notification = document.createElement('div');
+          notification.className = `notification notification-${type}`;
+          notification.textContent = message;
+          document.body.appendChild(notification);
+
+          // Animate in
+          setTimeout(() => {
+            notification.classList.add('show');
+          }, 100);
+
+          // Remove after 5 seconds
+          setTimeout(() => {
+            notification.classList.remove('show');
+            setTimeout(() => {
+              if (notification.parentNode) {
+                document.body.removeChild(notification);
+              }
+            }, 300);
+          }, 5000);
+        },
+
+        resetFilters() {
+          document.getElementById('employeeSearchInput').value = '';
+          document.getElementById('roleFilter').value = '';
+          document.getElementById('statusFilter').value = '';
+          document.getElementById('departmentFilter').value = '';
+          this.renderEmployeesTable();
+        },
+
+        canManageBranches() {
+          const subscription = JSON.parse(localStorage.getItem('umi_subscription') || '{}');
+          const planType = subscription.planType || 'Care';
+          
+          const tierConfig = {
+            'Care': { maxBranches: 1 },
+            'Care Plus': { maxBranches: 3 },
+            'Care Pro': { maxBranches: 10 }
+          };
+          
+          return tierConfig[planType] ? tierConfig[planType].maxBranches > 1 : false;
+        }
+      }
+    }
+  </script>
+
+  <script>
+    document.addEventListener('DOMContentLoaded', function() {
+      const system = userManagementSystem();
+      system.init();
+    });
+  </script>
+
+  <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
+</body>
+</html>

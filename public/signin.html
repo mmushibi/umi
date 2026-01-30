@@ -30,13 +30,14 @@
       color: var(--color-text-white);
       font-family: 'Nunito', 'Varela Round', sans-serif;
       line-height: 1.5;
-      min-height: 100vh;
+      height: 100vh;
+      overflow: hidden;
       position: relative;
     }
 
     .auth-container {
       display: flex;
-      min-height: 100vh;
+      height: 100vh;
     }
 
     .auth-left {
@@ -68,6 +69,14 @@
       border-radius: 20px;
       padding: 1.75rem;
       box-shadow: 0 20px 40px rgba(0, 0, 0, 0.2);
+      max-height: 90vh;
+      overflow-y: auto;
+      scrollbar-width: none; /* Firefox */
+      -ms-overflow-style: none; /* IE and Edge */
+    }
+
+    .auth-card::-webkit-scrollbar {
+      display: none; /* Chrome, Safari, Opera */
     }
 
     .auth-header {
@@ -476,20 +485,83 @@
     @media (max-width: 768px) {
       .auth-container {
         flex-direction: column;
+        height: 100vh;
       }
 
       .auth-right {
         display: none;
       }
 
+      .auth-left {
+        padding: 1rem;
+      }
+
       .auth-card {
         max-width: 100%;
-        padding: 2rem 1.5rem;
+        padding: 1.5rem 1rem;
+        max-height: 85vh;
+        overflow-y: auto;
+        scrollbar-width: none; /* Firefox */
+        -ms-overflow-style: none; /* IE and Edge */
+      }
+
+      .auth-card::-webkit-scrollbar {
+        display: none; /* Chrome, Safari, Opera */
+      }
+
+      .auth-header {
+        margin-bottom: 1.5rem;
+      }
+
+      .logo-container {
+        margin-bottom: 1rem;
+      }
+
+      .umi-logo {
+        max-width: 90px;
+      }
+
+      .tabs {
+        margin-bottom: 1.5rem;
+      }
+
+      .form-group {
+        margin-bottom: 0.75rem;
+      }
+
+      .form-input {
+        padding: 0.625rem;
+      }
+
+      .remember-forgot {
+        margin-bottom: 0.75rem;
+      }
+
+      .checkbox-wrapper {
+        margin-bottom: 0.75rem;
+      }
+
+      .submit-button {
+        padding: 0.625rem;
+        margin-bottom: 1rem;
+      }
+
+      .demo-credentials {
+        padding: 0.75rem;
+        margin-bottom: 0.75rem;
+      }
+
+      .demo-user-selection {
+        margin-bottom: 0.75rem;
+      }
+
+      .demo-main-button {
+        margin-bottom: 0.75rem;
       }
 
       .back-to-home {
         position: static;
-        margin-bottom: 2rem;
+        margin-bottom: 1.5rem;
         justify-content: center;
       }
     }

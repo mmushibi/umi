@@ -81,21 +81,18 @@
                 throw new Error('API Client not initialized');
             }
             
-            // Check if this is an admin endpoint (bypass auth)
-            const isAdminEndpoint = endpoint.startsWith('/admin/');
             const auth = window.checkAdminAuth();
+            if (!auth.isAuthenticated) {
+                throw new Error('Not authenticated');
+            }
             
             const defaultOptions = {
                 headers: {
-                    'Content-Type': 'application/json'
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${auth.token}`,
+                    'X-Tenant-ID': auth.tenant
                 }
             };
-            
-            // Add auth headers only for non-admin endpoints
-            if (!isAdminEndpoint && auth.isAuthenticated) {
-                defaultOptions.headers['Authorization'] = `Bearer ${auth.token}`;
-                defaultOptions.headers['X-Tenant-ID'] = auth.tenant;
-            }
             
             const finalOptions = { ...defaultOptions, ...options };
             
