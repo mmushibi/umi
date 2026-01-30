@@ -7,6 +7,22 @@
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
   <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap">
   <link rel="stylesheet" href="https://fonts.googleapis.com/icon?family=Material+Symbols+Rounded:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200" />
+  
+  <!-- Backend Integration -->
+  <link rel="stylesheet" href="../../shared/css/shared-styles.css">
+  <script src="../../shared/js/data-sync.js"></script>
+  <script src="../../shared/js/role-based-access.js"></script>
+  <script src="../../shared/js/feature-protection.js"></script>
+  <script src="js/admin-api.js"></script>
+  
+  <!-- New UI Components -->
+  <script src="../../js/components/DataTable.js"></script>
+  <script src="../../js/components/FormValidator.js"></script>
+  <script src="../../js/components/Modal.js"></script>
+  <script src="../../js/components/NotificationSystem.js"></script>
+  <link rel="stylesheet" href="../../shared/css/enhanced-components.css">
+  <link rel="stylesheet" href="../../shared/css/portal-themes.css">
+  <link rel="stylesheet" href="../../shared/css/responsive-design.css">
   <style>
     :root {
       --color-primary: #000000;
@@ -1807,9 +1823,112 @@
             backendHelper: window.backendHelper,
             apiClient: window.apiClient,
             authManager: window.authManager,
+            adminAPI: window.adminAPI,
             isAuthenticated: false,
             loading: false,
             error: null,
+            
+            // API Integration Methods
+            async loadPrescriptions() {
+                this.loading = true;
+                try {
+                    if (window.adminAPI) {
+                        const response = await window.adminAPI.getPrescriptions();
+                        this.prescriptions = response.data || response || [];
+                        this.showNotification('Prescriptions loaded successfully', 'success');
+                    }
+                } catch (error) {
+                    console.error('Failed to load prescriptions:', error);
+                    this.showNotification('Failed to load prescriptions', 'error');
+                } finally {
+                    this.loading = false;
+                }
+            },
+            
+            async createPrescription(prescriptionData) {
+                try {
+                    if (window.adminAPI) {
+                        const response = await window.adminAPI.createPrescription(prescriptionData);
+                        this.prescriptions.push(response);
+                        this.showNotification('Prescription created successfully', 'success');
+                        return response;
+                    }
+                } catch (error) {
+                    console.error('Failed to create prescription:', error);
+                    this.showNotification('Failed to create prescription', 'error');
+                    throw error;
+                }
+            },
+            
+            async updatePrescription(prescriptionId, prescriptionData) {
+                try {
+                    if (window.adminAPI) {
+                        const response = await window.adminAPI.updatePrescription(prescriptionId, prescriptionData);
+                        const index = this.prescriptions.findIndex(p => p.id === prescriptionId);
+                        if (index !== -1) {
+                            this.prescriptions[index] = response;
+                        }
+                        this.showNotification('Prescription updated successfully', 'success');
+                        return response;
+                    }
+                } catch (error) {
+                    console.error('Failed to update prescription:', error);
+                    this.showNotification('Failed to update prescription', 'error');
+                    throw error;
+                }
+            },
+            
+            async deletePrescription(prescriptionId) {
+                try {
+                    if (window.adminAPI) {
+                        await window.adminAPI.deletePrescription(prescriptionId);
+                        this.prescriptions = this.prescriptions.filter(p => p.id !== prescriptionId);
+                        this.showNotification('Prescription deleted successfully', 'success');
+                    }
+                } catch (error) {
+                    console.error('Failed to delete prescription:', error);
+                    this.showNotification('Failed to delete prescription', 'error');
+                    throw error;
+                }
+            },
+            
+            async loadPatients() {
+                try {
+                    if (window.adminAPI) {
+                        const response = await window.adminAPI.getPatients();
+                        this.patients = response.data || response || [];
+                    }
+                } catch (error) {
+                    console.error('Failed to load patients:', error);
+                    this.showNotification('Failed to load patients', 'error');
+                }
+            },
+            
+            showNotification(message, type = 'info') {
+                if (window.NotificationSystem) {
+                    const notificationSystem = NotificationSystem.getInstance();
+                    notificationSystem[type](message);
+                } else {
+                    // Fallback notification
+                    const notification = document.createElement('div');
+                    notification.className = `notification notification-${type}`;
+                    notification.textContent = message;
+                    document.body.appendChild(notification);
+
+                    setTimeout(() => {
+                        notification.classList.add('show');
+                    }, 100);
+
+                    setTimeout(() => {
+                        notification.classList.remove('show');
+                        setTimeout(() => {
+                            if (notification.parentNode) {
+                                notification.parentNode.removeChild(notification);
+                            }
+                        }, 300);
+                    }, 5000);
+                }
+            },
         sidebarOpen: false,
         // User and pharmacy info
         pharmacyInfo: {
@@ -2525,10 +2644,16 @@
       let medications = [];
       
       // Initialize
-      async function async init() {
+      async init() {
             try {
                 // Check authentication
                 this.isAuthenticated = this.authManager?.isAuthenticated() || false;
+                
+                // Load prescriptions
+                await this.loadPrescriptions();
+                
+                // Load patients
+                await this.loadPatients();
                 
                 if (!this.isAuthenticated) {
                     this.error = 'Please login to access this page';

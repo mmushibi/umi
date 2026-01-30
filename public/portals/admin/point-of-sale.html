@@ -9,6 +9,22 @@
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@100;400;500;600;700&family=Varela+Round&family=Nunito:wght@400;600;700&display=swap" rel="stylesheet">
   <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Rounded:wght@300;400;500;600;700&display=swap" rel="stylesheet">
   <script src="https://cdn.tailwindcss.com"></script>
+  
+  <!-- Backend Integration -->
+  <link rel="stylesheet" href="../../shared/css/shared-styles.css">
+  <script src="../../shared/js/data-sync.js"></script>
+  <script src="../../shared/js/role-based-access.js"></script>
+  <script src="../../shared/js/feature-protection.js"></script>
+  <script src="js/admin-api.js"></script>
+  
+  <!-- New UI Components -->
+  <script src="../../js/components/DataTable.js"></script>
+  <script src="../../js/components/FormValidator.js"></script>
+  <script src="../../js/components/Modal.js"></script>
+  <script src="../../js/components/NotificationSystem.js"></script>
+  <link rel="stylesheet" href="../../shared/css/enhanced-components.css">
+  <link rel="stylesheet" href="../../shared/css/portal-themes.css">
+  <link rel="stylesheet" href="../../shared/css/responsive-design.css">
   <style>
     :root {
       --color-primary: #000000;
@@ -2648,9 +2664,77 @@
             backendHelper: window.backendHelper,
             apiClient: window.apiClient,
             authManager: window.authManager,
+            adminAPI: window.adminAPI,
             isAuthenticated: false,
             loading: false,
             error: null,
+            
+            // API Integration Methods
+            async loadProducts() {
+                this.loading = true;
+                try {
+                    if (window.adminAPI) {
+                        const response = await window.adminAPI.getInventory();
+                        this.products = response.data || response || [];
+                        this.showNotification('Products loaded successfully', 'success');
+                    }
+                } catch (error) {
+                    console.error('Failed to load products:', error);
+                    this.showNotification('Failed to load products', 'error');
+                } finally {
+                    this.loading = false;
+                }
+            },
+            
+            async createSale(saleData) {
+                try {
+                    if (window.adminAPI) {
+                        const response = await window.adminAPI.createSale(saleData);
+                        this.transactionId++;
+                        this.showNotification('Sale completed successfully', 'success');
+                        return response;
+                    }
+                } catch (error) {
+                    console.error('Failed to create sale:', error);
+                    this.showNotification('Failed to process sale', 'error');
+                    throw error;
+                }
+            },
+            
+            async loadTransactions() {
+                try {
+                    if (window.adminAPI) {
+                        const response = await window.adminAPI.getSales();
+                        this.recentTransactions = response.data || response || [];
+                    }
+                } catch (error) {
+                    console.error('Failed to load transactions:', error);
+                    this.showNotification('Failed to load transactions', 'error');
+                }
+            },
+            
+            async processPayment(paymentData) {
+                try {
+                    if (window.adminAPI) {
+                        const response = await window.adminAPI.processPayment(paymentData);
+                        this.showNotification('Payment processed successfully', 'success');
+                        return response;
+                    }
+                } catch (error) {
+                    console.error('Failed to process payment:', error);
+                    this.showNotification('Payment failed', 'error');
+                    throw error;
+                }
+            },
+            
+            showNotification(message, type = 'info') {
+                if (window.NotificationSystem) {
+                    const notificationSystem = NotificationSystem.getInstance();
+                    notificationSystem[type](message);
+                } else {
+                    alert(message);
+                }
+            },
         sidebarOpen: false,
         searchQuery: '',
         searchSuggestions: [],
