@@ -130,7 +130,7 @@ class AuthService {
         } finally {
             this.clearAuthData();
             // Redirect to login page
-            window.location.href = '../auth/signin.html';
+            window.location.href = '/public/admin-signin.html';
         }
     }
 

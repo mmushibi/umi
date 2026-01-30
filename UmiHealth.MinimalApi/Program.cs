@@ -576,7 +576,7 @@ app.MapPost("/api/v1/auth/login", async (HttpRequest request, UmiHealthDbContext
 
         {
 
-            redirectUrl = "/portals/admin/home.html";
+            redirectUrl = "/portals/super-admin/home.html";
 
         }
 

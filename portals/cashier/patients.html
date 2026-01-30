@@ -2534,8 +2534,7 @@
           // Initial render
           this.renderPatientsTable();
           
-          const mode = (!userStr || userStr === 'undefined' || userStr === 'null') ? 'Demo' : 'Authenticated';
-          console.log(`Cashier patient system initialized (${mode} Mode)`);
+          console.log('Cashier patient system initialized (Authenticated Mode)');
         },
 
         addSyncButton() {
@@ -2582,91 +2581,50 @@
           try {
             this.isLoading = true;
             
-            // Check if we're in demo mode
-            const userStr = localStorage.getItem('umi_currentUser') || localStorage.getItem('umi_current_user');
-            if (!userStr || userStr === 'undefined' || userStr === 'null') {
-              // Demo mode: Load from localStorage
-              console.log('Demo mode: Loading patients from localStorage');
-              try {
-                const savedData = localStorage.getItem('umi_cashier_patients_data');
-                if (savedData) {
-                  const parsed = JSON.parse(savedData);
-                  this.patients = parsed.data || [];
-                } else {
-                  // Create demo data if none exists
-                  this.patients = [
-                    {
-                      id: 'demo-1',
-                      patientId: 'DEMO-001',
-                      firstName: 'John',
-                      lastName: 'Doe',
-                      dateOfBirth: '1990-01-01',
-                      gender: 'Male',
-                      phone: '+1234567890',
-                      email: 'john.doe@email.com',
-                      address: '123 Main St',
-                      bloodType: 'O+',
-                      nrc: '123456/78/9',
-                      status: 'active',
-                      registrationDate: '2023-01-01',
-                      lastVisit: '2023-12-01',
-                      emergencyContact: 'Jane Doe',
-                      emergencyPhone: '+0987654321',
-                      emergencyRelationship: 'Spouse',
-                      medicalHistory: {}
-                    }
-                  ];
-                }
-              } catch (error) {
-                console.error('Demo mode: Failed to load from localStorage:', error);
-                this.patients = [];
-              }
-            } else {
-              // Authenticated mode: Load from API
-              const response = await api.getPatients({
-                page: 1,
-                pageSize: 100
-              });
-              
-              // Handle backend response format
-              const patientsData = response.patients || response.data || [];
-              this.patients = patientsData.map(p => ({
-                id: p.id,
-                patientId: p.patientNumber || p.id,
-                firstName: p.firstName,
-                lastName: p.lastName,
-                dateOfBirth: p.dateOfBirth,
-                gender: p.gender,
-                phone: p.phone,
-                email: p.email,
-                address: p.address,
-                bloodType: p.bloodType,
-                nrc: p.nrc,
-                status: p.status || 'active',
-                registrationDate: p.createdAt,
-                lastVisit: p.lastVisit,
-                emergencyContact: p.emergencyContact?.name,
-                emergencyPhone: p.emergencyContact?.phone,
-                emergencyRelationship: p.emergencyContact?.relationship,
-                medicalHistory: p.medicalHistory || {},
+            // Authenticated mode: Load from API
+            const response = await api.getPatients({
+              page: 1,
+              pageSize: 100
+            });
+            
+            // Handle backend response format
+            const patientsData = response.patients || response.data || [];
+            this.patients = patientsData.map(p => ({
+              id: p.id,
+              patientId: p.patientNumber || p.id,
+              firstName: p.firstName,
+              lastName: p.lastName,
+              dateOfBirth: p.dateOfBirth,
+              gender: p.gender,
+              phone: p.phone,
+              email: p.email,
+              address: p.address,
+              bloodType: p.bloodType,
+              nrc: p.nrc,
+              status: p.status || 'active',
+              registrationDate: p.createdAt,
+              lastVisit: p.lastVisit,
+              emergencyContact: p.emergencyContact?.name,
+              emergencyPhone: p.emergencyContact?.phone,
+              emergencyRelationship: p.emergencyContact?.relationship,
+              medicalHistory: p.medicalHistory || {},
               allergies: p.allergies || [],
               insuranceInfo: p.insuranceInfo || {}
             }));
             
             this.renderPatientsTable();
             this.updatePatientStats();
+            
+            this.renderPatientsTable();
+            this.updatePatientStats();
+          } catch (error) {
+            console.error('Error loading patients:', error);
+            this.showError('Failed to load patients. Please try again.');
+            this.patients = [];
+          } finally {
+            this.isLoading = false;
           }
-          
-          this.renderPatientsTable();
-          this.updatePatientStats();
-        } catch (error) {
-          console.error('Error loading patients:', error);
-          this.showError('Failed to load patients. Please try again.');
-          this.patients = [];
-        } finally {
-          this.isLoading = false;
-        }
-      },
+        },
 
         setupDataSyncListeners() {
           // Listen for data manager events if available
