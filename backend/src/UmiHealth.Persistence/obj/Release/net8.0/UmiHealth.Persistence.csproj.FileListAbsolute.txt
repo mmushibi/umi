@@ -10,3 +10,15 @@ C:\Users\sepio\Desktop\Umi_Health\Umi_Health\Umi_Health\backend\src\UmiHealth.Pe
 C:\Users\sepio\Desktop\Umi_Health\Umi_Health\Umi_Health\backend\src\UmiHealth.Persistence\obj\Release\net8.0\refint\UmiHealth.Persistence.dll
 C:\Users\sepio\Desktop\Umi_Health\Umi_Health\Umi_Health\backend\src\UmiHealth.Persistence\obj\Release\net8.0\UmiHealth.Persistence.pdb
 C:\Users\sepio\Desktop\Umi_Health\Umi_Health\Umi_Health\backend\src\UmiHealth.Persistence\obj\Release\net8.0\ref\UmiHealth.Persistence.dll
+C:\Users\sepio\Desktop\Umi_Health\backend\src\UmiHealth.Persistence\bin\Release\net8.0\UmiHealth.Persistence.deps.json
+C:\Users\sepio\Desktop\Umi_Health\backend\src\UmiHealth.Persistence\bin\Release\net8.0\UmiHealth.Persistence.dll
+C:\Users\sepio\Desktop\Umi_Health\backend\src\UmiHealth.Persistence\bin\Release\net8.0\UmiHealth.Persistence.pdb
+C:\Users\sepio\Desktop\Umi_Health\backend\src\UmiHealth.Persistence\obj\Release\net8.0\UmiHealth.Persistence.GeneratedMSBuildEditorConfig.editorconfig
+C:\Users\sepio\Desktop\Umi_Health\backend\src\UmiHealth.Persistence\obj\Release\net8.0\UmiHealth.Persistence.AssemblyInfoInputs.cache
+C:\Users\sepio\Desktop\Umi_Health\backend\src\UmiHealth.Persistence\obj\Release\net8.0\UmiHealth.Persistence.AssemblyInfo.cs
+C:\Users\sepio\Desktop\Umi_Health\backend\src\UmiHealth.Persistence\obj\Release\net8.0\UmiHealth.Persistence.csproj.CoreCompileInputs.cache
+C:\Users\sepio\Desktop\Umi_Health\backend\src\UmiHealth.Persistence\obj\Release\net8.0\UmiHealth.Persistence.sourcelink.json
+C:\Users\sepio\Desktop\Umi_Health\backend\src\UmiHealth.Persistence\obj\Release\net8.0\UmiHealth.Persistence.dll
+C:\Users\sepio\Desktop\Umi_Health\backend\src\UmiHealth.Persistence\obj\Release\net8.0\refint\UmiHealth.Persistence.dll
+C:\Users\sepio\Desktop\Umi_Health\backend\src\UmiHealth.Persistence\obj\Release\net8.0\UmiHealth.Persistence.pdb
+C:\Users\sepio\Desktop\Umi_Health\backend\src\UmiHealth.Persistence\obj\Release\net8.0\ref\UmiHealth.Persistence.dll

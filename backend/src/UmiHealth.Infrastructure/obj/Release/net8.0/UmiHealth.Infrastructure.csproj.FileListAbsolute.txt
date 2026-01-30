@@ -10,3 +10,15 @@ C:\Users\sepio\Desktop\Umi_Health\Umi_Health\Umi_Health\backend\src\UmiHealth.In
 C:\Users\sepio\Desktop\Umi_Health\Umi_Health\Umi_Health\backend\src\UmiHealth.Infrastructure\obj\Release\net8.0\refint\UmiHealth.Infrastructure.dll
 C:\Users\sepio\Desktop\Umi_Health\Umi_Health\Umi_Health\backend\src\UmiHealth.Infrastructure\obj\Release\net8.0\UmiHealth.Infrastructure.pdb
 C:\Users\sepio\Desktop\Umi_Health\Umi_Health\Umi_Health\backend\src\UmiHealth.Infrastructure\obj\Release\net8.0\ref\UmiHealth.Infrastructure.dll
+C:\Users\sepio\Desktop\Umi_Health\backend\src\UmiHealth.Infrastructure\bin\Release\net8.0\UmiHealth.Infrastructure.deps.json
+C:\Users\sepio\Desktop\Umi_Health\backend\src\UmiHealth.Infrastructure\bin\Release\net8.0\UmiHealth.Infrastructure.dll
+C:\Users\sepio\Desktop\Umi_Health\backend\src\UmiHealth.Infrastructure\bin\Release\net8.0\UmiHealth.Infrastructure.pdb
+C:\Users\sepio\Desktop\Umi_Health\backend\src\UmiHealth.Infrastructure\obj\Release\net8.0\UmiHealth.Infrastructure.GeneratedMSBuildEditorConfig.editorconfig
+C:\Users\sepio\Desktop\Umi_Health\backend\src\UmiHealth.Infrastructure\obj\Release\net8.0\UmiHealth.Infrastructure.AssemblyInfoInputs.cache
+C:\Users\sepio\Desktop\Umi_Health\backend\src\UmiHealth.Infrastructure\obj\Release\net8.0\UmiHealth.Infrastructure.AssemblyInfo.cs
+C:\Users\sepio\Desktop\Umi_Health\backend\src\UmiHealth.Infrastructure\obj\Release\net8.0\UmiHealth.Infrastructure.csproj.CoreCompileInputs.cache
+C:\Users\sepio\Desktop\Umi_Health\backend\src\UmiHealth.Infrastructure\obj\Release\net8.0\UmiHealth.Infrastructure.sourcelink.json
+C:\Users\sepio\Desktop\Umi_Health\backend\src\UmiHealth.Infrastructure\obj\Release\net8.0\UmiHealth.Infrastructure.dll
+C:\Users\sepio\Desktop\Umi_Health\backend\src\UmiHealth.Infrastructure\obj\Release\net8.0\refint\UmiHealth.Infrastructure.dll
+C:\Users\sepio\Desktop\Umi_Health\backend\src\UmiHealth.Infrastructure\obj\Release\net8.0\UmiHealth.Infrastructure.pdb
+C:\Users\sepio\Desktop\Umi_Health\backend\src\UmiHealth.Infrastructure\obj\Release\net8.0\ref\UmiHealth.Infrastructure.dll
