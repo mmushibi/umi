@@ -1048,98 +1048,15 @@
     </div>
   </main>
 
-  <script>
-    function clinicalSystem() {
-      return {
-        // Initialize backend integration
-        const pageIntegration = new PageIntegrationTemplate('pharmacist-clinical', {
-            requireAuth: true,
+      async init() {
+        try {
+          // Check authentication
+          this.isAuthenticated = this.authManager?.isAuthenticated() || false;
+
+          // Initialize backend integration
+          await this.backendHelper.initPage('pharmacist-clinical', {
             enableRealTime: false,
-            enableCaching: true
-        });
-        
-        return {
-            ...pageIntegration,
-            backendHelper: window.backendHelper,
-            apiClient: window.apiClient,
-            authManager: window.authManager,
-            isAuthenticated: false,
-            loading: false,
-            error: null,
-        sidebarOpen: false,
-        loading: false,
-        isAuthenticated: false,
-        isDemoMode: true,
-        showRealTimeIndicator: false,
-        demoBannerClosed: false,
-        medications: [],
-        selectedPatient: null,
-        patientSearchQuery: '',
-        patientSearchResults: [],
-        showPatientResults: false,
-        
-        // Drug Interaction Data
-        interaction: {
-          drug1: '',
-          drug2: '',
-          result: null
-        },
-        
-        // Dosage Calculator Data
-        dosage: {
-          medication: '',
-          weight: '',
-          age: '',
-          result: null
-        },
-        
-        // Allergy Checker Data
-        allergy: {
-          patientId: '',
-          medication: '',
-          result: null
-        },
-
-        // Initialize API client
-        apiClient: null,
-
-        async async init() {
-            try {
-                // Check authentication
-                this.isAuthenticated = this.authManager?.isAuthenticated() || false;
-                
-                if (!this.isAuthenticated) {
-                    this.error = 'Please login to access this page';
-                    return;
-                }
-                
-                // Initialize backend integration
-                await this.backendHelper.initPage('pharmacist-clinical', {
-                    enableRealTime: false,
-                    initialData: this.getInitialDataConfig()
-                });
-                
-                // Load page data
-                await this.loadPageData();
-                
-                // Set up event listeners
-                this.setupEventListeners();
-                
-                console.log('pharmacist-clinical page initialized with backend integration');
-            } catch (error) {
-                console.error('Failed to initialize pharmacist-clinical page:', error);
-                this.error = 'Failed to initialize page';
-            }
-        },
-          
-          // Load demo banner preference
-          this.demoBannerClosed = localStorage.getItem('demoBannerClosed') === 'true';
-        },
-
-        checkAuthenticationStatus() {
-          // Check if user is authenticated
-          this.isAuthenticated = !!(this.apiClient.token && this.apiClient.userId && this.apiClient.tenantId);
-          
+            initialData: this.getInitialDataConfig()
           // Determine if we're in demo mode
           this.isDemoMode = !this.isAuthenticated;
           
