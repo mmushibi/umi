@@ -13,6 +13,21 @@
   <link rel="stylesheet" href="css/pharmacist-styles.css">
   <script src="../js/api-client.js"></script>
   <script src="js/pharmacist-api.js"></script>
+  
+  <!-- Backend Integration -->
+  <link rel="stylesheet" href="../../shared/css/shared-styles.css">
+  <script src="../../shared/js/data-sync.js"></script>
+  <script src="../../shared/js/role-based-access.js"></script>
+  <script src="../../shared/js/feature-protection.js"></script>
+  
+  <!-- New UI Components -->
+  <script src="../../js/components/DataTable.js"></script>
+  <script src="../../js/components/FormValidator.js"></script>
+  <script src="../../js/components/Modal.js"></script>
+  <script src="../../js/components/NotificationSystem.js"></script>
+  <link rel="stylesheet" href="../../shared/css/enhanced-components.css">
+  <link rel="stylesheet" href="../../shared/css/portal-themes.css">
+  <link rel="stylesheet" href="../../shared/css/responsive-design.css">
   <style>
     :root {
       --color-primary: #000000;
@@ -1063,9 +1078,89 @@
             backendHelper: window.backendHelper,
             apiClient: window.apiClient,
             authManager: window.authManager,
+            pharmacistApi: window.pharmacistApi,
             isAuthenticated: false,
             loading: false,
             error: null,
+            
+            // API Integration Methods
+            async loadMedications() {
+                try {
+                    if (window.pharmacistApi) {
+                        const response = await window.pharmacistApi.getInventory();
+                        this.medications = response.data || response || [];
+                        this.showNotification('Medications loaded successfully', 'success');
+                    }
+                } catch (error) {
+                    console.error('Failed to load medications:', error);
+                    this.showNotification('Failed to load medications', 'error');
+                }
+            },
+            
+            async searchPatients(searchQuery) {
+                try {
+                    if (window.pharmacistApi) {
+                        const response = await window.pharmacistApi.searchPatients(searchQuery);
+                        this.patientSearchResults = response.data || response || [];
+                        this.showPatientResults = true;
+                    }
+                } catch (error) {
+                    console.error('Failed to search patients:', error);
+                    this.showNotification('Failed to search patients', 'error');
+                }
+            },
+            
+            async checkDrugInteractions(drug1, drug2) {
+                try {
+                    if (window.pharmacistApi) {
+                        const response = await window.pharmacistApi.checkDrugInteractions([drug1, drug2]);
+                        this.interaction.result = response.data || response;
+                        this.showNotification('Drug interaction check completed', 'success');
+                    }
+                } catch (error) {
+                    console.error('Failed to check drug interactions:', error);
+                    this.showNotification('Failed to check drug interactions', 'error');
+                }
+            },
+            
+            async calculateDosage(medication, weight, age) {
+                try {
+                    if (window.pharmacistApi) {
+                        const response = await window.pharmacistApi.calculateDosage({
+                            medication: medication,
+                            weight: weight,
+                            age: age
+                        });
+                        this.dosage.result = response.data || response;
+                        this.showNotification('Dosage calculation completed', 'success');
+                    }
+                } catch (error) {
+                    console.error('Failed to calculate dosage:', error);
+                    this.showNotification('Failed to calculate dosage', 'error');
+                }
+            },
+            
+            async checkAllergies(patientId, medication) {
+                try {
+                    if (window.pharmacistApi) {
+                        const response = await window.pharmacistApi.checkAllergies(patientId, medication);
+                        this.allergy.result = response.data || response;
+                        this.showNotification('Allergy check completed', 'success');
+                    }
+                } catch (error) {
+                    console.error('Failed to check allergies:', error);
+                    this.showNotification('Failed to check allergies', 'error');
+                }
+            },
+            
+            showNotification(message, type = 'info') {
+                if (window.NotificationSystem) {
+                    const notificationSystem = NotificationSystem.getInstance();
+                    notificationSystem[type](message);
+                } else {
+                    alert(message);
+                }
+            },
         sidebarOpen: false,
         loading: false,
         isAuthenticated: false,
@@ -1103,10 +1198,13 @@
         // Initialize API client
         apiClient: null,
 
-        async async init() {
+        async init() {
             try {
                 // Check authentication
                 this.isAuthenticated = this.authManager?.isAuthenticated() || false;
+                
+                // Load medications
+                await this.loadMedications();
                 
                 if (!this.isAuthenticated) {
                     this.error = 'Please login to access this page';
