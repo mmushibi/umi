@@ -1,6 +1,0 @@
-$headers = @{
-    'Authorization' = 'Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJuYW1laWQiOiI0NTRlM2NmNS1mNmY3LTRhNWItYjM3OC00ZTg4Mzc1MWUwMjkiLCJlbWFpbCI6InRlc3RAZXhhbXBsZS5jb20iLCJyb2xlIjoiYWRtaW4iLCJ0ZW5hbnRfaWQiOiIxMzgyMTY4ZS1iZTY5LTQ4NTYtYjQwNS1hNWQ2ZmRmODQ4MDMiLCJqdGkiOiI4MDYwODU2Yy0wMjI0LTRjN2QtOGU0OC1kMzQyMjQ2Zjk5MjEiLCJpYXQiOjE3Njk3NTY4NTUsIm5iZiI6MTc2OTc1Njg1NSwiZXhwIjoxNzY5NzYwNDU1LCJpc3MiOiJVbWlIZWFsdGgiLCJhdWQiOiJVbWlIZWFsdGhVc2VycyJ9.244u8X_JDZOq7ESjLVsTO8ii9-_uRw1VBGd-pKSXHWc'
-}
-
-$response = Invoke-RestMethod -Uri 'http://localhost:5001/api/v1/patients' -Method GET -Headers $headers
-$response | ConvertTo-Json -Depth 10

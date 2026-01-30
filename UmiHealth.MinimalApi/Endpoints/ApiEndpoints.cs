@@ -2,6 +2,8 @@ using Microsoft.EntityFrameworkCore;
 using UmiHealth.MinimalApi.Data;
 using UmiHealth.MinimalApi.Models;
 using System.Security.Claims;
+using Microsoft.AspNetCore.SignalR;
+using UmiHealth.MinimalApi.Hubs;
 
 namespace UmiHealth.MinimalApi.Endpoints
 {
@@ -27,34 +29,11 @@ namespace UmiHealth.MinimalApi.Endpoints
 
         public static void RegisterApiEndpoints(this WebApplication app)
         {
+            // Get hub context for real-time notifications
+            var hubContext = app.Services.GetService<IHubContext<UmiHealthHub>>();
+
             // User Management APIs
-            app.MapGet("/api/v1/users", async (ClaimsPrincipal user, UmiHealthDbContext context) =>
-            {
-                var tenantId = GetCurrentTenantId(user);
-                if (string.IsNullOrEmpty(tenantId))
-                    return Results.Unauthorized();
-
-                var users = await context.Users
-                    .Where(u => u.TenantId == tenantId)
-                    .Select(u => new
-                    {
-                        u.Id,
-                        u.Username,
-                        u.Email,
-                        u.FirstName,
-                        u.LastName,
-                        u.PhoneNumber,
-                        u.Role,
-                        u.Status,
-                        u.CreatedAt
-                    })
-                    .ToListAsync();
-
-                return Results.Ok(new { success = true, data = users });
-            })
-            .RequireAuthorization();
-
-            app.MapPost("/api/v1/users", async (ClaimsPrincipal user, UmiHealthDbContext context, User newUser) =>
+            app.MapPost("/api/v1/users", async (ClaimsPrincipal user, UmiHealthDbContext context, User newUser, IHubContext<UmiHealthHub> hub) =>
             {
                 var tenantId = GetCurrentTenantId(user);
                 if (string.IsNullOrEmpty(tenantId))
@@ -69,6 +48,29 @@ namespace UmiHealth.MinimalApi.Endpoints
 
                 context.Users.Add(newUser);
                 await context.SaveChangesAsync();
+
+                // Send real-time notification
+                await hub.Clients.Group($"tenant_{tenantId}").SendAsync("UserUpdated", new
+                {
+                    action = "created",
+                    user = new
+                    {
+                        newUser.Id,
+                        newUser.Username,
+                        newUser.Email,
+                        newUser.FirstName,
+                        newUser.LastName,
+                        newUser.Role,
+                        newUser.CreatedAt
+                    }
+                });
+
+                await hub.Clients.Group($"tenant_{tenantId}").SendAsync("ReceiveNotification", new
+                {
+                    message = $"New user {newUser.FirstName} {newUser.LastName} has been added",
+                    type = "success",
+                    timestamp = DateTime.UtcNow
+                });
 
                 return Results.Ok(new { success = true, message = "User created successfully", data = newUser });
             })

@@ -1418,7 +1418,7 @@
           this.loading = true;
           this.error = null;
           try {
-            const response = window.pharmacistApi.suppliers.getSuppliers();
+            const response = this.apiClient.request('/suppliers');
             this.suppliers = response.data || [];
           } catch (error) {
             console.error('Failed to load suppliers:', error);
@@ -1430,7 +1430,7 @@
 
         async loadStats() {
           try {
-            const response = await window.pharmacistApi.suppliers.getSupplierStats();
+            const response = this.apiClient.request('/suppliers/stats');
             this.stats = response.data || {
               totalSuppliers: 0,
               activeSuppliers: 0,
@@ -1492,7 +1492,10 @@
         async createSupplier() {
           this.loading = true;
           try {
-            await window.pharmacistApi.suppliers.createSupplier(this.supplierForm);
+            await this.apiClient.request('/suppliers', {
+              method: 'POST',
+              body: JSON.stringify(this.supplierForm)
+            });
             this.showCreateModal = false;
             this.resetSupplierForm();
             await this.loadSuppliers();
@@ -1510,7 +1513,10 @@
         async updateSupplier() {
           this.loading = true;
           try {
-            await window.pharmacistApi.suppliers.updateSupplier(this.currentSupplier.id, this.supplierForm);
+            await this.apiClient.request(`/suppliers/${this.currentSupplier.id}`, {
+              method: 'PUT',
+              body: JSON.stringify(this.supplierForm)
+            });
             this.showEditModal = false;
             this.resetSupplierForm();
             await this.loadSuppliers();
@@ -1529,7 +1535,9 @@
           if (confirm(`Are you sure you want to delete ${supplier.name}?`)) {
             this.loading = true;
             try {
-              await window.pharmacistApi.suppliers.deleteSupplier(supplier.id);
+              await this.apiClient.request(`/suppliers/${supplier.id}`, {
+                method: 'DELETE'
+              });
               await this.loadSuppliers();
               await this.loadStats();
               this.showToast('Supplier deleted successfully', 'success');

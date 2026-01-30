@@ -11,19 +11,19 @@ class AdminAPI {
   getBaseURL() {
     // Check for environment variable first
     if (typeof process !== 'undefined' && process.env?.UMI_API_BASE_URL) {
-      return process.env.UMI_API_BASE_URL;
+      return process.env.UMI_API_BASE_URL + '/api/v1';
     }
     
     // Check for global configuration
     if (typeof window !== 'undefined' && window.UMI_CONFIG?.apiBaseUrl) {
-      return window.UMI_CONFIG.apiBaseUrl;
+      return window.UMI_CONFIG.apiBaseUrl + '/api/v1';
     }
     
     // Check for localStorage configuration
     if (typeof window !== 'undefined') {
       const storedUrl = localStorage.getItem('umi_api_base_url');
       if (storedUrl) {
-        return storedUrl;
+        return storedUrl + '/api/v1';
       }
     }
     
@@ -34,23 +34,27 @@ class AdminAPI {
       
       if (hostname === 'localhost' || hostname === '127.0.0.1') {
         // Development environment
-        return `http://localhost:${parseInt(port) + 1 || 5001}`;
+        return `http://localhost:${parseInt(port) + 1 || 5001}/api/v1`;
       } else if (hostname.includes('staging') || hostname.includes('dev')) {
         // Staging environment
-        return `https://api-staging.umihealth.com`;
+        return `https://api-staging.umihealth.com/api/v1`;
       } else {
-        // Production environment
-        return `https://api.umihealth.com`;
+        // Production environment - extract subdomain for tenant-specific API calls
+        const subdomain = hostname.split('.')[0];
+        if (subdomain && subdomain !== 'www' && subdomain !== 'umihealth') {
+          return `https://${subdomain}.umihealth.com/api/v1`;
+        }
+        return `https://api.umihealth.com/api/v1`;
       }
     }
     
     // Default fallback
-    return 'http://localhost:5001';
+    return 'http://localhost:5001/api/v1';
   }
 
   // User profile operations
   async updateUserProfile(profile) {
-    const response = await fetch(`${this.baseURL}/api/v1/admin/profile`, {
+    const response = await fetch(`${this.baseURL}/account/profile`, {
       method: 'PUT',
       headers: {
         'Authorization': `Bearer ${this.getAuthToken()}`,
@@ -69,7 +73,7 @@ class AdminAPI {
 
   // Pharmacy settings operations
   async updatePharmacySettings(settings) {
-    const response = await fetch(`${this.baseURL}/api/v1/admin/settings`, {
+    const response = await fetch(`${this.baseURL}/account/tenant-settings`, {
       method: 'PUT',
       headers: {
         'Authorization': `Bearer ${this.getAuthToken()}`,
@@ -88,7 +92,7 @@ class AdminAPI {
 
   // Notification settings operations
   async updateNotificationSettings(settings) {
-    const response = await fetch(`${this.baseURL}/api/v1/admin/settings`, {
+    const response = await fetch(`${this.baseURL}/account/tenant-settings`, {
       method: 'PUT',
       headers: {
         'Authorization': `Bearer ${this.getAuthToken()}`,
@@ -107,7 +111,7 @@ class AdminAPI {
 
   // Subscription operations
   async upgradeSubscription(upgradeData) {
-    const response = await fetch(`${this.baseURL}/api/v1/admin/subscription-upgrade`, {
+    const response = await fetch(`${this.baseURL}/account/upgrade-subscription`, {
       method: 'POST',
       headers: {
         'Authorization': `Bearer ${this.getAuthToken()}`,
@@ -126,7 +130,7 @@ class AdminAPI {
 
   // Get subscription info
   async getSubscriptionInfo() {
-    const response = await fetch(`${this.baseURL}/api/v1/admin/settings`, {
+    const response = await fetch(`${this.baseURL}/account/subscription-plans`, {
       method: 'GET',
       headers: {
         'Authorization': `Bearer ${this.getAuthToken()}`,
@@ -144,7 +148,7 @@ class AdminAPI {
 
   // Get users
   async getUsers() {
-    const response = await fetch(`${this.baseURL}/api/v1/admin/users`, {
+    const response = await fetch(`${this.baseURL}/users`, {
       method: 'GET',
       headers: {
         'Authorization': `Bearer ${this.getAuthToken()}`,
@@ -162,7 +166,7 @@ class AdminAPI {
 
   // Create user
   async createUser(userData) {
-    const response = await fetch(`${this.baseURL}/api/v1/admin/users`, {
+    const response = await fetch(`${this.baseURL}/users`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
@@ -172,17 +176,16 @@ class AdminAPI {
         firstName: userData.firstName || userData.name?.split(' ')[0] || '',
         lastName: userData.lastName || userData.name?.split(' ')[1] || '',
         email: userData.email,
-        phone: userData.phone || '',
+        phoneNumber: userData.phone || '',
         role: userData.role || 'Staff',
         password: userData.password || 'TempPassword123!',
-        branchId: userData.branchId || null,
-        sendInviteEmail: true
+        username: userData.email?.split('@')[0] || 'user'
       })
     });
 
     if (!response.ok) {
       const error = await response.json();
-      throw new Error(error.error || 'Failed to create user');
+      throw new Error(error.message || 'Failed to create user');
     }
 
     return await response.json();
@@ -190,7 +193,7 @@ class AdminAPI {
 
   // Update user
   async updateUser(userId, userData) {
-    const response = await fetch(`${this.baseURL}/api/v1/admin/users/${userId}`, {
+    const response = await fetch(`${this.baseURL}/users/${userId}`, {
       method: 'PUT',
       headers: {
         'Content-Type': 'application/json',
@@ -200,16 +203,15 @@ class AdminAPI {
         firstName: userData.firstName || userData.name?.split(' ')[0] || '',
         lastName: userData.lastName || userData.name?.split(' ')[1] || '',
         email: userData.email,
-        phone: userData.phone || '',
+        phoneNumber: userData.phone || '',
         role: userData.role || 'Staff',
-        status: userData.status || 'active',
-        branchId: userData.branchId || null
+        status: userData.status || 'active'
       })
     });
 
     if (!response.ok) {
       const error = await response.json();
-      throw new Error(error.error || 'Failed to update user');
+      throw new Error(error.message || 'Failed to update user');
     }
 
     return await response.json();
@@ -217,7 +219,7 @@ class AdminAPI {
 
   // Delete user
   async deleteUser(userId) {
-    const response = await fetch(`${this.baseURL}/api/v1/admin/users/${userId}`, {
+    const response = await fetch(`${this.baseURL}/users/${userId}`, {
       method: 'DELETE',
       headers: {
         'Authorization': `Bearer ${this.getAuthToken()}`
@@ -226,7 +228,7 @@ class AdminAPI {
 
     if (!response.ok) {
       const error = await response.json();
-      throw new Error(error.error || 'Failed to delete user');
+      throw new Error(error.message || 'Failed to delete user');
     }
 
     return await response.json();

@@ -13,7 +13,7 @@ class AuthManager {
     init() {
         // Listen for storage changes (for multi-tab support)
         window.addEventListener('storage', (e) => {
-            if (e.key === 'authToken' || e.key === 'umi_access_token') {
+            if (e.key === 'umi_access_token' || e.key === 'authToken') {
                 this.isAuthenticated = this.checkAuthStatus();
                 this.notifyAuthChange();
             }
@@ -21,9 +21,8 @@ class AuthManager {
     }
 
     checkAuthStatus() {
-        const token = localStorage.getItem('authToken') || 
-                    localStorage.getItem('umi_access_token') || 
-                    localStorage.getItem('umi_currentUser');
+        const token = localStorage.getItem('umi_access_token') || 
+                    localStorage.getItem('authToken');
         return !!token;
     }
 
@@ -99,7 +98,7 @@ class AuthManager {
             this.clearAuth();
             this.showToast('Logged out successfully', 'success');
             setTimeout(() => {
-                window.location.href = '/public/signin.html';
+                window.location.href = './signin.html';
             }, 1000);
         }
     }
@@ -130,7 +129,7 @@ class AuthManager {
         if (!this.isAuthenticated) {
             this.showToast('Please login to continue', 'warning');
             setTimeout(() => {
-                window.location.href = '/public/signin.html';
+                window.location.href = './signin.html';
             }, 1000);
             return false;
         }

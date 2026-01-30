@@ -8,6 +8,8 @@ using UmiHealth.MinimalApi.Models;
 
 using UmiHealth.MinimalApi.Endpoints;
 
+using UmiHealth.MinimalApi.Hubs;
+
 using Microsoft.EntityFrameworkCore;
 
 using Microsoft.IdentityModel.Tokens;
@@ -36,20 +38,18 @@ builder.Services.AddSwaggerGen();
 
 builder.Services.AddCors();
 
-
+// Add SignalR
+builder.Services.AddSignalR();
 
 // Add database context - SQLite
 
 builder.Services.AddDbContext<UmiHealthDbContext>(options =>
-
     options.UseSqlite(builder.Configuration.GetConnectionString("DefaultConnection")));
-
 
 
 // Tier service (scaffolding)
 
 builder.Services.AddSingleton<ITierService, TierService>();
-
 
 
 // Audit service
@@ -1940,11 +1940,163 @@ app.MapGet("/api/v1/admin/stats", async (HttpContext httpContext, UmiHealthDbCon
 
 
 
-// Register API endpoints
+// Account Management Endpoints (matching AuthAPI expectations)
 
+// Get current user profile (auth/me)
+app.MapGet("/api/v1/auth/me", async (HttpContext httpContext, UmiHealthDbContext context) =>
+{
+    try
+    {
+        var userId = httpContext.User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+        if (string.IsNullOrEmpty(userId))
+        {
+            return Results.Unauthorized();
+        }
+
+        var user = await context.Users
+            .Include(u => u.Tenant)
+            .FirstOrDefaultAsync(u => u.Id == userId);
+
+        if (user == null)
+        {
+            return Results.NotFound(new { success = false, message = "User not found" });
+        }
+
+        return Results.Ok(new { 
+            success = true, 
+            user = new {
+                id = user.Id,
+                username = user.Username,
+                email = user.Email,
+                firstName = user.FirstName,
+                lastName = user.LastName,
+                phoneNumber = user.PhoneNumber,
+                bio = user.Bio ?? "",
+                role = user.Role,
+                tenantId = user.TenantId,
+                createdAt = user.CreatedAt
+            },
+            tenant = user.Tenant != null ? new {
+                id = user.Tenant.Id,
+                name = user.Tenant.Name,
+                email = user.Tenant.Email,
+                subscriptionPlan = user.Tenant.SubscriptionPlan
+            } : null
+        });
+    }
+    catch (Exception ex)
+    {
+        return Results.BadRequest(new { success = false, message = ex.Message });
+    }
+})
+.RequireAuthorization();
+
+// Get subscription status
+app.MapGet("/api/v1/auth/subscription-status", async (HttpContext httpContext, UmiHealthDbContext context) =>
+{
+    try
+    {
+        var tenantId = httpContext.User.FindFirst("tenant_id")?.Value;
+        if (string.IsNullOrEmpty(tenantId))
+        {
+            return Results.Unauthorized();
+        }
+
+        var tenant = await context.Tenants.FindAsync(tenantId);
+        if (tenant == null)
+        {
+            return Results.NotFound(new { success = false, message = "Tenant not found" });
+        }
+
+        return Results.Ok(new { 
+            success = true, 
+            subscription = new {
+                plan = tenant.SubscriptionPlan,
+                status = tenant.Status,
+                features = tenant.EnabledFeatures?.Split(",") ?? []
+            }
+        });
+    }
+    catch (Exception ex)
+    {
+        return Results.BadRequest(new { success = false, message = ex.Message });
+    }
+})
+.RequireAuthorization();
+
+// Check setup status
+app.MapGet("/api/v1/auth/check-setup", async (HttpContext httpContext, UmiHealthDbContext context) =>
+{
+    try
+    {
+        var tenantId = httpContext.User.FindFirst("tenant_id")?.Value;
+        if (string.IsNullOrEmpty(tenantId))
+        {
+            return Results.Unauthorized();
+        }
+
+        var tenant = await context.Tenants.FindAsync(tenantId);
+        if (tenant == null)
+        {
+            return Results.NotFound(new { success = false, message = "Tenant not found" });
+        }
+
+        return Results.Ok(new { 
+            success = true, 
+            requiresSetup = !tenant.OnboardingCompleted,
+            setupCompleted = tenant.OnboardingCompleted,
+            completedAt = tenant.OnboardingCompletedAt
+        });
+    }
+    catch (Exception ex)
+    {
+        return Results.BadRequest(new { success = false, message = ex.Message });
+    }
+})
+.RequireAuthorization();
+
+// Logout endpoint
+app.MapPost("/api/v1/auth/logout", async (HttpContext httpContext, UmiHealthDbContext context) =>
+{
+    try
+    {
+        // In a real implementation, you would invalidate the token here
+        // For now, we'll just return success
+        return Results.Ok(new { success = true, message = "Logged out successfully" });
+    }
+    catch (Exception ex)
+    {
+        return Results.BadRequest(new { success = false, message = ex.Message });
+    }
+})
+.RequireAuthorization();
+
+// Refresh token endpoint
+app.MapPost("/api/v1/auth/refresh", async (HttpRequest request, UmiHealthDbContext context) =>
+{
+    try
+    {
+        var requestData = await request.ReadFromJsonAsync<Dictionary<string, string>>();
+        if (requestData == null || !requestData.TryGetValue("refreshToken", out var refreshToken))
+        {
+            return Results.BadRequest(new { success = false, message = "Refresh token required" });
+        }
+
+        // In a real implementation, you would validate the refresh token and generate a new access token
+        // For now, we'll return an error as this is not fully implemented
+        return Results.BadRequest(new { success = false, message = "Refresh token functionality not implemented" });
+    }
+    catch (Exception ex)
+    {
+        return Results.BadRequest(new { success = false, message = ex.Message });
+    }
+});
+
+// Register API endpoints
 app.RegisterApiEndpoints();
 
-
+// Map SignalR hub
+app.MapHub<UmiHealthHub>("/umiHealthHub");
 
 app.Run();
 
