@@ -1977,11 +1977,12 @@
   </style>
 
     <!-- Backend Integration Libraries -->
-    <script src="../../js/api-client.js"></script>
+    <script src="../../js/auth-api.js"></script>
+    <script src="../../js/admin-api.js"></script>
+    <script src="../../js/signalr-client.js"></script>
     <script src="../../js/auth-manager.js"></script>
     <script src="../shared/js/backend-integration-helper.js"></script>
     <script src="../shared/js/page-integration-template.js"></script>
-    <script src="https://unpkg.com/alpinejs@3.x.x/dist/cdn.min.js" defer></script></head>
 <body>
   <!-- Sidebar -->
   <aside class="sidebar" :class="sidebarOpen ? 'open' : ''">
@@ -3735,19 +3736,19 @@
         async loadPaymentsData() {
           try {
             // Load payment stats
-            const stats = await window.cashierAPI.getPaymentStats();
+            const stats = await this.apiClient.request(getPaymentStats();
             this.updatePaymentStats(stats);
             
             // Load payments based on current document type
             await this.loadDocumentsFromAPI(this.currentDocumentType);
             
             // Load recent payments
-            const recentPayments = await window.cashierAPI.getPayments({ pageSize: 10 });
+            const recentPayments = await this.apiClient.request(getPayments({ pageSize: 10 });
             this.updateRecentPayments(recentPayments.payments || []);
             
           } catch (error) {
             console.error('Error loading payments data:', error);
-            window.cashierAPI.handleError(error, 'loadPaymentsData');
+            console.error(`Error in 'loadPaymentsData':`, error);
           }
         },
         
@@ -3757,23 +3758,23 @@
             
             switch(type) {
               case 'invoices':
-                const invoices = await window.cashierAPI.getPayments({ type: 'invoice' });
+                const invoices = await this.apiClient.request(getPayments({ type: 'invoice' });
                 documents = invoices.payments || [];
                 break;
               case 'quotations':
-                const quotations = await window.cashierAPI.getPayments({ type: 'quotation' });
+                const quotations = await this.apiClient.request(getPayments({ type: 'quotation' });
                 documents = quotations.payments || [];
                 break;
               case 'credit-notes':
-                const creditNotes = await window.cashierAPI.getPayments({ type: 'credit-note' });
+                const creditNotes = await this.apiClient.request(getPayments({ type: 'credit-note' });
                 documents = creditNotes.payments || [];
                 break;
               case 'insurance-claims':
-                const claims = await window.cashierAPI.getPayments({ type: 'insurance-claim' });
+                const claims = await this.apiClient.request(getPayments({ type: 'insurance-claim' });
                 documents = claims.payments || [];
                 break;
               case 'receipts':
-                const receipts = await window.cashierAPI.getPayments({ type: 'receipt' });
+                const receipts = await this.apiClient.request(getPayments({ type: 'receipt' });
                 documents = receipts.payments || [];
                 break;
               default:
@@ -3802,7 +3803,7 @@
             this.renderPaymentsTable(documents);
           } catch (error) {
             console.error(`Error loading ${type}:`, error);
-            window.cashierAPI.handleError(error, `loadDocumentsFromAPI-${type}`);
+            console.error(`Error in `loadDocumentsFromAPI-${type}`:`, error);
           }
         },
         
@@ -3823,7 +3824,7 @@
                   <div class="payment-title">${payment.number || payment.id}</div>
                   <div class="payment-meta">
                     ${payment.customer || payment.patient || 'Unknown'} • 
-                    ${window.cashierAPI.formatDate(payment.date)}
+                    ${this.formatDate(payment.date)}
                   </div>
                 </div>
                 <div class="payment-amount">${this.formatCurrency(payment.amount || 0)}</div>
@@ -3857,7 +3858,7 @@
             };
             
             // Create invoice via API
-            const createdInvoice = await window.cashierAPI.createInvoice(newInvoice);
+            const createdInvoice = await this.apiClient.request(createInvoice(newInvoice);
             
             this.invoices.push(createdInvoice);
             this.closeModal('invoiceModal');
@@ -3868,7 +3869,7 @@
             alert('Invoice created successfully!');
           } catch (error) {
             console.error('Error creating invoice:', error);
-            window.cashierAPI.handleError(error, 'submitInvoiceForm');
+            console.error(`Error in 'submitInvoiceForm':`, error);
             alert('Failed to create invoice. Please try again.');
           }
         },
@@ -3894,7 +3895,7 @@
             };
             
             // Create quotation via API
-            const createdQuotation = await window.cashierAPI.createQuotation(newQuotation);
+            const createdQuotation = await this.apiClient.request(createQuotation(newQuotation);
             
             this.quotations.push(createdQuotation);
             this.closeModal('quotationModal');
@@ -3904,21 +3905,21 @@
             alert('Quotation created successfully!');
           } catch (error) {
             console.error('Error creating quotation:', error);
-            window.cashierAPI.handleError(error, 'submitQuotationForm');
+            console.error(`Error in 'submitQuotationForm':`, error);
             alert('Failed to create quotation. Please try again.');
           }
         },
         
         async viewDocumentDetails(documentId) {
           try {
-            const documentDetails = await window.cashierAPI.getPaymentDetails(documentId);
+            const documentDetails = await this.apiClient.request(getPaymentDetails(documentId);
             console.log('Document details:', documentDetails);
             
             // Show details in modal or navigate to detail page
             alert(`Document Details:\nNumber: ${documentDetails.number}\nAmount: ${this.formatCurrency(documentDetails.amount)}\nStatus: ${documentDetails.status}\nCustomer: ${documentDetails.customer || documentDetails.patient}`);
           } catch (error) {
             console.error('Error viewing document:', error);
-            window.cashierAPI.handleError(error, 'viewDocumentDetails');
+            console.error(`Error in 'viewDocumentDetails':`, error);
           }
         },
 
@@ -4033,7 +4034,7 @@
 
         async processBulkPayments() {
           try {
-            const response = await window.cashierAPI.bulkPaymentProcess({
+            const response = await this.apiClient.request(bulkPaymentProcess({
               payments: this.bulkPayments,
               tenantId: this.getCurrentTenantId()
             });
@@ -4058,7 +4059,7 @@
           const data = Object.fromEntries(formData.entries());
 
           try {
-            const response = await window.cashierAPI.createRecurringPayment({
+            const response = await this.apiClient.request(createRecurringPayment({
               ...data,
               tenantId: this.getCurrentTenantId(),
               amount: parseFloat(data.amount)
@@ -4084,7 +4085,7 @@
           const data = Object.fromEntries(formData.entries());
 
           try {
-            const response = await window.cashierAPI.createPaymentReminder({
+            const response = await this.apiClient.request(createPaymentReminder({
               ...data,
               tenantId: this.getCurrentTenantId(),
               amount: parseFloat(data.amount)
@@ -4120,7 +4121,7 @@
           };
 
           try {
-            const response = await window.cashierAPI.importBankStatement({
+            const response = await this.apiClient.request(importBankStatement({
               file: file,
               options: options,
               tenantId: this.getCurrentTenantId()
@@ -4539,5 +4540,5 @@
     paymentApp.init();
   });
 </script>
-</body>
+    <script src="https://unpkg.com/alpinejs@3.x.x/dist/cdn.min.js" defer></script></body>
 </html>

@@ -1845,11 +1845,12 @@
   </style>
 
     <!-- Backend Integration Libraries -->
-    <script src="../../js/api-client.js"></script>
+    <script src="../../js/auth-api.js"></script>
+    <script src="../../js/admin-api.js"></script>
+    <script src="../../js/signalr-client.js"></script>
     <script src="../../js/auth-manager.js"></script>
     <script src="../shared/js/backend-integration-helper.js"></script>
     <script src="../shared/js/page-integration-template.js"></script>
-    <script src="https://unpkg.com/alpinejs@3.x.x/dist/cdn.min.js" defer></script></head>
 <body>
   <!-- Sidebar -->
   <aside class="sidebar" :class="sidebarOpen ? 'open' : ''">
@@ -2906,7 +2907,7 @@
           this.loading = true;
           this.error = null;
           try {
-            const response = await window.pharmacistApi.payments.getPayments();
+            const response = await this.apiClient.request(payments.getPayments();
             const payments = response.data || [];
             this.invoices = payments.filter(p => p.type === 'invoice') || [];
             this.quotations = payments.filter(p => p.type === 'quotation') || [];
@@ -2933,7 +2934,7 @@
         
         async createPayment(paymentData) {
           try {
-            const response = await window.pharmacistApi.payments.createPayment(paymentData);
+            const response = await this.apiClient.request(payments.createPayment(paymentData);
             const newPayment = response.data;
             
             // Add to appropriate array based on type
@@ -2966,7 +2967,7 @@
 
         async updatePayment(id, paymentData) {
           try {
-            const response = await window.pharmacistApi.payments.updatePayment(id, paymentData);
+            const response = await this.apiClient.request(payments.updatePayment(id, paymentData);
             const updatedPayment = response.data;
             
             // Update in appropriate array
@@ -2981,7 +2982,7 @@
 
         async deletePayment(id) {
           try {
-            await window.pharmacistApi.payments.deletePayment(id);
+            await this.apiClient.request(payments.deletePayment(id);
             
             // Remove from all arrays
             this.invoices = this.invoices.filter(p => p.id !== id);
@@ -2997,7 +2998,7 @@
 
         async processRefund(id, refundData) {
           try {
-            const response = await window.pharmacistApi.payments.processRefund(id, refundData);
+            const response = await this.apiClient.request(payments.processRefund(id, refundData);
             const refund = response.data;
             
             // Update payment status
@@ -3034,7 +3035,7 @@
 
         async getPaymentSummary(startDate, endDate) {
           try {
-            const response = await window.pharmacistApi.payments.getSummary(startDate, endDate);
+            const response = await this.apiClient.request(payments.getSummary(startDate, endDate);
             return response.data;
           } catch (error) {
             console.error('Failed to get payment summary:', error);
@@ -3336,7 +3337,7 @@
             };
             
             // Save to backend
-            const response = await window.pharmacistApi.payments.createPayment(newInvoice);
+            const response = await this.apiClient.request(payments.createPayment(newInvoice);
             const savedInvoice = response.data;
             
             // Add to local array
@@ -3483,7 +3484,7 @@
             };
             
             // Save to backend
-            const response = await window.pharmacistApi.payments.createPayment(newQuotation);
+            const response = await this.apiClient.request(payments.createPayment(newQuotation);
             const savedQuotation = response.data;
             
             // Add to local array
@@ -3620,7 +3621,7 @@
             };
             
             // Save to backend
-            const response = await window.pharmacistApi.payments.createPayment(newCreditNote);
+            const response = await this.apiClient.request(payments.createPayment(newCreditNote);
             const savedCreditNote = response.data;
             
             // Add to local array
@@ -3675,7 +3676,7 @@
             };
             
             // Save to backend
-            const response = await window.pharmacistApi.payments.createPayment(newClaim);
+            const response = await this.apiClient.request(payments.createPayment(newClaim);
             const savedClaim = response.data;
             
             // Add to local array
@@ -3740,7 +3741,7 @@
         async loadAnalyticsData() {
           try {
             const period = document.getElementById('analyticsPeriod').value;
-            const response = await window.pharmacistApi.reports.getPaymentAnalytics({ period });
+            const response = await this.apiClient.request(reports.getPaymentAnalytics({ period });
             this.analyticsData = response.data || {};
             this.renderAnalyticsCharts();
           } catch (error) {
@@ -3807,7 +3808,7 @@
         // Reconciliation Methods
         async loadReconciliationData() {
           try {
-            const response = await window.pharmacistApi.payments.reconcile();
+            const response = await this.apiClient.request(payments.reconcile();
             this.reconciliationData = response.data || [];
             this.renderReconciliationTable();
           } catch (error) {
@@ -4174,7 +4175,7 @@
         // Load Payment Methods
         async loadPaymentMethods() {
           try {
-            const response = await window.pharmacistApi.payments.getMethods();
+            const response = await this.apiClient.request(payments.getMethods();
             this.paymentMethods = response.data || [
               { id: 1, name: 'Cash', icon: 'payments', total: 0, count: 0 },
               { id: 2, name: 'Mobile Money', icon: 'smartphone', total: 0, count: 0 },
@@ -4269,8 +4270,8 @@
         async loadCrossPageData() {
           try {
             // Fetch data from other relevant pages
-            const inventoryData = await window.pharmacistApi.crossPageData.getInventoryData();
-            const patientsData = await window.pharmacistApi.crossPageData.getPatientsData();
+            const inventoryData = await this.apiClient.request(crossPageData.getInventoryData();
+            const patientsData = await this.apiClient.request(crossPageData.getPatientsData();
             
             // Store for use in forms and dropdowns
             this.inventoryItems = inventoryData.products || [];
@@ -4419,5 +4420,5 @@
       }
     });
   </script>
-</body>
+    <script src="https://unpkg.com/alpinejs@3.x.x/dist/cdn.min.js" defer></script></body>
 </html>

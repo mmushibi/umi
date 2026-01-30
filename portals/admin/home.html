@@ -13,7 +13,9 @@
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
   <script src="https://unpkg.com/alpinejs@3.x.x/dist/cdn.min.js" defer></script>
   <!-- Backend Integration Libraries -->
-  <script src="../../js/api-client.js"></script>
+  <script src="../../js/auth-api.js"></script>
+    <script src="../../js/admin-api.js"></script>
+    <script src="../../js/signalr-client.js"></script>
   <script src="../../js/auth-manager.js"></script>
   <script src="../shared/js/backend-integration-helper.js"></script>
   <script src="../shared/js/page-integration-template.js"></script>
@@ -2799,15 +2801,15 @@
           
           try {
             // Load dashboard stats
-            const stats = await window.adminAPI.getDashboardStats();
+            const stats = await this.apiClient.request('/admin/dashboard/stats');
             this.dashboardStats = { ...this.dashboardStats, ...stats };
             
             // Load recent activity
-            const activity = await window.adminAPI.getRecentActivity();
+            const activity = await this.apiClient.request('/admin/activity');
             this.recentActivity = activity || [];
             
             // Load system health
-            const health = await window.adminAPI.getSystemHealth();
+            const health = await this.apiClient.request('/admin/system/health');
             this.systemHealth = health.status || 'good';
             
             // Update connection status and sync time
@@ -2835,12 +2837,12 @@
           
           try {
             // Simple health check to the API
-            const response = await fetch(`${window.adminAPI.baseURL}/admin/system/health`, {
+            const response = await fetch(`${this.apiClient.request(baseURL}/admin/system/health`, {
               method: 'GET',
               headers: {
                 'Content-Type': 'application/json',
-                'Authorization': `Bearer ${window.adminAPI.token}`,
-                'X-Tenant-ID': window.adminAPI.tenantId
+                'Authorization': `Bearer ${this.apiClient.request(token}`,
+                'X-Tenant-ID': this.apiClient.request(tenantId
               },
               timeout: 5000
             });
@@ -3097,7 +3099,7 @@
               format: 'excel'
             };
             
-            const blob = await window.adminAPI.generateSalesReport(reportData);
+            const blob = await this.apiClient.request('/reports/reportData);
             const url = window.URL.createObjectURL(blob);
             const a = document.createElement('a');
             a.href = url;
@@ -3110,7 +3112,7 @@
             // Show success message
             this.showSuccessMessage('Sales report downloaded successfully!');
           } catch (error) {
-            console.error('Download failed:', error);
+            console.error('Download failed:'', { method: 'POST', body: JSON.stringify(error) });
             this.error = error.message || 'Failed to download report';
           }
         },
@@ -3143,7 +3145,7 @@
               format: 'pdf'
             };
             
-            const blob = await window.adminAPI.generateReport('transactions', reportData);
+            const blob = await this.apiClient.request('/reports/'transactions'', { method: 'POST', body: JSON.stringify(reportData) });
             const url = window.URL.createObjectURL(blob);
             const a = document.createElement('a');
             a.href = url;
@@ -3390,7 +3392,7 @@
               '</head>' +
               '<body>' +
                 printContent +
-              '</body>' +
+              '    <script src="https://unpkg.com/alpinejs@3.x.x/dist/cdn.min.js" defer></script></body>' +
               '</html>';
             
             printWindow.document.write(htmlContent);
@@ -3422,9 +3424,9 @@
             };
             
             // Try to generate PDF via API first
-            if (this.apiReachable && window.adminAPI) {
+            if (this.apiReachable && this.apiClient) {
               try {
-                const blob = await window.adminAPI.generateReport('transactions', reportData);
+                const blob = await this.apiClient.request('/reports/'transactions'', { method: 'POST', body: JSON.stringify(reportData) });
                 this.downloadBlob(blob, 'transaction-report-' + new Date().toISOString().split('T')[0] + '.pdf');
                 this.showSuccessMessage('PDF report generated successfully!');
                 return;
@@ -3568,7 +3570,7 @@
                     '}, 500);' +
                   '};' +
                 '<\\/script>' +
-              '</body>' +
+              '    <script src="https://unpkg.com/alpinejs@3.x.x/dist/cdn.min.js" defer></script></body>' +
               '</html>';
             
             pdfWindow.document.write(htmlContent);
@@ -3741,5 +3743,5 @@
   <script src="../shared/js/role-based-access.js"></script>
   <script src="../shared/js/feature-protection.js"></script>
   <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
-</body>
+    <script src="https://unpkg.com/alpinejs@3.x.x/dist/cdn.min.js" defer></script></body>
 </html>

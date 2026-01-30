@@ -1,17 +1,17 @@
 {
   "format": 1,
   "restore": {
-    "c:\\Users\\sepio\\Desktop\\Umi_Health\\backend\\src\\UmiHealth.Identity\\UmiHealth.Identity.csproj": {}
+    "C:\\Users\\sepio\\Desktop\\Umi_Health\\backend\\src\\UmiHealth.Identity\\UmiHealth.Identity.csproj": {}
   },
   "projects": {
-    "c:\\Users\\sepio\\Desktop\\Umi_Health\\backend\\src\\UmiHealth.Identity\\UmiHealth.Identity.csproj": {
+    "C:\\Users\\sepio\\Desktop\\Umi_Health\\backend\\src\\UmiHealth.Identity\\UmiHealth.Identity.csproj": {
       "version": "1.0.0",
       "restore": {
-        "projectUniqueName": "c:\\Users\\sepio\\Desktop\\Umi_Health\\backend\\src\\UmiHealth.Identity\\UmiHealth.Identity.csproj",
+        "projectUniqueName": "C:\\Users\\sepio\\Desktop\\Umi_Health\\backend\\src\\UmiHealth.Identity\\UmiHealth.Identity.csproj",
         "projectName": "UmiHealth.Identity",
-        "projectPath": "c:\\Users\\sepio\\Desktop\\Umi_Health\\backend\\src\\UmiHealth.Identity\\UmiHealth.Identity.csproj",
+        "projectPath": "C:\\Users\\sepio\\Desktop\\Umi_Health\\backend\\src\\UmiHealth.Identity\\UmiHealth.Identity.csproj",
         "packagesPath": "C:\\Users\\sepio\\.nuget\\packages\\",
-        "outputPath": "c:\\Users\\sepio\\Desktop\\Umi_Health\\backend\\src\\UmiHealth.Identity\\obj\\",
+        "outputPath": "C:\\Users\\sepio\\Desktop\\Umi_Health\\backend\\src\\UmiHealth.Identity\\obj\\",
         "projectStyle": "PackageReference",
         "configFilePaths": [
           "C:\\Users\\sepio\\AppData\\Roaming\\NuGet\\NuGet.Config"
@@ -37,7 +37,8 @@
           "enableAudit": "true",
           "auditLevel": "low",
           "auditMode": "direct"
-        }
+        },
+        "SdkAnalysisLevel": "10.0.100"
       },
       "frameworks": {
         "net8.0": {
@@ -71,7 +72,7 @@
               "privateAssets": "all"
             }
           },
-          "runtimeIdentifierGraphPath": "C:\\Program Files\\dotnet\\sdk\\8.0.416/PortableRuntimeIdentifierGraph.json"
+          "runtimeIdentifierGraphPath": "C:\\Program Files\\dotnet\\sdk\\10.0.100/PortableRuntimeIdentifierGraph.json"
         }
       }
     }

@@ -58,6 +58,19 @@ builder.Services.AddSingleton<ITierService, TierService>();
 
 builder.Services.AddSingleton<IAuditService, AuditService>();
 
+// Validation service
+
+builder.Services.AddSingleton<IValidationService, ValidationService>();
+
+// Add controllers
+builder.Services.AddControllers();
+
+// Business logic services
+builder.Services.AddScoped<IUserService, UserService>();
+builder.Services.AddScoped<IPatientService, PatientService>();
+builder.Services.AddScoped<IInventoryService, InventoryService>();
+builder.Services.AddScoped<IReportService, ReportService>();
+
 
 
 // JWT Configuration
@@ -241,7 +254,12 @@ app.UseAuthentication();
 
 app.UseAuthorization();
 
+// Map controllers
+app.MapControllers();
 
+// Add security headers
+
+app.UseMiddleware<SecurityHeadersMiddleware>();
 
 // Tier-based rate limiting and feature gates (scaffolding)
 
@@ -267,37 +285,35 @@ app.UseMiddleware<FeatureGateMiddleware>();
 
 // Basic registration endpoint with database saving
 
-app.MapPost("/api/v1/auth/register", async (HttpRequest request, UmiHealthDbContext context) =>
-
+app.MapPost("/api/v1/auth/register", async (HttpRequest request, UmiHealthDbContext context, IValidationService validationService) =>
 {
-
     try
-
     {
-
         var formData = await request.ReadFromJsonAsync<Dictionary<string, string>>();
-
         
-
-        if (formData == null || 
-
-            !formData.TryGetValue("email", out var email) || 
-
-            !formData.TryGetValue("pharmacyName", out var pharmacyName))
-
+        if (formData == null)
         {
-
             return Results.BadRequest(new { 
-
                 success = false, 
-
-                message = "Missing required fields: email and pharmacyName" 
-
+                message = "Invalid form data" 
             });
-
         }
 
-        
+        // Validate input
+        var validationErrors = validationService.ValidateRegistrationInput(formData);
+        if (validationErrors.Any())
+        {
+            return Results.BadRequest(new { 
+                success = false, 
+                message = "Validation failed", 
+                errors = validationErrors
+            });
+        }
+
+        // Sanitize inputs
+        var email = validationService.SanitizeInput(formData["email"]);
+        var pharmacyName = validationService.SanitizeInput(formData["pharmacyName"]);
+
 
         // Check if email already exists
 
@@ -375,55 +391,50 @@ app.MapPost("/api/v1/auth/register", async (HttpRequest request, UmiHealthDbCont
 
         formData.TryGetValue("phoneNumber", out var phoneNumber);
 
-        
-
         // Create user with admin role for signup
-
         var user = new User
-
         {
-
             Id = userId,
-
             Username = formData.TryGetValue("username", out var username) ? username : (email?.Split('@')[0] ?? "user"),
-
             Email = email ?? "unknown@example.com",
-
-            Password = password ?? "defaultPassword", // In production, hash this
-
+            Password = BCrypt.Net.BCrypt.HashPassword(password ?? "defaultPassword"), // Hash password with BCrypt
             FirstName = adminFullName?.Split(' ')[0] ?? "Admin",
-
             LastName = adminFullName?.Split(' ').Length > 1 ? string.Join(" ", adminFullName?.Split(' ').Skip(1) ?? []) : "User",
-
             PhoneNumber = phoneNumber,
-
             Role = "admin", // Users who sign up become tenant admins
-
             Status = "active",
-
             CreatedAt = DateTime.UtcNow,
-
             TenantId = tenantId
-
         };
 
-        
-
         // Save to database
-
         context.Tenants.Add(tenant);
-
         context.Users.Add(user);
-
         await context.SaveChangesAsync();
 
+        // Generate real JWT tokens
+        var accessToken = GenerateJwtToken(user.Id, user.Email ?? "unknown@example.com", user.Role, user.TenantId);
+        var refreshToken = GenerateRefreshToken();
         
+        // Save refresh token to user record
+        user.RefreshToken = refreshToken;
+        user.RefreshTokenExpiryTime = DateTime.UtcNow.AddDays(7); // 7 days expiry
+        user.UpdatedAt = DateTime.UtcNow;
+        
+        await context.SaveChangesAsync();
 
-            // Generate real JWT tokens
-
-            var accessToken = GenerateJwtToken(user.Id, user.Email ?? "unknown@example.com", user.Role, user.TenantId);
-
-            var refreshToken = GenerateRefreshToken();
+        // Log successful registration
+        if (app.Services.GetService<IAuditService>() is { } auditService)
+        {
+            auditService.LogAuthenticationEvent(
+                user.Id, 
+                user.TenantId, 
+                "REGISTRATION_SUCCESS", 
+                request.HttpContext.Connection.RemoteIpAddress?.ToString(),
+                true,
+                $"Role: {user.Role}, Email: {user.Email}"
+            );
+        }
 
             
 
@@ -493,41 +504,34 @@ app.MapPost("/api/v1/auth/register", async (HttpRequest request, UmiHealthDbCont
 
 // Login endpoint with role-based authentication
 
-app.MapPost("/api/v1/auth/login", async (HttpRequest request, UmiHealthDbContext context) =>
-
+app.MapPost("/api/v1/auth/login", async (HttpRequest request, UmiHealthDbContext context, IValidationService validationService) =>
 {
-
     try
-
     {
-
         var loginData = await request.ReadFromJsonAsync<Dictionary<string, string>>();
-
         
-
-        if (loginData == null || 
-
-            !loginData.TryGetValue("username", out var loginUsername) || 
-
-            !loginData.TryGetValue("password", out var loginPassword))
-
+        if (loginData == null)
         {
-
             return Results.BadRequest(new { 
-
                 success = false, 
-
-                message = "Username and password are required" 
-
+                message = "Invalid login data" 
             });
-
         }
 
+        // Validate input
+        var validationErrors = validationService.ValidateLoginInput(loginData);
+        if (validationErrors.Any())
+        {
+            return Results.BadRequest(new { 
+                success = false, 
+                message = "Validation failed", 
+                errors = validationErrors
+            });
+        }
 
-
-        var username = loginData["username"];
-
-        var password = loginData["password"];
+        // Sanitize inputs
+        var loginUsername = validationService.SanitizeInput(loginData["username"]);
+        var loginPassword = loginData["password"]; // Don't sanitize password
 
 
 
@@ -557,20 +561,26 @@ app.MapPost("/api/v1/auth/login", async (HttpRequest request, UmiHealthDbContext
 
         
 
-        // Verify password (simple check for demo - in production, use proper hashing)
-
-        if (user.Password != loginPassword)
-
+        // Verify password using BCrypt
+        if (!BCrypt.Net.BCrypt.Verify(loginPassword, user.Password))
         {
-
+            // Log failed login attempt
+        if (app.Services.GetService<IAuditService>() is { } auditServiceLogin)
+        {
+            auditServiceLogin.LogAuthenticationEvent(
+                    user.Id, 
+                    user.TenantId, 
+                    "LOGIN_FAILED", 
+                    request.HttpContext.Connection.RemoteIpAddress?.ToString(),
+                    false,
+                    "Invalid password"
+                );
+            }
+            
             return Results.BadRequest(new { 
-
                 success = false, 
-
                 message = "Invalid username or password" 
-
             });
-
         }
 
 
@@ -606,12 +616,28 @@ app.MapPost("/api/v1/auth/login", async (HttpRequest request, UmiHealthDbContext
 
 
         // Generate real JWT tokens
-
         var accessToken = GenerateJwtToken(user.Id, user.Email, user.Role, user.TenantId);
-
         var refreshToken = GenerateRefreshToken();
+        
+        // Save refresh token to user record
+        user.RefreshToken = refreshToken;
+        user.RefreshTokenExpiryTime = DateTime.UtcNow.AddDays(7); // 7 days expiry
+        user.UpdatedAt = DateTime.UtcNow;
+        
+        await context.SaveChangesAsync();
 
-
+        // Log successful login
+        if (app.Services.GetService<IAuditService>() is { } auditServiceLoginSuccess)
+        {
+            auditServiceLoginSuccess.LogAuthenticationEvent(
+                user.Id, 
+                user.TenantId, 
+                "LOGIN_SUCCESS", 
+                request.HttpContext.Connection.RemoteIpAddress?.ToString(),
+                true,
+                $"Role: {user.Role}"
+            );
+        }
 
         return Results.Ok(new { 
 
@@ -671,6 +697,112 @@ app.MapPost("/api/v1/auth/login", async (HttpRequest request, UmiHealthDbContext
 
 });
 
+
+
+// Refresh token endpoint
+app.MapPost("/api/v1/auth/refresh", async (HttpRequest request, UmiHealthDbContext context) =>
+{
+    try
+    {
+        var refreshData = await request.ReadFromJsonAsync<Dictionary<string, string>>();
+        
+        if (refreshData == null || !refreshData.TryGetValue("refreshToken", out var refreshToken))
+        {
+            return Results.BadRequest(new { 
+                success = false, 
+                message = "Refresh token is required" 
+            });
+        }
+
+        // Find user with valid refresh token
+        var user = await context.Users
+            .Include(u => u.Tenant)
+            .FirstOrDefaultAsync(u => u.RefreshToken == refreshToken && u.RefreshTokenExpiryTime > DateTime.UtcNow);
+
+        if (user == null)
+        {
+            return Results.Unauthorized();
+        }
+
+        // Generate new tokens
+        var newAccessToken = GenerateJwtToken(user.Id, user.Email, user.Role, user.TenantId);
+        var newRefreshToken = GenerateRefreshToken();
+        
+        // Update refresh token
+        user.RefreshToken = newRefreshToken;
+        user.RefreshTokenExpiryTime = DateTime.UtcNow.AddDays(7);
+        user.UpdatedAt = DateTime.UtcNow;
+        
+        await context.SaveChangesAsync();
+
+        return Results.Ok(new { 
+            success = true, 
+            message = "Token refreshed successfully",
+            accessToken = newAccessToken,
+            refreshToken = newRefreshToken
+        });
+    }
+    catch (Exception ex)
+    {
+        return Results.BadRequest(new { 
+            success = false, 
+            message = "Token refresh failed: " + ex.Message 
+        });
+    }
+});
+
+// Logout endpoint
+app.MapPost("/api/v1/auth/logout", async (HttpRequest request, UmiHealthDbContext context) =>
+{
+    try
+    {
+        var logoutData = await request.ReadFromJsonAsync<Dictionary<string, string>>();
+        
+        if (logoutData == null || !logoutData.TryGetValue("refreshToken", out var refreshToken))
+        {
+            return Results.BadRequest(new { 
+                success = false, 
+                message = "Refresh token is required" 
+            });
+        }
+
+        // Find user and clear refresh token
+        var user = await context.Users
+            .FirstOrDefaultAsync(u => u.RefreshToken == refreshToken);
+
+        if (user != null)
+        {
+            user.RefreshToken = null;
+            user.RefreshTokenExpiryTime = null;
+            user.UpdatedAt = DateTime.UtcNow;
+            await context.SaveChangesAsync();
+            
+            // Log successful logout
+            if (app.Services.GetService<IAuditService>() is { } auditServiceLogout)
+            {
+                auditServiceLogout.LogAuthenticationEvent(
+                    user.Id, 
+                    user.TenantId, 
+                    "LOGOUT_SUCCESS", 
+                    request.HttpContext.Connection.RemoteIpAddress?.ToString(),
+                    true
+                );
+            }
+        }
+
+        return Results.Ok(new { 
+            success = true, 
+            message = "Logout successful" 
+        });
+    }
+    catch (Exception ex)
+    {
+        return Results.BadRequest(new { 
+            success = false, 
+            message = "Logout failed: " + ex.Message 
+        });
+    }
+});
 
 
 // Pharmacy name check endpoint
@@ -905,11 +1037,11 @@ app.MapPost("/api/v1/pharmacy/onboarding", async (HttpRequest request, UmiHealth
 
         // Sync to superadmin operations portal (audit log)
 
-        if (app.Services.GetService<IAuditService>() is { } auditService)
+        if (app.Services.GetService<IAuditService>() is { } auditServiceSuperAdmin)
 
         {
 
-            auditService.LogSuperAdminAction(
+            auditServiceSuperAdmin.LogSuperAdminAction(
 
                 currentUser.Email, 
 

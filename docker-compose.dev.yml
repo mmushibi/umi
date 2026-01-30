@@ -1,0 +1,98 @@
+version: '3.8'
+
+services:
+  # PostgreSQL Database
+  postgres:
+    image: postgres:15-alpine
+    container_name: umihealth-postgres-dev
+    ports:
+      - "5432:5432"
+    environment:
+      - POSTGRES_DB=UmiHealth
+      - POSTGRES_USER=umihealth
+      - POSTGRES_PASSWORD=UmiHealth@2024!
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+      - ./database/schema.sql:/docker-entrypoint-initdb.d/01-schema.sql:ro
+      - ./database/migrations:/docker-entrypoint-initdb.d/migrations:ro
+    networks:
+      - umihealth-network
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U umihealth"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    restart: unless-stopped
+
+  # Redis Cache
+  redis:
+    image: redis:7-alpine
+    container_name: umihealth-redis-dev
+    ports:
+      - "6379:6379"
+    command: redis-server --appendonly yes --requirepass UmiHealth@Redis2024
+    volumes:
+      - redis_data:/data
+    networks:
+      - umihealth-network
+    healthcheck:
+      test: ["CMD", "redis-cli", "--raw", "incr", "ping"]
+      interval: 10s
+      timeout: 3s
+      retries: 5
+    restart: unless-stopped
+
+  # UmiHealth API (built from source)
+  umihealth-api:
+    build:
+      context: .
+      dockerfile: backend/Dockerfile
+    container_name: umihealth-api-dev
+    ports:
+      - "8080:8080"
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    networks:
+      - umihealth-network
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Development
+      - ASPNETCORE_URLS=http://+:8080
+      - ConnectionStrings__DefaultConnection=Host=postgres;Port=5432;Database=UmiHealth;Username=umihealth;Password=UmiHealth@2024!
+      - Redis__ConnectionString=redis:6379,password=UmiHealth@Redis2024
+      - JwtSettings__Secret=UmiHealth_Secret_Key_2024_Very_Long_Secret_String
+      - JwtSettings__Issuer=UmiHealth
+      - JwtSettings__Audience=UmiHealth.Users
+      - JwtSettings__AccessTokenExpiration=15
+      - JwtSettings__RefreshTokenExpiration=168
+      - Serilog__MinimumLevel=Information
+    volumes:
+      - ./logs:/app/logs
+    restart: unless-stopped
+
+  # Nginx for serving frontend files
+  nginx:
+    image: nginx:alpine
+    container_name: umihealth-nginx-dev
+    ports:
+      - "80:80"
+    volumes:
+      - ./public:/usr/share/nginx/html:ro
+      - ./deployment/nginx/nginx.dev.conf:/etc/nginx/nginx.conf:ro
+    depends_on:
+      - umihealth-api
+    networks:
+      - umihealth-network
+    restart: unless-stopped
+
+volumes:
+  postgres_data:
+    driver: local
+  redis_data:
+    driver: local
+
+networks:
+  umihealth-network:
+    driver: bridge

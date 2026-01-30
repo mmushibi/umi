@@ -1342,12 +1342,13 @@
   </style>
 
     <!-- Backend Integration Libraries -->
-    <script src="../../js/api-client.js"></script>
+    <script src="../../js/auth-api.js"></script>
+    <script src="../../js/admin-api.js"></script>
+    <script src="../../js/signalr-client.js"></script>
     <script src="../../js/auth-manager.js"></script>
     <script src="../shared/js/backend-integration-helper.js"></script>
     <script src="../shared/js/page-integration-template.js"></script>
     <script src="../shared/js/admin-api-client-init.js"></script>
-    <script src="https://unpkg.com/alpinejs@3.x.x/dist/cdn.min.js" defer></script></head>
 <body>
   <!-- Sidebar -->
   <aside class="sidebar" :class="sidebarOpen ? 'open' : ''">
@@ -2176,9 +2177,9 @@
           this.loading = true;
           
           // Use adminAPI for backend integration
-          if (window.adminAPI) {
+          if (this.apiClient) {
             // Load invoices
-            window.adminAPI.getSales({ type: 'invoices' })
+            this.apiClient.request('/sales', { method: 'GET', params: { type: 'invoices' } })
               .then(invoices => {
                 this.invoices = invoices.map(inv => ({
                   id: inv.id,
@@ -2191,7 +2192,7 @@
                 }));
                 
                 // Load quotations
-                return window.adminAPI.getSales({ type: 'quotations' });
+                return this.apiClient.request('/sales', { method: 'GET', params: { type: 'quotations' } });
               })
               .then(quotations => {
                 this.quotations = quotations.map(q => ({
@@ -2205,7 +2206,7 @@
                 }));
                 
                 // Load credit notes
-                return window.adminAPI.getSales({ type: 'credit-notes' });
+                return this.apiClient.request('/sales', { method: 'GET', params: { type: 'credit-notes' } });
               })
               .then(creditNotes => {
                 this.creditNotes = creditNotes.map(cn => ({
@@ -2219,7 +2220,7 @@
                 }));
                 
                 // Load insurance claims
-                return window.adminAPI.getSales({ type: 'insurance-claims' });
+                return this.apiClient.request('/sales', { method: 'GET', params: { type: 'insurance-claims' } });
               })
               .then(claims => {
                 this.claims = claims.map(cl => ({
@@ -2463,7 +2464,7 @@
           const total = subtotal + tax;
           
           // Use adminAPI for backend integration
-          if (window.adminAPI) {
+          if (this.apiClient) {
             const invoicePayload = {
               invoiceNumber: invoiceNumber,
               customerName: invoiceData.customerName,
@@ -2478,7 +2479,7 @@
               notes: document.getElementById('invoiceNotes')?.value || ''
             };
 
-            window.adminAPI.generateSalesReport('invoice', invoicePayload)
+            this.apiClient.request('/reports/'invoice'', { method: 'POST', body: JSON.stringify(invoicePayload) })
               .then(response => {
                 const newInvoice = {
                   id: response.id || Date.now().toString(),
@@ -2608,7 +2609,7 @@
           const total = subtotal + tax;
           
           // Use adminAPI for backend integration
-          if (window.adminAPI) {
+          if (this.apiClient) {
             const quotationPayload = {
               quotationNumber: quotationNumber,
               customerName: quotationData.quoteCustomerName,
@@ -2622,7 +2623,7 @@
               terms: document.getElementById('quotationTerms')?.value || ''
             };
 
-            window.adminAPI.generateSalesReport('quotation', quotationPayload)
+            this.apiClient.request('/reports/'quotation'', { method: 'POST', body: JSON.stringify(quotationPayload) })
               .then(response => {
                 const newQuotation = {
                   id: response.id || Date.now().toString(),
@@ -2745,7 +2746,7 @@
           const creditNoteNumber = document.getElementById('creditNoteNumber').value || this.generateCreditNoteNumber();
           
           // Use adminAPI for backend integration
-          if (window.adminAPI) {
+          if (this.apiClient) {
             const creditNotePayload = {
               creditNoteNumber: creditNoteNumber,
               originalInvoice: creditNoteData.originalInvoice,
@@ -2755,7 +2756,7 @@
               notes: creditNoteData.creditNotes
             };
 
-            window.adminAPI.generateSalesReport('credit-note', creditNotePayload)
+            this.apiClient.request('/reports/'credit-note'', { method: 'POST', body: JSON.stringify(creditNotePayload) })
               .then(response => {
                 const newCreditNote = {
                   id: response.id || Date.now().toString(),
@@ -2800,7 +2801,7 @@
           const claimData = Object.fromEntries(formData.entries());
           
           // Use adminAPI for backend integration
-          if (window.adminAPI) {
+          if (this.apiClient) {
             const claimPayload = {
               claimNumber: claimData.claimNumber,
               patientName: claimData.patientName,
@@ -2812,7 +2813,7 @@
               claimNotes: claimData.claimNotes
             };
 
-            window.adminAPI.generateSalesReport('insurance-claim', claimPayload)
+            this.apiClient.request('/reports/'insurance-claim'', { method: 'POST', body: JSON.stringify(claimPayload) })
               .then(response => {
                 const newClaim = {
                   id: response.id || Date.now().toString(),
@@ -3049,5 +3050,5 @@
     paymentApp.init();
   });
 </script>
-</body>
+    <script src="https://unpkg.com/alpinejs@3.x.x/dist/cdn.min.js" defer></script></body>
 </html>

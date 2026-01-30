@@ -450,11 +450,12 @@
   </style>
 
     <!-- Backend Integration Libraries -->
-    <script src="../../js/api-client.js"></script>
+    <script src="../../js/auth-api.js"></script>
+    <script src="../../js/admin-api.js"></script>
+    <script src="../../js/signalr-client.js"></script>
     <script src="../../js/auth-manager.js"></script>
     <script src="../shared/js/backend-integration-helper.js"></script>
     <script src="../shared/js/page-integration-template.js"></script>
-    <script src="https://unpkg.com/alpinejs@3.x.x/dist/cdn.min.js" defer></script></head>
 <body>
   <!-- Sidebar -->
   <aside class="sidebar" :class="sidebarOpen ? 'open' : ''">
@@ -737,11 +738,11 @@
                 console.error('Failed to initialize cashier-shift-management page:', error);
                 this.error = 'Failed to initialize page';
             }
-        },,
+        },
 
         async loadUserInfo() {
           try {
-            const profile = await window.cashierAPI.getUserProfile();
+            const profile = await this.apiClient.request('/auth/profile');
             this.userInfo = {
               name: `${profile.firstName || ''} ${profile.lastName || ''}`.trim() || 'Cashier',
               role: 'Cashier',
@@ -939,8 +940,11 @@
 
         async takeBreak() {
           try {
-            await window.cashierAPI.takeBreak({
-              shiftId: this.currentShift.id
+            await this.apiClient.request('/shifts/take-break', {
+              method: 'POST',
+              body: JSON.stringify({
+                shiftId: this.currentShift.id
+              })
             });
             this.showNotification('Break started', 'info');
           } catch (error) {
@@ -1009,8 +1013,9 @@
         },
 
         logout() {
-          window.cashierAPI.logout()
+          this.apiClient.request('/auth/logout', { method: 'POST' })
             .then(() => {
+              this.apiClient.clearAuth();
               window.location.href = '../../public/signin.html';
             })
             .catch(error => {
@@ -1066,7 +1071,7 @@
         async getPOSData() {
           try {
             if (this.currentShift.id) {
-              const posData = await window.cashierAPI.getPOSData(this.currentShift.id);
+              const posData = await this.apiClient.request(`/shifts/${this.currentShift.id}/pos-data`);
               return {
                 transactions: posData.transactions || 0,
                 revenue: posData.revenue || 0
@@ -1093,11 +1098,14 @@
         // Tenant Admin Notification
         async notifyTenantAdmin(action, data) {
           try {
-            await window.cashierAPI.notifyDataChange('shift', {
-              action: action,
-              data: data,
-              timestamp: new Date().toISOString(),
-              userId: window.cashierAPI.getUserId()
+            await this.apiClient.request('/notifications/shift', {
+              method: 'POST',
+              body: JSON.stringify({
+                action: action,
+                data: data,
+                timestamp: new Date().toISOString(),
+                userId: this.getUserId()
+              })
             });
           } catch (error) {
             console.error('Error notifying tenant admin:', error);
@@ -1185,7 +1193,7 @@
           }
           
           try {
-            return await window.cashierAPI[method](...args);
+            return await this.apiClient.request('/' + method, ...args);
           } catch (error) {
             console.error(`API call failed (${method}):`, error);
             throw error;
@@ -1223,7 +1231,7 @@
               shiftHistory: this.shiftHistory,
               exportDate: new Date().toISOString(),
               currency: 'ZMW',
-              tenantId: window.cashierAPI.getTenantId()
+              tenantId: this.getTenantId()
             };
             
             const csv = this.convertToCSV(reportData);
@@ -1308,5 +1316,5 @@
 </script>
 
   <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
-</body>
+    <script src="https://unpkg.com/alpinejs@3.x.x/dist/cdn.min.js" defer></script></body>
 </html>

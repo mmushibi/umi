@@ -1,5 +1,5 @@
 /**
- * Admin Portal API Client
+ * Admin Portal API Client - Updated to use new service-based controllers
  * Handles all backend API calls for admin functionality
  */
 class AdminAPI {
@@ -57,7 +57,7 @@ class AdminAPI {
 
   // Dashboard APIs
   async getDashboardStats() {
-    return await this.request('/admin/dashboard/stats');
+    return await this.request('/admin/stats');
   }
 
   async getRecentActivity() {
@@ -70,18 +70,18 @@ class AdminAPI {
 
   // Tenant Management
   async getTenantSettings() {
-    return await this.request('/account/tenant/settings');
+    return await this.request('/admin/tenant');
   }
 
   async updateTenantSettings(settings) {
-    return await this.request('/account/tenant/settings', {
+    return await this.request('/admin/pharmacy/settings', {
       method: 'PUT',
       body: JSON.stringify(settings)
     });
   }
 
   async getSubscriptionStatus() {
-    return await this.request('/auth/subscription/status');
+    return await this.request('/admin/subscription/status');
   }
 
   async upgradeSubscription(planData) {
@@ -91,316 +91,259 @@ class AdminAPI {
     });
   }
 
-  // User Management
-  async getUsers(page = 1, limit = 100, filters = {}) {
-    const params = new URLSearchParams({
-      page: page.toString(),
-      limit: limit.toString(),
-      ...filters
-    });
-    
-    return await this.request('/admin/users', {
-      method: 'GET',
-      params
+  // User Management - Using new UserController
+  async getUsers() {
+    return await this.request('/user/tenant-users');
+  }
+
+  async getUserProfile() {
+    return await this.request('/user/profile');
+  }
+
+  async updateUserProfile(updateData) {
+    return await this.request('/user/profile', {
+      method: 'PUT',
+      body: JSON.stringify(updateData)
     });
   }
 
   async createUser(userData) {
-    return await this.request('/admin/users', {
+    return await this.request('/user/create', {
       method: 'POST',
-      body: JSON.stringify(userData)
-    });
-  }
-
-  async updateUser(userId, userData) {
-    return await this.request(`/admin/users/${userId}`, {
-      method: 'PUT',
       body: JSON.stringify(userData)
     });
   }
 
   async deleteUser(userId) {
-    return await this.request(`/admin/users/${userId}`, {
+    return await this.request(`/user/${userId}`, {
       method: 'DELETE'
     });
   }
 
-  async getUserPermissions(userId) {
-    return await this.request(`/admin/users/${userId}/permissions`);
-  }
-
-  async updateUserPermissions(userId, permissions) {
-    return await this.request(`/admin/users/${userId}/permissions`, {
-      method: 'PUT',
-      body: JSON.stringify(permissions)
-    });
-  }
-
-  // Branch Management
-  async getBranches() {
-    return await this.request('/admin/branches');
-  }
-
-  async createBranch(branchData) {
-    return await this.request('/admin/branches', {
+  async changePassword(currentPassword, newPassword) {
+    return await this.request('/user/change-password', {
       method: 'POST',
-      body: JSON.stringify(branchData)
+      body: JSON.stringify({ currentPassword, newPassword })
     });
   }
 
-  async updateBranch(branchId, branchData) {
-    return await this.request(`/admin/branches/${branchId}`, {
-      method: 'PUT',
-      body: JSON.stringify(branchData)
-    });
-  }
-
-  async deleteBranch(branchId) {
-    return await this.request(`/admin/branches/${branchId}`, {
-      method: 'DELETE'
-    });
-  }
-
-  // Product Management
-  async getProducts() {
-    return await this.request('/admin/products');
-  }
-
-  // Inventory Management
-  async getInventory(filters = {}) {
-    const params = new URLSearchParams(filters);
-    return await this.request(`/admin/inventory?${params}`);
-  }
-
-  async addProduct(productData) {
-    return await this.request('/admin/inventory/products', {
+  async resetPassword(email) {
+    return await this.request('/user/reset-password', {
       method: 'POST',
-      body: JSON.stringify(productData)
+      body: JSON.stringify({ email })
     });
   }
 
-  async updateProduct(productId, productData) {
-    return await this.request(`/admin/inventory/products/${productId}`, {
-      method: 'PUT',
-      body: JSON.stringify(productData)
-    });
+  // Patient Management - Using new PatientController
+  async getPatients() {
+    return await this.request('/patient');
   }
 
-  async deleteProduct(productId) {
-    return await this.request(`/admin/inventory/products/${productId}`, {
-      method: 'DELETE'
-    });
-  }
-
-  async getLowStockItems() {
-    return await this.request('/admin/inventory/low-stock');
-  }
-
-  // Sales Management
-  async getSales(filters = {}) {
-    const params = new URLSearchParams(filters);
-    return await this.request(`/admin/sales?${params}`);
-  }
-
-  async getSaleDetails(saleId) {
-    return await this.request(`/admin/sales/${saleId}`);
-  }
-
-  async generateSalesReport(reportData) {
-    return await this.request('/admin/reports/sales', {
-      method: 'POST',
-      body: JSON.stringify(reportData)
-    });
-  }
-
-  // Patient Management
-  async getPatients(filters = {}) {
-    const params = new URLSearchParams(filters);
-    return await this.request(`/admin/patients?${params}`);
+  async getPatient(patientId) {
+    return await this.request(`/patient/${patientId}`);
   }
 
   async createPatient(patientData) {
-    return await this.request('/admin/patients', {
+    return await this.request('/patient', {
       method: 'POST',
       body: JSON.stringify(patientData)
     });
   }
 
   async updatePatient(patientId, patientData) {
-    return await this.request(`/admin/patients/${patientId}`, {
+    return await this.request(`/patient/${patientId}`, {
       method: 'PUT',
       body: JSON.stringify(patientData)
     });
   }
 
   async deletePatient(patientId) {
-    return await this.request(`/admin/patients/${patientId}`, {
+    return await this.request(`/patient/${patientId}`, {
       method: 'DELETE'
     });
   }
 
-  // Prescription Management
-  async getPrescriptions(filters = {}) {
-    const params = new URLSearchParams(filters);
-    return await this.request(`/admin/prescriptions?${params}`);
+  async searchPatients(searchTerm) {
+    return await this.request('/patient/search', {
+      method: 'POST',
+      body: JSON.stringify({ searchTerm })
+    });
   }
 
-  async approvePrescription(prescriptionId) {
-    return await this.request(`/admin/prescriptions/${prescriptionId}/approve`, {
+  async addPatientAllergy(patientId, allergy) {
+    return await this.request(`/patient/${patientId}/allergies`, {
+      method: 'POST',
+      body: JSON.stringify({ allergy })
+    });
+  }
+
+  async removePatientAllergy(patientId, allergy) {
+    return await this.request(`/patient/${patientId}/allergies`, {
+      method: 'DELETE',
+      body: JSON.stringify({ allergy })
+    });
+  }
+
+  // Inventory Management - Using new InventoryController
+  async getInventory() {
+    return await this.request('/inventory');
+  }
+
+  async getInventoryItem(inventoryId) {
+    return await this.request(`/inventory/${inventoryId}`);
+  }
+
+  async createInventoryItem(inventoryData) {
+    return await this.request('/inventory', {
+      method: 'POST',
+      body: JSON.stringify(inventoryData)
+    });
+  }
+
+  async updateInventoryItem(inventoryId, inventoryData) {
+    return await this.request(`/inventory/${inventoryId}`, {
+      method: 'PUT',
+      body: JSON.stringify(inventoryData)
+    });
+  }
+
+  async deleteInventoryItem(inventoryId) {
+    return await this.request(`/inventory/${inventoryId}`, {
+      method: 'DELETE'
+    });
+  }
+
+  async searchInventory(searchTerm) {
+    return await this.request('/inventory/search', {
+      method: 'POST',
+      body: JSON.stringify({ searchTerm })
+    });
+  }
+
+  async getLowStockItems(threshold = 10) {
+    return await this.request('/inventory/low-stock', {
+      method: 'GET',
+      params: { threshold }
+    });
+  }
+
+  async updateStock(inventoryId, quantity, operation) {
+    return await this.request(`/inventory/${inventoryId}/stock`, {
+      method: 'POST',
+      body: JSON.stringify({ quantity, operation })
+    });
+  }
+
+  async checkExpiryDates(daysThreshold = 30) {
+    return await this.request('/inventory/expiry-check', {
+      method: 'GET',
+      params: { daysThreshold }
+    });
+  }
+
+  // Reports - Using new ReportController
+  async getReports() {
+    return await this.request('/report');
+  }
+
+  async getReport(reportId) {
+    return await this.request(`/report/${reportId}`);
+  }
+
+  async generateSalesReport(startDate, endDate) {
+    return await this.request('/report/sales', {
+      method: 'POST',
+      body: JSON.stringify({ startDate, endDate })
+    });
+  }
+
+  async generateInventoryReport() {
+    return await this.request('/report/inventory', {
       method: 'POST'
     });
   }
 
-  async rejectPrescription(prescriptionId, reason) {
-    return await this.request(`/admin/prescriptions/${prescriptionId}/reject`, {
+  async generatePatientReport() {
+    return await this.request('/report/patient', {
+      method: 'POST'
+    });
+  }
+
+  async generateFinancialReport(startDate, endDate) {
+    return await this.request('/report/financial', {
       method: 'POST',
-      body: JSON.stringify({ reason })
+      body: JSON.stringify({ startDate, endDate })
     });
   }
 
-  // System Settings
-  async getSystemSettings() {
-    return await this.request('/admin/settings/system');
-  }
-
-  async updateSystemSettings(settings) {
-    return await this.request('/admin/settings/system', {
-      method: 'PUT',
-      body: JSON.stringify(settings)
+  async deleteReport(reportId) {
+    return await this.request(`/report/${reportId}`, {
+      method: 'DELETE'
     });
   }
 
-  async getAuditLogs(filters = {}) {
-    const params = new URLSearchParams(filters);
-    return await this.request(`/admin/audit/logs?${params}`);
-  }
-
-  // Reports
-  async generateReport(type, filters = {}) {
-    return await this.request(`/admin/reports/${type}`, {
-      method: 'POST',
-      body: JSON.stringify(filters)
-    });
-  }
-
-  async getReports() {
-    return await this.request('/admin/reports');
-  }
-
-  async scheduleReport(scheduleData) {
-    return await this.request('/admin/reports/schedule', {
-      method: 'POST',
-      body: JSON.stringify(scheduleData)
-    });
-  }
-
-  async getScheduledReports() {
-    return await this.request('/admin/reports/scheduled');
-  }
-
-  async getBranchData(branchId) {
-    return await this.request(`/admin/branches/${branchId}/data`);
-  }
-
-  async downloadReport(reportId) {
-    const response = await fetch(`${this.baseURL}/admin/reports/${reportId}/download`, {
+  async exportReportToPdf(reportId) {
+    const url = `${this.baseURL}/report/${reportId}/export/pdf`;
+    const response = await fetch(url, {
       headers: this.getHeaders()
     });
     
     if (!response.ok) {
-      throw new Error('Failed to download report');
+      throw new Error(`Export failed: ${response.status}`);
     }
     
     return await response.blob();
   }
 
-  // Account Management APIs
-  async updateUserProfile(profileData) {
-    return await this.request('/account/profile', {
-      method: 'PUT',
-      body: JSON.stringify(profileData)
+  async exportReportToExcel(reportId) {
+    const url = `${this.baseURL}/report/${reportId}/export/excel`;
+    const response = await fetch(url, {
+      headers: this.getHeaders()
+    });
+    
+    if (!response.ok) {
+      throw new Error(`Export failed: ${response.status}`);
+    }
+    
+    return await response.blob();
+  }
+
+  // Sales Management (keeping existing endpoints for now)
+  async getSales(startDate, endDate) {
+    const params = {};
+    if (startDate) params.startDate = startDate.toISOString();
+    if (endDate) params.endDate = endDate.toISOString();
+    
+    return await this.request('/admin/sales', {
+      method: 'GET',
+      params
     });
   }
 
-  async getUserProfile() {
-    return await this.request('/account/profile');
-  }
-
-  async updatePharmacySettings(settings) {
-    return await this.request('/account/pharmacy/settings', {
-      method: 'PUT',
-      body: JSON.stringify(settings)
-    });
-  }
-
-  async getPharmacySettings() {
-    return await this.request('/account/pharmacy/settings');
-  }
-
-  async updateNotificationSettings(settings) {
-    return await this.request('/account/notifications/settings', {
-      method: 'PUT',
-      body: JSON.stringify(settings)
-    });
-  }
-
-  async getNotificationSettings() {
-    return await this.request('/account/notifications/settings');
-  }
-
-  async changePassword(passwordData) {
-    return await this.request('/account/password/change', {
+  async createSale(saleData) {
+    return await this.request('/admin/sales', {
       method: 'POST',
-      body: JSON.stringify(passwordData)
+      body: JSON.stringify(saleData)
     });
   }
 
-  async getActiveSessions() {
-    return await this.request('/account/sessions');
+  async getSale(saleId) {
+    return await this.request(`/admin/sales/${saleId}`);
   }
 
-  async revokeSession(sessionId) {
-    return await this.request(`/account/sessions/${sessionId}/revoke`, {
-      method: 'POST'
-    });
+  // Legacy endpoints for backward compatibility
+  async getLegacyUsers() {
+    return await this.request('/admin/users');
   }
 
-  async revokeAllSessions() {
-    return await this.request('/account/sessions/revoke-all', {
-      method: 'POST'
-    });
+  async getLegacyPatients() {
+    return await this.request('/admin/patients');
   }
 
-  async cancelSubscription(cancelData) {
-    return await this.request('/account/subscription/cancel', {
-      method: 'POST',
-      body: JSON.stringify(cancelData)
-    });
-  }
-
-  async sendNotification(notificationData) {
-    return await this.request('/notifications/send', {
-      method: 'POST',
-      body: JSON.stringify(notificationData)
-    });
-  }
-
-  // Data Sync APIs
-  async syncUserData() {
-    return await this.request('/sync/user');
-  }
-
-  async syncPharmacyData() {
-    return await this.request('/sync/pharmacy');
-  }
-
-  async broadcastUpdate(updateData) {
-    return await this.request('/sync/broadcast', {
-      method: 'POST',
-      body: JSON.stringify(updateData)
-    });
+  async getLegacyInventory() {
+    return await this.request('/admin/inventory');
   }
 }
 
-// Initialize global admin API instance
+// Initialize global API instance
 window.adminAPI = new AdminAPI();

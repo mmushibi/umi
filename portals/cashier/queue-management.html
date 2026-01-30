@@ -866,11 +866,12 @@
   </style>
 
     <!-- Backend Integration Libraries -->
-    <script src="../../js/api-client.js"></script>
+    <script src="../../js/auth-api.js"></script>
+    <script src="../../js/admin-api.js"></script>
+    <script src="../../js/signalr-client.js"></script>
     <script src="../../js/auth-manager.js"></script>
     <script src="../shared/js/backend-integration-helper.js"></script>
     <script src="../shared/js/page-integration-template.js"></script>
-    <script src="https://unpkg.com/alpinejs@3.x.x/dist/cdn.min.js" defer></script></head>
 <body>
   <!-- Sidebar -->
   <aside class="sidebar" :class="sidebarOpen ? 'open' : ''">
@@ -1851,7 +1852,7 @@
 
         async loadUserInfo() {
           try {
-            const profile = await window.cashierAPI.getUserProfile();
+            const profile = await this.apiClient.request('/auth/profile');
             this.userInfo = {
               name: `${profile.firstName || ''} ${profile.lastName || ''}`.trim() || 'Cashier',
               role: 'Cashier',
@@ -1877,8 +1878,8 @@
           this.loading.queue = true;
           try {
             const [queueData, statsData] = await Promise.all([
-              window.cashierAPI.getQueueData(),
-              window.cashierAPI.getQueueStats()
+              this.apiClient.request(getQueueData(),
+              this.apiClient.request(getQueueStats()
             ]);
             
             this.currentQueue = queueData.current || [];
@@ -1916,7 +1917,7 @@
 
         async servePatient(patient) {
           try {
-            const result = await window.cashierAPI.servePatient(patient.id);
+            const result = await this.apiClient.request(servePatient(patient.id);
             if (result.success) {
               patient.status = 'serving';
               await this.loadQueueData();
@@ -1934,7 +1935,7 @@
         async removePatient(patient) {
           if (confirm(`Remove ${patient.name} from the queue?`)) {
             try {
-              const result = await window.cashierAPI.removePatient(patient.id);
+              const result = await this.apiClient.request(removePatient(patient.id);
               if (result.success) {
                 await this.loadQueueData();
                 this.showNotification('Patient removed from queue', 'info');
@@ -1962,7 +1963,7 @@
 
         async callNextPatient() {
           try {
-            const result = await window.cashierAPI.callNextPatient();
+            const result = await this.apiClient.request(callNextPatient();
             if (result.success) {
               await this.loadQueueData();
               this.showNotification(`Calling next patient: ${result.patient?.name || 'Patient'}`, 'success');
@@ -1978,7 +1979,7 @@
         async clearQueue() {
           if (confirm('Clear all patients from the current queue? This action cannot be undone.')) {
             try {
-              const result = await window.cashierAPI.clearQueue();
+              const result = await this.apiClient.request(clearQueue();
               if (result.success) {
                 await this.loadQueueData();
                 this.showNotification('Queue cleared successfully', 'success');
@@ -1999,7 +2000,7 @@
 
         async submitAddPatient() {
           try {
-            const result = await window.cashierAPI.addToQueue(this.newPatient);
+            const result = await this.apiClient.request(addToQueue(this.newPatient);
             if (result.success) {
               this.showAddPatientModal = false;
               await this.loadQueueData();
@@ -2040,7 +2041,7 @@
         // New feature methods
         async loadProviders() {
           try {
-            const providersData = await window.cashierAPI.getProviders();
+            const providersData = await this.apiClient.request(getProviders();
             this.providers = providersData.data || providersData || [];
           } catch (error) {
             console.error('Error loading providers:', error);
@@ -2050,7 +2051,7 @@
 
         async loadEmergencyQueue() {
           try {
-            const emergencyData = await window.cashierAPI.getEmergencyQueue();
+            const emergencyData = await this.apiClient.request(getEmergencyQueue();
             this.emergencyQueue = emergencyData.data || emergencyData || [];
           } catch (error) {
             console.error('Error loading emergency queue:', error);
@@ -2061,10 +2062,10 @@
         async loadAnalytics() {
           try {
             const [waitTimes, peakHours, providerStats, forecast] = await Promise.all([
-              window.cashierAPI.getWaitTimeAnalytics(30),
-              window.cashierAPI.getPeakHourAnalysis(30),
-              window.cashierAPI.getProviderAnalytics('', 30),
-              window.cashierAPI.getQueueForecast(7)
+              this.apiClient.request(getWaitTimeAnalytics(30),
+              this.apiClient.request(getPeakHourAnalysis(30),
+              this.apiClient.request(getProviderAnalytics('', 30),
+              this.apiClient.request(getQueueForecast(7)
             ]);
             
             this.analytics = {
@@ -2081,8 +2082,8 @@
         async loadSettings() {
           try {
             const [soundVolume, notificationSettings] = await Promise.all([
-              window.cashierAPI.getSoundVolume(),
-              window.cashierAPI.getNotificationSettings()
+              this.apiClient.request(getSoundVolume(),
+              this.apiClient.request(getNotificationSettings()
             ]);
             
             this.soundVolume = soundVolume.volume || 0.5;
@@ -2104,7 +2105,7 @@
 
         async loadHistory() {
           try {
-            const historyData = await window.cashierAPI.getQueueHistory(this.historyFilters);
+            const historyData = await this.apiClient.request(getQueueHistory(this.historyFilters);
             this.history = historyData.data || historyData || [];
             this.showHistory = true;
           } catch (error) {
@@ -2162,7 +2163,7 @@
 
         playQueueSound(soundType) {
           if (this.soundEnabled && this.notificationSettings.sound) {
-            window.cashierAPI.playSound(soundType);
+            this.apiClient.request(playSound(soundType);
           }
         },
 
@@ -2173,7 +2174,7 @@
           }
           
           try {
-            const searchResults = await window.cashierAPI.searchPatients(this.searchQuery, this.filters);
+            const searchResults = await this.apiClient.request(searchPatients(this.searchQuery, this.filters);
             this.currentQueue = searchResults.data || searchResults || [];
           } catch (error) {
             console.error('Error searching patients:', error);
@@ -2183,7 +2184,7 @@
 
         async applyFilters() {
           try {
-            const filteredResults = await window.cashierAPI.filterQueue(this.filters);
+            const filteredResults = await this.apiClient.request(filterQueue(this.filters);
             this.currentQueue = filteredResults.data || filteredResults || [];
           } catch (error) {
             console.error('Error applying filters:', error);
@@ -2227,7 +2228,7 @@
           
           if (confirm(`Serve ${this.selectedPatients.length} selected patients?`)) {
             try {
-              const result = await window.cashierAPI.bulkServePatients(this.selectedPatients);
+              const result = await this.apiClient.request(bulkServePatients(this.selectedPatients);
               if (result.success) {
                 await this.loadQueueData();
                 this.selectedPatients = [];
@@ -2247,7 +2248,7 @@
           
           if (confirm(`Remove ${this.selectedPatients.length} selected patients?`)) {
             try {
-              const result = await window.cashierAPI.bulkRemovePatients(this.selectedPatients);
+              const result = await this.apiClient.request(bulkRemovePatients(this.selectedPatients);
               if (result.success) {
                 await this.loadQueueData();
                 this.selectedPatients = [];
@@ -2268,7 +2269,7 @@
           if (!providerId) return;
           
           try {
-            const result = await window.cashierAPI.bulkAssignProvider(this.selectedPatients, providerId);
+            const result = await this.apiClient.request(bulkAssignProvider(this.selectedPatients, providerId);
             if (result.success) {
               await this.loadQueueData();
               this.selectedPatients = [];
@@ -2283,7 +2284,7 @@
 
         async assignProvider(patientId, providerId) {
           try {
-            const result = await window.cashierAPI.assignPatientToProvider(patientId, providerId);
+            const result = await this.apiClient.request(assignPatientToProvider(patientId, providerId);
             if (result.success) {
               await this.loadQueueData();
               this.showNotification('Provider assigned successfully', 'success');
@@ -2296,7 +2297,7 @@
 
         async updatePriority(patientId, priority) {
           try {
-            const result = await window.cashierAPI.updatePatientPriority(patientId, priority);
+            const result = await this.apiClient.request(updatePatientPriority(patientId, priority);
             if (result.success) {
               await this.loadQueueData();
               this.showNotification('Priority updated successfully', 'success');
@@ -2318,7 +2319,7 @@
 
         async exportQueue(format = 'pdf') {
           try {
-            const blob = await window.cashierAPI.exportQueue(format, this.filters);
+            const blob = await this.apiClient.request(exportQueue(format, this.filters);
             const url = window.URL.createObjectURL(blob);
             const a = document.createElement('a');
             a.href = url;
@@ -2346,7 +2347,7 @@
               analytics: this.analytics
             };
             
-            const result = await window.cashierAPI.printDailyReport(reportData.date);
+            const result = await this.apiClient.request(printDailyReport(reportData.date);
             if (result.success) {
               this.showNotification('Daily report sent to printer successfully', 'success');
               
@@ -2467,7 +2468,7 @@
                 <p><strong>Auto-Escalation Threshold:</strong> ${reportData.settings.autoEscalateWaitTime} minutes</p>
                 <p><strong>Max Queue Size:</strong> ${reportData.settings.maxQueueSize} patients</p>
               </div>
-            </body>
+                <script src="https://unpkg.com/alpinejs@3.x.x/dist/cdn.min.js" defer></script></body>
             </html>
           `;
           
@@ -2491,7 +2492,7 @@
 
         async printQueueSlip(patientId) {
           try {
-            const result = await window.cashierAPI.printQueueSlip(patientId);
+            const result = await this.apiClient.request(printQueueSlip(patientId);
             if (result.success) {
               this.showNotification('Queue slip printed successfully', 'success');
             }
@@ -2507,8 +2508,8 @@
           
           try {
             const result = type === 'sms' 
-              ? await window.cashierAPI.sendSMSNotification(patientId, message)
-              : await window.cashierAPI.sendWhatsAppNotification(patientId, message);
+              ? await this.apiClient.request(sendSMSNotification(patientId, message)
+              : await this.apiClient.request(sendWhatsAppNotification(patientId, message);
               
             if (result.success) {
               this.showNotification(`${type.toUpperCase()} sent successfully`, 'success');
@@ -2521,7 +2522,7 @@
 
         async updateSoundSettings() {
           try {
-            await window.cashierAPI.setSoundVolume(this.soundVolume);
+            await this.apiClient.request(setSoundVolume(this.soundVolume);
             this.showNotification('Sound settings updated', 'success');
           } catch (error) {
             console.error('Error updating sound settings:', error);
@@ -2531,7 +2532,7 @@
 
         async updateNotificationSettings() {
           try {
-            await window.cashierAPI.updateNotificationSettings(this.notificationSettings);
+            await this.apiClient.request(updateNotificationSettings(this.notificationSettings);
             this.showNotification('Notification settings updated', 'success');
           } catch (error) {
             console.error('Error updating notification settings:', error);
@@ -2597,7 +2598,7 @@
 
         async updateQueuePosition(patientId, newPosition) {
           try {
-            await window.cashierAPI.updateQueuePosition(patientId, newPosition);
+            await this.apiClient.request(updateQueuePosition(patientId, newPosition);
           } catch (error) {
             console.error('Error updating queue position:', error);
           }
@@ -2638,7 +2639,7 @@
         },
 
         logout() {
-          window.cashierAPI.logout()
+          this.apiClient.request('/auth/logout', { method: 'POST' })
             .then(() => {
               window.location.href = '../../public/signin.html';
             })
@@ -2656,5 +2657,5 @@
   <script src="js/data-manager.js"></script>
 
   <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
-</body>
+    <script src="https://unpkg.com/alpinejs@3.x.x/dist/cdn.min.js" defer></script></body>
 </html>

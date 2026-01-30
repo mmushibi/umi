@@ -1,0 +1,597 @@
+/* Portal-Specific Theme Styles for Umi Health Application */
+
+/* Base Theme Variables */
+:root {
+    --primary-color: #007bff;
+    --secondary-color: #6c757d;
+    --success-color: #28a745;
+    --danger-color: #dc3545;
+    --warning-color: #ffc107;
+    --info-color: #17a2b8;
+    --light-color: #f8f9fa;
+    --dark-color: #343a40;
+    --primary-gradient: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    --success-gradient: linear-gradient(135deg, #11998e 0%, #38ef7d 100%);
+    --danger-gradient: linear-gradient(135deg, #eb3349 0%, #f45c43 100%);
+    --warning-gradient: linear-gradient(135deg, #f2994a 0%, #f2c94c 100%);
+    --info-gradient: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    --border-radius: 12px;
+    --box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    --transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* Admin Portal Theme */
+.admin-portal {
+    --primary-color: #2c3e50;
+    --secondary-color: #95a5a6;
+    --accent-color: #3498db;
+    --primary-gradient: linear-gradient(135deg, #2c3e50 0%, #3498db 100%);
+    --sidebar-bg: #2c3e50;
+    --sidebar-hover: #34495e;
+    --header-bg: #34495e;
+}
+
+.admin-portal .sidebar {
+    background: var(--sidebar-bg);
+    color: white;
+    min-height: 100vh;
+    position: fixed;
+    left: 0;
+    top: 0;
+    width: 250px;
+    z-index: 1000;
+    transition: var(--transition);
+}
+
+.admin-portal .sidebar-header {
+    padding: 20px;
+    background: var(--header-bg);
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.admin-portal .sidebar-logo {
+    font-size: 24px;
+    font-weight: bold;
+    color: white;
+    text-decoration: none;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.admin-portal .sidebar-menu {
+    padding: 20px 0;
+}
+
+.admin-portal .sidebar-item {
+    display: block;
+    padding: 12px 20px;
+    color: rgba(255, 255, 255, 0.8);
+    text-decoration: none;
+    transition: var(--transition);
+    border-left: 3px solid transparent;
+}
+
+.admin-portal .sidebar-item:hover,
+.admin-portal .sidebar-item.active {
+    background: var(--sidebar-hover);
+    color: white;
+    border-left-color: var(--accent-color);
+}
+
+.admin-portal .main-content {
+    margin-left: 250px;
+    padding: 20px;
+    background: #f8f9fa;
+    min-height: 100vh;
+}
+
+.admin-portal .dashboard-header {
+    background: white;
+    padding: 24px;
+    border-radius: var(--border-radius);
+    box-shadow: var(--box-shadow);
+    margin-bottom: 24px;
+}
+
+.admin-portal .stats-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+    gap: 20px;
+    margin-bottom: 24px;
+}
+
+.admin-portal .stat-card {
+    background: white;
+    padding: 24px;
+    border-radius: var(--border-radius);
+    box-shadow: var(--box-shadow);
+    transition: var(--transition);
+    border-left: 4px solid var(--primary-color);
+}
+
+.admin-portal .stat-card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 15px rgba(0, 0, 0, 0.2);
+}
+
+.admin-portal .stat-value {
+    font-size: 32px;
+    font-weight: bold;
+    color: var(--primary-color);
+    margin-bottom: 8px;
+}
+
+.admin-portal .stat-label {
+    color: var(--secondary-color);
+    font-size: 14px;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+/* Cashier Portal Theme */
+.cashier-portal {
+    --primary-color: #27ae60;
+    --secondary-color: #7f8c8d;
+    --accent-color: #2ecc71;
+    --primary-gradient: linear-gradient(135deg, #27ae60 0%, #2ecc71 100%);
+    --header-bg: #27ae60;
+    --pos-bg: #ffffff;
+}
+
+.cashier-portal .pos-interface {
+    background: var(--pos-bg);
+    border-radius: var(--border-radius);
+    box-shadow: var(--box-shadow);
+    overflow: hidden;
+}
+
+.cashier-portal .pos-header {
+    background: var(--header-bg);
+    color: white;
+    padding: 16px 24px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.cashier-portal .pos-body {
+    display: grid;
+    grid-template-columns: 1fr 400px;
+    gap: 0;
+    min-height: 500px;
+}
+
+.cashier-portal .product-grid {
+    padding: 20px;
+    background: #f8f9fa;
+}
+
+.cashier-portal .product-categories {
+    display: flex;
+    gap: 10px;
+    margin-bottom: 20px;
+    flex-wrap: wrap;
+}
+
+.cashier-portal .category-btn {
+    padding: 8px 16px;
+    background: white;
+    border: 2px solid #e9ecef;
+    border-radius: 20px;
+    cursor: pointer;
+    transition: var(--transition);
+    font-size: 14px;
+}
+
+.cashier-portal .category-btn:hover,
+.cashier-portal .category-btn.active {
+    background: var(--primary-color);
+    color: white;
+    border-color: var(--primary-color);
+}
+
+.cashier-portal .product-items {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
+    gap: 12px;
+}
+
+.cashier-portal .product-item {
+    background: white;
+    border: 1px solid #e9ecef;
+    border-radius: 8px;
+    padding: 12px;
+    text-align: center;
+    cursor: pointer;
+    transition: var(--transition);
+}
+
+.cashier-portal .product-item:hover {
+    border-color: var(--primary-color);
+    box-shadow: 0 4px 8px rgba(39, 174, 96, 0.2);
+}
+
+.cashier-portal .product-name {
+    font-size: 12px;
+    font-weight: 500;
+    margin-bottom: 4px;
+    color: #333;
+}
+
+.cashier-portal .product-price {
+    font-size: 14px;
+    font-weight: bold;
+    color: var(--primary-color);
+}
+
+.cashier-portal .cart-sidebar {
+    background: white;
+    border-left: 1px solid #e9ecef;
+    display: flex;
+    flex-direction: column;
+}
+
+.cashier-portal .cart-header {
+    padding: 16px;
+    border-bottom: 1px solid #e9ecef;
+    font-weight: 600;
+}
+
+.cashier-portal .cart-items {
+    flex: 1;
+    padding: 16px;
+    overflow-y: auto;
+}
+
+.cashier-portal .cart-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 12px 0;
+    border-bottom: 1px solid #f1f3f4;
+}
+
+.cashier-portal .cart-item:last-child {
+    border-bottom: none;
+}
+
+.cashier-portal .cart-footer {
+    padding: 16px;
+    border-top: 2px solid #e9ecef;
+    background: #f8f9fa;
+}
+
+.cashier-portal .cart-total {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    font-size: 18px;
+    font-weight: bold;
+    margin-bottom: 16px;
+}
+
+.cashier-portal .cart-actions {
+    display: flex;
+    gap: 12px;
+}
+
+/* Pharmacist Portal Theme */
+.pharmacist-portal {
+    --primary-color: #8e44ad;
+    --secondary-color: #95a5a6;
+    --accent-color: #9b59b6;
+    --primary-gradient: linear-gradient(135deg, #8e44ad 0%, #9b59b6 100%);
+    --clinical-bg: #f4f6f8;
+}
+
+.pharmacist-portal .clinical-workspace {
+    background: var(--clinical-bg);
+    min-height: 100vh;
+}
+
+.pharmacist-portal .workspace-header {
+    background: white;
+    padding: 20px;
+    box-shadow: var(--box-shadow);
+    margin-bottom: 24px;
+}
+
+.pharmacist-portal .prescription-form {
+    background: white;
+    border-radius: var(--border-radius);
+    box-shadow: var(--box-shadow);
+    padding: 24px;
+    margin-bottom: 24px;
+}
+
+.pharmacist-portal .form-section {
+    margin-bottom: 24px;
+}
+
+.pharmacist-portal .form-section-title {
+    font-size: 16px;
+    font-weight: 600;
+    color: var(--primary-color);
+    margin-bottom: 16px;
+    padding-bottom: 8px;
+    border-bottom: 2px solid var(--primary-color);
+}
+
+.pharmacist-portal .medication-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    gap: 16px;
+}
+
+.pharmacist-portal .medication-card {
+    background: white;
+    border: 1px solid #e9ecef;
+    border-radius: 8px;
+    padding: 16px;
+    transition: var(--transition);
+}
+
+.pharmacist-portal .medication-card:hover {
+    border-color: var(--primary-color);
+    box-shadow: 0 4px 8px rgba(142, 68, 173, 0.2);
+}
+
+.pharmacist-portal .medication-name {
+    font-weight: 600;
+    color: #333;
+    margin-bottom: 8px;
+}
+
+.pharmacist-portal .medication-details {
+    font-size: 14px;
+    color: #666;
+    line-height: 1.4;
+}
+
+/* Operations Portal Theme */
+.operations-portal {
+    --primary-color: #d35400;
+    --secondary-color: #7f8c8d;
+    --accent-color: #e67e22;
+    --primary-gradient: linear-gradient(135deg, #d35400 0%, #e67e22 100%);
+    --management-bg: #f8f9fa;
+}
+
+.operations-portal .management-dashboard {
+    background: var(--management-bg);
+    min-height: 100vh;
+}
+
+.operations-portal .operations-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+    gap: 24px;
+    padding: 24px;
+}
+
+.operations-portal .operation-card {
+    background: white;
+    border-radius: var(--border-radius);
+    box-shadow: var(--box-shadow);
+    overflow: hidden;
+    transition: var(--transition);
+}
+
+.operations-portal .operation-card:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
+}
+
+.operations-portal .operation-header {
+    background: var(--primary-gradient);
+    color: white;
+    padding: 16px 20px;
+    font-weight: 600;
+    font-size: 18px;
+}
+
+.operations-portal .operation-body {
+    padding: 20px;
+}
+
+.operations-portal .operation-stats {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 16px;
+    margin-bottom: 20px;
+}
+
+.operations-portal .operation-stat {
+    text-align: center;
+    padding: 12px;
+    background: #f8f9fa;
+    border-radius: 8px;
+}
+
+.operations-portal .stat-number {
+    font-size: 24px;
+    font-weight: bold;
+    color: var(--primary-color);
+}
+
+.operations-portal .stat-label {
+    font-size: 12px;
+    color: #666;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+/* Super Admin Portal Theme */
+.superadmin-portal {
+    --primary-color: #c0392b;
+    --secondary-color: #95a5a6;
+    --accent-color: #e74c3c;
+    --primary-gradient: linear-gradient(135deg, #c0392b 0%, #e74c3c 100%);
+    --admin-bg: #2c3e50;
+}
+
+.superadmin-portal .admin-interface {
+    background: var(--admin-bg);
+    color: white;
+    min-height: 100vh;
+}
+
+.superadmin-portal .admin-header {
+    background: var(--primary-gradient);
+    padding: 20px 0;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.3);
+}
+
+.superadmin-portal .admin-content {
+    padding: 24px;
+}
+
+.superadmin-portal .system-overview {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    gap: 24px;
+    margin-bottom: 32px;
+}
+
+.superadmin-portal .overview-card {
+    background: rgba(255, 255, 255, 0.1);
+    backdrop-filter: blur(10px);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    border-radius: var(--border-radius);
+    padding: 24px;
+    transition: var(--transition);
+}
+
+.superadmin-portal .overview-card:hover {
+    background: rgba(255, 255, 255, 0.15);
+    transform: translateY(-2px);
+}
+
+.superadmin-portal .overview-title {
+    font-size: 14px;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    opacity: 0.8;
+    margin-bottom: 8px;
+}
+
+.superadmin-portal .overview-value {
+    font-size: 32px;
+    font-weight: bold;
+    color: white;
+}
+
+/* Responsive Design for All Portals */
+@media (max-width: 1024px) {
+    .admin-portal .sidebar {
+        transform: translateX(-100%);
+    }
+    
+    .admin-portal .sidebar.open {
+        transform: translateX(0);
+    }
+    
+    .admin-portal .main-content {
+        margin-left: 0;
+    }
+    
+    .cashier-portal .pos-body {
+        grid-template-columns: 1fr;
+    }
+    
+    .cashier-portal .cart-sidebar {
+        border-left: none;
+        border-top: 1px solid #e9ecef;
+    }
+    
+    .operations-portal .operations-grid {
+        grid-template-columns: 1fr;
+        padding: 16px;
+    }
+}
+
+@media (max-width: 768px) {
+    .admin-portal .stats-grid {
+        grid-template-columns: 1fr;
+    }
+    
+    .cashier-portal .product-items {
+        grid-template-columns: repeat(auto-fill, minmax(100px, 1fr));
+    }
+    
+    .pharmacist-portal .medication-grid {
+        grid-template-columns: 1fr;
+    }
+    
+    .operations-portal .operation-stats {
+        grid-template-columns: 1fr;
+    }
+    
+    .superadmin-portal .system-overview {
+        grid-template-columns: 1fr;
+    }
+}
+
+/* Animation Classes */
+.fade-in {
+    animation: fadeIn 0.5s ease-in;
+}
+
+@keyframes fadeIn {
+    from { opacity: 0; }
+    to { opacity: 1; }
+}
+
+.slide-in-up {
+    animation: slideInUp 0.5s ease-out;
+}
+
+@keyframes slideInUp {
+    from {
+        opacity: 0;
+        transform: translateY(30px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.scale-in {
+    animation: scaleIn 0.3s ease-out;
+}
+
+@keyframes scaleIn {
+    from {
+        opacity: 0;
+        transform: scale(0.9);
+    }
+    to {
+        opacity: 1;
+        transform: scale(1);
+    }
+}
+
+/* Utility Classes */
+.text-gradient {
+    background: var(--primary-gradient);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+}
+
+.glass-effect {
+    background: rgba(255, 255, 255, 0.1);
+    backdrop-filter: blur(10px);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+}
+
+.hover-lift {
+    transition: var(--transition);
+}
+
+.hover-lift:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
+}

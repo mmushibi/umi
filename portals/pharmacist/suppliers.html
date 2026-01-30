@@ -527,7 +527,9 @@
   </style>
 
     <!-- Backend Integration Libraries -->
-    <script src="../../js/api-client.js"></script>
+    <script src="../../js/auth-api.js"></script>
+    <script src="../../js/admin-api.js"></script>
+    <script src="../../js/signalr-client.js"></script>
     <script src="../../js/auth-manager.js"></script>
     <script src="../shared/js/backend-integration-helper.js"></script>
     <script src="../shared/js/page-integration-template.js"></script>
@@ -1575,7 +1577,7 @@
           this.loading = true;
           try {
             // Real API call for authenticated users
-            const response = await window.pharmacistApi.suppliers.getSupplierOrders(supplier.id);
+            const response = await this.apiClient.request(suppliers.getSupplierOrders(supplier.id);
             this.orderHistory = response.data?.orders || [];
             this.orderStats = response.data?.stats || {
               totalOrders: 0,
@@ -1597,7 +1599,7 @@
           this.loading = true;
           try {
             // Real API call for authenticated users
-            const response = await window.pharmacistApi.suppliers.getSupplierDocuments(supplier.id);
+            const response = await this.apiClient.request(suppliers.getSupplierDocuments(supplier.id);
             this.documents = response.data?.documents || {
               contracts: [],
               licenses: [],
@@ -1626,7 +1628,7 @@
 
         downloadDocument(doc) {
           // Real document download for authenticated users
-          window.pharmacistApi.suppliers.downloadSupplierDocument(doc.id)
+          this.apiClient.request(suppliers.downloadSupplierDocument(doc.id)
             .then(() => {
               this.showToast(`Downloading ${doc.name}...`, 'info');
             })
@@ -1639,7 +1641,7 @@
         async deleteDocument(doc) {
           if (confirm(`Delete ${doc.name}?`)) {
             try {
-              await window.pharmacistApi.suppliers.deleteSupplierDocument(doc.id);
+              await this.apiClient.request(suppliers.deleteSupplierDocument(doc.id);
               this.showToast('Document deleted successfully', 'success');
               await this.viewDocuments(this.currentSupplier); // Refresh documents
             } catch (error) {
@@ -1656,7 +1658,7 @@
         async uploadDocument() {
           this.loading = true;
           try {
-            await window.pharmacistApi.suppliers.uploadSupplierDocument(this.currentSupplier.id, this.documentForm);
+            await this.apiClient.request(suppliers.uploadSupplierDocument(this.currentSupplier.id, this.documentForm);
             this.showToast('Document uploaded successfully', 'success');
             this.showUploadDocument = false;
             this.documentForm = { name: '', type: '', file: null };
@@ -1705,7 +1707,7 @@
             this.loading = true;
             try {
               for (const id of this.selectedSuppliers) {
-                await window.pharmacistApi.suppliers.deleteSupplier(id);
+                await this.apiClient.request(suppliers.deleteSupplier(id);
               }
               this.clearSelection();
               await this.loadSuppliers();
@@ -1740,7 +1742,7 @@
           this.loading = true;
           try {
             for (const id of this.selectedSuppliers) {
-              await window.pharmacistApi.suppliers.updateSupplierStatus(id, this.bulkStatus);
+              await this.apiClient.request(suppliers.updateSupplierStatus(id, this.bulkStatus);
             }
             this.showBulkStatusModal = false;
             this.bulkStatus = '';
@@ -1775,7 +1777,7 @@
         async exportSuppliers() {
           try {
             // Real API call for authenticated users
-            const response = await window.pharmacistApi.suppliers.exportSuppliers('csv');
+            const response = await this.apiClient.request(suppliers.exportSuppliers('csv');
             const csv = response.data || this.convertToCSV(this.filteredSuppliers);
             this.downloadCSV(csv, 'suppliers_export.csv');
             this.showToast('Suppliers exported successfully', 'success');
@@ -1813,7 +1815,7 @@
 
         async updateSupplierStatus(supplier, status) {
           try {
-            await window.pharmacistApi.suppliers.updateSupplierStatus(supplier.id, status);
+            await this.apiClient.request(suppliers.updateSupplierStatus(supplier.id, status);
             await this.loadSuppliers();
             await this.loadStats();
             this.showNotification(`Supplier status updated to ${status}`, 'success');
@@ -1861,5 +1863,5 @@
   
   <!-- Include Pharmacist API -->
   <script src="js/pharmacist-api.js"></script>
-</body>
+    <script src="https://unpkg.com/alpinejs@3.x.x/dist/cdn.min.js" defer></script></body>
 </html>

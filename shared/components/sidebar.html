@@ -1,0 +1,611 @@
+<!-- Reusable Sidebar Component -->
+<aside class="app-sidebar" data-component="sidebar">
+    <div class="sidebar-header">
+        <div class="sidebar-logo">
+            <img src="/assets/umi-logo.png" alt="Umi Health" class="sidebar-logo-img" />
+            <span class="sidebar-title">Umi Health</span>
+        </div>
+        <button class="sidebar-toggle" aria-label="Toggle sidebar">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <line x1="3" y1="12" x2="21" y2="12"></line>
+                <line x1="3" y1="6" x2="21" y2="6"></line>
+                <line x1="3" y1="18" x2="21" y2="18"></line>
+            </svg>
+        </button>
+    </div>
+    
+    <nav class="sidebar-nav">
+        <ul class="nav-list">
+            <li class="nav-item">
+                <a href="/dashboard" class="nav-link active" data-page="dashboard">
+                    <span class="nav-icon">
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <rect x="3" y="3" width="7" height="7"></rect>
+                            <rect x="14" y="3" width="7" height="7"></rect>
+                            <rect x="14" y="14" width="7" height="7"></rect>
+                            <rect x="3" y="14" width="7" height="7"></rect>
+                        </svg>
+                    </span>
+                    <span class="nav-text">Dashboard</span>
+                    <span class="nav-badge" data-badge="dashboard">3</span>
+                </a>
+            </li>
+            
+            <li class="nav-item">
+                <a href="/patients" class="nav-link" data-page="patients">
+                    <span class="nav-icon">
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path>
+                            <circle cx="9" cy="7" r="4"></circle>
+                            <path d="M23 21v-2a4 4 0 0 0-3-3.87"></path>
+                            <path d="M16 3.13a4 4 0 0 1 0 7.75"></path>
+                        </svg>
+                    </span>
+                    <span class="nav-text">Patients</span>
+                </a>
+            </li>
+            
+            <li class="nav-item">
+                <a href="/inventory" class="nav-link" data-page="inventory">
+                    <span class="nav-icon">
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"></path>
+                            <polyline points="3.27 6.96 12 12.01 20.73 6.96"></polyline>
+                            <line x1="12" y1="22.08" x2="12" y2="12"></line>
+                        </svg>
+                    </span>
+                    <span class="nav-text">Inventory</span>
+                    <span class="nav-badge warning" data-badge="inventory">5</span>
+                </a>
+            </li>
+            
+            <li class="nav-item">
+                <a href="/prescriptions" class="nav-link" data-page="prescriptions">
+                    <span class="nav-icon">
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+                            <polyline points="14 2 14 8 20 8"></polyline>
+                            <line x1="16" y1="13" x2="8" y2="13"></line>
+                            <line x1="16" y1="17" x2="8" y2="17"></line>
+                            <polyline points="10 9 9 9 8 9"></polyline>
+                        </svg>
+                    </span>
+                    <span class="nav-text">Prescriptions</span>
+                </a>
+            </li>
+            
+            <li class="nav-item">
+                <a href="/sales" class="nav-link" data-page="sales">
+                    <span class="nav-icon">
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <circle cx="9" cy="21" r="1"></circle>
+                            <circle cx="20" cy="21" r="1"></circle>
+                            <path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"></path>
+                        </svg>
+                    </span>
+                    <span class="nav-text">Sales</span>
+                </a>
+            </li>
+            
+            <li class="nav-item">
+                <a href="/reports" class="nav-link" data-page="reports">
+                    <span class="nav-icon">
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <line x1="18" y1="20" x2="18" y2="10"></line>
+                            <line x1="12" y1="20" x2="12" y2="4"></line>
+                            <line x1="6" y1="20" x2="6" y2="14"></line>
+                        </svg>
+                    </span>
+                    <span class="nav-text">Reports</span>
+                </a>
+            </li>
+        </ul>
+        
+        <div class="nav-section">
+            <div class="nav-section-title">Management</div>
+            <ul class="nav-list">
+                <li class="nav-item">
+                    <a href="/users" class="nav-link" data-page="users">
+                        <span class="nav-icon">
+                            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path>
+                                <circle cx="9" cy="7" r="4"></circle>
+                                <path d="M23 21v-2a4 4 0 0 0-3-3.87"></path>
+                                <path d="M16 3.13a4 4 0 0 1 0 7.75"></path>
+                            </svg>
+                        </span>
+                        <span class="nav-text">Users</span>
+                    </a>
+                </li>
+                
+                <li class="nav-item">
+                    <a href="/settings" class="nav-link" data-page="settings">
+                        <span class="nav-icon">
+                            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <circle cx="12" cy="12" r="3"></circle>
+                                <path d="M12 1v6m0 6v6m4.22-13.22l4.24 4.24M1.54 9.96l4.24 4.24M20.46 14.04l-4.24-4.24M7.78 19.78L3.54 15.54"></path>
+                            </svg>
+                        </span>
+                        <span class="nav-text">Settings</span>
+                    </a>
+                </li>
+            </ul>
+        </div>
+    </nav>
+    
+    <div class="sidebar-footer">
+        <div class="user-profile">
+            <div class="user-avatar">
+                <img src="/assets/default-avatar.png" alt="User" class="avatar-img" />
+                <span class="user-status online"></span>
+            </div>
+            <div class="user-info">
+                <div class="user-name">John Doe</div>
+                <div class="user-role">Administrator</div>
+            </div>
+            <button class="user-menu-btn" aria-label="User menu">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <circle cx="12" cy="12" r="1"></circle>
+                    <circle cx="12" cy="5" r="1"></circle>
+                    <circle cx="12" cy="19" r="1"></circle>
+                </svg>
+            </button>
+        </div>
+        
+        <div class="sidebar-actions">
+            <button class="action-btn" aria-label="Help">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <circle cx="12" cy="12" r="10"></circle>
+                    <path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"></path>
+                    <line x1="12" y1="17" x2="12.01" y2="17"></line>
+                </svg>
+            </button>
+            <button class="action-btn" aria-label="Notifications">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"></path>
+                    <path d="M13.73 21a2 2 0 0 1-3.46 0"></path>
+                </svg>
+            </button>
+        </div>
+    </div>
+</aside>
+
+<style>
+/* Sidebar Component Styles */
+.app-sidebar {
+    position: fixed;
+    left: 0;
+    top: 0;
+    width: 260px;
+    height: 100vh;
+    background: #1f2937;
+    color: white;
+    z-index: 1000;
+    transition: transform 0.3s ease, width 0.3s ease;
+    display: flex;
+    flex-direction: column;
+}
+
+.app-sidebar.collapsed {
+    width: 70px;
+}
+
+.sidebar-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 20px;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+    min-height: 64px;
+}
+
+.sidebar-logo {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+.sidebar-logo-img {
+    width: 32px;
+    height: 32px;
+}
+
+.sidebar-title {
+    font-size: 18px;
+    font-weight: 700;
+    color: white;
+    transition: opacity 0.3s ease;
+}
+
+.app-sidebar.collapsed .sidebar-title {
+    opacity: 0;
+    visibility: hidden;
+}
+
+.sidebar-toggle {
+    background: none;
+    border: none;
+    color: white;
+    cursor: pointer;
+    padding: 8px;
+    border-radius: 6px;
+    transition: background-color 0.2s ease;
+}
+
+.sidebar-toggle:hover {
+    background: rgba(255, 255, 255, 0.1);
+}
+
+.sidebar-nav {
+    flex: 1;
+    overflow-y: auto;
+    padding: 20px 0;
+}
+
+.nav-section {
+    margin-bottom: 24px;
+}
+
+.nav-section-title {
+    font-size: 12px;
+    font-weight: 600;
+    color: rgba(255, 255, 255, 0.5);
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    padding: 0 20px;
+    margin-bottom: 8px;
+    transition: opacity 0.3s ease;
+}
+
+.app-sidebar.collapsed .nav-section-title {
+    opacity: 0;
+    visibility: hidden;
+}
+
+.nav-list {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+}
+
+.nav-item {
+    margin-bottom: 4px;
+}
+
+.nav-link {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 12px 20px;
+    color: rgba(255, 255, 255, 0.8);
+    text-decoration: none;
+    transition: all 0.2s ease;
+    position: relative;
+}
+
+.nav-link:hover {
+    background: rgba(255, 255, 255, 0.1);
+    color: white;
+}
+
+.nav-link.active {
+    background: rgba(59, 130, 246, 0.2);
+    color: #60a5fa;
+    border-left: 3px solid #60a5fa;
+}
+
+.nav-icon {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 20px;
+    height: 20px;
+    flex-shrink: 0;
+}
+
+.nav-text {
+    font-size: 14px;
+    font-weight: 500;
+    transition: opacity 0.3s ease;
+}
+
+.app-sidebar.collapsed .nav-text {
+    opacity: 0;
+    visibility: hidden;
+}
+
+.nav-badge {
+    margin-left: auto;
+    background: #ef4444;
+    color: white;
+    font-size: 11px;
+    font-weight: 600;
+    padding: 2px 6px;
+    border-radius: 10px;
+    min-width: 18px;
+    text-align: center;
+    transition: opacity 0.3s ease;
+}
+
+.nav-badge.warning {
+    background: #f59e0b;
+}
+
+.app-sidebar.collapsed .nav-badge {
+    opacity: 0;
+    visibility: hidden;
+}
+
+.sidebar-footer {
+    border-top: 1px solid rgba(255, 255, 255, 0.1);
+    padding: 20px;
+}
+
+.user-profile {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin-bottom: 16px;
+}
+
+.user-avatar {
+    position: relative;
+    width: 36px;
+    height: 36px;
+    flex-shrink: 0;
+}
+
+.avatar-img {
+    width: 100%;
+    height: 100%;
+    border-radius: 50%;
+    object-fit: cover;
+}
+
+.user-status {
+    position: absolute;
+    bottom: 0;
+    right: 0;
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+    border: 2px solid #1f2937;
+}
+
+.user-status.online {
+    background: #10b981;
+}
+
+.user-status.away {
+    background: #f59e0b;
+}
+
+.user-status.busy {
+    background: #ef4444;
+}
+
+.user-info {
+    flex: 1;
+    transition: opacity 0.3s ease;
+}
+
+.user-info .user-name {
+    font-size: 14px;
+    font-weight: 600;
+    color: white;
+    line-height: 1.2;
+    margin-bottom: 2px;
+}
+
+.user-info .user-role {
+    font-size: 12px;
+    color: rgba(255, 255, 255, 0.6);
+    line-height: 1.2;
+}
+
+.app-sidebar.collapsed .user-info {
+    opacity: 0;
+    visibility: hidden;
+}
+
+.user-menu-btn {
+    background: none;
+    border: none;
+    color: rgba(255, 255, 255, 0.6);
+    cursor: pointer;
+    padding: 6px;
+    border-radius: 4px;
+    transition: all 0.2s ease;
+}
+
+.user-menu-btn:hover {
+    background: rgba(255, 255, 255, 0.1);
+    color: white;
+}
+
+.sidebar-actions {
+    display: flex;
+    gap: 8px;
+    justify-content: center;
+    transition: opacity 0.3s ease;
+}
+
+.app-sidebar.collapsed .sidebar-actions {
+    opacity: 0;
+    visibility: hidden;
+}
+
+.action-btn {
+    background: rgba(255, 255, 255, 0.1);
+    border: none;
+    color: rgba(255, 255, 255, 0.6);
+    cursor: pointer;
+    padding: 8px;
+    border-radius: 6px;
+    transition: all 0.2s ease;
+}
+
+.action-btn:hover {
+    background: rgba(255, 255, 255, 0.2);
+    color: white;
+}
+
+/* Responsive Design */
+@media (max-width: 1024px) {
+    .app-sidebar {
+        transform: translateX(-100%);
+    }
+    
+    .app-sidebar.open {
+        transform: translateX(0);
+    }
+    
+    .app-sidebar.collapsed {
+        width: 260px;
+        transform: translateX(-100%);
+    }
+    
+    .app-sidebar.collapsed.open {
+        transform: translateX(0);
+    }
+}
+
+@media (max-width: 768px) {
+    .app-sidebar {
+        width: 280px;
+    }
+    
+    .sidebar-header {
+        padding: 16px;
+    }
+    
+    .sidebar-nav {
+        padding: 16px 0;
+    }
+    
+    .sidebar-footer {
+        padding: 16px;
+    }
+}
+
+/* Overlay for mobile */
+.sidebar-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.5);
+    z-index: 999;
+    opacity: 0;
+    visibility: hidden;
+    transition: all 0.3s ease;
+}
+
+.sidebar-overlay.active {
+    opacity: 1;
+    visibility: visible;
+}
+
+@media (max-width: 1024px) {
+    .sidebar-overlay.active {
+        display: block;
+    }
+}
+</style>
+
+<script>
+// Sidebar Component JavaScript
+document.addEventListener('DOMContentLoaded', function() {
+    const sidebar = document.querySelector('.app-sidebar');
+    const sidebarToggle = document.querySelector('.sidebar-toggle');
+    const navLinks = document.querySelectorAll('.nav-link');
+    
+    // Toggle sidebar collapse
+    if (sidebarToggle) {
+        sidebarToggle.addEventListener('click', function() {
+            sidebar.classList.toggle('collapsed');
+            
+            // Emit custom event
+            window.dispatchEvent(new CustomEvent('sidebarToggle', {
+                detail: { collapsed: sidebar.classList.contains('collapsed') }
+            }));
+        });
+    }
+    
+    // Handle navigation
+    navLinks.forEach(link => {
+        link.addEventListener('click', function(e) {
+            // Remove active class from all links
+            navLinks.forEach(l => l.classList.remove('active'));
+            
+            // Add active class to clicked link
+            this.classList.add('active');
+            
+            // Emit navigation event
+            const page = this.dataset.page;
+            if (page) {
+                window.dispatchEvent(new CustomEvent('navigation', {
+                    detail: { page: page, url: this.href }
+                }));
+            }
+        });
+    });
+    
+    // Set active nav item based on current page
+    const setActiveNavItem = function() {
+        const currentPath = window.location.pathname;
+        navLinks.forEach(link => {
+            link.classList.remove('active');
+            const page = link.dataset.page;
+            if (page && currentPath.includes(page)) {
+                link.classList.add('active');
+            }
+        });
+    };
+    
+    setActiveNavItem();
+    
+    // Update active nav item on navigation
+    window.addEventListener('popstate', setActiveNavItem);
+    
+    // Handle mobile menu toggle from header
+    window.addEventListener('mobileMenuToggle', function() {
+        sidebar.classList.toggle('open');
+        
+        // Create/remove overlay for mobile
+        let overlay = document.querySelector('.sidebar-overlay');
+        if (!overlay) {
+            overlay = document.createElement('div');
+            overlay.className = 'sidebar-overlay';
+            document.body.appendChild(overlay);
+            
+            overlay.addEventListener('click', function() {
+                sidebar.classList.remove('open');
+                overlay.classList.remove('active');
+            });
+        }
+        
+        if (sidebar.classList.contains('open')) {
+            overlay.classList.add('active');
+        } else {
+            overlay.classList.remove('active');
+        }
+    });
+    
+    // Handle window resize
+    let resizeTimer;
+    window.addEventListener('resize', function() {
+        clearTimeout(resizeTimer);
+        resizeTimer = setTimeout(function() {
+            if (window.innerWidth > 1024) {
+                sidebar.classList.remove('open');
+                const overlay = document.querySelector('.sidebar-overlay');
+                if (overlay) {
+                    overlay.classList.remove('active');
+                }
+            }
+        }, 250);
+    });
+});
+</script>

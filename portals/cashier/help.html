@@ -516,11 +516,12 @@
   </style>
 
     <!-- Backend Integration Libraries -->
-    <script src="../../js/api-client.js"></script>
+    <script src="../../js/auth-api.js"></script>
+    <script src="../../js/admin-api.js"></script>
+    <script src="../../js/signalr-client.js"></script>
     <script src="../../js/auth-manager.js"></script>
     <script src="../shared/js/backend-integration-helper.js"></script>
     <script src="../shared/js/page-integration-template.js"></script>
-    <script src="https://unpkg.com/alpinejs@3.x.x/dist/cdn.min.js" defer></script></head>
 <body>
   <!-- Sidebar -->
   <aside class="sidebar" :class="sidebarOpen ? 'open' : ''">
@@ -847,7 +848,7 @@
 
         async loadUserInfo() {
           try {
-            const profile = await window.cashierAPI.getUserProfile();
+            const profile = await this.apiClient.request('/auth/profile');
             this.userInfo = {
               name: `${profile.firstName || ''} ${profile.lastName || ''}`.trim() || 'Cashier',
               role: 'Cashier',
@@ -921,7 +922,7 @@
         },
 
         logout() {
-          window.cashierAPI.logout()
+          this.apiClient.request('/auth/logout', { method: 'POST' })
             .then(() => {
               window.location.href = '../../public/signin.html';
             })
@@ -948,5 +949,5 @@
 </script>
 
   <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
-</body>
+    <script src="https://unpkg.com/alpinejs@3.x.x/dist/cdn.min.js" defer></script></body>
 </html>

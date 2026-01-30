@@ -649,11 +649,12 @@
   </style>
 
     <!-- Backend Integration Libraries -->
-    <script src="../../js/api-client.js"></script>
+    <script src="../../js/auth-api.js"></script>
+    <script src="../../js/admin-api.js"></script>
+    <script src="../../js/signalr-client.js"></script>
     <script src="../../js/auth-manager.js"></script>
     <script src="../shared/js/backend-integration-helper.js"></script>
     <script src="../shared/js/page-integration-template.js"></script>
-    <script src="https://unpkg.com/alpinejs@3.x.x/dist/cdn.min.js" defer></script></head>
 <body>
   <!-- Sidebar -->
   <aside class="sidebar" :class="sidebarOpen ? 'open' : ''">
@@ -1111,37 +1112,46 @@
         async loadSalesData() {
           try {
             // Load sales stats
-            const stats = await window.cashierAPI.getSalesStats();
+            const stats = await this.apiClient.request('/sales/stats');
             this.updateSalesStats(stats);
             
             // Load sales list with pagination
-            const salesData = await window.cashierAPI.getSales({
-              page: this.currentPage,
-              pageSize: this.pageSize,
-              search: this.searchQuery,
-              status: this.selectedStatus,
-              startDate: this.dateRange.start,
-              endDate: this.dateRange.end
+            const salesData = await this.apiClient.request('/sales', {
+              method: 'GET',
+              params: {
+                page: this.currentPage,
+                pageSize: this.pageSize,
+                search: this.searchQuery,
+                status: this.selectedStatus,
+                startDate: this.dateRange.start,
+                endDate: this.dateRange.end
+              }
             });
             this.updateSalesList(salesData.sales || []);
             this.totalPages = salesData.totalPages || 1;
             this.totalItems = salesData.totalCount || 0;
             
             // Load revenue chart data
-            const revenueStats = await window.cashierAPI.getSalesRevenueStats(this.selectedPeriod);
+            const revenueStats = await this.apiClient.request('/sales/revenue-stats', {
+              method: 'GET',
+              params: { period: this.selectedPeriod }
+            });
             this.updateRevenueChart(revenueStats);
             
             // Load payment methods stats
-            const paymentStats = await window.cashierAPI.getPaymentMethodsStats();
+            const paymentStats = await this.apiClient.request('/sales/payment-stats');
             this.updatePaymentChart(paymentStats);
             
             // Load top products for insights
-            const topProducts = await window.cashierAPI.getPopularProducts(5);
+            const topProducts = await this.apiClient.request('/sales/popular-products', {
+              method: 'GET',
+              params: { limit: 5 }
+            });
             this.updateTopProducts(topProducts);
             
           } catch (error) {
             console.error('Error loading sales data:', error);
-            window.cashierAPI.handleError(error, 'loadSalesData');
+            this.apiClient.handleError(error, 'loadSalesData');
             this.showNotification('Failed to load sales data', 'error');
           }
         },
@@ -1158,7 +1168,7 @@
             id: sale.id,
             receiptNumber: sale.saleNumber,
             customer: sale.patientId ? `Patient #${sale.patientId}` : 'OTC Customer',
-            date: window.cashierAPI.formatDateTime(sale.saleDate),
+            date: this.formatDateTime(sale.saleDate),
             items: sale.items ? sale.items.length : 0,
             paymentMethod: sale.paymentMethod || 'cash',
             status: sale.status || 'pending',
@@ -1219,11 +1229,16 @@
         async exportSales(format = 'csv') {
           try {
             this.isLoading = true;
-            const blob = await window.cashierAPI.exportReport('sales', format, {
-              startDate: this.dateRange.start,
-              endDate: this.dateRange.end,
-              status: this.selectedStatus,
-              search: this.searchQuery
+            const blob = await this.apiClient.request('/reports/export', {
+              method: 'POST',
+              body: JSON.stringify({
+                reportType: 'sales',
+                format: format,
+                startDate: this.dateRange.start,
+                endDate: this.dateRange.end,
+                status: this.selectedStatus,
+                search: this.searchQuery
+              })
             });
             
             const url = window.URL.createObjectURL(blob);
@@ -1286,7 +1301,7 @@
           const statsArray = Array.isArray(revenueStats) ? revenueStats : (revenueStats.data || []);
           
           // Prepare chart data
-          const labels = statsArray.map(stat => window.cashierAPI.formatDate(stat.date));
+          const labels = statsArray.map(stat => this.formatDate(stat.date));
           const data = statsArray.map(stat => stat.revenue);
           
           if (this.revenueChart) {
@@ -1369,23 +1384,26 @@
         
         async updateRevenueChart(period) {
           try {
-            const revenueStats = await window.cashierAPI.getSalesRevenueStats(parseInt(period));
+            const revenueStats = await this.apiClient.request('/sales/revenue-stats', {
+              method: 'GET',
+              params: { period: parseInt(period) }
+            });
             this.updateRevenueChart(revenueStats);
           } catch (error) {
             console.error('Error updating revenue chart:', error);
-            window.cashierAPI.handleError(error, 'updateRevenueChart');
+            this.apiClient.handleError(error, 'updateRevenueChart');
           }
         },
         
         async viewSale(sale) {
           try {
-            const saleDetails = await window.cashierAPI.getSaleDetails(sale.id);
+            const saleDetails = await this.apiClient.request(`/sales/${sale.id}`);
             console.log('Sale details:', saleDetails);
             // Implement detailed view modal or navigation
-            alert(`Sale Details:\nReceipt: ${saleDetails.saleNumber}\nAmount: ${window.cashierAPI.formatCurrency(saleDetails.totalAmount)}\nStatus: ${saleDetails.status}`);
+            alert(`Sale Details:\nReceipt: ${saleDetails.saleNumber}\nAmount: ${this.formatCurrency(saleDetails.totalAmount)}\nStatus: ${saleDetails.status}`);
           } catch (error) {
             console.error('Error viewing sale:', error);
-            window.cashierAPI.handleError(error, 'viewSale');
+            this.apiClient.handleError(error, 'viewSale');
           }
         },
         
@@ -1403,7 +1421,10 @@
               processedBy: this.getUserId()
             };
             
-            const result = await window.cashierAPI.createRefund(refundData);
+            const result = await this.apiClient.request('/refunds', {
+              method: 'POST',
+              body: JSON.stringify(refundData)
+            });
             this.showNotification('Refund processed successfully', 'success');
             this.loadSalesData(); // Refresh the data
           } catch (error) {
@@ -1415,7 +1436,7 @@
         },
         
         getUserId() {
-          return window.cashierAPI.getUserId() || 'current-user';
+          return this.getUserId() || 'current-user';
         },
 
         formatCurrency(amount) {
@@ -1458,12 +1479,11 @@
                 console.error('Failed to initialize cashier-sales page:', error);
                 this.error = 'Failed to initialize page';
             }
-        },;
         },
         
         async loadUserInfo() {
           try {
-            const userProfile = await window.cashierAPI.getUserProfile();
+            const userProfile = await this.apiClient.request('/auth/profile');
             this.userInfo = {
               name: userProfile.fullName || userProfile.email || 'Cashier',
               role: userProfile.role || 'Cashier',
@@ -1491,5 +1511,5 @@
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
   <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
-</body>
+    <script src="https://unpkg.com/alpinejs@3.x.x/dist/cdn.min.js" defer></script></body>
 </html>

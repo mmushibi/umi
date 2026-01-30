@@ -1,0 +1,620 @@
+<!-- Reusable Header Component -->
+<header class="app-header" data-component="header">
+    <div class="header-container">
+        <div class="header-left">
+            <button class="mobile-menu-toggle no-print" aria-label="Toggle menu">
+                <span class="hamburger-line"></span>
+                <span class="hamburger-line"></span>
+                <span class="hamburger-line"></span>
+            </button>
+            
+            <div class="logo-container">
+                <img src="/assets/umi-logo.png" alt="Umi Health" class="logo" />
+                <h1 class="app-title">Umi Health</h1>
+            </div>
+        </div>
+        
+        <div class="header-center">
+            <div class="search-container">
+                <input type="text" class="search-input" placeholder="Search patients, medications, inventory..." />
+                <button class="search-btn" aria-label="Search">
+                    <svg class="search-icon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <circle cx="11" cy="11" r="8"></circle>
+                        <path d="m21 21-4.35-4.35"></path>
+                    </svg>
+                </button>
+            </div>
+        </div>
+        
+        <div class="header-right">
+            <div class="header-actions">
+                <button class="notification-btn" aria-label="Notifications" data-badge="3">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"></path>
+                        <path d="M13.73 21a2 2 0 0 1-3.46 0"></path>
+                    </svg>
+                </button>
+                
+                <button class="help-btn" aria-label="Help">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <circle cx="12" cy="12" r="10"></circle>
+                        <path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"></path>
+                        <line x1="12" y1="17" x2="12.01" y2="17"></line>
+                    </svg>
+                </button>
+                
+                <div class="user-menu">
+                    <button class="user-menu-toggle" aria-label="User menu">
+                        <div class="user-avatar">
+                            <img src="/assets/default-avatar.png" alt="User" class="avatar-img" />
+                            <span class="user-status online"></span>
+                        </div>
+                        <div class="user-info">
+                            <span class="user-name">John Doe</span>
+                            <span class="user-role">Administrator</span>
+                        </div>
+                        <svg class="dropdown-arrow" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <polyline points="6 9 12 15 18 9"></polyline>
+                        </svg>
+                    </button>
+                    
+                    <div class="user-dropdown">
+                        <div class="dropdown-header">
+                            <div class="user-avatar">
+                                <img src="/assets/default-avatar.png" alt="User" class="avatar-img" />
+                            </div>
+                            <div class="user-details">
+                                <div class="user-name">John Doe</div>
+                                <div class="user-email">john.doe@pharmacy.com</div>
+                                <div class="user-role">Administrator</div>
+                            </div>
+                        </div>
+                        
+                        <div class="dropdown-divider"></div>
+                        
+                        <a href="/account" class="dropdown-item">
+                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path>
+                                <circle cx="12" cy="7" r="4"></circle>
+                            </svg>
+                            My Profile
+                        </a>
+                        
+                        <a href="/settings" class="dropdown-item">
+                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <circle cx="12" cy="12" r="3"></circle>
+                                <path d="M12 1v6m0 6v6m4.22-13.22l4.24 4.24M1.54 9.96l4.24 4.24M20.46 14.04l-4.24-4.24M7.78 19.78L3.54 15.54"></path>
+                            </svg>
+                            Settings
+                        </a>
+                        
+                        <a href="/help" class="dropdown-item">
+                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <circle cx="12" cy="12" r="10"></circle>
+                                <path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"></path>
+                                <line x1="12" y1="17" x2="12.01" y2="17"></line>
+                            </svg>
+                            Help & Support
+                        </a>
+                        
+                        <div class="dropdown-divider"></div>
+                        
+                        <button class="dropdown-item logout-btn">
+                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path>
+                                <polyline points="16 17 21 12 16 7"></polyline>
+                                <line x1="21" y1="12" x2="9" y2="12"></line>
+                            </svg>
+                            Sign Out
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Mobile Navigation -->
+    <nav class="mobile-nav no-print">
+        <div class="mobile-nav-items">
+            <a href="/dashboard" class="mobile-nav-item active">
+                <span class="mobile-nav-icon">🏠</span>
+                <span>Home</span>
+            </a>
+            <a href="/patients" class="mobile-nav-item">
+                <span class="mobile-nav-icon">👥</span>
+                <span>Patients</span>
+            </a>
+            <a href="/inventory" class="mobile-nav-item">
+                <span class="mobile-nav-icon">💊</span>
+                <span>Inventory</span>
+            </a>
+            <a href="/prescriptions" class="mobile-nav-item">
+                <span class="mobile-nav-icon">📋</span>
+                <span>Prescriptions</span>
+            </a>
+            <a href="/reports" class="mobile-nav-item">
+                <span class="mobile-nav-icon">📊</span>
+                <span>Reports</span>
+            </a>
+        </div>
+    </nav>
+</header>
+
+<style>
+/* Header Component Styles */
+.app-header {
+    background: white;
+    border-bottom: 1px solid #e5e7eb;
+    position: sticky;
+    top: 0;
+    z-index: 100;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+}
+
+.header-container {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0 20px;
+    height: 64px;
+    max-width: 1400px;
+    margin: 0 auto;
+}
+
+.header-left {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+}
+
+.mobile-menu-toggle {
+    display: none;
+    background: none;
+    border: none;
+    cursor: pointer;
+    padding: 8px;
+    border-radius: 6px;
+    transition: background-color 0.2s ease;
+}
+
+.mobile-menu-toggle:hover {
+    background: #f3f4f6;
+}
+
+.hamburger-line {
+    display: block;
+    width: 20px;
+    height: 2px;
+    background: #374151;
+    margin: 3px 0;
+    transition: all 0.3s ease;
+}
+
+.logo-container {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+.logo {
+    width: 32px;
+    height: 32px;
+}
+
+.app-title {
+    font-size: 20px;
+    font-weight: 700;
+    color: #1f2937;
+    margin: 0;
+}
+
+.header-center {
+    flex: 1;
+    max-width: 600px;
+    margin: 0 20px;
+}
+
+.search-container {
+    position: relative;
+    display: flex;
+    align-items: center;
+}
+
+.search-input {
+    width: 100%;
+    padding: 10px 40px 10px 16px;
+    border: 2px solid #e5e7eb;
+    border-radius: 8px;
+    font-size: 14px;
+    transition: all 0.2s ease;
+}
+
+.search-input:focus {
+    outline: none;
+    border-color: #3b82f6;
+    box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+}
+
+.search-btn {
+    position: absolute;
+    right: 8px;
+    background: none;
+    border: none;
+    padding: 6px;
+    cursor: pointer;
+    color: #6b7280;
+    border-radius: 4px;
+    transition: color 0.2s ease;
+}
+
+.search-btn:hover {
+    color: #3b82f6;
+}
+
+.header-right {
+    display: flex;
+    align-items: center;
+}
+
+.header-actions {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+.notification-btn,
+.help-btn {
+    position: relative;
+    background: none;
+    border: none;
+    padding: 8px;
+    cursor: pointer;
+    color: #6b7280;
+    border-radius: 6px;
+    transition: all 0.2s ease;
+}
+
+.notification-btn:hover,
+.help-btn:hover {
+    background: #f3f4f6;
+    color: #3b82f6;
+}
+
+.notification-btn[data-badge]::after {
+    content: attr(data-badge);
+    position: absolute;
+    top: 4px;
+    right: 4px;
+    background: #ef4444;
+    color: white;
+    font-size: 10px;
+    font-weight: bold;
+    padding: 2px 4px;
+    border-radius: 10px;
+    min-width: 16px;
+    text-align: center;
+}
+
+.user-menu {
+    position: relative;
+}
+
+.user-menu-toggle {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    background: none;
+    border: none;
+    padding: 8px 12px;
+    cursor: pointer;
+    border-radius: 8px;
+    transition: background-color 0.2s ease;
+}
+
+.user-menu-toggle:hover {
+    background: #f3f4f6;
+}
+
+.user-avatar {
+    position: relative;
+    width: 36px;
+    height: 36px;
+}
+
+.avatar-img {
+    width: 100%;
+    height: 100%;
+    border-radius: 50%;
+    object-fit: cover;
+}
+
+.user-status {
+    position: absolute;
+    bottom: 0;
+    right: 0;
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+    border: 2px solid white;
+}
+
+.user-status.online {
+    background: #10b981;
+}
+
+.user-status.away {
+    background: #f59e0b;
+}
+
+.user-status.busy {
+    background: #ef4444;
+}
+
+.user-info {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+}
+
+.user-name {
+    font-size: 14px;
+    font-weight: 600;
+    color: #1f2937;
+    line-height: 1.2;
+}
+
+.user-role {
+    font-size: 12px;
+    color: #6b7280;
+    line-height: 1.2;
+}
+
+.dropdown-arrow {
+    color: #6b7280;
+    transition: transform 0.2s ease;
+}
+
+.user-menu.open .dropdown-arrow {
+    transform: rotate(180deg);
+}
+
+.user-dropdown {
+    position: absolute;
+    top: 100%;
+    right: 0;
+    background: white;
+    border: 1px solid #e5e7eb;
+    border-radius: 8px;
+    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+    min-width: 280px;
+    opacity: 0;
+    visibility: hidden;
+    transform: translateY(-10px);
+    transition: all 0.2s ease;
+    z-index: 1000;
+}
+
+.user-menu.open .user-dropdown {
+    opacity: 1;
+    visibility: visible;
+    transform: translateY(0);
+}
+
+.dropdown-header {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 16px;
+    border-bottom: 1px solid #f3f4f6;
+}
+
+.user-details .user-name {
+    font-weight: 600;
+    margin-bottom: 2px;
+}
+
+.user-details .user-email {
+    font-size: 12px;
+    color: #6b7280;
+    margin-bottom: 2px;
+}
+
+.user-details .user-role {
+    font-size: 11px;
+    color: #9ca3af;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.dropdown-divider {
+    height: 1px;
+    background: #f3f4f6;
+    margin: 4px 0;
+}
+
+.dropdown-item {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 12px 16px;
+    color: #374151;
+    text-decoration: none;
+    transition: background-color 0.2s ease;
+    border: none;
+    background: none;
+    width: 100%;
+    text-align: left;
+    font-size: 14px;
+    cursor: pointer;
+}
+
+.dropdown-item:hover {
+    background: #f9fafb;
+}
+
+.logout-btn {
+    color: #ef4444;
+}
+
+.logout-btn:hover {
+    background: #fef2f2;
+}
+
+/* Mobile Navigation */
+.mobile-nav {
+    display: none;
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    background: white;
+    border-top: 1px solid #e5e7eb;
+    z-index: 1000;
+}
+
+.mobile-nav-items {
+    display: flex;
+    justify-content: space-around;
+    align-items: center;
+    padding: 8px 0;
+}
+
+.mobile-nav-item {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 8px 12px;
+    text-decoration: none;
+    color: #6b7280;
+    font-size: 12px;
+    transition: color 0.2s ease;
+    min-width: 60px;
+}
+
+.mobile-nav-item:hover,
+.mobile-nav-item.active {
+    color: #3b82f6;
+}
+
+.mobile-nav-icon {
+    font-size: 20px;
+    margin-bottom: 4px;
+}
+
+/* Responsive Design */
+@media (max-width: 1024px) {
+    .header-center {
+        margin: 0 16px;
+    }
+}
+
+@media (max-width: 768px) {
+    .mobile-menu-toggle {
+        display: block;
+    }
+    
+    .header-center {
+        display: none;
+    }
+    
+    .user-info {
+        display: none;
+    }
+    
+    .mobile-nav {
+        display: block;
+    }
+    
+    .header-container {
+        padding: 0 16px;
+    }
+}
+
+@media (max-width: 480px) {
+    .header-actions {
+        gap: 8px;
+    }
+    
+    .notification-btn,
+    .help-btn {
+        padding: 6px;
+    }
+    
+    .user-menu-toggle {
+        padding: 6px 8px;
+    }
+    
+    .user-avatar {
+        width: 32px;
+        height: 32px;
+    }
+}
+</style>
+
+<script>
+// Header Component JavaScript
+document.addEventListener('DOMContentLoaded', function() {
+    const userMenuToggle = document.querySelector('.user-menu-toggle');
+    const userMenu = document.querySelector('.user-menu');
+    const mobileMenuToggle = document.querySelector('.mobile-menu-toggle');
+    
+    // User menu toggle
+    if (userMenuToggle && userMenu) {
+        userMenuToggle.addEventListener('click', function(e) {
+            e.stopPropagation();
+            userMenu.classList.toggle('open');
+        });
+        
+        // Close user menu when clicking outside
+        document.addEventListener('click', function() {
+            userMenu.classList.remove('open');
+        });
+        
+        userMenu.addEventListener('click', function(e) {
+            e.stopPropagation();
+        });
+    }
+    
+    // Mobile menu toggle (placeholder functionality)
+    if (mobileMenuToggle) {
+        mobileMenuToggle.addEventListener('click', function() {
+            // Emit custom event for mobile menu toggle
+            window.dispatchEvent(new CustomEvent('mobileMenuToggle'));
+        });
+    }
+    
+    // Search functionality
+    const searchInput = document.querySelector('.search-input');
+    const searchBtn = document.querySelector('.search-btn');
+    
+    if (searchInput && searchBtn) {
+        const performSearch = function() {
+            const query = searchInput.value.trim();
+            if (query) {
+                // Emit search event
+                window.dispatchEvent(new CustomEvent('globalSearch', { 
+                    detail: { query: query } 
+                }));
+            }
+        };
+        
+        searchBtn.addEventListener('click', performSearch);
+        searchInput.addEventListener('keypress', function(e) {
+            if (e.key === 'Enter') {
+                performSearch();
+            }
+        });
+    }
+    
+    // Logout functionality
+    const logoutBtn = document.querySelector('.logout-btn');
+    if (logoutBtn) {
+        logoutBtn.addEventListener('click', function() {
+            if (confirm('Are you sure you want to sign out?')) {
+                // Emit logout event
+                window.dispatchEvent(new CustomEvent('userLogout'));
+            }
+        });
+    }
+});
+</script>

@@ -692,11 +692,12 @@
   </style>
 
     <!-- Backend Integration Libraries -->
-    <script src="../../js/api-client.js"></script>
+    <script src="../../js/auth-api.js"></script>
+    <script src="../../js/admin-api.js"></script>
+    <script src="../../js/signalr-client.js"></script>
     <script src="../../js/auth-manager.js"></script>
     <script src="../shared/js/backend-integration-helper.js"></script>
     <script src="../shared/js/page-integration-template.js"></script>
-    <script src="https://unpkg.com/alpinejs@3.x.x/dist/cdn.min.js" defer></script></head>
 <body>
   <div class="dashboard-container">
     <!-- Sidebar -->
@@ -1010,7 +1011,7 @@
         async loadTenants() {
           try {
             this.loading = true;
-            const response = await window.operationsAPI.getTenants(
+            const response = await this.apiClient.request(getTenants(
               this.currentPage,
               this.itemsPerPage,
               this.searchQuery
@@ -1143,9 +1144,9 @@
         async saveTenant() {
           try {
             if (this.editingTenant) {
-              await window.operationsAPI.updateTenant(this.editingTenant.id, this.tenantForm);
+              await this.apiClient.request(`/tenants/this.editingTenant.id`, { method: 'PUT', body: JSON.stringify(this.tenantForm) });
             } else {
-              await window.operationsAPI.createTenant(this.tenantForm);
+              await this.apiClient.request('/tenants', { method: 'POST', body: JSON.stringify(this.tenantForm) });
             }
             
             this.closeTenantModal();
@@ -1220,12 +1221,12 @@
         
         handleLogout() {
           if (confirm('Are you sure you want to sign out?')) {
-            window.operationsAPI.clearAuthToken();
+            this.apiClient.request(clearAuthToken();
             window.location.href = '../../public/signin.html';
           }
         }
       }
     }
   </script>
-</body>
+    <script src="https://unpkg.com/alpinejs@3.x.x/dist/cdn.min.js" defer></script></body>
 </html>

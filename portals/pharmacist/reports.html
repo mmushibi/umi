@@ -1270,11 +1270,12 @@
   </style>
 
     <!-- Backend Integration Libraries -->
-    <script src="../../js/api-client.js"></script>
+    <script src="../../js/auth-api.js"></script>
+    <script src="../../js/admin-api.js"></script>
+    <script src="../../js/signalr-client.js"></script>
     <script src="../../js/auth-manager.js"></script>
     <script src="../shared/js/backend-integration-helper.js"></script>
     <script src="../shared/js/page-integration-template.js"></script>
-    <script src="https://unpkg.com/alpinejs@3.x.x/dist/cdn.min.js" defer></script></head>
 <body>
   <!-- Sidebar -->
   <aside class="sidebar" :class="sidebarOpen ? 'open' : ''">
@@ -1797,7 +1798,7 @@
           this.error = null;
           try {
             // Fetch comprehensive data from all pages
-            const comprehensiveData = await window.pharmacistApi.crossPageData.getComprehensiveData();
+            const comprehensiveData = await this.apiClient.request(crossPageData.getComprehensiveData();
             
             // Process inventory data for reports
             this.processInventoryData(comprehensiveData.inventory);
@@ -2002,7 +2003,7 @@
           this.loading = true;
           this.error = null;
           try {
-            const response = await window.pharmacistApi.reports.getReports({
+            const response = await this.apiClient.request(reports.getReports({
               period: this.reportPeriod,
               type: this.reportType,
               location: this.reportLocation
@@ -2019,7 +2020,7 @@
 
         async generateReport(reportData) {
           try {
-            const response = await window.pharmacistApi.reports.generateReport(reportData);
+            const response = await this.apiClient.request(reports.generateReport(reportData);
             const report = response.data;
             
             // Add to reports list
@@ -2082,7 +2083,7 @@
 
         async exportReport(reportId, format) {
           try {
-            const response = await window.pharmacistApi.reports.downloadReport(reportId, format);
+            const response = await this.apiClient.request(reports.downloadReport(reportId, format);
             
             // Create download link if file data is returned
             if (response.data && response.data.fileUrl) {
@@ -2312,7 +2313,7 @@
 
         async exportInventoryReport() {
           try {
-            const response = await window.pharmacistApi.reports.exportAnalytics('inventory', 'pdf', {
+            const response = await this.apiClient.request(reports.exportAnalytics('inventory', 'pdf', {
               period: this.reportPeriod
             });
             
@@ -2337,7 +2338,7 @@
 
         async exportCustomerInsights() {
           try {
-            const response = await window.pharmacistApi.reports.exportAnalytics('patient', 'pdf', {
+            const response = await this.apiClient.request(reports.exportAnalytics('patient', 'pdf', {
               period: this.reportPeriod
             });
             
@@ -2357,7 +2358,7 @@
 
         async exportChart(chartType) {
           try {
-            const response = await window.pharmacistApi.reports.exportAnalytics(chartType, 'png', {
+            const response = await this.apiClient.request(reports.exportAnalytics(chartType, 'png', {
               period: this.reportPeriod
             });
             
@@ -2377,7 +2378,7 @@
 
         async viewReport(reportId) {
           try {
-            const response = await window.pharmacistApi.reports.getReport(reportId);
+            const response = await this.apiClient.request(reports.getReport(reportId);
             const report = response.data;
             
             // Open report in new window or modal
@@ -2394,7 +2395,7 @@
 
         async downloadReport(reportId) {
           try {
-            const response = await window.pharmacistApi.reports.downloadReport(reportId, 'pdf');
+            const response = await this.apiClient.request(reports.downloadReport(reportId, 'pdf');
             
             if (response.data && response.data.fileUrl) {
               const link = document.createElement('a');
@@ -2412,7 +2413,7 @@
 
         async shareReport(reportId) {
           try {
-            const response = await window.pharmacistApi.reports.shareReport(reportId, {
+            const response = await this.apiClient.request(reports.shareReport(reportId, {
               shareMethod: 'link'
             });
             
@@ -2681,5 +2682,5 @@
   <script src="js/pharmacist-api.js"></script>
 
   <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
-</body>
+    <script src="https://unpkg.com/alpinejs@3.x.x/dist/cdn.min.js" defer></script></body>
 </html>

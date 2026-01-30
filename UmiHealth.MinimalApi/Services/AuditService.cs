@@ -9,6 +9,7 @@ public interface IAuditService
     void LogSuperAdminAction(string? userId, string? targetTenantId, string action, string resource, Dictionary<string, object>? details = null);
     void LogRoleEnforcement(string? userId, string role, string resource, bool allowed, string? reason = null);
     void LogCrossTenantAccess(string? userId, string sourceTenant, string targetTenant, string operation);
+    void LogAuthenticationEvent(string? userId, string? tenantId, string eventType, string? ipAddress = null, bool success = true, string? details = null);
 }
 
 public class AuditService : IAuditService
@@ -60,6 +61,23 @@ public class AuditService : IAuditService
         };
         _auditLog.Add(entry);
         System.Diagnostics.Debug.WriteLine($"[AUDIT] Cross-tenant operation: {operation} from {sourceTenant} to {targetTenant}");
+    }
+
+    public void LogAuthenticationEvent(string? userId, string? tenantId, string eventType, string? ipAddress = null, bool success = true, string? details = null)
+    {
+        var entry = new
+        {
+            Timestamp = DateTime.UtcNow,
+            Type = "AUTHENTICATION_EVENT",
+            UserId = userId,
+            TenantId = tenantId,
+            EventType = eventType,
+            IPAddress = ipAddress,
+            Success = success,
+            Details = details
+        };
+        _auditLog.Add(entry);
+        System.Diagnostics.Debug.WriteLine($"[AUDIT] Auth event: {eventType} for user {userId} - {(success ? "SUCCESS" : "FAILURE")}");
     }
 
     public IReadOnlyList<object> GetAuditLog() => _auditLog.AsReadOnly();

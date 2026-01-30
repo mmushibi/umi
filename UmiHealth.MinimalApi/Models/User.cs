@@ -50,6 +50,11 @@ namespace UmiHealth.MinimalApi.Models
         
         public DateTime? UpdatedAt { get; set; }
         
+        [MaxLength(500)]
+        public string? RefreshToken { get; set; }
+        
+        public DateTime? RefreshTokenExpiryTime { get; set; }
+        
         // Navigation property
         public Tenant Tenant { get; set; } = null!;
     }

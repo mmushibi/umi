@@ -14,6 +14,7 @@ RUN dotnet restore "UmiHealth.MinimalApi/UmiHealth.MinimalApi.csproj"
 # Copy everything else and build
 COPY UmiHealth.MinimalApi/. ./UmiHealth.MinimalApi/
 WORKDIR "/src/UmiHealth.MinimalApi"
+RUN dotnet restore "UmiHealth.MinimalApi.csproj"
 RUN dotnet build "UmiHealth.MinimalApi.csproj" -c Release -o /app/build --no-restore /p:TreatWarningsAsErrors=false
 
 # Build runtime image

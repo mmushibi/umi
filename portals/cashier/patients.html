@@ -1118,7 +1118,9 @@
   </style>
 
     <!-- Backend Integration Libraries -->
-    <script src="../../js/api-client.js"></script>
+    <script src="../../js/auth-api.js"></script>
+    <script src="../../js/admin-api.js"></script>
+    <script src="../../js/signalr-client.js"></script>
     <script src="../../js/auth-manager.js"></script>
     <script src="../shared/js/backend-integration-helper.js"></script>
     <script src="../shared/js/page-integration-template.js"></script></head>
@@ -1932,7 +1934,7 @@
   <!-- Alpine.js Component -->
   <script>
     // Initialize API client and data manager
-    const api = new window.CashierAPI();
+    const api = this.apiClient;
     const dataManager = window.umiDataManager || new UmiDataManager('cashier', '/api/patients');
     
     function patientSystem() {

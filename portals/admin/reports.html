@@ -1276,12 +1276,13 @@
   </style>
 
     <!-- Backend Integration Libraries -->
-    <script src="../../js/api-client.js"></script>
+    <script src="../../js/auth-api.js"></script>
+    <script src="../../js/admin-api.js"></script>
+    <script src="../../js/signalr-client.js"></script>
     <script src="../../js/auth-manager.js"></script>
     <script src="../shared/js/backend-integration-helper.js"></script>
     <script src="../shared/js/page-integration-template.js"></script>
     <script src="../shared/js/admin-api-client-init.js"></script>
-    <script src="https://unpkg.com/alpinejs@3.x.x/dist/cdn.min.js" defer></script></head>
 <body>
   <!-- Sidebar -->
   <aside class="sidebar" :class="sidebarOpen ? 'open' : ''">
@@ -2015,8 +2016,8 @@
 
         loadBranches() {
           // Load branches from API or data sync
-          if (window.adminAPI) {
-            window.adminAPI.getBranches()
+          if (this.apiClient) {
+            this.apiClient.request('/branches')
               .then(branches => {
                 this.availableBranches = branches;
               })
@@ -2137,7 +2138,7 @@
           }
 
           // Use adminAPI for backend integration
-          if (window.adminAPI) {
+          if (this.apiClient) {
             const scheduleData = {
               name: this.scheduledReport.name,
               type: this.scheduledReport.type,
@@ -2149,7 +2150,7 @@
               description: this.scheduledReport.description
             };
 
-            window.adminAPI.scheduleReport(scheduleData)
+            this.apiClient.request('/reports/schedule', { method: 'POST', body: JSON.stringify(scheduleData) })
               .then(response => {
                 const scheduledReport = {
                   id: response.id || Date.now(),
@@ -2201,8 +2202,8 @@
 
         loadScheduledReportsFromAPI() {
           // Load scheduled reports from API or localStorage
-          if (window.adminAPI) {
-            window.adminAPI.getScheduledReports()
+          if (this.apiClient) {
+            this.apiClient.request('/reports/scheduled')
               .then(reports => {
                 this.scheduledReports = reports;
               })
@@ -2281,8 +2282,8 @@
           this.loading = true;
           
           // Use adminAPI for backend integration
-          if (window.adminAPI) {
-            window.adminAPI.getReports()
+          if (this.apiClient) {
+            this.apiClient.request('/reports')
               .then(reports => {
                 this.reports = reports.map(r => ({
                   id: r.id,
@@ -2485,8 +2486,8 @@
         fetchFromAllBranches() {
           // Fetch data from all branches if multi-branch is enabled
           if (this.canManageBranches()) {
-            if (window.adminAPI) {
-              window.adminAPI.getBranches()
+            if (this.apiClient) {
+              this.apiClient.request('/branches')
                 .then(branches => {
                   branches.forEach(branch => {
                     this.fetchBranchData(branch.id);
@@ -2501,8 +2502,8 @@
 
         fetchBranchData(branchId) {
           // Fetch specific branch data
-          if (window.adminAPI) {
-            window.adminAPI.getBranchData(branchId)
+          if (this.apiClient) {
+            this.apiClient.request(`/branches/branchId`)
               .then(data => {
                 this.mergeBranchData(data);
               })
@@ -2644,7 +2645,7 @@
           }
 
           // Use adminAPI for backend integration
-          if (window.adminAPI) {
+          if (this.apiClient) {
             const reportData = {
               name: this.newReport.name,
               type: this.newReport.type,
@@ -2655,14 +2656,14 @@
               description: this.newReport.description
             };
 
-            window.adminAPI.generateReport(this.newReport.type, {
+            this.apiClient.request('/reports/this.newReport.type', { method: 'POST', body: JSON.stringify({
               name: this.newReport.name,
               startDate: this.newReport.startDate,
               endDate: this.newReport.endDate,
               format: this.newReport.format,
               email: this.newReport.email === 'yes',
               description: this.newReport.description
-            })
+            }) })
             .then(response => {
               const report = {
                 id: response.id || Date.now(),
@@ -2903,11 +2904,11 @@
 
         refreshRevenueChart() {
           // Use adminAPI to get fresh sales data
-          if (window.adminAPI) {
-            window.adminAPI.getSales({ 
+          if (this.apiClient) {
+            this.apiClient.request('/sales', { method: 'GET', params: { 
               period: this.reportPeriod,
               type: 'revenue' 
-            })
+            } })
             .then(salesData => {
               this.updateRevenueChart(salesData);
               this.showSuccess('Revenue chart refreshed successfully!');
@@ -2929,11 +2930,11 @@
 
         refreshTopProducts() {
           // Use adminAPI to get fresh product data
-          if (window.adminAPI) {
-            window.adminAPI.getInventory({ 
+          if (this.apiClient) {
+            this.apiClient.request('/inventory', { method: 'GET', params: { 
               sortBy: 'sales',
               limit: 10 
-            })
+            } })
             .then(products => {
               this.topProducts = products.map(p => ({
                 name: p.name,
@@ -2959,8 +2960,8 @@
 
         refreshInventoryMetrics() {
           // Use adminAPI to get fresh inventory data
-          if (window.adminAPI) {
-            window.adminAPI.getInventory()
+          if (this.apiClient) {
+            this.apiClient.request('/inventory', { method: 'GET', params:  })
               .then(inventory => {
                 // Update inventory metrics
                 this.updateInventoryMetrics(inventory);
@@ -2983,10 +2984,10 @@
 
         refreshCustomerInsights() {
           // Use adminAPI to get fresh patient data
-          if (window.adminAPI) {
-            window.adminAPI.getPatients({ 
+          if (this.apiClient) {
+            this.apiClient.request('/patients', { method: 'GET', params: { 
               period: this.reportPeriod 
-            })
+            } })
             .then(patients => {
               this.updateCustomerMetrics(patients);
               this.showSuccess('Customer insights refreshed successfully!');
@@ -3020,8 +3021,8 @@
           console.log('Downloading report:', reportId);
           
           // Use adminAPI for backend integration
-          if (window.adminAPI) {
-            window.adminAPI.downloadReport(reportId)
+          if (this.apiClient) {
+            this.apiClient.request(`/reports/download/reportId`)
               .then(blob => {
                 // Create download link
                 const url = window.URL.createObjectURL(blob);
@@ -3257,5 +3258,5 @@
   </script>
 
   <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
-</body>
+    <script src="https://unpkg.com/alpinejs@3.x.x/dist/cdn.min.js" defer></script></body>
 </html>

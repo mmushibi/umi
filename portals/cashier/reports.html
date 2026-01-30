@@ -11,11 +11,12 @@
   <link rel="stylesheet" href="css/reports.css">
   
     <!-- Backend Integration Libraries -->
-    <script src="../../js/api-client.js"></script>
+    <script src="../../js/auth-api.js"></script>
+    <script src="../../js/admin-api.js"></script>
+    <script src="../../js/signalr-client.js"></script>
     <script src="../../js/auth-manager.js"></script>
     <script src="../shared/js/backend-integration-helper.js"></script>
     <script src="../shared/js/page-integration-template.js"></script>
-    <script src="https://unpkg.com/alpinejs@3.x.x/dist/cdn.min.js" defer></script></head>
 <body>
   <!-- Sidebar -->
   <aside class="sidebar" :class="sidebarOpen ? 'open' : ''">
@@ -564,7 +565,7 @@
             
           } catch (error) {
             console.error('Error loading report data:', error);
-            window.cashierAPI.handleError(error, 'loadReportData');
+            console.error(`Error in 'loadReportData':`, error);
           }
         },
 
@@ -579,7 +580,7 @@
               });
             } else {
               // Fallback to direct API call
-              summaryData = await window.cashierAPI.getReportSummary({
+              summaryData = await this.apiClient.request(getReportSummary({
                 startDate: this.filters.dateFrom,
                 endDate: this.filters.dateTo,
                 reportType: 'summary'
@@ -599,7 +600,7 @@
             this.summary = summaryData;
           } catch (error) {
             console.error('Error loading summary data:', error);
-            window.cashierAPI.handleError(error, 'loadSummaryData');
+            console.error(`Error in 'loadSummaryData':`, error);
             // Set empty values when API fails
             this.summary = {
               totalSales: 0,
@@ -639,7 +640,7 @@
             this.salesData = salesData;
           } catch (error) {
             console.error('Error loading sales data:', error);
-            window.cashierAPI.handleError(error, 'loadSalesData');
+            console.error(`Error in 'loadSalesData':`, error);
             this.salesData = [];
           } finally {
             this.loading.sales = false;
@@ -656,7 +657,7 @@
             this.inventoryData = inventoryData;
           } catch (error) {
             console.error('Error loading inventory data:', error);
-            window.cashierAPI.handleError(error, 'loadInventoryData');
+            console.error(`Error in 'loadInventoryData':`, error);
             this.inventoryData = [];
           } finally {
             this.loading.inventory = false;
@@ -673,7 +674,7 @@
             this.patientData = patientData;
           } catch (error) {
             console.error('Error loading patient data:', error);
-            window.cashierAPI.handleError(error, 'loadPatientData');
+            console.error(`Error in 'loadPatientData':`, error);
             this.patientData = [];
           } finally {
             this.loading.patients = false;
@@ -727,7 +728,7 @@
 
         async exportReport(reportType, format) {
           try {
-            const blob = await window.cashierAPI.exportReport(reportType, format, this.filters);
+            const blob = await this.apiClient.request('/reports/export', { method: 'POST', body: JSON.stringify({ reportType: reportType, format: format, ...this.filters }) });
             
             // Create download link
             const url = window.URL.createObjectURL(blob);
@@ -742,7 +743,7 @@
             this.showNotification(`Report exported as ${format.toUpperCase()} successfully`, 'success');
           } catch (error) {
             console.error('Error exporting report:', error);
-            window.cashierAPI.handleError(error, 'exportReport');
+            console.error(`Error in 'exportReport':`, error);
             this.showNotification('Failed to export report. Please try again.', 'error');
           }
         },
@@ -804,7 +805,7 @@
           localStorage.removeItem('activeReportTab');
           
           // Call logout API
-          window.cashierAPI.logout()
+          this.apiClient.request('/auth/logout', { method: 'POST' })
             .then(() => {
               // Redirect to login page
               window.location.href = '../../public/signin.html';
@@ -838,5 +839,5 @@
 </script>
 
   <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
-</body>
+    <script src="https://unpkg.com/alpinejs@3.x.x/dist/cdn.min.js" defer></script></body>
 </html>

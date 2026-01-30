@@ -951,11 +951,12 @@
   </style>
 
     <!-- Backend Integration Libraries -->
-    <script src="../../js/api-client.js"></script>
+    <script src="../../js/auth-api.js"></script>
+    <script src="../../js/admin-api.js"></script>
+    <script src="../../js/signalr-client.js"></script>
     <script src="../../js/auth-manager.js"></script>
     <script src="../shared/js/backend-integration-helper.js"></script>
     <script src="../shared/js/page-integration-template.js"></script>
-    <script src="https://unpkg.com/alpinejs@3.x.x/dist/cdn.min.js" defer></script></head>
 <body>
   <!-- Sidebar -->
   <aside class="sidebar" :class="sidebarOpen ? 'open' : ''">
@@ -1564,13 +1565,13 @@
           try {
             // Load user profile
             this.loading.profile = true;
-            const profile = await window.cashierAPI.getUserProfile();
+            const profile = await this.apiClient.request('/auth/profile');
             this.updateProfile(profile);
             this.loading.profile = false;
             
             // Load notification settings
             this.loading.notifications = true;
-            const notificationSettings = await window.cashierAPI.getNotificationSettings();
+            const notificationSettings = await this.apiClient.request(getNotificationSettings();
             this.updateNotifications(notificationSettings);
             this.loading.notifications = false;
             
@@ -1581,7 +1582,7 @@
             
           } catch (error) {
             console.error('Error loading account data:', error);
-            window.cashierAPI.handleError(error, 'loadAccountData');
+            console.error(`Error in 'loadAccountData':`, error);
             // Reset loading states on error
             this.loading.profile = false;
             this.loading.notifications = false;
@@ -1592,15 +1593,15 @@
         async loadSecurityData() {
           try {
             // Load password info
-            const passwordInfo = await window.cashierAPI.getPasswordInfo();
+            const passwordInfo = await this.apiClient.request(getPasswordInfo();
             this.passwordInfo = passwordInfo;
             
             // Load 2FA status
-            const twoFactorStatus = await window.cashierAPI.getTwoFactorStatus();
+            const twoFactorStatus = await this.apiClient.request(getTwoFactorStatus();
             this.twoFactorEnabled = twoFactorStatus.enabled;
             
             // Load sessions
-            const sessions = await window.cashierAPI.getLoginSessions();
+            const sessions = await this.apiClient.request(getLoginSessions();
             this.sessions = sessions;
             
           } catch (error) {
@@ -1826,7 +1827,7 @@
               return;
             }
             
-            await window.cashierAPI.sendTwoFactorCode({
+            await this.apiClient.request(sendTwoFactorCode({
               method: method,
               destination: destination
             });
@@ -1844,7 +1845,7 @@
             
           } catch (error) {
             console.error('Error sending verification code:', error);
-            window.cashierAPI.handleError(error, 'sendVerificationCode');
+            console.error(`Error in 'sendVerificationCode':`, error);
             this.showNotification('Failed to send verification code. Please try again.', 'error');
           }
         },
@@ -1858,7 +1859,7 @@
                 return;
               }
               
-              await window.cashierAPI.disableTwoFactor({
+              await this.apiClient.request(disableTwoFactor({
                 password: this.twoFactorForm.password
               });
               
@@ -1875,7 +1876,7 @@
               const method = this.twoFactorForm.method;
               const destination = method === 'email' ? this.profile.email : this.profile.phone;
               
-              await window.cashierAPI.enableTwoFactor({
+              await this.apiClient.request(enableTwoFactor({
                 method: method,
                 destination: destination,
                 code: this.twoFactorForm.code
@@ -1889,10 +1890,10 @@
             this.twoFactorForm = { method: 'email', code: '', password: '', cooldown: 0 };
             
             // Notify tenant admin about 2FA change
-            await window.cashierAPI.notifyUserChange({
+            await this.apiClient.request(notifyUserChange({
                 type: '2fa_change',
-                userId: window.cashierAPI.getUserId(),
-                tenantId: window.cashierAPI.getTenantId(),
+                userId: this.getUserId(),
+                tenantId: this.getTenantId(),
                 enabled: this.twoFactorEnabled,
                 method: this.twoFactorEnabled ? method : null,
                 timestamp: new Date().toISOString()
@@ -1900,14 +1901,14 @@
             
           } catch (error) {
             console.error('Error toggling 2FA:', error);
-            window.cashierAPI.handleError(error, 'confirmTwoFactor');
+            console.error(`Error in 'confirmTwoFactor':`, error);
             this.showNotification('Failed to update two-factor authentication. Please try again.', 'error');
           }
         },
         
         async revokeSession(sessionId) {
           try {
-            await window.cashierAPI.revokeSession(sessionId);
+            await this.apiClient.request(revokeSession(sessionId);
             
             // Remove session from list
             this.sessions = this.sessions.filter(s => s.id !== sessionId);
@@ -1915,24 +1916,24 @@
             this.showNotification('Session revoked successfully', 'success');
             
             // Notify about session revocation
-            await window.cashierAPI.notifyUserChange({
+            await this.apiClient.request(notifyUserChange({
                 type: 'session_revoked',
                 sessionId: sessionId,
-                userId: window.cashierAPI.getUserId(),
-                tenantId: window.cashierAPI.getTenantId(),
+                userId: this.getUserId(),
+                tenantId: this.getTenantId(),
                 timestamp: new Date().toISOString()
             });
             
           } catch (error) {
             console.error('Error revoking session:', error);
-            window.cashierAPI.handleError(error, 'revokeSession');
+            console.error(`Error in 'revokeSession':`, error);
             this.showNotification('Failed to revoke session. Please try again.', 'error');
           }
         },
         
         async revokeAllSessions() {
           try {
-            await window.cashierAPI.revokeAllSessions();
+            await this.apiClient.request(revokeAllSessions();
             
             // Reload sessions to show only current session
             await this.loadSecurityData();
@@ -1940,16 +1941,16 @@
             this.showNotification('All other sessions revoked successfully', 'success');
             
             // Notify about mass session revocation
-            await window.cashierAPI.notifyUserChange({
+            await this.apiClient.request(notifyUserChange({
                 type: 'all_sessions_revoked',
-                userId: window.cashierAPI.getUserId(),
-                tenantId: window.cashierAPI.getTenantId(),
+                userId: this.getUserId(),
+                tenantId: this.getTenantId(),
                 timestamp: new Date().toISOString()
             });
             
           } catch (error) {
             console.error('Error revoking all sessions:', error);
-            window.cashierAPI.handleError(error, 'revokeAllSessions');
+            console.error(`Error in 'revokeAllSessions':`, error);
             this.showNotification('Failed to revoke sessions. Please try again.', 'error');
           }
         },
@@ -1959,7 +1960,7 @@
           localStorage.removeItem('activeSection');
           
           // Call logout API
-          window.cashierAPI.logout()
+          this.apiClient.request('/auth/logout', { method: 'POST' })
             .then(() => {
               // Redirect to login page
               window.location.href = '../../public/signin.html';
@@ -1998,5 +1999,5 @@
 </script>
 
   <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
-</body>
+    <script src="https://unpkg.com/alpinejs@3.x.x/dist/cdn.min.js" defer></script></body>
 </html>

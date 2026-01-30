@@ -740,11 +740,12 @@
   </style>
 
     <!-- Backend Integration Libraries -->
-    <script src="../../js/api-client.js"></script>
+    <script src="../../js/auth-api.js"></script>
+    <script src="../../js/admin-api.js"></script>
+    <script src="../../js/signalr-client.js"></script>
     <script src="../../js/auth-manager.js"></script>
     <script src="../shared/js/backend-integration-helper.js"></script>
     <script src="../shared/js/page-integration-template.js"></script>
-    <script src="https://unpkg.com/alpinejs@3.x.x/dist/cdn.min.js" defer></script></head>
 <body>
   <div class="dashboard-container">
     <aside class="sidebar" :class="{ 'open': mobileMenuOpen }">
@@ -1196,7 +1197,7 @@
             this.loading = true;
             
             // Load subscriptions
-            const subscriptionsResponse = await window.operationsAPI.getSubscriptions(
+            const subscriptionsResponse = await this.apiClient.request(getSubscriptions(
               this.currentPage,
               this.itemsPerPage,
               this.searchQuery
@@ -1207,7 +1208,7 @@
             this.totalPages = subscriptionsResponse.totalPages || 0;
             
             // Load tenants for dropdown
-            const tenantsResponse = await window.operationsAPI.getTenants(1, 100);
+            const tenantsResponse = await this.apiClient.request(getTenants(1, 100);
             this.tenants = tenantsResponse.data || [];
             
           } catch (error) {
@@ -1311,7 +1312,7 @@
         async saveSubscription() {
           try {
             if (this.editingSubscription) {
-              await window.operationsAPI.updateSubscription(this.editingSubscription.id, this.subscriptionForm);
+              await this.apiClient.request(`/subscriptions/this.editingSubscription.id`, { method: 'PUT', body: JSON.stringify(this.subscriptionForm) });
             } else {
               // Create new subscription logic would go here
               console.log('Creating new subscription:', this.subscriptionForm);
@@ -1348,7 +1349,7 @@
               targetPlan: subscription.plan === 'Care' ? 'Care Plus' : subscription.plan === 'Care Plus' ? 'Care Pro' : 'Care Pro'
             };
             
-            await window.operationsAPI.upgradeSubscription(subscription.id, upgradeData);
+            await this.apiClient.request(upgradeSubscription(subscription.id, upgradeData);
             alert('Subscription upgraded successfully!');
             await this.loadData();
           } catch (error) {
@@ -1453,5 +1454,5 @@
   <script src="../admin/js/admin-api.js"></script>
   <script src="js/operations-api.js"></script>
 
-</body>
+    <script src="https://unpkg.com/alpinejs@3.x.x/dist/cdn.min.js" defer></script></body>
 </html>
