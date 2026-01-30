@@ -24,6 +24,8 @@ using System.Text;
 
 using System.Text.Json;
 
+using BCrypt.Net;
+
 
 
 var builder = WebApplication.CreateBuilder(args);
@@ -1481,76 +1483,6 @@ app.MapGet("/api/v1/admin/auth/me", async (HttpContext httpContext, UmiHealthDbC
 
 
 
-// Update user profile
-
-app.MapPut("/api/v1/admin/profile", async (HttpContext httpContext, UpdateProfileRequest request, UmiHealthDbContext context) =>
-
-{
-
-    try
-
-    {
-
-        var userId = httpContext.User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
-
-        if (string.IsNullOrEmpty(userId))
-
-        {
-
-            return Results.Unauthorized();
-
-        }
-
-
-
-        var user = await context.Users.FindAsync(userId);
-
-        if (user == null)
-
-        {
-
-            return Results.NotFound(new { success = false, message = "User not found" });
-
-        }
-
-
-
-        // Update user profile
-
-        user.FirstName = request.FirstName ?? user.FirstName;
-
-        user.LastName = request.LastName ?? user.LastName;
-
-        user.Email = request.Email ?? user.Email;
-
-        user.PhoneNumber = request.PhoneNumber ?? user.PhoneNumber;
-
-        user.Bio = request.Bio ?? user.Bio;
-
-        user.UpdatedAt = DateTime.UtcNow;
-
-
-
-        await context.SaveChangesAsync();
-
-
-
-        return Results.Ok(new { success = true, message = "Profile updated successfully" });
-
-    }
-
-    catch (Exception ex)
-
-    {
-
-        return Results.BadRequest(new { success = false, message = ex.Message });
-
-    }
-
-});
-
-
-
 // Get tenant information
 
 app.MapGet("/api/v1/admin/tenant", async (HttpContext httpContext, UmiHealthDbContext context) =>
@@ -1630,167 +1562,6 @@ app.MapGet("/api/v1/admin/tenant", async (HttpContext httpContext, UmiHealthDbCo
 });
 
 
-
-// Update pharmacy settings
-
-app.MapPut("/api/v1/admin/pharmacy/settings", async (HttpContext httpContext, PharmacySettingsRequest request, UmiHealthDbContext context) =>
-
-{
-
-    try
-
-    {
-
-        var tenantId = httpContext.User.FindFirst("tenant_id")?.Value;
-
-        if (string.IsNullOrEmpty(tenantId))
-
-        {
-
-            return Results.Unauthorized();
-
-        }
-
-
-
-        var tenant = await context.Tenants.FindAsync(tenantId);
-
-        if (tenant == null)
-
-        {
-
-            return Results.NotFound(new { success = false, message = "Tenant not found" });
-
-        }
-
-
-
-        // Update tenant information
-
-        tenant.Name = request.Name ?? tenant.Name;
-
-        tenant.Email = request.Email ?? tenant.Email;
-
-        tenant.PhoneNumber = request.PhoneNumber ?? tenant.PhoneNumber;
-
-        tenant.Address = request.Address ?? tenant.Address;
-
-        tenant.City = request.City ?? tenant.City;
-
-        tenant.Province = request.Province ?? tenant.Province;
-
-        tenant.PostalCode = request.PostalCode ?? tenant.PostalCode;
-
-        tenant.LicenseNumber = request.LicenseNumber ?? tenant.LicenseNumber;
-
-        tenant.UpdatedAt = DateTime.UtcNow;
-
-
-
-        await context.SaveChangesAsync();
-
-
-
-        return Results.Ok(new { success = true, message = "Pharmacy settings updated successfully" });
-
-    }
-
-    catch (Exception ex)
-
-    {
-
-        return Results.BadRequest(new { success = false, message = ex.Message });
-
-    }
-
-});
-
-
-
-// Change password
-
-app.MapPost("/api/v1/admin/auth/change-password", async (HttpContext httpContext, ChangePasswordRequest request, UmiHealthDbContext context) =>
-
-{
-
-    try
-
-    {
-
-        var userId = httpContext.User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
-
-        if (string.IsNullOrEmpty(userId))
-
-        {
-
-            return Results.Unauthorized();
-
-        }
-
-
-
-        if (request.NewPassword != request.ConfirmPassword)
-
-        {
-
-            return Results.BadRequest(new { success = false, message = "Passwords do not match" });
-
-        }
-
-
-
-        var user = await context.Users.FindAsync(userId);
-
-        if (user == null)
-
-        {
-
-            return Results.NotFound(new { success = false, message = "User not found" });
-
-        }
-
-
-
-        // Verify current password (simple check for demo - in production, use proper hashing)
-
-        if (user.Password != request.CurrentPassword)
-
-        {
-
-            return Results.BadRequest(new { success = false, message = "Current password is incorrect" });
-
-        }
-
-
-
-        // Update password
-
-        user.Password = request.NewPassword; // In production, hash this
-
-        user.UpdatedAt = DateTime.UtcNow;
-
-
-
-        await context.SaveChangesAsync();
-
-
-
-        return Results.Ok(new { success = true, message = "Password changed successfully" });
-
-    }
-
-    catch (Exception ex)
-
-    {
-
-        return Results.BadRequest(new { success = false, message = ex.Message });
-
-    }
-
-});
-
-
-
 // Get notification settings
 
 app.MapGet("/api/v1/admin/notification/settings", async (HttpContext httpContext, UmiHealthDbContext context) =>
@@ -1830,46 +1601,6 @@ app.MapGet("/api/v1/admin/notification/settings", async (HttpContext httpContext
 
 
         return Results.Ok(new { success = true, data = settings });
-
-    }
-
-    catch (Exception ex)
-
-    {
-
-        return Results.BadRequest(new { success = false, message = ex.Message });
-
-    }
-
-});
-
-
-
-// Update notification settings
-
-app.MapPut("/api/v1/admin/notification/settings", async (HttpContext httpContext, NotificationSettingsRequest request, UmiHealthDbContext context) =>
-
-{
-
-    try
-
-    {
-
-        var userId = httpContext.User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
-
-        if (string.IsNullOrEmpty(userId))
-
-        {
-
-            return Results.Unauthorized();
-
-        }
-
-
-
-        // For now, just return success (in production, save to database)
-
-        return Results.Ok(new { success = true, message = "Notification settings saved successfully" });
 
     }
 
@@ -2352,18 +2083,29 @@ app.MapPut("/api/v1/admin/users/{userId}", async (string userId, UpdateProfileRe
 });
 
 // Change password endpoint for admin
-app.MapPost("/api/v1/admin/auth/change-password", async (ChangePasswordRequest request, UmiHealthDbContext context) =>
+app.MapPost("/api/v1/admin/auth/change-password", async (HttpContext httpContext, ChangePasswordRequest request, UmiHealthDbContext context) =>
 {
     try
     {
-        var user = await context.Users.FirstOrDefaultAsync(u => u.Id == request.UserId);
+        var userId = httpContext.User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+        if (string.IsNullOrEmpty(userId))
+        {
+            return Results.Ok(new { success = false, message = "User not authenticated" });
+        }
+
+        var user = await context.Users.FirstOrDefaultAsync(u => u.Id == userId);
         if (user == null)
         {
             return Results.Ok(new { success = false, message = "User not found" });
         }
 
-        // In a real implementation, you would verify the current password
-        // For admin bypass, we'll just update the password
+        // Verify current password
+        if (!BCrypt.Net.BCrypt.Verify(request.CurrentPassword, user.Password))
+        {
+            return Results.Ok(new { success = false, message = "Current password is incorrect" });
+        }
+
+        // Update password
         user.Password = BCrypt.Net.BCrypt.HashPassword(request.NewPassword);
         user.UpdatedAt = DateTime.UtcNow;
         
