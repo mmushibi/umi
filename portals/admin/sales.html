@@ -11,6 +11,7 @@
   <script src="https://cdn.tailwindcss.com"></script>
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
   <link rel="stylesheet" href="../shared/css/shared-styles.css">
+  <link rel="stylesheet" href="css/common-inline-styles.css">
   <script src="../shared/js/data-sync.js"></script>
   <script src="../shared/js/role-based-access.js"></script>
   <script src="../admin/js/admin-api.js"></script>
@@ -864,9 +865,9 @@
     <!-- Sales Content -->
     <div class="sales-content" :class="loading ? 'loading' : ''">
       <!-- Loading Indicator -->
-      <div x-show="loading" class="loading-overlay" style="position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(255,255,255,0.8); display: flex; align-items: center; justify-content: center; z-index: 9998;">
+      <div x-show="loading" class="loading-overlay">
         <div class="loading-spinner"></div>
-        <span style="margin-left: 1rem;">Loading sales data...</span>
+        <span>Loading sales data...</span>
       </div>
       <!-- Stats Grid -->
       <div class="stats-grid">
@@ -1043,15 +1044,14 @@
   <!-- Alpine.js Component -->
       <script>
         function salesSystem() {
+          // Initialize backend integration
+          const pageIntegration = new PageIntegrationTemplate('admin-sales', {
+              requireAuth: true,
+              enableRealTime: true,
+              enableCaching: true
+          });
+          
           return {
-        // Initialize backend integration
-        const pageIntegration = new PageIntegrationTemplate('admin-sales', {
-            requireAuth: true,
-            enableRealTime: true,
-            enableCaching: true
-        });
-        
-        return {
             ...pageIntegration,
             backendHelper: window.backendHelper,
             apiClient: window.apiClient,
@@ -1079,6 +1079,17 @@
             totalTransactions: 0,
             pendingTransactions: 0,
             averageSale: 0,
+            
+            // Computed Properties
+            get filteredSales() {
+              if (!this.searchQuery) return this.sales;
+              
+              return this.sales.filter(sale => 
+                sale.receiptNumber.toLowerCase().includes(this.searchQuery.toLowerCase()) ||
+                sale.customer.toLowerCase().includes(this.searchQuery.toLowerCase()) ||
+                sale.paymentMethod.toLowerCase().includes(this.searchQuery.toLowerCase())
+              );
+            },
             
             // Data loading methods
             async loadSalesData() {
@@ -1118,9 +1129,6 @@
               // No fallback - API required for real data
               this.sales = [];
               console.warn('Local storage fallback removed - API required');
-                status: s.status || 'completed',
-                amount: s.totalAmount || s.amount || 0
-              }));
               
               this.updateSalesMetrics();
               this.updateCharts();
@@ -1255,36 +1263,7 @@
           }, 5000);
         },
 
-        get filteredSales() {
-          if (!this.searchQuery) return this.sales;
-          
-          return this.sales.filter(sale => 
-            sale.receiptNumber.toLowerCase().includes(this.searchQuery.toLowerCase()) ||
-            sale.customer.toLowerCase().includes(this.searchQuery.toLowerCase()) ||
-            sale.paymentMethod.toLowerCase().includes(this.searchQuery.toLowerCase())
-          );
-        },
-
-        get todayRevenue() {
-          const today = new Date().toISOString().split('T')[0];
-          return this.sales
-            .filter(sale => sale.date.startsWith(today) && sale.status === 'completed')
-            .reduce((total, sale) => total + sale.amount, 0);
-        },
-
-        get totalTransactions() {
-          return this.sales.filter(sale => sale.status === 'completed').length;
-        },
-
-        get pendingTransactions() {
-          return this.sales.filter(sale => sale.status === 'pending').length;
-        },
-
-        get averageSale() {
-          const completedSales = this.sales.filter(sale => sale.status === 'completed');
-          if (completedSales.length === 0) return 0;
-          return completedSales.reduce((total, sale) => total + sale.amount, 0) / completedSales.length;
-        },
+        // Computed properties should be at the top level, not inside methods
 
         viewSale(sale) {
           // Show sale details in a modal or navigate to detail page

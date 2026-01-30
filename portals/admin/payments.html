@@ -10,6 +10,7 @@
   <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Rounded:wght@300;400;500;600;700&display=swap" rel="stylesheet">
   <script src="https://cdn.tailwindcss.com"></script>
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <link rel="stylesheet" href="css/common-inline-styles.css">
   <style>
     :root {
       --color-primary: #000000;
@@ -1722,7 +1723,7 @@
           </label>
           
           <!-- Invoice Items -->
-          <div class="invoice-items-section" style="grid-column: 1 / -1;">
+          <div class="invoice-items-section grid-span-all">
             <h3>Invoice Items</h3>
             <div id="invoiceItems">
               <div class="invoice-item">
@@ -1742,7 +1743,7 @@
           </div>
           
           <!-- Totals -->
-          <div class="invoice-totals" style="grid-column: 1 / -1;">
+          <div class="invoice-totals grid-span-all">
             <div class="total-row">
               <span>Subtotal:</span>
               <span id="invoiceSubtotal">ZMW 0.00</span>
@@ -1757,7 +1758,7 @@
             </div>
           </div>
           
-          <label class="form-textarea" style="grid-column: 1 / -1;">
+          <label class="form-textarea grid-span-all">
             <span>Notes</span>
             <textarea id="invoiceNotes" rows="3" placeholder="Additional notes or terms"></textarea>
           </label>
@@ -1805,7 +1806,7 @@
           </label>
           
           <!-- Quotation Items -->
-          <div class="quotation-items-section" style="grid-column: 1 / -1;">
+          <div class="quotation-items-section grid-span-all">
             <h3>Quotation Items</h3>
             <div id="quotationItems">
               <div class="quotation-item">
@@ -1825,7 +1826,7 @@
           </div>
           
           <!-- Totals -->
-          <div class="quotation-totals" style="grid-column: 1 / -1;">
+          <div class="quotation-totals grid-span-all">
             <div class="total-row">
               <span>Subtotal:</span>
               <span id="quotationSubtotal">ZMW 0.00</span>
@@ -1840,7 +1841,7 @@
             </div>
           </div>
           
-          <label class="form-textarea" style="grid-column: 1 / -1;">
+          <label class="form-textarea grid-span-all">
             <span>Terms & Conditions</span>
             <textarea id="quotationTerms" rows="3" placeholder="Enter terms and conditions"></textarea>
           </label>
@@ -1883,12 +1884,12 @@
             <input type="number" id="creditAmount" placeholder="0.00" step="0.01" min="0" required>
           </label>
           
-          <label class="form-textarea" style="grid-column: 1 / -1;">
+          <label class="form-textarea grid-span-all">
             <span>Reason for Credit</span>
             <textarea id="creditReason" rows="3" placeholder="Explain the reason for this credit note" required></textarea>
           </label>
           
-          <label class="form-textarea" style="grid-column: 1 / -1;">
+          <label class="form-textarea grid-span-all">
             <span>Notes</span>
             <textarea id="creditNotes" rows="2" placeholder="Additional notes"></textarea>
           </label>
@@ -1939,12 +1940,12 @@
             <input type="date" id="dateOfService" required>
           </label>
           
-          <label class="form-textarea" style="grid-column: 1 / -1;">
+          <label class="form-textarea grid-span-all">
             <span>Diagnosis/Service Details</span>
             <textarea id="diagnosisDetails" rows="3" placeholder="Enter diagnosis and service details" required></textarea>
           </label>
           
-          <label class="form-textarea" style="grid-column: 1 / -1;">
+          <label class="form-textarea grid-span-all">
             <span>Additional Notes</span>
             <textarea id="claimNotes" rows="2" placeholder="Additional claim information"></textarea>
           </label>
@@ -1999,7 +2000,6 @@
   <!-- Alpine.js Component -->
   <script>
     function paymentSystem() {
-      return {
         // Initialize backend integration
         const pageIntegration = new PageIntegrationTemplate('admin-payments', {
             requireAuth: true,
@@ -2154,7 +2154,7 @@
                 console.error('Failed to initialize admin-payments page:', error);
                 this.error = 'Failed to initialize page';
             }
-        },,
+        },
 
         // Load pharmacy info from localStorage
         loadPharmacyInfo() {
@@ -3038,6 +3038,7 @@
         }
       }
     }
+  }
   </script>
 
   <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>

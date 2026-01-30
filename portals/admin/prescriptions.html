@@ -7,6 +7,7 @@
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
   <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap">
   <link rel="stylesheet" href="https://fonts.googleapis.com/icon?family=Material+Symbols+Rounded:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200" />
+  <link rel="stylesheet" href="css/common-inline-styles.css">
   <style>
     :root {
       --color-primary: #000000;
@@ -1794,15 +1795,14 @@
   <!-- Alpine.js Component - Must be defined before main script -->
   <script>
     function prescriptionSystem() {
+      // Initialize backend integration
+      const pageIntegration = new PageIntegrationTemplate('admin-prescriptions', {
+          requireAuth: true,
+          enableRealTime: true,
+          enableCaching: true
+      });
+      
       return {
-        // Initialize backend integration
-        const pageIntegration = new PageIntegrationTemplate('admin-prescriptions', {
-            requireAuth: true,
-            enableRealTime: true,
-            enableCaching: true
-        });
-        
-        return {
             ...pageIntegration,
             backendHelper: window.backendHelper,
             apiClient: window.apiClient,
@@ -1979,7 +1979,7 @@
               <input type="text" id="formRecipientPharmacy" name="recipientPharmacy" placeholder="Pharmacy name or ID">
             </label>
           </div>
-          <div id="eprescribeStatus" class="eprescribe-status" style="display: none;">
+          <div id="eprescribeStatus" class="eprescribe-status">
             <span class="material-symbols-rounded">info</span>
             <span id="eprescribeStatusText">Not sent</span>
           </div>
@@ -2006,7 +2006,7 @@
               <input type="number" id="formLabelQuantity" name="labelQuantity" min="1" max="5" value="1">
             </label>
           </div>
-          <div class="label-preview" id="labelPreview" style="display: none;">
+          <div class="label-preview" id="labelPreview">
             <div class="label-header">PRESCRIPTION LABEL</div>
             <div class="label-content" id="labelContent"></div>
             <div class="label-footer">Umi Health Pharmacy • Lusaka, Zambia</div>
@@ -2020,9 +2020,9 @@
         </label>
 
         <!-- Drug Interaction Check Section -->
-        <div class="drug-interaction-section" id="drugInteractionSection" style="display: none;">
+        <div class="drug-interaction-section" id="drugInteractionSection">
           <h4 class="form-section-title">
-            <span class="material-symbols-rounded" style="color: var(--color-warning);">warning</span>
+            <span class="material-symbols-rounded color-warning">warning</span>
             Drug Interaction Alerts (DUR)
           </h4>
           <div id="interactionAlerts" class="interaction-alerts"></div>
@@ -2141,7 +2141,7 @@
             </select>
           </label>
         </div>
-        <div id="reportResults" class="report-results" style="display: none;">
+        <div id="reportResults" class="report-results">
           <h4>Report Results</h4>
           <div id="reportContent"></div>
         </div>
@@ -2524,60 +2524,6 @@
       // Medications will be loaded from inventory API
       let medications = [];
       
-      // Initialize
-      async function async init() {
-            try {
-                // Check authentication
-                this.isAuthenticated = this.authManager?.isAuthenticated() || false;
-                
-                if (!this.isAuthenticated) {
-                    this.error = 'Please login to access this page';
-                    return;
-                }
-                
-                // Initialize backend integration
-                await this.backendHelper.initPage('admin-prescriptions', {
-                    enableRealTime: true,
-                    initialData: this.getInitialDataConfig()
-                });
-                
-                // Load page data
-                await this.loadPageData();
-                
-                // Set up event listeners
-                this.setupEventListeners();
-                
-                console.log('admin-prescriptions page initialized with backend integration');
-            } catch (error) {
-                console.error('Failed to initialize admin-prescriptions page:', error);
-                this.error = 'Failed to initialize page';
-            }
-        },
-
-        try {
-          await Promise.all([
-            loadSampleData(),
-            loadMedicationsFromInventory()
-          ]);
-          populateMedicationDropdown();
-          updateStatCounts();
-          renderPrescriptionTable();
-          setupEventListeners();
-          
-          // Setup auto-save
-          dataManager.setupAutoSave();
-          
-          // Add sync button to header (only in authenticated mode)
-          if (userStr && userStr !== 'undefined' && userStr !== 'null') {
-            addSyncButton();
-          }
-          
-          const mode = (!userStr || userStr === 'undefined' || userStr === 'null') ? 'Demo' : 'Authenticated';
-          console.log(`Prescription system initialized successfully (${mode} Mode)`);
-        } catch (error) {
-          console.error('Failed to initialize prescription system:', error);
-        }
-      }
       
       // Load prescription data with shared data manager
       async function loadSampleData() {

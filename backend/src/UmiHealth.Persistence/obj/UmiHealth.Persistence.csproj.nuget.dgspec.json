@@ -1,17 +1,17 @@
 {
   "format": 1,
   "restore": {
-    "C:\\Users\\sepio\\Desktop\\Umi_Health\\backend\\src\\UmiHealth.Persistence\\UmiHealth.Persistence.csproj": {}
+    "c:\\Users\\sepio\\Desktop\\Umi_Health\\backend\\src\\UmiHealth.Persistence\\UmiHealth.Persistence.csproj": {}
   },
   "projects": {
-    "C:\\Users\\sepio\\Desktop\\Umi_Health\\backend\\src\\UmiHealth.Persistence\\UmiHealth.Persistence.csproj": {
+    "c:\\Users\\sepio\\Desktop\\Umi_Health\\backend\\src\\UmiHealth.Persistence\\UmiHealth.Persistence.csproj": {
       "version": "1.0.0",
       "restore": {
-        "projectUniqueName": "C:\\Users\\sepio\\Desktop\\Umi_Health\\backend\\src\\UmiHealth.Persistence\\UmiHealth.Persistence.csproj",
+        "projectUniqueName": "c:\\Users\\sepio\\Desktop\\Umi_Health\\backend\\src\\UmiHealth.Persistence\\UmiHealth.Persistence.csproj",
         "projectName": "UmiHealth.Persistence",
-        "projectPath": "C:\\Users\\sepio\\Desktop\\Umi_Health\\backend\\src\\UmiHealth.Persistence\\UmiHealth.Persistence.csproj",
+        "projectPath": "c:\\Users\\sepio\\Desktop\\Umi_Health\\backend\\src\\UmiHealth.Persistence\\UmiHealth.Persistence.csproj",
         "packagesPath": "C:\\Users\\sepio\\.nuget\\packages\\",
-        "outputPath": "C:\\Users\\sepio\\Desktop\\Umi_Health\\backend\\src\\UmiHealth.Persistence\\obj\\",
+        "outputPath": "c:\\Users\\sepio\\Desktop\\Umi_Health\\backend\\src\\UmiHealth.Persistence\\obj\\",
         "projectStyle": "PackageReference",
         "configFilePaths": [
           "C:\\Users\\sepio\\AppData\\Roaming\\NuGet\\NuGet.Config"
@@ -37,8 +37,7 @@
           "enableAudit": "true",
           "auditLevel": "low",
           "auditMode": "direct"
-        },
-        "SdkAnalysisLevel": "10.0.100"
+        }
       },
       "frameworks": {
         "net8.0": {
@@ -59,7 +58,7 @@
               "privateAssets": "all"
             }
           },
-          "runtimeIdentifierGraphPath": "C:\\Program Files\\dotnet\\sdk\\10.0.100/PortableRuntimeIdentifierGraph.json"
+          "runtimeIdentifierGraphPath": "C:\\Program Files\\dotnet\\sdk\\8.0.416/PortableRuntimeIdentifierGraph.json"
         }
       }
     }

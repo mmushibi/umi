@@ -10,6 +10,7 @@
   <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Rounded:wght@300;400;500;600;700&display=swap" rel="stylesheet">
   <script src="https://cdn.tailwindcss.com"></script>
   <link rel="stylesheet" href="../shared/css/shared-styles.css">
+  <link rel="stylesheet" href="css/common-inline-styles.css">
   <script src="../shared/js/data-sync.js"></script>
   <script src="../shared/js/role-based-access.js"></script>
   <script src="../shared/js/feature-protection.js"></script>
@@ -1306,9 +1307,9 @@
               </thead>
               <tbody id="patientsTableBody">
                 <tr>
-                  <td colspan="9" style="text-align: center; padding: 40px;">
-                    <span class="material-symbols-rounded" style="font-size: 48px; color: var(--gray-400); margin-bottom: 16px; display: block;">people</span>
-                    <p style="color: var(--gray-500); margin: 0;">Loading patient data...</p>
+                  <td colspan="9" class="text-center p-40px">
+                    <span class="material-symbols-rounded fs-48px color-gray-400 mb-1-6rem d-block">people</span>
+                    <p class="color-gray-500 m-0">Loading patient data...</p>
                   </td>
                 </tr>
               </tbody>
@@ -1664,29 +1665,29 @@
       <div class="modal-body">
         <div class="csv-import-instructions">
           <h4>Import Instructions:</h4>
-          <ol style="margin-left: 1.5rem; color: #6b7280; font-size: 0.875rem;">
+          <ol class="csv-import-instructions-list">
             <li>Download the CSV template using the button below</li>
             <li>Fill in patient information following the template format</li>
             <li>Upload the completed CSV file</li>
             <li>Review and confirm the import</li>
           </ol>
-          <button class="secondary-button" id="downloadTemplateBtn" style="margin-top: 1rem;">
+          <button class="secondary-button mt-1rem" id="downloadTemplateBtn">
             <span class="material-symbols-rounded">download</span>
             Download CSV Template
           </button>
         </div>
         
-        <div class="csv-import-area" id="csvDropZone" style="margin-top: 1.5rem;">
-          <span class="material-symbols-rounded" style="font-size: 48px; color: #9ca3af; margin-bottom: 1rem;">upload_file</span>
-          <h4 style="margin-bottom: 0.5rem;">Drop CSV file here or click to browse</h4>
-          <p style="color: #6b7280; font-size: 0.875rem;">Supported format: .csv (Maximum 1000 records)</p>
-          <input type="file" id="csvFileInput" accept=".csv" style="display: none;">
+        <div class="csv-import-area" id="csvDropZone">
+          <span class="material-symbols-rounded fs-48px color-gray-700 mb-1rem">upload_file</span>
+          <h4 class="mb-0-5rem">Drop CSV file here or click to browse</h4>
+          <p class="color-gray-600 fs-0-875rem">Supported format: .csv (Maximum 1000 records)</p>
+          <input type="file" id="csvFileInput" accept=".csv" class="d-none">
         </div>
         
-        <div id="csvPreview" style="display: none; margin-top: 1.5rem;">
+        <div id="csvPreview" class="csv-preview">
           <h4>Preview (First 5 rows)</h4>
-          <div id="csvPreviewTable" style="max-height: 300px; overflow: auto; border: 1px solid #e5e7eb; border-radius: 8px; margin-top: 0.75rem;"></div>
-          <p id="csvStats" style="margin-top: 0.75rem; color: #6b7280; font-size: 0.875rem;"></p>
+          <div id="csvPreviewTable" class="csv-preview-table"></div>
+          <p id="csvStats" class="csv-stats"></p>
         </div>
       </div>
       <footer class="modal-footer">
@@ -1735,11 +1736,11 @@
             <input type="date" id="allergyDate" name="allergyDate">
           </label>
         </div>
-        <label class="form-textarea" style="margin-top: 1rem;">
+        <label class="form-textarea form-textarea-margin-top">
           <span>Reaction Description *</span>
           <textarea id="allergyReaction" name="reaction" rows="3" placeholder="Describe the allergic reaction..." required></textarea>
         </label>
-        <label class="form-textarea" style="margin-top: 1rem;">
+        <label class="form-textarea form-textarea-margin-top">
           <span>Notes</span>
           <textarea id="allergyNotes" name="notes" rows="2" placeholder="Additional notes or treatment recommendations..."></textarea>
         </label>
@@ -1814,7 +1815,7 @@
             </select>
           </label>
         </div>
-        <label class="form-textarea" style="margin-top: 1rem;">
+        <label class="form-textarea form-textarea-margin-top">
           <span>Instructions</span>
           <textarea id="medicationInstructions" name="instructions" rows="3" placeholder="e.g., Take with food, twice daily after meals..."></textarea>
         </label>
@@ -1881,7 +1882,7 @@
             </select>
           </label>
         </div>
-        <label class="form-textarea" style="margin-top: 1rem;">
+        <label class="form-textarea form-textarea-margin-top">
           <span>Notes</span>
           <textarea id="vaccineNotes" name="notes" rows="3" placeholder="Additional notes, side effects, or observations..."></textarea>
         </label>
@@ -1897,20 +1898,19 @@
   <!-- Alpine.js Component -->
   <script>
     function patientSystem() {
+      // Initialize backend integration
+      const pageIntegration = new PageIntegrationTemplate('admin-patients', {
+          requireAuth: true,
+          enableRealTime: true,
+          enableCaching: true
+      });
+      
       return {
-        // Initialize backend integration
-        const pageIntegration = new PageIntegrationTemplate('admin-patients', {
-            requireAuth: true,
-            enableRealTime: true,
-            enableCaching: true
-        });
-        
-        return {
-            ...pageIntegration,
-            backendHelper: window.backendHelper,
-            apiClient: window.apiClient,
-            authManager: window.authManager,
-            isAuthenticated: false,
+          ...pageIntegration,
+          backendHelper: window.backendHelper,
+          apiClient: window.apiClient,
+          authManager: window.authManager,
+          isAuthenticated: false,
             loading: false,
             error: null,
         sidebarOpen: false,
@@ -2314,7 +2314,7 @@
                 console.error('Failed to initialize admin-patients page:', error);
                 this.error = 'Failed to initialize page';
             }
-        },, 30000);
+        }, 30000);
           
           // Save to localStorage on any change
           this.$watch('patients', () => {
