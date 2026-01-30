@@ -2100,3 +2100,9 @@ app.MapHub<UmiHealthHub>("/umiHealthHub");
 
 app.Run();
 
+// Public Program class for integration test accessibility
+namespace UmiHealth.MinimalApi
+{
+    public partial class Program { }
+}
+
