@@ -2078,11 +2078,21 @@
   </style>
 
     <!-- Backend Integration Libraries -->
-    <script src="../../js/api-client.js"></script>
-    <script src="../../js/auth-manager.js"></script>
-    <script src="../shared/js/backend-integration-helper.js"></script>
-    <script src="../shared/js/page-integration-template.js"></script>
-    <script src="../shared/js/admin-api-client-init.js"></script>
+    <link rel="stylesheet" href="../../shared/css/shared-styles.css">
+  <script src="../../shared/js/data-sync.js"></script>
+  <script src="../../shared/js/role-based-access.js"></script>
+  <script src="../../shared/js/feature-protection.js"></script>
+  <script src="js/admin-api.js"></script>
+  
+  <!-- New UI Components -->
+  <script src="../../js/components/DataTable.js"></script>
+  <script src="../../js/components/FormValidator.js"></script>
+  <script src="../../js/components/Modal.js"></script>
+  <script src="../../js/components/NotificationSystem.js"></script>
+  <link rel="stylesheet" href="../../shared/css/enhanced-components.css">
+  <link rel="stylesheet" href="../../shared/css/portal-themes.css">
+  <link rel="stylesheet" href="../../shared/css/responsive-design.css">
+  <script src="../shared/js/admin-api-client-init.js"></script>
     <script src="https://unpkg.com/alpinejs@3.x.x/dist/cdn.min.js" defer></script></head>
 <body>
   <!-- Sidebar -->
@@ -3105,9 +3115,126 @@
             backendHelper: window.backendHelper,
             apiClient: window.apiClient,
             authManager: window.authManager,
+            adminAPI: window.adminAPI,
             isAuthenticated: false,
             loading: false,
             error: null,
+            
+            // API Integration Methods
+            async loadInventory() {
+                this.loading = true;
+                try {
+                    if (window.adminAPI) {
+                        const response = await window.adminAPI.getInventory();
+                        this.products = response.data || response || [];
+                        this.updateMetrics();
+                        this.showNotification('Inventory loaded successfully', 'success');
+                    }
+                } catch (error) {
+                    console.error('Failed to load inventory:', error);
+                    this.showNotification('Failed to load inventory', 'error');
+                } finally {
+                    this.loading = false;
+                }
+            },
+            
+            async createProduct(productData) {
+                try {
+                    if (window.adminAPI) {
+                        const response = await window.adminAPI.createInventoryItem(productData);
+                        this.products.push(response);
+                        this.updateMetrics();
+                        this.showNotification('Product created successfully', 'success');
+                        return response;
+                    }
+                } catch (error) {
+                    console.error('Failed to create product:', error);
+                    this.showNotification('Failed to create product', 'error');
+                    throw error;
+                }
+            },
+            
+            async updateProduct(productId, productData) {
+                try {
+                    if (window.adminAPI) {
+                        const response = await window.adminAPI.updateInventory(productId, productData);
+                        const index = this.products.findIndex(p => p.id === productId);
+                        if (index !== -1) {
+                            this.products[index] = response;
+                        }
+                        this.updateMetrics();
+                        this.showNotification('Product updated successfully', 'success');
+                        return response;
+                    }
+                } catch (error) {
+                    console.error('Failed to update product:', error);
+                    this.showNotification('Failed to update product', 'error');
+                    throw error;
+                }
+            },
+            
+            async deleteProduct(productId) {
+                try {
+                    if (window.adminAPI) {
+                        await window.adminAPI.deleteInventory(productId);
+                        this.products = this.products.filter(p => p.id !== productId);
+                        this.updateMetrics();
+                        this.showNotification('Product deleted successfully', 'success');
+                    }
+                } catch (error) {
+                    console.error('Failed to delete product:', error);
+                    this.showNotification('Failed to delete product', 'error');
+                    throw error;
+                }
+            },
+            
+            async searchInventory(searchTerm) {
+                try {
+                    if (window.adminAPI) {
+                        const response = await window.adminAPI.searchInventory(searchTerm);
+                        this.products = response.data || response || [];
+                    }
+                } catch (error) {
+                    console.error('Failed to search inventory:', error);
+                    this.showNotification('Failed to search inventory', 'error');
+                }
+            },
+            
+            async updateStock(productId, quantity, operation) {
+                try {
+                    if (window.adminAPI) {
+                        await window.adminAPI.updateStock(productId, quantity, operation);
+                        await this.loadInventory(); // Reload to get updated data
+                        this.showNotification('Stock updated successfully', 'success');
+                    }
+                } catch (error) {
+                    console.error('Failed to update stock:', error);
+                    this.showNotification('Failed to update stock', 'error');
+                    throw error;
+                }
+            },
+            
+            updateMetrics() {
+                this.totalProducts = this.products.length;
+                this.lowStockItems = this.products.filter(p => p.currentStock <= p.minStockLevel).length;
+                this.outOfStockItems = this.products.filter(p => p.currentStock === 0).length;
+                this.expiringItems = this.products.filter(p => {
+                    if (!p.expiryDate) return false;
+                    const expiryDate = new Date(p.expiryDate);
+                    const thirtyDaysFromNow = new Date();
+                    thirtyDaysFromNow.setDate(thirtyDaysFromNow.getDate() + 30);
+                    return expiryDate <= thirtyDaysFromNow;
+                }).length;
+            },
+            
+            showNotification(message, type = 'info') {
+                if (window.NotificationSystem) {
+                    const notificationSystem = NotificationSystem.getInstance();
+                    notificationSystem[type](message);
+                } else {
+                    alert(message);
+                }
+            },
         sidebarOpen: false,
         searchQuery: '',
         showFilterMenu: false,
@@ -3184,6 +3311,9 @@
             try {
                 // Check authentication
                 this.isAuthenticated = this.authManager?.isAuthenticated() || false;
+                
+                // Load inventory data
+                await this.loadInventory();
                 
                 if (!this.isAuthenticated) {
                     this.error = 'Please login to access this page';

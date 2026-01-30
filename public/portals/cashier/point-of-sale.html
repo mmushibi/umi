@@ -9,6 +9,20 @@
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@100;400;500;600;700&family=Varela+Round&family=Nunito:wght@400;600;700&display=swap" rel="stylesheet">
   <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Rounded:wght@300;400;500;600;700&display=swap" rel="stylesheet">
   <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="stylesheet" href="../../shared/css/shared-styles.css">
+  <script src="../../shared/js/data-sync.js"></script>
+  <script src="../../shared/js/role-based-access.js"></script>
+  <script src="../../shared/js/feature-protection.js"></script>
+  <script src="js/cashier-api.js"></script>
+  
+  <!-- New UI Components -->
+  <script src="../../js/components/DataTable.js"></script>
+  <script src="../../js/components/FormValidator.js"></script>
+  <script src="../../js/components/Modal.js"></script>
+  <script src="../../js/components/NotificationSystem.js"></script>
+  <link rel="stylesheet" href="../../shared/css/enhanced-components.css">
+  <link rel="stylesheet" href="../../shared/css/portal-themes.css">
+  <link rel="stylesheet" href="../../shared/css/responsive-design.css">
   <style>
     :root {
       --color-primary: #000000;
@@ -2564,43 +2578,6 @@
         }
       }
       
-      // Initialize
-      function async init() {
-            try {
-                // Check authentication
-                this.isAuthenticated = this.authManager?.isAuthenticated() || false;
-                
-                if (!this.isAuthenticated) {
-                    this.error = 'Please login to access this page';
-                    return;
-                }
-                
-                // Initialize backend integration
-                await this.backendHelper.initPage('cashier-point-of-sale', {
-                    enableRealTime: true,
-                    initialData: this.getInitialDataConfig()
-                });
-                
-                // Load page data
-                await this.loadPageData();
-                
-                // Set up event listeners
-                this.setupEventListeners();
-                
-                console.log('cashier-point-of-sale page initialized with backend integration');
-            } catch (error) {
-                console.error('Failed to initialize cashier-point-of-sale page:', error);
-                this.error = 'Failed to initialize page';
-            }
-        },
-        });
-        
-        // Add event listeners for report buttons
-        const printReportBtn = document.getElementById('printReportBtn');
-        const generateReportBtn = document.getElementById('generateReportBtn');
-        
-        printReportBtn?.addEventListener('click', () => {
-          const posData = window.Alpine?.evaluate(document.querySelector('[x-data]'), 'posSystem()');
           if (posData && posData.printReport) {
             posData.printReport();
           }
@@ -2646,9 +2623,89 @@
             backendHelper: window.backendHelper,
             apiClient: window.apiClient,
             authManager: window.authManager,
+            cashierAPI: window.cashierAPI,
             isAuthenticated: false,
             loading: false,
             error: null,
+            
+            // API Integration Methods
+            async loadProducts() {
+                this.loading = true;
+                try {
+                    if (window.cashierAPI) {
+                        const response = await window.cashierAPI.getInventory();
+                        this.products = response.data || response || [];
+                        this.showNotification('Products loaded successfully', 'success');
+                    }
+                } catch (error) {
+                    console.error('Failed to load products:', error);
+                    this.showNotification('Failed to load products', 'error');
+                } finally {
+                    this.loading = false;
+                }
+            },
+            
+            async createSale(saleData) {
+                try {
+                    if (window.cashierAPI) {
+                        const response = await window.cashierAPI.createSale(saleData);
+                        this.transactionId++;
+                        this.showNotification('Sale completed successfully', 'success');
+                        return response;
+                    }
+                } catch (error) {
+                    console.error('Failed to create sale:', error);
+                    this.showNotification('Failed to process sale', 'error');
+                    throw error;
+                }
+            },
+            
+            async loadTransactions() {
+                try {
+                    if (window.cashierAPI) {
+                        const response = await window.cashierAPI.getSales();
+                        this.recentTransactions = response.data || response || [];
+                    }
+                } catch (error) {
+                    console.error('Failed to load transactions:', error);
+                    this.showNotification('Failed to load transactions', 'error');
+                }
+            },
+            
+            async processPayment(paymentData) {
+                try {
+                    if (window.cashierAPI) {
+                        const response = await window.cashierAPI.processPayment(paymentData);
+                        this.showNotification('Payment processed successfully', 'success');
+                        return response;
+                    }
+                } catch (error) {
+                    console.error('Failed to process payment:', error);
+                    this.showNotification('Payment failed', 'error');
+                    throw error;
+                }
+            },
+            
+            async searchProducts(searchTerm) {
+                try {
+                    if (window.cashierAPI) {
+                        const response = await window.cashierAPI.searchInventory(searchTerm);
+                        return response.data || response || [];
+                    }
+                } catch (error) {
+                    console.error('Failed to search products:', error);
+                    return [];
+                }
+            },
+            
+            showNotification(message, type = 'info') {
+                if (window.NotificationSystem) {
+                    const notificationSystem = NotificationSystem.getInstance();
+                    notificationSystem[type](message);
+                } else {
+                    alert(message);
+                }
+            },
         sidebarOpen: false,
         searchQuery: '',
         searchSuggestions: [],
@@ -2671,6 +2728,34 @@
           initials: (localStorage.getItem('umi_user_name') || 'Admin User').split(' ').map(n => n[0]).join('').toUpperCase()
         },
         products: [],
+        
+        // Initialize method
+        async init() {
+            try {
+                // Check authentication
+                this.isAuthenticated = this.authManager?.isAuthenticated() || false;
+                
+                // Load products
+                await this.loadProducts();
+                
+                // Load transactions
+                await this.loadTransactions();
+                
+                if (!this.isAuthenticated) {
+                    this.error = 'Please login to access this page';
+                    return;
+                }
+                
+                // Initialize backend integration
+                await this.backendHelper.initPage('cashier-point-of-sale', {
+                    enableRealTime: true,
+                    initialData: this.getInitialDataConfig()
+                });
+            } catch (error) {
+                console.error('Initialization error:', error);
+                this.error = 'Failed to initialize page';
+            }
+        },
 
         get filteredSuggestions() {
           if (!this.searchQuery || this.searchQuery.length < 2) {
