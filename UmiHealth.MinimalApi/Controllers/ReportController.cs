@@ -162,7 +162,7 @@ public class ReportController : ControllerBase
         }
 
         var pdfData = await _reportService.ExportReportToPdfAsync(reportId);
-        return File(pdfData, "application/pdf", $"{report.Title}.pdf");
+        return File(pdfData, "application/pdf", $"{report.ReportName}.pdf");
     }
 
     [HttpGet("{reportId}/export/excel")]
@@ -181,7 +181,7 @@ public class ReportController : ControllerBase
         }
 
         var excelData = await _reportService.ExportReportToExcelAsync(reportId);
-        return File(excelData, "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet", $"{report.Title}.xlsx");
+        return File(excelData, "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet", $"{report.ReportName}.xlsx");
     }
 }
 

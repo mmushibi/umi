@@ -48,7 +48,7 @@ public class InventoryService : IInventoryService
                 inventory.TenantId,
                 "INVENTORY_CREATED",
                 "Inventory",
-                new Dictionary<string, object> { ["InventoryId"] = inventory.Id, ["Name"] = inventory.Name, ["Quantity"] = inventory.Quantity }
+                new Dictionary<string, object> { ["InventoryId"] = inventory.Id, ["Name"] = inventory.ProductName, ["Quantity"] = inventory.CurrentStock }
             );
 
             return (true, "Inventory item created successfully", inventory);
@@ -111,7 +111,7 @@ public class InventoryService : IInventoryService
                 inventory.TenantId,
                 "INVENTORY_DELETED",
                 "Inventory",
-                new Dictionary<string, object> { ["InventoryId"] = inventoryId, ["Name"] = inventory.Name }
+                new Dictionary<string, object> { ["InventoryId"] = inventoryId, ["Name"] = inventory.ProductName }
             );
 
             return (true, "Inventory item deleted successfully");
@@ -192,9 +192,9 @@ public class InventoryService : IInventoryService
                 new Dictionary<string, object> 
                 { 
                     ["InventoryId"] = inventoryId, 
-                    ["Name"] = inventory.Name,
+                    ["Name"] = inventory.ProductName,
                     ["OriginalQuantity"] = originalQuantity,
-                    ["NewQuantity"] = inventory.Quantity,
+                    ["NewQuantity"] = inventory.CurrentStock,
                     ["Operation"] = operation,
                     ["Quantity"] = quantity
                 }

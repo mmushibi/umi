@@ -185,8 +185,8 @@ public class UserService : IUserService
     public async Task<List<User>> GetUsersByTenantAsync(string tenantId)
     {
         return await _context.Users
-            .Where(u => u.TenantId == tenantId && u.IsActive)
-            .OrderBy(u => u.FullName)
+            .Where(u => u.TenantId == tenantId && u.Status == "active")
+            .OrderBy(u => u.FirstName + " " + u.LastName)
             .ToListAsync();
     }
 

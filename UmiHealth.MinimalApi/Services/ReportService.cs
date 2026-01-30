@@ -22,7 +22,6 @@ public class ReportService : IReportService
         {
             var sales = await _context.Sales
                 .Where(s => s.TenantId == tenantId && s.CreatedAt >= startDate && s.CreatedAt <= endDate)
-                .Include(s => s.SaleItems)
                 .ToListAsync();
 
             var reportData = new
@@ -30,11 +29,7 @@ public class ReportService : IReportService
                 TotalSales = sales.Count,
                 TotalRevenue = sales.Sum(s => s.TotalAmount),
                 AverageSaleValue = sales.Any() ? sales.Average(s => s.TotalAmount) : 0,
-                TopSellingItems = sales.SelectMany(s => s.SaleItems)
-                    .GroupBy(si => si.InventoryId)
-                    .Select(g => new { ItemId = g.Key, Quantity = g.Sum(si => si.Quantity), Revenue = g.Sum(si => si.TotalPrice) })
-                    .OrderByDescending(x => x.Quantity)
-                    .Take(10),
+                TopSellingItems = new List<object>(), // TODO: Implement when SaleItems is available
                 DailySales = sales.GroupBy(s => s.CreatedAt.Date)
                     .Select(g => new { Date = g.Key, Sales = g.Count(), Revenue = g.Sum(s => s.TotalAmount) })
                     .OrderBy(x => x.Date)
@@ -135,11 +130,13 @@ public class ReportService : IReportService
                 PatientsWithAllergies = patients.Count(p => !string.IsNullOrWhiteSpace(p.Allergies)),
                 TotalPrescriptions = prescriptions.Count,
                 PrescriptionsThisMonth = prescriptions.Count(p => p.CreatedAt >= DateTime.UtcNow.AddDays(-30)),
-                AgeDistribution = patients.GroupBy(p => CalculateAge(p.DateOfBirth))
+                AgeDistribution = patients.Where(p => !string.IsNullOrWhiteSpace(p.DateOfBirth))
+                    .GroupBy(p => CalculateAge(DateTime.TryParse(p.DateOfBirth, out var dob) ? dob : (DateTime?)null))
                     .Select(g => new { AgeGroup = GetAgeGroup(g.Key), Count = g.Count() })
                     .OrderBy(x => x.AgeGroup),
-                GenderDistribution = patients.GroupBy(p => p.Gender)
+                GenderDistribution = patients.GroupBy(p => p.Gender ?? "Unknown")
                     .Select(g => new { Gender = g.Key, Count = g.Count() })
+                    .ToList()
             };
 
             var report = new Report
