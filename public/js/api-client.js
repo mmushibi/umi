@@ -560,7 +560,7 @@ class ApiClient {
 
 // Create global instance
 const apiClient = new ApiClient(
-    window.API_BASE_URL || 'http://localhost:5000/api/v1'
+    window.API_BASE_URL || 'http://localhost:5001/api/v1'
 );
 
 // Export for use in modules

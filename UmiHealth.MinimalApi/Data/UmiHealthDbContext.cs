@@ -9,6 +9,14 @@ namespace UmiHealth.MinimalApi.Data
         {
         }
 
+        protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
+        {
+            if (!optionsBuilder.IsConfigured)
+            {
+                optionsBuilder.UseSqlite("Data Source=umihealth.db");
+            }
+        }
+
         public DbSet<User> Users { get; set; } = null!;
         public DbSet<Tenant> Tenants { get; set; } = null!;
         public DbSet<Patient> Patients { get; set; } = null!;

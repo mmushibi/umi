@@ -11,7 +11,15 @@
   <script src="https://cdn.tailwindcss.com"></script>
   <script src="https://unpkg.com/alpinejs@3.x.x/dist/cdn.min.js" defer></script>
   <link rel="stylesheet" href="css/pharmacist-styles.css">
-  <script src="../js/api-client.js"></script>
+  <script src="../../js/api-client.js"></script>
+  <script src="../../js/auth-manager.js"></script>
+  <script src="../shared/js/backend-integration-helper.js"></script>
+  <script src="../shared/js/page-integration-template.js"></script>
+  <link rel="stylesheet" href="../shared/css/shared-styles.css">
+  <script src="../shared/js/data-sync.js"></script>
+  <script src="../shared/js/role-based-access.js"></script>
+  <script src="../shared/js/feature-protection.js"></script>
+  <script src="../shared/js/portal-data-sync.js"></script>
   <style>
     :root {
       --color-primary: #000000;
@@ -1171,16 +1179,12 @@
         <span class="mobile-title">Inventory</span>
       </div>
       <div class="header-right">
-        <div x-show="isDemoMode" class="demo-indicator">
-          <span class="material-symbols-rounded">info</span>
-          <span>Demo Mode</span>
-        </div>
-        <div x-show="!isDemoMode" class="sync-indicator" x-show="showRealTimeIndicator">
+        <div class="sync-indicator" x-show="showRealTimeIndicator">
           <span class="material-symbols-rounded">sync</span>
           <span>Syncing...</span>
         </div>
         <div style="display: flex; gap: 0.5rem;">
-          <button x-show="!isDemoMode" class="btn btn-secondary" @click="refreshWithSync()" title="Manual Sync">
+          <button class="btn btn-secondary" @click="refreshWithSync()" title="Manual Sync">
             <span class="material-symbols-rounded">sync</span>
             <span>Sync</span>
           </button>
@@ -1910,7 +1914,7 @@
         showItemDetailsModal: false,
         showRealTimeIndicator: false,
         selectedItem: null,
-        isDemoMode: !apiClient.isAuthenticated(),
+        isDemoMode: false,
         searchQuery: '',
         selectedCategory: '',
         stockStatus: '',
@@ -2022,33 +2026,21 @@
           this.loadInventory();
           this.checkAlerts();
           
-          // Start real-time sync for authenticated mode
-          if (!this.isDemoMode) {
-            this.startRealTimeSync();
-          }
+        // Start real-time sync
+        this.startRealTimeSync();
         },
 
         // API Methods
         async loadInventory() {
           try {
-            if (this.isDemoMode) {
-              // Demo mode: Load from localStorage or use empty array
-              const storedInventory = localStorage.getItem('demo_inventory');
-              if (storedInventory) {
-                this.inventory = JSON.parse(storedInventory);
-              } else {
-                this.inventory = [];
-              }
+            // Load from API
+            const response = await apiClient.getInventory();
+            if (response.success) {
+              this.inventory = response.data || [];
             } else {
-              // Authenticated mode: Load from API
-              const response = await apiClient.getInventory();
-              if (response.success) {
-                this.inventory = response.data || [];
-              } else {
-                console.error('Failed to load inventory:', response.message);
-                this.showNotification('Failed to load inventory', 'error');
-                this.inventory = [];
-              }
+              console.error('Failed to load inventory:', response.message);
+              this.showNotification('Failed to load inventory', 'error');
+              this.inventory = [];
             }
           } catch (error) {
             console.error('Error loading inventory:', error);
@@ -2059,44 +2051,19 @@
 
         async saveItem() {
           try {
-            if (this.isDemoMode) {
-              // Demo mode: Save to localStorage
-              if (this.newItem.id) {
-                // Update existing item
-                const index = this.inventory.findIndex(item => item.id === this.newItem.id);
-                if (index > -1) {
-                  this.inventory[index] = { ...this.newItem, updatedAt: new Date().toISOString() };
-                }
-              } else {
-                // Create new item
-                const newItem = {
-                  ...this.newItem,
-                  id: Date.now().toString(),
-                  createdAt: new Date().toISOString(),
-                  updatedAt: new Date().toISOString()
-                };
-                this.inventory.push(newItem);
-              }
-              
-              // Save to localStorage
-              localStorage.setItem('demo_inventory', JSON.stringify(this.inventory));
-              this.showNotification(this.newItem.id ? 'Item updated successfully (Demo Mode)' : 'Item added successfully (Demo Mode)', 'success');
-              
+            // Save to API
+            let response;
+            if (this.newItem.id) {
+              response = await apiClient.updateProduct(this.newItem.id, this.newItem);
             } else {
-              // Authenticated mode: Save to API
-              let response;
-              if (this.newItem.id) {
-                response = await apiClient.updateProduct(this.newItem.id, this.newItem);
-              } else {
-                response = await apiClient.createProduct(this.newItem);
-              }
+              response = await apiClient.createProduct(this.newItem);
+            }
 
-              if (response.success) {
-                this.showNotification(this.newItem.id ? 'Item updated successfully' : 'Item added successfully', 'success');
-              } else {
-                this.showNotification(response.message || 'Failed to save item', 'error');
-                return;
-              }
+            if (response.success) {
+              this.showNotification(this.newItem.id ? 'Item updated successfully' : 'Item added successfully', 'success');
+            } else {
+              this.showNotification(response.message || 'Failed to save item', 'error');
+              return;
             }
 
             this.showAddItemModal = false;
@@ -2112,25 +2079,14 @@
         async deleteItem(item) {
           if (confirm(`Are you sure you want to delete ${item.genericName}?`)) {
             try {
-              if (this.isDemoMode) {
-                // Demo mode: Remove from localStorage
-                this.inventory = this.inventory.filter(i => i.id !== item.id);
-                localStorage.setItem('demo_inventory', JSON.stringify(this.inventory));
-                this.showNotification('Item deleted successfully (Demo Mode)', 'success');
+              // Authenticated mode: Delete via API
+              const response = await apiClient.deleteProduct(item.id);
+              if (response.success) {
+                this.showNotification('Item deleted successfully', 'success');
+                await this.loadInventory();
               } else {
-                // Authenticated mode: Delete via API
-                const response = await apiClient.deleteProduct(item.id);
-                if (response.success) {
-                  this.showNotification('Item deleted successfully', 'success');
-                } else {
-                  this.showNotification(response.message || 'Failed to delete item', 'error');
-                  return;
-                }
+                this.showNotification(response.message || 'Failed to delete item', 'error');
               }
-              
-              this.showItemDetailsModal = false;
-              this.loadInventory(); // Reload inventory
-              this.checkAlerts();
             } catch (error) {
               console.error('Error deleting item:', error);
               this.showNotification('Error deleting item', 'error');
@@ -2142,40 +2098,18 @@
           const quantity = prompt(`Enter quantity to dispense for ${item.genericName}:`, '1');
           if (quantity && !isNaN(quantity) && parseInt(quantity) > 0) {
             try {
-              if (this.isDemoMode) {
-                // Demo mode: Update in localStorage
-                const itemIndex = this.inventory.findIndex(i => i.id === item.id);
-                if (itemIndex > -1) {
-                  const currentStock = this.inventory[itemIndex].stockQuantity || 0;
-                  const newStock = currentStock - parseInt(quantity);
-                  
-                  if (newStock >= 0) {
-                    this.inventory[itemIndex].stockQuantity = newStock;
-                    this.inventory[itemIndex].stockStatus = newStock === 0 ? 'out-of-stock' : 
-                                                   newStock <= (this.inventory[itemIndex].minStockLevel || 0) ? 'low-stock' : 'in-stock';
-                    this.inventory[itemIndex].updatedAt = new Date().toISOString();
-                    
-                    localStorage.setItem('demo_inventory', JSON.stringify(this.inventory));
-                    this.showNotification(`Dispensed ${quantity} units successfully (Demo Mode)`, 'success');
-                  } else {
-                    this.showNotification('Insufficient stock available', 'error');
-                    return;
-                  }
-                }
-              } else {
-                // Authenticated mode: Use API
-                const response = await apiClient.request(`/inventory/${item.id}/dispense`, {
-                  method: 'POST',
-                  body: JSON.stringify({ quantity: parseInt(quantity) })
-                });
+              // Authenticated mode: Use API
+              const response = await apiClient.request(`/inventory/${item.id}/dispense`, {
+                method: 'POST',
+                body: JSON.stringify({ quantity: parseInt(quantity) })
+              });
 
-                if (!response.success) {
-                  this.showNotification(response.message || 'Failed to dispense item', 'error');
-                  return;
-                }
-                
-                this.showNotification(`Dispensed ${quantity} units successfully`, 'success');
+              if (!response.success) {
+                this.showNotification(response.message || 'Failed to dispense item', 'error');
+                return;
               }
+              
+              this.showNotification(`Dispensed ${quantity} units successfully`, 'success');
 
               this.showItemDetailsModal = false;
               this.loadInventory(); // Reload inventory
@@ -2241,11 +2175,6 @@
 
         // Manual refresh with sync
         async refreshWithSync() {
-          if (this.isDemoMode) {
-            this.showNotification('Login required for real-time sync features', 'warning');
-            return;
-          }
-          
           this.showNotification('Syncing data...', 'info');
           await this.syncInventoryData();
           await this.syncAlerts();
@@ -2256,83 +2185,45 @@
           try {
             this.alerts = [];
 
-            if (this.isDemoMode) {
-              // Demo mode: Check local inventory for alerts
-              this.inventory.forEach(item => {
-                // Low stock alerts
-                if (item.stockQuantity > 0 && item.stockQuantity <= (item.minStockLevel || 0)) {
-                  this.alerts.push({
-                    id: `low-stock-${item.id}`,
-                    type: 'warning',
-                    title: 'Low Stock Alert',
-                    message: `${item.genericName} ${item.strength || ''} is below minimum level (${item.stockQuantity} units)`,
-                    action: 'Reorder'
-                  });
-                }
+            // Authenticated mode: Get alerts from API
+            const lowStockResponse = await apiClient.getLowStockProducts();
+            const expiringResponse = await apiClient.getExpiringProducts();
 
-                // Expiry alerts
-                if (item.expiryDate) {
-                  const daysLeft = this.getDaysUntilExpiry(item.expiryDate);
-                  if (daysLeft < 0) {
-                    this.alerts.push({
-                      id: `expired-${item.id}`,
-                      type: 'critical',
-                      title: 'Expired Medication',
-                      message: `${item.genericName} ${item.strength || ''} (Batch: ${item.batchNumber}) has expired`,
-                      action: 'Remove'
-                    });
-                  } else if (daysLeft <= 30) {
-                    this.alerts.push({
-                      id: `expiring-${item.id}`,
-                      type: 'warning',
-                      title: 'Expiring Soon',
-                      message: `${item.genericName} ${item.strength || ''} expires in ${daysLeft} days`,
-                      action: 'Review'
-                    });
-                  }
+            // Add low stock alerts
+            if (lowStockResponse.success && lowStockResponse.data) {
+              lowStockResponse.data.forEach(item => {
+                this.alerts.push({
+                  id: `low-stock-${item.id}`,
+                  type: 'warning',
+                  title: 'Low Stock Alert',
+                  message: `${item.genericName} ${item.strength || ''} is below minimum level (${item.stockQuantity} units)`,
+                  action: 'Reorder'
+                });
+              });
+            }
+
+            // Add expiring alerts
+            if (expiringResponse.success && expiringResponse.data) {
+              expiringResponse.data.forEach(item => {
+                const daysLeft = this.getDaysUntilExpiry(item.expiryDate);
+                if (daysLeft < 0) {
+                  this.alerts.push({
+                    id: `expired-${item.id}`,
+                    type: 'critical',
+                    title: 'Expired Medication',
+                    message: `${item.genericName} ${item.strength || ''} (Batch: ${item.batchNumber}) has expired`,
+                    action: 'Remove'
+                  });
+                } else {
+                  this.alerts.push({
+                    id: `expiring-${item.id}`,
+                    type: 'warning',
+                    title: 'Expiring Soon',
+                    message: `${item.genericName} ${item.strength || ''} expires in ${daysLeft} days`,
+                    action: 'Review'
+                  });
                 }
               });
-            } else {
-              // Authenticated mode: Get alerts from API
-              const lowStockResponse = await apiClient.getLowStockProducts();
-              const expiringResponse = await apiClient.getExpiringProducts();
-
-              // Add low stock alerts
-              if (lowStockResponse.success && lowStockResponse.data) {
-                lowStockResponse.data.forEach(item => {
-                  this.alerts.push({
-                    id: `low-stock-${item.id}`,
-                    type: 'warning',
-                    title: 'Low Stock Alert',
-                    message: `${item.genericName} ${item.strength || ''} is below minimum level (${item.stockQuantity} units)`,
-                    action: 'Reorder'
-                  });
-                });
-              }
-
-              // Add expiring alerts
-              if (expiringResponse.success && expiringResponse.data) {
-                expiringResponse.data.forEach(item => {
-                  const daysLeft = this.getDaysUntilExpiry(item.expiryDate);
-                  if (daysLeft < 0) {
-                    this.alerts.push({
-                      id: `expired-${item.id}`,
-                      type: 'critical',
-                      title: 'Expired Medication',
-                      message: `${item.genericName} ${item.strength || ''} (Batch: ${item.batchNumber}) has expired`,
-                      action: 'Remove'
-                    });
-                  } else {
-                    this.alerts.push({
-                      id: `expiring-${item.id}`,
-                      type: 'warning',
-                      title: 'Expiring Soon',
-                      message: `${item.genericName} ${item.strength || ''} expires in ${daysLeft} days`,
-                      action: 'Review'
-                    });
-                  }
-                });
-              }
             }
           } catch (error) {
             console.error('Error checking alerts:', error);
@@ -2574,10 +2465,7 @@
 
         // Reporting Functions
         generateReport() {
-          if (this.isDemoMode) {
-            this.showNotification('Login required for report generation features', 'warning');
-            return;
-          }
+          this.showNotification('Generating report...', 'info');
           
           const reportData = {
             generatedAt: new Date().toISOString(),
@@ -2595,6 +2483,7 @@
           // Create and download CSV report
           const csv = this.convertToCSV(reportData);
           this.downloadCSV(csv, 'inventory-report.csv');
+          this.showNotification('Report generated successfully', 'success');
         },
 
         convertToCSV(data) {
@@ -2620,24 +2509,9 @@
           return csvContent;
         },
 
-        downloadCSV(csv, filename) {
-          const blob = new Blob([csv], { type: 'text/csv' });
-          const url = window.URL.createObjectURL(blob);
-          const a = document.createElement('a');
-          a.href = url;
-          a.download = filename;
-          a.click();
-          window.URL.revokeObjectURL(url);
-        },
-
         refreshReports() {
           // Refresh data and charts
-          if (!this.isDemoMode) {
-            this.refreshWithSync();
-          } else {
-            this.checkAlerts();
-            console.log('Reports refreshed (Demo Mode)');
-          }
+          this.refreshWithSync();
         },
 
         reorderItem(item) {

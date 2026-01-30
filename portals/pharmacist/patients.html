@@ -555,28 +555,6 @@
   font-size: 1.25rem;
 }
 
-/* Demo Mode Banner */
-.demo-banner {
-  position: fixed;
-  top: 0;
-  left: 0;
-  right: 0;
-  background: linear-gradient(90deg, #667eea 0%, #764ba2 100%);
-  color: white;
-  padding: 0.5rem 1rem;
-  text-align: center;
-  font-size: 0.875rem;
-  font-weight: 500;
-  z-index: 10001;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
-}
-
-.demo-banner .close-btn:hover {
-  opacity: 1;
-}
-
-    /* Responsive Design */
-
     .csv-instructions-list li {
       margin-bottom: 0.5rem;
       font-size: 0.75rem;
@@ -1231,12 +1209,6 @@
     <script src="../shared/js/page-integration-template.js"></script>
     <script src="https://unpkg.com/alpinejs@3.x.x/dist/cdn.min.js" defer></script></head>
 <body>
-  <div x-show="!isAuthenticated" class="demo-banner" x-transition>
-    <span>🔒 Authentication Required: Please login to access patient management</span>
-    <button class="close-btn" @click="window.location.href='/public/signin.html'">
-      sign in
-    </button>
-  </div>
   <!-- Sidebar -->
   <aside class="sidebar" :class="sidebarOpen ? 'open' : ''">
     <div class="sidebar-header">
@@ -2747,7 +2719,7 @@
             a.click();
             window.URL.revokeObjectURL(url);
             
-            const mode = this.getAuthToken() ? 'Authenticated' : 'Demo';
+            const mode = this.getAuthToken() ? 'Authenticated' : 'Real';
             this.showNotification(`Exported ${patients.length} patients (${mode} Mode)`, 'success');
           } catch (error) {
             console.error('Export error:', error);
@@ -3082,22 +3054,21 @@
           // Get user information from auth manager
           const authInfo = auth.getAuthInfo();
           if (!authInfo.isAuthenticated) {
-            console.warn('No user authentication found - demo mode enabled');
-            this.showNotification('Demo mode: Some features require login for full functionality', 'info');
-            
-            // Set demo user info for basic functionality
-            this.tenantInfo.name = 'Demo Pharmacy';
-            this.tenantInfo.location = 'Demo Location';
-            this.userInfo.name = 'Demo User';
-            this.userInfo.role = 'pharmacist';
-            this.userInfo.initials = 'DU';
-            
-            // Load patients from API
-            await this.loadPatients();
-            
-            console.log('Demo mode initialized - basic functionality available');
+            this.error = 'Please login to access this page';
             return;
           }
+
+          // Set user info
+          this.tenantInfo.name = authInfo.tenant?.name || 'Pharmacy';
+          this.tenantInfo.location = authInfo.tenant?.location || 'Main Branch';
+          this.userInfo.name = authInfo.user?.name || 'User';
+          this.userInfo.role = authInfo.user?.role || 'pharmacist';
+          this.userInfo.initials = this.getInitials(authInfo.user?.name || 'User');
+          
+          // Load patients from API
+          await this.loadPatients();
+          
+          console.log('Patient management initialized successfully');
 
           try {
             const user = authInfo.user;

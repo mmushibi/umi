@@ -38,11 +38,11 @@ builder.Services.AddCors();
 
 
 
-// Add database context - PostgreSQL
+// Add database context - SQLite
 
 builder.Services.AddDbContext<UmiHealthDbContext>(options =>
 
-    options.UseNpgsql(builder.Configuration.GetConnectionString("DefaultConnection")));
+    options.UseSqlite(builder.Configuration.GetConnectionString("DefaultConnection")));
 
 
 
@@ -228,17 +228,17 @@ app.UseMiddleware<FeatureGateMiddleware>();
 
 
 
-// Create database on startup
+// Create database on startup (optional - commented out for now)
 
-using (var scope = app.Services.CreateScope())
+// using (var scope = app.Services.CreateScope())
 
-{
+// {
 
-    var context = scope.ServiceProvider.GetRequiredService<UmiHealthDbContext>();
+//     var context = scope.ServiceProvider.GetRequiredService<UmiHealthDbContext>();
 
-    context.Database.EnsureCreated();
+//     context.Database.EnsureCreated();
 
-}
+// }
 
 
 
@@ -1937,6 +1937,12 @@ app.MapGet("/api/v1/admin/stats", async (HttpContext httpContext, UmiHealthDbCon
 });
 
 
+
+
+
+// Register API endpoints
+
+app.RegisterApiEndpoints();
 
 
 

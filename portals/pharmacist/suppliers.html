@@ -531,7 +531,12 @@
     <script src="../../js/auth-manager.js"></script>
     <script src="../shared/js/backend-integration-helper.js"></script>
     <script src="../shared/js/page-integration-template.js"></script>
-    <script src="https://unpkg.com/alpinejs@3.x.x/dist/cdn.min.js" defer></script></head>
+    <script src="https://unpkg.com/alpinejs@3.x.x/dist/cdn.min.js" defer></script>
+    <link rel="stylesheet" href="../shared/css/shared-styles.css">
+    <script src="../shared/js/data-sync.js"></script>
+    <script src="../shared/js/role-based-access.js"></script>
+    <script src="../shared/js/feature-protection.js"></script>
+    <script src="../shared/js/portal-data-sync.js"></script></head>
 <body>
   <!-- Sidebar -->
   <aside class="sidebar" :class="sidebarOpen ? 'open' : ''">
@@ -1333,47 +1338,6 @@
   </div>
 
   <script>
-    // Demo Mode Manager
-    class DemoModeManager {
-      constructor() {
-        this.isDemoMode = !this.isAuthenticated();
-        this.storageKey = 'umi_suppliers_demo_data';
-        this.init();
-      }
-
-      isAuthenticated() {
-        return !!(localStorage.getItem('authToken') || localStorage.getItem('umi_access_token'));
-      }
-
-      async init() {
-            try {
-                // Check authentication
-                this.isAuthenticated = this.authManager?.isAuthenticated() || false;
-                
-                if (!this.isAuthenticated) {
-                    this.error = 'Please login to access this page';
-                    return;
-                }
-                
-                // Initialize backend integration
-                await this.backendHelper.initPage('pharmacist-suppliers', {
-                    enableRealTime: false,
-                    initialData: this.getInitialDataConfig()
-                });
-                
-                // Load page data
-                await this.loadPageData();
-                
-                // Set up event listeners
-                this.setupEventListeners();
-                
-                console.log('pharmacist-suppliers page initialized with backend integration');
-            } catch (error) {
-                console.error('Failed to initialize pharmacist-suppliers page:', error);
-                this.error = 'Failed to initialize page';
-            }
-        },
-
     function supplierSystem() {
       return {
         // Initialize backend integration
@@ -1408,8 +1372,8 @@
           address: '',
           status: 'active'
         },
-        
-        init() {
+
+        async init() {
           try {
             // Check authentication
             this.isAuthenticated = this.authManager?.isAuthenticated() || false;
@@ -1420,13 +1384,13 @@
             }
             
             // Initialize backend integration
-            this.backendHelper.initPage('pharmacist-suppliers', {
+            await this.backendHelper.initPage('pharmacist-suppliers', {
               enableRealTime: false,
               initialData: this.getInitialDataConfig()
             });
             
             // Load page data
-            this.loadPageData();
+            await this.loadPageData();
             
             // Set up event listeners
             this.setupEventListeners();
@@ -1528,29 +1492,16 @@
         async createSupplier() {
           this.loading = true;
           try {
-            if (demoManager.isDemoMode) {
-              const response = await demoManager.simulateApiCall('/suppliers', this.supplierForm, 'POST');
-              this.showCreateModal = false;
-              this.resetSupplierForm();
-              await this.loadSuppliers();
-              await this.loadStats();
-              demoManager.showToast('Supplier created successfully (Demo Mode)', 'success');
-            } else {
-              await window.pharmacistApi.suppliers.createSupplier(this.supplierForm);
-              this.showCreateModal = false;
-              this.resetSupplierForm();
-              await this.loadSuppliers();
-              await this.loadStats();
-              demoManager.showToast('Supplier created successfully', 'success');
-            }
+            await window.pharmacistApi.suppliers.createSupplier(this.supplierForm);
+            this.showCreateModal = false;
+            this.resetSupplierForm();
+            await this.loadSuppliers();
+            await this.loadStats();
+            this.showToast('Supplier created successfully', 'success');
           } catch (error) {
             console.error('Failed to create supplier:', error);
             this.error = 'Failed to create supplier. Please try again.';
-            if (demoManager.isDemoMode) {
-              demoManager.showToast('Failed to create supplier', 'error');
-            } else {
-              demoManager.showToast('Failed to create supplier: Authentication required', 'error');
-            }
+            this.showToast('Failed to create supplier', 'error');
           } finally {
             this.loading = false;
           }
@@ -1559,36 +1510,16 @@
         async updateSupplier() {
           this.loading = true;
           try {
-            if (demoManager.isDemoMode) {
-              // Demo mode - simulate update
-              const supplierIndex = this.suppliers.findIndex(s => s.id === this.currentSupplier.id);
-              if (supplierIndex !== -1) {
-                this.suppliers[supplierIndex] = { ...this.suppliers[supplierIndex], ...this.supplierForm };
-                const demoData = demoManager.getDemoData();
-                demoData.suppliers = this.suppliers;
-                demoManager.saveDemoData(demoData);
-              }
-              this.showEditModal = false;
-              this.resetSupplierForm();
-              await this.loadSuppliers();
-              await this.loadStats();
-              demoManager.showToast('Supplier updated successfully (Demo Mode)', 'success');
-            } else {
-              await window.pharmacistApi.suppliers.updateSupplier(this.currentSupplier.id, this.supplierForm);
-              this.showEditModal = false;
-              this.resetSupplierForm();
-              await this.loadSuppliers();
-              await this.loadStats();
-              demoManager.showToast('Supplier updated successfully', 'success');
-            }
+            await window.pharmacistApi.suppliers.updateSupplier(this.currentSupplier.id, this.supplierForm);
+            this.showEditModal = false;
+            this.resetSupplierForm();
+            await this.loadSuppliers();
+            await this.loadStats();
+            this.showToast('Supplier updated successfully', 'success');
           } catch (error) {
             console.error('Failed to update supplier:', error);
             this.error = 'Failed to update supplier. Please try again.';
-            if (demoManager.isDemoMode) {
-              demoManager.showToast('Failed to update supplier', 'error');
-            } else {
-              demoManager.showToast('Failed to update supplier: Authentication required', 'error');
-            }
+            this.showToast('Failed to update supplier', 'error');
           } finally {
             this.loading = false;
           }
@@ -1598,24 +1529,13 @@
           if (confirm(`Are you sure you want to delete ${supplier.name}?`)) {
             this.loading = true;
             try {
-              if (demoManager.isDemoMode) {
-                await demoManager.simulateApiCall(`/suppliers/${supplier.id}`, null, 'DELETE');
-                await this.loadSuppliers();
-                await this.loadStats();
-                demoManager.showToast('Supplier deleted successfully (Demo Mode)', 'success');
-              } else {
-                await window.pharmacistApi.suppliers.deleteSupplier(supplier.id);
-                await this.loadSuppliers();
-                await this.loadStats();
-                demoManager.showToast('Supplier deleted successfully', 'success');
-              }
+              await window.pharmacistApi.suppliers.deleteSupplier(supplier.id);
+              await this.loadSuppliers();
+              await this.loadStats();
+              this.showToast('Supplier deleted successfully', 'success');
             } catch (error) {
               console.error('Failed to delete supplier:', error);
-              if (demoManager.isDemoMode) {
-                demoManager.showToast('Failed to delete supplier', 'error');
-              } else {
-                demoManager.showToast('Failed to delete supplier: Authentication required', 'error');
-              }
+              this.showToast('Failed to delete supplier', 'error');
             } finally {
               this.loading = false;
             }
@@ -1646,32 +1566,19 @@
           this.currentSupplier = supplier;
           this.loading = true;
           try {
-            if (demoManager.isDemoMode) {
-              // Demo mode - show empty order history with notification
-              this.orderHistory = [];
-              this.orderStats = {
-                totalOrders: 0,
-                completedOrders: 0,
-                pendingOrders: 0,
-                totalValue: '$0'
-              };
-              this.showOrderHistoryModal = true;
-              demoManager.showToast('Order history requires authentication (Demo Mode)', 'warning');
-            } else {
-              // Real API call for authenticated users
-              const response = await window.pharmacistApi.suppliers.getSupplierOrders(supplier.id);
-              this.orderHistory = response.data?.orders || [];
-              this.orderStats = response.data?.stats || {
-                totalOrders: 0,
-                completedOrders: 0,
-                pendingOrders: 0,
-                totalValue: '$0'
-              };
-              this.showOrderHistoryModal = true;
-            }
+            // Real API call for authenticated users
+            const response = await window.pharmacistApi.suppliers.getSupplierOrders(supplier.id);
+            this.orderHistory = response.data?.orders || [];
+            this.orderStats = response.data?.stats || {
+              totalOrders: 0,
+              completedOrders: 0,
+              pendingOrders: 0,
+              totalValue: '$0'
+            };
+            this.showOrderHistoryModal = true;
           } catch (error) {
             console.error('Failed to load order history:', error);
-            demoManager.showToast('Failed to load order history: Authentication required', 'error');
+            this.showToast('Failed to load order history', 'error');
           } finally {
             this.loading = false;
           }
@@ -1681,30 +1588,18 @@
           this.currentSupplier = supplier;
           this.loading = true;
           try {
-            if (demoManager.isDemoMode) {
-              // Demo mode - show empty documents with notification
-              this.documents = {
-                contracts: [],
-                licenses: [],
-                other: []
-              };
-              this.allDocuments = [];
-              this.showDocumentsModal = true;
-              demoManager.showToast('Document management requires authentication (Demo Mode)', 'warning');
-            } else {
-              // Real API call for authenticated users
-              const response = await window.pharmacistApi.suppliers.getSupplierDocuments(supplier.id);
-              this.documents = response.data || {
-                contracts: [],
-                licenses: [],
-                other: []
-              };
-              this.allDocuments = [...this.documents.contracts, ...this.documents.licenses, ...this.documents.other];
-              this.showDocumentsModal = true;
-            }
+            // Real API call for authenticated users
+            const response = await window.pharmacistApi.suppliers.getSupplierDocuments(supplier.id);
+            this.documents = response.data?.documents || {
+              contracts: [],
+              licenses: [],
+              other: []
+            };
+            this.allDocuments = response.data?.allDocuments || [];
+            this.showDocumentsModal = true;
           } catch (error) {
             console.error('Failed to load documents:', error);
-            demoManager.showToast('Failed to load documents: Authentication required', 'error');
+            this.showToast('Failed to load documents', 'error');
           } finally {
             this.loading = false;
           }
@@ -1722,36 +1617,26 @@
         },
 
         downloadDocument(doc) {
-          if (demoManager.isDemoMode) {
-            demoManager.showToast('Document download requires authentication', 'warning');
-            return;
-          }
-          
           // Real document download for authenticated users
           window.pharmacistApi.suppliers.downloadSupplierDocument(doc.id)
             .then(() => {
-              demoManager.showToast(`Downloading ${doc.name}...`, 'info');
+              this.showToast(`Downloading ${doc.name}...`, 'info');
             })
             .catch(error => {
               console.error('Failed to download document:', error);
-              demoManager.showToast('Failed to download document', 'error');
+              this.showToast('Failed to download document', 'error');
             });
         },
 
         async deleteDocument(doc) {
-          if (demoManager.isDemoMode) {
-            demoManager.showToast('Document deletion requires authentication', 'warning');
-            return;
-          }
-          
           if (confirm(`Delete ${doc.name}?`)) {
             try {
               await window.pharmacistApi.suppliers.deleteSupplierDocument(doc.id);
-              demoManager.showToast('Document deleted successfully', 'success');
+              this.showToast('Document deleted successfully', 'success');
               await this.viewDocuments(this.currentSupplier); // Refresh documents
             } catch (error) {
               console.error('Failed to delete document:', error);
-              demoManager.showToast('Failed to delete document', 'error');
+              this.showToast('Failed to delete document', 'error');
             }
           }
         },
@@ -1761,21 +1646,16 @@
         },
 
         async uploadDocument() {
-          if (demoManager.isDemoMode) {
-            demoManager.showToast('Document upload requires authentication', 'warning');
-            return;
-          }
-          
           this.loading = true;
           try {
             await window.pharmacistApi.suppliers.uploadSupplierDocument(this.currentSupplier.id, this.documentForm);
-            demoManager.showToast('Document uploaded successfully', 'success');
+            this.showToast('Document uploaded successfully', 'success');
             this.showUploadDocument = false;
             this.documentForm = { name: '', type: '', file: null };
             await this.viewDocuments(this.currentSupplier); // Refresh documents
           } catch (error) {
             console.error('Failed to upload document:', error);
-            demoManager.showToast('Failed to upload document', 'error');
+            this.showToast('Failed to upload document', 'error');
           } finally {
             this.loading = false;
           }
@@ -1813,11 +1693,6 @@
         },
 
         async bulkDelete() {
-          if (demoManager.isDemoMode) {
-            demoManager.showToast('Bulk operations require authentication', 'warning');
-            return;
-          }
-          
           if (confirm(`Delete ${this.selectedSuppliers.length} selected suppliers?`)) {
             this.loading = true;
             try {
@@ -1827,10 +1702,10 @@
               this.clearSelection();
               await this.loadSuppliers();
               await this.loadStats();
-              demoManager.showToast('Suppliers deleted successfully', 'success');
+              this.showToast('Suppliers deleted successfully', 'success');
             } catch (error) {
               console.error('Failed to delete suppliers:', error);
-              demoManager.showToast('Failed to delete suppliers', 'error');
+              this.showToast('Failed to delete suppliers', 'error');
             } finally {
               this.loading = false;
             }
@@ -1854,11 +1729,6 @@
         },
 
         async confirmBulkStatusUpdate() {
-          if (demoManager.isDemoMode) {
-            demoManager.showToast('Bulk status updates require authentication', 'warning');
-            return;
-          }
-          
           this.loading = true;
           try {
             for (const id of this.selectedSuppliers) {
@@ -1869,10 +1739,10 @@
             this.clearSelection();
             await this.loadSuppliers();
             await this.loadStats();
-            demoManager.showToast('Supplier status updated successfully', 'success');
+            this.showToast('Supplier status updated successfully', 'success');
           } catch (error) {
             console.error('Failed to update supplier status:', error);
-            demoManager.showToast('Failed to update supplier status', 'error');
+            this.showToast('Failed to update supplier status', 'error');
           } finally {
             this.loading = false;
           }
@@ -1896,26 +1766,14 @@
         // Export operations
         async exportSuppliers() {
           try {
-            if (demoManager.isDemoMode) {
-              // Demo mode - export demo data
-              const selectedData = this.suppliers.filter(s => this.selectedSuppliers.includes(s.id));
-              const csv = this.convertToCSV(selectedData);
-              this.downloadCSV(csv, 'suppliers_export_demo.csv');
-              demoManager.showToast('Suppliers exported (Demo Mode)', 'success');
-            } else {
-              // Real API call for authenticated users
-              const response = await window.pharmacistApi.suppliers.exportSuppliers('csv');
-              const csv = response.data || this.convertToCSV(this.filteredSuppliers);
-              this.downloadCSV(csv, 'suppliers_export.csv');
-              demoManager.showToast('Suppliers exported successfully', 'success');
-            }
+            // Real API call for authenticated users
+            const response = await window.pharmacistApi.suppliers.exportSuppliers('csv');
+            const csv = response.data || this.convertToCSV(this.filteredSuppliers);
+            this.downloadCSV(csv, 'suppliers_export.csv');
+            this.showToast('Suppliers exported successfully', 'success');
           } catch (error) {
             console.error('Failed to export suppliers:', error);
-            if (demoManager.isDemoMode) {
-              demoManager.showToast('Failed to export suppliers', 'error');
-            } else {
-              demoManager.showToast('Failed to export suppliers: Authentication required', 'error');
-            }
+            this.showToast('Failed to export suppliers', 'error');
           }
         },
 
@@ -1958,7 +1816,30 @@
         },
 
         showNotification(message, type = 'info') {
-          demoManager.showToast(message, type);
+          // Create toast notification
+          const toast = document.createElement('div');
+          toast.className = `toast toast-${type}`;
+          toast.innerHTML = `
+            <div class="toast-content">
+              <span class="material-symbols-rounded">${type === 'success' ? 'check_circle' : type === 'error' ? 'error' : 'info'}</span>
+              <div class="toast-message">
+                <p>${message}</p>
+              </div>
+              <button class="toast-close" onclick="this.parentElement.parentElement.remove()">
+                <span class="material-symbols-rounded">close</span>
+              </button>
+            </div>
+          `;
+
+          document.body.appendChild(toast);
+          setTimeout(() => toast.classList.add('show'), 100);
+          
+          setTimeout(() => {
+            if (toast.parentElement) {
+              toast.classList.remove('show');
+              setTimeout(() => toast.remove(), 300);
+            }
+          }, type === 'error' ? 5000 : 3000);
         },
 
         logout() {
