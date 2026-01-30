@@ -8,19 +8,19 @@ FROM mcr.microsoft.com/dotnet/sdk:8.0 AS build
 WORKDIR /src
 
 # Copy csproj files and restore as distinct layers (relative to build context root)
-COPY ["backend/src/UmiHealth.Identity/UmiHealth.Identity.csproj", "backend/src/UmiHealth.Identity/"]
-COPY ["backend/src/UmiHealth.Application/UmiHealth.Application.csproj", "backend/src/UmiHealth.Application/"]
-COPY ["backend/src/UmiHealth.Core/UmiHealth.Core.csproj", "backend/src/UmiHealth.Core/"]
-COPY ["backend/src/UmiHealth.Domain/UmiHealth.Domain.csproj", "backend/src/UmiHealth.Domain/"]
-COPY ["backend/src/UmiHealth.Infrastructure/UmiHealth.Infrastructure.csproj", "backend/src/UmiHealth.Infrastructure/"]
-COPY ["backend/src/UmiHealth.Persistence/UmiHealth.Persistence.csproj", "backend/src/UmiHealth.Persistence/"]
-COPY ["backend/src/UmiHealth.Shared/UmiHealth.Shared.csproj", "backend/src/UmiHealth.Shared/"]
+COPY ["backend/src/UmiHealth.Identity/UmiHealth.Identity.csproj", "UmiHealth.Identity/"]
+COPY ["backend/src/UmiHealth.Application/UmiHealth.Application.csproj", "UmiHealth.Application/"]
+COPY ["backend/src/UmiHealth.Core/UmiHealth.Core.csproj", "UmiHealth.Core/"]
+COPY ["backend/src/UmiHealth.Domain/UmiHealth.Domain.csproj", "UmiHealth.Domain/"]
+COPY ["backend/src/UmiHealth.Infrastructure/UmiHealth.Infrastructure.csproj", "UmiHealth.Infrastructure/"]
+COPY ["backend/src/UmiHealth.Persistence/UmiHealth.Persistence.csproj", "UmiHealth.Persistence/"]
+COPY ["backend/src/UmiHealth.Shared/UmiHealth.Shared.csproj", "UmiHealth.Shared/"]
 
-RUN dotnet restore "backend/src/UmiHealth.Identity/UmiHealth.Identity.csproj"
+RUN dotnet restore "UmiHealth.Identity/UmiHealth.Identity.csproj"
 
 # Copy everything else and build
-COPY . .
-WORKDIR "/src/backend/src/UmiHealth.Identity"
+COPY backend/src/UmiHealth.Identity/. ./UmiHealth.Identity/
+WORKDIR "/src/UmiHealth.Identity"
 RUN dotnet build "UmiHealth.Identity.csproj" -c Release -o /app/build /p:TreatWarningsAsErrors=false
 
 # Build runtime image
