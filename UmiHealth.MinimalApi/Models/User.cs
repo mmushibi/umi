@@ -30,6 +30,9 @@ namespace UmiHealth.MinimalApi.Models
         [MaxLength(20)]
         public string? PhoneNumber { get; set; }
         
+        [MaxLength(500)]
+        public string? Bio { get; set; }
+        
         [Required]
         [MaxLength(50)]
         public string Role { get; set; } = "user";
@@ -80,6 +83,15 @@ namespace UmiHealth.MinimalApi.Models
         
         [MaxLength(500)]
         public string? Address { get; set; }
+        
+        [MaxLength(100)]
+        public string? City { get; set; }
+        
+        [MaxLength(100)]
+        public string? Province { get; set; }
+        
+        [MaxLength(20)]
+        public string? PostalCode { get; set; }
         
         [MaxLength(20)]
         public string? PhoneNumber { get; set; }
