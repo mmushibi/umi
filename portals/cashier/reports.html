@@ -807,12 +807,12 @@
           window.cashierAPI.logout()
             .then(() => {
               // Redirect to login page
-              window.location.href = '../public/admin-signin.html';
+              window.location.href = '/public/signin.html';
             })
             .catch(error => {
               console.error('Logout error:', error);
               // Still redirect even if API call fails
-              window.location.href = '../public/admin-signin.html';
+              window.location.href = '/public/signin.html';
             });
         }
       }
