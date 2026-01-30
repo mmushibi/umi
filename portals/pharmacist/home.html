@@ -627,8 +627,7 @@
       font-size: 1.25rem;
     }
 
-    /* Demo Mode Banner */
-    .demo-banner {
+    .auth-required-overlay {
       position: fixed;
       top: 0;
       left: 0;
@@ -643,7 +642,7 @@
       box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
     }
 
-    .demo-banner .close-btn {
+    .auth-required-overlay .close-btn {
       position: absolute;
       right: 1rem;
       top: 50%;
@@ -657,7 +656,7 @@
       transition: opacity 0.2s;
     }
 
-    .demo-banner .close-btn:hover {
+    .auth-required-overlay .close-btn:hover {
       opacity: 1;
     }
 
@@ -725,12 +724,6 @@
     <script src="../shared/js/page-integration-template.js"></script>
     <script src="https://unpkg.com/alpinejs@3.x.x/dist/cdn.min.js" defer></script></head>
 <body>
-  <div x-show="!isAuthenticated" class="demo-banner" x-transition>
-    <span>🔒 Authentication Required: Please login to access pharmacist dashboard</span>
-    <button class="close-btn" @click="window.location.href='/public/admin-signin.html'">
-      sign in
-    </button>
-  </div>
   <!-- Sidebar -->
   <aside class="sidebar" :class="sidebarOpen ? 'open' : ''">
     <div class="sidebar-header">

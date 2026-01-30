@@ -173,7 +173,7 @@ window.authManager = new AuthManager();
                 localStorage.removeItem('umi_access_token');
                 localStorage.removeItem('umi_currentUser');
                 localStorage.setItem('umi_logged_out', Date.now().toString());
-                setTimeout(()=> { window.location.href = '/public/admin-signin.html'; }, 1000);
+                setTimeout(()=> { window.location.href = '/public/signin.html'; }, 1000);
             } else {
                 resetTimer(false);
             }
@@ -191,7 +191,7 @@ window.authManager = new AuthManager();
                 const last = parseInt(localStorage.getItem('umi_last_activity')||'0',10);
                 if (Date.now() - last >= timeoutMs()) {
                     localStorage.setItem('umi_logged_out', Date.now().toString());
-                    window.location.href = '/public/admin-signin.html';
+                    window.location.href = '/public/signin.html';
                 }
             }, timeoutMs());
         }
@@ -200,7 +200,7 @@ window.authManager = new AuthManager();
             localStorage.removeItem('authToken');
             localStorage.removeItem('umi_access_token');
             localStorage.removeItem('umi_currentUser');
-            setTimeout(()=> { window.location.href = '/public/admin-signin.html'; }, 800);
+            setTimeout(()=> { window.location.href = '/public/signin.html'; }, 800);
         }
     });
 

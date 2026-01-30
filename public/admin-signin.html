@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>Umi Admin Sign In</title>
+  <title>Super Admin Sign In | Umi Health</title>
   <link rel="icon" href="../logo.png" type="image/png">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -565,8 +565,15 @@
     <div class="auth-left">
       <div class="auth-card">
         <div class="auth-header">
-          <h1 class="auth-title">Umi Admin</h1>
-          <p class="auth-subtitle">Authorized personnel only</p>
+          <h1 class="auth-title">Super Admin Portal</h1>
+          <p class="auth-subtitle">Authorized super administrators only</p>
+          <div class="mt-4 p-3 bg-yellow-500/20 border border-yellow-500/30 rounded-lg">
+            <p class="text-sm text-yellow-200">
+              <span class="material-symbols-rounded text-yellow-300" style="font-size: 16px; vertical-align: middle;">warning</span>
+              This portal is for super administrators only. 
+              <a href="signin.html" class="text-yellow-100 underline hover:text-yellow-50 ml-1">Tenant users click here</a>
+            </p>
+          </div>
         </div>
         <!-- Error message removed - using toast instead -->
 
@@ -647,6 +654,15 @@
             if (!result.success) {
               this.showErrorToast('Access Denied', result.message || 'Invalid admin credentials');
               this.loading = false;
+              return;
+            }
+
+            // Verify user is super-admin
+            if (result.user && result.user.role !== 'superadmin') {
+              this.showErrorToast('Access Denied', 'This portal is for super administrators only. Please use the regular sign-in page.');
+              this.loading = false;
+              // Clear any stored tokens
+              window.UmiHealthInformationSystemsAuth.clearAuth();
               return;
             }
 
