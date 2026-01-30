@@ -1,4 +1,4 @@
-// Dashboard Service for Umi Health Demo System
+// Dashboard Service for Umi Health System
 window.DashboardService = {
     stats: {
         totalSales: 12500.00,

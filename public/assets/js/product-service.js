@@ -1,4 +1,4 @@
-// Product Service for Umi Health Demo System
+// Product Service for Umi Health System
 window.ProductService = {
     products: [
         { id: 1, name: 'Paracetamol 500mg', price: 2.50, stock: 100 },

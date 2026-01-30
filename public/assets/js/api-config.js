@@ -1,4 +1,4 @@
-// API Configuration for Umi Health Demo System
+// API Configuration for Umi Health System
 window.ApiConfig = {
     baseUrl: 'http://localhost:5001',
     endpoints: {

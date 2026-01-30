@@ -102,7 +102,7 @@ class BackendIntegrationHelper {
         // This would integrate with SignalR or WebSocket for real-time updates
         console.log('Subscribed to backend updates');
         
-        // Mock real-time updates for demo
+        // Mock real-time updates for testing
         const mockInterval = setInterval(() => {
             callback({
                 type: 'heartbeat',

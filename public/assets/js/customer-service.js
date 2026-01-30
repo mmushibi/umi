@@ -1,4 +1,4 @@
-// Customer Service for Umi Health Demo System
+// Customer Service for Umi Health System
 window.CustomerService = {
     customers: [
         { id: 1, name: 'John Doe', email: 'john@example.com', phone: '+260123456789' },
