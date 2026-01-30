@@ -124,7 +124,7 @@ jobs:
           elif [ "${{ matrix.service }}" = "Identity" ]; then
             SERVICE_NAME="identity"
             DOCKERFILE_PATH="backend/src/UmiHealth.Identity/Dockerfile"
-            CONTEXT="backend/src"
+            CONTEXT="."
           fi
           
           echo "Building service: $SERVICE_NAME"
