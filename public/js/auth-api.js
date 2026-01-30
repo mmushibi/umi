@@ -241,7 +241,7 @@ class AuthAPI {
         localStorage.removeItem('umi_tenant_id');
         
         // Redirect to login
-        window.location.href = '/signin.html';
+        window.location.href = '/public/signin.html';
     }
 
     setUserInfo(user, tenant, subscription) {

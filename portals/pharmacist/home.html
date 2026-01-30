@@ -1103,7 +1103,24 @@
         recentActivity: [],
         alerts: [],
         
-        async async init() {
+        async init() {
+            // Check authentication first
+            const token = localStorage.getItem('umi_access_token');
+            const userData = localStorage.getItem('umi_current_user');
+            
+            if (!token || !userData) {
+                window.location.href = '../../public/signin.html';
+                return;
+            }
+
+            try {
+                this.userInfo = JSON.parse(userData);
+            } catch (error) {
+                console.error('Error parsing user data:', error);
+                window.location.href = '../../public/signin.html';
+                return;
+            }
+
             try {
                 // Check authentication
                 this.isAuthenticated = this.authManager?.isAuthenticated() || false;
@@ -1322,7 +1339,7 @@
         logout() {
           if (confirm('Are you sure you want to logout?')) {
             window.pharmacistService.clearAuthData();
-            window.location.href = '../login.html';
+            window.location.href = '../../public/signin.html';
           }
         }
       }

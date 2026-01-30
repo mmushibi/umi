@@ -1914,7 +1914,6 @@
         showItemDetailsModal: false,
         showRealTimeIndicator: false,
         selectedItem: null,
-        isDemoMode: false,
         searchQuery: '',
         selectedCategory: '',
         stockStatus: '',
@@ -2449,7 +2448,7 @@
               
               // Redirect to login page after a short delay
               setTimeout(() => {
-                window.location.href = '../../index.html';
+                window.location.href = '../../public/signin.html';
               }, 1000);
               
             } catch (error) {
@@ -2457,7 +2456,7 @@
               this.showNotification('Error during logout', 'error');
               // Force redirect even if there's an error
               setTimeout(() => {
-                window.location.href = '../../index.html';
+                window.location.href = '../../public/signin.html';
               }, 1000);
             }
           }

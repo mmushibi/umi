@@ -71,7 +71,7 @@ class AuthService {
         return this.branchId;
     }
 
-    // Login method (for demo purposes - in production, this would call an API)
+    // Login method
     async login(credentials) {
         try {
             // Call the real authentication API
@@ -130,7 +130,7 @@ class AuthService {
         } finally {
             this.clearAuthData();
             // Redirect to login page
-            window.location.href = '/public/signin.html';
+            window.location.href = '../../public/signin.html';
         }
     }
 
@@ -184,7 +184,7 @@ window.authService.setupTokenRefresh();
             if (Date.now() - last >= timeoutMs()) {
                 try { window.authService.clearAuthData(); } catch(e){}
                 localStorage.setItem('umi_logged_out', Date.now().toString());
-                try { window.authService.logout(); } catch(e){ window.location.href = '../auth/signin.html'; }
+                try { window.authService.logout(); } catch(e){ window.location.href = '../../public/signin.html'; }
             } else {
                 resetTimer(false);
             }
@@ -200,13 +200,13 @@ window.authService.setupTokenRefresh();
                 const last = parseInt(localStorage.getItem('umi_last_activity')||'0',10);
                 if (Date.now() - last >= timeoutMs()) {
                     localStorage.setItem('umi_logged_out', Date.now().toString());
-                    try { window.authService.logout(); } catch(e){ window.location.href = '../auth/signin.html'; }
+                    try { window.authService.logout(); } catch(e){ window.location.href = '../../public/signin.html'; }
                 }
             }, timeoutMs());
         }
         if (e.key === 'umi_logged_out') {
             try { window.authService.clearAuthData(); } catch(e){}
-            setTimeout(()=> { window.location.href = '../auth/signin.html'; }, 800);
+            setTimeout(()=> { window.location.href = '../../public/signin.html'; }, 800);
         }
     });
     resetTimer(true);

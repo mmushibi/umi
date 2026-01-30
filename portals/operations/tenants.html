@@ -738,7 +738,7 @@
       </nav>
       
       <div class="logout-section">
-        <a href="../../signin.html" class="logout-button" @click.prevent="handleLogout">
+        <a href="/public/signin.html" class="logout-button" @click.prevent="handleLogout">
           <span class="material-symbols-rounded logout-icon">logout</span>
           Sign Out
         </a>
@@ -1221,7 +1221,7 @@
         handleLogout() {
           if (confirm('Are you sure you want to sign out?')) {
             window.operationsAPI.clearAuthToken();
-            window.location.href = '../../signin.html';
+            window.location.href = '../../public/signin.html';
           }
         }
       }

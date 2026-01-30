@@ -779,7 +779,7 @@
         </div>
       </nav>
       <div class="sidebar-footer">
-        <a href="../auth/signin.html" class="menu-item" @click.prevent="handleLogout">
+        <a href="/public/admin-signin.html" class="menu-item" @click.prevent="handleLogout">
           <span class="material-symbols-rounded menu-icon">logout</span>
           Sign Out
         </a>
@@ -1157,6 +1157,30 @@
           failedBackups: 0
         },
         init() {
+          // Check if user is super admin
+          const userStr = localStorage.getItem('umi_current_user');
+          if (userStr) {
+            const user = JSON.parse(userStr);
+            if (user.role !== 'superadmin') {
+              // Redirect to appropriate portal based on role
+              const baseUrl = '../portals';
+              if (user.role === 'admin' || user.role === 'manager') {
+                window.location.href = `${baseUrl}/admin/home.html`;
+              } else if (user.role === 'cashier') {
+                window.location.href = `${baseUrl}/cashier/home.html`;
+              } else if (user.role === 'pharmacist') {
+                window.location.href = `${baseUrl}/pharmacist/home.html`;
+              } else {
+                window.location.href = `${baseUrl}/admin/home.html`;
+              }
+              return;
+            }
+          } else {
+            // Redirect to sign-in
+            window.location.href = '/public/admin-signin.html';
+            return;
+          }
+
           // Get user info from session
           this.userName = sessionStorage.getItem('userName') || 'Super Admin';
           this.userEmail = sessionStorage.getItem('userEmail') || 'admin@UmiHealthInformationSystems.zm';

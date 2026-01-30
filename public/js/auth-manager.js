@@ -99,7 +99,7 @@ class AuthManager {
             this.clearAuth();
             this.showToast('Logged out successfully', 'success');
             setTimeout(() => {
-                window.location.href = '/signin.html';
+                window.location.href = '/public/signin.html';
             }, 1000);
         }
     }
@@ -130,7 +130,7 @@ class AuthManager {
         if (!this.isAuthenticated) {
             this.showToast('Please login to continue', 'warning');
             setTimeout(() => {
-                window.location.href = '/signin.html';
+                window.location.href = '/public/signin.html';
             }, 1000);
             return false;
         }

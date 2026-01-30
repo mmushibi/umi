@@ -821,7 +821,7 @@
           if (!token || !userData) {
             this.showErrorToast('Authentication Required', 'Please sign in to complete onboarding');
             setTimeout(() => {
-              window.location.href = './signin.html';
+              window.location.href = '/public/signin.html';
             }, 2000);
             return;
           }
@@ -832,7 +832,7 @@
             console.error('Error parsing user data:', error);
             this.showErrorToast('Error', 'Invalid user session');
             setTimeout(() => {
-              window.location.href = './signin.html';
+              window.location.href = '/public/signin.html';
             }, 2000);
             return;
           }
@@ -864,7 +864,7 @@
                 // Already completed, redirect to admin dashboard
                 this.showSuccessToast('Already Completed', 'Your pharmacy setup is already complete');
                 setTimeout(() => {
-                  window.location.href = '../portals/admin/home.html';
+                  window.location.href = '/portals/admin/home.html';
                 }, 1500);
               }
             }
@@ -957,7 +957,7 @@
               
               // Redirect to admin portal dashboard after successful onboarding
               setTimeout(() => {
-                window.location.href = '../portals/admin/home.html';
+                window.location.href = '/portals/admin/home.html';
               }, 2000);
             } else {
               this.showErrorToast('Setup Failed', result.message || 'Failed to complete setup');
@@ -971,7 +971,7 @@
             localStorage.setItem('umi_onboarding_completed', 'true');
             
             setTimeout(() => {
-              window.location.href = '../portals/admin/home.html';
+              window.location.href = '/portals/admin/home.html';
             }, 3000);
           } finally {
             this.loading = false;
@@ -1026,7 +1026,7 @@
         skipOnboarding() {
           if (confirm('You can complete setup later. Some features may be limited until setup is complete. Continue?')) {
             localStorage.setItem('umi_onboarding_completed', 'false');
-            window.location.href = '../portals/admin/home.html';
+            window.location.href = '/portals/admin/home.html';
           }
         },
 

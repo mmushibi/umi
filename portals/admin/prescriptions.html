@@ -2794,18 +2794,10 @@
             
             // Save to API first, then fallback to localStorage
             try {
-              const userStr = localStorage.getItem('umi_currentUser') || localStorage.getItem('umi_current_user');
-              if (!userStr || userStr === 'undefined' || userStr === 'null') {
-                // Demo mode: Add demo prefix to ID
-                newPrescription.id = 'DEMO-RX' + Date.now().toString().slice(-6);
-                // Save directly to localStorage
-                await dataManager.saveToLocalStorage(newPrescription);
-                dataManager.showSaveIndicator('Prescription created successfully (Demo Mode)!');
-              } else {
-                // Authenticated mode: Use API
-                await dataManager.save(newPrescription, 'create');
-                dataManager.showSaveIndicator('Prescription created successfully!');
-              }
+              // Use API for prescription creation
+              newPrescription.id = 'RX' + Date.now().toString().slice(-6);
+              await dataManager.save(newPrescription, 'create');
+              dataManager.showSaveIndicator('Prescription created successfully!');
             } catch (saveError) {
               console.warn('Save failed:', saveError);
               // Error is already handled by dataManager

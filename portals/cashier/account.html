@@ -1487,14 +1487,14 @@
                 console.error('Failed to initialize cashier-account page:', error);
                 this.error = 'Failed to initialize page';
             }
-        },,
+        },
 
         async loadUserData() {
           try {
             const token = localStorage.getItem('authToken');
             if (!token) {
               console.log('No auth token found - please login to access account settings');
-              window.location.href = '/login.html';
+              window.location.href = '../../public/signin.html';
               return;
             }
 
@@ -1513,7 +1513,7 @@
               this.userInfo.initials = `${profile.firstName[0]}${profile.lastName[0]}`;
             } else if (profileResponse.status === 401) {
               console.log('Unauthorized - redirecting to login');
-              window.location.href = '/login.html';
+              window.location.href = '../../public/signin.html';
               return;
             }
 
@@ -1962,12 +1962,12 @@
           window.cashierAPI.logout()
             .then(() => {
               // Redirect to login page
-              window.location.href = '/public/signin.html';
+              window.location.href = '../../public/signin.html';
             })
             .catch(error => {
               console.error('Logout error:', error);
               // Still redirect even if API call fails
-              window.location.href = '/public/signin.html';
+              window.location.href = '../../public/signin.html';
             });
         }
       }

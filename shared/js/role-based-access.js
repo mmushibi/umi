@@ -149,10 +149,10 @@ class RoleBasedAccess {
    */
   redirectToRolePage(userRole) {
     const role = this.roles[userRole];
-    if (!role) return 'signin.html';
+    if (!role) return '/public/signin.html';
 
     // Redirect to first allowed page
-    return role.pages[0] || 'signin.html';
+    return role.pages[0] || '/public/signin.html';
   }
 
   /**
@@ -163,7 +163,7 @@ class RoleBasedAccess {
     const currentPage = window.location.pathname.split('/').pop();
 
     if (!currentUser) {
-      window.location.href = '../signin.html';
+      window.location.href = '/public/signin.html';
       return false;
     }
 

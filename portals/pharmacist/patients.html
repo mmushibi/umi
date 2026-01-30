@@ -2699,7 +2699,7 @@
           try {
             this.loading = true;
             
-            // Get all patients (works in both demo and authenticated mode)
+            // Get all patients
             const patients = this.patients;
             
             if (patients.length === 0) {
@@ -3148,7 +3148,7 @@
 
     // Check authentication
     if (!auth.isAuthenticated()) {
-      window.location.href = '/public/signin.html';
+      window.location.href = '../../public/signin.html';
     }
 
     // Check permissions

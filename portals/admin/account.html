@@ -1368,10 +1368,6 @@
               } else {
                 throw new Error('User ID not found');
               }
-            } else {
-              // Fallback to local storage for demo mode
-              localStorage.setItem('umi_profile', JSON.stringify(this.profile));
-              this.backendHelper?.showNotification('Profile saved locally', 'info');
             }
           } catch (error) {
             console.error('Error saving profile:', error);
@@ -1478,8 +1474,6 @@
               } else {
                 throw new Error(response.message || 'Failed to change password');
               }
-            } else {
-              this.backendHelper?.showNotification('Password change not available in demo mode', 'warning');
             }
           } catch (error) {
             console.error('Error changing password:', error);
@@ -1495,10 +1489,10 @@
             if (this.authManager) {
               await this.authManager.logout();
             }
-            window.location.href = '/public/signin.html';
+            window.location.href = '../../public/signin.html';
           } catch (error) {
             console.error('Logout error:', error);
-            window.location.href = '/public/signin.html';
+            window.location.href = '../../public/signin.html';
           }
         },
         

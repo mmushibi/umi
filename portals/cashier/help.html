@@ -923,11 +923,11 @@
         logout() {
           window.cashierAPI.logout()
             .then(() => {
-              window.location.href = '/public/signin.html';
+              window.location.href = '../../public/signin.html';
             })
             .catch(error => {
               console.error('Logout error:', error);
-              window.location.href = '/public/signin.html';
+              window.location.href = '../../public/signin.html';
             });
         }
       }

@@ -1,0 +1,155 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Authentication Test - Umi Health</title>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 20px; }
+        .test-section { margin: 20px 0; padding: 15px; border: 1px solid #ddd; }
+        .success { background: #d4edda; border-color: #c3e6cb; }
+        .error { background: #f8d7da; border-color: #f5c6cb; }
+        .test-button { padding: 10px 20px; margin: 5px; cursor: pointer; }
+    </style>
+</head>
+<body>
+    <h1>🔐 Authentication Redirect Tests</h1>
+    
+    <div class="test-section">
+        <h2>Test Authentication Status</h2>
+        <button class="test-button" onclick="testAuthStatus()">Check Current Auth</button>
+        <div id="authStatus"></div>
+    </div>
+
+    <div class="test-section">
+        <h2>Test Portal Redirects</h2>
+        <button class="test-button" onclick="testPortalRedirect('admin')">Test Admin Portal</button>
+        <button class="test-button" onclick="testPortalRedirect('cashier')">Test Cashier Portal</button>
+        <button class="test-button" onclick="testPortalRedirect('pharmacist')">Test Pharmacist Portal</button>
+        <button class="test-button" onclick="testPortalRedirect('operations')">Test Operations Portal</button>
+        <button class="test-button" onclick="testPortalRedirect('super-admin')">Test Super-Admin Portal</button>
+        <div id="redirectResults"></div>
+    </div>
+
+    <div class="test-section">
+        <h2>Simulate Login</h2>
+        <button class="test-button" onclick="simulateLogin('admin')">Admin Login</button>
+        <button class="test-button" onclick="simulateLogin('cashier')">Cashier Login</button>
+        <button class="test-button" onclick="simulateLogin('pharmacist')">Pharmacist Login</button>
+        <button class="test-button" onclick="simulateLogin('superadmin')">Super-Admin Login</button>
+        <div id="loginResults"></div>
+    </div>
+
+    <div class="test-section">
+        <h2>Clear Authentication</h2>
+        <button class="test-button" onclick="clearAuth()">Clear All Auth Data</button>
+        <div id="clearResults"></div>
+    </div>
+
+    <script>
+        function testAuthStatus() {
+            const token = localStorage.getItem('umi_access_token');
+            const userData = localStorage.getItem('umi_current_user');
+            const status = document.getElementById('authStatus');
+            
+            if (token && userData) {
+                try {
+                    const user = JSON.parse(userData);
+                    status.innerHTML = `
+                        <div class="success">
+                            ✅ Authenticated<br>
+                            User: ${user.name || user.email || 'Unknown'}<br>
+                            Role: ${user.role || 'Unknown'}<br>
+                            Token: ${token.substring(0, 20)}...
+                        </div>
+                    `;
+                } catch (e) {
+                    status.innerHTML = `<div class="error">❌ Invalid user data format</div>`;
+                }
+            } else {
+                status.innerHTML = `<div class="error">❌ Not authenticated</div>`;
+            }
+        }
+
+        function testPortalRedirect(portal) {
+            const results = document.getElementById('redirectResults');
+            const testUrls = {
+                'admin': '../portals/admin/home.html',
+                'cashier': '../portals/cashier/home.html', 
+                'pharmacist': '../portals/pharmacist/home.html',
+                'operations': '../portals/operations/home.html',
+                'super-admin': '../portals/super-admin/home.html'
+            };
+
+            const url = testUrls[portal];
+            if (url) {
+                results.innerHTML += `
+                    <div class="success">
+                        ✅ ${portal} portal URL: ${url}<br>
+                        <a href="${url}" target="_blank">Test in new tab</a>
+                    </div>
+                `;
+            }
+        }
+
+        function simulateLogin(role) {
+            const results = document.getElementById('loginResults');
+            
+            // Mock authentication data
+            const mockUser = {
+                id: Math.floor(Math.random() * 1000),
+                name: `Test ${role}`,
+                email: `test-${role}@umihealth.com`,
+                role: role
+            };
+
+            const mockToken = `mock_token_${role}_${Date.now()}`;
+
+            // Store in localStorage
+            localStorage.setItem('umi_access_token', mockToken);
+            localStorage.setItem('umi_refresh_token', `refresh_${mockToken}`);
+            localStorage.setItem('umi_current_user', JSON.stringify(mockUser));
+            localStorage.setItem('umi_current_tenant', JSON.stringify({id: 1, name: 'Test Pharmacy'}));
+            localStorage.setItem('umi_tenant_id', '1');
+
+            results.innerHTML = `
+                <div class="success">
+                    ✅ Simulated ${role} login successful<br>
+                    User: ${mockUser.name}<br>
+                    Role: ${mockUser.role}<br>
+                    Token stored
+                </div>
+            `;
+        }
+
+        function clearAuth() {
+            const results = document.getElementById('clearResults');
+            
+            // Clear all auth-related items
+            const keysToRemove = [
+                'umi_access_token',
+                'umi_refresh_token', 
+                'umi_current_user',
+                'umi_current_tenant',
+                'umi_tenant_id',
+                'authToken',
+                'umi_currentUser'
+            ];
+
+            keysToRemove.forEach(key => localStorage.removeItem(key));
+
+            results.innerHTML = `
+                <div class="success">
+                    ✅ All authentication data cleared<br>
+                    You should now be redirected to login pages
+                </div>
+            `;
+        }
+
+        // Auto-check auth status on load
+        window.onload = function() {
+            testAuthStatus();
+        };
+    </script>
+</body>
+</html>

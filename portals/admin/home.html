@@ -2424,32 +2424,38 @@
   <!-- Alpine.js Component -->
   <script>
     function adminDashboard() {
-      // Initialize backend integration
-      const pageIntegration = new PageIntegrationTemplate('admin-home', {
-        requireAuth: true,
-        enableRealTime: true,
-        enableCaching: true
-      });
-      
       return {
-        ...pageIntegration,
-        
-        // Data state
-        dashboardStats: {
-          totalUsers: 0,
-          activeUsers: 0,
-          totalBranches: 0,
-          activeBranches: 0,
-          totalSales: 0,
-          todaySales: 0,
-          pendingPrescriptions: 0,
-          lowStockItems: 0
+        // Check authentication first
+        async init() {
+          const token = localStorage.getItem('umi_access_token');
+          const userData = localStorage.getItem('umi_current_user');
+          
+          if (!token || !userData) {
+            window.location.href = '../../public/signin.html';
+            return;
+          }
+
+          try {
+            this.currentUser = JSON.parse(userData);
+          } catch (error) {
+            console.error('Error parsing user data:', error);
+            window.location.href = '../../public/signin.html';
+            return;
+          }
+
+          // Initialize backend integration
+          const pageIntegration = new PageIntegrationTemplate('admin-home', {
+            requireAuth: true,
+            enableRealTime: true,
+            enableCaching: true
+          });
+          
+          Object.assign(this, pageIntegration);
+          this.backendHelper = window.backendHelper;
+          this.apiClient = window.apiClient;
+          this.authManager = window.authManager;
+          this.isAuthenticated = true;
         },
-        recentActivity: [],
-        systemHealth: 'good',
-        loading: false,
-        error: null,
-        isAuthenticated: false,
         
         // Connection status
         connectionStatus: 'disconnected', // 'connected', 'disconnected', 'error', 'connecting'
@@ -2527,7 +2533,7 @@
             this.isAuthenticated = this.authManager?.isAuthenticated() || false;
             
             if (!this.isAuthenticated) {
-              window.location.href = '/public/signin.html';
+              window.location.href = '../../public/signin.html';
               return;
             }
             

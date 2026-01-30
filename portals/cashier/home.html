@@ -1030,6 +1030,7 @@
                 
                 if (!this.isAuthenticated) {
                     this.error = 'Please login to access this page';
+                    window.location.href = '../../public/signin.html';
                     return;
                 }
                 
@@ -1359,7 +1360,7 @@
           localStorage.removeItem('umi_user_id');
           
           // Redirect to login
-          window.location.href = '../index.html';
+          window.location.href = '../../public/signin.html';
         }
       }
     }

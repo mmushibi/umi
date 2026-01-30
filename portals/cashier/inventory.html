@@ -3550,7 +3550,7 @@
         simulateBarcodeDetection() {
           // This is a placeholder for actual barcode detection
           // In production, replace this with a real barcode scanning library
-          // For demo purposes, we'll simulate finding a barcode after 3 seconds
+          // We'll simulate finding a barcode after 3 seconds
           if (!this.scannedBarcode && Math.random() < 0.001) { // Very small chance to simulate detection
             const sampleBarcode = `INV${Date.now().toString().slice(-8)}`;
             this.scannedBarcode = sampleBarcode;

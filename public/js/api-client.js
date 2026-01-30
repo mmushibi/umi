@@ -126,7 +126,7 @@ class ApiClient {
         } catch (error) {
             this.clearTokens();
             this.processQueue(error, null);
-            window.location.href = '/signin';
+            window.location.href = '/public/signin.html';
             throw error;
         }
     }

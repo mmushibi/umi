@@ -129,7 +129,7 @@ class PharmacistApi {
      */
     handleUnauthorized() {
         this.clearAuth();
-        window.location.href = '/public/signin.html';
+        window.location.href = '../../public/signin.html';
     }
 
     /**
