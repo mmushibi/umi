@@ -120,7 +120,7 @@ jobs:
           if [ "${{ matrix.service }}" = "API" ]; then
             SERVICE_NAME="api"
             DOCKERFILE_PATH="backend/Dockerfile"
-            CONTEXT="backend"
+            CONTEXT="."
           elif [ "${{ matrix.service }}" = "Identity" ]; then
             SERVICE_NAME="identity"
             DOCKERFILE_PATH="backend/src/UmiHealth.Identity/Dockerfile"
